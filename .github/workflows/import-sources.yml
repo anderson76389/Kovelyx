@@ -1,4 +1,4 @@
-name: Importer les sources de Kovelyx
+name: Importer les 3 applications Kovelyx
 
 on:
   push:
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   import:
-    name: Copier les versions épinglées
+    name: Copier les sources des trois clients
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -38,11 +38,11 @@ jobs:
         shell: bash
         run: bash scripts/import-upstream.sh
 
-      - name: Contrôler les quatre imports
+      - name: Contrôler les trois imports
         shell: bash
         run: |
           set -euo pipefail
-          for path in apps/tv apps/mobile apps/desktop server; do
+          for path in apps/tv apps/mobile apps/desktop; do
             test -s "$path/LICENSE"
             test -s "$path/.kovelyx-source.txt"
             echo "$path OK: $(cat "$path/.kovelyx-source.txt")"
