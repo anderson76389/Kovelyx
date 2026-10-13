@@ -51,7 +51,23 @@ vendor_mpvkit() {
   mkdir -p "$destination"
   git -C "$scratch" archive --format=tar HEAD | tar -xf - -C "$destination"
   printf '%s\n' "NuvioMedia/MPVKit @ $sha" > "$destination/.kovelyx-source.txt"
-  [[ -s "$destination/LICENSE" ]] || { echo "Licence MPVKit manquante" >&2; exit 1; }
+  # Les commits MPVKit épinglés n'ont pas de LICENSE dans leur propre arbre.
+  # On copie le texte LGPL-3.0 du dépôt public actuel, en indiquant clairement
+  # que son applicabilité au vieux commit doit être confirmée avant redistribution.
+  if [[ ! -s "$destination/LICENSE" ]]; then
+    local license_checkout="$WORK/mpv-license-$(basename "$(dirname "$destination")")"
+    fetch_commit "NuvioMedia/MPVKit" "f5d1f0e3e9d7341d922162f8a590b16ac7eefc36" "$license_checkout"
+    git -C "$license_checkout" show HEAD:LICENSE > "$destination/LICENSE"
+    cat > "$destination/LICENCE_ORIGINE.txt" <<'NOTICE'
+Le commit MPVKit épinglé ne contenait pas de fichier LICENSE.
+Le texte de LGPL-3.0 présent ici a été copié depuis le commit public
+f5d1f0e3e9d7341d922162f8a590b16ac7eefc36 (branche principale MPVKit).
+Cette copie documentaire ne suffit PAS, à elle seule, à prouver que le même
+contrat de licence couvrait le commit historique. Vérification requise
+avant distribution de binaires.
+NOTICE
+  fi
+  [[ -s "$destination/LICENSE" ]] || { echo "Texte de licence MPVKit introuvable" >&2; exit 1; }
 }
 
 commit_step() {
