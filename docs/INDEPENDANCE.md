@@ -1,6 +1,6 @@
 # Indépendance : critères de réussite
 
-**Définition :** Kovelyx reste installable et maintenable si les dépôts, releases, URL, comptes et images `NuvioMedia` disparaissent.
+**Définition :** Kovelyx doit pouvoir être installé et maintenu sur Windows, Android et Android TV si les dépôts, Releases et sites NuvioMedia disparaissent. Il **ne doit pas nécessiter de serveur personnel Kovelyx**.
 
 Une copie de sources est un premier pas ; **elle ne suffit pas**.
 
@@ -15,12 +15,12 @@ Une copie de sources est un premier pas ; **elle ne suffit pas**.
 | libmpv-android (TV) | Gitlink sans URL détecté | Source et binaires récupérés légalement, build/test |
 | libass-android (mobile/desktop) | Gitlink sans URL détecté | Source et binaires récupérés légalement, build/test |
 | MPV natif sur Desktop | Pointeurs Git LFS | Objets binaires sauvegardés sur une infrastructure propre |
-| Backend & comptes | Configuration self-host, images Docker externes | Images figées/miroirs + sources/audit des licences |
+| Configuration par appareil | Gestion du stockage local encore à auditer | Préférences, addons et bibliothèque conservés localement sans compte ni backend Kovelyx |
 | Mise à jour | Références Nuvio dans certains clients | Mises à jour sur le dépôt et les releases Kovelyx |
 | Marque | Nuvio dans sources, packages et visuels | Identifiants, marque et contenus de Kovelyx distincts |
 | Services tiers | APIs de métadonnées / catalogues / addons | Liste explicite, solutions de secours et gestion des pannes |
 | Automatisation | Workflows de base | Builds reproductibles, tests, APK et MSI publiés |
-| Sauvegarde | GitHub unique | Deuxième sauvegarde indépendante et restauration testée |
+| Sauvegarde | GitHub unique | Deuxième sauvegarde des sources + export des réglages depuis chaque appareil |
 
 ## Feuille de route technique
 
@@ -28,7 +28,7 @@ Une copie de sources est un premier pas ; **elle ne suffit pas**.
 1. Importer les snapshots et conserver `LICENSE`, `NOTICE`, etc.
 2. Résoudre les gitlinks orphelins.
 3. Préserver les objets Git LFS nécessaires et les ressources natives.
-4. Documenter les scripts externes, les images Docker et les appels réseau.
+4. Documenter les téléchargements de dépendances, les API externes et les appels réseau.
 
 ### Phase B — Construction
 1. Compiler les variantes `fullDebug` Android TV et Mobile.
@@ -39,9 +39,9 @@ Une copie de sources est un premier pas ; **elle ne suffit pas**.
 ### Phase C — Kovelyx
 1. Définir le logo original et l'identité visuelle.
 2. Modifier les identifiants d'app, noms et URLs de mises à jour **sans** changer inconsidérément les espaces de noms du code.
-3. Remplacer l'infrastructure Nuvio par des services sous ton contrôle.
-4. Migrer les données avec procédures de retour arrière et sauvegarde.
-5. Documenter les données qui dépendent toujours de fournisseurs tiers.
+3. Supprimer les obligations de compte et backend spécifiques à Nuvio sans casser les fonctions de lecture.
+4. Conserver paramètres, extensions et bibliothèque dans le stockage local de chaque appareil ; prévoir un export/import manuel si nécessaire.
+5. Documenter les fonctions nécessitant toujours Internet, notamment les addons, catalogues et métadonnées.
 
 ## Sécurité
 
