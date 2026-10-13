@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/import-sources.yml'
+      - 'scripts/import-upstream.sh'
   workflow_dispatch:
 
 permissions:
