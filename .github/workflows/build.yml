@@ -36,8 +36,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Vérifier le SDK Android préinstallé
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-}"
+          test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Compiler Android TV
@@ -67,8 +70,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Vérifier le SDK Android préinstallé
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-}"
+          test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Compiler Android mobile
