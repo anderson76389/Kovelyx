@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">Kovelyx – Icône officielle</title>
+<desc id="desc">Monogramme K formé de rubans violets et d'un symbole de lecture sur fond sombre.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#121325"/><stop offset=".55" stop-color="#0B0C1A"/><stop offset="1" stop-color="#080B16"/></linearGradient>
+ <linearGradient id="stem" x1=".1" y1=".02" x2=".8" y2=".98"><stop stop-color="#F1D6FF"/><stop offset=".25" stop-color="#AE7BFF"/><stop offset=".73" stop-color="#683FF4"/><stop offset="1" stop-color="#4E46FD"/></linearGradient>
+ <linearGradient id="branch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D47BFF"/><stop offset=".48" stop-color="#9C42FA"/><stop offset="1" stop-color="#5243EB"/></linearGradient>
+ <linearGradient id="face" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B65CFF"/><stop offset="1" stop-color="#6455EE"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#6E45FF" stop-opacity=".32"/><stop offset="1" stop-color="#6E45FF" stop-opacity="0"/></radialGradient>
+ <filter id="shadow" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="12"/></filter>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<circle cx="360" cy="365" r="210" fill="url(#glow)"/>
+<rect x="2" y="2" width="508" height="508" rx="110" fill="none" stroke="#8A79F0" stroke-opacity=".22" stroke-width="4"/>
+<path d="M145 97 Q108 101 108 143 L108 376 Q108 410 140 416 L175 425 L189 122 Q188 96 145 97Z" fill="#211159" opacity=".65" transform="translate(4 10)" filter="url(#shadow)"/>
+<path d="M140 94 C121 94 111 110 111 130 L111 373 C111 396 124 412 144 417 L184 425 L184 126 C184 105 169 94 140 94Z" fill="url(#stem)"/>
+<path d="M182 215 L324 116 Q351 98 374 111 L389 121 Q408 138 397 164 Q393 174 382 183 L225 288 L182 263Z" fill="url(#branch)"/>
+<path d="M185 249 L391 352 Q415 365 405 388 Q401 403 388 412 L371 422 Q354 431 334 417 L184 316 Z" fill="url(#face)"/>
+<path d="M183 224 L284 257 L183 312Z" fill="#CE95FF" fill-opacity=".82"/>
+<path d="M184 262 L253 290 L184 332Z" fill="#523AE0" fill-opacity=".62"/>
+<circle cx="436" cy="426" r="10" fill="#9D50FF" opacity=".92"/>
+</svg>
