@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080812">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Kovelyx, votre univers multimédia open source sur Android TV, Android et Windows. Retrouvez les versions disponibles et leur historique de publication.">
+  <title>Kovelyx — Votre univers, sur tous vos écrans</title>
+  <link rel="icon" type="image/svg+xml" href="./brand/logo.svg">
+  <style>
+    :root { color-scheme: dark; --bg:#080812; --fg:#f6f4ff; --muted:#aba7c6; --accent:#a878ff; --edge:#28243d; --card:#12121f; --radius:23px; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--fg); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.55; }
+    body::before { content:""; position:absolute; z-index:-1; pointer-events:none; top:-160px; right:-100px; width:700px; height:640px; background:radial-gradient(circle,#6030c638,transparent 70%); }
+    a { color:inherit; text-decoration:none; }
+    button { font:inherit; }
+    .container { width:min(1120px,calc(100% - 42px)); margin-inline:auto; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:25px 0; }
+    .brand { display:inline-flex; align-items:center; gap:12px; font-size:19px; font-weight:850; letter-spacing:.035em; }
+    .brand img { width:42px; height:42px; border-radius:12px; }
+    .toplinks { display:flex; flex-wrap:wrap; gap:24px; align-items:center; font-size:14px; font-weight:600; color:var(--muted); }
+    .toplinks a:hover,.textlink:hover { color:#fff; }
+    .toplinks a:focus-visible,.button:focus-visible,.textlink:focus-visible { outline:3px solid var(--accent); outline-offset:4px; }
+    .hero { position:relative; padding:72px 0 75px; overflow:hidden; }
+    .hero .orb { position:absolute; z-index:-1; right:5%; top:8%; width:310px; height:310px; border-radius:50%; background:radial-gradient(circle at 30% 20%,#ad73f845,#6738dd18 58%,transparent 72%); filter:blur(10px); }
+    .eyebrow { display:inline-flex; align-items:center; gap:9px; color:#d2b9ff; font-size:12px; letter-spacing:.16em; text-transform:uppercase; font-weight:800; border:1px solid #6c498855; border-radius:40px; padding:9px 13px; background:#23143277; }
+    .eyebrow .dot { background:#bd8cff; border-radius:50%; width:7px; height:7px; box-shadow:0 0 15px #9e64ff; }
+    h1 { max-width:850px; margin:22px 0 20px; font-size:clamp(45px,7vw,88px); line-height:1.075; letter-spacing:-.065em; font-weight:850; }
+    h1 span,.purple { color:#ae80ff; }
+    .lead { max-width:620px; font-size:clamp(17px,2vw,21px); color:var(--muted); margin:0; }
+    .hero-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:29px; }
+    .button { display:inline-flex; justify-content:center; align-items:center; gap:10px; min-height:46px; padding:11px 19px; border-radius:12px; border:1px solid #4b3c66; background:#1e1a2c; color:#f5efff; font-weight:750; transition:transform .18s ease,background .18s ease; }
+    .button:hover { transform:translateY(-2px); background:#2c2343; }
+    .primary { background:linear-gradient(120deg,#a374fb,#7d50e5); border-color:#a983ff; color:#100a1e; }
+    .primary:hover { background:linear-gradient(120deg,#bc99ff,#936ef2); }
+    .visual { margin-top:37px; border:1px solid #6e55a144; border-radius:25px; padding:18px; background:linear-gradient(130deg,#12111f 0%,#1a1035 65%,#111122 100%); box-shadow:0 15px 45px #02020a66; }
+    .visual img { width:100%; display:block; border-radius:15px; }
+    section { padding:24px 0 64px; }
+    .sec-top { margin-bottom:23px; }
+    .kicker { text-transform:uppercase; font-weight:850; letter-spacing:.15em; font-size:12px; color:#ad85ff; }
+    h2 { margin:6px 0 9px; font-size:clamp(28px,3vw,40px); letter-spacing:-.04em; }
+    .desc { color:var(--muted); margin:0; font-size:16px; }
+    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; }
+    .card { position:relative; display:flex; flex-direction:column; padding:25px; min-height:340px; border:1px solid var(--edge); border-radius:var(--radius); background:linear-gradient(150deg,#181526,#10101b 70%); overflow:hidden; }
+    .card::before { content:""; position:absolute; top:0; left:24px; right:24px; height:1px; background:linear-gradient(90deg,transparent,#b389ff77,transparent); }
+    .symbol { width:51px; height:51px; display:grid; place-items:center; border:1px solid #7357a966; border-radius:15px; background:#30214680; font-size:28px; margin-bottom:24px; }
+    .card h3 { margin:0; font-size:23px; letter-spacing:-.03em; }
+    .card p { margin:9px 0 18px; color:var(--muted); font-size:14px; min-height:48px; }
+    .status { display:flex; align-items:center; gap:8px; font-size:13px; color:#c5bbda; margin-top:auto; padding-bottom:13px; }
+    .status::before { content:""; width:7px; height:7px; border-radius:50%; background:#9382b3; flex-shrink:0; }
+    .status.ready::before { background:#70dbb1; }
+    .status.ready { color:#d0f5e6; }
+    .card .button { width:100%; font-size:14px; }
+    .card .button[aria-disabled="true"] { color:#817a93; background:#171522; border-color:#332a43; pointer-events:none; cursor:not-allowed; }
+    .micro { margin:12px 0 0; font-size:12px; color:#89849f; text-align:center; min-height:18px; }
+    .note { border:1px solid #51416f65; background:#1c162d75; border-radius:17px; padding:20px 22px; color:#c9c2dc; margin-top:20px; font-size:14px; }
+    .note strong { color:#e3d3ff; }
+    .info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .info-item { padding:22px; border-radius:18px; background:#12111e; border:1px solid #292438; }
+    .info-item h3 { font-size:16px; margin:0 0 8px; }
+    .info-item p { margin:0; font-size:14px; color:var(--muted); }
+    .info-item b { color:#b78cff; }
+    .footer { border-top:1px solid #28243d; padding:30px 0 45px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px; font-size:13px; color:var(--muted); }
+    .footer .footbrand { display:flex; align-items:center; gap:10px; color:#ebe4ff; font-weight:800; }
+    .footbrand img { width:30px; height:30px; }
+    .footer a { color:#d6baff; }
+    .announcement { display:inline-block; margin-top:16px; color:#a6a0be; font-size:13px; }
+    @media(max-width:830px) { .cards{grid-template-columns:1fr}.card{min-height:0}.info-grid{grid-template-columns:1fr}.toplinks{gap:15px}.hero{padding:35px 0 40px} }
+    @media(max-width:440px) { .container{width:min(100% - 30px,1120px)}.topbar{align-items:flex-start}.toplinks{justify-content:flex-end;font-size:12px}.hero-actions .button{width:100%}.visual{padding:7px} }
+    @media(prefers-reduced-motion:reduce) { html {scroll-behavior:auto} .button {transition:none} }
+  </style>
+</head>
+<body>
+<header class="container topbar">
+ <a href="./" class="brand" aria-label="Kovelyx, accueil"><img src="./brand/logo.svg" alt=""> KOVELYX</a>
+ <nav class="toplinks" aria-label="Navigation principale">
+  <a href="#telechargements">Téléchargements</a>
+  <a href="#apropos">À propos</a>
+  <a href="https://github.com/anderson76389/Kovelyx">GitHub ↗</a>
+ </nav>
+</header>
+<main>
+ <div class="container hero">
+   <span class="eyebrow"><span class="dot"></span> Logiciel libre · Windows · Android · TV</span>
+   <div class="orb" aria-hidden="true"></div>
+   <h1>Tout votre univers.<br><span>Sur tous vos écrans.</span></h1>
+   <p class="lead">Kovelyx réunit vos sources multimédias dans une expérience pensée pour la télévision, le téléphone et le PC. Un projet libre, sous votre contrôle.</p>
+   <div class="hero-actions">
+     <a class="button primary" href="#telechargements">↓ Voir les versions disponibles</a>
+     <a class="button" href="https://github.com/anderson76389/Kovelyx">⌁ Code source sur GitHub</a>
+   </div>
+   <p class="announcement">Projet en développement · Les fichiers sont proposés uniquement après publication effective d'une Release.</p>
+   <div class="visual"><img src="./brand/banner.svg" alt="Bannière officielle Kovelyx, logo violet et les trois plateformes Android TV, Android et Windows"></div>
+ </div>
+ <section id="telechargements" class="container" aria-labelledby="download-title">
+   <div class="sec-top">
+     <div class="kicker">Téléchargements</div>
+     <h2 id="download-title">Choisissez votre appareil.</h2>
+     <p class="desc">Le site vérifie les fichiers présents dans les <a class="textlink" href="https://github.com/anderson76389/Kovelyx/releases">Releases GitHub</a>. Aucune version n'est inventée.</p>
+   </div>
+   <div class="cards">
+     <article class="card" data-platform="tv">
+       <div class="symbol" aria-hidden="true">▣</div>
+       <h3>Android TV</h3>
+       <p>Google TV, Android TV et boîtiers compatibles. Interface conçue pour la télécommande.</p>
+       <span class="status" aria-live="polite">Recherche de version…</span>
+       <a class="button" href="#telechargements" aria-disabled="true" tabindex="-1">Indisponible</a>
+       <div class="micro">Format APK</div>
+     </article>
+     <article class="card" data-platform="mobile">
+       <div class="symbol" aria-hidden="true">▯</div>
+       <h3>Android Mobile</h3>
+       <p>Smartphones et tablettes Android, avec interface tactile et bibliothèque personnelle.</p>
+       <span class="status" aria-live="polite">Recherche de version…</span>
+       <a class="button" href="#telechargements" aria-disabled="true" tabindex="-1">Indisponible</a>
+       <div class="micro">Format APK</div>
+     </article>
+     <article class="card" data-platform="desktop">
+       <div class="symbol" aria-hidden="true">⊞</div>
+       <h3>Windows</h3>
+       <p>Un installateur pour votre PC Windows 64 bits, avec un vrai programme de bureau.</p>
+       <span class="status" aria-live="polite">Recherche de version…</span>
+       <a class="button" href="#telechargements" aria-disabled="true" tabindex="-1">Indisponible</a>
+       <div class="micro">Format MSI</div>
+     </article>
+   </div>
+   <div class="note" role="note"><strong>Transparence :</strong> une compilation réussie ne prouve pas que toutes les fonctions de lecture, extensions et paramètres fonctionnent. Les versions expérimentales seront signalées. Ce site n'affiche un bouton de téléchargement que lorsqu'un vrai fichier a été publié sur le dépôt Kovelyx.</div>
+ </section>
+ <section id="apropos" class="container" aria-labelledby="about-title">
+   <div class="sec-top">
+     <div class="kicker">Le projet</div>
+     <h2 id="about-title">Simple à utiliser. Libre à conserver.</h2>
+     <p class="desc">Trois applications. Pas de serveur Kovelyx personnel à maintenir.</p>
+   </div>
+   <div class="info-grid">
+     <div class="info-item"><h3><b>01.</b> Vos appareils</h3><p>Paramètres et données locaux sont l'objectif du projet, sans compte Kovelyx ni synchronisation centralisée.</p></div>
+     <div class="info-item"><h3><b>02.</b> Vos sources</h3><p>Les extensions, métadonnées et flux restent dépendants des fournisseurs externes que vous choisissez et peuvent nécessiter Internet.</p></div>
+     <div class="info-item"><h3><b>03.</b> Votre code</h3><p>Les sources et les développements sont publics, avec conservation des crédits et obligations des licences open source.</p></div>
+   </div>
+ </section>
+</main>
+<footer class="container footer">
+  <div class="footbrand"><img src="./brand/logo.svg" alt=""> KOVELYX <span style="font-weight:400;color:#868098">· Your media. Your world.</span></div>
+  <div>Projet indépendant, non affilié à NuvioMedia · <a href="https://github.com/anderson76389/Kovelyx">Sources et licences</a></div>
+</footer>
+<script>
+(function () {
+  "use strict";
+  var endpoint = "https://api.github.com/repos/anderson76389/Kovelyx/releases?per_page=30";
+  var patterns = {
+    tv: /^kovelyx[-_](?:tv|android-tv)[-_].+\.apk$/i,
+    mobile: /^kovelyx[-_](?:mobile|android)[-_].+\.apk$/i,
+    desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.msi$/i
+  };
+  function setCard(card, selected) {
+    var status = card.querySelector(".status");
+    var action = card.querySelector(".button");
+    var micro = card.querySelector(".micro");
+    if (!selected) {
+      status.textContent = "Pas de version publiée";
+      action.textContent = "Bientôt disponible";
+      action.setAttribute("aria-disabled", "true");
+      action.setAttribute("tabindex", "-1");
+      action.setAttribute("href", "#telechargements");
+      return;
+    }
+    var asset = selected.asset;
+    status.textContent = selected.release.tag_name + (selected.release.prerelease ? " · Préversion" : " · Version publiée");
+    status.classList.add("ready");
+    action.textContent = "↓ Télécharger " + (card.dataset.platform === "desktop" ? "le MSI" : "l'APK");
+    action.href = asset.browser_download_url;
+    action.removeAttribute("aria-disabled");
+    action.removeAttribute("tabindex");
+    action.setAttribute("rel", "noopener noreferrer");
+    micro.textContent = asset.name + " · " + (asset.size / 1048576).toFixed(1) + " Mo";
+  }
+  var cards = Array.prototype.slice.call(document.querySelectorAll("[data-platform]"));
+  fetch(endpoint, {headers: {"Accept": "application/vnd.github+json"}})
+    .then(function (response) { if (!response.ok) throw new Error("HTTP " + response.status); return response.json(); })
+    .then(function (releases) {
+      if (!Array.isArray(releases)) throw new Error("Format de réponse inattendu");
+      cards.forEach(function (card) {
+        var matching = null;
+        for (var i = 0; i < releases.length && !matching; i++) {
+          var release = releases[i];
+          if (release.draft || !Array.isArray(release.assets)) continue;
+          var asset = release.assets.find(function (item) {
+            return item.state === "uploaded" && patterns[card.dataset.platform].test(item.name) &&
+              /^https:\/\/github\.com\/anderson76389\/Kovelyx\/releases\/download\//i.test(item.browser_download_url || "");
+          });
+          if (asset) matching = {release:release, asset:asset};
+        }
+        setCard(card, matching);
+      });
+    })
+    .catch(function () {
+      cards.forEach(function (card) {
+        setCard(card, null);
+        card.querySelector(".status").textContent = "Vérification momentanément indisponible";
+      });
+    });
+}());
+</script>
+</body>
+</html>
