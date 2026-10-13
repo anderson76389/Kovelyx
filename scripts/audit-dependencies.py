@@ -8,7 +8,7 @@ import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-PLATFORMS = {"TV": ROOT / "apps/tv", "Android": ROOT / "apps/mobile", "Windows": ROOT / "apps/desktop", "Serveur": ROOT / "server"}
+PLATFORMS = {"TV": ROOT / "apps/tv", "Android": ROOT / "apps/mobile", "Windows": ROOT / "apps/desktop"}
 EXTENSIONS = {".kt", ".kts", ".java", ".swift", ".xml", ".json", ".yml", ".yaml", ".toml", ".properties", ".sh", ".py", ".gradle", ".xcconfig", ".plist", ".ts", ".tsx", ".js"}
 LINK_RE = re.compile(r"https?://([A-Za-z0-9.-]+)(?::\d+)?", re.I)
 UPSTREAM_RE = re.compile(r"(?i)nuvio\.tv|nuviomedia|nuvio://")
