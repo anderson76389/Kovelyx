@@ -73,12 +73,25 @@ NOTICE
 commit_step() {
   local path="$1" commit_message="$2"
   # La copie de travail contient uniquement les archives publiques, jamais leurs .git ni un fichier .env privé.
-  local large
-  large="$(find "$path" -type f -size +95M -print -quit)"
-  if [[ -n "$large" ]]; then
-    echo "Blocage de sécurité : fichier > 95 Mio : $large (prévoir Git LFS/stockage adapté)." >&2
-    exit 1
-  fi
+  # GitHub refuse les fichiers Git ordinaires dépassant 100 Mo.
+  # Ne surtout pas pousser les gros binaires sans validation de leur licence.
+  # Inventorier précisément chaque fichier exclu pour le restaurer plus tard
+  # via un stockage Kovelyx vérifié (sha256 + instructions de récupération).
+  local manifest="$path/.kovelyx-binaries-a-sauvegarder.txt"
+  local oversized=0
+  while IFS= read -r -d '' large; do
+    if (( oversized == 0 )); then
+      {
+        echo "# Fichiers hors Git (> 95 Mio), non sauvegardés ici"
+        echo "# Ces fichiers DOIVENT être restaurés pour une compilation/lecture complète."
+        echo "# SHA256 | OCTETS | CHEMIN ORIGINAL"
+      } > "$manifest"
+    fi
+    oversized=$((oversized + 1))
+    printf '%s | %s | %s\n' "$(sha256sum "$large" | awk '{print $1}')" "$(stat -c '%s' "$large")" "$large" >> "$manifest"
+    echo "ATTENTION: binaire volumineux hors dépôt Git : $large" >&2
+    rm -f -- "$large"
+  done < <(find "$path" -type f -size +95M -print0)
   git add -f -A -- "$path"
   if ! git diff --cached --quiet; then
     git -c user.name="Kovelyx Source Import" -c user.email="github-actions[bot]@users.noreply.github.com" \
