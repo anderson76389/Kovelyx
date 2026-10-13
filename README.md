@@ -2,7 +2,7 @@
 
 **Kovelyx — PC Windows · Android · Android TV**
 
-> **État : fondation / import des sources.** Aucun APK, MSI ni serveur Kovelyx opérationnel n'est encore garanti. Les fonctionnalités, le changement d'identité et l'indépendance complète restent à développer et à tester.
+> **État : quatre snapshots sources intégrés ; compilations de référence en cours de vérification.** Aucun APK ni MSI Kovelyx utilisable n'est encore confirmé. Le changement d'identité, la reprise des dépendances natives et l'autonomie du serveur restent à réaliser.
 
 Kovelyx est un projet communautaire indépendant destiné à préserver et adapter une base d'applications multimédias open source à travers trois plateformes, avec la possibilité de contrôler l'hébergement, les compilations et les mises à jour.
 
@@ -35,18 +35,25 @@ Voir [PROVENANCE.md](docs/PROVENANCE.md) et [INDEPENDANCE.md](docs/INDEPENDANCE.
 
 ## Initialisation automatisée du code source
 
-Les quatre applications ne sont **pas** créées à partir de coquilles vides : le workflow [Import des sources](.github/workflows/import-sources.yml) utilise [scripts/import-upstream.sh](scripts/import-upstream.sh) pour récupérer des **commits précis** de projets publics et les importer dans les quatre répertoires.
+Les quatre projets sources ne sont **pas** créés à partir de coquilles vides : le workflow [Import des sources](.github/workflows/import-sources.yml) utilise [scripts/import-upstream.sh](scripts/import-upstream.sh) pour récupérer des **commits précis** de projets publics et les importer dans les quatre répertoires.
 
 - Import **à usage unique**, sans écraser les modifications de Kovelyx.
 - Provenance et SHA des commits enregistrés.
 - Pas de sous-modules Git conservant silencieusement un lien dynamique vers l'amont pour MPVKit : le code de MPVKit est recopié à la version épinglée.
 - Les autres Gitlinks, les objets Git LFS et les images Docker restent à inventorier et sécuriser avant toute affirmation d'autonomie totale.
 
-Le workflow est déclenché à l'installation et peut être relancé manuellement depuis l'onglet **Actions** du dépôt.
+Le workflow d'importation a été **exécuté avec succès** sur les quatre snapshots. Un [workflow de compilation de référence](.github/workflows/build.yml) tente de produire les fichiers APK et MSI ; sa réussite est vérifiable dans l'onglet **Actions** du dépôt. Les exécutables ne sont pas encore certifiés.
+
+## État des compilations
+
+- [Journal de la dernière tentative et des tests](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml).
+- Les objets Git LFS, les bibliothèques natives Gitlink manquantes et les images Docker externes empêchent pour l'instant toute promesse d'indépendance complète.
+- Le fichier `apps/desktop/.kovelyx-binaries-a-sauvegarder.txt` documente le binaire Windows de 115 Mo manquant dans Git.
+- Les décisions et blocages sont suivis dans les [issues](https://github.com/anderson76389/Kovelyx/issues).
 
 ## Feuille de route
 
-1. [ ] Importer et contrôler tous les répertoires sources et leurs licences.
+1. [x] Importer les 4 répertoires sources et enregistrer leurs commits (licence historique MPVKit restant à confirmer).
 2. [ ] Traiter les Gitlinks non résolus, les binaires LFS et les images Docker privées/externes.
 3. [ ] Obtenir des compilations de référence Android TV, Android mobile et Windows.
 4. [ ] Choisir des identifiants Android et des signatures propres à Kovelyx.
