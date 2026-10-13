@@ -1,0 +1,51 @@
+name: Importer les sources de Kovelyx
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-sources.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kovelyx-source-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    name: Copier les versions épinglées
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Récupérer le dépôt Kovelyx
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+
+      - name: Préparer Git
+        shell: bash
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global core.autocrlf false
+
+      - name: Importer les archives publiques (sans écraser les dossiers existants)
+        shell: bash
+        run: bash scripts/import-upstream.sh
+
+      - name: Contrôler les quatre imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in apps/tv apps/mobile apps/desktop server; do
+            test -s "$path/LICENSE"
+            test -s "$path/.kovelyx-source.txt"
+            echo "$path OK: $(cat "$path/.kovelyx-source.txt")"
+          done
+          test -s apps/mobile/MPVKit/LICENSE
+          test -s apps/desktop/MPVKit/LICENSE
+          echo "Import source fini. Les builds et la chaîne vidéo restent à valider."
