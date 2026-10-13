@@ -13,6 +13,8 @@ Kovelyx importe des **instantanés** (arbres de fichiers, sans historique Git co
 
 Les imports préservent les licences et notices des archives. Ils **ne copient pas** l'historique complet des projets en amont.
 
+**MPVKit :** les deux commits Gitlink historiques ne possèdent pas de fichier `LICENSE`. Le processus ajoute, à titre documentaire, le texte LGPL-3.0 du commit principal actuel de MPVKit avec une notice d'origine distincte. Son applicabilité aux anciens commits reste à confirmer avant une redistribution de binaires.
+
 ## Dépendances Git non résolues
 
 Les arbres des commits d'origine signalent des `gitlink` sans URL exploitable dans `.gitmodules` :
