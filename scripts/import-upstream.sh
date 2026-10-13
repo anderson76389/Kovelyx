@@ -102,7 +102,7 @@ commit_step() {
   fi
 }
 
-# Les quatre snapshots forment un monorepo. Un succès est commité séparément
+# Les trois snapshots forment un monorepo. Un succès est commité séparément
 # pour éviter de perdre les premiers imports si l'un des suivants échoue.
 if [[ ! -e apps/tv ]]; then
   copy_snapshot "NuvioMedia/NuvioTV" "fe3142bf5c8357e59e0ecb274c54eb5ccb284b00" "apps/tv"
@@ -130,11 +130,5 @@ else
   echo "apps/desktop existe : aucun écrasement"
 fi
 
-if [[ ! -e server ]]; then
-  copy_snapshot "NuvioMedia/self-host" "39ea2bd1bc71636127f9d797599c23b4236960c4" "server"
-  commit_step "server" "import(server): capture Apache-2.0 de self-host"
-else
-  echo "server existe : aucun écrasement"
-fi
 
 echo "Sources importées ou déjà présentes. Voir docs/INDEPENDANCE.md pour les dépendances restantes."
