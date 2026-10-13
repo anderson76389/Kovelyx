@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="366" viewBox="0 0 1280 366" role="img" aria-labelledby="title subtitle">
+<title id="title">KOVELYX</title><desc id="subtitle">Votre univers multimédia — Windows, Android et Android TV</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0D1021"/><stop offset=".52" stop-color="#070A17"/><stop offset="1" stop-color="#100927"/></linearGradient>
+<linearGradient id="purple" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#F6D6FF"/><stop offset=".32" stop-color="#B578FF"/><stop offset="1" stop-color="#7059FF"/></linearGradient>
+<linearGradient id="k" x1=".1" y1="0" x2=".8" y2="1"><stop stop-color="#F2C9FF"/><stop offset=".45" stop-color="#9C5CFC"/><stop offset="1" stop-color="#584DF5"/></linearGradient>
+<radialGradient id="halo"><stop stop-color="#743CF5" stop-opacity=".24"/><stop offset="1" stop-color="#743CF5" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#B6B0FF" stroke-opacity=".035"/></pattern>
+</defs>
+<rect width="1280" height="366" rx="28" fill="url(#bg)"/>
+<rect width="1280" height="366" rx="28" fill="url(#grid)"/>
+<circle cx="1132" cy="135" r="320" fill="url(#halo)"/>
+<circle cx="1190" cy="55" r="180" stroke="#9978FC" stroke-opacity=".12" fill="none" stroke-width="2"/>
+<circle cx="1190" cy="55" r="120" stroke="#9978FC" stroke-opacity=".09" fill="none" stroke-width="2"/>
+<rect x="48" y="63" width="220" height="228" rx="51" fill="#100F26" stroke="#9274FA" stroke-opacity=".65" stroke-width="2"/>
+<rect x="57" y="72" width="202" height="210" rx="45" fill="#14102A"/>
+<path d="M120 113 Q106 116 106 136 L106 235 Q106 254 123 259 L144 265 L144 125 Q142 113 120 113Z" fill="url(#k)"/>
+<path d="M142 165 L203 120 Q221 108 238 126 Q249 143 230 157 L164 204Z" fill="#BD66FF"/>
+<path d="M145 186 L236 235 Q253 246 238 261 Q226 273 208 262 L143 220Z" fill="#7B58FA"/>
+<path d="M144 169 L181 190 L144 218Z" fill="#E0A4FF"/>
+<text x="315" y="166" font-family="Arial,Helvetica,sans-serif" font-size="95" font-weight="800" letter-spacing="4" fill="#F6F6FD">KOVE</text>
+<text x="621" y="166" font-family="Arial,Helvetica,sans-serif" font-size="95" font-weight="800" letter-spacing="4" fill="url(#purple)">LYX</text>
+<text x="322" y="207" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="500" letter-spacing="8" fill="#B8B3D3">YOUR MEDIA. YOUR WORLD.</text>
+<rect x="319" y="242" width="171" height="43" rx="21.5" fill="#1C1733" stroke="#7B5BDD" stroke-opacity=".66"/>
+<circle cx="342" cy="264" r="5" fill="#AD81FF"/><text x="358" y="271" font-size="17" fill="#E9E0FF" font-family="Arial,Helvetica,sans-serif">ANDROID TV</text>
+<rect x="503" y="242" width="155" height="43" rx="21.5" fill="#1C1733" stroke="#7B5BDD" stroke-opacity=".66"/>
+<circle cx="526" cy="264" r="5" fill="#AD81FF"/><text x="542" y="271" font-size="17" fill="#E9E0FF" font-family="Arial,Helvetica,sans-serif">ANDROID</text>
+<rect x="670" y="242" width="167" height="43" rx="21.5" fill="#1C1733" stroke="#7B5BDD" stroke-opacity=".66"/>
+<circle cx="693" cy="264" r="5" fill="#AD81FF"/><text x="709" y="271" font-size="17" fill="#E9E0FF" font-family="Arial,Helvetica,sans-serif">WINDOWS</text>
+<path d="M1035 0 L910 366" stroke="#AB81FC" stroke-opacity=".05" stroke-width="70"/>
+<path d="M1086 0 L961 366" stroke="#AB81FC" stroke-opacity=".06" stroke-width="30"/>
+<rect x="1.5" y="1.5" width="1277" height="363" rx="27" stroke="#A790FF" stroke-opacity=".22" stroke-width="3" fill="none"/>
+</svg>
