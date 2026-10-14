@@ -9,7 +9,9 @@ Ce guide concerne **uniquement Windows et Linux**. Les anciennes sources Android
 | Installer facilement sur Windows 10/11 x64 | `Kovelyx-Windows-Setup-….exe` | **Un fichier** à lancer pour installer Kovelyx |
 | Installation MSI traditionnelle | `Kovelyx-Windows-….msi` | Paquet standard Windows |
 | Garder une copie sans installation classique | `Kovelyx-Windows-Portable-….zip` | Dossier portable, mais il contient **de nombreux fichiers nécessaires** |
-| Utiliser Linux x86-64 | `Kovelyx-Linux-x86_64-….AppImage` | **Un seul fichier exécutable** ; lancement sans installateur classique |
+| Utiliser Linux x86-64 sans installation | `Kovelyx-Linux-x86_64-….AppImage` | **Un seul fichier exécutable** ; lancement sans installateur classique |
+| Installer sur Debian / Ubuntu x86-64 | `Kovelyx-Linux-amd64-….deb` | Paquet système et dépendances déclarées |
+| Installer sur Fedora x86-64 | `Kovelyx-Linux-x86_64-….rpm` | Paquet système et dépendances déclarées |
 
 **Un seul fichier téléchargé ne veut pas dire un seul fichier utilisé en mémoire** : le runtime Java, les extensions natives et les bibliothèques restent nécessaires. Le `Setup.exe` les installe automatiquement. Une AppImage les rassemble autant que possible mais peut encore dépendre de bibliothèques Linux du système.
 
@@ -18,7 +20,7 @@ Ce guide concerne **uniquement Windows et Linux**. Les anciennes sources Android
 - [Build Windows validé (EXE, MSI, portable)](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908)
 - [Compilations Windows](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
 - [Build Linux validé (AppImage x86-64)](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
-- [Compilations Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml)
+- [Compilations Linux : AppImage + job DEB/RPM](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) — les paquets natifs ne sont disponibles qu'après réussite du nouveau job
 - [Releases](https://github.com/anderson76389/Kovelyx/releases) — uniquement les versions effectivement publiées
 - [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
 
