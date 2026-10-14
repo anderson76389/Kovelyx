@@ -60,6 +60,12 @@ Get-FileHash -Algorithm SHA256 .\Kovelyx-Windows-Setup-*.exe
 
 Les exécutables expérimentaux peuvent être **non signés**. Cela peut déclencher un avertissement SmartScreen ; cela ne prouve ni qu'ils sont sûrs ni qu'ils sont malveillants. Ne désactivez pas les protections Windows pour tester.
 
+## Comptes indépendants de Nuvio
+
+Le mode invité fonctionne sans serveur. Pour proposer de **vrais comptes exclusivement Kovelyx**, il faut un backend d'authentification contrôlé par le projet : [configuration pas à pas](./COMPTES_KOVELYX.md) et [informations comptes/confidentialité](./COMPTES_ET_CONFIDENTIALITE.md).
+
+Un serveur de comptes **n'est pas créé par la compilation GitHub**. Sans variables `KOVELYX_SUPABASE_URL` et `KOVELYX_SUPABASE_PUBLISHABLE_KEY` correctes, le formulaire affiche que les comptes en ligne ne sont pas disponibles et **n'envoie rien à Nuvio**. Ne renseignez jamais un identifiant Nuvio pour tenter d'activer ce service. La synchronisation distante nécessite encore des fonctions SQL et des contrôles supplémentaires.
+
 ## Mise à jour depuis l'application
 
 Le bandeau de mise à jour apparaît automatiquement lorsqu'une Release GitHub plus récente **et compatible avec votre format d'installation** est disponible. Cliquez une fois sur « Mettre à jour » : Kovelyx télécharge et vérifie le paquet, puis lance automatiquement la mise à jour adaptée à votre installation.
@@ -73,6 +79,19 @@ Le bandeau de mise à jour apparaît automatiquement lorsqu'une Release GitHub p
 | Linux Flatpak | Mises à jour gérées par Flatpak ; pas d'installation directe dans Kovelyx |
 
 Toutes les versions publiées doivent avoir un **nom de version identique dans l'application et sur GitHub** ainsi qu'une empreinte `.sha256` correspondante. Si le paquet ou sa signature de contrôle ne correspond pas, l'installation est bloquée. Le processus ne désinstalle pas intentionnellement les profils ou les paramètres locaux.
+
+### Vérifier que la mise à jour s'est vraiment installée
+
+La version Windows **installée** est mise à jour avec le MSI officiel, vérifié avec l'empreinte SHA-256 GitHub. Après le téléchargement, Kovelyx se ferme ; un assistant indépendant attend la fin du processus, lance Windows Installer et contrôle désormais **la version réellement enregistrée** avant de relancer l'application. Si l'installation échoue, l'assistant tente de rouvrir l'ancienne version. Une demande d'autorisation administrateur de Windows peut apparaître.
+
+Après une mise à jour, contrôlez **Paramètres → À propos → Version** : le numéro doit correspondre à la Release téléchargée. Les diagnostics Windows (ne partagez aucun journal contenant des données personnelles) :
+
+```powershell
+Get-Content "$env:APPDATA\Kovelyx\updates\windows-update.log" -Tail 30
+Get-Content "$env:APPDATA\Kovelyx\updates\windows-update.msi.log" -Tail 30
+```
+
+L'indication `Kovelyx update verified: ...` dans le journal confirme que Windows Installer a enregistré la version attendue. Attention, **un test d'installation MSI sur GitHub ne prouve pas à lui seul que la mise à jour a réussi sur votre ordinateur** : vérifier le numéro et les journaux locaux reste nécessaire.
 
 **Ce n'est pas un téléchargement par différences** : le nouveau paquet complet est téléchargé en arrière-plan depuis Kovelyx. Les formats de mise à jour et le redémarrage doivent être testés sur Windows et plusieurs distributions Linux. Les copies de sauvegarde portables prennent de l'espace disque.
 
