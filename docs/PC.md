@@ -37,6 +37,19 @@ Les artefacts Actions ne sont pas des Releases publiques et **peuvent expirer**.
 
 Les photos personnelles sont copiées dans `%APPDATA%\Kovelyx\profile-media` et ne sont pas partagées automatiquement avec un compte en ligne.
 
+## Configurer Trakt et MDBList sur Windows
+
+Dans **Paramètres → Suivi → Configurer les clés Trakt et MDBList**, renseignez les identifiants OAuth de vos propres applications :
+
+- **Trakt :** `Client ID` et `Client Secret` créés depuis [Trakt — OAuth Applications](https://trakt.tv/oauth/applications). La version Windows emploie l'autorisation par code affiché à l'écran.
+- **MDBList :** `Client ID` de votre application MDBList. La connexion utilise aussi un code d'autorisation.
+
+Cliquez sur **Enregistrer**, puis **Connecter Trakt** ou **Connecter MDBList**, et autorisez Kovelyx dans le navigateur. Sans identifiants, les boutons restent désactivés : le code ne peut pas inventer de clés valides. Le site web de Ma-Collection n'est pas nécessaire pour connecter ces services.
+
+Les valeurs sont mémorisées **localement sur votre PC** dans le stockage de Kovelyx, pas dans GitHub. Actuellement, elles ne sont **pas chiffrées** : évitez de les utiliser pour des services sensibles ou de partager ce dossier. Ce sont des identifiants d'application, pas votre mot de passe Trakt/MDBList. Vous pouvez les effacer dans le même écran. Les connexions réseau et permissions réelles doivent être testées avec votre compte.
+
+Les crédits du code d'origine restent documentés dans [PROVENANCE.md](PROVENANCE.md) pour respecter les licences. L'identité et le lien de l'application publiés dans Kovelyx PC sont ceux de [Kovelyx](https://github.com/anderson76389/Kovelyx).
+
 ## Sécurité des téléchargements
 
 Chaque artefact généré par le workflow contient des fichiers `.sha256`. Avant d'installer une archive téléchargée, vérifier son origine GitHub et comparer les empreintes :
