@@ -1,0 +1,161 @@
+name: Kovelyx Windows - MSI et tests de packaging
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'scripts/generate-windows-icon.py'
+      - '.github/workflows/windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: kovelyx-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: Compiler Kovelyx Windows
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Sources Kovelyx
+        uses: actions/checkout@v4
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Générer l'icône originale Kovelyx
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
+          python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+          if (-not (Test-Path 'apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.ico')) { throw 'Icône Windows manquante' }
+      - name: Restaurer la DLL MPV archivée dans Kovelyx
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $runs = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/native-windows.yml/runs?branch=main&status=success&per_page=10" | ConvertFrom-Json
+          $success = @($runs.workflow_runs | Where-Object { $_.conclusion -eq 'success' } | Select-Object -First 1)
+          if ($success.Count -ne 1) {
+            Write-Host "::notice title=Windows::Aucune archive MPV vérifiée dans les artefacts Kovelyx."
+            exit 0
+          }
+          $root = Join-Path $env:RUNNER_TEMP "kovelyx-mpv"
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          gh run download $success[0].id --repo $env:GITHUB_REPOSITORY --name kovelyx-windows-mpv --dir $root
+          if ($LASTEXITCODE -ne 0) { throw "Impossible de restaurer le runtime de Kovelyx." }
+          $dll = Join-Path $root "libmpv-2.dll"
+          if (-not (Test-Path $dll)) { throw "Runtime MPV absent de l'artefact." }
+          $checksum = (Get-FileHash -Algorithm SHA256 $dll).Hash.ToLowerInvariant()
+          if ($checksum -ne '07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906') {
+            throw "SHA256 MPV invalide."
+          }
+          if ((Get-Item $dll).Length -ne 115320296) { throw "Taille du binaire MPV incorrecte." }
+          $dst = "apps/desktop/composeApp/src/desktopMain/native/windows/runtime"
+          New-Item -ItemType Directory -Path $dst -Force | Out-Null
+          Copy-Item -Path $dll -Destination (Join-Path $dst "libmpv-2.dll") -Force
+          Write-Host "Runtime MPV restauré et contrôlé depuis les artefacts Kovelyx."
+      - name: Préparer le SDK officiel Microsoft WebView2
+        id: webview
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $version = "1.0.2739.15"
+          $dir = Join-Path $env:RUNNER_TEMP "kovelyx-webview2"
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $package = Join-Path $dir "sdk.zip"
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/$version" -OutFile $package
+          Expand-Archive -Path $package -DestinationPath (Join-Path $dir "sdk") -Force
+          $sdk = Join-Path $dir "sdk"
+          if (-not (Test-Path (Join-Path $sdk "build/native/include/WebView2.h"))) { throw "WebView2.h introuvable." }
+          if (-not (Test-Path (Join-Path $sdk "build/native/x64/WebView2Loader.dll.lib"))) { throw "WebView2Loader.dll.lib introuvable." }
+          "WEBVIEW_DIR=$sdk" >> $env:GITHUB_ENV
+          Write-Host "SDK WebView2 $version prêt."
+      - name: Vérifier les bibliothèques natives indispensables
+        id: native
+        shell: pwsh
+        run: |
+          $dll = "apps/desktop/composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll"
+          if (Test-Path $dll) {
+            "available=true" >> $env:GITHUB_OUTPUT
+            "### Windows : bibliothèque MPV trouvée, compilation autorisée" >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            "available=false" >> $env:GITHUB_OUTPUT
+            Write-Host "::notice title=Windows non compilé::La DLL MPV (115 Mo) manque ; aucun MSI n'est produit. Voir apps/desktop/.kovelyx-binaries-a-sauvegarder.txt"
+            "### Windows : compilation non tentée" >> $env:GITHUB_STEP_SUMMARY
+            "Le binaire libmpv-2.dll (115 Mo) est absent du dépôt. Aucun MSI n'est disponible." >> $env:GITHUB_STEP_SUMMARY
+          }
+      - name: Compiler l'installateur MSI via Visual Studio et Gradle
+        if: steps.native.outputs.available == 'true'
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $vswhere = "C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
+          $vs = & $vswhere -latest -products "*" -property installationPath
+          if (-not $vs) { throw "Visual Studio C++ introuvable sur le runner Windows." }
+          $vsdev = Join-Path $vs "Common7/Tools/VsDevCmd.bat"
+          if (-not (Test-Path $vsdev)) { throw "VsDevCmd.bat introuvable." }
+          $batch = Join-Path $env:RUNNER_TEMP "kovelyx-build-msi.bat"
+          @(
+            "@echo off",
+            "call `"$vsdev`" -arch=x64 -host_arch=x64",
+            "if errorlevel 1 exit /b 1",
+            "call .\\gradlew.bat :composeApp:packageReleaseMsi --no-daemon --max-workers=2 --stacktrace `"-Pnuvio.webview2.dir=$env:WEBVIEW_DIR`" `"-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m`"",
+            "exit /b %errorlevel%"
+          ) | Set-Content -Path $batch -Encoding ASCII
+          & $batch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Vérifier les propriétés du MSI
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $msiFiles = @(Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries' -Filter '*.msi' -Recurse)
+          if ($msiFiles.Count -ne 1) { throw ('Un seul MSI attendu ; obtenu : ' + $msiFiles.Count) }
+          $msi = $msiFiles[0]
+          if ($msi.Name -notmatch 'Kovelyx' -or $msi.Length -lt 1000000) { throw ('MSI non valide ou non renommé : ' + $msi.Name) }
+          $com = New-Object -ComObject WindowsInstaller.Installer
+          $database = $com.OpenDatabase($msi.FullName, 0)
+          function Value([string]$field) {
+            $q = $database.OpenView("SELECT Value FROM Property WHERE Property = '$field'")
+            $q.Execute()
+            $r = $q.Fetch()
+            $result = if ($null -ne $r) { $r.StringData(1) } else { '' }
+            $q.Close()
+            return $result
+          }
+          $product = Value 'ProductName'
+          $vendor = Value 'Manufacturer'
+          $upgrade = Value 'UpgradeCode'
+          Write-Host ('Name=' + $product + ' Vendor=' + $vendor + ' UpgradeCode=' + $upgrade)
+          if ($product -ne 'Kovelyx' -or $vendor -match 'Nuvio' -or $upgrade -match '395990ee-9b8a-3548-922c-e7a23a495b8d') { throw 'Identité MSI non indépendante' }
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          $out = Join-Path 'dist' ('Kovelyx-Windows-' + $env:GITHUB_SHA + '.msi')
+          Copy-Item $msi.FullName -Destination $out
+          $hash = (Get-FileHash -Path $out -Algorithm SHA256).Hash.ToLowerInvariant()
+          ($hash + '  ' + (Split-Path $out -Leaf)) | Set-Content -Path ($out + '.sha256') -Encoding Ascii
+          ('MSI Kovelyx vérifié (identité/package), SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          'Note : les fonctionnalités et le lancement de l’interface restent à tester sur un vrai ordinateur.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Enregistrer le MSI
+        if: steps.native.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-MSI-experimental
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
