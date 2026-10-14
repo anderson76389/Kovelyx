@@ -229,16 +229,8 @@ internal actual fun CollectionCardRemoteImage(
 
     var composeBitmap by remember(imageUrl) { mutableStateOf<ImageBitmap?>(null) }
 
-    // Prefetch as soon as the card becomes visible (not on hover) so the codec is already
-    // downloaded/decoded and cached by the time the user actually hovers - hover then reads
-    // straight from gifCodecCache with zero network/decode delay.
-    if (animateIfPossible) {
-        LaunchedEffect(imageUrl) {
-            if (synchronized(gifCodecCache) { !gifCodecCache.containsKey(imageUrl) }) {
-                loadDesktopGifCodec(imageUrl)
-            }
-        }
-    }
+    // Avoid downloading every animated preview while scrolling. The first hover
+    // loads it; subsequent hovers reuse the memory/disk cache.
 
     if (shouldAnimate) {
         var codecHolder by remember(imageUrl) {
