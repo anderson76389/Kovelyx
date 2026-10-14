@@ -77,7 +77,9 @@ internal object DesktopCollectionImportBridge {
     internal fun extractSettings(payload: String): Map<String,String> {
         val parsed = runCatching { Json.parseToJsonElement(payload) as? JsonObject }.getOrNull()
         val fields = parsed?.get("settings") as? JsonObject ?: return emptyMap()
-        return listOf("tmdbKey","mdblistKey","realDebridKey","posterProvider","rpdbTheme","rpdbKey").mapNotNull { name ->
+        return listOf("tmdbKey","mdblistKey","realDebridKey","tmdbLanguage","importMode","importAction",
+            "posterProvider","rpdbTheme","rpdbKey","bttrQuality","bttrGenre","bttrRating",
+            "bttrAge","bttrSource","bttrLanguage","topPosterKey").mapNotNull { name ->
             val value = (fields[name] as? JsonPrimitive)?.content?.trim().orEmpty()
             if (value.isNotEmpty() && value.length <= 512) name to value else null
         }.toMap()
@@ -95,6 +97,69 @@ internal object DesktopCollectionImportBridge {
     }
 
     /** Extensions configurées par l'utilisateur : validation stricte avant tout accès réseau. */
+
+    internal fun posterPattern(settings: Map<String, String>): String? {
+        when (settings["posterProvider"]) {
+            "rpdb" -> return rpdbPosterPattern(settings)
+            "bttr" -> {
+                val genre = settings["bttrGenre"] != "false"
+                val rating = settings["bttrRating"] != "false"
+                val modifiers = buildString {
+                    if (!genre && !rating) append('n')
+                    else {
+                        if (!genre) append('r')
+                        if (!rating) append('g')
+                    }
+                    if (settings["bttrQuality"] == "true") append('q')
+                    if (settings["bttrAge"] == "true") append('a')
+                }
+                val format = if (modifiers.isEmpty()) "poster" else "poster-$modifiers"
+                val lang = if (settings["bttrLanguage"] == "en") "en" else "fr"
+                val source = settings["bttrSource"]?.takeIf { it in setOf("TM","IM","RT","TR") }
+                val params = mutableListOf<String>()
+                if (lang != "en") params.add("lang=$lang")
+                if (source != null) params.add("rs=$source")
+                val query = if (params.isEmpty()) "" else "?" + params.joinToString("&")
+                return "https://btttr.cc/$format/imdb/poster-default/{imdb_id}.jpg$query"
+            }
+            "top" -> {
+                val key = settings["topPosterKey"]?.takeIf {
+                    it.matches(Regex("[A-Za-z0-9_-]{1,128}"))
+                } ?: return null
+                return "https://api.top-posters.com/$key/imdb/poster/{imdb_id}.jpg?lang=fr"
+            }
+            else -> return null
+        }
+    }
+
+    internal fun mergeCollectionPayload(current: String, incoming: String): String {
+        val old = Json.parseToJsonElement(current) as JsonArray
+        val added = Json.parseToJsonElement(incoming) as JsonArray
+        val collections = linkedMapOf<String, JsonObject>()
+        fun idOf(item: JsonObject): String = (item["id"] as? JsonPrimitive)?.content.orEmpty()
+        for (entry in old) {
+            val item = entry as JsonObject
+            collections[idOf(item)] = item
+        }
+        for (entry in added) {
+            val item = entry as JsonObject
+            val id = idOf(item)
+            val prior = collections[id]
+            if (prior == null) {
+                collections[id] = item
+            } else {
+                val oldFolders = prior["folders"] as? JsonArray ?: JsonArray(emptyList())
+                val newFolders = item["folders"] as? JsonArray ?: JsonArray(emptyList())
+                val existingIds = oldFolders.map { idOf(it as JsonObject) }.toHashSet()
+                val additions = newFolders.filter { idOf(it as JsonObject) !in existingIds }
+                collections[id] = JsonObject(prior.toMutableMap().apply {
+                    put("folders", JsonArray(oldFolders + additions))
+                })
+            }
+        }
+        return JsonArray(collections.values.toList()).toString()
+    }
+
     internal fun extractAddonManifests(payload: String): List<String> {
         val root = Json.parseToJsonElement(payload) as? JsonObject ?: return emptyList()
         val settings = root["settings"] as? JsonObject ?: return emptyList()
