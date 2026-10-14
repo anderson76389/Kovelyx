@@ -1394,14 +1394,19 @@ fun publishWindowsMsiOutput(release: Boolean) {
 
     val distributionName = if (release) "main-release" else "main"
     val outputDir = layout.buildDirectory.dir("compose/binaries/$distributionName/msi").get().asFile
-    val finalMsi = outputDir.resolve("Nuvio-Windows-$windowsPlayerBridgeArch-$desktopReleaseVersionName.msi")
-    val defaultMsi = outputDir.resolve("Nuvio-$desktopReleasePackageVersion.msi")
-    val sourceMsi = defaultMsi.takeIf { it.exists() }
-        ?: finalMsi.takeIf { it.exists() }
-        ?: error("Expected Windows MSI output in ${outputDir.absolutePath}")
+    val finalMsi = outputDir.resolve("Kovelyx-Windows-$windowsPlayerBridgeArch-$desktopReleaseVersionName.msi")
+    val defaultMsi = outputDir.resolve("Kovelyx-$desktopReleasePackageVersion.msi")
+    val sourceMsi = defaultMsi.takeIf { it.isFile }
+        ?: finalMsi.takeIf { it.isFile }
+        ?: error("Expected Kovelyx MSI output in ${outputDir.absolutePath}")
 
     if (sourceMsi.canonicalFile != finalMsi.canonicalFile) {
         sourceMsi.copyTo(finalMsi, overwrite = true)
+        check(finalMsi.isFile && finalMsi.length() == sourceMsi.length()) {
+            "Kovelyx Windows MSI copy failed"
+        }
+        // Only one MSI should remain under compose/binaries for the CI verification.
+        check(sourceMsi.delete()) { "Unable to remove old MSI filename: ${sourceMsi.absolutePath}" }
     }
 
     logger.lifecycle("Windows MSI artifact: ${finalMsi.absolutePath}")
