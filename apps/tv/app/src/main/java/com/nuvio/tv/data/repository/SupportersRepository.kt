@@ -20,6 +20,11 @@ class SupportersRepository @Inject constructor(
 ) {
 
     suspend fun getSupporters(): Result<List<SupporterMember>> = runCatching {
+        // No default Nuvio supporters server: skip the request unless an explicit
+        // backend URL has been configured by the app's owner.
+        check(com.nuvio.tv.BuildConfig.SUPPORTERS_API_BASE_URL.isNotBlank()) {
+            "Le service des soutiens n'est pas configuré pour Kovelyx."
+        }
         val response = supportersApi.getSupportersWall()
         if (!response.isSuccessful) {
             error(appContext.getString(com.nuvio.tv.R.string.supporters_error_api_http, response.code()))
