@@ -54,7 +54,7 @@ jobs:
           case "$PLATFORM" in
             tv) job="Android TV - APK Full Debug"; artifact="kovelyx-tv-debug"; prefix="Kovelyx-TV"; suffix=".apk" ;;
             mobile) job="Android mobile - APK Full Debug"; artifact="kovelyx-mobile-debug"; prefix="Kovelyx-Mobile"; suffix=".apk" ;;
-            windows) job="Windows - Vérification des prérequis MSI"; artifact="kovelyx-desktop-msi"; prefix="Kovelyx-Windows"; suffix=".msi" ;;
+            windows) job="Compiler Kovelyx Windows"; artifact="Kovelyx-Windows-MSI-experimental"; prefix="Kovelyx-Windows"; suffix=".msi" ;;
             *) exit 1 ;;
           esac
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > /tmp/kovelyx_run.json
@@ -97,11 +97,20 @@ jobs:
           (cd dist && sha256sum "$name" > "$name.sha256")
           rm -f -- "${files[0]}"
           echo "KOVELYX_PACKAGE=dist/$name" >> "$GITHUB_ENV"
+          if [[ "$PLATFORM" == "windows" ]]; then
+            mapfile -d '' -t zips < <(find dist -type f -name '*Portable*.zip' -print0)
+            [[ "${#zips[@]}" == "1" ]] || { echo "::error::Archive Windows portable manquante ou ambiguë"; exit 1; }
+            portable="Kovelyx-Windows-Portable-$KOVELYX_VERSION.zip"
+            cp -- "${zips[0]}" "dist/$portable"
+            (cd dist && sha256sum "$portable" > "$portable.sha256")
+            echo "KOVELYX_PORTABLE=dist/$portable" >> "$GITHUB_ENV"
+          fi
 
       - name: Publier la préversion (jamais comme version stable)
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.version }}
+          KOVELYX_PLATFORM: ${{ inputs.platform }}
         shell: bash
         run: |
           set -euo pipefail
@@ -109,9 +118,17 @@ jobs:
             gh release view "$TAG" --json isPrerelease --jq '.isPrerelease' | grep -qx true || {
               echo "::error::Une version stable existe déjà sous ce tag"; exit 1;
             }
-            gh release upload "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256"
+            if [[ "$KOVELYX_PLATFORM" == "windows" ]]; then
+              gh release upload "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256" "$KOVELYX_PORTABLE" "$KOVELYX_PORTABLE.sha256" --clobber
+            else
+              gh release upload "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256"
+            fi
           else
-            gh release create "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256" \
+            assets=("$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256")
+            if [[ "$KOVELYX_PLATFORM" == "windows" ]]; then
+              assets+=("$KOVELYX_PORTABLE" "$KOVELYX_PORTABLE.sha256")
+            fi
+            gh release create "$TAG" "${assets[@]}" \
               --target "$KOVELYX_SOURCE_SHA" \
               --title "Kovelyx $TAG - préversion de test" \
               --prerelease \
