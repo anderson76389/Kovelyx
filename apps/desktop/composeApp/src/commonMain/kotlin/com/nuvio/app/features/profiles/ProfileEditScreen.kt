@@ -84,19 +84,21 @@ fun ProfileEditScreen(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showPinSetup by remember { mutableStateOf(false) }
     var showPinClear by remember { mutableStateOf(false) }
+    var localImageError by remember { mutableStateOf<String?>(null) }
     val memberAccess by remember {
         MemberAccessRepository.ensureStarted()
         MemberAccessRepository.access
     }.collectAsStateWithLifecycle()
     val backgroundCatalog by ProfileBackgroundRepository.catalog.collectAsStateWithLifecycle()
-    val canChooseBackground = !isNew && memberAccess.entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)
+    val hasMemberBackgrounds = !isNew && memberAccess.entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)
+    val canChooseBackground = ProfileLocalImages.supported || hasMemberBackgrounds
 
     val avatars by AvatarRepository.avatars.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         AvatarRepository.refreshAvatars()
     }
-    LaunchedEffect(canChooseBackground) {
-        if (canChooseBackground) ProfileBackgroundRepository.preloadLandscapeImages()
+    LaunchedEffect(hasMemberBackgrounds) {
+        if (hasMemberBackgrounds) ProfileBackgroundRepository.preloadLandscapeImages()
     }
     LaunchedEffect(isNew, avatars, selectedAvatarId, avatarUrl) {
         if (isNew && avatarUrl.isBlank() && selectedAvatarId == null && avatars.isNotEmpty()) {
@@ -154,8 +156,36 @@ fun ProfileEditScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (ProfileLocalImages.supported) {
+                        NuvioPrimaryButton(
+                            text = "Choisir une photo depuis mon PC",
+                            onClick = {
+                                scope.launch {
+                                    try {
+                                        ProfileLocalImages.chooseImage(background = false)?.let { selected ->
+                                            avatarUrl = selected
+                                            selectedAvatarId = null
+                                            localImageError = null
+                                        }
+                                    } catch (error: Exception) {
+                                        localImageError = error.message ?: "Impossible d'importer cette image."
+                                    }
+                                }
+                            },
+                        )
+                        if (ProfileLocalImages.isManagedUri(avatarUrl)) {
+                            Text(
+                                text = "Photo personnelle enregistrée sur cet ordinateur.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Button(onClick = { avatarUrl = ""; selectedAvatarId = null }) {
+                                Text("Retirer ma photo personnelle")
+                            }
+                        }
+                    }
                     NuvioInputField(
-                        value = avatarUrl,
+                        value = if (ProfileLocalImages.isManagedUri(avatarUrl)) "" else avatarUrl,
                         onValueChange = { value ->
                             avatarUrl = value
                             if (value.isNotBlank()) {
@@ -184,16 +214,42 @@ fun ProfileEditScreen(
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
-                        Text(
-                            text = stringResource(Res.string.profile_background_member_note),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        if (hasMemberBackgrounds) {
+                            Text(
+                                text = stringResource(Res.string.profile_background_member_note),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (ProfileLocalImages.supported) {
+                            Text(
+                                text = "Choisissez votre propre fond depuis votre ordinateur, sans abonnement.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            NuvioPrimaryButton(
+                                text = "Choisir un fond depuis mon PC",
+                                onClick = {
+                                    scope.launch {
+                                        try {
+                                            ProfileLocalImages.chooseImage(background = true)?.let { selected ->
+                                                selectedBackgroundId = null
+                                                selectedBackgroundUrl = selected
+                                                localImageError = null
+                                            }
+                                        } catch (error: Exception) {
+                                            localImageError = error.message ?: "Impossible d'importer ce fond."
+                                        }
+                                    }
+                                },
+                            )
+                        }
                         ProfileBackgroundPicker(
-                            backgrounds = backgroundCatalog,
+                            backgrounds = if (hasMemberBackgrounds) backgroundCatalog else emptyList(),
                             selectedBackgroundId = selectedBackgroundId,
                             selectedBackgroundUrl = selectedBackgroundUrl,
-                            customBackgroundUrl = currentProfile?.profileBackgroundUrl,
+                            customBackgroundUrl = selectedBackgroundUrl?.takeIf(ProfileLocalImages::isManagedUri)
+                                ?: currentProfile?.profileBackgroundUrl,
                             standardBackgroundColor = previewAccent,
                             onSelectionChange = { id, url ->
                                 selectedBackgroundId = id
@@ -270,6 +326,16 @@ fun ProfileEditScreen(
             }
         }
 
+        if (localImageError != null) {
+            item {
+                Text(
+                    text = localImageError.orEmpty(),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+
         item {
             Spacer(modifier = Modifier.height(8.dp))
             NuvioPrimaryButton(
@@ -291,6 +357,8 @@ fun ProfileEditScreen(
                                 avatarColorHex = avatarColorHex,
                                 avatarId = if (customAvatarUrl == null) selectedAvatarId else null,
                                 avatarUrl = customAvatarUrl,
+                                profileBackgroundId = selectedBackgroundId,
+                                profileBackgroundUrl = selectedBackgroundUrl,
                                 usesPrimaryAddons = usesPrimaryAddons,
                             )
                         } else {

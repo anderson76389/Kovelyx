@@ -133,7 +133,7 @@ jobs:
             "@echo off",
             "call `"$vsdev`" -arch=x64 -host_arch=x64",
             "if errorlevel 1 exit /b 1",
-            "call .\\gradlew.bat :composeApp:packageReleaseMsi :composeApp:createReleaseDistributable --no-daemon --max-workers=2 --stacktrace `"-Pnuvio.webview2.dir=$env:WEBVIEW_DIR`" `"-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m`"",
+            "call .\\gradlew.bat :composeApp:packageReleaseMsi :composeApp:packageReleaseExe :composeApp:createReleaseDistributable --no-daemon --max-workers=2 --stacktrace `"-Pnuvio.webview2.dir=$env:WEBVIEW_DIR`" `"-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m`"",
             "exit /b %errorlevel%"
           ) | Set-Content -Path $batch -Encoding ASCII
           & $batch
@@ -173,6 +173,26 @@ jobs:
           $hash = (Get-FileHash -Path $target -Algorithm SHA256).Hash.ToLowerInvariant()
           ($hash + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
           ('Kovelyx MSI : produit=' + $product + ', SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Valider et copier l'installateur EXE complet
+        if: steps.native.outputs.available == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exes = @(Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries/main-release' -Filter '*.exe' -Recurse -File |
+              Where-Object { $_.FullName -match '[\\/]exe[\\/]' })
+          if ($exes.Count -ne 1) { throw ('Attendu : un seul installateur EXE ; obtenu : ' + $exes.Count) }
+          $source = $exes[0]
+          if ($source.Name -notmatch '^Kovelyx' -or $source.Length -lt 1000000) {
+              throw 'Fichier EXE invalide ou incomplet'
+          }
+          $magic = [System.IO.File]::ReadAllBytes($source.FullName)
+          if ($magic[0] -ne 77 -or $magic[1] -ne 90) { throw 'Signature PE (MZ) absente dans EXE' }
+          New-Item -ItemType Directory -Path dist -Force | Out-Null
+          $target = Join-Path 'dist' ('Kovelyx-Windows-Setup-' + $env:GITHUB_SHA + '.exe')
+          Copy-Item -Path $source.FullName -Destination $target -Force
+          $hash = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
+          ($hash + '  ' + (Split-Path $target -Leaf)) | Set-Content ($target + '.sha256') -Encoding Ascii
+          ('EXE autonome pour installation : ' + $target + ' SHA256=' + $hash) | Out-File $env:GITHUB_STEP_SUMMARY -Append
       - name: Préparer l'archive Windows portable complète
         if: steps.native.outputs.available == 'true'
         shell: pwsh
@@ -230,7 +250,7 @@ jobs:
         if: steps.native.outputs.available == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Kovelyx-Windows-MSI-experimental
+          name: Kovelyx-Windows-installers-experimental
           path: dist/
           if-no-files-found: error
           retention-days: 30
