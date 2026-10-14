@@ -714,9 +714,23 @@ private fun AuthForm(
     onPasswordBoundsChange: (Rect) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+    val remoteAuthAvailable = !com.nuvio.app.isDesktop ||
+        com.nuvio.app.core.network.ServerConfigurationRepository.active.value.let { config ->
+            config.backendUrl.isNotBlank() &&
+                config.publishableKey.isNotBlank() &&
+                config.capabilities.emailPasswordAuth
+        }
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
+        if (!remoteAuthAvailable) {
+            Text(
+                text = "Les comptes en ligne Kovelyx ne sont pas encore disponibles : aucun serveur de comptes Kovelyx n'est configuré. Tu peux continuer sans compte pour utiliser tes profils locaux.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = AuthTextSecondary,
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+        }
         AuthTextField(
             value = email,
             onValueChange = onEmailChange,
@@ -773,7 +787,7 @@ private fun AuthForm(
             Spacer(modifier = Modifier.height(14.dp * scale))
             AuthTermsAcknowledgement(
                 scale = scale,
-                onTermsClick = { uriHandler.openUri("https://nuvio.tv/terms") },
+                onTermsClick = { uriHandler.openUri("https://anderson76389.github.io/Kovelyx/conditions.html") },
             )
         }
 
@@ -783,7 +797,7 @@ private fun AuthForm(
             text = if (isSignUp) stringResource(Res.string.compose_auth_create_account)
             else stringResource(Res.string.compose_auth_sign_in),
             isLoading = isLoading,
-            enabled = !isLoading,
+            enabled = !isLoading && remoteAuthAvailable,
             height = metrics.primaryHeight,
             scale = scale,
             onClick = onSubmit,
