@@ -506,7 +506,9 @@ fun MetaDetailsScreen(
                     Text(
                         text = when (networkStatusUiState.condition) {
                             NetworkCondition.NoInternet -> stringResource(Res.string.details_check_connection)
-                            NetworkCondition.ServersUnreachable -> stringResource(Res.string.details_servers_unreachable)
+                            // Account-server connectivity is unrelated to metadata addons.
+                            // Keep the provider's actual error rather than hiding it.
+                            NetworkCondition.ServersUnreachable -> uiState.errorMessage.orEmpty()
                             else -> uiState.errorMessage.orEmpty()
                         },
                         style = MaterialTheme.typography.bodyMedium,
