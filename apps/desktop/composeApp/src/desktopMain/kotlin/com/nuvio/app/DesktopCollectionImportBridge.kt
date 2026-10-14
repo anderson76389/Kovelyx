@@ -14,6 +14,13 @@ import com.nuvio.app.core.ui.DialogButtons
 import com.nuvio.app.core.ui.DialogButtonStyle
 import com.nuvio.app.core.ui.DialogSurface
 import com.nuvio.app.features.collection.CollectionRepository
+import com.nuvio.app.features.tmdb.TmdbSettingsRepository
+import com.nuvio.app.features.mdblist.MdbListSettingsRepository
+import com.nuvio.app.features.debrid.DebridSettingsRepository
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
@@ -51,6 +58,25 @@ internal object DesktopCollectionImportBridge {
     val pending = _pending.asStateFlow()
 
     @Volatile private var server: HttpServer? = null
+
+    /** Ancien tableau JSON ou enveloppe de configuration issue du site officiel. */
+    internal fun extractCollectionJson(payload: String): String? = runCatching {
+        when (val parsed = Json.parseToJsonElement(payload)) {
+            is JsonArray -> parsed.toString()
+            is JsonObject -> (parsed["collections"] as? JsonArray)?.toString()
+            else -> null
+        }
+    }.getOrNull()
+
+    /** On ne prend en charge que les clés intégrées nativement à Kovelyx PC. */
+    internal fun extractSettings(payload: String): Map<String,String> {
+        val parsed = runCatching { Json.parseToJsonElement(payload) as? JsonObject }.getOrNull()
+        val fields = parsed?.get("settings") as? JsonObject ?: return emptyMap()
+        return listOf("tmdbKey","mdblistKey","realDebridKey").mapNotNull { name ->
+            val value = (fields[name] as? JsonPrimitive)?.content?.trim().orEmpty()
+            if (value.isNotEmpty() && value.length <= 512) name to value else null
+        }.toMap()
+    }
 
     @Synchronized fun start() {
         if (server != null) return
@@ -161,8 +187,8 @@ internal object DesktopCollectionImportBridge {
                 return
             }
             val json = String(bytes, StandardCharsets.UTF_8)
-            if (json.isBlank() || json.firstOrNull() != '[') {
-                respond(exchange, 422, "La collection doit être un tableau JSON")
+            if (extractCollectionJson(json) == null) {
+                respond(exchange, 422, "La collection doit être un tableau JSON ou une enveloppe valide")
                 return
             }
             if (_pending.value != null) {
@@ -194,6 +220,8 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     val activeProfile = profileState.activeProfile
     if (!isAppReady || activeProfile == null) return
     val json = incoming ?: return
+    val collectionJson = remember(json) { DesktopCollectionImportBridge.extractCollectionJson(json).orEmpty() }
+    val importKeys = remember(json) { DesktopCollectionImportBridge.extractSettings(json) }
 
     var errorMessage by remember(json) { mutableStateOf<String?>(null) }
     val currentCount by CollectionRepository.collections.collectAsState()
@@ -205,7 +233,8 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     ) {
         Text(
             "Cet import remplacera les ${currentCount.size} collections actuellement présentes dans ce profil. " +
-                "Une sauvegarde JSON locale sera créée avant le remplacement.",
+                "Une sauvegarde JSON locale sera créée avant le remplacement." +
+                if (importKeys.isNotEmpty()) " Après confirmation, ${importKeys.size} clé(s) de services seront également enregistrées dans ce profil." else "",
             style = MaterialTheme.typography.bodyMedium,
         )
         errorMessage?.let { message ->
@@ -221,14 +250,30 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                 style = DialogButtonStyle.Primary,
                 onClick = {
                     try {
-                        val validation = CollectionRepository.validateJson(json)
+                        val validation = CollectionRepository.validateJson(collectionJson)
                         if (!validation.valid) throw IllegalArgumentException(validation.error ?: "JSON invalide")
                         val backupDir = File(DesktopStorage.rootDir.toFile(), "collection-backups")
                         check(backupDir.exists() || backupDir.mkdirs()) { "Sauvegarde impossible : dossier inaccessible" }
                         val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS"))
                         File(backupDir, "profile-${activeProfile.profileIndex}-$stamp.json")
                             .writeText(CollectionRepository.exportToJson(), Charsets.UTF_8)
-                        CollectionRepository.importFromJson(json).getOrThrow()
+                        CollectionRepository.importFromJson(collectionJson).getOrThrow()
+                        // Seulement après validation, sauvegarde et confirmation de l'utilisateur.
+                        importKeys["tmdbKey"]?.let { key ->
+                            TmdbSettingsRepository.ensureLoaded()
+                            TmdbSettingsRepository.setApiKey(key)
+                            TmdbSettingsRepository.setEnabled(true)
+                        }
+                        importKeys["mdblistKey"]?.let { key ->
+                            MdbListSettingsRepository.ensureLoaded()
+                            MdbListSettingsRepository.setApiKey(key)
+                            MdbListSettingsRepository.setEnabled(true)
+                        }
+                        importKeys["realDebridKey"]?.let { key ->
+                            DebridSettingsRepository.ensureLoaded()
+                            DebridSettingsRepository.setRealDebridApiKey(key)
+                            DebridSettingsRepository.setEnabled(true)
+                        }
                         DesktopCollectionImportBridge.discard(json)
                     } catch (error: Exception) {
                         errorMessage = error.message ?: "Import impossible : vos collections restent inchangées."
