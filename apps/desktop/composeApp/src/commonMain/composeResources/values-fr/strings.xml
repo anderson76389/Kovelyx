@@ -23,7 +23,7 @@
     <string name="action_switch">Changer</string>
     <string name="action_validate">Valider</string>
     <string name="addon_installing">Installation en cours</string>
-    <string name="addon_title">Addons</string>
+    <string name="addon_title">Extensions</string>
     <string name="addons_badge_active">Actif</string>
     <string name="addons_badge_catalogs">%1$d catalogues</string>
     <string name="addons_badge_configurable">Configurable</string>
@@ -54,7 +54,7 @@
     <string name="addons_move_down">Déplacer l’addon vers le bas</string>
     <string name="addons_move_up">Déplacer l’addon vers le haut</string>
     <string name="addons_overview_active">Actif</string>
-    <string name="addons_overview_addons">Addons</string>
+    <string name="addons_overview_addons">Extensions</string>
     <string name="addons_overview_catalogs">Catalogues</string>
     <string name="addons_refresh">Actualiser l’addon</string>
     <string name="addons_section_add_addon">Ajouter un addon</string>
@@ -357,7 +357,7 @@
     <string name="compose_player_outline_color">Couleur du contour</string>
     <string name="compose_player_panel_episodes">Épisodes</string>
     <string name="compose_player_panel_sources">Sources</string>
-    <string name="compose_player_panel_streams">Streams</string>
+    <string name="compose_player_panel_streams">Flux</string>
     <string name="compose_player_playback_error">Erreur de lecture</string>
     <string name="compose_player_playing">Lecture en cours</string>
     <string name="compose_player_fetch_subtitles">Appuyez pour chercher des sous-titres</string>
@@ -408,7 +408,7 @@
     <string name="compose_settings_category_about">À propos</string>
     <string name="compose_settings_category_general">Général</string>
     <string name="compose_settings_page_account">Compte</string>
-    <string name="compose_settings_page_addons">Addons</string>
+    <string name="compose_settings_page_addons">Extensions</string>
     <string name="compose_settings_page_advanced">Avancé</string>
     <string name="compose_settings_page_appearance">Apparence</string>
     <string name="compose_settings_page_content_discovery">Contenu et découverte</string>
@@ -422,11 +422,11 @@
     <string name="settings_appearance_section_detail_page">ÉCRAN MÉTA</string>
     <string name="compose_settings_page_notifications">Notifications</string>
     <string name="compose_settings_page_playback">Lecture</string>
-    <string name="compose_settings_page_plugins">Plugins</string>
+    <string name="compose_settings_page_plugins">Modules complémentaires</string>
     <string name="compose_settings_page_poster_customization">Personnalisation des affiches</string>
     <string name="compose_settings_page_root">Paramètres</string>
-    <string name="compose_settings_page_streams">Streams</string>
-    <string name="settings_appearance_section_streams">STREAMS</string>
+    <string name="compose_settings_page_streams">Flux</string>
+    <string name="settings_appearance_section_streams">FLUX</string>
     <string name="compose_settings_page_supporters_contributors">Supporters et contributeurs</string>
     <string name="compose_settings_page_tmdb_enrichment">Enrichissement TMDB</string>
     <string name="compose_settings_page_trakt">Trakt</string>
@@ -566,7 +566,7 @@
     <string name="settings_appearance_app_language_device">Langue de l’appareil</string>
     <string name="settings_appearance_app_language_sheet_title">Choisir la langue</string>
     <string name="settings_appearance_continue_watching_description">Afficher, masquer et ajuster le bandeau Continuer à regarder.</string>
-    <string name="settings_appearance_liquid_glass">Liquid Glass</string>
+    <string name="settings_appearance_liquid_glass">Verre liquide</string>
     <string name="settings_appearance_liquid_glass_description">Utilise la barre d’onglets native iPhone sur iOS 26 et versions ultérieures.</string>
     <string name="settings_appearance_poster_customization_description">Ajuste la largeur des cartes et le rayon des coins.</string>
     <string name="settings_appearance_section_display">AFFICHAGE</string>
@@ -667,7 +667,7 @@
     <string name="settings_integrations_debrid_description">Connectez des comptes pour les liens et l’accès à la bibliothèque</string>
     <string name="settings_debrid_section_title">SERVICES CONNECTÉS</string>
     <string name="settings_debrid_experimental_notice">Ces intégrations sont expérimentales et peuvent être conservées, modifiées ou supprimées plus tard.</string>
-    <string name="settings_debrid_cloud_library">Cloud library</string>
+    <string name="settings_debrid_cloud_library">Bibliothèque cloud</string>
     <string name="settings_debrid_cloud_library_description">Parcourez et lisez les fichiers déjà présents dans vos comptes connectés.</string>
     <string name="settings_debrid_enable">Résoudre les liens lisibles</string>
     <string name="settings_debrid_enable_description">Demande à un service connecté des liens lisibles quand un résultat le nécessite. Cela peut ajouter l’élément à ce service.</string>
@@ -731,8 +731,8 @@
     <string name="settings_fusion_badges_empty">Aucune URL de badge Fusion importée.</string>
     <string name="settings_fusion_badge_url_label">URL JSON du badge Fusion</string>
     <string name="settings_fusion_badge_urls_imported">%1$d/%2$d URL Fusion importées</string>
-    <string name="settings_fusion_badge_url_active">Active</string>
-    <string name="settings_fusion_badge_url_inactive">Inactive</string>
+    <string name="settings_fusion_badge_url_active">Actif</string>
+    <string name="settings_fusion_badge_url_inactive">Inactif</string>
     <string name="settings_fusion_badge_url_status_summary">%1$s · %2$d badges activés · %3$d groupes</string>
     <string name="settings_fusion_badge_preview_action">Aperçu</string>
     <string name="settings_fusion_badge_preview_title">Aperçu du badge Fusion</string>
@@ -818,7 +818,7 @@
     <string name="community_loading_donation_progress">Chargement de la progression du financement…</string>
     <string name="community_supporters_not_configured">L’API des supporters n’est pas configurée. Ajoutez DONATIONS_BASE_URL dans local.properties.</string>
     <string name="community_tab_contributors">Contributeurs</string>
-    <string name="community_tab_supporters">Supporters</string>
+    <string name="community_tab_supporters">Membres de soutien</string>
     <string name="community_open_github">Ouvrir GitHub</string>
     <string name="community_github_profile_unavailable">Profil GitHub indisponible</string>
     <string name="community_no_message_attached">Aucun message joint.</string>
@@ -850,7 +850,7 @@
     <string name="settings_playback_all_plugins">Tous les plugins</string>
     <string name="settings_playback_allowed_addons">Addons autorisés</string>
     <string name="settings_playback_allowed_plugins">Plugins autorisés</string>
-    <string name="settings_playback_anime_skip">Anime Skip</string>
+    <string name="settings_playback_anime_skip">Passage des séquences d’animé</string>
     <string name="settings_playback_anime_skip_client_id">ID client AnimeSkip</string>
     <string name="settings_playback_anime_skip_client_id_description">Saisissez votre ID client API AnimeSkip. Obtenez-en un sur anime-skip.com.</string>
     <string name="settings_playback_intro_submit_enabled">Activer la soumission d’intro</string>
@@ -1473,7 +1473,7 @@
     <string name="tmdb_sources_person_not_found">Personne TMDB introuvable</string>
     <string name="generic_trailer">Bande-annonce</string>
     <string name="generic_unknown">Inconnu</string>
-    <string name="generic_addon">Addon</string>
+    <string name="generic_addon">Extension</string>
     <string name="action_saved">Enregistré</string>
     <string name="action_play_episode">Lire %1$s</string>
     <string name="action_resume_episode">Reprendre %1$s</string>
@@ -1586,7 +1586,7 @@
     <string name="cloud_library_type_usenet">Usenet</string>
     <string name="cloud_library_type_web">Web</string>
     <string name="cloud_library_type_files">Fichiers</string>
-    <string name="media_anime">Anime</string>
+    <string name="media_anime">Animé</string>
     <string name="media_channels">Chaînes</string>
     <string name="media_movies">Films</string>
     <string name="media_series">Séries</string>
@@ -1625,8 +1625,8 @@
     <string name="player_video_settings_output_preset">Préréglage de sortie</string>
     <string name="player_video_settings_hdr_peak_detection">Détection du pic HDR</string>
     <string name="player_video_settings_hdr_peak_detection_desc">Estime le pic de luminosité HDR quand les métadonnées sont absentes ou erronées.</string>
-    <string name="player_video_settings_tone_mapping">Tone mapping</string>
-    <string name="player_video_settings_deband">Deband</string>
+    <string name="player_video_settings_tone_mapping">Adaptation des tons</string>
+    <string name="player_video_settings_deband">Réduction des bandes de couleur</string>
     <string name="player_video_settings_deband_desc">Réduit les artefacts de banding au prix d’une légère perte de performances.</string>
     <string name="player_video_settings_interpolation">Interpolation d’images</string>
     <string name="player_video_settings_interpolation_desc">Lisse le mouvement quand mpv peut utiliser la synchro d’affichage proprement.</string>
@@ -1637,7 +1637,7 @@
     <!-- iOS video output presets -->
     <string name="player_ios_preset_native_edr_label">Native EDR</string>
     <string name="player_ios_preset_native_edr_desc">Optimal pour les iPhones et iPads compatibles HDR.</string>
-    <string name="player_ios_preset_sdr_tone_mapped_label">SDR tone mapped</string>
+    <string name="player_ios_preset_sdr_tone_mapped_label">SDR avec adaptation des tons</string>
     <string name="player_ios_preset_sdr_tone_mapped_desc">Blancs et noirs plus prévisibles sur une sortie de type SDR.</string>
     <string name="player_ios_preset_compatibility_label">Compatibilité</string>
     <string name="player_ios_preset_compatibility_desc">Au plus près de l’ancien comportement MPV iOS.</string>
@@ -1749,9 +1749,9 @@
     <!-- Submit intro/recap/outro dialog -->
     <string name="submit_intro_title">Soumettre les timestamps</string>
     <string name="submit_intro_segment_type">TYPE DE SEGMENT</string>
-    <string name="submit_intro_segment_intro">Intro</string>
+    <string name="submit_intro_segment_intro">Introduction</string>
     <string name="submit_intro_segment_recap">Récap</string>
-    <string name="submit_intro_segment_outro">Outro</string>
+    <string name="submit_intro_segment_outro">Générique de fin</string>
     <string name="submit_intro_start_time">DÉBUT (MM:SS)</string>
     <string name="submit_intro_end_time">FIN (MM:SS)</string>
     <string name="submit_intro_submit">Soumettre</string>
@@ -2011,7 +2011,7 @@
     <string name="settings_tracking_services">Comptes</string>
     <string name="settings_tracking_data_sources">Sources de suivi</string>
     <string name="settings_appearance_app_icon_sheet_title">Choisir l’icône de Kovelyx</string>
-    <string name="settings_appearance_app_icon_original">Original</string>
+    <string name="settings_appearance_app_icon_original">D’origine</string>
     <string name="settings_appearance_app_icon_arctic_blue">Bleu arctique</string>
     <string name="settings_appearance_app_icon_emerald">Émeraude</string>
     <string name="settings_appearance_app_icon_rose_gold">Or rose</string>
@@ -2651,4 +2651,9 @@
     <string name="servers_subtitle_switch_failed">Impossible de changer la piste de sous-titres.</string>
     <string name="servers_play_method_direct_play">Lecture directe</string>
     <string name="servers_play_method_direct_stream">Flux direct</string>
+    <string name="servers_play_method_transcode">Transcodage</string>
+    <string name="servers_watched_failed">Impossible de mettre à jour l’état de visionnage sur le serveur.</string>
+    <string name="servers_resume_row">Reprendre la lecture</string>
+    <string name="servers_failure_unsupported">Ce serveur ne prend pas en charge cet élément.</string>
+    <string name="servers_failure_incomplete">La médiathèque de ce serveur est encore en cours d’analyse. Réessayez dans un instant.</string>
 </resources>
