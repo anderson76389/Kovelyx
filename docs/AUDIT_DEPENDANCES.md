@@ -246,7 +246,7 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **134**.
+Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **132**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -363,7 +363,7 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
-- …et 54 autres correspondances (plafond d'affichage).
+- …et 52 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 
