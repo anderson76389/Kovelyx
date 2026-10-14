@@ -33,8 +33,8 @@ internal fun SettingsAttribution(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            MemberBrandWordmark(
-                height = if (isTablet) 30.dp else 26.dp,
+            AppBrandWordmark(
+                modifier = Modifier.height(if (isTablet) 30.dp else 26.dp),
             )
         }
         Spacer(
