@@ -70,8 +70,42 @@ jobs:
             platform="${entry%%:*}"
             prefix="${entry#*:}"
             mapfile -d '' -t files < <(find "/tmp/kovelyx/$platform" -type f -name "*.apk" -print0)
-            [[ "${#files[@]}" == "1" ]] || { echo "::error::Un seul APK attendu pour $platform"; exit 1; }
-            apk="${files[0]}"
+            echo "$platform : ${#files[@]} APK trouvés dans le build"
+            printf '%s\n' "${files[@]}"
+            if [[ "$platform" == "tv" ]]; then
+              # Gradle crée plusieurs APK ABI spécifiques + un APK universel.
+              # La Release grand public ne doit contenir que l'universel pour éviter
+              # de proposer au hasard un fichier incompatible avec la télévision.
+              mapfile -t universal < <(printf '%s\n' "${files[@]}" | grep -i 'universal.*\.apk
+            [[ "$(stat -c%s "$apk")" -gt 100000 ]] || { echo "::error::APK trop petit"; exit 1; }
+            file "$apk"
+            unzip -tq "$apk" >/dev/null || { echo "::error::Archive APK corrompue"; exit 1; }
+            name="$prefix-$TAG.apk"
+            cp "$apk" "dist/$name"
+            (cd dist && sha256sum "$name" > "$name.sha256")
+          done
+          echo "### APK de test prêts" >> "$GITHUB_STEP_SUMMARY"
+          echo "- TV et Android : fichiers ZIP/APK intègres, non testés sur appareils réels." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Sources : `$SOURCE_SHA`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Créer une préversion GitHub (jamais stable)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Préversion $TAG déjà présente ; aucune modification ni remplacement silencieux."
+            exit 0
+          fi
+          gh release create "$TAG" dist/*.apk dist/*.sha256             --repo "$GITHUB_REPOSITORY"             --target "$SOURCE_SHA"             --title "Kovelyx $TAG · APK expérimentaux"             --prerelease             --notes "⚠️ PRÉVERSION DE DÉVELOPPEMENT, pas une version stable. Les APK ont été compilés, mais pas testés sur téléphone/TV. L'interface peut encore afficher des références Nuvio, des fonctionnalités peuvent ne pas fonctionner, et les services externes peuvent être nécessaires. Les APK de débogage peuvent être incompatibles avec une future signature de publication. Sauvegardez vos données et ne les installez pas sur votre appareil principal. Sources et licences disponibles dans ce même dépôt. SHA source : $SOURCE_SHA."
+ || true)
+              [[ "${#universal[@]}" == "1" ]] || { echo "::error::Un APK universel TV attendu"; exit 1; }
+              apk="${universal[0]}"
+            else
+              [[ "${#files[@]}" == "1" ]] || { echo "::error::Un seul APK mobile attendu"; exit 1; }
+              apk="${files[0]}"
+            fi
             [[ "$(stat -c%s "$apk")" -gt 100000 ]] || { echo "::error::APK trop petit"; exit 1; }
             file "$apk"
             unzip -tq "$apk" >/dev/null || { echo "::error::Archive APK corrompue"; exit 1; }
