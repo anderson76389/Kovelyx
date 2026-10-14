@@ -215,10 +215,12 @@ jobs:
           test "$(stat -c%s "$rpm_file")" -gt 1000000
           cp -- "$deb" "dist/Kovelyx-Linux-amd64-$GITHUB_SHA.deb"
           cp -- "$rpm_file" "dist/Kovelyx-Linux-x86_64-$GITHUB_SHA.rpm"
-          (cd dist && sha256sum *.deb *.rpm > SHA256SUMS)
-          echo '### Paquets Linux natifs produits' >> "$GITHUB_STEP_SUMMARY"
-          (cd dist && sha256sum *.deb *.rpm) >> "$GITHUB_STEP_SUMMARY"
-          echo 'Tests de lancement/lecture sur distributions réelles restant nécessaires.' >> "$GITHUB_STEP_SUMMARY"
+          (cd dist && sha256sum -- ./*.deb ./*.rpm > SHA256SUMS)
+          {
+            echo '### Paquets Linux natifs produits'
+            (cd dist && sha256sum -- ./*.deb ./*.rpm)
+            echo 'Tests de lancement/lecture sur distributions réelles restant nécessaires.'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Archiver les paquets Linux
         uses: actions/upload-artifact@v4
         with:
