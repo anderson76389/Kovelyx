@@ -7,7 +7,7 @@ Fichiers inspectés : 4512
 
 ## Inventaire des références à traiter
 
-### Connexions et services (117 correspondances)
+### Connexions et services (114 correspondances)
 
 - apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
 - apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
@@ -89,7 +89,7 @@ Fichiers inspectés : 4512
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
-- Autres correspondances non détaillées : 37
+- Autres correspondances non détaillées : 34
 
 ### Mises à jour et releases (11 correspondances)
 
@@ -326,7 +326,7 @@ Fichiers inspectés : 4512
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7855 lignes.
+- apps/desktop : 7857 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
