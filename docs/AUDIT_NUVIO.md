@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4509
+Fichiers inspectés : 4510
 
 ## Inventaire des références à traiter
 
@@ -329,7 +329,7 @@ Fichiers inspectés : 4509
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7851 lignes.
+- apps/desktop : 7852 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 

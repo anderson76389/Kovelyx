@@ -246,7 +246,7 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia : **132**.
+Fichiers texte examinés : **1783** ; références statiques à Nuvio/NuvioMedia : **132**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -275,11 +275,11 @@ Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia
 | `postersplus.example.com` | 9 |
 | `api.mdblist.com` | 8 |
 | `catalog.example` | 8 |
+| `example.org` | 8 |
 | `media.w3.org` | 7 |
 | `developer.apple.com` | 6 |
 | `www.youtube.com` | 6 |
 | `btttr.cc` | 6 |
-| `example.org` | 6 |
 
 ### Références à vérifier en priorité
 
