@@ -1,6 +1,6 @@
 # 🐧 Kovelyx sur Linux
 
-L'objectif Linux est **une AppImage exécutable x86-64 dans un seul fichier** : pas de dossier de 50 fichiers à conserver à côté du programme. La version Linux est **expérimentale** : sa compilation AppImage et sa structure ont été vérifiées sur Ubuntu 24.04 en CI, mais la lecture vidéo et la compatibilité avec plusieurs distributions doivent encore être testées.
+L'objectif Linux est de proposer **une AppImage portable x86-64**, ainsi que des **paquets DEB (Debian/Ubuntu) et RPM (Fedora)**. La version AppImage évite de conserver un dossier de nombreux fichiers à côté du programme. La version Linux est **expérimentale** : sa compilation AppImage et sa structure ont été vérifiées sur Ubuntu 24.04 en CI, mais la lecture vidéo et la compatibilité avec plusieurs distributions doivent encore être testées.
 
 ## Fichier principal
 
@@ -16,6 +16,24 @@ L'objectif Linux est **une AppImage exécutable x86-64 dans un seul fichier** : 
 4. Vérifier l'empreinte du fichier téléchargé avec `sha256sum -c *.sha256`, depuis le dossier qui contient les deux fichiers.
 
 **Compatibilité :** version **x86-64** uniquement. Aucun build ARM64 n'est encore validé. Une AppImage contient le lanceur, l'application et le runtime Java, **mais ne promet pas d'embarquer toutes les bibliothèques du système**.
+
+## Installations natives DEB et RPM
+
+Le workflow [Linux](../.github/workflows/linux.yml) comporte également un **job de compilation distinct** pour les paquets `Kovelyx-Linux-amd64-<commit>.deb` et `Kovelyx-Linux-x86_64-<commit>.rpm`. Il n'existe aucun paquet à télécharger tant que ce job n'a pas réussi et publié l'artefact `Kovelyx-Linux-Packages-experimental`.
+
+Sur Ubuntu ou Debian x86-64 :
+
+```bash
+sudo apt install ./Kovelyx-Linux-amd64-*.deb
+```
+
+Sur Fedora x86-64 :
+
+```bash
+sudo dnf install ./Kovelyx-Linux-x86_64-*.rpm
+```
+
+Ces commandes installent **un paquet vérifié provenant du dépôt Kovelyx**, et demandent les droits nécessaires à l'installation. Les bibliothèques système indiquées comme dépendances doivent être satisfaites par le gestionnaire de paquets. Les autres distributions Linux ne sont pas automatiquement prises en charge.
 
 ## Dépendances et limitations Linux
 
@@ -54,6 +72,10 @@ La commande d'installation des dépendances demande les droits administrateur, *
 | L'AppImage ne démarre pas | Journal du terminal, distribution et version |
 
 Signaler les erreurs dans les [Issues Kovelyx](https://github.com/anderson76389/Kovelyx/issues) avec la distribution, sa version, le type de session (X11/Wayland), la version du noyau, le processeur et les journaux expurgés de toute donnée sensible.
+
+## Tests et vérification des paquets
+
+Le pipeline contrôle les noms de paquets, les architectures amd64/x86_64, le mainteneur et l'éditeur affichés, les raccourcis Linux et les dépendances déclarées. Il produit des empreintes SHA-256. Ces contrôles de structure ne garantissent pas que l'interface et la lecture fonctionnent sur tous les PC.
 
 ## Attention
 

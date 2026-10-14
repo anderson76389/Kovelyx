@@ -65,10 +65,20 @@ jobs:
           jq -e --arg job "$job" '[.jobs[] | select(.name==$job and .conclusion=="success")] | length > 0' /tmp/kovelyx_jobs.json >/dev/null || {
             echo "::error::La compilation de cette plateforme n'a pas réussi"; exit 1;
           }
+          if [[ "$PLATFORM" == "linux" ]]; then
+            jq -e '[.jobs[] | select(.name=="Compiler Kovelyx Linux DEB et RPM" and .conclusion=="success")] | length > 0' /tmp/kovelyx_jobs.json >/dev/null || {
+              echo "::error::Le job des paquets Linux natifs doit réussir avant publication"; exit 1;
+            }
+          fi
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100" > /tmp/kovelyx_artifacts.json
           jq -e --arg artifact "$artifact" '[.artifacts[] | select(.name==$artifact and .expired==false)] | length > 0' /tmp/kovelyx_artifacts.json >/dev/null || {
             echo "::error::Aucun fichier généré pour cette plateforme ou artefact expiré"; exit 1;
           }
+          if [[ "$PLATFORM" == "linux" ]]; then
+            jq -e '[.artifacts[] | select(.name=="Kovelyx-Linux-Packages-experimental" and .expired==false)] | length > 0' /tmp/kovelyx_artifacts.json >/dev/null || {
+              echo "::error::Artefact DEB/RPM manquant ou expiré"; exit 1;
+            }
+          fi
           {
             echo "KOVELYX_VERSION=$RELEASE_VERSION"
             echo "KOVELYX_RUN_ID=$RUN_ID"
@@ -109,6 +119,21 @@ jobs:
             cp -- "${setups[0]}" "dist/$setup"
             (cd dist && sha256sum "$setup" > "$setup.sha256")
             echo "KOVELYX_SETUP=dist/$setup" >> "$GITHUB_ENV"
+          else
+            mkdir -p native-packages
+            gh run download "$KOVELYX_RUN_ID" --name Kovelyx-Linux-Packages-experimental --dir native-packages
+            mapfile -d '' -t debs < <(find native-packages -type f -name '*.deb' -print0)
+            mapfile -d '' -t rpms < <(find native-packages -type f -name '*.rpm' -print0)
+            [[ "${#debs[@]}" == 1 && "${#rpms[@]}" == 1 ]] || {
+              echo "::error::Un DEB et un RPM vérifiés sont obligatoires"; exit 1;
+            }
+            deb="Kovelyx-Linux-amd64-$KOVELYX_VERSION.deb"
+            rpm="Kovelyx-Linux-x86_64-$KOVELYX_VERSION.rpm"
+            cp -- "${debs[0]}" "dist/$deb"
+            cp -- "${rpms[0]}" "dist/$rpm"
+            (cd dist && sha256sum "$deb" > "$deb.sha256" && sha256sum "$rpm" > "$rpm.sha256")
+            echo "KOVELYX_DEB=dist/$deb" >> "$GITHUB_ENV"
+            echo "KOVELYX_RPM=dist/$rpm" >> "$GITHUB_ENV"
           fi
 
       - name: Publier la préversion (jamais comme version stable)
@@ -126,16 +151,18 @@ jobs:
             if [[ "$KOVELYX_PLATFORM" == "windows" ]]; then
               gh release upload "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256" "$KOVELYX_PORTABLE" "$KOVELYX_PORTABLE.sha256" "$KOVELYX_SETUP" "$KOVELYX_SETUP.sha256" --clobber
             else
-              gh release upload "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256"
+              gh release upload "$TAG" "$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256" "$KOVELYX_DEB" "$KOVELYX_DEB.sha256" "$KOVELYX_RPM" "$KOVELYX_RPM.sha256" --clobber
             fi
           else
             assets=("$KOVELYX_PACKAGE" "$KOVELYX_PACKAGE.sha256")
             if [[ "$KOVELYX_PLATFORM" == "windows" ]]; then
               assets+=("$KOVELYX_PORTABLE" "$KOVELYX_PORTABLE.sha256" "$KOVELYX_SETUP" "$KOVELYX_SETUP.sha256")
+            else
+              assets+=("$KOVELYX_DEB" "$KOVELYX_DEB.sha256" "$KOVELYX_RPM" "$KOVELYX_RPM.sha256")
             fi
             gh release create "$TAG" "${assets[@]}" \
               --target "$KOVELYX_SOURCE_SHA" \
               --title "Kovelyx $TAG - préversion de test" \
               --prerelease \
-              --notes "Préversion expérimentale PC (Windows / Linux x86-64). Vérifier la compatibilité système, la lecture et les extensions sur un ordinateur réel. Le Setup.exe est un installateur Windows ; l'AppImage est un fichier exécutable Linux. Sources, crédits et obligations de licence dans le dépôt. Cette version n'est pas stable."
+              --notes "Préversion expérimentale PC (Windows / Linux x86-64). Vérifier la compatibilité système, la lecture et les extensions sur un ordinateur réel. Le Setup.exe est un installateur Windows ; AppImage, DEB et RPM sont les formats Linux x86-64. Sources, crédits et obligations de licence dans le dépôt. Cette version n'est pas stable."
           fi

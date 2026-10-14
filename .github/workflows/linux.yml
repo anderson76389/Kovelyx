@@ -178,6 +178,12 @@ jobs:
             rpm rpm2cpio cpio fakeroot
           for tool in dpkg-deb rpm rpm2cpio rpmbuild fakeroot; do command -v "$tool"; done
           test -s apps/desktop/composeApp/src/desktopMain/native/linux/engine/libnuvio_engine.so
+      - name: Tester les raccourcis et le branding Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n apps/desktop/scripts/linux/*.sh
+          bash scripts/tests/test-linux-shortcut.sh
       - name: Compiler DEB et RPM à partir du code du dépôt
         working-directory: apps/desktop
         shell: bash
