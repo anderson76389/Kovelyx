@@ -252,6 +252,15 @@ actual object AppUpdaterPlatform {
     }
 
     private fun launchInstaller(updateFile: File) {
+        // The official MSI is the same Windows product as the EXE installer.
+        // Run it after Kovelyx exits so the user does not have to follow a
+        // second interactive installation wizard for each update.
+        if (currentOs == DesktopUpdaterOs.WINDOWS &&
+            updateFile.extension.equals("msi", ignoreCase = true)
+        ) {
+            launchSilentWindowsInstaller(updateFile)
+            return
+        }
         val command = when (currentOs) {
             DesktopUpdaterOs.WINDOWS -> windowsInstallerCommand(updateFile)
             DesktopUpdaterOs.MACOS -> listOf("open", updateFile.absolutePath)
@@ -264,6 +273,33 @@ actual object AppUpdaterPlatform {
             DesktopUpdaterOs.UNKNOWN -> error("Desktop updates are not supported on this operating system.")
         }
         ProcessBuilder(command).start()
+    }
+
+    private fun launchSilentWindowsInstaller(msiFile: File) {
+        check(msiFile.isFile && msiFile.extension.equals("msi", ignoreCase = true)) {
+            "Installateur MSI Kovelyx introuvable."
+        }
+        val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+            ?: ProcessHandle.current().info().command().orElse(null)
+            ?: error("Impossible de retrouver le lanceur Kovelyx.")
+        check(File(launcher).isFile && File(launcher).name.equals("Kovelyx.exe", ignoreCase = true)) {
+            "L'installation silencieuse est réservée à Kovelyx installé sur Windows."
+        }
+
+        val resource = AppUpdaterPlatform::class.java.getResourceAsStream(
+            "/updater/apply-installed-windows-update.ps1",
+        ) ?: error("Assistant de mise à jour Windows introuvable.")
+        val script = File(updatesDir(), "apply-installed-windows-update.ps1")
+        resource.use { input -> script.outputStream().use { output -> input.copyTo(output) } }
+
+        ProcessBuilder(
+            "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+            "-File", script.absolutePath,
+            "-MsiPath", msiFile.absolutePath,
+            "-CurrentLauncher", launcher,
+            "-AppProcessId", ProcessHandle.current().pid().toString(),
+            "-LogPath", File(updatesDir(), "windows-update.log").absolutePath,
+        ).start()
     }
 
     private fun scheduleAppExit() {
@@ -286,7 +322,7 @@ private enum class DesktopUpdaterOs {
             WINDOWS -> AppUpdateAssetSelector(
                 // Prefer the single-file installer; never accidentally choose Linux/ARM or checksum files.
                 fileExtensions = listOf(".exe", ".msi"),
-                preferredNameFragments = listOf("Kovelyx-Windows-Setup-") + archFragments + listOf("windows"),
+                preferredNameFragments = listOf("Kovelyx-Windows-v") + archFragments + listOf("Kovelyx-Windows-Setup-", "windows"),
                 fallbackNameFragments = listOf("universal", "all"),
             )
             MACOS -> AppUpdateAssetSelector(
