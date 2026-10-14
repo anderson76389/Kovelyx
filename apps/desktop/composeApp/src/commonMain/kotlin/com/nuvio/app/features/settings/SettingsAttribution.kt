@@ -59,7 +59,7 @@ internal fun SettingsAttribution(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        AppVersionPolicy.basedOnVersionName?.let { basedOnVersionName ->
+        AppVersionPolicy.basedOnVersionName?.takeUnless { isDesktop }?.let { basedOnVersionName ->
             Text(
                 text = stringResource(
                     Res.string.compose_about_based_on_version_format,
