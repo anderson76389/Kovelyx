@@ -10,7 +10,7 @@ val sentryAuthToken = providers.environmentVariable("SENTRY_AUTH_TOKEN")
 
 sentry {
     includeSourceContext.set(true)
-    autoUploadSourceContext.set(sentryAuthToken != null)
+    autoUploadSourceContext.set(false)
     additionalSourceDirsForSourceContext.set(
         setOf(
             "../composeApp/src/commonMain/kotlin",
@@ -20,8 +20,8 @@ sentry {
     )
     includeDependenciesReport.set(false)
     telemetry.set(false)
-    org.set("nuviomedia")
-    projectName.set("nuvio-desktop")
+    org.set("kovelyx")
+    projectName.set("kovelyx-desktop")
     sentryAuthToken?.let(authToken::set)
     autoInstallation {
         enabled.set(false)
