@@ -246,14 +246,14 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1780** ; références statiques à Nuvio/NuvioMedia : **132**.
+Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia : **133**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `github.com` | 246 |
 | `example.com` | 178 |
 | `www.themoviedb.org` | 110 |
-| `example.test` | 73 |
+| `example.test` | 75 |
 | `schemas.android.com` | 49 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
@@ -363,7 +363,7 @@ Fichiers texte examinés : **1780** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59`
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- …et 52 autres correspondances (plafond d'affichage).
+- …et 53 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 

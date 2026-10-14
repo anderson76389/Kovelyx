@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4507
+Fichiers inspectés : 4509
 
 ## Inventaire des références à traiter
 
@@ -106,7 +106,7 @@ Fichiers inspectés : 4507
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (52 correspondances)
+### Liens annexes (53 correspondances)
 
 - apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:310 : .baseUrl("https://placeholder.nuvio.tv/")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
@@ -157,7 +157,8 @@ Fichiers inspectés : 4507
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61 : parseSimklAuthCallback("nuvio://auth/trakt
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:291 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:87 : /** Per-user URL registration, no administrator privileges, never claims nuvio:// or stremio://. */
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:304 : value.startsWith("nuvio://", ignoreCase = true) //
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
@@ -329,7 +330,7 @@ Fichiers inspectés : 4507
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7820 lignes.
+- apps/desktop : 7829 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
