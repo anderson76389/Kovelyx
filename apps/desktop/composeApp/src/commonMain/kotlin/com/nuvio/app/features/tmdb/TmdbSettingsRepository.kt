@@ -1,5 +1,6 @@
 package com.nuvio.app.features.tmdb
 
+import com.nuvio.app.isDesktop
 import com.nuvio.app.features.details.MetaDetailsRepository
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.watchprogress.ContinueWatchingEnrichmentCache
@@ -57,8 +58,12 @@ object TmdbSettingsRepository {
         val normalized = value.trim()
         if (apiKey == normalized) return
         apiKey = normalized
-        publish()
         TmdbSettingsStorage.saveApiKey(normalized)
+        if (isDesktop && normalized.isNotBlank() && !enabled) {
+            enabled = true
+            TmdbSettingsStorage.saveEnabled(true)
+        }
+        publish()
         invalidateMetadata()
     }
 
@@ -166,7 +171,8 @@ object TmdbSettingsRepository {
         val wasLoaded = hasLoaded
         val previousApiKey = apiKey
         hasLoaded = true
-        enabled = TmdbSettingsStorage.loadEnabled() ?: false
+        enabled = TmdbSettingsStorage.loadEnabled()
+            ?: (isDesktop && (TmdbSettingsStorage.loadApiKey().orEmpty().isNotBlank() || TmdbConfig.API_KEY.isNotBlank()))
         apiKey = TmdbSettingsStorage.loadApiKey()?.trim().orEmpty()
         val storedLanguage = TmdbSettingsStorage.loadLanguage()
         language = if (storedLanguage == null) "fr" else normalizeLanguage(storedLanguage)
