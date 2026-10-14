@@ -47,6 +47,22 @@ Get-FileHash -Algorithm SHA256 .\Kovelyx-Windows-Setup-*.exe
 
 Les exécutables expérimentaux peuvent être **non signés**. Cela peut déclencher un avertissement SmartScreen ; cela ne prouve ni qu'ils sont sûrs ni qu'ils sont malveillants. Ne désactivez pas les protections Windows pour tester.
 
+## Mise à jour depuis l'application
+
+Le bandeau de mise à jour apparaît automatiquement lorsqu'une Release GitHub plus récente **et compatible avec votre format d'installation** est disponible. Vous pouvez télécharger directement dans Kovelyx, suivre la progression et installer ensuite.
+
+| Installation actuelle | Comportement prévu |
+|---|---|
+| Windows avec Setup.exe / MSI | Lance le nouvel installateur officiel après téléchargement et vérification |
+| Windows portable (ZIP) | Prépare et remplace les fichiers après fermeture, en conservant une sauvegarde du dossier précédent |
+| Linux AppImage | Remplace le fichier après fermeture, avec possibilité de conserver une sauvegarde |
+| Linux DEB / RPM | Ouvre le gestionnaire de paquets du système (validation éventuelle de l'administrateur) |
+| Linux Flatpak | Mises à jour gérées par Flatpak ; pas d'installation directe dans Kovelyx |
+
+Toutes les versions publiées doivent avoir un **nom de version identique dans l'application et sur GitHub** ainsi qu'une empreinte `.sha256` correspondante. Si le paquet ou sa signature de contrôle ne correspond pas, l'installation est bloquée. Le processus ne désinstalle pas intentionnellement les profils ou les paramètres locaux.
+
+**Ce n'est pas un téléchargement par différences** : le nouveau paquet complet est téléchargé en arrière-plan depuis Kovelyx. Les formats de mise à jour et le redémarrage doivent être testés sur Windows et plusieurs distributions Linux. Les copies de sauvegarde portables prennent de l'espace disque.
+
 ## Données et mises à jour
 
 - **Paramètres Windows :** `%APPDATA%\Kovelyx`
