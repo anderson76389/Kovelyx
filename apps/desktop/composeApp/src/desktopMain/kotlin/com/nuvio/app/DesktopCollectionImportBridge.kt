@@ -132,7 +132,7 @@ internal object DesktopCollectionImportBridge {
                     if (settings["bttrAge"] == "true") append('a')
                 }
                 val format = if (modifiers.isEmpty()) "poster" else "poster-$modifiers"
-                val lang = if (settings["bttrLanguage"] == "en") "en" else "fr"
+                val lang = settings["bttrLanguage"]?.takeIf { it in setOf("fr","en","es","de") } ?: "fr"
                 val source = settings["bttrSource"]?.takeIf { it in setOf("TM","IM","RT","TR") }
                 val params = mutableListOf<String>()
                 if (lang != "en") params.add("lang=$lang")
