@@ -20,11 +20,15 @@ internal object WindowsAppShortcutIconUpdater {
     private fun update(icon: AppIconOption) {
         if (DesktopHostOs.current != DesktopHostOs.WINDOWS) return
         runCatching {
-            val resource = "icons/app-icon-${icon.key}-transparent.ico"
+            val resource = if (icon == AppIconOption.ORIGINAL) "icons/kovelyx.ico"
+            else "icons/app-icon-${icon.key}-transparent.ico"
             val localAppData = knownFolder("LocalApplicationData") ?: return@runCatching
             val iconDirectory = localAppData.resolve("Kovelyx/icons")
             Files.createDirectories(iconDirectory)
-            val iconFile = iconDirectory.resolve("app-icon-${icon.key}-transparent.ico")
+            val iconFile = iconDirectory.resolve(
+                if (icon == AppIconOption.ORIGINAL) "kovelyx.ico"
+                else "app-icon-${icon.key}-transparent.ico"
+            )
             Thread.currentThread().contextClassLoader.getResourceAsStream(resource)?.use { input ->
                 Files.copy(input, iconFile, StandardCopyOption.REPLACE_EXISTING)
             } ?: return@runCatching
