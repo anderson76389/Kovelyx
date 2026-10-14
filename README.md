@@ -72,6 +72,17 @@ chmod +x Kovelyx-Linux-x86_64-*.AppImage
 
 Pas de `sudo` pour lancer l'AppImage. Les bibliothèques vidéo, WebKit/GTK et la compatibilité graphique restent à tester suivant la distribution (voir le [guide Linux](./docs/LINUX.md)). L'AppImage **ne fonctionne pas automatiquement sur ARM64**.
 
+### 🔄 Mises à jour intégrées à Kovelyx
+
+L'application vérifie les nouvelles **Releases GitHub** au démarrage et périodiquement lorsqu'elle reste ouverte. Quand une version compatible plus récente est publiée, une **bannière en haut** permet de télécharger le fichier avec une barre de progression. Le téléchargement est contrôlé par son empreinte SHA-256 avant l'installation.
+
+- **Windows Setup.exe / MSI :** l'application télécharge le nouvel installateur et le lance après votre clic, sans passer manuellement par le site.
+- **Windows portable :** le ZIP complet est téléchargé depuis Kovelyx, vérifié puis remplacé après fermeture, avec sauvegarde de l'ancienne copie pour revenir en arrière en cas de problème.
+- **Linux AppImage :** mise à jour du fichier portable et conservation d'une copie antérieure ; **DEB/RPM :** installation confiée au gestionnaire de paquets du système.
+- Les versions non compatibles ou non publiées ne sont **pas** proposées. Flatpak n'a pas d'auto-installation depuis Kovelyx.
+
+**Important :** ce mécanisme évite les téléchargements et installations manuels, mais **ce n'est pas une mise à jour différentielle** : il retélécharge encore le paquet complet. L'automatisation est intégrée au code ; chaque nouveau format doit être validé sur une machine réelle avant d'être considéré comme stable.
+
 ## ✨ Fonctions PC
 
 | Domaine | État vérifiable |
