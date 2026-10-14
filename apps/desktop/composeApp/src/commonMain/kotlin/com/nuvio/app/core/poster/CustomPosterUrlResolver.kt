@@ -58,7 +58,8 @@ object CustomPosterUrlResolver {
     ): String? {
         if (pattern.isBlank() || ServerItemRef.isServerId(ids.id)) return null
         val decoded = decodePatternPlaceholders(pattern)
-        if (!containsPlaceholder(decoded)) return null
+        // A fixed URL is valid too: callers may configure one image for every title.
+        if (!containsPlaceholder(decoded)) return decoded
         return if (isRpdbFamily(decoded)) {
             resolveRpdbWithFallback(decoded, ids, type, shape)
         } else {
