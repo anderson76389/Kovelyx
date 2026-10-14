@@ -78,7 +78,54 @@ if [[ "$(od -An -tx1 -N2 "${setups[0]}" | tr -d '[:space:]')" != "4d5a" ]]; then
   echo "::error::Setup.exe does not have a Windows executable header"
   exit 1
 fi
-if ! unzip -Z -1 "${portables[0]}" | grep -Eq '(^|/)Kovelyx.exe$'; then
+unzip -Z -1 "${portables[0]}" > portable-entries.txt
+if ! grep -Eq '(^|/)Kovelyx.exe
+  echo "::error::Portable archive does not contain Kovelyx.exe"
+  exit 1
+fi
+
+cp -- "${setups[0]}" "dist/Kovelyx-Windows-Setup-$tag.exe"
+cp -- "${msis[0]}" "dist/Kovelyx-Windows-$tag.msi"
+cp -- "${portables[0]}" "dist/Kovelyx-Windows-Portable-$tag.zip"
+(cd dist && for file in ./*.exe ./*.msi ./*.zip; do sha256sum -- "$file" > "$file.sha256"; done)
+
+cat > release-notes.md <<EOF
+## Kovelyx Windows — preview $tag
+
+**Recommended download:** Kovelyx-Windows-Setup-$tag.exe (one file to INSTALL).
+The MSI is an alternative installer. The portable ZIP must retain the complete app and Java runtime folders.
+
+- Source Windows CI: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id
+- Source commit: $source_sha
+- SHA-256 checksums are provided for every file.
+- This build is **experimental, unsigned and not certified on real hardware**.
+- Playback, extensions, tracking sign-in, and updates still need real-PC verification.
+- License and dependency notices: https://github.com/$GITHUB_REPOSITORY/blob/main/docs/PROVENANCE.md
+
+This is NOT a stable release. Do not ignore Windows security warnings.
+EOF
+
+if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+  gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq '.isPrerelease' | grep -qx true || {
+    echo "::error::Refusing to alter an existing stable release"
+    exit 1
+  }
+  gh release upload "$tag" --repo "$GITHUB_REPOSITORY" --clobber \
+    dist/*.exe dist/*.exe.sha256 dist/*.msi dist/*.msi.sha256 dist/*.zip dist/*.zip.sha256
+else
+  gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
+    --target "$source_sha" --title "Kovelyx Windows $tag — test" \
+    --prerelease --notes-file release-notes.md \
+    dist/*.exe dist/*.exe.sha256 dist/*.msi dist/*.msi.sha256 dist/*.zip dist/*.zip.sha256
+fi
+
+echo "Published Windows preview: $tag"
+{
+  echo "### Windows preview $tag"
+  echo "Compiled by https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+  echo "Release: https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag"
+} >> "$GITHUB_STEP_SUMMARY"
+ portable-entries.txt; then
   echo "::error::Portable archive does not contain Kovelyx.exe"
   exit 1
 fi
