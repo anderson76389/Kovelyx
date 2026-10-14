@@ -1,0 +1,93 @@
+name: Publier APK Android Kovelyx de test
+
+on:
+  workflow_run:
+    workflows:
+      - "Compiler Kovelyx (APK et diagnostic Windows)"
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: kovelyx-mobile-experimental-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Vérifier et publier uniquement l'APK mobile de test
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Vérifier le job de compilation mobile
+        shell: bash
+        env:
+          GH_${{ github.token }}: TOKEN
+          BUILD_ID: ${{ github.event.workflow_run.id }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
+          jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || {
+            echo "::notice::Compilation mobile absente ou en échec. Aucune publication."
+            exit 1
+          }
+          mkdir -p /tmp/kv-mobile dist
+          gh run download "$BUILD_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-mobile-debug --dir /tmp/kv-mobile
+          count="$(find /tmp/kv-mobile -type f -name '*.apk' | wc -l)"
+          [[ "$count" == "1" ]] || { echo "::error::Un seul fichier APK attendu"; exit 1; }
+          short="$(printf '%s' "$SOURCE_SHA" | cut -c1-12)"
+          tag="android-preview-$short"
+          apk="Kovelyx-Android-$tag.apk"
+          find /tmp/kv-mobile -type f -name '*.apk' -exec cp {} "dist/$apk" \;
+          echo "APK_NAME=$apk" >> "$GITHUB_ENV"
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_ENV"
+          echo "SOURCE_SHA=$SOURCE_SHA" >> "$GITHUB_ENV"
+
+      - name: Contrôler l'APK et sa signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="dist/$APK_NAME"
+          [[ -s "$apk" && "$(stat -c '%s' "$apk")" -gt 1000000 ]] || { echo "::error::APK absent ou trop petit"; exit 1; }
+          unzip -tq "$apk" >/dev/null
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose "$apk"
+          "$tools/aapt" dump badging "$apk" | grep -F "package: name='com.kovelyx.mobile.debug'" >/dev/null || {
+            echo "::error::Identifiant Android inattendu"
+            exit 1
+          }
+          (cd dist && sha256sum "$APK_NAME" > "$APK_NAME.sha256")
+          echo "APK de test contrôlé (ZIP, signature, identifiant Android)." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Créer la Release expérimentale
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "La préversion existe déjà."
+            exit 0
+          fi
+          cat > /tmp/kv-notes.md <<EOF
+          ## Kovelyx Android - préversion expérimentale
+
+          APK Android **de débogage**, compilé depuis Kovelyx, archive ZIP, signature et identifiant vérifiés.
+
+          ATTENTION : non testé sur un téléphone réel. La lecture, les extensions, les services tiers et la stabilité ne sont pas garantis. Ce fichier est signé avec une clé de test et ne constitue pas une APK de production. Sauvegarder les données avant installation. Le compte unique Kovelyx n'est pas encore déployé.
+
+          Sources : $SOURCE_SHA
+          Build : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
+          Licence et crédits : https://github.com/$GITHUB_REPOSITORY
+          EOF
+          gh release create "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" \
+            --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" \
+            --title "Kovelyx Android experimental - $TAG" \
+            --prerelease --notes-file /tmp/kv-notes.md
+          echo "APK mobile publié dans les Releases Kovelyx." >> "$GITHUB_STEP_SUMMARY"
