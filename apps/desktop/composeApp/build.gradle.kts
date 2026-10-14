@@ -1341,7 +1341,7 @@ compose.desktop {
             }
             linux {
                 iconFile.set(project.file("src/desktopMain/resources/icons/kovelyx.png"))
-                debMaintainer = "contact@nuvio.tv"
+                debMaintainer = "anderson76389@users.noreply.github.com"
                 shortcut = true
                 menuGroup = "Kovelyx"
                 appCategory = "AudioVideo"

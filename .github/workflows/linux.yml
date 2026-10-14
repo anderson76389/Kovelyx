@@ -140,3 +140,83 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 30
+
+  native-packages:
+    name: Compiler Kovelyx Linux DEB et RPM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - name: Sources Kovelyx
+        uses: actions/checkout@v4
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Logo Kovelyx pour les paquets Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
+          python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+          test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
+      - name: Dépendances natives et outils de packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential pkg-config libmpv-dev libwebkit2gtk-4.1-dev \
+            libgtk-3-dev libx11-dev libxcomposite-dev libxext-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+            rpm rpm2cpio cpio fakeroot
+          for tool in dpkg-deb rpm rpm2cpio rpmbuild fakeroot; do command -v "$tool"; done
+          test -s apps/desktop/composeApp/src/desktopMain/native/linux/engine/libnuvio_engine.so
+      - name: Compiler DEB et RPM à partir du code du dépôt
+        working-directory: apps/desktop
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :composeApp:packageReleaseDeb :composeApp:packageReleaseRpm \
+            --no-daemon --max-workers=2 --stacktrace \
+            "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m"
+      - name: Vérifier identité, architecture et fichiers réellement produits
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          packages='apps/desktop/composeApp/build/compose/binaries/main-release'
+          mapfile -d '' -t debs < <(find "$packages" -type f -name '*.deb' -print0)
+          mapfile -d '' -t rpms < <(find "$packages" -type f -name '*.rpm' -print0)
+          (( ${#debs[@]} == 1 )) || { echo '::error::DEB unique manquant'; exit 1; }
+          (( ${#rpms[@]} == 1 )) || { echo '::error::RPM unique manquant'; exit 1; }
+          deb="${debs[0]}"
+          rpm_file="${rpms[0]}"
+          [[ "$(dpkg-deb -f "$deb" Package)" == 'kovelyx' ]] || { echo '::error::Nom DEB incorrect'; exit 1; }
+          [[ "$(dpkg-deb -f "$deb" Architecture)" == 'amd64' ]] || { echo '::error::DEB non amd64'; exit 1; }
+          [[ "$(rpm -qp --qf '%{NAME}' "$rpm_file")" == 'kovelyx' ]] || { echo '::error::Nom RPM incorrect'; exit 1; }
+          [[ "$(rpm -qp --qf '%{ARCH}' "$rpm_file")" == 'x86_64' ]] || { echo '::error::RPM non x86_64'; exit 1; }
+          bash apps/desktop/scripts/linux/verify-linux-deb.sh "$deb"
+          bash apps/desktop/scripts/linux/verify-linux-rpm.sh "$rpm_file"
+          test "$(stat -c%s "$deb")" -gt 1000000
+          test "$(stat -c%s "$rpm_file")" -gt 1000000
+          cp -- "$deb" "dist/Kovelyx-Linux-amd64-$GITHUB_SHA.deb"
+          cp -- "$rpm_file" "dist/Kovelyx-Linux-x86_64-$GITHUB_SHA.rpm"
+          (cd dist && sha256sum *.deb *.rpm > SHA256SUMS)
+          echo '### Paquets Linux natifs produits' >> "$GITHUB_STEP_SUMMARY"
+          (cd dist && sha256sum *.deb *.rpm) >> "$GITHUB_STEP_SUMMARY"
+          echo 'Tests de lancement/lecture sur distributions réelles restant nécessaires.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Archiver les paquets Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Linux-Packages-experimental
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
