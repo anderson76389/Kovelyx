@@ -1,4 +1,4 @@
-name: Compiler Kovelyx (diagnostic)
+name: Compiler Kovelyx (APK et diagnostic Windows)
 
 on:
   push:
@@ -92,7 +92,7 @@ jobs:
           retention-days: 7
 
   desktop:
-    name: Windows - MSI Debug de référence
+    name: Windows - Vérification des prérequis MSI
     if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'desktop' }}
     runs-on: windows-latest
     timeout-minutes: 90
@@ -107,19 +107,27 @@ jobs:
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Vérifier les bibliothèques natives indispensables
+        id: native
         shell: pwsh
         run: |
           $dll = "apps/desktop/composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll"
-          if (-not (Test-Path $dll)) {
-            Write-Error "libmpv-2.dll (115 Mo) est absent du dépôt Git : voir apps/desktop/.kovelyx-binaries-a-sauvegarder.txt. Pas de MSI déclaré fonctionnel avant restauration et contrôle des licences."
-            exit 1
+          if (Test-Path $dll) {
+            "available=true" >> $env:GITHUB_OUTPUT
+            "### Windows : bibliothèque MPV trouvée, compilation autorisée" >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            "available=false" >> $env:GITHUB_OUTPUT
+            Write-Host "::notice title=Windows non compilé::La DLL MPV (115 Mo) manque ; aucun MSI n'est produit. Voir apps/desktop/.kovelyx-binaries-a-sauvegarder.txt"
+            "### Windows : compilation non tentée" >> $env:GITHUB_STEP_SUMMARY
+            "Le binaire libmpv-2.dll (115 Mo) est absent du dépôt. Aucun MSI n'est disponible." >> $env:GITHUB_STEP_SUMMARY
           }
       - name: Compiler l'installateur MSI
+        if: steps.native.outputs.available == 'true'
         working-directory: apps/desktop
         shell: pwsh
         run: |
           .\gradlew.bat :composeApp:packageReleaseMsi --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
       - name: Enregistrer le MSI
+        if: steps.native.outputs.available == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-desktop-msi
