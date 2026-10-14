@@ -7,7 +7,7 @@ Fichiers inspectés : 4501
 
 ## Inventaire des références à traiter
 
-### Connexions et services (118 correspondances)
+### Connexions et services (116 correspondances)
 
 - apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
 - apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
@@ -59,7 +59,6 @@ Fichiers inspectés : 4501
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2134 : <string name="custom_server_error_official_available">api.nuvio.tv 是官方伺服器。關閉此對話框並選擇「使用官方伺服器」以切換回去。</string>
 - apps/tv/local.example.properties:3 : NUVIO_SUPABASE_FALLBACK_URL=
 - apps/tv/local.example.properties:15 : SUPPORTERS_API_BASE_URL=https://nuvio.tv/
-- apps/mobile/composeApp/build.gradle.kts:202 : / const val SUPPORTERS_WALL_URL = "${props.getProperty("SUPPORTERS_WALL_URL", "https://nuvio.tv/api/supporters/wall")}"
 - apps/mobile/composeApp/build.gradle.kts:325 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
 - apps/mobile/composeApp/build.gradle.kts:326 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
 - apps/mobile/composeApp/build.gradle.kts:327 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
@@ -89,7 +88,8 @@ Fichiers inspectés : 4501
 - apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv Official server ہے۔ یہ dialog بند کریں اور واپس جانے کے لیے Official server استعمال کریں منتخب کریں۔</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
-- Autres correspondances non détaillées : 38
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
+- Autres correspondances non détaillées : 36
 
 ### Mises à jour et releases (12 correspondances)
 

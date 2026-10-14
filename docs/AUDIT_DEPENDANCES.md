@@ -125,7 +125,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia : **125**.
+Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia : **124**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -153,8 +153,8 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 | `catalog.example` | 8 |
 | `trakt.tv` | 7 |
 | `www.youtube.com` | 6 |
-| `nuvio.tv` | 5 |
 | `a.com` | 5 |
+| `nuvio.tv` | 4 |
 | `fake.example` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
@@ -219,7 +219,6 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/MPVKit/Package.swift:304`
 - `apps/mobile/composeApp/build.gradle.kts:106`
 - `apps/mobile/composeApp/build.gradle.kts:120`
-- `apps/mobile/composeApp/build.gradle.kts:202`
 - `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/mobile/.github/ISSUE_TEMPLATE/config.yml:4`
 - `apps/mobile/.github/ISSUE_TEMPLATE/config.yml:7`
@@ -242,11 +241,12 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/SettingsRootPage.kt:67`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50`
-- …et 45 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/auth/AuthScreen.kt:776`
+- …et 44 autres correspondances (plafond d'affichage).
 
 ## Windows
 
-Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **136**.
+Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **135**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -278,8 +278,8 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 | `media.w3.org` | 7 |
 | `developer.apple.com` | 6 |
 | `www.youtube.com` | 6 |
-| `nuvio.tv` | 5 |
 | `developer.mozilla.org` | 5 |
+| `a.com` | 5 |
 
 ### Références à vérifier en priorité
 
@@ -341,7 +341,6 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/MPVKit/Package.swift:304`
 - `apps/desktop/composeApp/build.gradle.kts:127`
 - `apps/desktop/composeApp/build.gradle.kts:141`
-- `apps/desktop/composeApp/build.gradle.kts:238`
 - `apps/desktop/composeApp/build.gradle.kts:1342`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:4`
@@ -363,7 +362,8 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37`
-- …et 56 autres correspondances (plafond d'affichage).
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45`
+- …et 55 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 
