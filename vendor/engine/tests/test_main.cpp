@@ -79,9 +79,9 @@ std::string send_http_request(const std::uint16_t port, const std::string& reque
     while (offset < request.size()) {
         const auto remaining = request.size() - offset;
 #if defined(_WIN32)
-        const auto chunk = static_cast<int>(std::min(
+        const auto chunk = static_cast<int>((std::min)(
             remaining,
-            static_cast<std::size_t>(std::numeric_limits<int>::max())
+            static_cast<std::size_t>((std::numeric_limits<int>::max)())
         ));
         const auto count = send(client, request.data() + offset, chunk, 0);
         if (count == SOCKET_ERROR || count == 0) {
