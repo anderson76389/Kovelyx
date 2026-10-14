@@ -16,6 +16,12 @@ Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-
 
 **Pour Linux x86-64**, le workflow propose une AppImage portable et prépare également un paquet `.deb` et un paquet `.rpm`. Ce sont des jobs distincts : seuls les fichiers produits par un job GitHub Actions réussi sont à utiliser. Les fichiers Windows `.exe` ne sont pas nativement exécutables sous Linux.
 
+### Comptes et synchronisation
+
+**Paramètres → Tracking** contient les cartes réelles **Trakt, Simkl et MDBList**. Leurs boutons de connexion utilisent les flux d’autorisation existants : code d’appareil, navigateur, synchronisation et déconnexion. Une carte dont l'identifiant OAuth est manquant est volontairement désactivée : afficher un formulaire fictif ne connecterait aucun compte.
+
+Pour les distributions personnalisées, la configuration peut utiliser `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET`, `SIMKL_CLIENT_ID` et `MDBLIST_CLIENT_ID` dans `apps/desktop/local.properties` avant compilation (ne jamais publier ce fichier dans Git). Les valeurs sont indispensables aux API des fournisseurs et ne peuvent pas être fabriquées par Kovelyx.
+
 Le **Setup.exe est autonome pour l'installation** : ce n'est pas un exécutable portable à lancer sans installation. Aucun fichier n'est annoncé disponible avant la réussite des vérifications et son enregistrement dans les artefacts.
 
 ## Photos et fonds de profil personnels

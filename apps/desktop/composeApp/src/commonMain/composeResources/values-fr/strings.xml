@@ -2007,4 +2007,22 @@
     <string name="stream_info_subtitle_source_addon">Addon</string>
     <string name="stream_info_subtitle_source_embedded">Intégré</string>
     <string name="stream_info_player_engine">Moteur du lecteur</string>
+    <string name="settings_trakt_visit">Visiter Trakt</string>
+    <string name="settings_tracking_services">Comptes</string>
+    <string name="settings_tracking_data_sources">Sources de suivi</string>
+    <string name="settings_appearance_app_icon_sheet_title">Choisir l’icône de Kovelyx</string>
+    <string name="settings_appearance_app_icon_original">Original</string>
+    <string name="settings_appearance_app_icon_arctic_blue">Bleu arctique</string>
+    <string name="settings_appearance_app_icon_emerald">Émeraude</string>
+    <string name="settings_appearance_app_icon_rose_gold">Or rose</string>
+    <string name="settings_appearance_app_icon_copper">Cuivre</string>
+    <string name="settings_appearance_app_icon_graphite">Graphite</string>
+    <string name="settings_simkl_connect">Connecter Simkl</string>
+    <string name="settings_simkl_disconnect">Déconnecter Simkl</string>
+    <string name="settings_simkl_missing_credentials">Connexion Simkl indisponible : identifiant d’application SIMKL_CLIENT_ID non configuré pour cette version de Kovelyx.</string>
+    <string name="settings_simkl_sign_in_description">Connectez Simkl pour synchroniser vos listes, votre historique, votre progression et votre suivi de lecture.</string>
+    <string name="settings_simkl_connected_description">Synchronisation des listes, de l’historique et de la progression avec Simkl.</string>
+    <string name="settings_simkl_visit">Visiter Simkl</string>
+    <string name="settings_simkl_sync_now">Synchroniser</string>
+    <string name="settings_simkl_connected_as">Connecté en tant que %1$s</string>
 </resources>

@@ -104,6 +104,7 @@ import nuvio.composeapp.generated.resources.settings_tracking_disconnect_descrip
 import nuvio.composeapp.generated.resources.settings_tracking_disconnect_title
 import nuvio.composeapp.generated.resources.settings_trakt_approval_redirect
 import nuvio.composeapp.generated.resources.settings_trakt_connect
+import nuvio.composeapp.generated.resources.settings_trakt_visit
 import nuvio.composeapp.generated.resources.settings_trakt_connected_as
 import nuvio.composeapp.generated.resources.settings_trakt_default_user
 import nuvio.composeapp.generated.resources.settings_trakt_disconnect
@@ -256,7 +257,7 @@ private fun TraktProviderCard(
             uiState.mode == TraktConnectionMode.CONNECTED
         },
         errorMessage = uiState.errorMessage,
-        websiteLabel = "Visiter Trakt",
+        websiteLabel = stringResource(Res.string.settings_trakt_visit),
         websiteUrl = "https://trakt.tv",
         onConnectRequested = TraktAuthRepository::onConnectRequested,
         onResumeAuthorization = {
