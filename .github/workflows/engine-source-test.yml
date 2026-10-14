@@ -23,15 +23,23 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $vswhere = 'C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe'
-          $vsVersion = & $vswhere -latest -products '*' -property installationVersion
-          if (-not $vsVersion) { throw 'Visual Studio introuvable sur ce runner' }
-          $generator = if ($vsVersion.StartsWith('18.')) { 'Visual Studio 18 2026' } else { 'Visual Studio 17 2022' }
-          Write-Host ('Visual Studio : ' + $vsVersion + ' ; générateur : ' + $generator)
-          cmake -S vendor/engine -B vendor/engine/build/kovelyx -G $generator -A x64 -DNUVIO_ENGINE_BUILD_SHARED=ON -DNUVIO_ENGINE_ENABLE_LIBTORRENT=OFF -DNUVIO_ENGINE_BUILD_TESTS=ON
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          cmake --build vendor/engine/build/kovelyx --config Release --parallel 4
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          ctest --test-dir vendor/engine/build/kovelyx -C Release --output-on-failure
+          $install = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $install) { throw 'Compilateur Visual Studio C++ introuvable sur le runner.' }
+          $vsdev = Join-Path $install 'Common7/Tools/VsDevCmd.bat'
+          if (-not (Test-Path $vsdev)) { throw 'VsDevCmd.bat introuvable.' }
+          $batch = Join-Path $env:RUNNER_TEMP 'kovelyx-engine-build.cmd'
+          @(
+            '@echo off',
+            "call `"$vsdev`" -arch=x64 -host_arch=x64",
+            'if errorlevel 1 exit /b 1',
+            'cmake -S vendor/engine -B vendor/engine/build/kovelyx -G Ninja -DCMAKE_BUILD_TYPE=Release -DNUVIO_ENGINE_BUILD_SHARED=ON -DNUVIO_ENGINE_ENABLE_LIBTORRENT=OFF -DNUVIO_ENGINE_BUILD_TESTS=ON',
+            'if errorlevel 1 exit /b 1',
+            'cmake --build vendor/engine/build/kovelyx --parallel 4',
+            'if errorlevel 1 exit /b 1',
+            'ctest --test-dir vendor/engine/build/kovelyx --output-on-failure',
+            'exit /b %errorlevel%'
+          ) | Set-Content -Path $batch -Encoding ASCII
+          & $batch
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           'Moteur natif compilable depuis les sources sauvegardées. Le moteur P2P COMPLET nécessite encore les dépendances libtorrent et des tests séparés.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
       - name: Sauvegarder la DLL de test (P2P désactivé)
