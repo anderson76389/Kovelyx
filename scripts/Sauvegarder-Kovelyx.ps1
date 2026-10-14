@@ -38,6 +38,37 @@ if ($LASTEXITCODE -eq 0) {
             Add-Content -Path (Join-Path $target "checksums.txt") -Value "$hash  $($item.tagName)/$($_.Name)"
         }
     }
+    # Sauvegarde additionnelle : artefacts temporaires du moteur vidéo Windows.
+    # Ils expirent sur GitHub Actions : les copier localement au plus tôt.
+    $downloads = @(
+        @{Workflow='native-windows.yml'; Artifact='kovelyx-windows-mpv'; Folder='Windows-MPV'},
+        @{Workflow='windows.yml'; Artifact='Kovelyx-Windows-MSI-experimental'; Folder='Windows-MSI'}
+    )
+    foreach ($entry in $downloads) {
+        $runsJson = & gh run list --repo $repository --workflow $entry.Workflow --branch main --status success --limit 8 --json databaseId
+        if ($LASTEXITCODE -ne 0) { Write-Warning ('Liste Actions indisponible : ' + $entry.Workflow); continue }
+        $runs = @($runsJson | ConvertFrom-Json)
+        foreach ($run in $runs) {
+            $destination = Join-Path $target $entry.Folder
+            New-Item -ItemType Directory -Path $destination -Force | Out-Null
+            & gh run download $run.databaseId --repo $repository --name $entry.Artifact --dir $destination 2>$null
+            if ($LASTEXITCODE -ne 0) { continue }
+            Get-ChildItem $destination -File | ForEach-Object {
+                $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+                Add-Content -Path (Join-Path $target 'checksums.txt') -Value ($hash + '  ' + $entry.Folder + '/' + $_.Name)
+            }
+            if ($entry.Folder -eq 'Windows-MPV') {
+                $dll = Join-Path $destination 'libmpv-2.dll'
+                if (Test-Path $dll) {
+                    $actual = (Get-FileHash $dll -Algorithm SHA256).Hash.ToLowerInvariant()
+                    $expected = '07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906'
+                    if ($actual -ne $expected) { throw 'La DLL MPV sauvegardée ne correspond pas à son SHA256 attendu.' }
+                }
+            }
+            Write-Host ('Artefact sauvegardé : ' + $entry.Artifact)
+            break
+        }
+    }
 } else {
     Write-Warning "GitHub CLI non connecté : seules les sources Git sont sauvegardées. Lance gh auth login puis réessaie."
 }
@@ -51,6 +82,8 @@ Releases : Releases/
 ATTENTION : un miroir Git ne sauvegarde pas les dépendances téléchargées
 (Maven, NuGet, SDK Android) ni les anciens binaires LFS hors dépôt.
 Les Releases et checksums sont copiés séparément lorsqu'ils existent.
+Les derniers artefacts temporaires Windows-MPV et Windows-MSI sont aussi
+sauvegardés lorsque leur téléchargement GitHub est encore possible.
 Contrôler les licences et les sauvegardes de clés de signature à part.
 "@ | Set-Content -Path (Join-Path $target "LIRE-MOI.txt") -Encoding UTF8
 
