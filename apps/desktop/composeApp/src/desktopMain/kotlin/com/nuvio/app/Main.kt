@@ -131,12 +131,9 @@ fun main(args: Array<String>) {
             },
             title = if (smokePlayerUrl == null) "Kovelyx" else "Kovelyx Player Smoke",
             state = windowState,
-            // The very first native frame uses the Kovelyx icon, not the imported Nuvio asset.
-            icon = painterResource(
-                if (DesktopHostOs.current == DesktopHostOs.WINDOWS && appIconState.selected == AppIconOption.ORIGINAL)
-                    "icons/kovelyx.png"
-                else appIconState.selected.transparentPreviewResource,
-            ),
+            // Compose needs a typed DrawableResource here. The Windows-specific
+            // Kovelyx icon is loaded from the packaged PNG in the LaunchedEffect below.
+            icon = painterResource(appIconState.selected.transparentPreviewResource),
             init = ::configureMacosWindowBeforePeer,
         ) {
             SideEffect {

@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'apps/desktop/**'
+      - '!apps/desktop/**/*.md'
+      - 'vendor/engine/**'
       - 'scripts/generate-windows-icon.py'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
