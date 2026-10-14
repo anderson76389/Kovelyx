@@ -174,18 +174,20 @@ fun ProfileSelectionScreen(
                         },
                     )
                     .padding(horizontal = 24.dp),
-                verticalArrangement = if (isTabletLayout) Arrangement.Center else Arrangement.Top,
+                verticalArrangement = if (isDesktop || isTabletLayout) Arrangement.Center else Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Spacer(modifier = Modifier.height(if (isTabletLayout) 0.dp else 60.dp))
+                Spacer(modifier = Modifier.height(if (isDesktop || isTabletLayout) 0.dp else 60.dp))
 
-                MemberBrandWordmark(
-                    height = if (isTabletLayout) 42.dp else 34.dp,
-                    modifier = Modifier.graphicsLayer {
-                        alpha = titleAlpha.value
-                        translationY = titleOffset.value
-                    },
-                )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    MemberBrandWordmark(
+                        height = if (isTabletLayout) 42.dp else 34.dp,
+                        modifier = Modifier.graphicsLayer {
+                            alpha = titleAlpha.value
+                            translationY = titleOffset.value
+                        },
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(if (isTabletLayout) 22.dp else 18.dp))
 
@@ -197,7 +199,8 @@ fun ProfileSelectionScreen(
                     ),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.graphicsLayer {
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().graphicsLayer {
                         alpha = titleAlpha.value
                         translationY = titleOffset.value
                     },
