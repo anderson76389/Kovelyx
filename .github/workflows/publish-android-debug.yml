@@ -44,10 +44,12 @@ jobs:
           tag="android-preview-$short"
           apk="Kovelyx-Android-$tag.apk"
           find /tmp/kv-mobile -type f -name '*.apk' -exec cp {} "dist/$apk" \;
-          echo "APK_NAME=$apk" >> "$GITHUB_ENV"
-          echo "TAG=$tag" >> "$GITHUB_ENV"
-          echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_ENV"
-          echo "SOURCE_SHA=$SOURCE_SHA" >> "$GITHUB_ENV"
+          {
+            echo "APK_NAME=$apk"
+            echo "TAG=$tag"
+            echo "BUILD_ID=$BUILD_ID"
+            echo "SOURCE_SHA=$SOURCE_SHA"
+          } >> "$GITHUB_ENV"
 
       - name: Contrôler l'APK et sa signature
         shell: bash
@@ -56,7 +58,7 @@ jobs:
           apk="dist/$APK_NAME"
           [[ -s "$apk" && "$(stat -c '%s' "$apk")" -gt 1000000 ]] || { echo "::error::APK absent ou trop petit"; exit 1; }
           unzip -tq "$apk" >/dev/null
-          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           "$tools/apksigner" verify --verbose "$apk"
           "$tools/aapt" dump badging "$apk" | grep -F "package: name='com.kovelyx.mobile.debug'" >/dev/null || {
             echo "::error::Identifiant Android inattendu"
