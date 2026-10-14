@@ -333,6 +333,12 @@ object ProfileRepository {
     }
 
     suspend fun deleteProfile(profileIndex: Int) {
+        // Remove the local overrides for the deleted profile without affecting other accounts.
+        val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId.orEmpty()
+        if (owner.isNotBlank()) {
+            ProfileLocalImages.saveImage(owner, profileIndex, false, null)
+            ProfileLocalImages.saveImage(owner, profileIndex, true, null)
+        }
         if (AuthRepository.state.value.isAnonymous) {
             val remaining = _state.value.profiles.filter { it.profileIndex != profileIndex }
             ProfilePinCacheStorage.removePayload(profileIndex)
