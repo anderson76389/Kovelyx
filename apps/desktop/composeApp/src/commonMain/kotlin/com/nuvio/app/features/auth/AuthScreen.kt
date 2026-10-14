@@ -84,6 +84,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nuvio.app.core.network.ServerConfigurationRepository
+import com.nuvio.app.core.network.isKovelyxAccountBackendReady
 import com.nuvio.app.isDesktop
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.DeviceLinkAuthRepository
@@ -717,10 +718,7 @@ private fun AuthForm(
 ) {
     val uriHandler = LocalUriHandler.current
     val accountServer by ServerConfigurationRepository.active.collectAsStateWithLifecycle()
-    val accountHost = runCatching { io.ktor.http.Url(accountServer.backendUrl).host.lowercase() }.getOrDefault("")
-    val kovelyxAccountsReady = accountServer.capabilities.emailPasswordAuth &&
-        accountServer.backendUrl.isNotBlank() && accountServer.publishableKey.isNotBlank() &&
-        accountHost != "nuvio.tv" && !accountHost.endsWith(".nuvio.tv") && !accountHost.endsWith(".nuvio.app")
+    val kovelyxAccountsReady = accountServer.isKovelyxAccountBackendReady()
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
