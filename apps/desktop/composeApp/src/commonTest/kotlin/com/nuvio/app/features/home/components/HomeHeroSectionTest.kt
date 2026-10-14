@@ -53,7 +53,8 @@ class HomeHeroSectionTest {
             preferDesktopLayout = true,
         )
 
-        assertEquals(660f, layout.heroHeight.value, 0.001f)
+        // Standard desktop hero is now capped at 640dp by desktopHeroHeight.
+        assertEquals(640f, layout.heroHeight.value, 0.001f)
         assertEquals(2560f, layout.contentContainerMaxWidth.value, 0.001f)
         assertEquals(32f, layout.contentHorizontalPadding.value, 0.001f)
         assertEquals(40f, layout.contentVerticalPadding.value, 0.001f)
