@@ -1,5 +1,21 @@
 package com.nuvio.app
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
+import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.auth.AuthState
+import com.nuvio.app.features.collection.CollectionSyncService
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -314,108 +330,274 @@ internal object DesktopCollectionImportBridge {
 @Composable
 internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     val incoming by DesktopCollectionImportBridge.pending.collectAsState()
+    if (!isAppReady) return
+    val payload = incoming ?: return
     val profileState by ProfileRepository.state.collectAsState()
+    val authState by AuthRepository.state.collectAsState()
     val activeProfile = profileState.activeProfile
-    if (!isAppReady || activeProfile == null) return
-    val json = incoming ?: return
-    val collectionJson = remember(json) { DesktopCollectionImportBridge.extractCollectionJson(json).orEmpty() }
-    val importKeys = remember(json) { DesktopCollectionImportBridge.extractSettings(json) }
-    val rpdbPattern = remember(json) { DesktopCollectionImportBridge.rpdbPosterPattern(importKeys) }
-    val addonResult = remember(json) { runCatching { DesktopCollectionImportBridge.extractAddonManifests(json) } }
+
+    val collectionJson = remember(payload) { DesktopCollectionImportBridge.extractCollectionJson(payload).orEmpty() }
+    val importedSettings = remember(payload) { DesktopCollectionImportBridge.extractSettings(payload) }
+    val posterPattern = remember(payload) { DesktopCollectionImportBridge.posterPattern(importedSettings) }
+    val addonResult = remember(payload) { runCatching { DesktopCollectionImportBridge.extractAddonManifests(payload) } }
     val addonUrls = addonResult.getOrDefault(emptyList())
+    val accountMode = importedSettings["importMode"] == "account"
+    val auth = authState as? AuthState.Authenticated
+    val accountConnected = auth != null && !auth.isAnonymous
     val scope = rememberCoroutineScope()
 
-    var errorMessage by remember(json) { mutableStateOf<String?>(null) }
-    var installing by remember(json) { mutableStateOf(false) }
-    var completed by remember(json) { mutableStateOf(false) }
-    val currentCount by CollectionRepository.collections.collectAsState()
+    var selectedProfileIndex by remember(payload) { mutableStateOf<Int?>(null) }
+    var replaceCollections by remember(payload) { mutableStateOf(importedSettings["importAction"] != "merge") }
+    var email by remember(payload) { mutableStateOf("") }
+    var password by remember(payload) { mutableStateOf("") }
+    var errorMessage by remember(payload) { mutableStateOf<String?>(null) }
+    var processing by remember(payload) { mutableStateOf(false) }
+    var completed by remember(payload) { mutableStateOf(false) }
+
+    LaunchedEffect(payload, accountConnected) {
+        if (accountMode && accountConnected && auth != null) {
+            ProfileRepository.ensureLoaded(auth.userId)
+            ProfileRepository.pullProfiles()
+        }
+    }
+
+    val availableProfiles = if (accountMode && accountConnected) profileState.profiles else emptyList()
+    val targetProfile = if (accountMode) {
+        availableProfiles.firstOrNull { it.profileIndex == selectedProfileIndex }
+    } else activeProfile
+    val activeCount by CollectionRepository.collections.collectAsState()
 
     DialogSurface(
-        onDismissRequest = { if (!installing) DesktopCollectionImportBridge.discard(json) },
+        onDismissRequest = { if (!processing) DesktopCollectionImportBridge.discard(payload) },
         title = "Importer depuis Ma-Collection",
-        message = "Le site Ma-Collection souhaite installer votre sélection dans le profil « ${activeProfile.name} ».",
+        message = "Choisissez votre profil et confirmez la mise à jour des catalogues dans Kovelyx PC.",
     ) {
+        if (accountMode && !accountConnected) {
+            Text(
+                "Connexion facultative : vous avez choisi le mode compte. " +
+                    "Connectez-vous ici avec votre compte Kovelyx pour récupérer ses profils. " +
+                    "Les identifiants sont transmis par l'application à votre serveur d'authentification, jamais au site Ma-Collection.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            OutlinedTextField(
+                value = email, onValueChange = { email = it },
+                label = { Text("Adresse e-mail Kovelyx") },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = password, onValueChange = { password = it },
+                label = { Text("Mot de passe Kovelyx") },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            DialogButtons {
+                DialogButton(text = "Annuler", onClick = { DesktopCollectionImportBridge.discard(payload) })
+                DialogButton(
+                    text = if (processing) "Connexion en cours…" else "Se connecter",
+                    style = DialogButtonStyle.Primary,
+                    onClick = {
+                        if (processing) return@DialogButton
+                        if (email.isBlank() || password.isBlank()) {
+                            errorMessage = "Renseignez votre e-mail et votre mot de passe."
+                            return@DialogButton
+                        }
+                        processing = true
+                        scope.launch {
+                            try {
+                                AuthRepository.signInWithEmail(email.trim(), password).getOrThrow()
+                                password = ""
+                                val authenticated = AuthRepository.state.value as? AuthState.Authenticated
+                                if (authenticated != null && !authenticated.isAnonymous) {
+                                    ProfileRepository.ensureLoaded(authenticated.userId)
+                                    ProfileRepository.pullProfiles()
+                                }
+                                errorMessage = null
+                            } catch (error: Exception) {
+                                password = ""
+                                errorMessage = "Connexion impossible. Vérifiez votre compte ou le serveur Kovelyx."
+                            } finally {
+                                processing = false
+                            }
+                        }
+                    },
+                )
+            }
+            return@DialogSurface
+        }
+
+        if (accountMode) {
+            Text("Profils de votre compte Kovelyx :", style = MaterialTheme.typography.bodyMedium)
+            if (availableProfiles.isEmpty()) {
+                Text("Aucun profil disponible. Vérifiez votre connexion au compte et vos profils dans Kovelyx.")
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                availableProfiles.forEach { profile ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .clickable(enabled = !processing) { selectedProfileIndex = profile.profileIndex }
+                            .padding(vertical = 3.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selectedProfileIndex == profile.profileIndex,
+                            onClick = { if (!processing) selectedProfileIndex = profile.profileIndex },
+                        )
+                        Text(
+                            profile.name + if (profile.pinEnabled) " (protégé par code PIN)" else "",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                }
+            }
+        } else {
+            Text(
+                "Sans connexion : import dans le profil local actif « " +
+                    (activeProfile?.name ?: "aucun profil sélectionné") + " ».",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+
         Text(
-            "Cet import remplacera les ${currentCount.size} collections actuellement présentes dans ce profil. " +
-                "Une sauvegarde JSON locale sera créée avant le remplacement." +
-                (if (importKeys.isNotEmpty()) " Après confirmation, les paramètres compatibles seront également enregistrés dans ce profil." else "") +
-                (if (addonUrls.isNotEmpty()) " ${addonUrls.size} extension(s) seront vérifiées et installées." else ""),
+            "Méthode d'importation :", style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(enabled = !processing) { replaceCollections = true },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RadioButton(selected = replaceCollections, onClick = { replaceCollections = true })
+            Text("Remplacer toutes les anciennes collections (avec sauvegarde)")
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(enabled = !processing) { replaceCollections = false },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RadioButton(selected = !replaceCollections, onClick = { replaceCollections = false })
+            Text("Conserver les anciennes collections et ajouter les nouvelles")
+        }
+        Text(
+            if (targetProfile?.profileIndex == activeProfile?.profileIndex) {
+                "Le profil sélectionné contient actuellement " + activeCount.size + " catégories."
+            } else {
+                "Les catégories du profil ciblé seront chargées avant leur sauvegarde et l'importation."
+            },
             style = MaterialTheme.typography.bodyMedium,
         )
-        errorMessage?.let { message ->
-            Text(message, color = MaterialTheme.colorScheme.error)
-        }
+        Text(
+            "Une sauvegarde JSON locale du profil choisi sera créée AVANT la modification. " +
+                (if (importedSettings.isNotEmpty()) "Les paramètres compatibles seront aussi appliqués." else "") +
+                (if (addonUrls.isNotEmpty()) " " + addonUrls.size + " extension(s) seront vérifiées." else ""),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         DialogButtons {
             DialogButton(
                 text = "Annuler",
-                onClick = { if (!installing) DesktopCollectionImportBridge.discard(json) },
+                onClick = { if (!processing) DesktopCollectionImportBridge.discard(payload) },
             )
             DialogButton(
-                text = if (installing) "Installation des extensions…" else if (completed) "Terminer" else "Importer dans Kovelyx",
+                text = when {
+                    processing -> "Importation en cours…"
+                    completed -> "Terminer"
+                    replaceCollections -> "Sauvegarder et remplacer"
+                    else -> "Sauvegarder et compléter"
+                },
                 style = DialogButtonStyle.Primary,
                 onClick = {
-                    if (installing) return@DialogButton
+                    if (processing) return@DialogButton
                     if (completed) {
-                        DesktopCollectionImportBridge.discard(json)
+                        DesktopCollectionImportBridge.discard(payload)
+                        return@DialogButton
+                    }
+                    val chosen = targetProfile
+                    if (chosen == null) {
+                        errorMessage = if (accountMode) "Sélectionnez un profil de votre compte."
+                            else "Activez d'abord un profil local dans Kovelyx."
+                        return@DialogButton
+                    }
+                    // La sélection d'un profil verrouillé doit passer par le contrôle PIN de Kovelyx.
+                    if (chosen.pinEnabled && chosen.profileIndex != activeProfile?.profileIndex) {
+                        errorMessage = "Profil protégé : ouvrez et déverrouillez ce profil dans Kovelyx avant l'importation."
                         return@DialogButton
                     }
                     try {
                         addonResult.getOrThrow()
-                        if (importKeys["posterProvider"] == "rpdb" && rpdbPattern == null) throw IllegalArgumentException("Configuration RPDB invalide")
+                        val provider = importedSettings["posterProvider"]
+                        if (provider in setOf("rpdb", "bttr", "top") && posterPattern == null) {
+                            throw IllegalArgumentException("Paramètres d'affiches invalides.")
+                        }
                         val validation = CollectionRepository.validateJson(collectionJson)
-                        if (!validation.valid) throw IllegalArgumentException(validation.error ?: "JSON invalide")
-                        val backupDir = File(DesktopStorage.rootDir.toFile(), "collection-backups")
-                        check(backupDir.exists() || backupDir.mkdirs()) { "Sauvegarde impossible : dossier inaccessible" }
-                        val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS"))
-                        File(backupDir, "profile-${activeProfile.profileIndex}-$stamp.json")
-                            .writeText(CollectionRepository.exportToJson(), Charsets.UTF_8)
-                        CollectionRepository.importFromJson(collectionJson).getOrThrow()
-                        // Seulement après validation, sauvegarde et confirmation de l'utilisateur.
-                        importKeys["tmdbKey"]?.let { key ->
-                            TmdbSettingsRepository.ensureLoaded()
-                            TmdbSettingsRepository.setApiKey(key)
-                            TmdbSettingsRepository.setEnabled(true)
-                        }
-                        importKeys["mdblistKey"]?.let { key ->
-                            MdbListSettingsRepository.ensureLoaded()
-                            MdbListSettingsRepository.setApiKey(key)
-                            MdbListSettingsRepository.setEnabled(true)
-                        }
-                        importKeys["realDebridKey"]?.let { key ->
-                            DebridSettingsRepository.ensureLoaded()
-                            DebridSettingsRepository.setRealDebridApiKey(key)
-                            DebridSettingsRepository.setEnabled(true)
-                        }
-                        rpdbPattern?.let { CustomPosterUrlRepository.setPattern(it) }
-                        if (addonUrls.isEmpty()) {
-                            DesktopCollectionImportBridge.discard(json)
-                        } else {
-                            installing = true
-                            scope.launch {
-                                var failures = 0
-                                try {
-                                    AddonRepository.initialize()
-                                    for (url in addonUrls) {
-                                        when (AddonRepository.addAddon(url)) {
-                                            is AddAddonResult.Success -> Unit
-                                            is AddAddonResult.Error -> failures++
-                                        }
-                                    }
-                                } catch (error: Exception) {
-                                    failures++
-                                } finally {
-                                    installing = false
-                                    completed = true
-                                }
-                                if (failures == 0) {
-                                    DesktopCollectionImportBridge.discard(json)
-                                } else {
-                                    errorMessage = "Catalogues et réglages importés, mais $failures extension(s) n'ont pas été installées. Vérifiez leurs manifests dans les extensions Kovelyx, puis cliquez sur Terminer."
+                        if (!validation.valid) throw IllegalArgumentException(validation.error ?: "Collection JSON invalide")
+                    } catch (error: Exception) {
+                        errorMessage = error.message ?: "Configuration invalide."
+                        return@DialogButton
+                    }
+                    processing = true
+                    scope.launch {
+                        try {
+                            if (accountMode) {
+                                val latestAuth = AuthRepository.state.value as? AuthState.Authenticated
+                                check(latestAuth != null && !latestAuth.isAnonymous) {
+                                    "Votre session a expiré. Reconnectez-vous dans Kovelyx."
                                 }
                             }
+                            if (ProfileRepository.activeProfileId != chosen.profileIndex) {
+                                ProfileRepository.switchToProfile(chosen.profileIndex)
+                            }
+                            // Synchroniser le profil de compte avant de sauvegarder ses collections.
+                            CollectionRepository.initialize()
+                            if (accountMode) CollectionSyncService.pullFromServer(chosen.profileIndex)
+                            val currentJson = CollectionRepository.exportToJson()
+                            val finalJson = if (replaceCollections) collectionJson
+                                else DesktopCollectionImportBridge.mergeCollectionPayload(currentJson, collectionJson)
+                            val finalValidation = CollectionRepository.validateJson(finalJson)
+                            check(finalValidation.valid) { finalValidation.error ?: "Import JSON invalide" }
+                            val backupDir = File(DesktopStorage.rootDir.toFile(), "collection-backups")
+                            check(backupDir.exists() || backupDir.mkdirs()) { "Dossier de sauvegarde inaccessible" }
+                            val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS"))
+                            File(backupDir, "profile-" + chosen.profileIndex + "-" + stamp + ".json")
+                                .writeText(currentJson, Charsets.UTF_8)
+                            CollectionRepository.importFromJson(finalJson).getOrThrow()
+
+                            importedSettings["tmdbKey"]?.let { key ->
+                                TmdbSettingsRepository.setApiKey(key)
+                                TmdbSettingsRepository.setEnabled(true)
+                            }
+                            // Corrige la régression des résumés en anglais au moment de l'import.
+                            TmdbSettingsRepository.setLanguage(
+                                if (importedSettings["tmdbLanguage"] == "en") "en" else "fr"
+                            )
+                            importedSettings["mdblistKey"]?.let { key ->
+                                MdbListSettingsRepository.setApiKey(key)
+                                MdbListSettingsRepository.setEnabled(true)
+                            }
+                            importedSettings["realDebridKey"]?.let { key ->
+                                DebridSettingsRepository.setRealDebridApiKey(key)
+                                DebridSettingsRepository.setEnabled(true)
+                            }
+                            posterPattern?.let { CustomPosterUrlRepository.setPattern(it) }
+                            var failedAddons = 0
+                            if (addonUrls.isNotEmpty()) {
+                                AddonRepository.initialize()
+                                for (url in addonUrls) {
+                                    when (AddonRepository.addAddon(url)) {
+                                        is AddAddonResult.Success -> Unit
+                                        is AddAddonResult.Error -> failedAddons++
+                                    }
+                                }
+                            }
+                            if (failedAddons == 0) {
+                                DesktopCollectionImportBridge.discard(payload)
+                            } else {
+                                errorMessage = "Collections importées, mais " + failedAddons +
+                                    " extension(s) ont échoué. Vérifiez leurs manifests puis cliquez sur Terminer."
+                                completed = true
+                            }
+                        } catch (error: Exception) {
+                            errorMessage = error.message ?: "Importation impossible. Vérifiez les sauvegardes."
+                        } finally {
+                            processing = false
                         }
-                    } catch (error: Exception) {
-                        errorMessage = error.message ?: "Import impossible : vos collections restent inchangées."
                     }
                 },
             )
