@@ -246,11 +246,11 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1779** ; références statiques à Nuvio/NuvioMedia : **132**.
+Fichiers texte examinés : **1780** ; références statiques à Nuvio/NuvioMedia : **132**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `github.com` | 239 |
+| `github.com` | 246 |
 | `example.com` | 178 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 73 |
