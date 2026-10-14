@@ -1,12 +1,13 @@
 name: Publier les APK Kovelyx en préversion
 
 on:
-  workflow_run:
-    workflows:
-      - "Compiler Kovelyx (APK et diagnostic Windows)"
-    types: [completed]
   workflow_dispatch:
     inputs:
+      validation_confirmed:
+        description: "L'audit d'indépendance, les licences et les essais sur appareils ont été vérifiés."
+        required: true
+        default: false
+        type: boolean
       build_run_id:
         description: "Identifiant du workflow de compilation contenant les deux APK"
         required: true
@@ -23,7 +24,7 @@ concurrency:
 jobs:
   publish:
     name: Vérifier les APK et créer une préversion
-    if: ${{ github.event_name == 'workflow_dispatch' || ((github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure') && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') }}
+    if: ${{ inputs.validation_confirmed == true }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
