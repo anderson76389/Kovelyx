@@ -21,7 +21,10 @@ import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
+internal fun MdbListProviderCard(
+    modifier: Modifier = Modifier,
+    onCredentialsRequested: (() -> Unit)? = null,
+) {
     val auth by remember { MdbListTracker.ensureLoaded(); MdbListTracker.auth.state }.collectAsStateWithLifecycle()
     val accountStatus by MdbListTracker.account.status.collectAsStateWithLifecycle()
     val sync by MdbListTracker.sync.state.collectAsStateWithLifecycle()
@@ -40,6 +43,7 @@ internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
             else -> TrackingConnectionCardMode.DISCONNECTED
         },
         credentialsConfigured = remember(credentialsRevision) { MdbListTracker.auth.hasRequiredCredentials() },
+        onCredentialsRequested = onCredentialsRequested,
         isLoading = status?.isBusy == true,
         connectedLabel = stringResource(Res.string.settings_mdblist_connected_as, auth.user?.username ?: stringResource(Res.string.settings_mdblist_account_fallback)),
         connectedDescription = stringResource(Res.string.settings_mdblist_connected_description),
