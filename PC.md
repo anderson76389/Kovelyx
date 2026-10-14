@@ -84,6 +84,20 @@ Toutes les versions publiées doivent avoir un **nom de version identique dans l
 
 Faire une **copie** de ces données avant un changement important de version. Un `Setup.exe` ne garantit pas à lui seul un mécanisme de mise à jour automatique : la logique de mise à jour doit être testée.
 
+## Dépannage : « Échec du chargement » des films et séries
+
+Cet écran concerne les **métadonnées de l'œuvre**, pas automatiquement le serveur de comptes Kovelyx.
+
+La récupération suit cet ordre : **extensions de métadonnées installées → TMDB (si disponible) → Cinemeta (dernier recours pour les identifiants IMDb `tt...`)**. Cette dernière source publique, distincte de Nuvio, ne demande pas de compte ni de clé API ; elle reste toutefois un service tiers susceptible d'être inaccessible. Le résultat de Cinemeta peut être en anglais ; une clé TMDB valide configurée en français est préférable pour les descriptions françaises.
+
+Si toutes les fiches échouent :
+1. Vérifier les extensions dans **Paramètres → Extensions** : une extension fournissant la ressource `meta` doit être activée et son manifeste accessible.
+2. Vérifier une fiche avec identifiant IMDb (`tt...`). Les références uniquement `tmdb:...` demandent une source capable de convertir/résoudre l'identifiant.
+3. Dans **Paramètres → TMDB**, activer l'enrichissement et renseigner une clé API TMDB valide pour couvrir les œuvres non résolues par IMDb.
+4. Si l'erreur persiste, noter l'identifiant de la fiche et le message exact affiché. Un serveur de compte indisponible ne signifie pas que tous les fournisseurs de métadonnées sont hors ligne.
+
+Le mécanisme de secours ne touche ni aux profils, ni aux catalogues, ni aux sources de lecture. Son objectif est de garder les fiches accessibles même lorsqu'une extension de métadonnées est absente.
+
 ## Tester et signaler
 
 Utiliser le [plan de vérification PC](./TESTS_PC.md). Pour chaque anomalie, joindre la version du fichier, les étapes de reproduction, le résultat attendu, le résultat constaté et les journaux non sensibles. La compilation verte n'est **pas** une certification de toutes les fonctionnalités.

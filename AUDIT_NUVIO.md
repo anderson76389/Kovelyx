@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4509
+Fichiers inspectés : 4510
 
 ## Inventaire des références à traiter
 
@@ -91,7 +91,7 @@ Fichiers inspectés : 4509
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
 - Autres correspondances non détaillées : 37
 
-### Mises à jour et releases (12 correspondances)
+### Mises à jour et releases (11 correspondances)
 
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/LicensesAttributionsScreen.kt:68 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioTV"
 - apps/mobile/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.5/Libmpv.xcframework.zip",
@@ -101,7 +101,6 @@ Fichiers inspectés : 4509
 - apps/desktop/composeApp/src/androidFull/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:12 : owner = "NuvioMedia",
 - apps/desktop/composeApp/src/androidPlaystore/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:15 : owner = "NuvioMedia",
 - apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:51 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
-- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:52 : private const val DesktopRepositoryUrl = "https://github.com/NuvioMedia/NuvioDesktop"
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.ios.kt:15 : owner = "NuvioMedia",
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
@@ -157,8 +156,8 @@ Fichiers inspectés : 4509
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61 : parseSimklAuthCallback("nuvio://auth/trakt
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:87 : /** Per-user URL registration, no administrator privileges, never claims nuvio:// or stremio://. */
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:304 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:229 : /** Per-user URL registration, no administrator privileges, never claims nuvio:// or stremio://. */
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:319 : value.startsWith("nuvio://", ignoreCase = true) //
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
@@ -330,7 +329,7 @@ Fichiers inspectés : 4509
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7829 lignes.
+- apps/desktop : 7852 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 

@@ -246,7 +246,7 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia : **133**.
+Fichiers texte examinés : **1783** ; références statiques à Nuvio/NuvioMedia : **132**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -262,11 +262,11 @@ Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia
 | `simkl.com` | 16 |
 | `api.trakt.tv` | 16 |
 | `mdblist.com` | 15 |
+| `api.ratingposterdb.com` | 14 |
 | `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
-| `api.ratingposterdb.com` | 12 |
 | `example.invalid` | 11 |
 | `pm` | 9 |
 | `trakt.tv` | 9 |
@@ -275,11 +275,11 @@ Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia
 | `postersplus.example.com` | 9 |
 | `api.mdblist.com` | 8 |
 | `catalog.example` | 8 |
+| `example.org` | 8 |
 | `media.w3.org` | 7 |
 | `developer.apple.com` | 6 |
 | `www.youtube.com` | 6 |
-| `developer.mozilla.org` | 5 |
-| `192.168.1.10` | 5 |
+| `btttr.cc` | 6 |
 
 ### Références à vérifier en priorité
 
@@ -363,7 +363,7 @@ Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59`
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- …et 53 autres correspondances (plafond d'affichage).
+- …et 52 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 
