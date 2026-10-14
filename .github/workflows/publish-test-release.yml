@@ -72,6 +72,7 @@ jobs:
             echo "::error::Aucun fichier généré pour cette plateforme ou artefact expiré"; exit 1;
           }
           {
+            echo "KOVELYX_VERSION=$RELEASE_VERSION"
             echo "KOVELYX_RUN_ID=$RUN_ID"
             echo "KOVELYX_SOURCE_SHA=$source_sha"
             echo "KOVELYX_ARTIFACT=$artifact"
@@ -91,9 +92,9 @@ jobs:
           [[ "${#files[@]}" == "1" ]] || { echo "::error::Un seul fichier de paquet attendu ; fichiers trouvés : ${#files[@]}"; exit 1; }
           size="$(stat -c %s "${files[0]}")"
           ((size > 100000)) || { echo "::error::Paquet anormalement petit"; exit 1; }
-          name="$KOVELYX_PREFIX-${{ inputs.version }}$KOVELYX_SUFFIX"
+          name="$KOVELYX_PREFIX-$KOVELYX_VERSION$KOVELYX_SUFFIX"
           cp -- "${files[0]}" "dist/$name"
-          sha256sum "dist/$name" > "dist/$name.sha256"
+          (cd dist && sha256sum "$name" > "$name.sha256")
           rm -f -- "${files[0]}"
           echo "KOVELYX_PACKAGE=dist/$name" >> "$GITHUB_ENV"
 
