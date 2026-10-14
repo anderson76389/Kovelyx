@@ -54,11 +54,30 @@ internal object DesktopCache {
         return target
     }
 
-    private fun resourceStamp(url: URL): String =
-        when (val connection = url.openConnection()) {
-            is JarURLConnection -> connection.jarEntry.let { entry -> "${entry.size}:${entry.crc}" }
-            else -> "${connection.contentLengthLong}:${connection.lastModified}"
+    private fun resourceStamp(url: URL): String = when (url.protocol.lowercase()) {
+        // FileURLConnection.contentLengthLong may leave a handle open on Windows.
+        "file" -> {
+            val path = Path.of(url.toURI())
+            "${Files.size(path)}:${Files.getLastModifiedTime(path).toMillis()}"
         }
+        // JarURLConnection caches JarFile handles by default, preventing JAR cleanup
+        // and replacement on Windows even after the input stream has been closed.
+        "jar" -> {
+            val connection = url.openConnection() as JarURLConnection
+            connection.useCaches = false
+            connection.jarFile.use { jar ->
+                val entry = requireNotNull(jar.getJarEntry(connection.entryName)) {
+                    "Missing JAR resource: $url"
+                }
+                "${entry.size}:${entry.crc}"
+            }
+        }
+        else -> {
+            val connection = url.openConnection()
+            connection.useCaches = false
+            "${connection.contentLengthLong}:${connection.lastModified}"
+        }
+    }
 
     private fun writeIfChanged(target: Path, bytes: ByteArray) {
         if (Files.exists(target) && Files.readAllBytes(target).contentEquals(bytes)) return
