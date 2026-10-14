@@ -134,7 +134,16 @@ object ProfileRepository {
         }
         try {
             val result = SupabaseProvider.client.postgrest.rpc("sync_pull_profiles")
-            val profiles = result.decodeList<NuvioProfile>()
+            val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId.orEmpty()
+            val profiles = result.decodeList<NuvioProfile>().map { profile ->
+                // Personal file:/// pictures never leave this device, even when
+                // the other profile fields are synchronized to an account.
+                profile.copy(
+                    avatarUrl = ProfileLocalImages.savedImage(owner, profile.profileIndex, false) ?: profile.avatarUrl,
+                    profileBackgroundUrl = ProfileLocalImages.savedImage(owner, profile.profileIndex, true)
+                        ?: profile.profileBackgroundUrl,
+                )
+            }
             _state.value = _state.value.copy(
                 profiles = profiles.sortedBy { it.profileIndex },
                 isLoaded = true,
@@ -207,14 +216,34 @@ object ProfileRepository {
     }
 
     suspend fun pushProfiles(profiles: List<ProfilePushPayload>) {
+        val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId.orEmpty()
+        if (owner.isNotBlank()) {
+            profiles.forEach { item ->
+                ProfileLocalImages.saveImage(
+                    owner, item.profileIndex, false,
+                    item.avatarUrl?.takeIf(ProfileLocalImages::isManagedUri),
+                )
+                ProfileLocalImages.saveImage(
+                    owner, item.profileIndex, true,
+                    item.profileBackgroundUrl?.takeIf(ProfileLocalImages::isManagedUri),
+                )
+            }
+        }
         if (AuthRepository.state.value.isAnonymous) {
             applyPayloadsLocally(profiles)
             return
         }
+        // Do not send private file URIs or machine-specific paths to Supabase.
+        val syncPayloads = profiles.map { item ->
+            item.copy(
+                avatarUrl = item.avatarUrl?.takeUnless(ProfileLocalImages::isManagedUri),
+                profileBackgroundUrl = item.profileBackgroundUrl?.takeUnless(ProfileLocalImages::isManagedUri),
+            )
+        }
         try {
             val params = buildJsonObject {
                 put("p_client_max_profiles", MAX_PROFILES)
-                put("p_profiles", json.encodeToJsonElement(profiles))
+                put("p_profiles", json.encodeToJsonElement(syncPayloads))
                 putSyncOriginClientId()
             }
             SupabaseProvider.client.postgrest.rpc("sync_push_profiles", params)
@@ -230,6 +259,8 @@ object ProfileRepository {
         avatarColorHex: String,
         avatarId: String? = null,
         avatarUrl: String? = null,
+        profileBackgroundId: String? = null,
+        profileBackgroundUrl: String? = null,
         usesPrimaryAddons: Boolean = false,
     ) {
         val existing = _state.value.profiles
@@ -254,6 +285,8 @@ object ProfileRepository {
             usesPrimaryAddons = usesPrimaryAddons,
             avatarId = avatarId,
             avatarUrl = avatarUrl,
+            profileBackgroundId = profileBackgroundId,
+            profileBackgroundUrl = profileBackgroundUrl,
         )
 
         pushProfiles(allPayloads)
