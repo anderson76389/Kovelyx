@@ -1,10 +1,10 @@
-# Kovelyx pour Windows
+# Kovelyx pour PC (Windows et Linux)
 
-**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 reste prioritaire ; Android et Android TV seront traités ensuite.
+**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 reste prioritaire, avec une déclinaison Linux x86-64. Android et Android TV seront traités ensuite.
 
 ## Télécharger et tester
 
-[**Compilations Windows (GitHub Actions)**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [Releases](https://github.com/anderson76389/Kovelyx/releases)
+[**Compilations Windows**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [**Compilations Linux**](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) · [Releases](https://github.com/anderson76389/Kovelyx/releases)
 
 Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-Windows-installers-experimental** :
 
@@ -13,6 +13,8 @@ Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-
 | `Kovelyx-Windows-Setup-….exe` | Un seul fichier pour **installer** Kovelyx avec son runtime Java |
 | `Kovelyx-Windows-….msi` | Installateur MSI Windows |
 | `Kovelyx-Windows-Portable-….zip` | Dossier portable à extraire entièrement, avec `Kovelyx.exe`, `app` et `runtime` |
+
+**Pour Linux x86-64**, le workflow propose une AppImage portable et prépare également un paquet `.deb` et un paquet `.rpm`. Ce sont des jobs distincts : seuls les fichiers produits par un job GitHub Actions réussi sont à utiliser. Les fichiers Windows `.exe` ne sont pas nativement exécutables sous Linux.
 
 Le **Setup.exe est autonome pour l'installation** : ce n'est pas un exécutable portable à lancer sans installation. Aucun fichier n'est annoncé disponible avant la réussite des vérifications et son enregistrement dans les artefacts.
 

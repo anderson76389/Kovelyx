@@ -81,10 +81,10 @@ if [[ "$license" == "(none)" || -z "$license" ]]; then
     license="Proprietary"
 fi
 if [[ "$vendor" == "(none)" || -z "$vendor" ]]; then
-    vendor="Nuvio Media"
+    vendor="Kovelyx"
 fi
 if [[ "$summary" == "(none)" || -z "$summary" ]]; then
-    summary="Nuvio"
+    summary="Kovelyx"
 fi
 if [[ "$url" == "(none)" ]]; then
     url=""

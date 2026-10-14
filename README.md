@@ -43,6 +43,8 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 | **Linux x86-64** | `Kovelyx-Linux-x86_64-….AppImage` | **1 fichier exécutable** à lancer sans décompresser un gros dossier | [Build AppImage réussi](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469) |
 | Windows x64 (alternative) | `.msi` | Installateur Windows classique | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
 | Windows x64 (alternative) | `Portable.zip` | Dossier portable avec lanceur et runtime | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
+| **Linux Debian/Ubuntu x86-64** | `Kovelyx-Linux-amd64-….deb` | Installation native du paquet, avec dépendances | [Nouveau job DEB : build à vérifier](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) |
+| **Linux Fedora x86-64** | `Kovelyx-Linux-x86_64-….rpm` | Installation native du paquet, avec dépendances | [Nouveau job RPM : build à vérifier](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) |
 
 **Fichiers PC expérimentaux déjà compilés :** [🪟 Windows — EXE, MSI et portable](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908) · [🐧 Linux — AppImage x86-64](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
 
@@ -59,7 +61,7 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 
 ### 🐧 Linux : une AppImage
 
-Le workflow Linux prépare une **AppImage x86-64 expérimentale**. Dès qu'une compilation est verte, récupère le fichier dans ses artefacts :
+Le workflow Linux prépare une **AppImage x86-64 expérimentale** et, avec le job de paquets natifs, des **DEB et RPM**, chacun avec ses vérifications d'intégrité. Ces deux nouveaux formats ne seront disponibles qu'après une compilation réussie. Dès qu'une compilation est verte, récupère le fichier dans ses artefacts :
 
 ```bash
 chmod +x Kovelyx-Linux-x86_64-*.AppImage
@@ -78,6 +80,7 @@ Pas de `sudo` pour lancer l'AppImage. Les bibliothèques vidéo, WebKit/GTK et l
 | Lecteur, audio, pistes et sous-titres | Infrastructure compilée ; tests réels avec différents fichiers/flux nécessaires |
 | Distribution Windows MSI + EXE + portable | **Build Windows complet réussi** |
 | Distribution Linux AppImage | **AppImage compilée et contrôlée ; compatibilité Linux réelle non encore certifiée** |
+| Distribution Linux DEB + RPM | **Chaîne de construction et contrôles ajoutés ; réussite et fonctionnement encore à confirmer** |
 | Autonomie vis-à-vis de Nuvio | **Audit en cours**, certains composants techniques/dépendances demeurent |
 
 Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisateur configure ses sources et respecte les droits applicables.
@@ -108,7 +111,7 @@ Kovelyx/
 ├── scripts/               Outils de contrôle et sauvegarde
 └── .github/workflows/
     ├── windows.yml        Installateurs Windows et tests
-    └── linux.yml          AppImage Linux expérimentale
+    └── linux.yml          AppImage + paquets natifs Linux expérimentaux
 ```
 
 **Ne supprime pas les dossiers internes du logiciel installé** : la version Windows a besoin de son runtime, même si tu n'as téléchargé qu'un `.exe`.
@@ -120,6 +123,8 @@ Kovelyx/
 - [x] Suite Desktop verte sur une révision de référence
 - [x] Importation locale des photos et fonds de profil sur Windows (code)
 - [x] AppImage Linux x86-64 compilée et structure contrôlée
+- [x] Préparation des paquets Linux natifs DEB et RPM dans un job séparé
+- [ ] Compilation réussie et essais d'installation du DEB et du RPM sur PC réels
 - [ ] AppImage Linux testée en lecture sur différentes distributions et interfaces graphiques
 - [ ] Tests interactifs des lecteurs, codecs, sous-titres, extensions et réglages sur les deux OS
 - [ ] Réduire les dépendances héritées ; documenter les licences natives avant publication stable
