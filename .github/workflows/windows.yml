@@ -34,7 +34,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 90
     env:
-      # Public app settings only. NEVER use a Supabase service_role/secret key.
+      # Public Kovelyx project settings only: NEVER embed service_role keys.
       KOVELYX_SUPABASE_URL: ${{ vars.KOVELYX_SUPABASE_URL }}
       KOVELYX_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KOVELYX_SUPABASE_PUBLISHABLE_KEY }}
     steps:
@@ -61,28 +61,28 @@ jobs:
           }
           "KOVELYX_BUILD_VERSION=$version" >> $env:GITHUB_ENV
           Write-Host "Kovelyx Windows version $version"
-      - name: Vérifier la configuration indépendante des comptes Kovelyx
+      - name: Vérifier le serveur de comptes indépendant
         shell: pwsh
         run: |
           $url = $env:KOVELYX_SUPABASE_URL
           $key = $env:KOVELYX_SUPABASE_PUBLISHABLE_KEY
           if ([string]::IsNullOrWhiteSpace($url) -xor [string]::IsNullOrWhiteSpace($key)) {
-            throw 'Configurer KOVELYX_SUPABASE_URL et KOVELYX_SUPABASE_PUBLISHABLE_KEY ensemble dans les variables GitHub.'
+            throw 'Configurer les deux variables publiques de serveur Kovelyx ensemble.'
           }
           if (-not [string]::IsNullOrWhiteSpace($url)) {
-            $parsed = $null
-            if (-not [uri]::TryCreate($url, [UriKind]::Absolute, [ref]$parsed) -or $parsed.Scheme -ne 'https') {
-              throw 'Le serveur de comptes Kovelyx doit utiliser HTTPS.'
+            $uri = $null
+            if (-not [uri]::TryCreate($url, [UriKind]::Absolute, [ref]$uri) -or $uri.Scheme -ne 'https') {
+              throw 'URL HTTPS obligatoire pour le serveur de comptes.'
             }
-            if ($parsed.Host -eq 'nuvio.tv' -or $parsed.Host.EndsWith('.nuvio.tv')) {
-              throw 'Le serveur des comptes Kovelyx doit être indépendant de Nuvio.'
+            if ($uri.Host -eq 'nuvio.tv' -or $uri.Host.EndsWith('.nuvio.tv')) {
+              throw 'Backend Nuvio non autorisé.'
             }
             if ($key -like '*service_role*' -or $key -like 'sb_secret_*') {
-              throw 'Clé privée Supabase interdite dans une application publique. Utiliser la clé publishable/anon.'
+              throw 'Utiliser une clé Supabase publique (publishable/anon), jamais une clé privée.'
             }
-            'Comptes Kovelyx : serveur HTTPS configuré.' >> $env:GITHUB_STEP_SUMMARY
+            'Comptes Kovelyx : backend indépendant configuré.' >> $env:GITHUB_STEP_SUMMARY
           } else {
-            'Comptes Kovelyx : pas encore activés (mode invité, sans backend Nuvio).' >> $env:GITHUB_STEP_SUMMARY
+            'Comptes Kovelyx : non configurés, mode invité préservé.' >> $env:GITHUB_STEP_SUMMARY
           }
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -290,13 +290,13 @@ jobs:
           }
           '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
 
-      - name: Vérifier une installation MSI réelle sur Windows
+      - name: Vérifier le MSI installé sur le runner Windows
         if: steps.native.outputs.available == 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $msis = @(Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries' -Filter '*.msi' -File -Recurse)
-          if ($msis.Count -ne 1) { throw 'MSI de test introuvable.' }
+          if ($msis.Count -ne 1) { throw 'MSI de vérification introuvable.' }
           $msi = $msis[0]
           $installer = New-Object -ComObject WindowsInstaller.Installer
           $database = $installer.OpenDatabase($msi.FullName, 0)
@@ -310,56 +310,27 @@ jobs:
           }
           $product = Read-MsiValue 'ProductCode'
           $version = Read-MsiValue 'ProductVersion'
-          if ($product -notmatch '^{[0-9A-Fa-f-]{36}}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-test-reports
-          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
-          if-no-files-found: ignore
-          retention-days: 14
-      - name: Enregistrer le MSI
-        if: steps.native.outputs.available == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-installers-experimental
-          path: dist/
-          if-no-files-found: error
-          retention-days: 30
- -or $version -notmatch '^[0-9]+[.][0-9]+[.][0-9]+
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-test-reports
-          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
-          if-no-files-found: ignore
-          retention-days: 14
-      - name: Enregistrer le MSI
-        if: steps.native.outputs.available == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-installers-experimental
-          path: dist/
-          if-no-files-found: error
-          retention-days: 30
-) {
-            throw 'Code produit ou version MSI invalide.'
+          if ($product -notmatch '^[{][0-9A-Fa-f-]{36}[}]$' -or
+              $version -notmatch '^[0-9]+[.][0-9]+[.][0-9]+$') {
+            throw 'Identité de produit/version MSI invalide.'
           }
           $log = Join-Path $env:RUNNER_TEMP 'kovelyx-msi-smoke.log'
           try {
             $args = '/i "{0}" /qn /norestart /L*v "{1}"' -f $msi.FullName, $log
-            $installation = Start-Process -FilePath (Join-Path $env:WINDIR 'System32\msiexec.exe') -ArgumentList $args -PassThru -Wait
+            $installation = Start-Process -FilePath (Join-Path $env:WINDIR 'System32\msiexec.exe') -ArgumentList $args -Wait -PassThru
             if ($installation.ExitCode -ne 0 -and $installation.ExitCode -ne 3010) {
-              throw ('Échec installation MSI (code ' + $installation.ExitCode + ').')
+              throw ('MSI installation failed, code ' + $installation.ExitCode)
             }
-            if ($installer.ProductState($product) -ne 5) { throw 'MSI non enregistré comme installé.' }
+            if ($installer.ProductState($product) -ne 5) { throw 'Produit absent après installation.' }
             $observed = [string]$installer.ProductInfo($product, 'VersionString')
-            if ($observed -ne $version) { throw ('Version MSI installée incorrecte : ' + $observed) }
-            ('### Installation Windows vérifiée : Kovelyx ' + $observed) >> $env:GITHUB_STEP_SUMMARY
+            if ($observed -ne $version) { throw ('Version installée différente de : ' + $version) }
+            ('### MSI Kovelyx réellement installé : version ' + $observed) >> $env:GITHUB_STEP_SUMMARY
           }
           finally {
             if ($installer.ProductState($product) -eq 5) {
-              $removal = Start-Process -FilePath (Join-Path $env:WINDIR 'System32\msiexec.exe') -ArgumentList ('/x ' + $product + ' /qn /norestart') -PassThru -Wait
-              if ($removal.ExitCode -ne 0 -and $removal.ExitCode -ne 3010) {
-                Write-Warning ('MSI de test impossible à supprimer, code ' + $removal.ExitCode)
+              $remove = Start-Process -FilePath (Join-Path $env:WINDIR 'System32\msiexec.exe') -ArgumentList ('/x ' + $product + ' /qn /norestart') -Wait -PassThru
+              if ($remove.ExitCode -ne 0 -and $remove.ExitCode -ne 3010) {
+                Write-Warning ('Nettoyage MSI du runner impossible : code ' + $remove.ExitCode)
               }
             }
           }
