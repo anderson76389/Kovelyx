@@ -1,31 +1,46 @@
-# Kovelyx — Windows
+# Kovelyx pour Windows
 
-Application multimédia de bureau du projet **[Kovelyx](https://github.com/anderson76389/Kovelyx)**. **Priorité à Windows x64** ; les versions Android et TV seront abordées ensuite.
+**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 reste prioritaire ; Android et Android TV seront traités ensuite.
 
-## État du développement (14 octobre 2026)
+## Télécharger et tester
 
-- Le code Kotlin Multiplatform / Compose Desktop est présent et un installateur MSI a déjà été compilé dans GitHub Actions.
-- Les contrôles du MSI et la création de l’archive portable sont en cours de stabilisation.
-- Le lancement, la lecture, les extensions, les thèmes et les paramètres ne sont **pas encore validés sur un PC réel**.
-- Le pipeline Windows produit, une fois toutes les vérifications réussies, un MSI et un ZIP portable avec son environnement Java. Ces fichiers restent des **artefacts expérimentaux**.
-- Le runtime vidéo MPV utilise actuellement un binaire archivé dont les sources et la licence doivent être vérifiées avant redistribution publique.
+[**Compilations Windows (GitHub Actions)**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [Releases](https://github.com/anderson76389/Kovelyx/releases)
 
-## Compiler sous Windows
+Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-Windows-installers-experimental** :
 
-Prévoir Java 21, Python 3.12, les outils C++ Visual Studio, le SDK officiel Microsoft WebView2 et les bibliothèques natives vidéo nécessaires.
+| Fichier | Utilisation |
+|---|---|
+| `Kovelyx-Windows-Setup-….exe` | Un seul fichier pour **installer** Kovelyx avec son runtime Java |
+| `Kovelyx-Windows-….msi` | Installateur MSI Windows |
+| `Kovelyx-Windows-Portable-….zip` | Dossier portable à extraire entièrement, avec `Kovelyx.exe`, `app` et `runtime` |
+
+Le **Setup.exe est autonome pour l'installation** : ce n'est pas un exécutable portable à lancer sans installation. Aucun fichier n'est annoncé disponible avant la réussite des vérifications et son enregistrement dans les artefacts.
+
+## Photos et fonds de profil personnels
+
+Dans **Profils → Modifier / Ajouter** sur Windows :
+
+1. Cliquer sur **Choisir une photo depuis mon PC** pour importer un avatar.
+2. Cliquer sur **Choisir un fond depuis mon PC** pour importer le fond de sélection de profil.
+3. Vérifier l'aperçu et cliquer sur **Enregistrer**.
+
+Les images PNG, JPG, GIF (première image) et BMP sont acceptées, dans la limite de **12 Mo et 32 mégapixels**. L'avatar est optimisé en PNG, le fond en JPEG. Les fonds **personnels** sont gratuits ; les fonds des catalogues réservés aux membres ne sont pas débloqués.
+
+Les copies sont conservées dans `%APPDATA%\Kovelyx\profile-media`. Tu peux déplacer ou supprimer l'image d'origine après importation. Les chemins de photos locales ne sont **pas envoyés au serveur** : ils ne sont pas automatiquement partagés avec tes autres appareils.
+
+## Vérifications
+
+GitHub Actions compile le MSI, le Setup EXE, l'archive portable, contrôle leurs fichiers puis exécute **les tests Desktop** avant d'enregistrer le paquet. Un échec bloque la distribution de la révision concernée. Ces tests ne remplacent pas les essais interactifs de lecture, navigation, extensions et profils sur un vrai PC.
+
+## Construire depuis les sources
+
+Environnement local : Java 21, Python 3.12, Visual Studio C++, WebView2 SDK et bibliothèques vidéo natives prévues par [le workflow](../../.github/workflows/windows.yml).
 
 ```powershell
 cd apps/desktop
-.\gradlew.bat :composeApp:packageReleaseMsi :composeApp:createReleaseDistributable --no-daemon
+.\gradlew.bat :composeApp:packageReleaseMsi :composeApp:packageReleaseExe :composeApp:createReleaseDistributable --no-daemon
 ```
 
-La commande locale n’installe pas automatiquement toutes les dépendances natives. Pour les prérequis du pipeline, consulter [le workflow Windows](../../.github/workflows/windows.yml).
+## Provenance et indépendance
 
-## Téléchargements et indépendance
-
-- [Compilations Windows et artefacts](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
-- [Releases Kovelyx](https://github.com/anderson76389/Kovelyx/releases) — préversions seulement après vérification de la licence et des installations
-- [État technique](../../docs/ETAT_TECHNIQUE.md) et [audit des services d’origine](../../docs/AUDIT_NUVIO.md)
-- [Provenance et licences](../../docs/PROVENANCE.md)
-
-Kovelyx provient initialement du code open source NuvioDesktop, sous GPLv3. L’indépendance complète à l’égard des services, comptes et binaires d’origine **reste à démontrer**. Conserver les crédits et notices applicables.
+Kovelyx s'appuie historiquement sur du code de NuvioDesktop publié sous **GPLv3**. Les crédits et obligations de licences des composants doivent être respectés. L'indépendance complète des services et binaires d'origine n'est **pas encore certifiée** : voir [l'état technique](../../docs/ETAT_TECHNIQUE.md), [l'audit des connexions](../../docs/AUDIT_NUVIO.md) et [la provenance](../../docs/PROVENANCE.md).
