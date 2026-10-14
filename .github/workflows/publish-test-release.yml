@@ -54,7 +54,7 @@ jobs:
           case "$PLATFORM" in
             tv) job="Android TV - APK Full Debug"; artifact="kovelyx-tv-debug"; prefix="Kovelyx-TV"; suffix=".apk" ;;
             mobile) job="Android mobile - APK Full Debug"; artifact="kovelyx-mobile-debug"; prefix="Kovelyx-Mobile"; suffix=".apk" ;;
-            windows) job="Windows - MSI Debug de référence"; artifact="kovelyx-desktop-msi"; prefix="Kovelyx-Windows"; suffix=".msi" ;;
+            windows) job="Windows - Vérification des prérequis MSI"; artifact="kovelyx-desktop-msi"; prefix="Kovelyx-Windows"; suffix=".msi" ;;
             *) exit 1 ;;
           esac
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > /tmp/kovelyx_run.json
