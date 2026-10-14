@@ -321,8 +321,13 @@ private fun TraktProviderCard(
     // a verified user code arrives, instead of requiring a second click.
     androidx.compose.runtime.LaunchedEffect(isDesktop, approvalCode) {
         if (isDesktop && !approvalCode.isNullOrBlank()) {
-            val officialUrl = "https://trakt.tv/activate/" +
-                approvalCode.filter { it.isLetterOrDigit() }
+            // Use the official verification URL returned by Trakt itself.
+            // Do not invent an undocumented /activate/<code> endpoint.
+            val officialUrl = uiState.pendingDeviceVerificationUrl
+                ?.takeIf {
+                    it.startsWith("https://trakt.tv/") ||
+                        it.startsWith("https://auth.trakt.tv/")
+                } ?: "https://trakt.tv/activate"
             runCatching { browser.openUri(officialUrl) }
         }
     }
