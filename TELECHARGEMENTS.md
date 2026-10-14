@@ -2,16 +2,19 @@
 
 Ce dépôt fournit une page de téléchargement statique depuis `docs/index.html`. Elle **ne crée pas de faux téléchargements** : elle consulte la liste des Releases GitHub et n'affiche un bouton actif que lorsqu'un APK ou MSI existe réellement.
 
-## Activer GitHub Pages (une seule fois)
+## Publication du site (branche gh-pages)
 
-La connexion GitHub automatisée n'a pas l'autorisation d'activer Pages à ta place. Dans le dépôt [Kovelyx](https://github.com/anderson76389/Kovelyx) :
+Le site est maintenu dans `docs/` sur `main` et synchronisé automatiquement dans la branche [`gh-pages`](https://github.com/anderson76389/Kovelyx/tree/gh-pages) par le workflow [Publier le site Kovelyx](https://github.com/anderson76389/Kovelyx/actions/workflows/pages.yml).
 
-1. Ouvre **Settings** → **Pages**.
-2. Dans **Build and deployment**, sélectionne **Source → GitHub Actions**.
-3. Va dans **Actions** → **Site Kovelyx - GitHub Pages** → **Run workflow** (branche `main`).
-4. Après un déploiement réussi, l'adresse publique sera : **https://anderson76389.github.io/Kovelyx/**.
+**GitHub Actions a confirmé la synchronisation et GitHub Pages a également signalé un déploiement réussi.** L'adresse cible est **https://anderson76389.github.io/Kovelyx/**.
 
-Le site est une simple page statique hébergée par GitHub. **Il ne constitue pas un serveur de streaming ni un serveur de comptes**. Les applications Kovelyx n'ont pas besoin de cette page pour fonctionner une fois installées.
+Si ton navigateur n'affiche pas encore le site, vérifie une fois les paramètres [Settings → Pages](https://github.com/anderson76389/Kovelyx/settings/pages) :
+
+1. **Build and deployment** → **Source : Deploy from a branch**.
+2. **Branch : gh-pages**, dossier **/(root)**, puis **Save**.
+3. Laisse GitHub terminer son propre workflow `pages build and deployment`.
+
+**Ne sélectionne pas `GitHub Actions` comme source pour cette méthode.** Le workflow Kovelyx sert à mettre les fichiers à jour dans la branche `gh-pages` ; GitHub Pages se charge ensuite de l'hébergement. Aucun serveur personnel n'est nécessaire.
 
 ## Où seront les vrais fichiers ?
 
@@ -29,7 +32,7 @@ Une copie du code source ne suffit pas à créer des exécutables. Les première
 - Android : le fichier de configuration locale facultatif était traité comme obligatoire par Gradle ; la déclaration a été corrigée.
 - Windows : une DLL vidéo native d'environ 115 Mo manque dans Git. Elle a été inventoriée avec son empreinte SHA-256 ; il faut une restauration vérifiée et conforme aux licences avant la génération d'un MSI.
 
-Ces corrections n'attestent **pas encore** que tous les builds réussissent ni que l'application fonctionne. Le résultat réel est visible dans [Actions](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml).
+Les deux compilations Android et Android TV ont déjà réussi sur un build de référence ; cela **ne garantit pas encore leur bon fonctionnement sur appareil réel**. Windows reste en attente de sa bibliothèque native. Le résultat réel est visible dans [Actions](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml).
 
 ## Attention aux préversions
 
