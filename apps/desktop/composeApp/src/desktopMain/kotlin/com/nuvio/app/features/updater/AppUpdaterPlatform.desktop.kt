@@ -13,6 +13,7 @@ import nuvio.composeapp.generated.resources.updates_empty_download_body
 import org.jetbrains.compose.resources.getString
 import java.io.File
 import java.io.FileOutputStream
+import java.util.zip.ZipFile
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -38,6 +39,15 @@ actual object AppUpdaterPlatform {
     private val currentOs: DesktopUpdaterOs = DesktopUpdaterOs.current()
     private val store = DesktopStorage.store(desktopUpdaterPreferencesName)
     actual val isDebugBuild: Boolean = false
+
+    private val isPortableWindows: Boolean by lazy {
+        if (currentOs != DesktopUpdaterOs.WINDOWS) false else {
+            val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+                ?: ProcessHandle.current().info().command().orElse(null)
+            launcher != null &&
+                File(launcher).parentFile?.resolve("Kovelyx.portable")?.isFile == true
+        }
+    }
     actual val hasSingleUpdateChannel: Boolean = true
 
     // Linux ships four package formats and the running app is the only place
@@ -62,7 +72,14 @@ actual object AppUpdaterPlatform {
     )
 
     actual val assetSelector: AppUpdateAssetSelector
-        get() = currentOs.assetSelector(linuxInstallMethod)
+        get() = if (isPortableWindows) {
+            AppUpdateAssetSelector(
+                fileExtensions = listOf(".zip"),
+                preferredNameFragments = listOf("Kovelyx-Windows-Portable-"),
+            )
+        } else {
+            currentOs.assetSelector(linuxInstallMethod)
+        }
 
     actual val currentVersionName: String = AppVersionConfig.DESKTOP_VERSION_NAME
 
@@ -159,8 +176,15 @@ actual object AppUpdaterPlatform {
         val updateFile = File(path)
         check(updateFile.exists()) { runBlocking { getString(Res.string.updates_downloaded_file_missing) } }
 
-        launchInstaller(updateFile)
-        scheduleAppExit()
+        val shouldExit = if (isPortableWindows) {
+            launchPortableUpdate(updateFile)
+            true
+        } else {
+            launchInstaller(updateFile)
+            currentOs == DesktopUpdaterOs.WINDOWS ||
+                (currentOs == DesktopUpdaterOs.LINUX && linuxInstallMethod == LinuxInstallMethod.APP_IMAGE)
+        }
+        if (shouldExit) scheduleAppExit()
     }
 
     private fun fetchReleaseChecksum(assetUrl: URI, assetName: String): String {
@@ -190,6 +214,41 @@ actual object AppUpdaterPlatform {
                 file.deleteRecursively()
             }
         }
+    }
+
+    private fun launchPortableUpdate(zipFile: File) {
+        check(zipFile.name.endsWith(".zip", ignoreCase = true)) {
+            "Archive de mise à jour portable invalide."
+        }
+        ZipFile(zipFile).use { archive ->
+            val names = archive.entries().asSequence().map { it.name }.toList()
+            check(names.any { it.endsWith("/Kovelyx.portable") } &&
+                names.any { it.endsWith("/Kovelyx.exe") } &&
+                names.any { it.contains("/runtime/") }) {
+                "Archive portable incomplète : mise à jour refusée."
+            }
+        }
+        val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+            ?: ProcessHandle.current().info().command().orElse(null)
+            ?: error("Lanceur Kovelyx introuvable.")
+        val installDir = File(launcher).parentFile
+            ?: error("Dossier portable introuvable.")
+        check(File(installDir, "Kovelyx.portable").isFile && installDir.canWrite()) {
+            "Ce dossier portable ne peut pas être mis à jour automatiquement."
+        }
+        val resource = AppUpdaterPlatform::class.java.getResourceAsStream(
+            "/updater/apply-portable-update.ps1",
+        ) ?: error("Script de mise à jour portable manquant.")
+        val script = File(updatesDir(), "apply-portable-update.ps1")
+        resource.use { input -> script.outputStream().use { output -> input.copyTo(output) } }
+        ProcessBuilder(
+            "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+            "-File", script.absolutePath,
+            "-ZipPath", zipFile.absolutePath,
+            "-InstallDir", installDir.absolutePath,
+            "-AppProcessId", ProcessHandle.current().pid().toString(),
+            "-LogPath", File(updatesDir(), "portable-update.log").absolutePath,
+        ).start()
     }
 
     private fun launchInstaller(updateFile: File) {
@@ -424,7 +483,7 @@ internal fun isOfficialKovelyxReleaseAsset(uri: URI, name: String): Boolean {
     return version.matches(Regex("v[0-9]+\\.[0-9]+\\.[0-9]+(?:-(alpha|beta|rc)(?:\\.[0-9]+)?)?")) &&
         remoteName == name &&
         name.startsWith("Kovelyx-") &&
-        listOf(".exe", ".msi", ".AppImage", ".deb", ".rpm").any {
+        listOf(".exe", ".msi", ".AppImage", ".deb", ".rpm", ".zip").any {
             name.endsWith(it, ignoreCase = true)
         }
 }

@@ -222,6 +222,8 @@ jobs:
           $exes = @(Get-ChildItem $root -Recurse -File -Filter 'Kovelyx.exe')
           if ($exes.Count -ne 1) { throw ('Un seul lanceur Kovelyx.exe attendu, obtenu : ' + $exes.Count) }
           $appRoot = $exes[0].Directory.FullName
+          # Marker exists ONLY in the portable ZIP, never in installed EXE/MSI.
+          'Kovelyx portable package' | Set-Content -Path (Join-Path $appRoot 'Kovelyx.portable') -Encoding Ascii
           foreach ($folder in @('app', 'runtime')) {
             if (-not (Test-Path (Join-Path $appRoot $folder))) {
               throw ('Image portable incomplète, dossier absent : ' + $folder)
@@ -234,7 +236,7 @@ jobs:
           $extract = Join-Path $env:RUNNER_TEMP 'kovelyx-portable-check'
           Expand-Archive $target $extract -Force
           $name = Split-Path $appRoot -Leaf
-          foreach ($required in @("$name/Kovelyx.exe", "$name/app", "$name/runtime")) {
+          foreach ($required in @("$name/Kovelyx.exe", "$name/app", "$name/runtime", "$name/Kovelyx.portable")) {
             if (-not (Test-Path (Join-Path $extract $required))) {
               throw ('Fichier ZIP incomplet : ' + $required)
             }
