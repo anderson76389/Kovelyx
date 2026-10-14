@@ -59,9 +59,9 @@ std::string send_request(const std::uint16_t port, const std::string& request) {
     std::size_t offset = 0;
     while (offset < request.size()) {
         const auto remaining = request.size() - offset;
-        const auto chunk = static_cast<int>(std::min(
+        const auto chunk = static_cast<int>((std::min)(
             remaining,
-            static_cast<std::size_t>(std::numeric_limits<int>::max())
+            static_cast<std::size_t>((std::numeric_limits<int>::max)())
         ));
 #if defined(_WIN32)
         const auto written = send(client, request.data() + offset, chunk, 0);
