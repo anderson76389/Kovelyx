@@ -273,8 +273,8 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
         Text(
             "Cet import remplacera les ${currentCount.size} collections actuellement présentes dans ce profil. " +
                 "Une sauvegarde JSON locale sera créée avant le remplacement." +
-                if (importKeys.isNotEmpty()) " Après confirmation, les paramètres compatibles seront également enregistrés dans ce profil." else "" +
-                if (addonUrls.isNotEmpty()) " ${addonUrls.size} extension(s) seront vérifiées et installées." else "",
+                (if (importKeys.isNotEmpty()) " Après confirmation, les paramètres compatibles seront également enregistrés dans ce profil." else "") +
+                (if (addonUrls.isNotEmpty()) " ${addonUrls.size} extension(s) seront vérifiées et installées." else ""),
             style = MaterialTheme.typography.bodyMedium,
         )
         errorMessage?.let { message ->
