@@ -40,17 +40,7 @@ internal object PublicMetadataFallback {
         return try {
             withTimeoutOrNull(TIMEOUT_MS) {
                 val payload = fetchAddonResponseText(url)
-                val meta = MetaDetailsParser.parse(payload)
-                val expectedId = id.trim().removePrefix("imdb:").substringBefore(':')
-                if (!meta.id.equals(expectedId, ignoreCase = true) ||
-                    meta.name.isBlank() ||
-                    meta.type.lowercase() !in setOf("movie", "series", "tv")
-                ) {
-                    log.w { "Public metadata returned a mismatched item" }
-                    null
-                } else {
-                    meta
-                }
+                parseMetadataPayload(payload, type, id)
             }
         } catch (exception: CancellationException) {
             throw exception
@@ -59,4 +49,21 @@ internal object PublicMetadataFallback {
             null
         }
     }
+    /** Parse separately to test provider responses without making network calls. */
+    internal fun parseMetadataPayload(payload: String, type: String, id: String): MetaDetails? {
+        val expectedUrl = buildMetadataUrl(type, id) ?: return null
+        val expectedId = expectedUrl.substringAfterLast('/').removeSuffix(".json")
+        val expectedType = if (type.lowercase() == "tv") "series" else type.lowercase()
+        val meta = MetaDetailsParser.parse(payload)
+        val actualType = if (meta.type.lowercase() == "tv") "series" else meta.type.lowercase()
+        if (!meta.id.equals(expectedId, ignoreCase = true) ||
+            meta.name.isBlank() ||
+            actualType != expectedType
+        ) {
+            log.w { "Public metadata returned a mismatched item" }
+            return null
+        }
+        return meta
+    }
+
 }
