@@ -269,10 +269,10 @@ Fichiers texte examinés : **1779** ; références statiques à Nuvio/NuvioMedia
 | `backend.example.com` | 12 |
 | `example.invalid` | 11 |
 | `pm` | 9 |
+| `trakt.tv` | 9 |
 | `img` | 9 |
 | `image.tmdb.org` | 9 |
 | `postersplus.example.com` | 9 |
-| `trakt.tv` | 8 |
 | `api.mdblist.com` | 8 |
 | `catalog.example` | 8 |
 | `media.w3.org` | 7 |

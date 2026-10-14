@@ -329,7 +329,7 @@ Fichiers inspectés : 4506
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7818 lignes.
+- apps/desktop : 7819 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
