@@ -290,6 +290,80 @@ jobs:
           }
           '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
 
+      - name: Vérifier une installation MSI réelle sur Windows
+        if: steps.native.outputs.available == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $msis = @(Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries' -Filter '*.msi' -File -Recurse)
+          if ($msis.Count -ne 1) { throw 'MSI de test introuvable.' }
+          $msi = $msis[0]
+          $installer = New-Object -ComObject WindowsInstaller.Installer
+          $database = $installer.OpenDatabase($msi.FullName, 0)
+          function Read-MsiValue([string]$name) {
+            $view = $database.OpenView("SELECT Value FROM Property WHERE Property = '$name'")
+            [void]$view.Execute()
+            $record = $view.Fetch()
+            $value = if ($null -ne $record) { $record.StringData(1) } else { '' }
+            [void]$view.Close()
+            return [string]$value
+          }
+          $product = Read-MsiValue 'ProductCode'
+          $version = Read-MsiValue 'ProductVersion'
+          if ($product -notmatch '^{[0-9A-Fa-f-]{36}}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-test-reports
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Enregistrer le MSI
+        if: steps.native.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-installers-experimental
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+ -or $version -notmatch '^[0-9]+[.][0-9]+[.][0-9]+
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-test-reports
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Enregistrer le MSI
+        if: steps.native.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-installers-experimental
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
+) {
+            throw 'Code produit ou version MSI invalide.'
+          }
+          $log = Join-Path $env:RUNNER_TEMP 'kovelyx-msi-smoke.log'
+          try {
+            $args = '/i "{0}" /qn /norestart /L*v "{1}"' -f $msi.FullName, $log
+            $installation = Start-Process -FilePath (Join-Path $env:WINDIR 'System32\msiexec.exe') -ArgumentList $args -PassThru -Wait
+            if ($installation.ExitCode -ne 0 -and $installation.ExitCode -ne 3010) {
+              throw ('Échec installation MSI (code ' + $installation.ExitCode + ').')
+            }
+            if ($installer.ProductState($product) -ne 5) { throw 'MSI non enregistré comme installé.' }
+            $observed = [string]$installer.ProductInfo($product, 'VersionString')
+            if ($observed -ne $version) { throw ('Version MSI installée incorrecte : ' + $observed) }
+            ('### Installation Windows vérifiée : Kovelyx ' + $observed) >> $env:GITHUB_STEP_SUMMARY
+          }
+          finally {
+            if ($installer.ProductState($product) -eq 5) {
+              $removal = Start-Process -FilePath (Join-Path $env:WINDIR 'System32\msiexec.exe') -ArgumentList ('/x ' + $product + ' /qn /norestart') -PassThru -Wait
+              if ($removal.ExitCode -ne 0 -and $removal.ExitCode -ne 3010) {
+                Write-Warning ('MSI de test impossible à supprimer, code ' + $removal.ExitCode)
+              }
+            }
+          }
+
       - name: Enregistrer les rapports des tests Windows
         if: always()
         uses: actions/upload-artifact@v4
