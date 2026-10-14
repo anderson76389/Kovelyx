@@ -157,7 +157,7 @@ Fichiers inspectés : 4501
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61 : parseSimklAuthCallback("nuvio://auth/trakt
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:289 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:294 : value.startsWith("nuvio://", ignoreCase = true) //
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
