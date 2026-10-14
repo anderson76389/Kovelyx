@@ -111,11 +111,9 @@ internal object AppUpdaterRepository {
                 json.decodeFromString<List<GitHubReleaseDto>>(responseBody)
         }
         val eligibleReleases = ReleaseSelector.eligibleReleases(releases, channel)
-        val releasesToCheck = if (channel == UpdateChannel.ALL_RELEASES) {
-            eligibleReleases.take(1)
-        } else {
-            eligibleReleases
-        }
+        // A repository release may be published with Linux assets before Windows
+        // (or vice versa). Scan to the first release compatible with this device.
+        val releasesToCheck = eligibleReleases
         return releasesToCheck.firstNotNullOfOrNull { release ->
             val asset = selectBestUpdateAsset(
                 assets = release.assets.map { candidate ->

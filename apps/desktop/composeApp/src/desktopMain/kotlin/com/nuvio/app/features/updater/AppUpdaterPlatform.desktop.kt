@@ -13,10 +13,12 @@ import nuvio.composeapp.generated.resources.updates_empty_download_body
 import org.jetbrains.compose.resources.getString
 import java.io.File
 import java.io.FileOutputStream
+import java.util.zip.ZipFile
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.security.MessageDigest
 import java.time.Duration
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -37,6 +39,15 @@ actual object AppUpdaterPlatform {
     private val currentOs: DesktopUpdaterOs = DesktopUpdaterOs.current()
     private val store = DesktopStorage.store(desktopUpdaterPreferencesName)
     actual val isDebugBuild: Boolean = false
+
+    private val isPortableWindows: Boolean by lazy {
+        if (currentOs != DesktopUpdaterOs.WINDOWS) false else {
+            val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+                ?: ProcessHandle.current().info().command().orElse(null)
+            launcher != null &&
+                File(launcher).parentFile?.resolve("Kovelyx.portable")?.isFile == true
+        }
+    }
     actual val hasSingleUpdateChannel: Boolean = true
 
     // Linux ships four package formats and the running app is the only place
@@ -61,7 +72,14 @@ actual object AppUpdaterPlatform {
     )
 
     actual val assetSelector: AppUpdateAssetSelector
-        get() = currentOs.assetSelector(linuxInstallMethod)
+        get() = if (isPortableWindows) {
+            AppUpdateAssetSelector(
+                fileExtensions = listOf(".zip"),
+                preferredNameFragments = listOf("Kovelyx-Windows-Portable-"),
+            )
+        } else {
+            currentOs.assetSelector(linuxInstallMethod)
+        }
 
     actual val currentVersionName: String = AppVersionConfig.DESKTOP_VERSION_NAME
 
@@ -94,8 +112,15 @@ actual object AppUpdaterPlatform {
             val destination = File(updatesDir(), safeName)
             val tempFile = File(updatesDir(), "$safeName.part")
 
+            val releaseAsset = URI(assetUrl)
+            check(isOfficialKovelyxReleaseAsset(releaseAsset, safeName)) {
+                "Le fichier de mise à jour ne provient pas des Releases officielles de Kovelyx."
+            }
+            val expectedSha256 = fetchReleaseChecksum(releaseAsset, safeName)
+            val digest = MessageDigest.getInstance("SHA-256")
             val request = HttpRequest.newBuilder()
-                .uri(URI(assetUrl))
+                .uri(releaseAsset)
+                .timeout(Duration.ofMinutes(10))
                 .GET()
                 .build()
             val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofInputStream())
@@ -115,6 +140,7 @@ actual object AppUpdaterPlatform {
                             val read = input.read(buffer)
                             if (read <= 0) break
                             output.write(buffer, 0, read)
+                            digest.update(buffer, 0, read)
                             downloadedBytes += read.toLong()
                             onProgress(downloadedBytes, totalBytes)
                         }
@@ -124,6 +150,10 @@ actual object AppUpdaterPlatform {
 
                 if (totalBytes != null && downloadedBytes != totalBytes) {
                     error(runBlocking { getString(Res.string.updates_download_failed) })
+                }
+                val checksum = digest.digest().joinToString("") { "%02x".format(it) }
+                check(checksum.equals(expectedSha256, ignoreCase = true)) {
+                    "Empreinte SHA-256 invalide : mise à jour annulée."
                 }
 
                 if (!tempFile.renameTo(destination)) {
@@ -146,8 +176,33 @@ actual object AppUpdaterPlatform {
         val updateFile = File(path)
         check(updateFile.exists()) { runBlocking { getString(Res.string.updates_downloaded_file_missing) } }
 
-        launchInstaller(updateFile)
-        scheduleAppExit()
+        val shouldExit = if (isPortableWindows) {
+            launchPortableUpdate(updateFile)
+            true
+        } else {
+            launchInstaller(updateFile)
+            currentOs == DesktopUpdaterOs.WINDOWS ||
+                (currentOs == DesktopUpdaterOs.LINUX && linuxInstallMethod == LinuxInstallMethod.APP_IMAGE)
+        }
+        if (shouldExit) scheduleAppExit()
+    }
+
+    private fun fetchReleaseChecksum(assetUrl: URI, assetName: String): String {
+        val request = HttpRequest.newBuilder()
+            .uri(URI(assetUrl.toASCIIString() + ".sha256"))
+            .timeout(Duration.ofSeconds(30))
+            .GET()
+            .build()
+        val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        check(response.statusCode() == 200) { "Empreinte de mise à jour indisponible sur GitHub." }
+        val line = response.body().trim().lineSequence().firstOrNull().orEmpty()
+        val match = Regex("^([A-Fa-f0-9]{64})\\s+\\*?(.*)$").matchEntire(line)
+            ?: error("Fichier de vérification de mise à jour invalide.")
+        val checksumFilename = match.groupValues[2].removePrefix("./")
+        check(checksumFilename == assetName) {
+            "La vérification SHA-256 ne correspond pas au fichier de mise à jour."
+        }
+        return match.groupValues[1]
     }
 
     private fun updatesDir(): File =
@@ -159,6 +214,41 @@ actual object AppUpdaterPlatform {
                 file.deleteRecursively()
             }
         }
+    }
+
+    private fun launchPortableUpdate(zipFile: File) {
+        check(zipFile.name.endsWith(".zip", ignoreCase = true)) {
+            "Archive de mise à jour portable invalide."
+        }
+        ZipFile(zipFile).use { archive ->
+            val names = archive.entries().asSequence().map { it.name }.toList()
+            check(names.any { it.endsWith("/Kovelyx.portable") } &&
+                names.any { it.endsWith("/Kovelyx.exe") } &&
+                names.any { it.contains("/runtime/") }) {
+                "Archive portable incomplète : mise à jour refusée."
+            }
+        }
+        val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+            ?: ProcessHandle.current().info().command().orElse(null)
+            ?: error("Lanceur Kovelyx introuvable.")
+        val installDir = File(launcher).parentFile
+            ?: error("Dossier portable introuvable.")
+        check(File(installDir, "Kovelyx.portable").isFile && installDir.canWrite()) {
+            "Ce dossier portable ne peut pas être mis à jour automatiquement."
+        }
+        val resource = AppUpdaterPlatform::class.java.getResourceAsStream(
+            "/updater/apply-portable-update.ps1",
+        ) ?: error("Script de mise à jour portable manquant.")
+        val script = File(updatesDir(), "apply-portable-update.ps1")
+        resource.use { input -> script.outputStream().use { output -> input.copyTo(output) } }
+        ProcessBuilder(
+            "powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+            "-File", script.absolutePath,
+            "-ZipPath", zipFile.absolutePath,
+            "-InstallDir", installDir.absolutePath,
+            "-AppProcessId", ProcessHandle.current().pid().toString(),
+            "-LogPath", File(updatesDir(), "portable-update.log").absolutePath,
+        ).start()
     }
 
     private fun launchInstaller(updateFile: File) {
@@ -194,8 +284,9 @@ private enum class DesktopUpdaterOs {
         val archFragments = desktopArchitectureFragments()
         return when (this) {
             WINDOWS -> AppUpdateAssetSelector(
-                fileExtensions = listOf(".msi", ".exe"),
-                preferredNameFragments = archFragments + listOf("windows", "win"),
+                // Prefer the single-file installer; never accidentally choose Linux/ARM or checksum files.
+                fileExtensions = listOf(".exe", ".msi"),
+                preferredNameFragments = listOf("Kovelyx-Windows-Setup-") + archFragments + listOf("windows"),
                 fallbackNameFragments = listOf("universal", "all"),
             )
             MACOS -> AppUpdateAssetSelector(
@@ -357,15 +448,42 @@ internal fun appImageReplaceScript(
 ): String {
     val downloaded = singleQuote(downloadedPath)
     val target = singleQuote(appImagePath)
+    val stage = singleQuote("$appImagePath.kovelyx-staged-$currentPid")
+    val backup = singleQuote("$appImagePath.kovelyx-previous")
     return buildString {
+        // Stage an executable in the SAME folder as the target for atomic rename.
+        // The existing AppImage remains intact if copying or renaming fails.
+        append("if cp -f -- $downloaded $stage && chmod +x -- $stage; then ")
         append("i=0; ")
         append("while [ \$i -lt $appImageExitWaitTicks ] && kill -0 $currentPid 2>/dev/null; do ")
         append("sleep 0.1; i=\$((i+1)); ")
         append("done; ")
-        append("if cp -f -- $downloaded $target; then ")
-        append("chmod +x -- $target; rm -f -- $downloaded; exec $target; ")
-        append("else xdg-open $downloaded; fi")
+        append("if mv -f -- $target $backup; then ")
+        append("if mv -f -- $stage $target; then rm -f -- $downloaded; exec $target; ")
+        append("else mv -f -- $backup $target; xdg-open $downloaded; fi; ")
+        append("else rm -f -- $stage; xdg-open $downloaded; fi; ")
+        append("else rm -f -- $stage; xdg-open $downloaded; fi")
     }
 }
 
 private fun singleQuote(value: String): String = "'" + value.replace("'", "'\\''") + "'"
+
+
+internal fun isOfficialKovelyxReleaseAsset(uri: URI, name: String): Boolean {
+    if (uri.scheme != "https" || uri.host != "github.com" || uri.userInfo != null ||
+        uri.port != -1 || uri.rawQuery != null || uri.rawFragment != null
+    ) return false
+    val prefix = "/anderson76389/Kovelyx/releases/download/"
+    val path = uri.path ?: return false
+    if (!path.startsWith(prefix)) return false
+    val remainder = path.removePrefix(prefix)
+    if (remainder.count { it == '/' } != 1) return false
+    val version = remainder.substringBefore('/')
+    val remoteName = remainder.substringAfter('/')
+    return version.matches(Regex("v[0-9]+\\.[0-9]+\\.[0-9]+(?:-(alpha|beta|rc)(?:\\.[0-9]+)?)?")) &&
+        remoteName == name &&
+        name.startsWith("Kovelyx-") &&
+        listOf(".exe", ".msi", ".AppImage", ".deb", ".rpm", ".zip").any {
+            name.endsWith(it, ignoreCase = true)
+        }
+}

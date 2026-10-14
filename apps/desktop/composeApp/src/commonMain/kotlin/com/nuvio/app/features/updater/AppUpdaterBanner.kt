@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -93,6 +94,12 @@ fun AppUpdaterHost(
 
     LaunchedEffect(controller) {
         controller.ensureAutoCheckStarted()
+        // Keep a long-running desktop session informed of releases published later.
+        // Never download or install anything without a user click.
+        while (true) {
+            delay(6 * 60 * 60 * 1000L)
+            controller.checkForUpdates(force = false, showNoUpdateFeedback = false)
+        }
     }
     LaunchedEffect(state.update?.tag) {
         showReleaseNotes = false
