@@ -7,12 +7,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.nuvio.app.core.storage.DesktopStorage
 import com.nuvio.app.core.ui.DialogButton
 import com.nuvio.app.core.ui.DialogButtons
 import com.nuvio.app.core.ui.DialogButtonStyle
 import com.nuvio.app.core.ui.DialogSurface
+import com.nuvio.app.features.addons.AddonRepository
+import com.nuvio.app.features.addons.AddAddonResult
 import com.nuvio.app.features.collection.CollectionRepository
 import com.nuvio.app.core.poster.CustomPosterUrlRepository
 import com.nuvio.app.features.tmdb.TmdbSettingsRepository
@@ -22,6 +25,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.coroutines.launch
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.sun.net.httpserver.HttpExchange
 import com.sun.net.httpserver.HttpServer
@@ -88,6 +92,23 @@ internal object DesktopCollectionImportBridge {
             theme.takeIf { it in setOf("t0-free-rpdb", "t0-free-rpdb-blocks", "t0-free-rpdb-rounded-blocks") }
         } ?: return null
         return "https://api.ratingposterdb.com/$token/imdb/poster-default/{imdb_id}.jpg"
+    }
+
+    /** Extensions configurées par l'utilisateur : validation stricte avant tout accès réseau. */
+    internal fun extractAddonManifests(payload: String): List<String> {
+        val root = Json.parseToJsonElement(payload) as? JsonObject ?: return emptyList()
+        val settings = root["settings"] as? JsonObject ?: return emptyList()
+        val manifests = settings["addonManifests"] as? JsonArray ?: return emptyList()
+        require(manifests.size <= 15) { "Trop d'extensions (maximum 15)" }
+        return manifests.map { item ->
+            val url = (item as? JsonPrimitive)?.content ?: throw IllegalArgumentException("Manifest d'extension invalide")
+            val parsed = URL(url)
+            require(url.length <= 2048 && parsed.protocol.equals("https", true) &&
+                parsed.userInfo == null && parsed.path.endsWith("/manifest.json")) {
+                "Adresse d'extension invalide : HTTPS et manifest.json requis"
+            }
+            url
+        }.distinct()
     }
 
     @Synchronized fun start() {
@@ -235,19 +256,25 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     val collectionJson = remember(json) { DesktopCollectionImportBridge.extractCollectionJson(json).orEmpty() }
     val importKeys = remember(json) { DesktopCollectionImportBridge.extractSettings(json) }
     val rpdbPattern = remember(json) { DesktopCollectionImportBridge.rpdbPosterPattern(importKeys) }
+    val addonResult = remember(json) { runCatching { DesktopCollectionImportBridge.extractAddonManifests(json) } }
+    val addonUrls = addonResult.getOrDefault(emptyList())
+    val scope = rememberCoroutineScope()
 
     var errorMessage by remember(json) { mutableStateOf<String?>(null) }
+    var installing by remember(json) { mutableStateOf(false) }
+    var completed by remember(json) { mutableStateOf(false) }
     val currentCount by CollectionRepository.collections.collectAsState()
 
     DialogSurface(
-        onDismissRequest = { DesktopCollectionImportBridge.discard(json) },
+        onDismissRequest = { if (!installing) DesktopCollectionImportBridge.discard(json) },
         title = "Importer depuis Ma-Collection",
         message = "Le site Ma-Collection souhaite installer votre sélection dans le profil « ${activeProfile.name} ».",
     ) {
         Text(
             "Cet import remplacera les ${currentCount.size} collections actuellement présentes dans ce profil. " +
                 "Une sauvegarde JSON locale sera créée avant le remplacement." +
-                if (importKeys.isNotEmpty()) " Après confirmation, les paramètres compatibles seront également enregistrés dans ce profil." else "",
+                if (importKeys.isNotEmpty()) " Après confirmation, les paramètres compatibles seront également enregistrés dans ce profil." else "" +
+                if (addonUrls.isNotEmpty()) " ${addonUrls.size} extension(s) seront vérifiées et installées." else "",
             style = MaterialTheme.typography.bodyMedium,
         )
         errorMessage?.let { message ->
@@ -256,13 +283,19 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
         DialogButtons {
             DialogButton(
                 text = "Annuler",
-                onClick = { DesktopCollectionImportBridge.discard(json) },
+                onClick = { if (!installing) DesktopCollectionImportBridge.discard(json) },
             )
             DialogButton(
-                text = "Importer dans Kovelyx",
+                text = if (installing) "Installation des extensions…" else if (completed) "Terminer" else "Importer dans Kovelyx",
                 style = DialogButtonStyle.Primary,
                 onClick = {
+                    if (installing) return@DialogButton
+                    if (completed) {
+                        DesktopCollectionImportBridge.discard(json)
+                        return@DialogButton
+                    }
                     try {
+                        addonResult.getOrThrow()
                         if (importKeys["posterProvider"] == "rpdb" && rpdbPattern == null) throw IllegalArgumentException("Configuration RPDB invalide")
                         val validation = CollectionRepository.validateJson(collectionJson)
                         if (!validation.valid) throw IllegalArgumentException(validation.error ?: "JSON invalide")
@@ -289,7 +322,33 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                             DebridSettingsRepository.setEnabled(true)
                         }
                         rpdbPattern?.let { CustomPosterUrlRepository.setPattern(it) }
-                        DesktopCollectionImportBridge.discard(json)
+                        if (addonUrls.isEmpty()) {
+                            DesktopCollectionImportBridge.discard(json)
+                        } else {
+                            installing = true
+                            scope.launch {
+                                var failures = 0
+                                try {
+                                    AddonRepository.initialize()
+                                    for (url in addonUrls) {
+                                        when (AddonRepository.addAddon(url)) {
+                                            is AddAddonResult.Success -> Unit
+                                            is AddAddonResult.Error -> failures++
+                                        }
+                                    }
+                                } catch (error: Exception) {
+                                    failures++
+                                } finally {
+                                    installing = false
+                                    completed = true
+                                }
+                                if (failures == 0) {
+                                    DesktopCollectionImportBridge.discard(json)
+                                } else {
+                                    errorMessage = "Catalogues et réglages importés, mais $failures extension(s) n'ont pas été installées. Vérifiez leurs manifests dans les extensions Kovelyx, puis cliquez sur Terminer."
+                                }
+                            }
+                        }
                     } catch (error: Exception) {
                         errorMessage = error.message ?: "Import impossible : vos collections restent inchangées."
                     }
