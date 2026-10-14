@@ -69,6 +69,7 @@ object TmdbSettingsRepository {
         language = normalized
         publish()
         TmdbSettingsStorage.saveLanguage(normalized)
+        invalidateMetadata()
     }
 
     fun setUseTrailers(value: Boolean) = setBoolean(
