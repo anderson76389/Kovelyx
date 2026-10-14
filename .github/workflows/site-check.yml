@@ -50,7 +50,7 @@ jobs:
               if link.startswith('#'):
                   assert link[1:] in page.ids, 'Ancre cassée : ' + link
               elif link.startswith('./'):
-                  assert (root / link[2:]).is_file(), 'Fichier local absent : ' + link
+                  assert link == './' or (root / link[2:]).is_file(), 'Fichier local absent : ' + link
           js = (root / 'site.js').read_text(encoding='utf-8')
           assert 'api.github.com/repos/' in js, 'Intégration GitHub Releases absente'
           assert 'browser_download_url' in js, 'Lien de téléchargement vérifié manquant'
