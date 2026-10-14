@@ -1,6 +1,17 @@
 name: Publier APK Android Kovelyx de test
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-android-debug.yml'
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: "Identifiant de la compilation Android contenant l'APK"
+        required: false
+        default: '38637708803'
+        type: string
   workflow_run:
     workflows:
       - "Compiler Kovelyx (APK et diagnostic Windows)"
@@ -18,7 +29,7 @@ concurrency:
 jobs:
   publish:
     name: Vérifier et publier uniquement l'APK mobile de test
-    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion != 'cancelled' }}
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion != 'cancelled') }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -26,10 +37,15 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          BUILD_ID: ${{ github.event.workflow_run.id }}
-          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          BUILD_ID: ${{ github.event.workflow_run.id || inputs.build_run_id || '38637708803' }}
         run: |
           set -euo pipefail
+          [[ "$BUILD_ID" =~ ^[0-9]+$ ]] || { echo "::error::Identifiant de compilation invalide"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID" > /tmp/kv-run.json
+          jq -e --arg repo "$GITHUB_REPOSITORY" '.head_repository.full_name == $repo and .head_branch == "main" and .status == "completed" and .name == "Compiler Kovelyx (APK et diagnostic Windows)"' /tmp/kv-run.json >/dev/null || {
+            echo "::error::La compilation source n'est pas vérifiée"; exit 1;
+          }
+          SOURCE_SHA="$(jq -r '.head_sha' /tmp/kv-run.json)"
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] || exit 1
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
           jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || {
@@ -70,7 +86,7 @@ jobs:
       - name: Créer la Release expérimentale
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
