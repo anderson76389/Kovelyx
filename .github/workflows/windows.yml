@@ -8,6 +8,7 @@ on:
       - '!apps/desktop/**/*.md'
       - 'vendor/engine/**'
       - 'scripts/generate-windows-icon.py'
+      - 'scripts/generate-compose-brand.py'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
 
@@ -59,7 +60,10 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
           python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+          python scripts/generate-compose-brand.py --project apps/desktop
+          if ($LASTEXITCODE -ne 0) { throw 'Génération des logos Kovelyx en échec' }
           if (-not (Test-Path 'apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.ico')) { throw 'ICO Kovelyx manquant' }
+          if (-not (Test-Path 'apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark_original.png')) { throw 'Wordmark Kovelyx manquant' }
       - name: Restaurer la DLL MPV archivée dans Kovelyx
         shell: pwsh
         env:

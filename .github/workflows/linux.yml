@@ -8,6 +8,7 @@ on:
       - '!apps/desktop/**/*.md'
       - 'vendor/engine/**'
       - '.github/workflows/linux.yml'
+      - 'scripts/generate-compose-brand.py'
   workflow_dispatch:
 
 permissions:
@@ -46,6 +47,8 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
           python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+          python scripts/generate-compose-brand.py --project apps/desktop
+          test -s apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark_original.png
           test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
 
       - name: Dépendances natives Linux

@@ -256,6 +256,8 @@ private fun TraktProviderCard(
             uiState.mode == TraktConnectionMode.CONNECTED
         },
         errorMessage = uiState.errorMessage,
+        websiteLabel = "Visiter Trakt",
+        websiteUrl = "https://trakt.tv",
         onConnectRequested = TraktAuthRepository::onConnectRequested,
         onResumeAuthorization = {
             TraktAuthRepository.pendingAuthorizationUrl()

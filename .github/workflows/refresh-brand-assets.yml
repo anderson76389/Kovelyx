@@ -1,0 +1,66 @@
+name: Générer et sauvegarder les ressources Kovelyx PC
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate-compose-brand.py'
+      - '.github/workflows/refresh-brand-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kovelyx-brand-assets
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Installer Pillow
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Générer toutes les variantes depuis les formes Kovelyx
+        run: python scripts/generate-compose-brand.py --project apps/desktop
+      - name: Vérifier les ressources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+          base = Path('apps/desktop/composeApp/src/commonMain/composeResources/drawable')
+          icons = Path('apps/desktop/composeApp/src/desktopMain/resources/icons')
+          names = ('original','arctic_blue','emerald','rose_gold','copper','graphite')
+          for name in names:
+              for suffix in (f'app_icon_{name}.png', f'app_icon_{name}_transparent.png', f'app_logo_wordmark_{name}.png'):
+                  p = base/suffix
+                  assert p.stat().st_size > 2048, f'{p} absent ou vide'
+                  with Image.open(p) as im:
+                      assert im.mode == 'RGBA' and im.width >= 512
+              for suffix in (f'app-icon-{name}-transparent.png',f'app-icon-{name}-transparent.ico'):
+                  assert (icons/suffix).stat().st_size > 1024
+          assert (base/'app_logo_wordmark_gold.png').stat().st_size > 2048
+          print('20 PNG et 12 variantes Windows vérifiés')
+          PY
+      - name: Conserver les vrais logos dans le dépôt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Kovelyx CI"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A --             apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_icon_*.png             apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark*.png             apps/desktop/composeApp/src/desktopMain/resources/icons/
+          if git diff --cached --quiet; then
+            echo 'Identité Kovelyx déjà à jour.'
+          else
+            git commit -m "assets(pc): replace upstream icon artwork with Kovelyx variants"
+            git push origin HEAD:main
+          fi
