@@ -1340,7 +1340,7 @@ compose.desktop {
                 menuGroup = "Kovelyx"
             }
             linux {
-                iconFile.set(project.file("src/desktopMain/resources/icons/nuvio-app-icon-transparent.png"))
+                iconFile.set(project.file("src/desktopMain/resources/icons/kovelyx.png"))
                 debMaintainer = "contact@nuvio.tv"
                 shortcut = true
                 menuGroup = "Kovelyx"
@@ -1560,7 +1560,7 @@ if (isLinuxHost) {
             ?: System.getenv("APPIMAGE_WEBSITE_URL")?.takeIf { it.isNotBlank() }
 
         val distributionName = if (release) "main-release" else "main"
-        val appImageName = "Nuvio-Linux-$linuxAppImageArch-$desktopReleaseVersionName.AppImage"
+        val appImageName = "Kovelyx-Linux-$linuxAppImageArch-$desktopReleaseVersionName.AppImage"
         val outputAppImage = layout.buildDirectory
             .dir("compose/binaries/$distributionName/app")
             .get()

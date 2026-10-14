@@ -1,0 +1,130 @@
+name: Kovelyx Linux - AppImage PC x86-64
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - '!apps/desktop/**/*.md'
+      - 'vendor/engine/**'
+      - '.github/workflows/linux.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-linux-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  appimage:
+    name: Compiler Kovelyx Linux AppImage
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - name: Sources Kovelyx
+        uses: actions/checkout@v4
+
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Python pour créer le vrai logo Kovelyx
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Créer le PNG du lanceur Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
+          python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+          test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
+
+      - name: Dépendances natives Linux
+        working-directory: apps/desktop
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash ./scripts/linux/install-desktop-build-dependencies.sh
+          pkg-config --exists mpv webkit2gtk-4.1 gtk+-3.0 x11 xcomposite xext
+          test -s composeApp/src/desktopMain/native/linux/engine/libnuvio_engine.so
+          # The name of the upstream native library is an ABI concern, not a
+          # network dependency. Avoid renaming it without updating JNI callers.
+
+      - name: Vérifier appimagetool épinglé par SHA256
+        shell: bash
+        env:
+          APPIMAGETOOL_VERSION: '1.9.1'
+          APPIMAGETOOL_SHA256: 'ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0'
+        run: |
+          set -euo pipefail
+          dest="$RUNNER_TEMP/appimagetool-x86_64.AppImage"
+          curl --fail --location --retry 3 --silent --show-error \
+            "https://github.com/AppImage/appimagetool/releases/download/$APPIMAGETOOL_VERSION/appimagetool-x86_64.AppImage" \
+            --output "$dest"
+          echo "$APPIMAGETOOL_SHA256  $dest" | sha256sum --check --strict
+          chmod +x "$dest"
+          echo "APPIMAGETOOL=$dest" >> "$GITHUB_ENV"
+
+      - name: Compiler AppImage avec son environnement Java
+        working-directory: apps/desktop
+        shell: bash
+        env:
+          APPIMAGE_WEBSITE_URL: https://github.com/anderson76389/Kovelyx
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :composeApp:packageReleaseAppImage \
+            --no-daemon --max-workers=2 --stacktrace \
+            "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m"
+
+      - name: Vérifier le fichier Linux monobloc
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          mapfile -d '' -t found < <(find apps/desktop/composeApp/build/compose/release-appimages \
+            -maxdepth 1 -type f -name 'Kovelyx-Linux-x86_64-*.AppImage' -print0)
+          if [[ "${#found[@]}" -ne 1 ]]; then
+            echo "::error::Un seul fichier AppImage Kovelyx est attendu; trouvé: ${#found[@]}"
+            exit 1
+          fi
+          if [[ ! -x "${found[0]}" ]]; then
+            echo "::error::AppImage non exécutable"
+            exit 1
+          fi
+          if [[ "$(stat -c %s "${found[0]}")" -lt 1000000 ]]; then
+            echo "::error::AppImage anormalement petit"
+            exit 1
+          fi
+          file "${found[0]}"
+          destination="dist/Kovelyx-Linux-x86_64-$GITHUB_SHA.AppImage"
+          cp -- "${found[0]}" "$destination"
+          chmod +x "$destination"
+          echo "#### Contenu de l'AppImage" >> "$GITHUB_STEP_SUMMARY"
+          test_dir="$RUNNER_TEMP/kovelyx-appimage-extract"
+          mkdir -p "$test_dir"
+          (cd "$test_dir" && "$GITHUB_WORKSPACE/$destination" --appimage-extract >/dev/null)
+          test -x "$test_dir/squashfs-root/AppRun"
+          test -x "$test_dir/squashfs-root/bin/Kovelyx"
+          test -d "$test_dir/squashfs-root/lib"
+          test -s "$test_dir/squashfs-root/Kovelyx.png"
+          (cd dist && sha256sum "$(basename "$destination")" > "$(basename "$destination").sha256")
+          echo "AppImage x86-64 construite et vérifiée : $(basename "$destination")" >> "$GITHUB_STEP_SUMMARY"
+          echo "Attention : validation sur plusieurs distributions Linux nécessaire." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enregistrer la version Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Linux-AppImage-experimental
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
