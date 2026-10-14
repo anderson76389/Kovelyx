@@ -37,6 +37,14 @@ Les artefacts Actions ne sont pas des Releases publiques et **peuvent expirer**.
 
 Les photos personnelles sont copiées dans `%APPDATA%\Kovelyx\profile-media` et ne sont pas partagées automatiquement avec un compte en ligne.
 
+## Connexion simplifiée et métadonnées en français
+
+**Sur Kovelyx PC, SIMKL n'est plus proposé dans la connexion ni dans les choix des sources de suivi.** Les anciennes données sont conservées sur le disque pour éviter toute perte.
+
+**Trakt et MDBList :** les boutons de connexion peuvent ouvrir leur page d'autorisation dans le navigateur. Une application OAuth **Kovelyx** doit cependant être enregistrée auprès de ces services pour obtenir un identifiant d'application valide. Tant que Kovelyx ne dispose pas d'un identifiant public officiellement enregistré, une configuration initiale reste nécessaire via **Configurer les clés Trakt et MDBList**. Cela n'est **pas** le mot de passe de l'utilisateur : on ne peut pas remplacer ces identifiants par ceux d'une autre application. Une fois configuré, un clic sur **Connecter Trakt** ouvre la page d'activation après réception du code. MDBList ouvre sa page de validation quand il retourne une URL de confirmation.
+
+**Descriptions des films et séries :** les nouvelles installations Windows utilisent désormais `fr-FR` comme langue de métadonnées TMDB. Les anciens profils en anglais sont migrés une seule fois ; modifier la langue ensuite reste possible. Dès qu'une clé TMDB valable est renseignée dans **Paramètres → TMDB**, l'enrichissement est activé sur PC et les fiches sont rechargées lors des changements de langue ou de clé. Cela permet de remplacer les résumés anglais provenant de certaines extensions par la description française TMDB **quand TMDB en possède une**. Si aucune traduction française n'existe, ou si l'extension ne fournit pas d'identifiant TMDB/IMDb exploitable, le résumé d'origine peut encore s'afficher. Aucun texte n'est inventé ou traduit automatiquement.
+
 ## Configurer Trakt et MDBList sur Windows
 
 Dans **Paramètres → Suivi → Configurer les clés Trakt et MDBList**, renseignez les identifiants OAuth de vos propres applications :
