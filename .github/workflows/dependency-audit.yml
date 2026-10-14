@@ -7,6 +7,7 @@ on:
       - '.github/workflows/dependency-audit.yml'
       - 'scripts/audit-dependencies.py'
       - 'scripts/audit-nuvio.py'
+      - 'apps/**'
   workflow_dispatch:
 
 permissions:
