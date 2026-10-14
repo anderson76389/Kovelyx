@@ -52,8 +52,8 @@ internal fun officialConfiguration() = ServerConfiguration(
     backendUrl = SupabaseConfig.URL.trim().trimEnd('/'),
     publishableKey = SupabaseConfig.ANON_KEY.trim(),
     capabilities = ServerCapabilities(
-        emailPasswordAuth = true,
-        tvLogin = true,
+        emailPasswordAuth = SupabaseConfig.URL.isNotBlank() && SupabaseConfig.ANON_KEY.isNotBlank(),
+        tvLogin = false,
     ),
     isCustom = false,
     fallbackBackendUrl = SupabaseConfig.FALLBACK_URL.trim().trimEnd('/').takeIf { it.isNotBlank() },

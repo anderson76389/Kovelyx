@@ -1,55 +1,24 @@
-<div align="center">
+# Kovelyx — Android (préversion)
 
-  <img src="https://nuvio.tv/assets/nuvio-app-logo-wordmark.webp" alt="Nuvio" width="320" />
+Version Android mobile de **Kovelyx** issue du même dépôt GitHub que Windows et Android TV.
 
-  <p>
-    A free, open-source media app for your phone, your desktop, and the TV you already own.
-    <br />
-    Bring your own sources. Nuvio turns them into a library with artwork, ratings, subtitles, and your place saved on every screen.
-  </p>
+- **Dépôt du projet :** https://github.com/anderson76389/Kovelyx
+- **Téléchargements et versions expérimentales :** https://github.com/anderson76389/Kovelyx/releases
+- **Conditions :** https://anderson76389.github.io/Kovelyx/conditions.html
+- **Confidentialité :** https://anderson76389.github.io/Kovelyx/confidentialite.html
 
-  [Website](https://nuvio.tv) · [GitHub releases](https://github.com/NuvioMedia/NuvioMobile/releases/latest) · [Support Nuvio](https://nuvio.tv/support)
+## Compiler l'APK mobile de test
 
-</div>
-
-## Get Nuvio Mobile
-
-- [Android on Google Play](https://play.google.com/store/apps/details?id=com.nuvio.app)
-- [Android APK](https://github.com/NuvioMedia/NuvioMobile/releases/latest)
-- iOS via AltStore or SideStore: add [this source URL](https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/cmp-rewrite/store.json) in the app's Sources section, then install Nuvio.
-
-## Build from source
-
-```bash
-git clone https://github.com/NuvioMedia/NuvioMobile.git
-cd NuvioMobile
-```
-
-### Android
-
-Android development requires Android Studio and the Android SDK.
+Sur un système disposant de Java 21 et du SDK Android, à la racine de `apps/mobile` :
 
 ```bash
 ./gradlew :androidApp:assembleFullDebug
 ```
 
-### iOS
+L'APK est produit dans `androidApp/build/outputs/apk/full/debug/`.
 
-iOS development requires macOS and Xcode.
+**Attention :** l'APK de débogage est expérimental et signé avec une clé de test. Il ne garantit ni la stabilité de l'application ni une migration des données vers une future APK de production. Le système de compte universel Kovelyx n'est pas encore disponible. Un serveur de compte Nuvio n'est pas requis pour compiler l'APK.
 
-```bash
-env NUVIO_IOS_DISTRIBUTION=full xcodebuild \
-  -project iosApp/iosApp.xcodeproj \
-  -scheme iosApp \
-  -configuration Debug \
-  -sdk iphonesimulator \
-  -derivedDataPath build/ios-derived-full-simulator \
-  CODE_SIGNING_ALLOWED=NO \
-  build
-```
+Les noms de packages historiques du code et les crédits de licences peuvent encore citer Nuvio, dont les attributions légales doivent être conservées.
 
-The shared app is built with Kotlin Multiplatform and Compose Multiplatform.
-
-## License
-
-[GNU General Public License v3.0](./LICENSE)
+Licence : [GPL-3.0](LICENSE).
