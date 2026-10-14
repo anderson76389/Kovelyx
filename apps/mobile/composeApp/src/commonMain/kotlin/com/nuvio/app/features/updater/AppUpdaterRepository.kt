@@ -40,10 +40,10 @@ internal object AppUpdaterRepository {
     suspend fun getLatestChannelUpdate(channel: UpdateChannel): Result<AppUpdate> = runCatching {
         val response = httpRequestRaw(
             method = "GET",
-            url = "https://api.github.com/repos/NuvioMedia/NuvioMobile/${releasePath(channel)}",
+            url = "https://api.github.com/repos/anderson76389/Kovelyx/${releasePath(channel)}",
             headers = mapOf(
                 "Accept" to "application/vnd.github+json",
-                "User-Agent" to "NuvioMobile",
+                "User-Agent" to "Kovelyx-Mobile",
             ),
             body = "",
         )
@@ -91,8 +91,8 @@ internal object AppUpdaterRepository {
         supportedAbis: List<String>,
     ): GitHubAssetDto? {
         val apkAssets = assets.filter { asset ->
-            asset.name.endsWith(".apk", ignoreCase = true) ||
-                asset.contentType == "application/vnd.android.package-archive"
+            asset.name.startsWith("Kovelyx-Mobile-", ignoreCase = true) &&
+                asset.name.endsWith(".apk", ignoreCase = true)
         }
         for (abi in supportedAbis) {
             apkAssets.firstOrNull { it.name.contains(abi, ignoreCase = true) }?.let { return it }
