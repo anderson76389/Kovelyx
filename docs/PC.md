@@ -1,6 +1,6 @@
 # 🖥️ Guide PC — Kovelyx Desktop
 
-Ce guide concerne **uniquement Windows et Linux**. Les anciennes sources Android et TV sont conservées dans Git pour ne pas perdre l'historique, mais elles ne font pas partie de la priorité actuelle.
+Ce guide concerne **uniquement Windows**. Les compilations et publications automatiques Linux sont suspendues. Une fois Windows stabilisé, nous travaillerons sur **Android**, puis **TV**, avec les mêmes données et le même futur compte Kovelyx.
 
 ## Quel fichier choisir ?
 
@@ -9,18 +9,13 @@ Ce guide concerne **uniquement Windows et Linux**. Les anciennes sources Android
 | Installer facilement sur Windows 10/11 x64 | `Kovelyx-Windows-Setup-….exe` | **Un fichier** à lancer pour installer Kovelyx |
 | Installation MSI traditionnelle | `Kovelyx-Windows-….msi` | Paquet standard Windows |
 | Garder une copie sans installation classique | `Kovelyx-Windows-Portable-….zip` | Dossier portable, mais il contient **de nombreux fichiers nécessaires** |
-| Utiliser Linux x86-64 sans installation | `Kovelyx-Linux-x86_64-….AppImage` | **Un seul fichier exécutable** ; lancement sans installateur classique |
-| Installer sur Debian / Ubuntu x86-64 | `Kovelyx-Linux-amd64-….deb` | Paquet système et dépendances déclarées |
-| Installer sur Fedora x86-64 | `Kovelyx-Linux-x86_64-….rpm` | Paquet système et dépendances déclarées |
 
-**Un seul fichier téléchargé ne veut pas dire un seul fichier utilisé en mémoire** : le runtime Java, les extensions natives et les bibliothèques restent nécessaires. Le `Setup.exe` les installe automatiquement. Une AppImage les rassemble autant que possible mais peut encore dépendre de bibliothèques Linux du système.
+**Un seul fichier téléchargé ne veut pas dire un seul fichier utilisé en mémoire** : le runtime Java, les extensions natives et les bibliothèques restent nécessaires. Le `Setup.exe` les installe automatiquement.
 
 ## Où récupérer les fichiers ?
 
 - [Build Windows validé (EXE, MSI, portable)](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908)
 - [Compilations Windows](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
-- [Build Linux validé (AppImage x86-64)](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
-- [Compilations Linux : AppImage + job DEB/RPM](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) — les paquets natifs ne sont disponibles qu'après réussite du nouveau job
 - [Releases](https://github.com/anderson76389/Kovelyx/releases) — uniquement les versions effectivement publiées
 - [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
 
@@ -36,6 +31,16 @@ Les artefacts Actions ne sont pas des Releases publiques et **peuvent expirer**.
 6. Ajouter les extensions **que vous êtes autorisé à utiliser**, essayer une vidéo, les pistes et les sous-titres.
 
 Les photos personnelles sont copiées dans `%APPDATA%\Kovelyx\profile-media` et ne sont pas partagées automatiquement avec un compte en ligne.
+
+## Un seul compte Kovelyx, puis associer les services externes
+
+- **Compte Kovelyx** : servira à l'inscription, aux profils et à la synchronisation entre Windows, Android et TV après déploiement de **notre propre** serveur d'identité et de stockage. Aucun compte Nuvio ne doit être utilisé. En attendant la création du service, **le mode invité reste fonctionnel** et les comptes en ligne ne sont pas encore actifs.
+- **Trakt / MDBList** : leur authentification OAuth est séparée. Une fois les **applications Kovelyx** enregistrées auprès de ces fournisseurs, l'utilisateur cliquera sur « Connecter » puis autorisera Kovelyx dans son navigateur. Les comptes externes seront liés au profil, ils ne sont pas remplacés par un compte Kovelyx.
+- Si un identifiant OAuth d'application n'est pas configuré, le bouton « Connecter » ouvre désormais la configuration au lieu de rester inutilisable. Nous ne fournissons aucune clé fictive et ne réutilisons pas les clés de Nuvio.
+
+Les identifiants d'application OAuth doivent être créés par le propriétaire des intégrations : [documentation Trakt](https://developer.trakt.tv/docs/create-an-app), [documentation MDBList](https://docs.mdblist.com/docs/api). Trakt recommande **PKCE** (sans Client Secret dans l'EXE) : un flux de connexion public sans aucune configuration demandera cette évolution et une URL de callback HTTPS enregistrée.
+
+**Configuration du futur serveur :** [Comptes Kovelyx](COMPTES_KOVELYX.md) et [confidentialité](COMPTES_ET_CONFIDENTIALITE.md). Un serveur Supabase appartenant au projet est possible, mais il n'est pas encore déployé ni connecté à cette distribution. La création des comptes et la synchronisation complète devront être testées avant ouverture au public.
 
 ## Configurer Trakt et MDBList sur Windows
 
