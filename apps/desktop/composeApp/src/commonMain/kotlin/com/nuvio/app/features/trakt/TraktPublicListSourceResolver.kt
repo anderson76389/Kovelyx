@@ -1,5 +1,7 @@
 package com.nuvio.app.features.trakt
 
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
+
 import co.touchlab.kermit.Logger
 import com.nuvio.app.features.addons.RawHttpResponse
 import com.nuvio.app.features.addons.httpRequestRaw
@@ -159,7 +161,7 @@ object TraktPublicListSourceResolver {
         endpoint: String,
         query: Map<String, String> = emptyMap(),
     ): RawHttpResponse {
-        if (TraktConfig.CLIENT_ID.isBlank()) {
+        if (KovelyxIntegrationCredentials.traktClientId.isBlank()) {
             error(getString(Res.string.collections_trakt_credentials_missing))
         }
         val url = buildTraktUrl(endpoint, query)
@@ -169,7 +171,7 @@ object TraktPublicListSourceResolver {
             headers = mapOf(
                 "Accept" to "application/json",
                 "trakt-api-version" to API_VERSION,
-                "trakt-api-key" to TraktConfig.CLIENT_ID,
+                "trakt-api-key" to KovelyxIntegrationCredentials.traktClientId,
             ),
             body = "",
         )
