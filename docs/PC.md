@@ -49,11 +49,11 @@ Les exécutables expérimentaux peuvent être **non signés**. Cela peut déclen
 
 ## Mise à jour depuis l'application
 
-Le bandeau de mise à jour apparaît automatiquement lorsqu'une Release GitHub plus récente **et compatible avec votre format d'installation** est disponible. Vous pouvez télécharger directement dans Kovelyx, suivre la progression et installer ensuite.
+Le bandeau de mise à jour apparaît automatiquement lorsqu'une Release GitHub plus récente **et compatible avec votre format d'installation** est disponible. Cliquez une fois sur « Mettre à jour » : Kovelyx télécharge et vérifie le paquet, puis lance automatiquement la mise à jour adaptée à votre installation.
 
 | Installation actuelle | Comportement prévu |
 |---|---|
-| Windows avec Setup.exe / MSI | Lance le nouvel installateur officiel après téléchargement et vérification |
+| Windows avec Setup.exe / MSI | Un seul clic : télécharge et vérifie le MSI officiel, ferme Kovelyx, installe sans assistant interactif, puis relance l'application (Windows peut demander l'autorisation administrateur) |
 | Windows portable (ZIP) | Prépare et remplace les fichiers après fermeture, en conservant une sauvegarde du dossier précédent |
 | Linux AppImage | Remplace le fichier après fermeture, avec possibilité de conserver une sauvegarde |
 | Linux DEB / RPM | Ouvre le gestionnaire de paquets du système (validation éventuelle de l'administrateur) |
