@@ -1,4 +1,4 @@
-name: Publier une préversion Kovelyx (APK ou Windows)
+name: Publier une préversion Kovelyx PC (Windows ou Linux)
 
 on:
   workflow_dispatch:
@@ -16,11 +16,10 @@ on:
         type: choice
         required: true
         options:
-          - tv
-          - mobile
           - windows
+          - linux
       validation_confirmed:
-        description: "J'ai vérifié le MSI, l'EXE, le ZIP ou l'APK et les licences. Publier comme PRÉVERSION."
+        description: "J'ai testé le paquet Windows/Linux et vérifié les droits de redistribution. Publier comme PRÉVERSION."
         required: true
         default: false
         type: boolean
@@ -52,9 +51,8 @@ jobs:
           [[ "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)\.[0-9]+$ ]] || { echo "::error::Utiliser une version de test v0.1.0-beta.1"; exit 1; }
           [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::ID de build invalide"; exit 1; }
           case "$PLATFORM" in
-            tv) job="Android TV - APK Full Debug"; artifact="kovelyx-tv-debug"; prefix="Kovelyx-TV"; suffix=".apk" ;;
-            mobile) job="Android mobile - APK Full Debug"; artifact="kovelyx-mobile-debug"; prefix="Kovelyx-Mobile"; suffix=".apk" ;;
             windows) job="Compiler Kovelyx Windows"; artifact="Kovelyx-Windows-installers-experimental"; prefix="Kovelyx-Windows"; suffix=".msi" ;;
+            linux) job="Compiler Kovelyx Linux AppImage"; artifact="Kovelyx-Linux-AppImage-experimental"; prefix="Kovelyx-Linux-x86_64"; suffix=".AppImage" ;;
             *) exit 1 ;;
           esac
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > /tmp/kovelyx_run.json
@@ -139,5 +137,5 @@ jobs:
               --target "$KOVELYX_SOURCE_SHA" \
               --title "Kovelyx $TAG - préversion de test" \
               --prerelease \
-              --notes "Préversion expérimentale : tests de compatibilité et de lecture non certifiés. Sources et obligations de licence dans le dépôt. Il ne s'agit pas d'une version stable. Signature Android de développement : une future installation peut nécessiter la désinstallation avant mise à jour."
+              --notes "Préversion expérimentale PC (Windows / Linux x86-64). Vérifier la compatibilité système, la lecture et les extensions sur un ordinateur réel. Le Setup.exe est un installateur Windows ; l'AppImage est un fichier exécutable Linux. Sources, crédits et obligations de licence dans le dépôt. Cette version n'est pas stable."
           fi
