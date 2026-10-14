@@ -172,7 +172,7 @@ object AddonRepository {
         if (isUsingPrimaryAddonsFromSecondaryProfile()) {
             return AddAddonResult.Error(getString(Res.string.profile_primary_addons_required))
         }
-        log.i { "addAddon() — rawUrl=$rawUrl" }
+        log.i { "addAddon() — installation demandée (URL non journalisée)" }
         val manifestUrl = try {
             normalizeManifestUrl(rawUrl)
         } catch (error: IllegalArgumentException) {
