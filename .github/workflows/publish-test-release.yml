@@ -83,6 +83,7 @@ jobs:
       - name: Télécharger uniquement le paquet issu du build réussi
         env:
           GH_TOKEN: ${{ github.token }}
+          PLATFORM: ${{ inputs.platform }}
         shell: bash
         run: |
           set -euo pipefail
