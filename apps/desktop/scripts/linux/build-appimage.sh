@@ -55,47 +55,50 @@ if [[ ! -x "$appimagetool_path" ]]; then
     exit 1
 fi
 
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=linux-shortcut-definition.sh
-source "$script_dir/linux-shortcut-definition.sh"
-
-work_dir="$(mktemp -d "${TMPDIR:-/tmp}/nuvio-appimage.XXXXXX")"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/kovelyx-appimage.XXXXXX")"
 cleanup() {
     rm -rf "$work_dir"
 }
 trap cleanup EXIT
 
-app_dir="$work_dir/Nuvio.AppDir"
+app_dir="$work_dir/Kovelyx.AppDir"
 mkdir -p "$app_dir"
 cp -a "$app_root"/. "$app_dir/"
 
-desktop_file="$app_dir/${NUVIO_LINUX_SHORTCUT_NAME}.desktop"
-nuvio_linux_write_desktop_entry_file "$desktop_file" "AppRun %u" "$NUVIO_LINUX_SHORTCUT_NAME"
-if [[ -n "$website_url" ]]; then
-    printf 'X-AppImage-Website=%s\n' "$website_url" >> "$desktop_file"
-fi
-if [[ -n "$update_information" ]]; then
-    printf 'X-AppImage-UpdateInformation=%s\n' "$update_information" >> "$desktop_file"
-fi
-
-icon_source="$app_dir/lib/Nuvio.png"
-if [[ ! -f "$icon_source" ]]; then
-    echo "Expected AppImage icon at $icon_source" >&2
+# AppDir must use the brand actually built by jpackage. Never silently
+# package a Nuvio-branded launcher or point to an upstream application.
+launcher="$app_dir/bin/Kovelyx"
+[[ -x "$launcher" ]] || {
+    echo "Kovelyx Linux launcher missing from $launcher" >&2
     exit 1
-fi
-cp "$icon_source" "$app_dir/${NUVIO_LINUX_SHORTCUT_NAME}.png"
-ln -sf "${NUVIO_LINUX_SHORTCUT_NAME}.png" "$app_dir/.DirIcon"
+}
 
-cat > "$app_dir/AppRun" <<'EOF'
+icon_source="$app_dir/lib/Kovelyx.png"
+[[ -s "$icon_source" ]] || {
+    echo "Kovelyx Linux icon missing at $icon_source" >&2
+    exit 1
+}
+cp "$icon_source" "$app_dir/Kovelyx.png"
+ln -s Kovelyx.png "$app_dir/.DirIcon"
+
+cat > "$app_dir/Kovelyx.desktop" <<'DESKTOP'
+[Desktop Entry]
+Type=Application
+Name=Kovelyx
+Comment=Lecteur multimédia pour Linux
+Exec=AppRun %u
+Icon=Kovelyx
+Terminal=false
+Categories=AudioVideo;Video;Player;
+StartupNotify=true
+DESKTOP
+
+cat > "$app_dir/AppRun" <<'LAUNCHER'
 #!/usr/bin/env bash
 set -euo pipefail
 here="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-executable_path="$here/bin/Nuvio"
-if [[ ! -x "$executable_path" ]]; then
-    executable_path="$here/bin/nuvio"
-fi
-exec "$executable_path" "$@"
-EOF
+exec "$here/bin/Kovelyx" "$@"
+LAUNCHER
 chmod +x "$app_dir/AppRun"
 
 mkdir -p "$(dirname "$output_appimage")"
