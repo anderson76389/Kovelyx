@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
+import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.features.collection.CollectionSyncService
 import com.nuvio.app.features.profiles.InlinePinEntry
 import androidx.compose.material3.MaterialTheme
@@ -342,7 +343,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     val posterPattern = remember(payload) { DesktopCollectionImportBridge.posterPattern(importedSettings) }
     val addonResult = remember(payload) { runCatching { DesktopCollectionImportBridge.extractAddonManifests(payload) } }
     val addonUrls = addonResult.getOrDefault(emptyList())
-    val accountMode = importedSettings["importMode"] == "account"
+    var accountMode by remember(payload) { mutableStateOf(importedSettings["importMode"] == "account") }
     val auth = authState as? AuthState.Authenticated
     val accountConnected = auth != null && !auth.isAnonymous
     val scope = rememberCoroutineScope()
@@ -356,7 +357,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     var completed by remember(payload) { mutableStateOf(false) }
     var pinVerifiedIdentity by remember(payload) { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(payload, accountConnected) {
+    LaunchedEffect(payload, accountConnected, accountMode) {
         if (accountMode && accountConnected && auth != null) {
             ProfileRepository.ensureLoaded(auth.userId)
             ProfileRepository.pullProfiles()
@@ -374,6 +375,30 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
         title = "Importer depuis Ma-Collection",
         message = "Choisissez votre profil et confirmez la mise à jour des catalogues dans Kovelyx PC.",
     ) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(selected = !accountMode, onClick = { if (!processing) accountMode = false })
+            Text("Sans compte", modifier = Modifier.clickable { accountMode = false })
+            RadioButton(selected = accountMode, onClick = { if (!processing) accountMode = true })
+            Text("Avec compte", modifier = Modifier.clickable { accountMode = true })
+        }
+        if (accountMode && !accountConnected && !ServerConfigurationRepository.active.value.capabilities.emailPasswordAuth) {
+            Text(
+                "Aucun serveur de comptes Kovelyx n'est configuré. Vous pouvez choisir « Sans compte » " +
+                    "ci-dessus, ou configurer votre propre serveur d'authentification dans Kovelyx " +
+                    "avant d'utiliser les profils synchronisés.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+            )
+            DialogButtons {
+                DialogButton(text = "Annuler", onClick = { DesktopCollectionImportBridge.discard(payload) })
+                DialogButton(
+                    text = "Continuer sans compte",
+                    style = DialogButtonStyle.Primary,
+                    onClick = { accountMode = false },
+                )
+            }
+            return@DialogSurface
+        }
         if (accountMode && !accountConnected) {
             Text(
                 "Connexion facultative : vous avez choisi le mode compte. " +
