@@ -247,3 +247,6 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 .brand:hover .header-wordmark{filter:drop-shadow(0 0 13px rgba(185,121,255,.24))}
 @media(max-width:710px){.header-wordmark{width:143px}.hero-wordmark{margin-bottom:24px}}
 @media(max-width:380px){.header-wordmark{width:132px}.platform-icon{width:17px;height:17px}}
+/* Accès aux APK de développement non encore publiés en Release */
+.preview-artifact-link{font-size:12px!important;color:#948eaa!important;margin:15px 0 0!important;line-height:1.7!important}
+.preview-artifact-link .text-link{font-weight:700}
