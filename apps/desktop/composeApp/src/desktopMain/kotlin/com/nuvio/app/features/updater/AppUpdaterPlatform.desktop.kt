@@ -24,7 +24,7 @@ import kotlin.concurrent.thread
 import kotlin.io.path.createDirectories
 import kotlin.system.exitProcess
 
-private const val desktopUpdaterPreferencesName = "nuvio_updater"
+private const val desktopUpdaterPreferencesName = "kovelyx_updater"
 private const val ignoredTagKey = "ignored_release_tag"
 private const val updateChannelKey = "update_channel"
 
