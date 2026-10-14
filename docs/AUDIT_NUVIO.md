@@ -245,7 +245,7 @@ Fichiers inspectés : 4501
 - apps/desktop/store.json:18 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
 - Autres correspondances non détaillées : 49
 
-### Configuration générale (69 correspondances)
+### Configuration générale (68 correspondances)
 
 - apps/tv/app/build.gradle.kts:495 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
@@ -280,7 +280,6 @@ Fichiers inspectés : 4501
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357 : <string name="compose_auth_link_open">Mở nuvio.tv/link</string>
 - apps/mobile/scripts/prepare-ios-dependencies.sh:8 : engine_root="${NUVIO_ENGINE_ROOT:-${repository_root}/../nuvio-engine}"
 - apps/mobile/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
-- apps/desktop/composeApp/build.gradle.kts:155 : / const val CLIENT_ID = "${props.getProperty("NUVIO_DISCORD_CLIENT_ID", "1538974392376369212")}"
 - apps/desktop/composeApp/build.gradle.kts:497 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
 - apps/desktop/composeApp/build.gradle.kts:1190 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
 - apps/desktop/composeApp/build.gradle.kts:1342 : debMaintainer = "contact@nuvio.tv"
