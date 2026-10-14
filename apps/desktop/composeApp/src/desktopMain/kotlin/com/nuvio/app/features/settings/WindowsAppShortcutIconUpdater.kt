@@ -14,7 +14,7 @@ internal object WindowsAppShortcutIconUpdater {
             } finally {
                 onComplete()
             }
-        }, "Nuvio Windows app icon updater").apply { isDaemon = false }.start()
+        }, "Kovelyx Windows app icon updater").apply { isDaemon = false }.start()
     }
 
     private fun update(icon: AppIconOption) {
@@ -22,7 +22,7 @@ internal object WindowsAppShortcutIconUpdater {
         runCatching {
             val resource = "icons/app-icon-${icon.key}-transparent.ico"
             val localAppData = knownFolder("LocalApplicationData") ?: return@runCatching
-            val iconDirectory = localAppData.resolve("Nuvio/icons")
+            val iconDirectory = localAppData.resolve("Kovelyx/icons")
             Files.createDirectories(iconDirectory)
             val iconFile = iconDirectory.resolve("app-icon-${icon.key}-transparent.ico")
             Thread.currentThread().contextClassLoader.getResourceAsStream(resource)?.use { input ->
@@ -49,18 +49,18 @@ internal object WindowsAppShortcutIconUpdater {
         val commonDesktop = knownFolder("CommonDesktopDirectory")
         val commonPrograms = knownFolder("CommonPrograms")
 
-        desktop?.let { yield(it.resolve("Nuvio.lnk")) }
+        desktop?.let { yield(it.resolve("Kovelyx.lnk")) }
         programs?.let {
-            yield(it.resolve("Nuvio.lnk"))
-            yield(it.resolve("Nuvio/Nuvio.lnk"))
+            yield(it.resolve("Kovelyx.lnk"))
+            yield(it.resolve("Kovelyx/Kovelyx.lnk"))
         }
         applicationData?.let {
-            yield(it.resolve("Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar/Nuvio.lnk"))
+            yield(it.resolve("Microsoft/Internet Explorer/Quick Launch/User Pinned/TaskBar/Kovelyx.lnk"))
         }
-        commonDesktop?.let { yield(it.resolve("Nuvio.lnk")) }
+        commonDesktop?.let { yield(it.resolve("Kovelyx.lnk")) }
         commonPrograms?.let {
-            yield(it.resolve("Nuvio/Nuvio.lnk"))
-            yield(it.resolve("Nuvio.lnk"))
+            yield(it.resolve("Kovelyx/Kovelyx.lnk"))
+            yield(it.resolve("Kovelyx.lnk"))
         }
     }
 
@@ -90,7 +90,7 @@ internal object WindowsAppShortcutIconUpdater {
                 "    ${dollar}shortcut.Save()",
                 "}",
             ).joinToString("\n")
-            val scriptFile = Files.createTempFile("nuvio-icon-update-", ".ps1")
+            val scriptFile = Files.createTempFile("kovelyx-icon-update-", ".ps1")
             Files.writeString(scriptFile, script)
             val escapedScriptPath = scriptFile.toString().replace("'", "''")
             val launcher = "Start-Process powershell.exe -Verb RunAs -WindowStyle Hidden -Wait -ArgumentList " +
