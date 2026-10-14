@@ -5,12 +5,12 @@
   const patterns = {
     tv: /^kovelyx[-_](?:tv|android-tv)[-_].+\.apk$/i,
     mobile: /^kovelyx[-_](?:mobile|android)[-_].+\.apk$/i,
-    desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.msi$/i
+    desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.(?:exe|msi)$/i
   };
   const config = {
     mobile: {label:"02 / MOBILE",title:"Kovelyx pour Android.",desc:"Votre médiathèque dans la poche. Une expérience tactile adaptée aux téléphones et tablettes Android.",tags:["Android","Téléphone & tablette","APK"],device:"phone",suffix:"APK Android"},
     tv: {label:"03 / GRAND ÉCRAN",title:"Kovelyx pour Android TV.",desc:"Une navigation pensée pour la télécommande, la télévision et les boîtiers Android TV ou Google TV.",tags:["Android TV","Google TV","APK"],device:"tv",suffix:"APK Android TV"},
-    desktop: {label:"01 / WINDOWS",title:"Kovelyx pour Windows.",desc:"Le confort d’une application de bureau sur PC. Une interface adaptée au clavier, à la souris et au grand écran.",tags:["Windows x64","Installateur MSI","Archive portable"],device:"desktop",suffix:"Installateur MSI"}
+    desktop: {label:"01 / WINDOWS",title:"Kovelyx pour Windows.",desc:"Le confort d’une application de bureau sur PC. Une interface adaptée au clavier, à la souris et au grand écran.",tags:["Windows x64","Installateur EXE","MSI et portable"],device:"desktop",suffix:"Installateur MSI"}
   };
   const tabs = [...document.querySelectorAll('[role="tab"][data-platform]')];
   const title = document.getElementById("panel-title");
@@ -35,7 +35,10 @@
   function findMatchingRelease(releases, platform) {
     for (const release of releases) {
       if (release.draft || !Array.isArray(release.assets)) continue;
-      for (const asset of release.assets) {
+      const candidates = platform === "desktop"
+        ? [...release.assets].sort((a, b) => Number(/\.exe$/i.test(b.name || "")) - Number(/\.exe$/i.test(a.name || "")))
+        : release.assets;
+      for (const asset of candidates) {
         const url = asset.browser_download_url || "";
         if (asset.state === "uploaded" && asset.size > 100000 &&
             patterns[platform].test(asset.name) &&
@@ -80,7 +83,8 @@
     }
     if (matched) {
       link.href = matched.asset.browser_download_url;
-      link.textContent = "↓ Télécharger " + item.suffix;
+      link.textContent = "↓ Télécharger " +
+        (platform === "desktop" && /\.exe$/i.test(matched.asset.name) ? "l'installateur EXE" : item.suffix);
       link.hidden = false;
       disabled.hidden = true;
     } else {
@@ -117,7 +121,8 @@
       }
       if (match) {
         state.textContent = statusText(match);
-        action.textContent = "Télécharger →";
+        action.textContent = p === "desktop" && /\.exe$/i.test(match.asset.name)
+          ? "Télécharger EXE →" : "Télécharger →";
         action.href = match.asset.browser_download_url;
         action.hidden = false;
       } else {
