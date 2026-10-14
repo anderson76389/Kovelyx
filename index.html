@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#090a10">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Kovelyx : projet multimédia libre pour Windows, actuellement en développement. Versions Android et Android TV prévues ensuite. Téléchargements vérifiés via GitHub Releases.">
+  <meta name="description" content="Kovelyx Desktop : projet multimédia pour Windows et Linux. Installateur EXE Windows et AppImage Linux. Téléchargements vérifiés sur GitHub Releases.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Kovelyx">
   <meta property="og:title" content="Kovelyx — Votre univers multimédia">
-  <meta property="og:description" content="Projet multimédia open source, Windows en priorité ; Android et Android TV à venir.">
+  <meta property="og:description" content="Kovelyx sur PC : installateur EXE Windows et AppImage Linux en cours de validation.">
   <meta name="twitter:card" content="summary">
-  <title>Kovelyx — Votre univers multimédia sur Windows</title>
+  <title>Kovelyx — Votre univers multimédia sur Windows et Linux</title>
   <link rel="icon" type="image/svg+xml" href="./brand/logo.svg">
   <link rel="stylesheet" href="./site.css">
   <script src="./site.js" defer></script>
@@ -26,6 +26,10 @@
     <rect x="2.1" y="5.6" width="19.8" height="13.5" rx="3.1" fill="none" stroke="currentColor" stroke-width="1.7"/>
     <path d="m8.1 2.1 3.9 3.5 3.9-3.5M9 22h6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M10 9.2 15.4 12l-5.4 2.8V9.2Z" fill="currentColor"/>
+  </symbol>
+  <symbol id="kv-linux" viewBox="0 0 24 24">
+    <rect x="3" y="4" width="18" height="15" rx="2.5" stroke="currentColor" stroke-width="1.7" fill="none"/>
+    <path d="m7 9 3 2.5L7 14m6 0h4M8 22h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
   </symbol>
   <symbol id="kv-windows" viewBox="0 0 24 24">
     <path d="m2 4 9-1.2V11H2V4Zm11-1.5L22 1v10h-9V2.5ZM2 13h9v8.2L2 20v-7Zm11 0h9v10l-9-1.3V13Z" fill="currentColor"/>
@@ -56,16 +60,16 @@
   <main id="contenu">
     <section class="hero container" aria-labelledby="hero-title">
       <img class="hero-wordmark" src="./brand/wordmark.svg" width="300" height="65" alt="Kovelyx — Your media. Your world.">
-      <div class="hero-eyebrow"><span class="spark" aria-hidden="true">✦</span> Open source · Windows en priorité · Android et TV ensuite</div>
-      <h1 id="hero-title">Chaque écran.<br><em>Votre univers.</em></h1>
-      <p class="hero-desc">Films, séries et extensions compatibles réunis dans un projet multimédia libre. Nous développons d’abord la version Windows, avant d’adapter et de tester les versions mobile et TV.</p>
+      <div class="hero-eyebrow"><span class="spark" aria-hidden="true">✦</span> Open source · Windows x64 · Linux x86-64</div>
+      <h1 id="hero-title">Votre PC.<br><em>Votre univers.</em></h1>
+      <p class="hero-desc">Films, séries et extensions compatibles dans une application multimédia libre pour Windows et Linux. Un installateur EXE pour Windows, une AppImage en un fichier pour Linux.</p>
       <div class="hero-actions">
         <a class="button purple" href="#plateformes">Découvrir les téléchargements <span class="arr" aria-hidden="true">↗</span></a>
         <a class="button outline" href="https://github.com/anderson76389/Kovelyx">Voir le code source <span aria-hidden="true">↗</span></a>
       </div>
-      <p class="hero-note"><span class="circle" aria-hidden="true"></span> Windows en développement · Aucun média fourni par Kovelyx</p>
+      <p class="hero-note"><span class="circle" aria-hidden="true"></span> Application PC en développement · Aucun média fourni par Kovelyx</p>
 
-      <div class="showcase" aria-label="Maquette conceptuelle de l'interface Kovelyx sur télévision et téléphone ; ce ne sont pas des captures d'une version finale">
+      <div class="showcase" aria-label="Maquette conceptuelle de l'identité Kovelyx ; il ne s'agit pas de captures de la version installée">
         <div class="tv-shell screen">
           <div class="ui">
             <div class="ui-sidebar" aria-hidden="true">
@@ -113,29 +117,28 @@
 
     <div class="platform-rail" aria-label="Plateformes prévues">
       <div class="container">
-        <span><b>◉</b> WINDOWS · EN DÉVELOPPEMENT</span><span><b>✦</b> OPEN SOURCE</span><span><b>◉</b> ANDROID · À VENIR</span><span><b>◉</b> ANDROID TV · À VENIR</span>
+        <span><b>◉</b> WINDOWS · SETUP EXE</span><span><b>✦</b> OPEN SOURCE</span><span><b>◉</b> LINUX · APPIMAGE</span><span><b>◉</b> APPLICATION PC</span>
       </div>
     </div>
 
     <section id="plateformes" class="section container" aria-labelledby="platforms-title">
       <div class="kicker">01 — Vos appareils</div>
       <div class="section-head">
-        <h2 id="platforms-title">Choisissez votre écran.<br>Suivez les versions.</h2>
-        <p>Windows est notre priorité actuelle. Android et Android TV restent prévus pour la suite. Sélectionnez une plateforme pour consulter son état et ses téléchargements réellement publiés.</p>
+        <h2 id="platforms-title">Choisissez votre système.<br>Suivez les versions.</h2>
+        <p>La version PC est notre priorité. Choisissez Windows ou Linux pour consulter les versions réellement publiées et les compilations expérimentales.</p>
       </div>
 
       <div class="platform-tabs" role="tablist" aria-label="Choisir une plateforme">
         <button id="tab-desktop" role="tab" aria-selected="true" aria-controls="platform-showcase" tabindex="0" type="button" data-platform="desktop"><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-windows"/></svg> Windows</button>
-        <button id="tab-mobile" role="tab" aria-selected="false" aria-controls="platform-showcase" tabindex="-1" type="button" data-platform="mobile"><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-android"/></svg> Android</button>
-        <button id="tab-tv" role="tab" aria-selected="false" aria-controls="platform-showcase" tabindex="-1" type="button" data-platform="tv"><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-tv"/></svg> Android TV</button>
+        <button id="tab-linux" role="tab" aria-selected="false" aria-controls="platform-showcase" tabindex="-1" type="button" data-platform="linux"><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-linux"/></svg> Linux</button>
       </div>
 
       <div id="platform-showcase" class="platform-panel" role="tabpanel" aria-labelledby="tab-desktop" tabindex="0">
         <div class="panel-copy">
           <div id="panel-label" class="panel-label">01 / WINDOWS</div>
           <h3 id="panel-title">Kovelyx pour Windows.</h3>
-          <p id="panel-description">L’application multimédia de bureau en cours de développement. Compilations expérimentales et vérifications de lecture en cours.</p>
-          <div class="panel-tags" id="panel-tags" aria-label="Compatibilité"><span>Windows x64</span><span>Installateur MSI</span><span>Archive portable</span></div>
+          <p id="panel-description">Version PC pour Windows 10/11. Setup EXE complet, MSI et ZIP portable, avec contrôles de compilation et tests automatisés.</p>
+          <div class="panel-tags" id="panel-tags" aria-label="Compatibilité"><span>Windows x64</span><span>Installateur EXE</span><span>MSI / ZIP portable</span></div>
           <div class="panel-actions">
             <a class="download-action" id="platform-download" href="#plateformes" hidden>↓ Télécharger</a>
             <a class="download-action portable-action" id="platform-portable" href="#plateformes" hidden>↓ Version portable ZIP</a>
@@ -183,7 +186,7 @@
           <div class="feature-info">
             <div class="feature-index">02 / EXTENSIONS</div>
             <h3>Vos sources.<br>Vos possibilités.</h3>
-            <p>La prise en charge des addons est au cœur des bases open source du projet. Chaque intégration devra être vérifiée sur Windows, puis sur les autres plateformes.</p>
+            <p>La prise en charge des addons est au cœur des bases open source du projet. Chaque intégration devra être vérifiée sur Windows et Linux, selon les capacités du système et des sources.</p>
           </div>
           <div class="feature-small-visual" aria-hidden="true">
             <div class="tag-line"><span>Catalogues</span><span>Extensions</span><span>Sous-titres</span></div>
@@ -219,7 +222,7 @@
         <p>Le code est public. Les étapes de construction, les limites techniques et les binaires disponibles peuvent être vérifiés sur GitHub.</p>
       </div>
       <div class="open-source-grid">
-        <div class="source-card"><span class="step">01 / SOURCES</span><h3>Des bases préservées.</h3><p>Les sources Android, TV et Desktop ont été rassemblées dans le dépôt Kovelyx avec leur provenance et leurs licences.</p></div>
+        <div class="source-card"><span class="step">01 / SOURCES</span><h3>Des bases préservées.</h3><p>Les sources PC, les composants graphiques et les moteurs d'origine sont conservés avec leur provenance et leurs licences.</p></div>
         <div class="source-card"><span class="step">02 / CONSTRUCTION</span><h3>Des builds contrôlables.</h3><p>Les workflows de compilation sont publics. Aucun téléchargement officiel n’est annoncé sans fichier publié.</p></div>
         <div class="source-card"><span class="step">03 / INDÉPENDANCE</span><h3>Une évolution progressive.</h3><p>L’identité Kovelyx progresse. La suppression des services Nuvio restants et la vérification des bibliothèques natives sont encore en cours.</p></div>
       </div>
@@ -233,8 +236,7 @@
       </div>
       <div class="release-items">
         <div class="release-card" data-release-status="desktop"><h3><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-windows"/></svg> Windows</h3><p class="release-status">Vérification des versions…</p><strong>EXE, MSI et ZIP portable</strong><div class="release-card-actions"><a class="release-link" href="https://github.com/anderson76389/Kovelyx/releases">Voir les Releases →</a><a class="portable-link" href="https://github.com/anderson76389/Kovelyx/releases" hidden>Version portable ZIP ↓</a></div></div>
-        <div class="release-card" data-release-status="mobile"><h3><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-android"/></svg> Android mobile</h3><p class="release-status">Vérification des versions…</p><strong>APK</strong><div class="release-card-actions"><a class="release-link" href="https://github.com/anderson76389/Kovelyx/releases">Voir les Releases →</a></div></div>
-        <div class="release-card" data-release-status="tv"><h3><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-tv"/></svg> Android TV</h3><p class="release-status">Vérification des versions…</p><strong>APK</strong><div class="release-card-actions"><a class="release-link" href="https://github.com/anderson76389/Kovelyx/releases">Voir les Releases →</a></div></div>
+        <div class="release-card" data-release-status="linux"><h3><svg class="platform-icon" aria-hidden="true" focusable="false"><use href="#kv-linux"/></svg> Linux x86-64</h3><p class="release-status">Vérification des versions…</p><strong>AppImage (fichier unique)</strong><div class="release-card-actions"><a class="release-link" href="https://github.com/anderson76389/Kovelyx/releases">Voir les Releases →</a></div></div>
       </div>
       <p style="margin:19px 0 0;color:#8f899e;font-size:12px">Les préversions ne sont pas nécessairement stables ou testées sur tous les appareils. Aucun bouton ne pointe vers une version inexistante.</p>
     </section>
@@ -253,7 +255,7 @@
           </details>
           <details>
             <summary>Faut-il installer un serveur personnel ?</summary>
-            <p>Non, l'objectif de Kovelyx est de fonctionner sur votre PC, téléphone ou TV sans backend personnel. Les réglages et données locales doivent encore être testés sur chaque application. Les addons, métadonnées et flux externes peuvent nécessiter Internet.</p>
+            <p>Non, Kovelyx fonctionne sur PC sans serveur personnel à héberger. Les réglages peuvent être enregistrés localement, mais les addons, métadonnées et flux externes peuvent nécessiter Internet.</p>
           </details>
           <details>
             <summary>Kovelyx contient-il des films ou des chaînes ?</summary>
@@ -273,10 +275,10 @@
 
     <section class="container">
       <div class="final-cta">
-        <div class="kicker">Fait pour les écrans que vous aimez</div>
+        <div class="kicker">Fait pour votre ordinateur</div>
         <h2>Votre monde. <span style="color:#bd93ff">En grand.</span></h2>
-        <p>Windows d’abord, Android et Android TV ensuite : suivez les progrès et consultez uniquement les versions réellement publiées.</p>
-        <div class="hero-actions"><a class="button purple" href="#plateformes">Choisir mon appareil &nbsp;↗</a><a class="button outline" href="https://github.com/anderson76389/Kovelyx">Suivre le projet sur GitHub ↗</a></div>
+        <p>Windows et Linux : un format simple à télécharger pour chaque système. Consultez les builds expérimentaux et les versions réellement publiées.</p>
+        <div class="hero-actions"><a class="button purple" href="#plateformes">Choisir mon système &nbsp;↗</a><a class="button outline" href="https://github.com/anderson76389/Kovelyx">Suivre le projet sur GitHub ↗</a></div>
       </div>
     </section>
   </main>
