@@ -25,7 +25,7 @@ jobs:
       - name: Vérifier le job de compilation mobile
         shell: bash
         env:
-          GH_${{ github.token }}: TOKEN
+          GH_TOKEN: ${{ github.token }}
           BUILD_ID: ${{ github.event.workflow_run.id }}
           SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
