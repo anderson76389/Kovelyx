@@ -6,18 +6,16 @@
 
 <img src="./assets/brand/kovelyx-wordmark.svg" alt="Kovelyx" width="300">
 
-### Une seule application. Deux systèmes. Ton espace multimédia.
+### Kovelyx pour Windows. Ton espace multimédia.
 
-**Kovelyx Desktop** est un projet multimédia open source destiné aux **PC Windows et Linux**.
+**Kovelyx Desktop** est un projet multimédia open source pour **Windows 10 et 11**. Android et Android TV viendront ensuite ; les travaux Linux sont arrêtés.
 
 [**🌐 Site officiel**](https://anderson76389.github.io/Kovelyx/) · [**⬇️ Téléchargements**](#-télécharger-kovelyx) · [**🛠️ Sources PC**](./apps/desktop/) · [**📖 Guide PC**](./docs/PC.md)
 
 [![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-754CE8?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
-[![Linux](https://img.shields.io/badge/Linux-x86--64-754CE8?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml)
 [![GPL--3.0](https://img.shields.io/badge/Licence-GPLv3-49435C?style=for-the-badge)](./docs/PROVENANCE.md)
 
 [![Compilation Windows](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
-[![Compilation Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml)
 
 </div>
 
@@ -40,19 +38,16 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 | Système | Format principal | Ce que tu récupères | État |
 |:--|:--|:--|:--|
 | **Windows x64** | `Kovelyx-Windows-Setup-….exe` | **1 fichier** pour installer l'application et son environnement d'exécution | [Build automatisé réussi](https://github.com/anderson76389/Kovelyx/actions/runs/38507860951) |
-| **Linux x86-64** | `Kovelyx-Linux-x86_64-….AppImage` | **1 fichier exécutable** à lancer sans décompresser un gros dossier | [Build AppImage réussi](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469) |
 | Windows x64 (alternative) | `.msi` | Installateur Windows classique | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
 | Windows x64 (alternative) | `Portable.zip` | Dossier portable avec lanceur et runtime | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
-| **Linux Debian/Ubuntu x86-64** | `Kovelyx-Linux-amd64-….deb` | Installation native du paquet, avec dépendances | [Nouveau job DEB : build à vérifier](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) |
-| **Linux Fedora x86-64** | `Kovelyx-Linux-x86_64-….rpm` | Installation native du paquet, avec dépendances | [Nouveau job RPM : build à vérifier](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) |
 
-**Fichiers PC expérimentaux déjà compilés :** [🪟 Windows — EXE, MSI et portable](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908) · [🐧 Linux — AppImage x86-64](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
+**Fichiers PC expérimentaux déjà compilés :** [🪟 Windows — EXE, MSI et portable](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908)
 
-**Préversions Windows :** dès qu'une compilation et ses tests automatisés réussissent, le `Setup.exe` est publié directement dans les [Releases GitHub](https://github.com/anderson76389/Kovelyx/releases) sans archive ZIP de GitHub Actions. Le MSI est une alternative ; la version portable conserve ses dépendances dans un ZIP. Ce sont des versions de test non signées, pas des versions stables. Linux nécessite encore ses propres vérifications.
+**Préversions Windows :** dès qu'une compilation et ses tests automatisés réussissent, le `Setup.exe` est publié directement dans les [Releases GitHub](https://github.com/anderson76389/Kovelyx/releases) sans archive ZIP de GitHub Actions. Le MSI est une alternative ; la version portable conserve ses dépendances dans un ZIP. Ce sont des versions de test non signées, pas des versions stables.
 
 **Tous les téléchargements :** [GitHub Actions](https://github.com/anderson76389/Kovelyx/actions) · [Releases officielles](https://github.com/anderson76389/Kovelyx/releases) · [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
 
-> **Important :** sous Windows, le `Setup.exe` est un fichier unique **pour l'installation**. Le logiciel une fois installé contient normalement de nombreux fichiers internes (bibliothèques, Java, codecs). Linux ne lance pas les `.exe` Windows de façon native : le fichier unique adapté est une **AppImage**. Une AppImage peut encore nécessiter certaines bibliothèques présentes sur la distribution. **Un build réussi ne garantit pas toutes les fonctions en situation réelle.**
+> **Important :** sous Windows, le `Setup.exe` est un fichier unique **pour l'installation**. Le logiciel une fois installé contient normalement de nombreux fichiers internes (bibliothèques, Java, codecs). **Un build réussi ne garantit pas toutes les fonctions en situation réelle.**
 
 ### 🪟 Windows : le plus simple
 
@@ -61,25 +56,13 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 3. Décompresse l'archive téléchargée **une seule fois**, puis lance `Kovelyx-Windows-Setup-….exe`. Le MSI et le ZIP portable sont fournis en alternative.
 4. Si Windows SmartScreen demande une confirmation, vérifie le dépôt, l'origine du fichier et son SHA-256. Ne contourne pas les avertissements pour un binaire inconnu.
 
-### 🐧 Linux : une AppImage
-
-Le workflow Linux prépare une **AppImage x86-64 expérimentale** et, avec le job de paquets natifs, des **DEB et RPM**, chacun avec ses vérifications d'intégrité. Ces deux nouveaux formats ne seront disponibles qu'après une compilation réussie. Dès qu'une compilation est verte, récupère le fichier dans ses artefacts :
-
-```bash
-chmod +x Kovelyx-Linux-x86_64-*.AppImage
-./Kovelyx-Linux-x86_64-*.AppImage
-```
-
-Pas de `sudo` pour lancer l'AppImage. Les bibliothèques vidéo, WebKit/GTK et la compatibilité graphique restent à tester suivant la distribution (voir le [guide Linux](./docs/LINUX.md)). L'AppImage **ne fonctionne pas automatiquement sur ARM64**.
-
 ### 🔄 Mises à jour intégrées à Kovelyx
 
 L'application vérifie les nouvelles **Releases GitHub** au démarrage et périodiquement lorsqu'elle reste ouverte. Quand une version compatible plus récente est publiée, une **bannière en haut** permet de télécharger le fichier avec une barre de progression. Le téléchargement est contrôlé par son empreinte SHA-256 avant l'installation.
 
 - **Windows Setup.exe / MSI :** l'application télécharge le nouvel installateur et le lance après votre clic, sans passer manuellement par le site.
 - **Windows portable :** le ZIP complet est téléchargé depuis Kovelyx, vérifié puis remplacé après fermeture, avec sauvegarde de l'ancienne copie pour revenir en arrière en cas de problème.
-- **Linux AppImage :** mise à jour du fichier portable et conservation d'une copie antérieure ; **DEB/RPM :** installation confiée au gestionnaire de paquets du système.
-- Les versions non compatibles ou non publiées ne sont **pas** proposées. Flatpak n'a pas d'auto-installation depuis Kovelyx.
+- Les versions non compatibles ou non publiées ne sont pas proposées.
 
 **Important :** ce mécanisme évite les téléchargements et installations manuels, mais **ce n'est pas une mise à jour différentielle** : il retélécharge encore le paquet complet. L'automatisation est intégrée au code ; chaque nouveau format doit être validé sur une machine réelle avant d'être considéré comme stable.
 
@@ -92,8 +75,6 @@ L'application vérifie les nouvelles **Releases GitHub** au démarrage et pério
 | Plugins, extensions et sources configurées | Tests unitaires inclus ; dépend du fournisseur et du réseau |
 | Lecteur, audio, pistes et sous-titres | Infrastructure compilée ; tests réels avec différents fichiers/flux nécessaires |
 | Distribution Windows MSI + EXE + portable | **Build Windows complet réussi** |
-| Distribution Linux AppImage | **AppImage compilée et contrôlée ; compatibilité Linux réelle non encore certifiée** |
-| Distribution Linux DEB + RPM | **Chaîne de construction et contrôles ajoutés ; réussite et fonctionnement encore à confirmer** |
 | Autonomie vis-à-vis de Nuvio | **Audit en cours**, certains composants techniques/dépendances demeurent |
 
 Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisateur configure ses sources et respecte les droits applicables.
@@ -102,9 +83,8 @@ Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisat
 
 Le [workflow Windows](./.github/workflows/windows.yml) reconstruit les composants requis, fabrique les trois distributions, contrôle leurs formats/identités et **bloque la publication de l'artefact si la suite Desktop échoue**. Le [build Windows #25](https://github.com/anderson76389/Kovelyx/actions/runs/38507860951) a réussi les **1 554 tests exécutés, dont 1 ignoré** (aucun échec).
 
-Le [workflow Linux](./.github/workflows/linux.yml) tente de produire une AppImage en un fichier et vérifie l'exécutable, le lanceur interne, le logo et le SHA-256 avant l'enregistrement. Le [build Linux validé](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469) a produit et contrôlé une AppImage. Des essais de lecture sur Ubuntu, Fedora et d'autres configurations restent indispensables.
 
-[**📋 Guide de tests manuels**](./docs/TESTS_PC.md) · [**📄 Guide d'installation et FAQ**](./docs/PC.md) · [**🐧 Linux**](./docs/LINUX.md)
+[**📋 Guide de tests manuels**](./docs/TESTS_PC.md) · [**📄 Guide d'installation et FAQ**](./docs/PC.md)
 
 ## 🎨 Personnalisation des profils Windows
 
@@ -116,30 +96,28 @@ Dans **Profils → Modifier un profil**, choisis **une photo** ou **un fond depu
 Kovelyx/
 ├── apps/
 │   ├── desktop/           Application PC (Kotlin + Compose Desktop)
-│   ├── mobile/            Sources historiques conservées, hors priorité
-│   └── tv/                Sources historiques conservées, hors priorité
+│   ├── mobile/            Application Android (après Windows)
+│   └── tv/                Application Android TV (après Windows)
 ├── vendor/engine/         Sources du moteur embarqué
 ├── assets/brand/          Identité graphique originale Kovelyx
 ├── docs/                  Site, documentation et audits
 ├── scripts/               Outils de contrôle et sauvegarde
 └── .github/workflows/
-    ├── windows.yml        Installateurs Windows et tests
-    └── linux.yml          AppImage + paquets natifs Linux expérimentaux
+    └── windows.yml        Installateurs Windows et tests
 ```
 
 **Ne supprime pas les dossiers internes du logiciel installé** : la version Windows a besoin de son runtime, même si tu n'as téléchargé qu'un `.exe`.
 
-## 🧭 Feuille de route PC
+## 🧭 Feuille de route Windows, puis Android et TV
 
 - [x] Identité Kovelyx, branding du projet et site officiel
 - [x] Compilation Windows de l'installateur EXE, du MSI et du portable ZIP
 - [x] Suite Desktop verte sur une révision de référence
 - [x] Importation locale des photos et fonds de profil sur Windows (code)
-- [x] AppImage Linux x86-64 compilée et structure contrôlée
-- [x] Préparation des paquets Linux natifs DEB et RPM dans un job séparé
-- [ ] Compilation réussie et essais d'installation du DEB et du RPM sur PC réels
-- [ ] AppImage Linux testée en lecture sur différentes distributions et interfaces graphiques
-- [ ] Tests interactifs des lecteurs, codecs, sous-titres, extensions et réglages sur les deux OS
+- [ ] Tests interactifs des lecteurs, codecs, sous-titres, extensions et réglages sur Windows
+- [ ] Résoudre les erreurs de chargement et tester les connexions Trakt/MDBList sur Windows
+- [ ] Déployer un serveur de comptes Kovelyx avant d'activer l'inscription synchronisée
+- [ ] Finaliser Windows puis reprendre les applications Android et Android TV
 - [ ] Réduire les dépendances héritées ; documenter les licences natives avant publication stable
 - [ ] Releases signées et vérifiées, avec mises à jour compatibles
 
@@ -147,7 +125,7 @@ Kovelyx/
 
 Le projet vise à être **autonome vis-à-vis de l'organisation d'origine**, mais l'audit n'est pas terminé. Le code de départ est dérivé de **NuvioDesktop sous GNU GPLv3** ; les droits d'auteur, notices et obligations de fourniture des sources doivent rester accessibles. Certains binaires vidéo ont leur propre provenance et doivent être vérifiés avant toute redistribution publique.
 
-[**📖 Provenance**](./docs/PROVENANCE.md) · [**🧾 Audit des liens**](./docs/AUDIT_NUVIO.md) · [**🧩 Dépendances**](./docs/AUDIT_DEPENDANCES.md) · [**🔐 Indépendance**](./docs/INDEPENDANCE.md)
+[**🔐 Confidentialité**](https://anderson76389.github.io/Kovelyx/confidentialite.html) · [**📜 Conditions**](https://anderson76389.github.io/Kovelyx/conditions.html) · [**📖 Provenance**](./docs/PROVENANCE.md) · [**🧾 Audit des liens**](./docs/AUDIT_NUVIO.md) · [**🧩 Dépendances**](./docs/AUDIT_DEPENDANCES.md) · [**🔐 Indépendance**](./docs/INDEPENDANCE.md)
 
 ---
 
