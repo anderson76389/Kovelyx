@@ -1,0 +1,59 @@
+name: Vérifier le système de mises à jour PC
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/windows.yml'
+      - '.github/workflows/linux.yml'
+      - '.github/workflows/publish-linux-preview.yml'
+      - '.github/workflows/publish-windows-preview.yml'
+      - '.github/workflows/check-pc-updater.yml'
+      - 'scripts/desktop-release-version.py'
+      - 'scripts/publish-linux-preview.sh'
+      - 'scripts/publish-windows-preview.sh'
+      - 'apps/desktop/composeApp/src/**/updater/**'
+      - 'apps/desktop/composeApp/src/desktopMain/resources/updater/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/check-pc-updater.yml'
+      - 'scripts/desktop-release-version.py'
+      - 'scripts/publish-linux-preview.sh'
+      - 'scripts/publish-windows-preview.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Syntaxe des scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/publish-linux-preview.sh
+          bash -n scripts/publish-windows-preview.sh
+          shellcheck --severity=warning scripts/publish-linux-preview.sh scripts/publish-windows-preview.sh
+          python3 -m py_compile scripts/desktop-release-version.py
+      - name: Vérifier les numéros de version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          echo "Version candidate : $version"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)$ ]] || exit 1
+          git rev-list --count HEAD
+      - name: Contrôler les ressources portables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s apps/desktop/composeApp/src/desktopMain/resources/updater/apply-portable-update.ps1
+          grep -Fq 'Kovelyx.portable' .github/workflows/windows.yml
+          grep -Fq 'desktop.versionName' .github/workflows/linux.yml
+          grep -Fq 'desktop.versionName' .github/workflows/windows.yml
