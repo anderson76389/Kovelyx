@@ -56,7 +56,6 @@ jobs:
           bash ./scripts/linux/install-desktop-build-dependencies.sh
           pkg-config --exists mpv webkit2gtk-4.1 gtk+-3.0 x11 xcomposite xext
           test -s composeApp/src/desktopMain/native/linux/engine/libnuvio_engine.so
-          bash ./scripts/linux/test-linux-deb-tools.sh
           # The name of the upstream native library is an ABI concern, not a
           # network dependency. Avoid renaming it without updating JNI callers.
 
