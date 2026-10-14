@@ -1,0 +1,52 @@
+name: Vérification rapide des paquets PC
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/linux.yml'
+      - '.github/workflows/publish-test-release.yml'
+      - '.github/workflows/pc-packaging-smoke.yml'
+      - 'apps/desktop/scripts/linux/**'
+      - 'apps/desktop/composeApp/build.gradle.kts'
+      - 'scripts/tests/test-linux-shortcut.sh'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/linux.yml'
+      - '.github/workflows/publish-test-release.yml'
+      - '.github/workflows/pc-packaging-smoke.yml'
+      - 'apps/desktop/scripts/linux/**'
+      - 'apps/desktop/composeApp/build.gradle.kts'
+      - 'scripts/tests/test-linux-shortcut.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  metadata:
+    name: Vérifier scripts Linux et identité Kovelyx
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier la syntaxe de chaque script Bash
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in apps/desktop/scripts/linux/*.sh scripts/tests/test-linux-shortcut.sh; do
+            bash -n "$script"
+          done
+      - name: Exécuter les tests de raccourci Linux
+        shell: bash
+        run: bash scripts/tests/test-linux-shortcut.sh
+      - name: Vérifier que les fichiers de packaging sont présents
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s apps/desktop/scripts/linux/patch-linux-deb.sh
+          test -s apps/desktop/scripts/linux/verify-linux-deb.sh
+          test -s apps/desktop/scripts/linux/patch-linux-rpm.sh
+          test -s apps/desktop/scripts/linux/verify-linux-rpm.sh
+          grep -Fq ':composeApp:packageReleaseDeb' .github/workflows/linux.yml
+          grep -Fq ':composeApp:packageReleaseRpm' .github/workflows/linux.yml

@@ -182,7 +182,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash -n apps/desktop/scripts/linux/*.sh
+          for script in apps/desktop/scripts/linux/*.sh; do bash -n "$script"; done
           bash scripts/tests/test-linux-shortcut.sh
       - name: Compiler DEB et RPM à partir du code du dépôt
         working-directory: apps/desktop
