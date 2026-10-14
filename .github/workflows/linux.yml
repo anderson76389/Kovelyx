@@ -106,8 +106,11 @@ jobs:
             echo "::error::Un seul fichier AppImage Kovelyx est attendu; trouvé: ${#found[@]}"
             exit 1
           fi
+          # Compose copies the AppImage to release-appimages without preserving
+          # its POSIX executable bit. The generated payload itself remains valid.
+          chmod +x "${found[0]}"
           if [[ ! -x "${found[0]}" ]]; then
-            echo "::error::AppImage non exécutable"
+            echo "::error::Impossible de rendre l'AppImage exécutable"
             exit 1
           fi
           if [[ "$(stat -c %s "${found[0]}")" -lt 1000000 ]]; then
