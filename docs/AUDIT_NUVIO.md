@@ -7,21 +7,14 @@ Fichiers inspectés : 4501
 
 ## Inventaire des références à traiter
 
-### Connexions et services (125 correspondances)
+### Connexions et services (118 correspondances)
 
-- apps/tv/app/build.gradle.kts:125 : buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "https://nuvio.tv/tv-login")}\"")
-- apps/tv/app/build.gradle.kts:141 : buildConfigField("String", "SUPPORTERS_API_BASE_URL", buildConfigString(localProperties.getProperty("SUPPORTERS_API_BASE_URL", "https://nuvio.tv/")))
 - apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
 - apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
 - apps/tv/app/build.gradle.kts:207 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
-- apps/tv/app/build.gradle.kts:208 : buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${devProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "https://nuvio.tv/tv-login")}\"")
-- apps/tv/app/build.gradle.kts:215 : buildConfigField("String", "SUPPORTERS_API_BASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "SUPPORTERS_API_BASE_URL", "https://nuvio.tv/")))
 - apps/tv/app/build.gradle.kts:240 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
 - apps/tv/app/build.gradle.kts:241 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
 - apps/tv/app/build.gradle.kts:242 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
-- apps/tv/app/build.gradle.kts:243 : buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "https://nuvio.tv/tv-login")}\"")
-- apps/tv/app/build.gradle.kts:250 : buildConfigField("String", "SUPPORTERS_API_BASE_URL", buildConfigString(localProperties.getProperty("SUPPORTERS_API_BASE_URL", "https://nuvio.tv/")))
-- apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:512 : .baseUrl(normalizedBaseUrl(BuildConfig.SUPPORTERS_API_BASE_URL, "https://nuvio.tv/"))
 - apps/tv/app/src/main/res/values/strings.xml:2236 : <string name="custom_server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
 - apps/tv/app/src/main/res/values/strings.xml:2237 : <string name="custom_server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2644 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
@@ -89,7 +82,14 @@ Fichiers inspectés : 4501
 - apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2074 : <string name="server_error_official_active">api.nuvio.tv to oficjalny serwer i jest już wybrany.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2075 : <string name="server_error_official_available">api.nuvio.tv to oficjalny serwer. Zamknij to okno i wybierz „Użyj oficjalnego serwera", aby przełączyć.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395 : <string name="server_error_official_active">api.nuvio.tv является официальным сервером и уже выбран.</string>
-- Autres correspondances non détaillées : 45
+- apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396 : <string name="server_error_official_available">api.nuvio.tv — официальный сервер. Закройте это диалоговое окно и выберите «Использовать официальный сервер», чтобы вернуться об
+- apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2217 : <string name="server_error_official_active">api.nuvio.tv je oficiálny server a už je vybraný.</string>
+- apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2218 : <string name="server_error_official_available">api.nuvio.tv je oficiálny server. Zatvorte toto okno a vyberte možnosť Použiť oficiálny server pre návrat.</string>
+- apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv Official server ہے اور پہلے ہی منتخب ہے۔</string>
+- apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv Official server ہے۔ یہ dialog بند کریں اور واپس جانے کے لیے Official server استعمال کریں منتخب کریں۔</string>
+- apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
+- apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
+- Autres correspondances non détaillées : 38
 
 ### Mises à jour et releases (12 correspondances)
 
@@ -106,14 +106,8 @@ Fichiers inspectés : 4501
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (58 correspondances)
+### Liens annexes (52 correspondances)
 
-- apps/tv/app/build.gradle.kts:126 : buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "https://nuvio.tv/link")}\"")
-- apps/tv/app/build.gradle.kts:142 : buildConfigField("String", "SUPPORT_URL", buildConfigString(localProperties.getProperty("SUPPORT_URL", "https://nuvio.tv/support")))
-- apps/tv/app/build.gradle.kts:209 : buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${devProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "https://nuvio.tv/link")}\"")
-- apps/tv/app/build.gradle.kts:216 : buildConfigField("String", "SUPPORT_URL", buildConfigString(resolveProperty(devProperties, localProperties, "SUPPORT_URL", "https://nuvio.tv/support")))
-- apps/tv/app/build.gradle.kts:244 : buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "https://nuvio.tv/link")}\"")
-- apps/tv/app/build.gradle.kts:251 : buildConfigField("String", "SUPPORT_URL", buildConfigString(localProperties.getProperty("SUPPORT_URL", "https://nuvio.tv/support")))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:310 : .baseUrl("https://placeholder.nuvio.tv/")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/AboutScreen.kt:162 : Uri.parse("https://nuvio.tv/privacy-policy")
@@ -338,7 +332,7 @@ Fichiers inspectés : 4501
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6729 lignes.
+- apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
 - apps/desktop : 7809 lignes.
 

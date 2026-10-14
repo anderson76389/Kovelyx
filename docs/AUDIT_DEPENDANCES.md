@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6797**.
+Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6785**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -22,7 +22,6 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 | `addon.example` | 22 |
 | `.` | 20 |
 | `www.apache.org` | 19 |
-| `nuvio.tv` | 18 |
 | `127.0.0.1` | 16 |
 | `video.example.com` | 16 |
 | `x` | 16 |
@@ -32,12 +31,13 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 | `media.trakt.tv` | 14 |
 | `simkl.com` | 13 |
 | `api.aioratings.com` | 13 |
+| `github.com` | 12 |
 | `example.test` | 12 |
+| `localhost` | 10 |
 | `image.tmdb.org` | 10 |
 | `mdblist.com` | 9 |
-| `localhost` | 9 |
-| `github.com` | 9 |
 | `postersplus.example.com` | 9 |
+| `subs.example.com` | 8 |
 
 ### Références à vérifier en priorité
 
@@ -45,18 +45,6 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/local.example.properties:16`
 - `apps/tv/local.example.properties:17`
 - `apps/tv/app/build.gradle.kts:100`
-- `apps/tv/app/build.gradle.kts:125`
-- `apps/tv/app/build.gradle.kts:126`
-- `apps/tv/app/build.gradle.kts:141`
-- `apps/tv/app/build.gradle.kts:142`
-- `apps/tv/app/build.gradle.kts:208`
-- `apps/tv/app/build.gradle.kts:209`
-- `apps/tv/app/build.gradle.kts:215`
-- `apps/tv/app/build.gradle.kts:216`
-- `apps/tv/app/build.gradle.kts:243`
-- `apps/tv/app/build.gradle.kts:244`
-- `apps/tv/app/build.gradle.kts:250`
-- `apps/tv/app/build.gradle.kts:251`
 - `apps/tv/app/build.gradle.kts:374`
 - `apps/tv/app/build.gradle.kts:406`
 - `apps/tv/baselineprofile/build.gradle.kts:8`
@@ -121,7 +109,19 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:421`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/FetchResponseHeaders.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:1`
-- …et 6717 autres correspondances (plafond d'affichage).
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:9`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:10`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:11`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:50`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:1`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:10`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:53`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/TvTypeExtensions.kt:1`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:1`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:24`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:25`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:26`
+- …et 6705 autres correspondances (plafond d'affichage).
 
 ## Android
 
