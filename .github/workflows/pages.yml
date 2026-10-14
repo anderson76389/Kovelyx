@@ -1,4 +1,4 @@
-name: Site Kovelyx - GitHub Pages
+name: Publier le site Kovelyx (branche gh-pages)
 
 on:
   push:
@@ -9,41 +9,55 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: pages
+  group: kovelyx-gh-pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  publish:
+    name: Synchroniser docs vers gh-pages
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 10
     steps:
-      - name: Récupérer le site
+      - name: Récupérer le dépôt et la branche du site
         uses: actions/checkout@v4
-      - name: Configurer GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Vérifier le site (pas de téléchargement fictif)
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Vérifier les ressources du site
         shell: bash
         run: |
           set -euo pipefail
           test -s docs/index.html
+          test -s docs/site.js
+          test -s docs/site.css
           test -s docs/brand/logo.svg
           test -s docs/brand/banner.svg
-          test -s docs/site.css
-          test -s docs/site.js
-          grep -q 'site.css' docs/index.html
-          grep -q 'site.js' docs/index.html
+          node --check docs/site.js
           grep -q 'api.github.com/repos/' docs/site.js
-      - name: Préparer les fichiers statiques
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-      - name: Publier sur GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+
+      - name: Synchroniser les fichiers statiques
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages
+          SITE_DIR="$RUNNER_TEMP/kovelyx-pages"
+          git worktree add --detach "$SITE_DIR" FETCH_HEAD
+          find "$SITE_DIR" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf -- {} +
+          cp -a docs/. "$SITE_DIR/"
+          touch "$SITE_DIR/.nojekyll"
+          git -C "$SITE_DIR" add -A
+          if git -C "$SITE_DIR" diff --cached --quiet; then
+            echo "Le site gh-pages est déjà à jour."
+          else
+            git -C "$SITE_DIR" commit -m "site: met à jour les fichiers depuis main/docs"
+            git -C "$SITE_DIR" push origin HEAD:gh-pages
+          fi
+          test -s "$SITE_DIR/index.html"
+          echo "Les fichiers du site sont publiés dans la branche gh-pages."
+          echo "Une seule activation manuelle est nécessaire : Settings > Pages > Deploy from a branch > gh-pages > /(root)."
