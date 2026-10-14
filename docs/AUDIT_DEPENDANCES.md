@@ -246,7 +246,7 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **132**.
+Fichiers texte examinés : **1779** ; références statiques à Nuvio/NuvioMedia : **132**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -340,7 +340,7 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/MPVKit/Package.swift:304`
 - `apps/desktop/composeApp/build.gradle.kts:127`
 - `apps/desktop/composeApp/build.gradle.kts:141`
-- `apps/desktop/composeApp/build.gradle.kts:1342`
+- `apps/desktop/composeApp/build.gradle.kts:1344`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:4`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:7`
