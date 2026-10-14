@@ -121,6 +121,7 @@ object AuthRepository {
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
         SupabaseProvider.client.auth.signUpWith(Email) {
             this.email = email
             this.password = password
@@ -134,6 +135,7 @@ object AuthRepository {
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
         SupabaseProvider.client.auth.signInWith(Email) {
             this.email = email
             this.password = password
