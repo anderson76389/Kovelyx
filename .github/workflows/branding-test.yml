@@ -1,0 +1,49 @@
+name: Tester les logos et variantes Kovelyx
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/generate-compose-brand.py'
+      - '.github/workflows/branding-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate-compose-brand.py'
+      - '.github/workflows/branding-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  assets:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Générer et contrôler les six variantes de couleurs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/generate-compose-brand.py --project apps/desktop
+          python - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageChops
+          base=Path('apps/desktop/composeApp/src/commonMain/composeResources/drawable')
+          names=('original','arctic_blue','emerald','rose_gold','copper','graphite')
+          for name in names:
+              original=Image.open(base/f'app_icon_{name}.png').convert('RGBA')
+              transparent=Image.open(base/f'app_icon_{name}_transparent.png').convert('RGBA')
+              wordmark=Image.open(base/f'app_logo_wordmark_{name}.png').convert('RGBA')
+              assert original.size == (512,512)
+              assert transparent.getpixel((0,0))[3] == 0
+              assert transparent.getbbox() is not None
+              assert wordmark.getbbox() is not None
+              assert wordmark.width > wordmark.height
+          assert ImageChops.difference(Image.open(base/'app_icon_original.png'),Image.open(base/'app_icon_emerald.png')).convert('RGB').getbbox()
+          print('OK: six variantes distinctes et splash wordmark Kovelyx')
+          PY
