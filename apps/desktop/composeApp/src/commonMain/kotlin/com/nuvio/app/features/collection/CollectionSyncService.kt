@@ -45,51 +45,50 @@ object CollectionSyncService {
     }
 
     suspend fun pullFromServer(profileId: Int) {
-        if (ProfileRepository.activeProfileId != profileId) return
-        runCatching {
-            val params = buildJsonObject {
-                put("p_profile_id", profileId)
-            }
-            val result = SupabaseProvider.client.postgrest.rpc("sync_pull_collections", params)
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching
-            val blobs = result.decodeList<SupabaseCollectionBlob>()
-            val blob = blobs.firstOrNull()
+        pullFromServerChecked(profileId)
+    }
 
+    /** Un import destructif ne doit jamais continuer si le chargement du compte a échoué. */
+    suspend fun pullFromServerChecked(profileId: Int): Boolean {
+        if (ProfileRepository.activeProfileId != profileId) return false
+        return runCatching {
+            val params = buildJsonObject { put("p_profile_id", profileId) }
+            val result = SupabaseProvider.client.postgrest.rpc("sync_pull_collections", params)
+            if (ProfileRepository.activeProfileId != profileId) return@runCatching false
+            val blob = result.decodeList<SupabaseCollectionBlob>().firstOrNull()
             if (blob == null) {
                 log.i { "pullFromServer — no remote collections found" }
-                return
+                return@runCatching true
             }
-
-            val remoteCollectionsJson = if (blob.collectionsJson == JsonNull) {
-                JsonArray(emptyList())
-            } else {
-                blob.collectionsJson
-            }
+            val remoteCollectionsJson = if (blob.collectionsJson == JsonNull)
+                JsonArray(emptyList()) else blob.collectionsJson
             val remoteJson = remoteCollectionsJson.toString()
             val localJson = CollectionRepository.exportToJson()
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching
-
+            if (ProfileRepository.activeProfileId != profileId) return@runCatching false
             if (remoteJson == localJson) {
-                log.d { "pullFromServer — remote matches local, no update needed" }
-                return
+                log.d { "pullFromServer — remote matches local" }
+                return@runCatching true
             }
-
             val remoteCollections = runCatching {
                 json.decodeFromString<List<Collection>>(remoteJson)
             }.getOrNull()
-
-            if (remoteCollections != null) {
-                if (ProfileRepository.activeProfileId != profileId) return@runCatching
-                isSyncingFromRemote = true
-                CollectionRepository.applyFromRemote(remoteCollections, remoteCollectionsJson)
-                isSyncingFromRemote = false
-                log.i { "pullFromServer — applied ${remoteCollections.size} collections from remote" }
-            } else {
+            if (remoteCollections == null) {
                 log.w { "pullFromServer — failed to parse remote collections JSON" }
+                return@runCatching false
             }
-        }.onFailure { e ->
+            if (ProfileRepository.activeProfileId != profileId) return@runCatching false
+            isSyncingFromRemote = true
+            try {
+                CollectionRepository.applyFromRemote(remoteCollections, remoteCollectionsJson)
+            } finally {
+                isSyncingFromRemote = false
+            }
+            log.i { "pullFromServer — applied " + remoteCollections.size + " collections from remote" }
+            true
+        }.getOrElse { error ->
             isSyncingFromRemote = false
-            log.e(e) { "pullFromServer — FAILED" }
+            log.e(error) { "pullFromServer — FAILED" }
+            false
         }
     }
 
