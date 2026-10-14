@@ -1,0 +1,33 @@
+name: Vérifier toutes les traductions françaises PC
+
+on:
+  pull_request:
+    paths:
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
+      - 'scripts/tests/check-french-resources.py'
+      - '.github/workflows/validate-french.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
+      - 'scripts/tests/check-french-resources.py'
+      - '.github/workflows/validate-french.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Couverture française à 100 %
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier XML, clés et paramètres des chaînes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/tests/check-french-resources.py
