@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -470,6 +471,7 @@ internal fun TrackingProviderCard(
     val displayedApprovalCode = authorizationCode ?: approvalCode
     val failedOpenBrowserMessage = stringResource(Res.string.settings_trakt_failed_open_browser)
     var browserError by rememberSaveable { mutableStateOf(false) }
+    var openBrowserAfterConnect by remember { mutableStateOf(false) }
     var showDisconnectDialog by rememberSaveable { mutableStateOf(false) }
     var localStatusMessage by rememberSaveable(displayedApprovalCode) { mutableStateOf<String?>(null) }
 
@@ -478,6 +480,20 @@ internal fun TrackingProviderCard(
         browserError = false
         runCatching { uriHandler.openUri(url) }
             .onFailure { browserError = true }
+    }
+
+    // Trakt Windows creates its device authorization link asynchronously.
+    // Opening it here, after the user clicked Connect, also works for future providers.
+    LaunchedEffect(approvalUrl, mode, openBrowserAfterConnect, errorMessage) {
+        if (!errorMessage.isNullOrBlank() && openBrowserAfterConnect) {
+            openBrowserAfterConnect = false
+        } else if (openBrowserAfterConnect &&
+            mode == TrackingConnectionCardMode.AWAITING_APPROVAL &&
+            !approvalUrl.isNullOrBlank()
+        ) {
+            openBrowserAfterConnect = false
+            openUrl(approvalUrl)
+        }
     }
 
     Box(
@@ -555,11 +571,18 @@ internal fun TrackingProviderCard(
                         loading = isLoading,
                         enabled = !isLoading,
                         onClick = {
-                            actionScope.launch { openUrl(onResumeAuthorization()) }
+                            actionScope.launch {
+                                val url = onResumeAuthorization()
+                                if (!url.isNullOrBlank()) openUrl(url)
+                                else openBrowserAfterConnect = true
+                            }
                         },
                     )
                     OutlinedButton(
-                        onClick = onCancelAuthorization,
+                        onClick = {
+                            openBrowserAfterConnect = false
+                            onCancelAuthorization()
+                        },
                         enabled = !isLoading,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -585,7 +608,11 @@ internal fun TrackingProviderCard(
                         loading = isLoading,
                         enabled = credentialsConfigured && !isLoading,
                         onClick = {
-                            actionScope.launch { openUrl(onConnectRequested()) }
+                            actionScope.launch {
+                                val url = onConnectRequested()
+                                if (!url.isNullOrBlank()) openUrl(url)
+                                else openBrowserAfterConnect = true
+                            }
                         },
                     )
                     if (!credentialsConfigured) {
