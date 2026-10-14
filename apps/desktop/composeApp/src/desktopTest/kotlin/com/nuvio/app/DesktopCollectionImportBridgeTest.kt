@@ -31,6 +31,20 @@ class DesktopCollectionImportBridgeTest {
         assertEquals(null, DesktopCollectionImportBridge.pending.value)
     }
 
+    @Test
+    fun bundleImportIsAcceptedButNeverAppliedWithoutConfirmation() {
+        DesktopCollectionImportBridge.start()
+        val json = """{"format":"ma-collection-bundle-v1","collections":[{"id":"test","title":"Test","folders":[]}],"setup":{"version":1,"tmdbKey":"qa-tmdb","poster":{"provider":"rpdb","pattern":"https://api.ratingposterdb.com/t0-free-rpdb/imdb/poster-default/{imdb_id}.jpg"},"addons":[]}}"""
+        val unpacked = DesktopCollectionImportBridge.unpack(json)
+        assertTrue(unpacked.collections.startsWith("["))
+        assertEquals("qa-tmdb", unpacked.setup?.get("tmdbKey")?.toString()?.trim('"'))
+        assertEquals(202, post("https://anderson76389.github.io", json))
+        assertEquals(json, DesktopCollectionImportBridge.pending.value)
+        DesktopCollectionImportBridge.pending.value?.let(DesktopCollectionImportBridge::discard)
+        assertEquals(null, DesktopCollectionImportBridge.pending.value)
+        assertEquals(422, post("https://anderson76389.github.io", """{"format":"unknown","collections":[]}"""))
+    }
+
     private fun post(origin: String, body: String): Int {
         // HttpURLConnection drops Origin as a restricted header on some JDKs.
         // java.net.http sets it explicitly, like a browser CORS request.

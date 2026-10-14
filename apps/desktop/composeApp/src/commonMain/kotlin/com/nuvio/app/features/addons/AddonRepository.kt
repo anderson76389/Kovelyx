@@ -172,7 +172,7 @@ object AddonRepository {
         if (isUsingPrimaryAddonsFromSecondaryProfile()) {
             return AddAddonResult.Error(getString(Res.string.profile_primary_addons_required))
         }
-        log.i { "addAddon() — rawUrl=$rawUrl" }
+        log.i { "addAddon() — chargement du manifest demandé" } // Ne jamais journaliser une clé API présente dans une URL.
         val manifestUrl = try {
             normalizeManifestUrl(rawUrl)
         } catch (error: IllegalArgumentException) {
