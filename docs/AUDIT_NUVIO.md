@@ -1,0 +1,465 @@
+# Audit Nuvio des trois applications
+
+Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
+un symbole de package historique ne prouve pas une dépendance de service.
+
+Fichiers inspectés : 4501
+
+## Inventaire des références à traiter
+
+### Connexions et services (554 correspondances)
+
+- apps/tv/app/build.gradle.kts:125 : buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "https://nuvio.tv/tv-login")}\"")
+- apps/tv/app/build.gradle.kts:141 : buildConfigField("String", "SUPPORTERS_API_BASE_URL", buildConfigString(localProperties.getProperty("SUPPORTERS_API_BASE_URL", "https://nuvio.tv/")))
+- apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
+- apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
+- apps/tv/app/build.gradle.kts:207 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
+- apps/tv/app/build.gradle.kts:208 : buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${devProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "https://nuvio.tv/tv-login")}\"")
+- apps/tv/app/build.gradle.kts:215 : buildConfigField("String", "SUPPORTERS_API_BASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "SUPPORTERS_API_BASE_URL", "https://nuvio.tv/")))
+- apps/tv/app/build.gradle.kts:240 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
+- apps/tv/app/build.gradle.kts:241 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
+- apps/tv/app/build.gradle.kts:242 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
+- apps/tv/app/build.gradle.kts:243 : buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "https://nuvio.tv/tv-login")}\"")
+- apps/tv/app/build.gradle.kts:250 : buildConfigField("String", "SUPPORTERS_API_BASE_URL", buildConfigString(localProperties.getProperty("SUPPORTERS_API_BASE_URL", "https://nuvio.tv/")))
+- apps/tv/app/src/main/java/com/nuvio/tv/MainActivity.kt:161 : import com.nuvio.tv.data.remote.supabase.AvatarRepository
+- apps/tv/app/src/main/java/com/nuvio/tv/MainActivity.kt:314 : lateinit var profileBackgroundRepository: com.nuvio.tv.data.remote.supabase.ProfileBackgroundRepository
+- apps/tv/app/src/main/java/com/nuvio/tv/MainActivity.kt:475 : var avatarCatalog by remember { mutableStateOf(emptyList<com.nuvio.tv.data.remote.supabase.AvatarCatalogItem>()) }
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AccountLocalDataResetService.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AccountLocalDataResetService.kt:5 : import com.nuvio.tv.core.sync.androidtv.AndroidTvChannelManager
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AccountLocalDataResetService.kt:6 : import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AccountLocalDataResetService.kt:7 : import com.nuvio.tv.data.local.ProfileDataStore
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AccountLocalDataResetService.kt:8 : import com.nuvio.tv.data.local.ProfileDataStoreFactory
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AccountLocalDataResetService.kt:9 : import com.nuvio.tv.data.local.ProfileLockStateDataStore
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:5 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:6 : import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticEventListenerFactory
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:7 : import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticsSession
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:8 : import com.nuvio.tv.core.auth.diagnostics.authDiagnosticFilteredBody
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:9 : import com.nuvio.tv.core.logging.bodySnippetForLog
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:10 : import com.nuvio.tv.core.logging.diagnosticSummary
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:11 : import com.nuvio.tv.core.logging.rawForLog
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:12 : import com.nuvio.tv.core.logging.urlForLog
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:13 : import com.nuvio.tv.data.local.AuthSessionNoticeDataStore
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:14 : import com.nuvio.tv.data.remote.supabase.DeviceLoginStartResult
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:15 : import com.nuvio.tv.data.remote.supabase.TvLoginExchangeResult
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:16 : import com.nuvio.tv.data.remote.supabase.TvLoginPollResult
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:17 : import com.nuvio.tv.data.remote.supabase.TvLoginStartResult
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:18 : import com.nuvio.tv.data.repository.AuthDiagnosticReportRepository
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:19 : import com.nuvio.tv.domain.model.AuthState
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthManager.kt:20 : import com.nuvio.tv.domain.model.ServerConfiguration
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthRefreshResponsePolicy.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthSessionValidationPolicy.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/AuthSessionValidator.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/DeviceSessionRegistration.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/DeviceSessionRegistration.kt:8 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/DeviceSessionRegistration.kt:9 : import com.nuvio.tv.core.sync.SyncClientIdentity
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/DeviceSessionRegistration.kt:10 : import com.nuvio.tv.domain.model.AuthState
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/SupabaseAuthSession.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/SupabaseAuthSession.kt:3 : import com.nuvio.tv.data.remote.supabase.TvLoginExchangeResult
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:1 : package com.nuvio.tv.core.auth.diagnostics
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:7 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:8 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticAppDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:9 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticDeviceDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:10 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticEnvironmentDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:11 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticEventDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:12 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticExceptionDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:13 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticFlowDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:14 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticNetworkDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:15 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticReportRequestDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:16 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticRequestDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:17 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticResponseDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:18 : import com.nuvio.tv.data.remote.dto.AuthDiagnosticTerminalDto
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:19 : import com.nuvio.tv.data.repository.AuthDiagnosticReportRepository
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:20 : import com.nuvio.tv.domain.model.ServerConfiguration
+- apps/tv/app/src/main/java/com/nuvio/tv/core/auth/diagnostics/AuthDiagnostics.kt:415 : if (error.causeChain().any { it.startsWith("com.nuvio.tv.core.auth.AuthHttpException:") }) return null
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/LibrarySyncModule.kt:6 : import com.nuvio.tv.data.remote.supabase.SupabaseLibrarySyncRemoteDataSource
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:1 : package com.nuvio.tv.core.di
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:4 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:5 : import com.nuvio.tv.core.network.NoDelaySocketFactory
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:6 : import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:7 : import com.nuvio.tv.core.sync.SyncClientIdentity
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:8 : import com.nuvio.tv.data.local.ProfileDataStore
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:9 : import com.nuvio.tv.data.mediaserver.AndroidServerPersistence
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:10 : import com.nuvio.tv.data.mediaserver.ServerRepository
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:11 : import com.nuvio.tv.data.mediaserver.emby.EmbyProvider
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:12 : import com.nuvio.tv.data.mediaserver.jellyfin.JellyfinProvider
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/MediaServerModule.kt:13 : import com.nuvio.tv.data.mediaserver.mediabrowser.ServerClientIdentity
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:12 : import com.nuvio.tv.data.remote.api.SupportersApi
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:512 : .baseUrl(normalizedBaseUrl(BuildConfig.SUPPORTERS_API_BASE_URL, "https://nuvio.tv/"))
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/SupabaseModule.kt:1 : package com.nuvio.tv.core.di
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/SupabaseModule.kt:3 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/SupabaseModule.kt:4 : import com.nuvio.tv.core.auth.TransientAuthRefreshException
+- Autres correspondances non détaillées : 474
+
+### Mises à jour et releases (68 correspondances)
+
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:4 : import com.nuvio.tv.data.remote.dto.GitHubAssetDto
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkDownloader.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:9 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdatePreferences.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdatePreferences.kt:11 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:3 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:4 : import com.nuvio.tv.data.remote.api.GitHubReleaseApi
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:5 : import com.nuvio.tv.updater.model.AppUpdate
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:6 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:7 : import com.nuvio.tv.R
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:8 : import com.nuvio.tv.updater.model.AppUpdate
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/model/AppUpdate.kt:1 : package com.nuvio.tv.updater.model
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:3 : package com.nuvio.tv.updater.ui
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:46 : import com.nuvio.tv.R
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:47 : import com.nuvio.tv.domain.model.AppTheme
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:48 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:49 : import com.nuvio.tv.ui.theme.ThemeColors
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:50 : import com.nuvio.tv.ui.theme.accentBrush
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:51 : import com.nuvio.tv.updater.UpdateUiState
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBanner.kt:52 : import com.nuvio.tv.updater.model.AppUpdate
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBannerHost.kt:1 : package com.nuvio.tv.updater.ui
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateBannerHost.kt:27 : import com.nuvio.tv.updater.UpdateUiState
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateDialogs.kt:3 : package com.nuvio.tv.updater.ui
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateDialogs.kt:48 : import com.nuvio.tv.R
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateDialogs.kt:49 : import com.nuvio.tv.ui.components.NuvioDialog
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateDialogs.kt:50 : import com.nuvio.tv.ui.screens.detail.requestFocusAfterFrames
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateDialogs.kt:51 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/full/java/com/nuvio/tv/updater/ui/UpdateDialogs.kt:52 : import com.nuvio.tv.updater.model.AppUpdate
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:11 : import com.nuvio.tv.data.remote.api.GitHubReleaseApi
+- apps/tv/app/src/main/java/com/nuvio/tv/core/util/EpisodeReleaseDateParser.kt:1 : package com.nuvio.tv.core.util
+- apps/tv/app/src/main/java/com/nuvio/tv/core/util/ReleaseInfoUtils.kt:1 : package com.nuvio.tv.core.util
+- apps/tv/app/src/main/java/com/nuvio/tv/core/util/ReleaseInfoUtils.kt:3 : import com.nuvio.tv.domain.model.CatalogRow
+- apps/tv/app/src/main/java/com/nuvio/tv/core/util/ReleaseInfoUtils.kt:4 : import com.nuvio.tv.domain.model.MetaPreview
+- apps/tv/app/src/main/java/com/nuvio/tv/data/remote/api/GitHubReleaseApi.kt:1 : package com.nuvio.tv.data.remote.api
+- apps/tv/app/src/main/java/com/nuvio/tv/data/remote/api/GitHubReleaseApi.kt:3 : import com.nuvio.tv.data.remote.dto.GitHubContributorDto
+- apps/tv/app/src/main/java/com/nuvio/tv/data/remote/api/GitHubReleaseApi.kt:4 : import com.nuvio.tv.data.remote.dto.GitHubReleaseDto
+- apps/tv/app/src/main/java/com/nuvio/tv/data/remote/dto/GitHubReleaseDto.kt:1 : package com.nuvio.tv.data.remote.dto
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/LicensesAttributionsScreen.kt:68 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioTV"
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/SupportersContributorsScreen.kt:77 : import com.nuvio.tv.data.repository.GitHubContributor
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/SupportersContributorsViewModel.kt:5 : import com.nuvio.tv.data.repository.GitHubContributor
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/SupportersContributorsViewModel.kt:6 : import com.nuvio.tv.data.repository.GitHubContributorsRepository
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/UpdateChannelSettings.kt:1 : package com.nuvio.tv.ui.screens.settings
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/UpdateChannelSettings.kt:19 : import com.nuvio.tv.R
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/UpdateChannelSettings.kt:20 : import com.nuvio.tv.updater.UpdateChannel
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/UpdateChannelSettings.kt:21 : import com.nuvio.tv.updater.UpdateViewModel
+- apps/tv/app/src/main/java/com/nuvio/tv/updater/ReleaseSelector.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/main/java/com/nuvio/tv/updater/ReleaseSelector.kt:3 : import com.nuvio.tv.data.remote.dto.GitHubReleaseDto
+- apps/tv/app/src/main/java/com/nuvio/tv/updater/UpdateBannerPolicy.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/main/java/com/nuvio/tv/updater/UpdateChannel.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/main/java/com/nuvio/tv/updater/VersionUtils.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/playstore/java/com/nuvio/tv/updater/UpdateViewModel.kt:1 : package com.nuvio.tv.updater
+- apps/tv/app/src/playstore/java/com/nuvio/tv/updater/ui/UpdateBannerHost.kt:1 : package com.nuvio.tv.updater.ui
+- apps/tv/app/src/playstore/java/com/nuvio/tv/updater/ui/UpdateBannerHost.kt:4 : import com.nuvio.tv.updater.UpdateUiState
+- apps/mobile/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.5/Libmpv.xcframework.zip",
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
+- apps/mobile/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
+- apps/desktop/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.4/Libmpv.xcframework.zip",
+- apps/desktop/composeApp/src/androidFull/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:12 : owner = "NuvioMedia",
+- apps/desktop/composeApp/src/androidPlaystore/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:15 : owner = "NuvioMedia",
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:51 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:52 : private const val DesktopRepositoryUrl = "https://github.com/NuvioMedia/NuvioDesktop"
+- apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.ios.kt:15 : owner = "NuvioMedia",
+- apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
+- apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
+
+### Liens annexes (58 correspondances)
+
+- apps/tv/app/build.gradle.kts:126 : buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "https://nuvio.tv/link")}\"")
+- apps/tv/app/build.gradle.kts:142 : buildConfigField("String", "SUPPORT_URL", buildConfigString(localProperties.getProperty("SUPPORT_URL", "https://nuvio.tv/support")))
+- apps/tv/app/build.gradle.kts:209 : buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${devProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "https://nuvio.tv/link")}\"")
+- apps/tv/app/build.gradle.kts:216 : buildConfigField("String", "SUPPORT_URL", buildConfigString(resolveProperty(devProperties, localProperties, "SUPPORT_URL", "https://nuvio.tv/support")))
+- apps/tv/app/build.gradle.kts:244 : buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${localProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "https://nuvio.tv/link")}\"")
+- apps/tv/app/build.gradle.kts:251 : buildConfigField("String", "SUPPORT_URL", buildConfigString(localProperties.getProperty("SUPPORT_URL", "https://nuvio.tv/support")))
+- apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:310 : .baseUrl("https://placeholder.nuvio.tv/")
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
+- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/AboutScreen.kt:162 : Uri.parse("https://nuvio.tv/privacy-policy")
+- apps/tv/local.example.properties:16 : SUPPORT_URL=https://nuvio.tv/support
+- apps/tv/local.example.properties:17 : PLAYBACK_REPORTS_BASE_URL=https://nuvio.tv/
+- apps/mobile/composeApp/build.gradle.kts:106 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
+- apps/mobile/composeApp/build.gradle.kts:120 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56 : append("nuvio://meta
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62 : fun buildDownloadsDeepLinkUrl(): String = "nuvio://downloads"
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107 : append("nuvio://external-player/infuse/$sessionId/success".encodeURLParameter())
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109 : append("nuvio://external-player/infuse/$sessionId/error".encodeURLParameter())
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/SettingsRootPage.kt:67 : private const val PRIVACY_POLICY_URL = "https://nuvio.tv/privacy-policy"
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13 : parseAppDeepLink("nuvio://meta
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37 : parseAppDeepLink("nuvio://series/tt0944947"),
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45 : parseAppDeepLink("nuvio://imdb/series/tt0944947"),
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53 : parseAppDeepLink("nuvio://tmdb/tv/1399"),
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59 : assertNull(parseAppDeepLink("nuvio://auth/trakt
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:39 : assertEquals("nuvio://external-player/infuse/session-1/success", url.parameters["x-success"])
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:40 : assertEquals("nuvio://external-player/infuse/session-1/error", url.parameters["x-error"])
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153 : assertFalse(callbacks.handleUrl("nuvio://meta
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158 : assertTrue(callbacks.handleUrl("nuvio://external-player/infuse/session-1/success
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46 : redirectUri = "nuvio://auth/simkl",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61 : parseSimklAuthCallback("nuvio://auth/trakt
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
+- apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
+- apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
+- apps/desktop/composeApp/build.gradle.kts:127 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
+- apps/desktop/composeApp/build.gradle.kts:141 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56 : append("nuvio://meta
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62 : fun buildDownloadsDeepLinkUrl(): String = "nuvio://downloads"
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107 : append("nuvio://external-player/infuse/$sessionId/success".encodeURLParameter())
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109 : append("nuvio://external-player/infuse/$sessionId/error".encodeURLParameter())
+- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/SettingsRootPage.kt:55 : private const val PRIVACY_POLICY_URL = "https://nuvio.tv/privacy-policy"
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13 : parseAppDeepLink("nuvio://meta
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37 : parseAppDeepLink("nuvio://series/tt0944947"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45 : parseAppDeepLink("nuvio://imdb/series/tt0944947"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53 : parseAppDeepLink("nuvio://tmdb/tv/1399"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59 : assertNull(parseAppDeepLink("nuvio://auth/trakt
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:39 : assertEquals("nuvio://external-player/infuse/session-1/success", url.parameters["x-success"])
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:40 : assertEquals("nuvio://external-player/infuse/session-1/error", url.parameters["x-error"])
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153 : assertFalse(callbacks.handleUrl("nuvio://meta
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158 : assertTrue(callbacks.handleUrl("nuvio://external-player/infuse/session-1/success
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46 : redirectUri = "nuvio://auth/simkl",
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61 : parseSimklAuthCallback("nuvio://auth/trakt
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:284 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
+- apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
+
+### Archives et tests (1263 correspondances)
+
+- apps/tv/.github/workflows/android-release.yml:221 : run: ./gradlew :app:testFullReleaseUnitTest --tests 'com.nuvio.tv.updater.*' :app:assembleFullRelease --stacktrace
+- apps/tv/.github/workflows/pr-full-debug-build.yml:70 : run: ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.updater.*' :app:assembleFullDebug --stacktrace
+- apps/tv/app/src/main/java/com/nuvio/tv/core/plugin/TestDiagnostics.kt:1 : package com.nuvio.tv.core.plugin
+- apps/tv/app/src/test/java/com/nuvio/tv/MainDispatcherRule.kt:1 : package com.nuvio.tv
+- apps/tv/app/src/test/java/com/nuvio/tv/TestPreferencesStore.kt:1 : package com.nuvio.tv
+- apps/tv/app/src/test/java/com/nuvio/tv/core/auth/AuthRefreshResponsePolicyTest.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/test/java/com/nuvio/tv/core/auth/AuthSessionValidationPolicyTest.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/test/java/com/nuvio/tv/core/auth/DeviceSessionRegistrationTest.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/test/java/com/nuvio/tv/core/auth/SupabaseAuthSessionTest.kt:1 : package com.nuvio.tv.core.auth
+- apps/tv/app/src/test/java/com/nuvio/tv/core/auth/SupabaseAuthSessionTest.kt:3 : import com.nuvio.tv.data.remote.supabase.TvLoginExchangeResult
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:3 : import com.nuvio.tv.data.remote.dto.PremiumizeDirectDownloadFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:4 : import com.nuvio.tv.data.remote.dto.RealDebridTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:5 : import com.nuvio.tv.data.remote.dto.TorboxTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:6 : import com.nuvio.tv.domain.model.StreamClientResolve
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:7 : import com.nuvio.tv.domain.model.StreamClientResolveRaw
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectionTest.kt:8 : import com.nuvio.tv.domain.model.StreamClientResolveStream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorParityTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorParityTest.kt:3 : import com.nuvio.tv.data.remote.dto.PremiumizeDirectDownloadFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorParityTest.kt:4 : import com.nuvio.tv.data.remote.dto.RealDebridTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorParityTest.kt:5 : import com.nuvio.tv.data.remote.dto.TorboxTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorParityTest.kt:6 : import com.nuvio.tv.domain.model.StreamClientResolve
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorReleaseTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorReleaseTest.kt:3 : import com.nuvio.tv.data.remote.dto.PremiumizeDirectDownloadFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorReleaseTest.kt:4 : import com.nuvio.tv.data.remote.dto.RealDebridTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorReleaseTest.kt:5 : import com.nuvio.tv.data.remote.dto.TorboxTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridFileSelectorReleaseTest.kt:6 : import com.nuvio.tv.domain.model.StreamClientResolve
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridMagnetBuilderTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridMagnetBuilderTest.kt:3 : import com.nuvio.tv.domain.model.Stream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridMagnetBuilderTest.kt:4 : import com.nuvio.tv.domain.model.StreamBehaviorHints
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridProvidersTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridProvidersTest.kt:3 : import com.nuvio.tv.domain.model.DebridSettings
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamFormatterTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamFormatterTest.kt:3 : import com.nuvio.tv.domain.model.DebridSettings
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamFormatterTest.kt:4 : import com.nuvio.tv.domain.model.Stream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamFormatterTest.kt:5 : import com.nuvio.tv.domain.model.StreamBehaviorHints
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamFormatterTest.kt:6 : import com.nuvio.tv.domain.model.StreamDebridCacheState
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamFormatterTest.kt:7 : import com.nuvio.tv.domain.model.StreamDebridCacheStatus
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DebridStreamTemplateEngineTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:3 : import com.nuvio.tv.data.mapper.toDomain
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:4 : import com.nuvio.tv.data.remote.dto.StreamResponseDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:5 : import com.nuvio.tv.domain.model.DebridSettings
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:6 : import com.nuvio.tv.domain.model.DebridStreamCodecFilter
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:7 : import com.nuvio.tv.domain.model.DebridStreamAudioChannel
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:8 : import com.nuvio.tv.domain.model.DebridStreamAudioTag
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:9 : import com.nuvio.tv.domain.model.DebridStreamEncode
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:10 : import com.nuvio.tv.domain.model.DebridStreamFeatureFilter
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:11 : import com.nuvio.tv.domain.model.DebridStreamLanguage
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:12 : import com.nuvio.tv.domain.model.DebridStreamMinimumQuality
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:13 : import com.nuvio.tv.domain.model.DebridStreamPreferences
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:14 : import com.nuvio.tv.domain.model.DebridStreamQuality
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:15 : import com.nuvio.tv.domain.model.DebridStreamResolution
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:16 : import com.nuvio.tv.domain.model.DebridStreamSortCriterion
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:17 : import com.nuvio.tv.domain.model.DebridStreamSortDirection
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:18 : import com.nuvio.tv.domain.model.DebridStreamSortKey
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:19 : import com.nuvio.tv.domain.model.DebridStreamSortMode
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:20 : import com.nuvio.tv.domain.model.DebridStreamVisualTag
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:21 : import com.nuvio.tv.domain.model.Stream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:22 : import com.nuvio.tv.domain.model.StreamClientResolve
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:23 : import com.nuvio.tv.domain.model.StreamClientResolveParsed
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:24 : import com.nuvio.tv.domain.model.StreamClientResolveRaw
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/DirectDebridStreamFilterTest.kt:25 : import com.nuvio.tv.domain.model.StreamClientResolveStream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:3 : import com.nuvio.tv.data.local.DebridSettingsDataStore
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:4 : import com.nuvio.tv.domain.model.AddonStreams
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:5 : import com.nuvio.tv.domain.model.DebridSettings
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:6 : import com.nuvio.tv.domain.model.Stream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:7 : import com.nuvio.tv.domain.model.StreamBehaviorHints
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/LocalDebridAvailabilityServiceTest.kt:8 : import com.nuvio.tv.domain.model.StreamDebridCacheState
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:1 : package com.nuvio.tv.core.debrid
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:3 : import com.nuvio.tv.data.local.DebridSettingsDataStore
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:4 : import com.nuvio.tv.data.remote.api.RealDebridApi
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:5 : import com.nuvio.tv.data.remote.dto.RealDebridAddTorrentDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:6 : import com.nuvio.tv.data.remote.dto.RealDebridTorrentFileDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:7 : import com.nuvio.tv.data.remote.dto.RealDebridTorrentInfoDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:8 : import com.nuvio.tv.data.remote.dto.RealDebridUnrestrictLinkDto
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:9 : import com.nuvio.tv.domain.model.DebridSettings
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:10 : import com.nuvio.tv.domain.model.Stream
+- apps/tv/app/src/test/java/com/nuvio/tv/core/debrid/RealDebridDirectDebridResolverTest.kt:11 : import com.nuvio.tv.domain.model.StreamClientResolve
+- Autres correspondances non détaillées : 1183
+
+### Configuration générale (5167 correspondances)
+
+- apps/tv/app/build.gradle.kts:100 : namespace = "com.nuvio.tv"
+- apps/tv/app/build.gradle.kts:374 : include("com.nuvio.tv.**")
+- apps/tv/app/build.gradle.kts:406 : // com.nuvio.tv.core.player.dvmkv. Media3 keeps these compileOnly in its own
+- apps/tv/app/build.gradle.kts:495 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/core/profile/ProtectedProfilePreferencesTest.kt:1 : package com.nuvio.tv.core.profile
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveAccountTest.kt:1 : package com.nuvio.tv.data.mdblist
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveAccountTest.kt:5 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:1 : package com.nuvio.tv.data.mdblist
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:5 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:8 : import com.nuvio.tv.core.tracking.TrackingRefreshIntent
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:9 : import com.nuvio.tv.domain.model.LibraryEntryInput
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:10 : import com.nuvio.tv.domain.model.LibraryListPrivacy
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:11 : import com.nuvio.tv.domain.model.ListMembershipChanges
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:1 : package com.nuvio.tv.data.mdblist
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:5 : import com.nuvio.tv.BuildConfig
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:6 : import com.nuvio.tv.core.tracking.TrackingScrobbleAction
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListTimestampTest.kt:1 : package com.nuvio.tv.data.mdblist
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:1 : package com.nuvio.tv.ui.screens.detail
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:32 : import com.nuvio.tv.domain.model.ContentType
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:33 : import com.nuvio.tv.domain.model.ContinueWatchingCardStyle
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:34 : import com.nuvio.tv.domain.model.EpisodeShuffleSettings
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:35 : import com.nuvio.tv.domain.model.Meta
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:36 : import com.nuvio.tv.domain.model.PosterShape
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:37 : import com.nuvio.tv.domain.model.Video
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:38 : import com.nuvio.tv.ui.components.ContinueWatchingCard
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:39 : import com.nuvio.tv.ui.screens.home.ContinueWatchingItem
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:40 : import com.nuvio.tv.ui.screens.home.NextUpInfo
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:41 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:1 : package com.nuvio.tv.ui.screens.library
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:15 : import com.nuvio.tv.R
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:16 : import com.nuvio.tv.core.tracking.TrackingListManagementCapabilities
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:17 : import com.nuvio.tv.domain.model.LibraryListPrivacy
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:18 : import com.nuvio.tv.domain.model.LibraryListTab
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:19 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:20 : import com.nuvio.tv.ui.components.posteroptions.PosterListPickerDialog
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/player/PlayerProgressFillTest.kt:1 : package com.nuvio.tv.ui.screens.player
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:1 : package com.nuvio.tv.ui.screens.settings
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:17 : import com.nuvio.tv.R
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:18 : import com.nuvio.tv.data.mdblist.MdbListDeviceSession
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:19 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:1 : package com.nuvio.tv.ui.screens.settings
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:18 : import com.nuvio.tv.R
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:19 : import com.nuvio.tv.data.local.InternalPlayerEngine
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:20 : import com.nuvio.tv.data.local.PlayerPreference
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:21 : import com.nuvio.tv.data.local.PlayerSettings
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:22 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:1 : package com.nuvio.tv.ui.screens.settings
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:20 : import com.nuvio.tv.R
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:21 : import com.nuvio.tv.core.tracking.TrackingProviderId
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:22 : import com.nuvio.tv.data.local.WatchProgressSource
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:23 : import com.nuvio.tv.data.simkl.SimklConnectionMode
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:24 : import com.nuvio.tv.domain.model.LibrarySourceMode
+- apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:25 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:1 : package com.nuvio.tv.ui.screens.settings
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:30 : import com.nuvio.tv.R
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:31 : import com.nuvio.tv.domain.model.AppTheme
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:32 : import com.nuvio.tv.domain.model.CustomThemeColors
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:33 : import com.nuvio.tv.ui.theme.LocalNuvioFocusRingStyle
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:34 : import com.nuvio.tv.ui.theme.NuvioTheme
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:35 : import com.nuvio.tv.ui.theme.ThemeColors
+- apps/tv/app/src/debug/java/com/nuvio/tv/ui/screens/settings/CustomThemePreviews.kt:36 : import com.nuvio.tv.ui.theme.createFocusRingStyle
+- apps/tv/app/src/full/java/com/lagradost/cloudstream3/ui/home/HomeViewModel.kt:11 : * NuvioTV's real home screen lives at [com.nuvio.tv.ui.screens.home.HomeViewModel].
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/FetchResponseHeaders.kt:1 : package com.nuvio.tv.core.plugin
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:1 : package com.nuvio.tv.core.plugin
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:4 : import com.nuvio.tv.core.plugin.cloudstream.toNuvioType
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:5 : import com.nuvio.tv.core.plugin.cloudstream.tvTypeFromString
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:6 : import com.nuvio.tv.core.plugin.cloudstream.ExternalExtensionLoader
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:7 : import com.nuvio.tv.core.plugin.cloudstream.ExternalExtensionRunner
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:8 : import com.nuvio.tv.core.plugin.cloudstream.ExternalRepoParser
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:9 : import com.nuvio.tv.data.local.PluginDataStore
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:10 : import com.nuvio.tv.domain.model.ExternalPluginEntry
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:11 : import com.nuvio.tv.domain.model.LocalScraperResult
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:12 : import com.nuvio.tv.domain.model.PluginManifest
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:13 : import com.nuvio.tv.domain.model.PluginRepository
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:14 : import com.nuvio.tv.domain.model.RemotePluginInfo
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:15 : import com.nuvio.tv.domain.model.RepositoryType
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:16 : import com.nuvio.tv.domain.model.ScraperInfo
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:17 : import com.nuvio.tv.domain.model.ScraperManifestInfo
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:66 : private val pluginSyncService: com.nuvio.tv.core.sync.PluginSyncService,
+- apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:67 : private val authManager: com.nuvio.tv.core.auth.AuthManager,
+- Autres correspondances non détaillées : 5087
+
+## Binaires hérités
+
+- apps/tv/app/libs/lib-nuvio-engine-android-0.1.4.aar
+- apps/tv/app/libs/quickjs-kt-android-1.0.5-nuvio.aar
+- apps/mobile/composeApp/libs/lib-nuvio-engine-android-0.1.4.aar
+- apps/mobile/composeApp/libs/quickjs-kt-android-1.0.5-nuvio.aar
+- apps/desktop/composeApp/libs/lib-nuvio-engine-android-0.1.4.aar
+- apps/desktop/composeApp/libs/nuvio-engine-jvm-0.1.4.jar
+- apps/desktop/composeApp/libs/quickjs-kt-android-1.0.5-nuvio.aar
+- apps/desktop/composeApp/src/desktopMain/native/linux/engine/libnuvio_engine.so
+- apps/desktop/composeApp/src/desktopMain/native/macos/engine/libnuvio_engine.dylib
+- apps/desktop/composeApp/src/desktopMain/native/windows/engine/nuvio_engine.dll
+
+## Références de packages Kotlin historiques
+
+- apps/tv : 6729 lignes.
+- apps/mobile : 6932 lignes.
+- apps/desktop : 7809 lignes.
+
+## Variables héritées (ne pas renommer sans migrer les consommateurs)
+
+- NUVIO_SYNC : 126
+- NUVIO_RELEASE_STORE_FILE : 14
+- NUVIO_IOS_DISTRIBUTION : 12
+- NUVIO_RELEASE_KEY_ALIAS : 10
+- NUVIO_RELEASE_KEY_PASSWORD : 10
+- NUVIO_RELEASE_STORE_PASSWORD : 10
+- NUVIO_JS : 10
+- NUVIO_GRADLE_JVMARGS : 8
+- NUVIO_KOTLIN_NATIVE_JVMARGS : 8
+- NUVIO_SUPABASE_URL : 7
+- NUVIO_SUPABASE_ANON_KEY : 7
+- NUVIO_MACOS_NOTARY_KEYCHAIN_PROFILE : 6
+- NUVIO_MACOS_SIGNING_IDENTITY : 6
+- NUVIO_LINUX_SHORTCUT_NAME : 6
+- NUVIO_SUPABASE_FALLBACK_URL : 5
+- NUVIO_LINUX_SHORTCUT_RELATIVE_PATH : 5
+- NUVIO_ENGINE_EVENT_DISK_CACHE_RECLAIMED : 4
+- NUVIO_ENGINE_EVENT_STREAM_PREPARED : 4
+- NUVIO_ENGINE_EVENT_STREAM_STOPPED : 4
+- NUVIO_ENGINE_EVENT_TORRENT_ERROR : 4
+- NUVIO_ENGINE_EVENT_TORRENT_METADATA_READY : 4
+- NUVIO_ENGINE_STATUS_NO_EVENT : 4
+- NUVIO_ENGINE_STATUS_OK : 4
+- NUVIO_ENGINE_TORRENT_PROFILE_BALANCED : 4
+- NUVIO_ENGINE_TORRENT_PROFILE_FAST : 4
+- NUVIO_ENGINE_TORRENT_PROFILE_SOFT : 4
+- NUVIO_ENGINE_UPLOAD_DISABLED : 4
+- NUVIO_ENGINE_UPLOAD_UNLIMITED : 4
+- NUVIO_LINUX_RPM_RUNTIME_DEPENDENCIES : 4
+- NUVIO_LINUX_SHORTCUT_STARTUP_WM_CLASS : 4
+- NUVIO_RELEASE_ : 3
+- NUVIO_MACOS_ : 3
+- NUVIO_LINUX_DEB_RUNTIME_DEPENDENCIES : 3
+- NUVIO_LINUX_SHORTCUT_MIME_TYPES : 3
+- NUVIO_SHARED_POOL_MAX_IDLE : 2
+- NUVIO_LANE_POOL_MAX_IDLE : 2
+- NUVIO_ANDROID_DISTRIBUTION : 2
+- NUVIO_LOG_PACKAGE : 2
+- NUVIO_ENGINE_ROOT : 2
+- NUVIO_MACOS_NOTARY_KEYCHAIN_PATH : 2
+
+## Limites et vérifications indispensables
+
+- Tester les trois applications en surveillant les appels réseau réels et sans accès aux domaines Nuvio.
+- Migrer ou rendre facultatives les fonctions Supabase (compte, authentification, synchronisation).
+- Conserver les sources et licences des bibliothèques MPV, libass et moteurs livrés sous forme binaire.
+- Migrer les URL de support et connexion sans inventer de faux services.
+- Tester la signature, les identifiants d'application, les mises à jour et la conservation des données.
+- Ne pas supprimer les mentions d'attribution/licence Nuvio obligatoires.
+
+Absence de résultat dans cet audit ne constituerait pas une garantie 100 % indépendante.
