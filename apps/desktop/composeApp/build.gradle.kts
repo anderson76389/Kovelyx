@@ -1009,9 +1009,11 @@ if (isWindowsHost) {
         "package",
         "packageDistributionForCurrentOS",
         "packageMsi",
+        "packageExe",
         "packageUberJarForCurrentOS",
         "packageReleaseDistributionForCurrentOS",
         "packageReleaseMsi",
+        "packageReleaseExe",
         "packageReleaseUberJarForCurrentOS",
     )
     tasks.matching { it.name in desktopNativePlayerTasks }.configureEach {
@@ -1278,7 +1280,7 @@ compose.desktop {
         )
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
             packageName = "Kovelyx"
             packageVersion = desktopReleasePackageVersion
             vendor = "Kovelyx"
