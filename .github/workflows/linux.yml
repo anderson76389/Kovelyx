@@ -20,7 +20,7 @@ concurrency:
 jobs:
   appimage:
     name: Compiler Kovelyx Linux AppImage
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - name: Sources Kovelyx
@@ -53,15 +53,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The upstream convenience script installs GStreamer development
-          # packages not used by our JNI player bridge; GitHub's Ubuntu 22.04
-          # image has an incompatible libunwind-dev constraint for that set.
-          # Install only dependencies actually used by the bridge.
+          # Compose Media Player itself compiles a GStreamer native bridge,
+          # in addition to the application's libmpv/WebKit/GTK/X11 bridge.
+          # GitHub's Ubuntu 22.04 image has a conflicting libunwind-dev;
+          # Ubuntu 24.04 has been used successfully for this dependency.
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends \
             build-essential pkg-config libmpv-dev libwebkit2gtk-4.1-dev \
-            libgtk-3-dev libx11-dev libxcomposite-dev libxext-dev
-          pkg-config --exists mpv webkit2gtk-4.1 gtk+-3.0 x11 xcomposite xext
+            libgtk-3-dev libx11-dev libxcomposite-dev libxext-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+          pkg-config --exists mpv webkit2gtk-4.1 gtk+-3.0 x11 xcomposite xext \
+            gstreamer-1.0 gstreamer-app-1.0 gstreamer-video-1.0
           test -s composeApp/src/desktopMain/native/linux/engine/libnuvio_engine.so
           # The name of the upstream native library is an ABI concern, not a
           # network dependency. Avoid renaming it without updating JNI callers.
