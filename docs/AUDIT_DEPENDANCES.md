@@ -246,7 +246,7 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **135**.
+Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia : **134**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -336,7 +336,6 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/store.json:267`
 - `apps/desktop/store.json:276`
 - `apps/desktop/store.json:277`
-- `apps/desktop/desktopSentry/build.gradle.kts:23`
 - `apps/desktop/scripts/prepare-ios-dependencies.sh:25`
 - `apps/desktop/MPVKit/Package.swift:304`
 - `apps/desktop/composeApp/build.gradle.kts:127`
@@ -363,7 +362,8 @@ Fichiers texte examinés : **1774** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45`
-- …et 55 autres correspondances (plafond d'affichage).
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
+- …et 54 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 

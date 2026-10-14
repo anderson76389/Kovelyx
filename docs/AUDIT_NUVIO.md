@@ -245,7 +245,7 @@ Fichiers inspectés : 4501
 - apps/desktop/store.json:18 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
 - Autres correspondances non détaillées : 49
 
-### Configuration générale (68 correspondances)
+### Configuration générale (67 correspondances)
 
 - apps/tv/app/build.gradle.kts:495 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
@@ -311,7 +311,6 @@ Fichiers inspectés : 4501
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:99 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:115 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:133 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
-- apps/desktop/desktopSentry/build.gradle.kts:23 : org.set("nuviomedia")
 - apps/desktop/scripts/linux/verify-linux-deb.sh:29 : expected_maintainer="Nuvio Media <contact@nuvio.tv>"
 - apps/desktop/scripts/prepare-ios-dependencies.sh:8 : engine_root="${NUVIO_ENGINE_ROOT:-${repository_root}/../nuvio-engine}"
 - apps/desktop/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
@@ -333,7 +332,7 @@ Fichiers inspectés : 4501
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7809 lignes.
+- apps/desktop : 7808 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
