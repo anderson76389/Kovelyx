@@ -10,6 +10,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.painterResource
@@ -52,6 +54,13 @@ private const val MacosDarkAquaAppearance = "NSAppearanceNameDarkAqua"
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
+    if (args.any { it.trim().equals("kovelyx://import", ignoreCase = true) } &&
+        DesktopCollectionImportBridge.alreadyRunning()) {
+        return // Local import is handled by the already running desktop process.
+    }
+    DesktopCollectionImportBridge.start()
+    DesktopCollectionImportBridge.registerWindowsProtocol()
+
     // On Linux, initialize GTK BEFORE AWT/Compose/Skia to prevent GdkDisplayManager
     // type registration conflict (Skiko partially loads GDK without full GTK init).
     if (System.getProperty("os.name", "").lowercase().contains("linux")) {
@@ -222,7 +231,11 @@ fun main(args: Array<String>) {
 
             if (smokePlayerUrl == null) {
                 ProvideDesktopWindowInsets(isFullscreen = windowState.placement == WindowPlacement.Fullscreen) {
-                    App()
+                    var appReady by remember { mutableStateOf(false) }
+                    App(
+                        onAppReady = { ready -> appReady = ready },
+                        desktopOverlay = { DesktopCollectionImportPrompt(isAppReady = appReady) },
+                    )
                 }
             } else {
                 // The player surface reads LocalNuvioPlatformDensity, which only
