@@ -97,7 +97,7 @@ fun avatarImageUrl(avatar: AvatarCatalogItem): String? =
         ?: avatar.storagePath.takeIf { it.isNotBlank() && !avatar.memberOnly }?.let(::avatarStorageUrl)
 
 fun normalizedAvatarUrl(url: String?): String? =
-    url?.trim()?.takeIf { it.isValidAvatarUrl() }
+    url?.trim()?.takeIf { it.isValidAvatarUrl() || ProfileLocalImages.isManagedUri(it) }
 
 fun String.isValidAvatarUrl(): Boolean {
     val value = trim()
