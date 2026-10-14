@@ -278,8 +278,8 @@ Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia
 | `media.w3.org` | 7 |
 | `developer.apple.com` | 6 |
 | `www.youtube.com` | 6 |
-| `developer.mozilla.org` | 5 |
-| `192.168.1.10` | 5 |
+| `btttr.cc` | 6 |
+| `example.org` | 6 |
 
 ### Références à vérifier en priorité
 
