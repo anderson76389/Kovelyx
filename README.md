@@ -1,227 +1,143 @@
 <div align="center">
 
-<img src="assets/brand/kovelyx-banner.svg" alt="KOVELYX — Your media. Your world." width="100%" />
+<img src="./assets/brand/kovelyx-banner.svg" alt="Kovelyx — ton univers multimédia sur ordinateur" width="100%" />
 
-<img src="assets/brand/kovelyx-wordmark.svg" alt="Signature Kovelyx" width="350" />
+<br>
 
-<br />
+<img src="./assets/brand/kovelyx-wordmark.svg" alt="Kovelyx" width="300">
 
-**Un seul univers multimédia. Trois écrans. Le contrôle entre tes mains.**
+### Une seule application. Deux systèmes. Ton espace multimédia.
 
-🌐 **[Site officiel de Kovelyx — anderson76389.github.io/Kovelyx](https://anderson76389.github.io/Kovelyx/)**
+**Kovelyx Desktop** est un projet multimédia open source destiné aux **PC Windows et Linux**.
 
-<br />
+[**🌐 Site officiel**](https://anderson76389.github.io/Kovelyx/) · [**⬇️ Téléchargements**](#-télécharger-kovelyx) · [**🛠️ Sources PC**](./apps/desktop/) · [**📖 Guide PC**](./docs/PC.md)
 
-[![Plateformes](https://img.shields.io/badge/PLATEFORMES-Windows%20%7C%20Android%20%7C%20Android%20TV-8761EA?style=for-the-badge&labelColor=111125)](https://github.com/anderson76389/Kovelyx)
-[![Licence](https://img.shields.io/badge/LICENCE-GPLv3-A47BFF?style=for-the-badge&labelColor=111125)](#-licences-et-crédits)
-[![Développement](https://img.shields.io/badge/STATUT-EN%20DÉVELOPPEMENT-6A689E?style=for-the-badge&labelColor=111125)](#-état-du-projet)
+[![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-754CE8?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
+[![Linux](https://img.shields.io/badge/Linux-x86--64-754CE8?style=for-the-badge&logo=linux&logoColor=white)](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml)
+[![GPL--3.0](https://img.shields.io/badge/Licence-GPLv3-49435C?style=for-the-badge)](./docs/PROVENANCE.md)
 
-<br />
-
-[**Téléchargements**](./docs/index.html) · [**Releases**](https://github.com/anderson76389/Kovelyx/releases) · [**Plateformes**](#-sur-vos-trois-écrans) · [**Installation**](#-installation-et-compilation) · [**Avancement**](#-état-du-projet)
+[![Compilation Windows](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
+[![Compilation Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml)
 
 </div>
 
 ---
 
-## ✦ Découvrir Kovelyx
+## ✦ Pourquoi Kovelyx ?
 
-**Kovelyx** est un projet libre d'application multimédia pour **Windows, Android et Android TV**, construit à partir de bases open source existantes.
-
-L'objectif : conserver une expérience de découverte et de lecture agréable, personnalisable et compatible avec les extensions et sources prises en charge, mais avec **une application que tu peux compiler, sauvegarder et maintenir toi-même**.
+Des films, des séries, des bibliothèques et des sources configurables dans une interface pensée pour le bureau. Notre priorité : **garder la maîtrise du code, des paramètres et des builds**, et proposer des fichiers simples à installer ou à lancer.
 
 <table>
 <tr>
-<td width="33%" align="center"><strong>✦ Une interface soignée</strong><br /><sub>Films, séries, bibliothèques et recherche : une expérience cohérente selon l'écran.</sub></td>
-<td width="33%" align="center"><strong>⌁ Des sources au choix</strong><br /><sub>Compatibilité avec les addons et protocoles déjà utilisés par les bases du projet, sous réserve de tests.</sub></td>
-<td width="33%" align="center"><strong>◇ Tes réglages sur ton appareil</strong><br /><sub>Pas de serveur Kovelyx à installer : configuration et données conservées localement, objectif en cours d'intégration.</sub></td>
+<td align="center" width="33%"><strong>🎬 Découverte et lecture</strong><br><sub>Catalogue, recherche, lecteurs, pistes audio et sous-titres : fonctions à vérifier avec vos sources.</sub></td>
+<td align="center" width="33%"><strong>🧩 Extensions et préférences</strong><br><sub>Configuration personnalisable, thèmes, extensions et suivi de lecture.</sub></td>
+<td align="center" width="33%"><strong>🖼️ Profils personnels</strong><br><sub>Avatar et fond choisis sur ton ordinateur, copiés dans le stockage local Kovelyx.</sub></td>
 </tr>
 </table>
 
-## ⬇️ Téléchargements
+## ⬇️ Télécharger Kovelyx
 
-<div align="center">
+| Système | Format principal | Ce que tu récupères | État |
+|:--|:--|:--|:--|
+| **Windows x64** | `Kovelyx-Windows-Setup-….exe` | **1 fichier** pour installer l'application et son environnement d'exécution | [Build automatisé réussi](https://github.com/anderson76389/Kovelyx/actions/runs/38507860951) |
+| **Linux x86-64** | `Kovelyx-Linux-x86_64-….AppImage` | **1 fichier exécutable** à lancer sans décompresser un gros dossier | [Compilation en cours de validation](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) |
+| Windows x64 (alternative) | `.msi` | Installateur Windows classique | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
+| Windows x64 (alternative) | `Portable.zip` | Dossier portable avec lanceur et runtime | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
 
-**[🌐 Site de téléchargement Kovelyx](https://anderson76389.github.io/Kovelyx/)** · **[📦 Releases GitHub](https://github.com/anderson76389/Kovelyx/releases)** · **[⚙️ Configuration et téléchargement](./docs/TELECHARGEMENTS.md)**
+**Téléchargements :** [GitHub Actions](https://github.com/anderson76389/Kovelyx/actions) · [Releases officielles](https://github.com/anderson76389/Kovelyx/releases) · [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
 
-</div>
+> **Important :** sous Windows, le `Setup.exe` est un fichier unique **pour l'installation**. Le logiciel une fois installé contient normalement de nombreux fichiers internes (bibliothèques, Java, codecs). Linux ne lance pas les `.exe` Windows de façon native : le fichier unique adapté est une **AppImage**. Une AppImage peut encore nécessiter certaines bibliothèques présentes sur la distribution. **Un build réussi ne garantit pas toutes les fonctions en situation réelle.**
 
-| Appareil | Fichier prévu | Disponibilité |
-| :--- | :--- | :--- |
-| 📺 Android TV / Google TV | `Kovelyx-TV-preview-…apk` | Préversions expérimentales après compilation réussie |
-| 📱 Android mobile | `Kovelyx-Mobile-preview-…apk` | Préversions expérimentales après compilation réussie |
-| 🖥️ Windows | `Kovelyx-Windows-…msi` | Pas de Release validée |
+### 🪟 Windows : le plus simple
 
-Le [site de téléchargement](https://anderson76389.github.io/Kovelyx/) vérifie les **vrais fichiers des Releases** et active les boutons automatiquement, sans inventer de téléchargements. Le site est publié à partir de la branche **gh-pages** et mis à jour automatiquement depuis `docs/`. Si nécessaire, sélectionner **Settings → Pages → Deploy from a branch → gh-pages / (root)**. Les APK de préversion n'apparaissent qu'après une compilation réussie. Ils ne sont pas encore validés sur appareils réels. Le MSI Windows reste soumis à ses propres vérifications.
+1. Ouvre [**le dernier workflow Windows réussi**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) et vérifie son statut **Success**.
+2. Dans **Artifacts**, télécharge `Kovelyx-Windows-installers-experimental` (connexion GitHub souvent nécessaire).
+3. Décompresse l'archive téléchargée **une seule fois**, puis lance `Kovelyx-Windows-Setup-….exe`. Le MSI et le ZIP portable sont fournis en alternative.
+4. Si Windows SmartScreen demande une confirmation, vérifie le dépôt, l'origine du fichier et son SHA-256. Ne contourne pas les avertissements pour un binaire inconnu.
 
+### 🐧 Linux : une AppImage
 
-> **Indépendance : audit non terminé.** Les services de connexion et de synchronisation, certains liens internes et plusieurs moteurs binaires proviennent encore de Nuvio. Voir le [plan de suppression des dépendances](https://github.com/anderson76389/Kovelyx/issues/5). Les mentions de provenance et de licence des auteurs d'origine doivent être conservées.
+Le workflow Linux prépare une **AppImage x86-64 expérimentale**. Dès qu'une compilation est verte, récupère le fichier dans ses artefacts :
 
-## 📺 Sur vos trois écrans
-
-<table>
-<thead><tr><th align="center">Android TV / Google TV</th><th align="center">Android mobile</th><th align="center">Windows</th></tr></thead>
-<tbody>
-<tr>
-<td align="center"><h3>▣ TV</h3><sub>Navigation à la télécommande<br/>Interface grand écran</sub></td>
-<td align="center"><h3>▯ MOBILE</h3><sub>Navigation tactile<br/>Téléphone et tablette Android</sub></td>
-<td align="center"><h3>▤ DESKTOP</h3><sub>Application de bureau<br/>Souris et clavier</sub></td>
-</tr>
-<tr>
-<td align="center"><a href="./apps/tv"><strong>Explorer le code TV →</strong></a></td>
-<td align="center"><a href="./apps/mobile"><strong>Explorer le code mobile →</strong></a></td>
-<td align="center"><a href="./apps/desktop"><strong>Explorer le code PC →</strong></a></td>
-</tr>
-</tbody>
-</table>
-
-> **À savoir :** les trois dossiers contiennent les **sources importées**, pas encore trois applications Kovelyx finalisées ou certifiées. La branche Desktop de référence est toujours en développement alpha.
-
-## 💜 Sans serveur personnel
-
-Pas besoin de louer un VPS, d'installer Docker ou de créer un compte sur un serveur Kovelyx.
-
-| Sur tes appareils | Sur Internet, seulement lorsque nécessaire |
-| :--- | :--- |
-| Préférences et configuration locales **à rendre autonomes et tester** | Récupération des catalogues, métadonnées et visuels depuis leurs fournisseurs |
-| Sources et extensions configurées sur chaque installation | Connexion aux serveurs utilisés par certains addons |
-| Bibliothèque, favoris et historique **à vérifier selon les capacités de chaque client** | Accès aux flux et services externes choisis |
-| Sauvegarde/export manuel : **fonction à étudier** | Mises à jour applicatives depuis les Releases Kovelyx, lorsque disponibles |
-
-**Ce que « sans serveur » signifie :** pas de *backend personnel Kovelyx*. Cela **ne signifie pas** que tous les contenus seront disponibles hors ligne, que les addons fonctionneront sans Internet ou que les appareils se synchroniseront automatiquement. Sans serveur partagé, les données de chaque installation restent séparées, sauf mécanisme explicite d'import/export.
-
-## ⚡ Expérience visée
-
-| Domaine | Objectif |
-| --- | --- |
-| 🎞️ **Découverte** | Films, séries et informations riches suivant les sources compatibles |
-| 🧩 **Extensions** | Installer et gérer les addons compatibles avec les clients |
-| ▶️ **Lecture** | Lecteurs vidéo, audio et sous-titres selon les capacités réelles de chaque version |
-| 🎨 **Personnalisation** | Interface et thèmes adaptés à la TV, au mobile et au PC |
-| ♡ **Bibliothèque** | Favoris, progression et données conservés localement lorsque les fonctions seront validées |
-| ⬇️ **Distribution** | APK pour Android et Android TV, installateur Windows, publiés par Kovelyx |
-| 🛡️ **Indépendance** | Sources archivées, références à Nuvio auditées, builds reproductibles |
-
-Ces points constituent **la feuille de route**, et non une affirmation que toutes les fonctions marchent déjà.
-
-## 🚧 État du projet
-
-| Composant | Sources | Compilation Kovelyx |
-| --- | :---: | :---: |
-| Android TV | ✅ Importées | 🧪 Non validée |
-| Android mobile | ✅ Importées | 🧪 Non validée |
-| Windows | ✅ Importées | 🧪 Non validée |
-| Configuration sans serveur | 🎯 Objectif | ⏳ À adapter et tester |
-| Marque Kovelyx | ✅ Logo et bannière du README | ⏳ Intégration dans les applications |
-
-Les premières tentatives de compilation n'ont pas encore produit de paquet Kovelyx validé. Des dépendances natives et des configurations de build restent à corriger ; la version Windows nécessite notamment la restauration d'un binaire vidéo absent du dépôt Git.
-
-**[Voir les tests de compilation →](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml)** · **[Voir les problèmes ouverts →](https://github.com/anderson76389/Kovelyx/issues)**
-
-> Il n'y a **pas encore de téléchargement officiel APK ou MSI Kovelyx**. Aucun badge « build réussi » ou lien vers une Release inexistante n'est affiché.
-
-## 🛠️ Installation et compilation
-
-Il s'agit pour l'instant de compilations **de développement à partir des sources**, et non d'une procédure d'installation grand public.
-
-<details>
-<summary><strong>📺 Android TV — compilation de référence</strong></summary>
-
-Nécessite un JDK et le SDK Android configurés. Depuis PowerShell sous Windows :
-
-```powershell
-git clone https://github.com/anderson76389/Kovelyx.git
-cd Kovelyx\apps\tv
-.\gradlew.bat :app:assembleFullDebug
+```bash
+chmod +x Kovelyx-Linux-x86_64-*.AppImage
+./Kovelyx-Linux-x86_64-*.AppImage
 ```
 
-L'APK ne doit être considéré comme utilisable qu'après résolution des dépendances et tests d'installation.
+Pas de `sudo` pour lancer l'AppImage. Les bibliothèques vidéo, WebKit/GTK et la compatibilité graphique restent à tester suivant la distribution (voir le [guide Linux](./docs/LINUX.md)). L'AppImage **ne fonctionne pas automatiquement sur ARM64**.
 
-</details>
+## ✨ Fonctions PC
 
-<details>
-<summary><strong>📱 Android mobile — compilation de référence</strong></summary>
+| Domaine | État vérifiable |
+|:--|:--|
+| Création et modification des profils, avatars et fonds locaux Windows | Code intégré ; tests automatisés réussis ; essai visuel recommandé |
+| Thèmes, réglages et sauvegardes locales | Suite Desktop testée ; parcours utilisateur à valider |
+| Plugins, extensions et sources configurées | Tests unitaires inclus ; dépend du fournisseur et du réseau |
+| Lecteur, audio, pistes et sous-titres | Infrastructure compilée ; tests réels avec différents fichiers/flux nécessaires |
+| Distribution Windows MSI + EXE + portable | **Build Windows complet réussi** |
+| Distribution Linux AppImage | **Préparation du pipeline ; compatibilité Linux non encore certifiée** |
+| Autonomie vis-à-vis de Nuvio | **Audit en cours**, certains composants techniques/dépendances demeurent |
 
-```powershell
-git clone https://github.com/anderson76389/Kovelyx.git
-cd Kovelyx\apps\mobile
-.\gradlew.bat :androidApp:assembleFullDebug
-```
+Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisateur configure ses sources et respecte les droits applicables.
 
-Nécessite aussi le SDK Android et une configuration Gradle valide.
+## ✅ Qualité et diagnostics
 
-</details>
+Le [workflow Windows](./.github/workflows/windows.yml) reconstruit les composants requis, fabrique les trois distributions, contrôle leurs formats/identités et **bloque la publication de l'artefact si la suite Desktop échoue**. Le [build Windows #25](https://github.com/anderson76389/Kovelyx/actions/runs/38507860951) a réussi les **1 554 tests exécutés, dont 1 ignoré** (aucun échec).
 
-<details>
-<summary><strong>🖥️ Windows — compilation de référence</strong></summary>
+Le [workflow Linux](./.github/workflows/linux.yml) tente de produire une AppImage en un fichier et vérifie l'exécutable, le lanceur interne, le logo et le SHA-256 avant l'enregistrement. Une validation sur Ubuntu, Fedora et différentes configurations reste indispensable.
 
-```powershell
-git clone https://github.com/anderson76389/Kovelyx.git
-cd Kovelyx\apps\desktop
-.\gradlew.bat :composeApp:packageReleaseMsi
-```
+[**📋 Guide de tests manuels**](./docs/TESTS_PC.md) · [**📄 Guide d'installation et FAQ**](./docs/PC.md) · [**🐧 Linux**](./docs/LINUX.md)
 
-⚠️ La compilation et la lecture vidéo sur Windows sont **bloquées** tant que les dépendances natives manquantes ne sont pas restaurées et vérifiées. Voir [l'inventaire des binaires](./apps/desktop/.kovelyx-binaries-a-sauvegarder.txt).
+## 🎨 Personnalisation des profils Windows
 
-</details>
+Dans **Profils → Modifier un profil**, choisis **une photo** ou **un fond depuis ton PC**. Les images importées sont copiées dans `%APPDATA%\Kovelyx\profile-media` et redimensionnées pour limiter leur poids. Elles restent sur cet ordinateur ; les URI locaux ne sont pas synchronisés en ligne. Les fonds des catalogues réservés aux membres ne sont pas débloqués artificiellement.
 
-## 🗂️ Organisation du dépôt
+## 🏗️ Architecture et organisation
 
 ```text
 Kovelyx/
-├── assets/
-│   └── brand/                # Logo et bannière du projet
 ├── apps/
-│   ├── tv/                   # Android TV / Google TV
-│   ├── mobile/               # Android mobile
-│   └── desktop/              # Windows
-├── docs/
-│   ├── INDEPENDANCE.md       # Critères techniques d'autonomie
-│   └── PROVENANCE.md         # Sources et commits de référence
-├── scripts/                  # Import des sources et outils d'audit
-└── .github/workflows/        # Automatisations et essais de compilation
+│   ├── desktop/           Application PC (Kotlin + Compose Desktop)
+│   ├── mobile/            Sources historiques conservées, hors priorité
+│   └── tv/                Sources historiques conservées, hors priorité
+├── vendor/engine/         Sources du moteur embarqué
+├── assets/brand/          Identité graphique originale Kovelyx
+├── docs/                  Site, documentation et audits
+├── scripts/               Outils de contrôle et sauvegarde
+└── .github/workflows/
+    ├── windows.yml        Installateurs Windows et tests
+    └── linux.yml          AppImage Linux expérimentale
 ```
 
-**Aucun dossier backend/serveur n'est requis pour l'architecture cible.** Les trois projets conservent leur structure Gradle, leur code et les notices juridiques d'origine.
+**Ne supprime pas les dossiers internes du logiciel installé** : la version Windows a besoin de son runtime, même si tu n'as téléchargé qu'un `.exe`.
 
-## 🧭 Feuille de route
+## 🧭 Feuille de route PC
 
-- [x] Réunir les trois codes sources dans un dépôt indépendant.
-- [x] Créer le logo et la bannière Kovelyx pour la documentation.
-- [x] Retirer le serveur personnel de l'architecture du projet.
-- [ ] Résoudre les dépendances natives et obtenir trois compilations réussies.
-- [ ] Attribuer des identifiants, icônes, noms et écrans de marque propres à Kovelyx.
-- [ ] Retirer les références fonctionnelles aux mises à jour et comptes Nuvio.
-- [ ] Valider le stockage local des réglages, addons et données personnelles.
-- [ ] Tester la lecture, la navigation, les sous-titres, les thèmes et les extensions sur des appareils réels.
-- [ ] Publier des Releases Kovelyx reproductibles (APK TV, APK mobile et MSI Windows).
+- [x] Identité Kovelyx, branding du projet et site officiel
+- [x] Compilation Windows de l'installateur EXE, du MSI et du portable ZIP
+- [x] Suite Desktop verte sur une révision de référence
+- [x] Importation locale des photos et fonds de profil sur Windows (code)
+- [ ] AppImage Linux construite et testée sur différentes distributions
+- [ ] Tests interactifs des lecteurs, codecs, sous-titres, extensions et réglages sur les deux OS
+- [ ] Réduire les dépendances héritées ; documenter les licences natives avant publication stable
+- [ ] Releases signées et vérifiées, avec mises à jour compatibles
 
-Pour l'état réellement vérifié et les limites d'autonomie, consultez **[l'état technique](./docs/ETAT_TECHNIQUE.md)**, **[l'audit des liens Nuvio](./docs/AUDIT_NUVIO.md)** et **[le plan d'indépendance](./docs/INDEPENDANCE.md)**.
+## 🔒 Indépendance, confidentialité et licences
 
-Pour conserver une copie **hors GitHub** des sources et des Releases accessibles, lancez sur Windows le script [Sauvegarder-Kovelyx.ps1](./scripts/Sauvegarder-Kovelyx.ps1). Une sauvegarde des fichiers de source ne remplace pas l'archivage des dépendances natives, des SDK et de la clé de signature Android.
+Le projet vise à être **autonome vis-à-vis de l'organisation d'origine**, mais l'audit n'est pas terminé. Le code de départ est dérivé de **NuvioDesktop sous GNU GPLv3** ; les droits d'auteur, notices et obligations de fourniture des sources doivent rester accessibles. Certains binaires vidéo ont leur propre provenance et doivent être vérifiés avant toute redistribution publique.
 
-## ⚖️ Licences et crédits
-
-Kovelyx est un projet **indépendant**, non affilié à NuvioMedia. Ses sources initiales proviennent des projets publics [NuvioTV](https://github.com/NuvioMedia/NuvioTV), [NuvioMobile](https://github.com/NuvioMedia/NuvioMobile) et [NuvioDesktop](https://github.com/NuvioMedia/NuvioDesktop).
-
-Ces applications sont distribuées sous **GNU GPL v3** ; le code dérivé reste soumis aux obligations applicables de cette licence, notamment la conservation des notices et l'accès au code source correspondant. Les composants tiers (dont MPVKit et les bibliothèques natives) ont leurs propres exigences ; leur provenance doit être vérifiée avant la redistribution de binaires.
-
-Les marques et éléments graphiques présents dans le code amont ne deviennent pas des éléments officiels Kovelyx. Le nouveau logo SVG du README est distinct.
-
-📖 **[Détails des sources et des licences →](./docs/PROVENANCE.md)**
+[**📖 Provenance**](./docs/PROVENANCE.md) · [**🧾 Audit des liens**](./docs/AUDIT_NUVIO.md) · [**🧩 Dépendances**](./docs/AUDIT_DEPENDANCES.md) · [**🔐 Indépendance**](./docs/INDEPENDANCE.md)
 
 ---
 
 <div align="center">
 
-<img src="assets/brand/kovelyx-logo.svg" width="68" alt="Icône Kovelyx" />
+<img src="./assets/brand/kovelyx-logo.svg" width="72" alt="Logo Kovelyx">
 
-### KOVELYX
+**KOVELYX · DESKTOP**
 
-*Your media. Your world.*
+*Pensé pour ton PC. Libre à faire évoluer.*
 
-**Fait pour durer. Développé librement. Conçu pour tes écrans.**
-
-[Revenir en haut ↑](#)
+[Site](https://anderson76389.github.io/Kovelyx/) · [Sources](./apps/desktop/) · [Issues](https://github.com/anderson76389/Kovelyx/issues) · [Retour en haut ↑](#)
 
 </div>
