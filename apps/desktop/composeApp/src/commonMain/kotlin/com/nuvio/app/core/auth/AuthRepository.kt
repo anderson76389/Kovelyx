@@ -2,9 +2,9 @@ package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.network.ServerConfigurationRepository
+import com.nuvio.app.core.network.isKovelyxAccountBackendReady
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
-import io.ktor.http.Url
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -200,21 +200,10 @@ object AuthRepository {
         return if (failure == null) Result.success(Unit) else Result.failure(failure)
     }
 
-    // Never direct credentials to the former Nuvio service (including old
-    // settings restored from previous releases). Guests require no backend.
     private fun requireIndependentAccountsBackend() {
-        val config = ServerConfigurationRepository.active.value
-        check(config.backendUrl.isNotBlank() && config.publishableKey.isNotBlank() &&
-            config.capabilities.emailPasswordAuth) {
-            "Le serveur des comptes Kovelyx n'est pas encore configuré. Utilisez le mode invité ou configurez un backend indépendant."
-        }
-        val endpoint = runCatching { Url(config.backendUrl) }.getOrNull()
-        val host = endpoint?.host?.lowercase().orEmpty()
-        check(host.isNotBlank() &&
-            host != "nuvio.tv" &&
-            !host.endsWith(".nuvio.tv") &&
-            !host.endsWith(".nuvio.app")) {
-            "Connexion à un serveur Nuvio refusée. Utilisez le serveur de comptes propre à Kovelyx."
+        check(ServerConfigurationRepository.active.value.isKovelyxAccountBackendReady()) {
+            "Le serveur des comptes Kovelyx n'est pas configuré ou n'est pas sécurisé. " +
+                "Aucune inscription ne sera envoyée à Nuvio."
         }
     }
 
