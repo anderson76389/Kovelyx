@@ -49,5 +49,6 @@ jobs:
             echo "Rapport inchangé"
           else
             git commit -m "docs: met à jour l'inventaire des dépendances"
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
