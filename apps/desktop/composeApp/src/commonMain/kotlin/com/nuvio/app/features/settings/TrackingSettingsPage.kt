@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.core.ui.nuvio
+import com.nuvio.app.isDesktop
 import com.nuvio.app.features.library.LibrarySourceMode
 import com.nuvio.app.features.mdblist.MdbListTracker
 import com.nuvio.app.features.profiles.ProfileRepository
@@ -143,7 +144,7 @@ internal fun LazyListScope.trackingSettingsContent(
                 isTablet = isTablet,
                 settingsUiState = settingsUiState,
                 traktConnected = traktUiState.mode == TraktConnectionMode.CONNECTED,
-                simklConnected = simklUiState.mode == SimklConnectionMode.CONNECTED,
+                simklConnected = !isDesktop && simklUiState.mode == SimklConnectionMode.CONNECTED,
             )
         }
     }
@@ -165,7 +166,7 @@ internal fun LazyListScope.trackingSettingsContent(
         }
     }
 
-    if (simklUiState.mode == SimklConnectionMode.CONNECTED) {
+    if (!isDesktop && simklUiState.mode == SimklConnectionMode.CONNECTED) {
         item {
             SettingsSection(
                 title = stringResource(Res.string.settings_tracking_anime_section),
@@ -214,7 +215,7 @@ private fun TrackingDataSources(
     val mdblistConnected by remember { MdbListTracker.ensureLoaded(); MdbListTracker.isAuthenticated }.collectAsStateWithLifecycle()
     val connectedProviders = buildSet {
         if (traktConnected) add(TrackingProviderId.TRAKT)
-        if (simklConnected) add(TrackingProviderId.SIMKL)
+        if (simklConnected && !isDesktop) add(TrackingProviderId.SIMKL)
         if (mdblistConnected) add(TrackingProviderId.MDBLIST)
     }
     val effectiveLibrarySource = effectiveLibrarySourceMode(settingsUiState.librarySourceMode) { provider ->
@@ -509,7 +510,7 @@ private fun librarySourceOptions(
             enabled = mdblistConnected,
             unavailableReason = trackingUnavailableReason(TrackingBrand.MDBLIST, mdblistConnected),
         ),
-    )
+    ).filterNot { isDesktop && it.value == LibrarySourceMode.SIMKL }
 }
 
 @Composable
@@ -547,7 +548,7 @@ private fun watchProgressSourceOptions(
             enabled = mdblistConnected,
             unavailableReason = trackingUnavailableReason(TrackingBrand.MDBLIST, mdblistConnected),
         ),
-    )
+    ).filterNot { isDesktop && it.value == WatchProgressSource.SIMKL }
 }
 
 @Composable
@@ -589,7 +590,7 @@ private fun recommendationsSourceOptions(
             enabled = simklConnected,
             unavailableReason = if (!simklConnected) stringResource(Res.string.settings_tracking_connect_first, "Simkl") else null,
         ),
-    )
+    ).filterNot { isDesktop && it.value == MoreLikeThisSourcePreference.SIMKL }
 }
 
 @Composable
