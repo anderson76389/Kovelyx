@@ -17,6 +17,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.security.MessageDigest
 import java.time.Duration
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -94,8 +95,15 @@ actual object AppUpdaterPlatform {
             val destination = File(updatesDir(), safeName)
             val tempFile = File(updatesDir(), "$safeName.part")
 
+            val releaseAsset = URI(assetUrl)
+            check(isOfficialKovelyxReleaseAsset(releaseAsset, safeName)) {
+                "Le fichier de mise à jour ne provient pas des Releases officielles de Kovelyx."
+            }
+            val expectedSha256 = fetchReleaseChecksum(releaseAsset, safeName)
+            val digest = MessageDigest.getInstance("SHA-256")
             val request = HttpRequest.newBuilder()
-                .uri(URI(assetUrl))
+                .uri(releaseAsset)
+                .timeout(Duration.ofMinutes(10))
                 .GET()
                 .build()
             val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofInputStream())
@@ -115,6 +123,7 @@ actual object AppUpdaterPlatform {
                             val read = input.read(buffer)
                             if (read <= 0) break
                             output.write(buffer, 0, read)
+                            digest.update(buffer, 0, read)
                             downloadedBytes += read.toLong()
                             onProgress(downloadedBytes, totalBytes)
                         }
@@ -124,6 +133,10 @@ actual object AppUpdaterPlatform {
 
                 if (totalBytes != null && downloadedBytes != totalBytes) {
                     error(runBlocking { getString(Res.string.updates_download_failed) })
+                }
+                val checksum = digest.digest().joinToString("") { "%02x".format(it) }
+                check(checksum.equals(expectedSha256, ignoreCase = true)) {
+                    "Empreinte SHA-256 invalide : mise à jour annulée."
                 }
 
                 if (!tempFile.renameTo(destination)) {
@@ -148,6 +161,24 @@ actual object AppUpdaterPlatform {
 
         launchInstaller(updateFile)
         scheduleAppExit()
+    }
+
+    private fun fetchReleaseChecksum(assetUrl: URI, assetName: String): String {
+        val request = HttpRequest.newBuilder()
+            .uri(URI(assetUrl.toASCIIString() + ".sha256"))
+            .timeout(Duration.ofSeconds(30))
+            .GET()
+            .build()
+        val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        check(response.statusCode() == 200) { "Empreinte de mise à jour indisponible sur GitHub." }
+        val line = response.body().trim().lineSequence().firstOrNull().orEmpty()
+        val match = Regex("^([A-Fa-f0-9]{64})\\s+\\*?(.*)$").matchEntire(line)
+            ?: error("Fichier de vérification de mise à jour invalide.")
+        val checksumFilename = match.groupValues[2].removePrefix("./")
+        check(checksumFilename == assetName) {
+            "La vérification SHA-256 ne correspond pas au fichier de mise à jour."
+        }
+        return match.groupValues[1]
     }
 
     private fun updatesDir(): File =
@@ -370,3 +401,23 @@ internal fun appImageReplaceScript(
 }
 
 private fun singleQuote(value: String): String = "'" + value.replace("'", "'\\''") + "'"
+
+
+internal fun isOfficialKovelyxReleaseAsset(uri: URI, name: String): Boolean {
+    if (uri.scheme != "https" || uri.host != "github.com" || uri.userInfo != null ||
+        uri.port != -1 || uri.rawQuery != null || uri.rawFragment != null
+    ) return false
+    val prefix = "/anderson76389/Kovelyx/releases/download/"
+    val path = uri.path ?: return false
+    if (!path.startsWith(prefix)) return false
+    val remainder = path.removePrefix(prefix)
+    if (remainder.count { it == '/' } != 1) return false
+    val version = remainder.substringBefore('/')
+    val remoteName = remainder.substringAfter('/')
+    return version.matches(Regex("v[0-9]+\\.[0-9]+\\.[0-9]+(?:-(alpha|beta|rc)(?:\\.[0-9]+)?)?")) &&
+        remoteName == name &&
+        name.startsWith("Kovelyx-") &&
+        listOf(".exe", ".msi", ".AppImage", ".deb", ".rpm").any {
+            name.endsWith(it, ignoreCase = true)
+        }
+}
