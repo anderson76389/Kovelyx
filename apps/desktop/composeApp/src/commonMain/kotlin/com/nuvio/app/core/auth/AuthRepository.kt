@@ -2,6 +2,7 @@ package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.network.ServerConfigurationRepository
+import com.nuvio.app.core.network.isKovelyxAccountBackendReady
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
 import io.github.jan.supabase.auth.auth
@@ -121,6 +122,7 @@ object AuthRepository {
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        requireIndependentAccountsBackend()
         SupabaseProvider.client.auth.signUpWith(Email) {
             this.email = email
             this.password = password
@@ -134,6 +136,7 @@ object AuthRepository {
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        requireIndependentAccountsBackend()
         SupabaseProvider.client.auth.signInWith(Email) {
             this.email = email
             this.password = password
@@ -197,9 +200,15 @@ object AuthRepository {
         return if (failure == null) Result.success(Unit) else Result.failure(failure)
     }
 
-    private fun hasConfiguredBackend(): Boolean = ServerConfigurationRepository.active.value.let { config ->
-        config.backendUrl.isNotBlank() && config.publishableKey.isNotBlank()
+    private fun requireIndependentAccountsBackend() {
+        check(ServerConfigurationRepository.active.value.isKovelyxAccountBackendReady()) {
+            "Le serveur des comptes Kovelyx n'est pas configuré ou n'est pas sécurisé. " +
+                "Aucune inscription ne sera envoyée à Nuvio."
+        }
     }
+
+    private fun hasConfiguredBackend(): Boolean =
+        ServerConfigurationRepository.active.value.isKovelyxAccountBackendReady()
 
     fun reinitialize() {
         sessionStatusJob?.cancel()

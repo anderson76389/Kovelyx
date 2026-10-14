@@ -24,6 +24,9 @@ jobs:
     name: Compiler Kovelyx Linux AppImage
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    env:
+      KOVELYX_SUPABASE_URL: ${{ vars.KOVELYX_SUPABASE_URL }}
+      KOVELYX_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KOVELYX_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
@@ -158,6 +161,9 @@ jobs:
     name: Compiler Kovelyx Linux DEB et RPM
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    env:
+      KOVELYX_SUPABASE_URL: ${{ vars.KOVELYX_SUPABASE_URL }}
+      KOVELYX_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KOVELYX_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
