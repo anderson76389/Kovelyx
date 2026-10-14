@@ -1,0 +1,59 @@
+name: Préserver le runtime vidéo Windows (vérification SHA-256)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/native-windows.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-windows-runtime-backup
+  cancel-in-progress: false
+
+jobs:
+  verify-native:
+    name: Copier et vérifier le runtime Windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Préparer l'archive Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          git lfs version
+          mkdir -p source output
+          git -C source init -q
+          git -C source remote add origin https://github.com/NuvioMedia/NuvioDesktop.git
+          GIT_LFS_SKIP_SMUDGE=1 git -C source fetch --depth=1 origin 51963ee4d83057ef08836f4ed9ab68037e081dd3
+          GIT_LFS_SKIP_SMUDGE=1 git -C source checkout --detach FETCH_HEAD
+          git -C source lfs pull --include="composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll" --exclude=""
+          src="source/composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll"
+          test -f "$src"
+          actual="$(sha256sum "$src" | cut -d' ' -f1)"
+          expected="07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906"
+          [[ "$actual" == "$expected" ]] || { echo "::error::SHA-256 inattendu, copie refusée"; exit 1; }
+          [[ "$(stat -c%s "$src")" == "115320296" ]] || { echo "::error::Taille incorrecte"; exit 1; }
+          cp "$src" output/libmpv-2.dll
+          cat > output/PROVENANCE.txt <<'EOF'
+          Source temporaire: NuvioMedia/NuvioDesktop
+          Commit: 51963ee4d83057ef08836f4ed9ab68037e081dd3
+          Chemin original: composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll
+          SHA-256: 07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906
+          Taille: 115320296 octets
+          Attention: ce binaire tiers est conservé pour des essais internes.
+          Avant toute redistribution publique, contrôler licences et
+          disponibilité du code source correspondant à ce build libmpv.
+          Ce binaire n'est PAS construit de façon indépendante.
+          EOF
+          echo "Runtime Windows copié et SHA-256 confirmé."
+      - name: Conserver le runtime vérifié dans les artefacts Kovelyx
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-windows-mpv
+          path: output/
+          retention-days: 90
+          if-no-files-found: error
