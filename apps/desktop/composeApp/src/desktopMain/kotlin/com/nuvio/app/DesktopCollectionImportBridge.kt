@@ -199,13 +199,13 @@ internal object DesktopCollectionImportBridge {
         for (entry in manifests) {
             val item = entry as? JsonObject ?: continue
             val value = item.string("url")
-            val uri = runCatching { java.net.URI(value) }.getOrNull()
+            val uri = runCatching { java.net.URI(value.replace("|", "%7C")) }.getOrNull()
             require(uri?.scheme.equals("https", ignoreCase = true) &&
                 uri?.host?.isNotBlank() == true && value.endsWith("/manifest.json")) {
                 "Une URL d'extension est invalide"
             }
             // Avoid redundant network calls for addons already installed.
-            if (AddonRepository.uiState.value.addons.any { it.manifestUrl == value }) continue
+            if (AddonRepository.uiState.value.addons.any { it.manifestUrl == value.replace("|", "%7C") }) continue
             val outcome = AddonRepository.addAddon(value)
             if (outcome is com.nuvio.app.features.addons.AddAddonResult.Success) {
                 installed++
