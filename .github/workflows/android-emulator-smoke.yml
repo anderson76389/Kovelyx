@@ -1,0 +1,69 @@
+name: Tester Kovelyx Android sur émulateur
+
+on:
+  workflow_run:
+    workflows:
+      - "Compiler Kovelyx (APK et diagnostic Windows)"
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  startup:
+    name: Installer et ouvrir l'APK Android dans un émulateur
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Télécharger l'APK de la compilation vérifiée
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
+          jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null
+          mkdir -p /tmp/kv-apk
+          gh run download "$BUILD_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-mobile-debug --dir /tmp/kv-apk
+          count="$(find /tmp/kv-apk -type f -name '*.apk' | wc -l)"
+          [[ "$count" == "1" ]] || exit 1
+      - name: Activer KVM sur le runner GitHub
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+          fi
+      - name: Tester le démarrage réel sous Android 35
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 3072M
+          heap-size: 512M
+          disable-animations: true
+          script: |
+            set -e
+            apk="$(find /tmp/kv-apk -type f -name '*.apk' -print -quit)"
+            test -n "$apk"
+            adb install -r "$apk"
+            adb shell monkey -p com.kovelyx.mobile.debug -c android.intent.category.LAUNCHER 1
+            sleep 20
+            adb shell pidof com.kovelyx.mobile.debug
+            adb shell screencap -p /sdcard/kovelyx-launch.png
+            adb pull /sdcard/kovelyx-launch.png /tmp/kovelyx-launch.png
+      - name: Enregistrer la capture de démarrage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-mobile-android-emulator-screenshot
+          path: /tmp/kovelyx-launch.png
+          if-no-files-found: ignore
+          retention-days: 7
