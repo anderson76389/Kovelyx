@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4510
+Fichiers inspectés : 4512
 
 ## Inventaire des références à traiter
 
@@ -105,7 +105,7 @@ Fichiers inspectés : 4510
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (53 correspondances)
+### Liens annexes (50 correspondances)
 
 - apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:310 : .baseUrl("https://placeholder.nuvio.tv/")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
@@ -137,11 +137,8 @@ Fichiers inspectés : 4510
 - apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 - apps/desktop/composeApp/build.gradle.kts:127 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
 - apps/desktop/composeApp/build.gradle.kts:141 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
-- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56 : append("nuvio://meta
-- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62 : fun buildDownloadsDeepLinkUrl(): String = "nuvio://downloads"
 - apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107 : append("nuvio://external-player/infuse/$sessionId/success".encodeURLParameter())
 - apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109 : append("nuvio://external-player/infuse/$sessionId/error".encodeURLParameter())
-- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/SettingsRootPage.kt:55 : private const val PRIVACY_POLICY_URL = "https://nuvio.tv/privacy-policy"
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13 : parseAppDeepLink("nuvio://meta
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37 : parseAppDeepLink("nuvio://series/tt0944947"),
@@ -157,7 +154,7 @@ Fichiers inspectés : 4510
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:229 : /** Per-user URL registration, no administrator privileges, never claims nuvio:// or stremio://. */
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:319 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:350 : value.startsWith("nuvio://", ignoreCase = true) //
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
@@ -329,7 +326,7 @@ Fichiers inspectés : 4510
 
 - apps/tv : 6730 lignes.
 - apps/mobile : 6932 lignes.
-- apps/desktop : 7852 lignes.
+- apps/desktop : 7855 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
