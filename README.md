@@ -14,7 +14,7 @@
 
 <br />
 
-[**Découvrir**](#-découvrir-kovelyx) · [**Plateformes**](#-sur-vos-trois-écrans) · [**Fonctionnement**](#-sans-serveur-personnel) · [**Installation**](#-installation-et-compilation) · [**Avancement**](#-état-du-projet)
+[**Téléchargements**](./docs/index.html) · [**Releases**](https://github.com/anderson76389/Kovelyx/releases) · [**Plateformes**](#-sur-vos-trois-écrans) · [**Installation**](#-installation-et-compilation) · [**Avancement**](#-état-du-projet)
 
 </div>
 
@@ -33,6 +33,22 @@ L'objectif : conserver une expérience de découverte et de lecture agréable, p
 <td width="33%" align="center"><strong>◇ Tes réglages sur ton appareil</strong><br /><sub>Pas de serveur Kovelyx à installer : configuration et données conservées localement, objectif en cours d'intégration.</sub></td>
 </tr>
 </table>
+
+## ⬇️ Téléchargements
+
+<div align="center">
+
+**[🌐 Site de téléchargement Kovelyx](./docs/index.html)** · **[📦 Releases GitHub](https://github.com/anderson76389/Kovelyx/releases)** · **[⚙️ Activer GitHub Pages](./docs/TELECHARGEMENTS.md)**
+
+</div>
+
+| Appareil | Fichier prévu | Disponibilité |
+| :--- | :--- | :--- |
+| 📺 Android TV / Google TV | `Kovelyx-TV-…apk` | Pas de Release validée |
+| 📱 Android mobile | `Kovelyx-Mobile-…apk` | Pas de Release validée |
+| 🖥️ Windows | `Kovelyx-Windows-…msi` | Pas de Release validée |
+
+Le [site de téléchargement](./docs/index.html) vérifie les **vrais fichiers des Releases** et active les boutons automatiquement, sans inventer de téléchargements. Son hébergement GitHub Pages nécessite une activation unique dans **Settings → Pages → Source : GitHub Actions**. Les APK et le MSI ne seront disponibles qu'après une compilation réussie et validation.
 
 ## 📺 Sur vos trois écrans
 
