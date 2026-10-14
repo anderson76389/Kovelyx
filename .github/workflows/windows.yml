@@ -36,12 +36,27 @@ jobs:
           python-version: '3.12'
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Générer l'icône originale Kovelyx
+      - name: Reconstruire le moteur JVM depuis vendor/engine
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & apps/desktop/gradlew.bat -p vendor/engine/platform/jvm jar --no-daemon --stacktrace
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $newJar = 'vendor/engine/platform/jvm/build/libs/nuvio-engine-jvm-0.1.4.jar'
+          $oldJar = 'apps/desktop/composeApp/libs/nuvio-engine-jvm-0.1.4.jar'
+          if (-not (Test-Path $newJar) -or -not (Test-Path $oldJar)) { throw 'JAR du moteur manquant' }
+          $oldClasses = @( & jar tf $oldJar | Where-Object { $_ -match '[.]class$' } )
+          $newClasses = @( & jar tf $newJar | Where-Object { $_ -match '[.]class$' } )
+          $missing = @($oldClasses | Where-Object { $_ -notin $newClasses })
+          if ($missing.Count -gt 0) { throw ('Classes du moteur manquantes : ' + ($missing -join ', ')) }
+          Copy-Item -Path $newJar -Destination $oldJar -Force
+          Write-Host 'JAR JVM recompilé et contrôlé depuis le dépôt Kovelyx.'
+      - name: Générer l'icône Kovelyx originale
         shell: pwsh
         run: |
           python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
           python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
-          if (-not (Test-Path 'apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.ico')) { throw 'Icône Windows manquante' }
+          if (-not (Test-Path 'apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.ico')) { throw 'ICO Kovelyx manquant' }
       - name: Restaurer la DLL MPV archivée dans Kovelyx
         shell: pwsh
         env:
@@ -121,54 +136,53 @@ jobs:
           & $batch
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Vérifier les propriétés du MSI
+      - name: Valider l'identité réelle du MSI
+        if: steps.native.outputs.available == 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $msiFiles = @(Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries' -Filter '*.msi' -Recurse)
-          if ($msiFiles.Count -ne 1) { throw ('Un seul MSI attendu ; obtenu : ' + $msiFiles.Count) }
-          $msi = $msiFiles[0]
-          if ($msi.Name -notmatch 'Kovelyx' -or $msi.Length -lt 1000000) { throw ('MSI non valide ou non renommé : ' + $msi.Name) }
-          $com = New-Object -ComObject WindowsInstaller.Installer
-          $database = $com.OpenDatabase($msi.FullName, 0)
-          function Value([string]$field) {
-            $q = $database.OpenView("SELECT Value FROM Property WHERE Property = '$field'")
-            $q.Execute()
-            $r = $q.Fetch()
-            $result = if ($null -ne $r) { $r.StringData(1) } else { '' }
-            $q.Close()
-            return $result
+          $msis = @(Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries' -Filter '*.msi' -Recurse)
+          if ($msis.Count -ne 1) { throw ('Attendu : 1 MSI ; obtenu : ' + $msis.Count) }
+          $msi = $msis[0]
+          if ($msi.Name -notmatch 'Kovelyx' -or $msi.Length -lt 1000000) { throw 'Nom ou taille du MSI non valides' }
+          $installer = New-Object -ComObject WindowsInstaller.Installer
+          $database = $installer.OpenDatabase($msi.FullName, 0)
+          function Read-Property([string]$name) {
+            $view = $database.OpenView("SELECT Value FROM Property WHERE Property = '$name'")
+            $view.Execute()
+            $record = $view.Fetch()
+            $value = if ($null -eq $record) { '' } else { $record.StringData(1) }
+            $view.Close()
+            return $value
           }
-          $product = Value 'ProductName'
-          $vendor = Value 'Manufacturer'
-          $upgrade = Value 'UpgradeCode'
-          Write-Host ('Name=' + $product + ' Vendor=' + $vendor + ' UpgradeCode=' + $upgrade)
-          if ($product -ne 'Kovelyx' -or $vendor -match 'Nuvio' -or $upgrade -match '395990ee-9b8a-3548-922c-e7a23a495b8d') { throw 'Identité MSI non indépendante' }
+          $product = Read-Property 'ProductName'
+          $vendor = Read-Property 'Manufacturer'
+          $upgrade = Read-Property 'UpgradeCode'
+          Write-Host ('ProductName=' + $product + ', Manufacturer=' + $vendor + ', UpgradeCode=' + $upgrade)
+          if ($product -ne 'Kovelyx' -or $vendor -match 'Nuvio' -or $upgrade -match '395990ee-9b8a-3548-922c-e7a23a495b8d') { throw 'Ancienne identité Nuvio détectée dans le MSI' }
           New-Item -ItemType Directory -Path dist -Force | Out-Null
-          $out = Join-Path 'dist' ('Kovelyx-Windows-' + $env:GITHUB_SHA + '.msi')
-          Copy-Item $msi.FullName -Destination $out
-          $hash = (Get-FileHash -Path $out -Algorithm SHA256).Hash.ToLowerInvariant()
-          ($hash + '  ' + (Split-Path $out -Leaf)) | Set-Content -Path ($out + '.sha256') -Encoding Ascii
-          ('MSI Kovelyx vérifié (identité/package), SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
-          'Note : les fonctionnalités et le lancement de l’interface restent à tester sur un vrai ordinateur.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
-      - name: Préparer la version Windows portable (sans installation)
+          $target = Join-Path 'dist' ('Kovelyx-Windows-' + $env:GITHUB_SHA + '.msi')
+          Copy-Item -Path $msi.FullName -Destination $target
+          $hash = (Get-FileHash -Path $target -Algorithm SHA256).Hash.ToLowerInvariant()
+          ($hash + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
+          ('Kovelyx MSI : produit=' + $product + ', SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Préparer l'archive Windows portable
         if: steps.native.outputs.available == 'true'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $root = 'apps/desktop/composeApp/build/compose/binaries'
-          $candidates = @(Get-ChildItem $root -Recurse -Filter 'Kovelyx.exe' -File)
-          if ($candidates.Count -eq 0) {
-            Write-Host '::warning::Aucun fichier Kovelyx.exe trouvé dans la distribution Compose ; ZIP portable non produit.'
-            exit 0
+          $exes = @(Get-ChildItem $root -Recurse -File -Filter 'Kovelyx.exe')
+          if ($exes.Count -gt 0) {
+            $exe = $exes | Sort-Object FullName | Select-Object -First 1
+            $target = Join-Path 'dist' ('Kovelyx-Windows-Portable-' + $env:GITHUB_SHA + '.zip')
+            Compress-Archive -Path (Join-Path $exe.Directory.FullName '*') -DestinationPath $target -CompressionLevel Optimal
+            $hash = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
+            ($hash + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
+            Write-Host ('Archive portable réalisée : ' + $target)
+          } else {
+            Write-Host '::notice::Aucune distribution EXE détectée ; seul le MSI est fourni.'
           }
-          $exe = $candidates | Sort-Object FullName | Select-Object -First 1
-          $target = Join-Path 'dist' ('Kovelyx-Windows-Portable-' + $env:GITHUB_SHA + '.zip')
-          Compress-Archive -Path (Join-Path $exe.Directory.FullName '*') -DestinationPath $target -CompressionLevel Optimal
-          $sha = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
-          ($sha + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
-          Write-Host ('Archive portable créée : ' + $target)
-          'ZIP portable : généré depuis la distribution Compose, non testé sur un PC utilisateur.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
       - name: Enregistrer le MSI
         if: steps.native.outputs.available == 'true'
         uses: actions/upload-artifact@v4
