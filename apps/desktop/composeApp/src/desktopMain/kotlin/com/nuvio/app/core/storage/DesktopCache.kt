@@ -26,7 +26,11 @@ internal object DesktopCache {
         resources.forEach { (relativePath, url) ->
             val target = resolveTarget(directory, relativePath)
             if (!Files.exists(target)) {
-                url.openStream().use { input ->
+                // URL.openStream() defaults to caching JarURLConnection's JarFile
+                // indefinitely on Windows, retaining a lock even after close().
+                // Disabling connection caching allows replacing/deleting old engine JARs.
+                val connection = url.openConnection().apply { useCaches = false }
+                connection.getInputStream().use { input ->
                     writeAtomically(target) { pending -> Files.copy(input, pending, StandardCopyOption.REPLACE_EXISTING) }
                 }
             }
