@@ -21,7 +21,7 @@ private const val ReconnectDelayMs = 15_000L
 
 // Discord activity type: 0 = Playing, 2 = Listening, 3 = Watching, 5 = Competing.
 // Nuvio is a media app, so every presence it publishes is a Watching one -- including the menus,
-// where Discord renders "Watching Nuvio" instead of the default "Playing Nuvio" (a game).
+// where Discord renders "Watching Kovelyx" instead of the default "Playing Kovelyx" (a game).
 private const val WatchingActivityType = 3
 
 internal object DiscordPresenceManager {
@@ -81,10 +81,10 @@ internal object DiscordPresenceManager {
     }
 }
 
-// Shown when nothing has been published yet, so the profile still reads "Watching Nuvio".
+// Shown when nothing has been published yet, so the profile still reads "Watching Kovelyx".
 private val IdleActivity = DiscordActivity(
     type = WatchingActivityType,
-    details = "Browsing Nuvio",
+    details = "Browsing Kovelyx",
 )
 
 private fun String.toDiscordEpisodeLabel(): String {
