@@ -8,9 +8,9 @@
     desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.msi$/i
   };
   const config = {
-    mobile: {label:"01 / MOBILE",title:"Kovelyx pour Android.",desc:"Votre médiathèque dans la poche. Une expérience tactile adaptée aux téléphones et tablettes Android.",tags:["Android","Téléphone & tablette","APK"],device:"phone",suffix:"APK Android"},
-    tv: {label:"02 / GRAND ÉCRAN",title:"Kovelyx pour Android TV.",desc:"Une navigation pensée pour la télécommande, la télévision et les boîtiers Android TV ou Google TV.",tags:["Android TV","Google TV","APK"],device:"tv",suffix:"APK Android TV"},
-    desktop: {label:"03 / ORDINATEUR",title:"Kovelyx pour Windows.",desc:"Le confort d’une application de bureau sur PC. Une interface adaptée au clavier, à la souris et au grand écran.",tags:["Windows","PC 64 bits","MSI"],device:"desktop",suffix:"Installateur MSI"}
+    mobile: {label:"02 / MOBILE",title:"Kovelyx pour Android.",desc:"Votre médiathèque dans la poche. Une expérience tactile adaptée aux téléphones et tablettes Android.",tags:["Android","Téléphone & tablette","APK"],device:"phone",suffix:"APK Android"},
+    tv: {label:"03 / GRAND ÉCRAN",title:"Kovelyx pour Android TV.",desc:"Une navigation pensée pour la télécommande, la télévision et les boîtiers Android TV ou Google TV.",tags:["Android TV","Google TV","APK"],device:"tv",suffix:"APK Android TV"},
+    desktop: {label:"01 / WINDOWS",title:"Kovelyx pour Windows.",desc:"Le confort d’une application de bureau sur PC. Une interface adaptée au clavier, à la souris et au grand écran.",tags:["Windows x64","Installateur MSI","Archive portable"],device:"desktop",suffix:"Installateur MSI"}
   };
   const tabs = [...document.querySelectorAll('[role="tab"][data-platform]')];
   const title = document.getElementById("panel-title");
@@ -21,11 +21,15 @@
   const panel = document.getElementById("platform-showcase");
   const link = document.getElementById("platform-download");
   const disabled = document.getElementById("download-disabled");
+  const portableLink = document.getElementById("platform-portable");
   const details = document.getElementById("download-meta");
   const releaseItems = [...document.querySelectorAll("[data-release-status]")];
-  let currentPlatform = "mobile";
+  let currentPlatform = "desktop";
   const versions = { mobile: null, tv: null, desktop: null };
   let availabilityState = "loading";
+  let portableAsset = null;
+  const portablePattern = /^kovelyx[-_](?:windows|desktop)[-_]portable[-_].+\.zip$/i;
+  const releaseAssetUrl = /^https:\/\/github\.com\/anderson76389\/Kovelyx\/releases\/download\//i;
 
   function sizeText(bytes) { return (bytes / 1048576).toLocaleString("fr-FR", {maximumFractionDigits:1}) + " Mo"; }
   function findMatchingRelease(releases, platform) {
@@ -35,12 +39,16 @@
         const url = asset.browser_download_url || "";
         if (asset.state === "uploaded" && asset.size > 100000 &&
             patterns[platform].test(asset.name) &&
-            /^https:\/\/github\.com\/anderson76389\/Kovelyx\/releases\/download\//i.test(url)) {
+            releaseAssetUrl.test(url)) {
           return {release, asset};
         }
       }
     }
     return null;
+  }
+  function findPortableAsset(release) {
+    if (!release || !Array.isArray(release.assets)) return null;
+    return release.assets.find(a => a.state === "uploaded" && a.size > 100000 && portablePattern.test(a.name) && releaseAssetUrl.test(a.browser_download_url || "")) || null;
   }
   function statusText(selected) {
     if (!selected) return availabilityState === "error" ? "Vérification indisponible" : availabilityState === "loading" ? "Vérification des versions…" : "Pas de version publiée";
@@ -64,6 +72,12 @@
     visual.className = "device " + item.device;
     const matched = versions[platform];
     details.textContent = matched ? statusText(matched) + " · " + sizeText(matched.asset.size) : statusText(null);
+    if (portableLink) {
+      const showPortable = platform === "desktop" && matched && portableAsset;
+      portableLink.hidden = !showPortable;
+      if (showPortable) portableLink.href = portableAsset.browser_download_url;
+      else portableLink.removeAttribute("href");
+    }
     if (matched) {
       link.href = matched.asset.browser_download_url;
       link.textContent = "↓ Télécharger " + item.suffix;
@@ -95,6 +109,12 @@
       const match = versions[p];
       const state = card.querySelector(".release-status");
       const action = card.querySelector(".release-link");
+      const portableAction = card.querySelector(".portable-link");
+      if (portableAction) {
+        portableAction.hidden = !(p === "desktop" && match && portableAsset);
+        if (!portableAction.hidden) portableAction.href = portableAsset.browser_download_url;
+        else portableAction.removeAttribute("href");
+      }
       if (match) {
         state.textContent = statusText(match);
         action.textContent = "Télécharger →";
@@ -119,6 +139,7 @@
       if (!Array.isArray(releases)) throw new Error("Réponse GitHub inattendue");
       releases.sort((a,b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
       for (const platform of Object.keys(versions)) versions[platform] = findMatchingRelease(releases,platform);
+      portableAsset = findPortableAsset(versions.desktop?.release);
       availabilityState = "loaded";
       if (mode) mode.textContent = releases.length ? "Versions vérifiées depuis GitHub Releases." : "Aucune Release Kovelyx publiée pour le moment.";
       setPlatform(currentPlatform);
