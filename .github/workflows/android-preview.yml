@@ -47,9 +47,11 @@ jobs:
           for artifact in kovelyx-mobile-debug kovelyx-tv-debug; do
             jq -e --arg name "$artifact" '[.artifacts[] | select(.name == $name and .expired == false)] | length == 1' /tmp/kv-artifacts.json >/dev/null || { echo "::error::Artefact absent : $artifact"; exit 1; }
           done
-          echo "SOURCE_SHA=$sha" >> "$GITHUB_ENV"
-          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
-          echo "TAG=preview-${sha:0:12}" >> "$GITHUB_ENV"
+          {
+            echo "SOURCE_SHA=$sha"
+            echo "RUN_ID=$RUN_ID"
+            echo "TAG=preview-${sha:0:12}"
+          } >> "$GITHUB_ENV"
 
       - name: Télécharger et contrôler les APK
         shell: bash
@@ -76,7 +78,7 @@ jobs:
       - name: Publier la Release expérimentale
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
         run: |
           set -euo pipefail
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
