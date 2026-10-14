@@ -39,15 +39,19 @@ internal actual object AppIconPlatform {
             runCatching {
                 Thread.sleep(900)
                 val appHome = System.getProperty("compose.application.home")?.let { Paths.get(it) }
-                val installedLauncher = appHome?.parent?.resolve("Nuvio.exe")
+                val installedLauncher = appHome?.parent?.resolve("Kovelyx.exe")
                 val parentLauncher = ProcessHandle.current().parent().orElse(null)?.info()?.command()?.orElse(null)?.let { Paths.get(it) }
                 val currentLauncher = ProcessHandle.current().info().command().orElse(null)?.let { Paths.get(it) }
-                val launcher = sequenceOf(installedLauncher, parentLauncher, currentLauncher).filterNotNull().firstOrNull(Files::isRegularFile)
+                val launcher = sequenceOf(installedLauncher, parentLauncher, currentLauncher)
+                    .filterNotNull()
+                    .firstOrNull { candidate ->
+                        Files.isRegularFile(candidate) && candidate.fileName.toString().equals("Kovelyx.exe", ignoreCase = true)
+                    }
                     ?: return@runCatching
                 ProcessBuilder(launcher.toString()).start()
                 exitProcess(0)
             }
-        }, "Nuvio Windows app restart").apply {
+        }, "Kovelyx Windows app restart").apply {
             isDaemon = false
             start()
         }

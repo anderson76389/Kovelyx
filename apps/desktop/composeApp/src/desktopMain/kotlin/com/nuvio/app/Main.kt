@@ -38,6 +38,7 @@ import com.nuvio.app.features.player.desktop.preloadNativePlayerBridgeAsync
 import com.nuvio.app.features.player.desktop.registerDesktopAppFullscreenToggle
 import com.nuvio.app.features.player.desktop.trackMaximizedBoundsForCurrentScreen
 import com.nuvio.app.features.profiles.ProfileRepository
+import com.nuvio.app.features.settings.AppIconOption
 import com.nuvio.app.features.settings.AppIconRepository
 import com.nuvio.app.features.settings.applyDesktopRendererPreference
 import com.nuvio.app.features.settings.transparentPreviewResource
@@ -141,7 +142,11 @@ fun main(args: Array<String>) {
             }
             LaunchedEffect(window, appIconState.selected) {
                 val backgroundSuffix = "-transparent"
-                val iconPath = "icons/app-icon-${appIconState.selected.key}$backgroundSuffix.png"
+                val iconPath = if (DesktopHostOs.current == DesktopHostOs.WINDOWS && appIconState.selected == AppIconOption.ORIGINAL) {
+                    "icons/kovelyx.png"
+                } else {
+                    "icons/app-icon-${appIconState.selected.key}$backgroundSuffix.png"
+                }
                 Thread.currentThread().contextClassLoader.getResourceAsStream(iconPath)?.use { stream ->
                     ImageIO.read(stream)?.let { image ->
                         window.iconImages = listOf(image)
