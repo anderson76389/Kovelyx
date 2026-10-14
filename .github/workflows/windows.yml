@@ -150,15 +150,19 @@ jobs:
           $database = $installer.OpenDatabase($msi.FullName, 0)
           function Read-Property([string]$name) {
             $view = $database.OpenView("SELECT Value FROM Property WHERE Property = '$name'")
-            $view.Execute()
+            $null = $view.Execute()
             $record = $view.Fetch()
             $value = if ($null -eq $record) { '' } else { $record.StringData(1).Trim() }
-            $view.Close()
+            $null = $view.Close()
             return $value
           }
-          $product = Read-Property 'ProductName'
-          $vendor = Read-Property 'Manufacturer'
-          $upgrade = Read-Property 'UpgradeCode'
+          # A COM method returning an implicit pipeline value must never contaminate properties.
+          $product = [string](Read-Property 'ProductName' | Select-Object -Last 1)
+          $vendor = [string](Read-Property 'Manufacturer' | Select-Object -Last 1)
+          $upgrade = [string](Read-Property 'UpgradeCode' | Select-Object -Last 1)
+          $product = $product.Trim()
+          $vendor = $vendor.Trim()
+          $upgrade = $upgrade.Trim()
           Write-Host ('ProductName=' + $product + ', Manufacturer=' + $vendor + ', UpgradeCode=' + $upgrade)
           if ($product -ne 'Kovelyx' -or $vendor -ne 'Kovelyx' -or $upgrade -ne '{3F7AF095-1F5E-4D2B-AF6C-3F5C12B2C9A1}') { throw 'Identité MSI différente de Kovelyx' }
           New-Item -ItemType Directory -Path dist -Force | Out-Null
