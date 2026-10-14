@@ -12,6 +12,10 @@ fun resolveProfileBackground(
     profile: NuvioProfile,
     entitlements: CosmeticEntitlements,
 ): ProfileBackgroundSelection? {
+    // Images selected from the user's computer are always free and private.
+    profile.profileBackgroundUrl?.trim()?.takeIf(ProfileLocalImages::isManagedUri)?.let {
+        return ProfileBackgroundSelection.Custom(it)
+    }
     if (!entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)) return null
     profile.profileBackgroundUrl?.trim()?.takeIf { it.isNotBlank() }?.let {
         return ProfileBackgroundSelection.Custom(it)
