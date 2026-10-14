@@ -54,6 +54,9 @@ L'objectif : conserver une expérience de découverte et de lecture agréable, p
 
 Le [site de téléchargement](https://anderson76389.github.io/Kovelyx/) vérifie les **vrais fichiers des Releases** et active les boutons automatiquement, sans inventer de téléchargements. Le site est publié à partir de la branche **gh-pages** et mis à jour automatiquement depuis `docs/`. Si nécessaire, sélectionner **Settings → Pages → Deploy from a branch → gh-pages / (root)**. Les APK de préversion n'apparaissent qu'après une compilation réussie. Ils ne sont pas encore validés sur appareils réels. Le MSI Windows reste soumis à ses propres vérifications.
 
+
+> **Indépendance : audit non terminé.** Les services de connexion et de synchronisation, certains liens internes et plusieurs moteurs binaires proviennent encore de Nuvio. Voir le [plan de suppression des dépendances](https://github.com/anderson76389/Kovelyx/issues/5). Les mentions de provenance et de licence des auteurs d'origine doivent être conservées.
+
 ## 📺 Sur vos trois écrans
 
 <table>
@@ -193,7 +196,7 @@ Kovelyx/
 - [ ] Tester la lecture, la navigation, les sous-titres, les thèmes et les extensions sur des appareils réels.
 - [ ] Publier des Releases Kovelyx reproductibles (APK TV, APK mobile et MSI Windows).
 
-Pour l'état réellement vérifié et les limites d'autonomie, consultez **[l'état technique](./docs/ETAT_TECHNIQUE.md)**, **[l'inventaire des dépendances](./docs/AUDIT_DEPENDANCES.md)** et **[le plan d'indépendance](./docs/INDEPENDANCE.md)**.
+Pour l'état réellement vérifié et les limites d'autonomie, consultez **[l'état technique](./docs/ETAT_TECHNIQUE.md)**, **[l'audit des liens Nuvio](./docs/AUDIT_NUVIO.md)** et **[le plan d'indépendance](./docs/INDEPENDANCE.md)**.
 
 Pour conserver une copie **hors GitHub** des sources et des Releases accessibles, lancez sur Windows le script [Sauvegarder-Kovelyx.ps1](./scripts/Sauvegarder-Kovelyx.ps1). Une sauvegarde des fichiers de source ne remplace pas l'archivage des dépendances natives, des SDK et de la clé de signature Android.
 
