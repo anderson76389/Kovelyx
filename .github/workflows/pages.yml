@@ -1,0 +1,47 @@
+name: Site Kovelyx - GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Récupérer le site
+        uses: actions/checkout@v4
+      - name: Configurer GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Vérifier le site (pas de téléchargement fictif)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/index.html
+          test -s docs/brand/logo.svg
+          test -s docs/brand/banner.svg
+          grep -q 'api.github.com/repos/anderson76389/Kovelyx/releases' docs/index.html
+      - name: Préparer les fichiers statiques
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - name: Publier sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
