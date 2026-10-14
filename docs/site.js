@@ -3,14 +3,12 @@
   const repo = "anderson76389/Kovelyx";
   const github = "https://github.com/" + repo;
   const patterns = {
-    tv: /^kovelyx[-_](?:tv|android-tv)[-_].+\.apk$/i,
-    mobile: /^kovelyx[-_](?:mobile|android)[-_].+\.apk$/i,
-    desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.(?:exe|msi)$/i
+    desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.(?:exe|msi)$/i,
+    linux: /^kovelyx[-_]linux[-_]x86[_-]64[-_].+\.appimage$/i
   };
   const config = {
-    mobile: {label:"02 / MOBILE",title:"Kovelyx pour Android.",desc:"Votre médiathèque dans la poche. Une expérience tactile adaptée aux téléphones et tablettes Android.",tags:["Android","Téléphone & tablette","APK"],device:"phone",suffix:"APK Android"},
-    tv: {label:"03 / GRAND ÉCRAN",title:"Kovelyx pour Android TV.",desc:"Une navigation pensée pour la télécommande, la télévision et les boîtiers Android TV ou Google TV.",tags:["Android TV","Google TV","APK"],device:"tv",suffix:"APK Android TV"},
-    desktop: {label:"01 / WINDOWS",title:"Kovelyx pour Windows.",desc:"Le confort d’une application de bureau sur PC. Une interface adaptée au clavier, à la souris et au grand écran.",tags:["Windows x64","Installateur EXE","MSI et portable"],device:"desktop",suffix:"Installateur MSI"}
+    desktop: {label:"01 / WINDOWS",title:"Kovelyx pour Windows.",desc:"L'application de bureau pour Windows 10 et 11. Téléchargez un installateur EXE complet, un MSI ou une archive portable selon vos besoins.",tags:["Windows x64","Installateur EXE","MSI et portable"],device:"desktop",suffix:"Installateur MSI"},
+    linux: {label:"02 / LINUX",title:"Kovelyx pour Linux.",desc:"Une AppImage x86-64 conçue pour éviter les dizaines de fichiers à manipuler. Les dépendances natives et la compatibilité avec chaque distribution restent à tester.",tags:["Linux x86-64","Fichier AppImage","Version expérimentale"],device:"desktop",suffix:"l'AppImage Linux"}
   };
   const tabs = [...document.querySelectorAll('[role="tab"][data-platform]')];
   const title = document.getElementById("panel-title");
@@ -25,7 +23,7 @@
   const details = document.getElementById("download-meta");
   const releaseItems = [...document.querySelectorAll("[data-release-status]")];
   let currentPlatform = "desktop";
-  const versions = { mobile: null, tv: null, desktop: null };
+  const versions = { desktop: null, linux: null };
   let availabilityState = "loading";
   let portableAsset = null;
   const portablePattern = /^kovelyx[-_](?:windows|desktop)[-_]portable[-_].+\.zip$/i;
