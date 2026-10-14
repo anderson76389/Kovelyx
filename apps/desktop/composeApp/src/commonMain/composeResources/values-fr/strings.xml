@@ -1387,9 +1387,9 @@
     <string name="continue_watching_up_next_episode">À suivre • S%1$d E%2$d</string>
     <string name="detail_logo_content_description">Logo de %1$s</string>
     <string name="details_comments_load_failed">Impossible de charger les commentaires</string>
-    <string name="details_load_failed_all_addons">Impossible de charger les détails depuis les addons disponibles.</string>
+    <string name="details_load_failed_all_addons">Impossible de récupérer cette fiche : extensions et services de métadonnées indisponibles. Vérifiez les extensions ou la configuration TMDB.</string>
     <string name="details_networks">Chaînes</string>
-    <string name="details_no_addon_meta">Aucun addon ne fournit de métadonnées pour ce contenu.</string>
+    <string name="details_no_addon_meta">Aucune fiche trouvée. Vérifiez vos extensions de métadonnées ou configurez TMDB dans les paramètres.</string>
     <string name="download_failed">Échec du téléchargement</string>
     <string name="downloads_channel_description">Affiche la progression en direct et les contrôles de téléchargement.</string>
     <string name="downloads_channel_name">Téléchargements</string>
