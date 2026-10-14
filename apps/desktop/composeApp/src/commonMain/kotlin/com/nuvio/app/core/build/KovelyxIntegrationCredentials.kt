@@ -1,5 +1,7 @@
 package com.nuvio.app.core.build
 
+import com.nuvio.app.features.mdblist.MdbListConfig
+import com.nuvio.app.features.trakt.TraktConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
