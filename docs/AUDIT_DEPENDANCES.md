@@ -262,7 +262,7 @@ Fichiers texte examinés : **1782** ; références statiques à Nuvio/NuvioMedia
 | `simkl.com` | 16 |
 | `api.trakt.tv` | 16 |
 | `mdblist.com` | 15 |
-| `api.ratingposterdb.com` | 13 |
+| `api.ratingposterdb.com` | 14 |
 | `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
 | `cdn.example.com` | 12 |
