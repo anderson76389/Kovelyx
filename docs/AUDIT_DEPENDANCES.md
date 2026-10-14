@@ -125,7 +125,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia : **124**.
+Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia : **122**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -154,11 +154,11 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 | `trakt.tv` | 7 |
 | `www.youtube.com` | 6 |
 | `a.com` | 5 |
-| `nuvio.tv` | 4 |
 | `fake.example` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
 | `192.168.1.10` | 4 |
+| `host` | 4 |
 
 ### Références à vérifier en priorité
 
@@ -239,10 +239,10 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/SettingsRootPage.kt:67`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/auth/AuthScreen.kt:776`
-- …et 44 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:50`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55`
+- …et 42 autres correspondances (plafond d'affichage).
 
 ## Windows
 
