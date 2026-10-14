@@ -33,6 +33,10 @@ jobs:
     name: Compiler Kovelyx Windows
     runs-on: windows-latest
     timeout-minutes: 90
+    env:
+      # Public app settings only. NEVER use a Supabase service_role/secret key.
+      KOVELYX_SUPABASE_URL: ${{ vars.KOVELYX_SUPABASE_URL }}
+      KOVELYX_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KOVELYX_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
@@ -57,6 +61,29 @@ jobs:
           }
           "KOVELYX_BUILD_VERSION=$version" >> $env:GITHUB_ENV
           Write-Host "Kovelyx Windows version $version"
+      - name: Vérifier la configuration indépendante des comptes Kovelyx
+        shell: pwsh
+        run: |
+          $url = $env:KOVELYX_SUPABASE_URL
+          $key = $env:KOVELYX_SUPABASE_PUBLISHABLE_KEY
+          if ([string]::IsNullOrWhiteSpace($url) -xor [string]::IsNullOrWhiteSpace($key)) {
+            throw 'Configurer KOVELYX_SUPABASE_URL et KOVELYX_SUPABASE_PUBLISHABLE_KEY ensemble dans les variables GitHub.'
+          }
+          if (-not [string]::IsNullOrWhiteSpace($url)) {
+            $parsed = $null
+            if (-not [uri]::TryCreate($url, [UriKind]::Absolute, [ref]$parsed) -or $parsed.Scheme -ne 'https') {
+              throw 'Le serveur de comptes Kovelyx doit utiliser HTTPS.'
+            }
+            if ($parsed.Host -eq 'nuvio.tv' -or $parsed.Host.EndsWith('.nuvio.tv')) {
+              throw 'Le serveur des comptes Kovelyx doit être indépendant de Nuvio.'
+            }
+            if ($key -like '*service_role*' -or $key -like 'sb_secret_*') {
+              throw 'Clé privée Supabase interdite dans une application publique. Utiliser la clé publishable/anon.'
+            }
+            'Comptes Kovelyx : serveur HTTPS configuré.' >> $env:GITHUB_STEP_SUMMARY
+          } else {
+            'Comptes Kovelyx : pas encore activés (mode invité, sans backend Nuvio).' >> $env:GITHUB_STEP_SUMMARY
+          }
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
       - name: Reconstruire le moteur JVM depuis vendor/engine
