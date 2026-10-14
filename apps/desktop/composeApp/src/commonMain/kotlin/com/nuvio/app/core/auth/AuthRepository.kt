@@ -1,6 +1,7 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
 import io.github.jan.supabase.auth.auth
@@ -48,6 +49,13 @@ object AuthRepository {
                 email = null,
                 isAnonymous = true,
             )
+        }
+
+        // Guest accounts live entirely on this device. A missing backend must
+        // never instantiate the remote Supabase client or leave the app loading.
+        if (!hasConfiguredBackend()) {
+            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            return
         }
 
         sessionStatusJob = scope.launch {
@@ -142,7 +150,7 @@ object AuthRepository {
         val wasAnonymous = anonymousRead.getOrNull() != null
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
         validatedRemoteUserId = null
-        val remoteSignOut = if (wasAnonymous) {
+        val remoteSignOut = if (wasAnonymous || !hasConfiguredBackend()) {
             Result.success(Unit)
         } else {
             runCatching { SupabaseProvider.client.auth.signOut() }
@@ -180,12 +188,17 @@ object AuthRepository {
         _error.value = null
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
         validatedRemoteUserId = null
-        val sessionClear = runCatching { SupabaseProvider.client.auth.clearSession() }
+        val sessionClear = if (!hasConfiguredBackend()) Result.success(Unit)
+            else runCatching { SupabaseProvider.client.auth.clearSession() }
         _state.value = AuthState.Unauthenticated
         val failure = anonymousClear.exceptionOrNull() ?: sessionClear.exceptionOrNull()
         val cancellation = sessionClear.exceptionOrNull() as? CancellationException
         if (cancellation != null) throw cancellation
         return if (failure == null) Result.success(Unit) else Result.failure(failure)
+    }
+
+    private fun hasConfiguredBackend(): Boolean = ServerConfigurationRepository.active.value.let { config ->
+        config.backendUrl.isNotBlank() && config.publishableKey.isNotBlank()
     }
 
     fun reinitialize() {
