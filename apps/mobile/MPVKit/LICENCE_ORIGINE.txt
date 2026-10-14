@@ -1,6 +1,0 @@
-Le commit MPVKit épinglé ne contenait pas de fichier LICENSE.
-Le texte de LGPL-3.0 présent ici a été copié depuis le commit public
-f5d1f0e3e9d7341d922162f8a590b16ac7eefc36 (branche principale MPVKit).
-Cette copie documentaire ne suffit PAS, à elle seule, à prouver que le même
-contrat de licence couvrait le commit historique. Vérification requise
-avant distribution de binaires.

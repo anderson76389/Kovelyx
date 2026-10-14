@@ -1,4 +1,0 @@
-# Fichiers hors Git (> 95 Mio), non sauvegardés ici
-# Ces fichiers DOIVENT être restaurés pour une compilation/lecture complète.
-# SHA256 | OCTETS | CHEMIN ORIGINAL
-07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906 | 115320296 | apps/desktop/composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll
