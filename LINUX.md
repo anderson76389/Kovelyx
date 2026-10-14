@@ -1,10 +1,10 @@
 # 🐧 Kovelyx sur Linux
 
-L'objectif Linux est **une AppImage exécutable x86-64 dans un seul fichier** : pas de dossier de 50 fichiers à conserver à côté du programme. La version Linux est **expérimentale** tant qu'elle n'a pas été construite et testée sur plusieurs distributions.
+L'objectif Linux est **une AppImage exécutable x86-64 dans un seul fichier** : pas de dossier de 50 fichiers à conserver à côté du programme. La version Linux est **expérimentale** : sa compilation AppImage et sa structure ont été vérifiées sur Ubuntu 24.04 en CI, mais la lecture vidéo et la compatibilité avec plusieurs distributions doivent encore être testées.
 
 ## Fichier principal
 
-`Kovelyx-Linux-x86_64-<commit>.AppImage` — téléchargement depuis le [workflow Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) **uniquement si l'exécution est verte et qu'un artefact existe**.
+`Kovelyx-Linux-x86_64-<commit>.AppImage` — téléchargement depuis le [workflow Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) **uniquement si l'exécution est verte et qu'un artefact existe**. [Première AppImage contrôlée par le pipeline](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804).
 
 1. Ouvrir le dernier workflow Linux **réussi**, puis télécharger son artefact `Kovelyx-Linux-AppImage-experimental`.
 2. Décompresser **l'archive GitHub Actions** (elle contient l'AppImage et son fichier SHA256). L'AppImage elle-même ne doit pas être décompressée manuellement.
