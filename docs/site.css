@@ -250,3 +250,17 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 /* Accès aux APK de développement non encore publiés en Release */
 .preview-artifact-link{font-size:12px!important;color:#948eaa!important;margin:15px 0 0!important;line-height:1.7!important}
 .preview-artifact-link .text-link{font-weight:700}
+
+/* Identité vectorielle Kovelyx : ne pas réduire le logo par les règles génériques img. */
+.brand img.header-wordmark{width:174px;height:auto;max-height:none;border-radius:0}
+.footer .foot-title img.footer-wordmark{width:180px;height:auto;max-height:none}
+.ui-logo img{display:block;width:100%;max-width:128px;height:auto}
+.phone-header img{display:block;max-width:100%;height:auto}
+.device-brand img{display:block;width:126px;max-width:70%;height:auto}
+.panel-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.download-action.portable-action{color:#e9d7ff;background:#282038;border-color:#70578f}
+.download-action.portable-action:hover{background:#38284d}
+.release-card-actions{margin-top:16px;display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px}
+.portable-link[hidden]{display:none}
+@media(max-width:710px){.brand img.header-wordmark{width:143px}.footer .foot-title img.footer-wordmark{width:165px}}
+@media(max-width:380px){.brand img.header-wordmark{width:132px}}
