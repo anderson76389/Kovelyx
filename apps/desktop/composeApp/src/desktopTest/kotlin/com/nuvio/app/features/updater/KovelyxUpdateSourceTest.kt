@@ -2,6 +2,7 @@ package com.nuvio.app.features.updater
 
 import java.net.URI
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -31,6 +32,20 @@ class KovelyxUpdateSourceTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun windowsUpdatesChooseMsiForOneClickInstallation() {
+        if (!System.getProperty("os.name").contains("Windows", ignoreCase = true)) return
+        val version = "v0.1.186-alpha"
+        val selected = selectBestUpdateAsset(
+            assets = listOf(
+                AppUpdateAssetCandidate("Kovelyx-Windows-Setup-$version.exe", "https://example.test/setup.exe"),
+                AppUpdateAssetCandidate("Kovelyx-Windows-$version.msi", "https://example.test/installer.msi"),
+            ),
+            selector = AppUpdaterPlatform.assetSelector,
+        )
+        assertEquals("Kovelyx-Windows-$version.msi", selected?.name)
     }
 
     @Test
