@@ -14,6 +14,7 @@ internal actual object TmdbSettingsStorage {
     private const val enabledKey = "tmdb_enabled"
     private const val apiKeyKey = "tmdb_api_key"
     private const val languageKey = "tmdb_language"
+    private const val frenchMigrationKey = "tmdb_language_fr_default_migrated"
     private const val useTrailersKey = "tmdb_use_trailers"
     private const val useArtworkKey = "tmdb_use_artwork"
     private const val useBasicInfoKey = "tmdb_use_basic_info"
@@ -46,8 +47,26 @@ internal actual object TmdbSettingsStorage {
     actual fun saveEnabled(enabled: Boolean) = saveBoolean(enabledKey, enabled)
     actual fun loadApiKey(): String? = loadString(apiKeyKey)
     actual fun saveApiKey(apiKey: String) = saveString(apiKeyKey, apiKey)
-    actual fun loadLanguage(): String? = loadString(languageKey)
-    actual fun saveLanguage(language: String) = saveString(languageKey, language)
+    actual fun loadLanguage(): String? {
+        val stored = loadString(languageKey)
+        val migrationKey = ProfileScopedKey.of(frenchMigrationKey)
+        if (store.getBoolean(migrationKey) != true) {
+            // Previous Windows builds used English as an implicit default.
+            // Migrate that default once to French; future user selections,
+            // including English, are respected without further migration.
+            store.putBoolean(migrationKey, true)
+            if (stored.equals("en", ignoreCase = true) ||
+                stored.equals("en-US", ignoreCase = true)) {
+                saveString(languageKey, "fr-FR")
+                return "fr-FR"
+            }
+        }
+        return stored
+    }
+    actual fun saveLanguage(language: String) {
+        saveString(languageKey, language)
+        store.putBoolean(ProfileScopedKey.of(frenchMigrationKey), true)
+    }
     actual fun loadUseTrailers(): Boolean? = loadBoolean(useTrailersKey)
     actual fun saveUseTrailers(enabled: Boolean) = saveBoolean(useTrailersKey, enabled)
     actual fun loadUseArtwork(): Boolean? = loadBoolean(useArtworkKey)
