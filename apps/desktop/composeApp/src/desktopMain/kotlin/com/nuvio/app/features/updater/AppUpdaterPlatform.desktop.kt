@@ -53,11 +53,11 @@ actual object AppUpdaterPlatform {
         get() = currentOs != DesktopUpdaterOs.UNKNOWN && linuxInstallMethod != LinuxInstallMethod.FLATPAK
 
     actual val releaseSource: AppUpdateReleaseSource = AppUpdateReleaseSource(
-        owner = "NuvioMedia",
-        repo = "NuvioDesktop",
+        owner = "anderson76389",
+        repo = "Kovelyx",
         channelBranch = null,
         includePrereleases = true,
-        userAgent = "NuvioDesktop",
+        userAgent = "Kovelyx-Windows",
     )
 
     actual val assetSelector: AppUpdateAssetSelector
@@ -177,7 +177,7 @@ actual object AppUpdaterPlatform {
     }
 
     private fun scheduleAppExit() {
-        thread(name = "nuvio-updater-exit", isDaemon = true) {
+        thread(name = "kovelyx-updater-exit", isDaemon = true) {
             Thread.sleep(500)
             exitProcess(0)
         }
