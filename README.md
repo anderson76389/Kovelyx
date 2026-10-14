@@ -40,11 +40,13 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 | Système | Format principal | Ce que tu récupères | État |
 |:--|:--|:--|:--|
 | **Windows x64** | `Kovelyx-Windows-Setup-….exe` | **1 fichier** pour installer l'application et son environnement d'exécution | [Build automatisé réussi](https://github.com/anderson76389/Kovelyx/actions/runs/38507860951) |
-| **Linux x86-64** | `Kovelyx-Linux-x86_64-….AppImage` | **1 fichier exécutable** à lancer sans décompresser un gros dossier | [Compilation en cours de validation](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) |
+| **Linux x86-64** | `Kovelyx-Linux-x86_64-….AppImage` | **1 fichier exécutable** à lancer sans décompresser un gros dossier | [Build AppImage réussi](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469) |
 | Windows x64 (alternative) | `.msi` | Installateur Windows classique | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
 | Windows x64 (alternative) | `Portable.zip` | Dossier portable avec lanceur et runtime | [Disponible dans les artefacts des builds réussis](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) |
 
-**Téléchargements :** [GitHub Actions](https://github.com/anderson76389/Kovelyx/actions) · [Releases officielles](https://github.com/anderson76389/Kovelyx/releases) · [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
+**Fichiers PC expérimentaux déjà compilés :** [🪟 Windows — EXE, MSI et portable](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908) · [🐧 Linux — AppImage x86-64](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
+
+**Tous les téléchargements :** [GitHub Actions](https://github.com/anderson76389/Kovelyx/actions) · [Releases officielles](https://github.com/anderson76389/Kovelyx/releases) · [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
 
 > **Important :** sous Windows, le `Setup.exe` est un fichier unique **pour l'installation**. Le logiciel une fois installé contient normalement de nombreux fichiers internes (bibliothèques, Java, codecs). Linux ne lance pas les `.exe` Windows de façon native : le fichier unique adapté est une **AppImage**. Une AppImage peut encore nécessiter certaines bibliothèques présentes sur la distribution. **Un build réussi ne garantit pas toutes les fonctions en situation réelle.**
 
@@ -75,7 +77,7 @@ Pas de `sudo` pour lancer l'AppImage. Les bibliothèques vidéo, WebKit/GTK et l
 | Plugins, extensions et sources configurées | Tests unitaires inclus ; dépend du fournisseur et du réseau |
 | Lecteur, audio, pistes et sous-titres | Infrastructure compilée ; tests réels avec différents fichiers/flux nécessaires |
 | Distribution Windows MSI + EXE + portable | **Build Windows complet réussi** |
-| Distribution Linux AppImage | **Préparation du pipeline ; compatibilité Linux non encore certifiée** |
+| Distribution Linux AppImage | **AppImage compilée et contrôlée ; compatibilité Linux réelle non encore certifiée** |
 | Autonomie vis-à-vis de Nuvio | **Audit en cours**, certains composants techniques/dépendances demeurent |
 
 Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisateur configure ses sources et respecte les droits applicables.
@@ -84,7 +86,7 @@ Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisat
 
 Le [workflow Windows](./.github/workflows/windows.yml) reconstruit les composants requis, fabrique les trois distributions, contrôle leurs formats/identités et **bloque la publication de l'artefact si la suite Desktop échoue**. Le [build Windows #25](https://github.com/anderson76389/Kovelyx/actions/runs/38507860951) a réussi les **1 554 tests exécutés, dont 1 ignoré** (aucun échec).
 
-Le [workflow Linux](./.github/workflows/linux.yml) tente de produire une AppImage en un fichier et vérifie l'exécutable, le lanceur interne, le logo et le SHA-256 avant l'enregistrement. Une validation sur Ubuntu, Fedora et différentes configurations reste indispensable.
+Le [workflow Linux](./.github/workflows/linux.yml) tente de produire une AppImage en un fichier et vérifie l'exécutable, le lanceur interne, le logo et le SHA-256 avant l'enregistrement. Le [build Linux validé](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469) a produit et contrôlé une AppImage. Des essais de lecture sur Ubuntu, Fedora et d'autres configurations restent indispensables.
 
 [**📋 Guide de tests manuels**](./docs/TESTS_PC.md) · [**📄 Guide d'installation et FAQ**](./docs/PC.md) · [**🐧 Linux**](./docs/LINUX.md)
 
@@ -117,7 +119,8 @@ Kovelyx/
 - [x] Compilation Windows de l'installateur EXE, du MSI et du portable ZIP
 - [x] Suite Desktop verte sur une révision de référence
 - [x] Importation locale des photos et fonds de profil sur Windows (code)
-- [ ] AppImage Linux construite et testée sur différentes distributions
+- [x] AppImage Linux x86-64 compilée et structure contrôlée
+- [ ] AppImage Linux testée en lecture sur différentes distributions et interfaces graphiques
 - [ ] Tests interactifs des lecteurs, codecs, sous-titres, extensions et réglages sur les deux OS
 - [ ] Réduire les dépendances héritées ; documenter les licences natives avant publication stable
 - [ ] Releases signées et vérifiées, avec mises à jour compatibles
