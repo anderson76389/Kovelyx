@@ -49,5 +49,6 @@ target_link_libraries(nuvio_engine_c_api_smoke PRIVATE Nuvio::Engine)
 add_test(NAME nuvio_engine_c_api_smoke COMMAND nuvio_engine_c_api_smoke)
 
 if(WIN32)
+    target_compile_definitions(nuvio_engine_tests PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
     target_link_libraries(nuvio_engine_tests PRIVATE ws2_32 bcrypt)
 endif()
