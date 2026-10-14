@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.features.collection.CollectionSyncService
+import com.nuvio.app.features.profiles.InlinePinEntry
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -353,6 +354,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     var errorMessage by remember(payload) { mutableStateOf<String?>(null) }
     var processing by remember(payload) { mutableStateOf(false) }
     var completed by remember(payload) { mutableStateOf(false) }
+    var pinVerifiedIdentity by remember(payload) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(payload, accountConnected) {
         if (accountMode && accountConnected && auth != null) {
@@ -490,6 +492,17 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
             style = MaterialTheme.typography.bodyMedium,
         )
         errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        val identity = (auth?.userId ?: "local") + ":" + (targetProfile?.profileIndex ?: -1)
+        if (targetProfile?.pinEnabled == true && pinVerifiedIdentity != identity) {
+            Text("Le profil est protégé par un code PIN. Vérifiez-le avant de remplacer ses collections.")
+            InlinePinEntry(
+                profileName = targetProfile.name,
+                onVerified = { pinVerifiedIdentity = identity },
+                onCancel = { DesktopCollectionImportBridge.discard(payload) },
+                verifyPin = { pin -> ProfileRepository.verifyPin(targetProfile.profileIndex, pin) },
+            )
+            return@DialogSurface
+        }
         DialogButtons {
             DialogButton(
                 text = "Annuler",
@@ -515,9 +528,10 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                             else "Activez d'abord un profil local dans Kovelyx."
                         return@DialogButton
                     }
-                    // La sélection d'un profil verrouillé doit passer par le contrôle PIN de Kovelyx.
-                    if (chosen.pinEnabled && chosen.profileIndex != activeProfile?.profileIndex) {
-                        errorMessage = "Profil protégé : ouvrez et déverrouillez ce profil dans Kovelyx avant l'importation."
+                    // Ne jamais contourner le PIN en changeant de profil via le pont local.
+                    if (chosen.pinEnabled &&
+                        pinVerifiedIdentity != (auth?.userId ?: "local") + ":" + chosen.profileIndex) {
+                        errorMessage = "Vérifiez le code PIN avant de continuer."
                         return@DialogButton
                     }
                     try {
