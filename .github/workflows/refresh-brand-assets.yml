@@ -62,5 +62,18 @@ jobs:
             echo 'Identité Kovelyx déjà à jour.'
           else
             git commit -m "assets(pc): replace upstream icon artwork with Kovelyx variants"
-            git push origin HEAD:main
+            # Le workflow d'audit peut mettre à jour docs simultanément.
+            # Rebase et push normal : ne jamais écraser une branche distante.
+            for attempt in 1 2 3 4; do
+              git fetch origin main
+              git rebase origin/main
+              if git push origin HEAD:main; then
+                echo 'Logos Kovelyx enregistrés dans main.'
+                exit 0
+              fi
+              echo "Nouvelle modification distante détectée, tentative $attempt/4"
+              sleep 3
+            done
+            echo 'Impossible de sauvegarder les logos après 4 essais.' >&2
+            exit 1
           fi
