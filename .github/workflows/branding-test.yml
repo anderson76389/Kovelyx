@@ -44,6 +44,6 @@ jobs:
               assert transparent.getbbox() is not None
               assert wordmark.getbbox() is not None
               assert wordmark.width > wordmark.height
-          assert ImageChops.difference(Image.open(base/'app_icon_original.png'),Image.open(base/'app_icon_emerald.png')).getbbox()
+          assert ImageChops.difference(Image.open(base/'app_icon_original.png'),Image.open(base/'app_icon_emerald.png')).convert('RGB').getbbox()
           print('OK: six variantes distinctes et splash wordmark Kovelyx')
           PY
