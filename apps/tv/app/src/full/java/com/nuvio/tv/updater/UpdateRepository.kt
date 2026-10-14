@@ -38,7 +38,13 @@ class UpdateRepository @Inject constructor(
             val releaseWithAsset = ReleaseSelector
                 .eligibleReleases(releases, channel)
                 .firstNotNullOfOrNull { release ->
-                    AbiSelector.chooseBestApkAsset(release.assets)?.let { asset ->
+                    // Une Release Kovelyx peut contenir l'APK mobile ET TV.
+                    // N'installer JAMAIS par erreur le fichier Android mobile sur une TV.
+                    val tvAssets = release.assets.filter { asset ->
+                        asset.name.startsWith("Kovelyx-TV-", ignoreCase = true) &&
+                            asset.name.endsWith(".apk", ignoreCase = true)
+                    }
+                    AbiSelector.chooseBestApkAsset(tvAssets)?.let { asset ->
                         release to asset
                     }
                 }
