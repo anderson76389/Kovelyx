@@ -618,7 +618,14 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                                 DebridSettingsRepository.setRealDebridApiKey(key)
                                 DebridSettingsRepository.setEnabled(true)
                             }
-                            posterPattern?.let { CustomPosterUrlRepository.setPattern(it) }
+                            when (importedSettings["posterProvider"]) {
+                                "none" -> CustomPosterUrlRepository.clearPattern()
+                                "bttr" -> {
+                                    checkNotNull(posterPattern) { "Configuration Bttr invalide." }
+                                    CustomPosterUrlRepository.setPattern(posterPattern)
+                                }
+                                else -> posterPattern?.let { CustomPosterUrlRepository.setPattern(it) }
+                            }
                             var failedAddons = 0
                             if (addonUrls.isNotEmpty()) {
                                 AddonRepository.initialize()
