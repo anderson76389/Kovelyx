@@ -14,6 +14,7 @@ import com.nuvio.app.core.ui.DialogButtons
 import com.nuvio.app.core.ui.DialogButtonStyle
 import com.nuvio.app.core.ui.DialogSurface
 import com.nuvio.app.features.collection.CollectionRepository
+import com.nuvio.app.core.poster.CustomPosterUrlRepository
 import com.nuvio.app.features.tmdb.TmdbSettingsRepository
 import com.nuvio.app.features.mdblist.MdbListSettingsRepository
 import com.nuvio.app.features.debrid.DebridSettingsRepository
@@ -72,10 +73,21 @@ internal object DesktopCollectionImportBridge {
     internal fun extractSettings(payload: String): Map<String,String> {
         val parsed = runCatching { Json.parseToJsonElement(payload) as? JsonObject }.getOrNull()
         val fields = parsed?.get("settings") as? JsonObject ?: return emptyMap()
-        return listOf("tmdbKey","mdblistKey","realDebridKey").mapNotNull { name ->
+        return listOf("tmdbKey","mdblistKey","realDebridKey","posterProvider","rpdbTheme","rpdbKey").mapNotNull { name ->
             val value = (fields[name] as? JsonPrimitive)?.content?.trim().orEmpty()
             if (value.isNotEmpty() && value.length <= 512) name to value else null
         }.toMap()
+    }
+
+    internal fun rpdbPosterPattern(settings: Map<String, String>): String? {
+        if (settings["posterProvider"] != "rpdb") return null
+        val theme = settings["rpdbTheme"] ?: "t0-free-rpdb"
+        val token = if (theme == "custom") {
+            settings["rpdbKey"]?.takeIf { it.matches(Regex("[A-Za-z0-9_-]{1,128}")) }
+        } else {
+            theme.takeIf { it in setOf("t0-free-rpdb", "t0-free-rpdb-blocks", "t0-free-rpdb-rounded-blocks") }
+        } ?: return null
+        return "https://api.ratingposterdb.com/$token/imdb/poster-default/{imdb_id}.jpg"
     }
 
     @Synchronized fun start() {
@@ -222,6 +234,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
     val json = incoming ?: return
     val collectionJson = remember(json) { DesktopCollectionImportBridge.extractCollectionJson(json).orEmpty() }
     val importKeys = remember(json) { DesktopCollectionImportBridge.extractSettings(json) }
+    val rpdbPattern = remember(json) { DesktopCollectionImportBridge.rpdbPosterPattern(importKeys) }
 
     var errorMessage by remember(json) { mutableStateOf<String?>(null) }
     val currentCount by CollectionRepository.collections.collectAsState()
@@ -234,7 +247,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
         Text(
             "Cet import remplacera les ${currentCount.size} collections actuellement présentes dans ce profil. " +
                 "Une sauvegarde JSON locale sera créée avant le remplacement." +
-                if (importKeys.isNotEmpty()) " Après confirmation, ${importKeys.size} clé(s) de services seront également enregistrées dans ce profil." else "",
+                if (importKeys.isNotEmpty()) " Après confirmation, les paramètres compatibles seront également enregistrés dans ce profil." else "",
             style = MaterialTheme.typography.bodyMedium,
         )
         errorMessage?.let { message ->
@@ -250,6 +263,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                 style = DialogButtonStyle.Primary,
                 onClick = {
                     try {
+                        if (importKeys["posterProvider"] == "rpdb" && rpdbPattern == null) throw IllegalArgumentException("Configuration RPDB invalide")
                         val validation = CollectionRepository.validateJson(collectionJson)
                         if (!validation.valid) throw IllegalArgumentException(validation.error ?: "JSON invalide")
                         val backupDir = File(DesktopStorage.rootDir.toFile(), "collection-backups")
@@ -274,6 +288,7 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                             DebridSettingsRepository.setRealDebridApiKey(key)
                             DebridSettingsRepository.setEnabled(true)
                         }
+                        rpdbPattern?.let { CustomPosterUrlRepository.setPattern(it) }
                         DesktopCollectionImportBridge.discard(json)
                     } catch (error: Exception) {
                         errorMessage = error.message ?: "Import impossible : vos collections restent inchangées."
