@@ -1,0 +1,71 @@
+name: Archiver les sources du moteur vidéo dans Kovelyx
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/vendor-engine.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kovelyx-vendor-engine
+  cancel-in-progress: false
+
+jobs:
+  archive-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Cloner Kovelyx
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Récupérer une copie statique du moteur GPLv3
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="vendor/engine"
+          if [[ -d "$target" ]]; then
+            echo "Le moteur est déjà archivé : ne jamais écraser une copie modifiée."
+            exit 0
+          fi
+          sha="ddb383ba46bafb9970baf0bc23f51de786f58a4c"
+          mkdir -p "$target"
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          git -C "$tmp" init -q
+          git -C "$tmp" remote add origin https://github.com/NuvioMedia/nuvio-engine.git
+          git -C "$tmp" fetch --depth=1 --no-tags origin "$sha"
+          [[ "$(git -C "$tmp" rev-parse FETCH_HEAD)" == "$sha" ]] || exit 1
+          git -C "$tmp" archive FETCH_HEAD | tar -xf - -C "$target"
+          test -s "$target/LICENSE"
+          test -s "$target/THIRD_PARTY_NOTICES.md"
+          test -s "$target/CMakeLists.txt"
+          cat > "$target/KOVELYX_PROVENANCE.md" <<'NOTICE'
+          # Origine de ce composant
+          - Code source original : https://github.com/NuvioMedia/nuvio-engine
+          - Commit archivé : ddb383ba46bafb9970baf0bc23f51de786f58a4c
+          - Licence originale : GPL-3.0-or-later, voir LICENSE et THIRD_PARTY_NOTICES.md
+          - Ce snapshot ne garantit **pas** qu'il corresponde aux DLL et JAR historiques déjà intégrés.
+          - Cette copie complète permet de maintenir ce code même si le dépôt original disparaît.
+          - Les binaires doivent être reconstruits/testés avant remplacement et distribution.
+          NOTICE
+          echo "Archive GPL complète prête."
+      - name: Conserver le moteur dans le dépôt Kovelyx
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A vendor/engine
+          if git diff --cached --quiet; then
+            echo "Aucune mise à jour nécessaire"
+          else
+            git commit -m "vendor(engine): sauvegarde autonome des sources GPL du moteur multimédia"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
