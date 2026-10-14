@@ -193,6 +193,8 @@ Kovelyx/
 
 Pour l'état réellement vérifié et les limites d'autonomie, consultez **[l'état technique](./docs/ETAT_TECHNIQUE.md)**, **[l'inventaire des dépendances](./docs/AUDIT_DEPENDANCES.md)** et **[le plan d'indépendance](./docs/INDEPENDANCE.md)**.
 
+Pour conserver une copie **hors GitHub** des sources et des Releases accessibles, lancez sur Windows le script [Sauvegarder-Kovelyx.ps1](./scripts/Sauvegarder-Kovelyx.ps1). Une sauvegarde des fichiers de source ne remplace pas l'archivage des dépendances natives, des SDK et de la clé de signature Android.
+
 ## ⚖️ Licences et crédits
 
 Kovelyx est un projet **indépendant**, non affilié à NuvioMedia. Ses sources initiales proviennent des projets publics [NuvioTV](https://github.com/NuvioMedia/NuvioTV), [NuvioMobile](https://github.com/NuvioMedia/NuvioMobile) et [NuvioDesktop](https://github.com/NuvioMedia/NuvioDesktop).
