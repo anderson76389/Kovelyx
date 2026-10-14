@@ -151,6 +151,24 @@ jobs:
           ($hash + '  ' + (Split-Path $out -Leaf)) | Set-Content -Path ($out + '.sha256') -Encoding Ascii
           ('MSI Kovelyx vérifié (identité/package), SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           'Note : les fonctionnalités et le lancement de l’interface restent à tester sur un vrai ordinateur.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Préparer la version Windows portable (sans installation)
+        if: steps.native.outputs.available == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'apps/desktop/composeApp/build/compose/binaries'
+          $candidates = @(Get-ChildItem $root -Recurse -Filter 'Kovelyx.exe' -File)
+          if ($candidates.Count -eq 0) {
+            Write-Host '::warning::Aucun fichier Kovelyx.exe trouvé dans la distribution Compose ; ZIP portable non produit.'
+            exit 0
+          }
+          $exe = $candidates | Sort-Object FullName | Select-Object -First 1
+          $target = Join-Path 'dist' ('Kovelyx-Windows-Portable-' + $env:GITHUB_SHA + '.zip')
+          Compress-Archive -Path (Join-Path $exe.Directory.FullName '*') -DestinationPath $target -CompressionLevel Optimal
+          $sha = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
+          ($sha + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
+          Write-Host ('Archive portable créée : ' + $target)
+          'ZIP portable : généré depuis la distribution Compose, non testé sur un PC utilisateur.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
       - name: Enregistrer le MSI
         if: steps.native.outputs.available == 'true'
         uses: actions/upload-artifact@v4
