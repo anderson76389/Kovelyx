@@ -2656,4 +2656,8 @@
     <string name="servers_resume_row">Reprendre la lecture</string>
     <string name="servers_failure_unsupported">Ce serveur ne prend pas en charge cet élément.</string>
     <string name="servers_failure_incomplete">La médiathèque de ce serveur est encore en cours d’analyse. Réessayez dans un instant.</string>
+    <plurals name="details_season_count">
+        <item quantity="one">%1$d saison</item>
+        <item quantity="other">%1$d saisons</item>
+    </plurals>
 </resources>

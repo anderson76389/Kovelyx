@@ -49,6 +49,42 @@ def read_strings(path: Path) -> dict[str, str]:
     return values
 
 
+
+def read_plurals(path: Path) -> dict[str, dict[str, str]]:
+    root = ET.parse(path).getroot()
+    plurals = {}
+    for element in root.findall("plurals"):
+        name = element.attrib.get("name")
+        if not name or name in plurals:
+            raise ValueError(f"{path}: invalid or duplicate plural key {name}")
+        items = {}
+        for item in element.findall("item"):
+            quantity = item.attrib.get("quantity")
+            if not quantity or quantity in items:
+                raise ValueError(f"{path}: duplicated plural quantity in {name}")
+            items[quantity] = "".join(item.itertext())
+        plurals[name] = items
+    return plurals
+
+
+def validate_plurals() -> int:
+    original = read_plurals(RESOURCE_ROOT / "values" / "strings.xml")
+    french = read_plurals(RESOURCE_ROOT / "values-fr" / "strings.xml")
+    missing = original.keys() - french.keys()
+    extra = french.keys() - original.keys()
+    if missing or extra:
+        raise ValueError(f"Plural keys: missing={sorted(missing)}; unexpected={sorted(extra)}")
+    for key, quantities in original.items():
+        localized = french[key]
+        for quantity, english in quantities.items():
+            if quantity not in localized:
+                raise ValueError(f"Plural '{key}' missing '{quantity}' in French")
+            source_args = sorted(FORMAT_ARGUMENT.findall(english))
+            translated_args = sorted(FORMAT_ARGUMENT.findall(localized[quantity]))
+            if source_args != translated_args:
+                raise ValueError(f"Plural '{key}' quantity={quantity}: incompatible format arguments")
+    return len(french)
+
 def main() -> int:
     english: dict[str, str] = {}
     for filename in SOURCE_MODULES:
@@ -83,7 +119,9 @@ def main() -> int:
     if missing or extra or mismatches:
         return 1
 
+    plural_count = validate_plurals()
     print(f"OK: {len(french)} / {len(english)} French strings covered (100%).")
+    print(f"OK: {plural_count} / {plural_count} French plural groups covered (100%).")
     print("OK: XML is valid, no duplicate keys, and formatting arguments match.")
     return 0
 
