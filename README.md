@@ -38,7 +38,7 @@ L'objectif : conserver une expérience de découverte et de lecture agréable, p
 
 <div align="center">
 
-**[🌐 Site de téléchargement Kovelyx](./docs/index.html)** · **[📦 Releases GitHub](https://github.com/anderson76389/Kovelyx/releases)** · **[⚙️ Activer GitHub Pages](./docs/TELECHARGEMENTS.md)**
+**[🌐 Site de téléchargement Kovelyx](https://anderson76389.github.io/Kovelyx/)** · **[📦 Releases GitHub](https://github.com/anderson76389/Kovelyx/releases)** · **[⚙️ Configuration et téléchargement](./docs/TELECHARGEMENTS.md)**
 
 </div>
 
@@ -48,7 +48,7 @@ L'objectif : conserver une expérience de découverte et de lecture agréable, p
 | 📱 Android mobile | `Kovelyx-Mobile-…apk` | Pas de Release validée |
 | 🖥️ Windows | `Kovelyx-Windows-…msi` | Pas de Release validée |
 
-Le [site de téléchargement](./docs/index.html) vérifie les **vrais fichiers des Releases** et active les boutons automatiquement, sans inventer de téléchargements. Son hébergement GitHub Pages nécessite une activation unique dans **Settings → Pages → Source : GitHub Actions**. Les APK et le MSI ne seront disponibles qu'après une compilation réussie et validation.
+Le [site de téléchargement](https://anderson76389.github.io/Kovelyx/) vérifie les **vrais fichiers des Releases** et active les boutons automatiquement, sans inventer de téléchargements. Le site est publié à partir de la branche **gh-pages** et mis à jour automatiquement depuis `docs/`. Si nécessaire, sélectionner **Settings → Pages → Deploy from a branch → gh-pages / (root)**. Les APK et le MSI n'apparaîtront qu'après publication d'une version réellement produite et validée.
 
 ## 📺 Sur vos trois écrans
 
