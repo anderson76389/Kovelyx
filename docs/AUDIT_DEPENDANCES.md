@@ -253,7 +253,7 @@ Fichiers texte examinés : **1780** ; références statiques à Nuvio/NuvioMedia
 | `github.com` | 246 |
 | `example.com` | 178 |
 | `www.themoviedb.org` | 110 |
-| `example.test` | 73 |
+| `example.test` | 75 |
 | `schemas.android.com` | 49 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
