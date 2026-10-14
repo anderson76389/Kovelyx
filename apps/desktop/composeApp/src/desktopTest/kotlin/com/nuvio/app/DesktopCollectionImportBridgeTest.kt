@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.assertFailsWith
 
 class DesktopCollectionImportBridgeTest {
     @Test
@@ -48,6 +49,32 @@ class DesktopCollectionImportBridgeTest {
         DesktopCollectionImportBridge.pending.value?.let(DesktopCollectionImportBridge::discard)
         assertEquals(422, post("https://anderson76389.github.io", """{"settings":{"tmdbKey":"bad"}}"""))
         assertEquals(null, DesktopCollectionImportBridge.pending.value)
+    }
+
+    @Test
+    fun rpdbAndConfiguredAddonsAreReadOnlyFromExplicitSettings() {
+        val payload = """{"collections":[],"settings":{
+            "posterProvider":"rpdb","rpdbTheme":"t0-free-rpdb-blocks",
+            "addonManifests":["https://example.org/configured/manifest.json"]
+        }}"""
+        val config = DesktopCollectionImportBridge.extractSettings(payload)
+        assertEquals(
+            "https://api.ratingposterdb.com/t0-free-rpdb-blocks/imdb/poster-default/{imdb_id}.jpg",
+            DesktopCollectionImportBridge.rpdbPosterPattern(config),
+        )
+        assertEquals(listOf("https://example.org/configured/manifest.json"),
+            DesktopCollectionImportBridge.extractAddonManifests(payload))
+        assertEquals(null, DesktopCollectionImportBridge.rpdbPosterPattern(emptyMap()))
+        assertFailsWith<IllegalArgumentException> {
+            DesktopCollectionImportBridge.extractAddonManifests(
+                """{"collections":[],"settings":{"addonManifests":["http://example.org/manifest.json"]}}"""
+            )
+        }
+        assertFailsWith<IllegalArgumentException> {
+            DesktopCollectionImportBridge.extractAddonManifests(
+                """{"collections":[],"settings":{"addonManifests":["https://example.org/not-a-manifest"]}}"""
+            )
+        }
     }
 
     private fun post(origin: String, body: String): Int {
