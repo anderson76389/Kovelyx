@@ -59,6 +59,7 @@ object KovelyxIntegrationCredentials {
 
     val desktopConfigured: Boolean get() = loaded
     val desktopTraktClientId: String get() = ownTraktClientId
+    val desktopTraktClientSecret: String get() = ownTraktClientSecret
     val desktopTraktSecretPresent: Boolean get() = ownTraktClientSecret.isNotBlank()
     val desktopMdbListClientId: String get() = ownMdbListClientId
 }
