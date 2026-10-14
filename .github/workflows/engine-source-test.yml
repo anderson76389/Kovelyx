@@ -1,0 +1,64 @@
+name: Tester les sources du moteur sauvegardé
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'vendor/engine/**'
+      - '.github/workflows/engine-source-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cpp-core:
+    name: Compiler et tester C++ Windows (mode sans libtorrent)
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurer CMake et compiler la bibliothèque du dépôt Kovelyx
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cmake -S vendor/engine -B vendor/engine/build/kovelyx -G 'Visual Studio 17 2022' -A x64 -DNUVIO_ENGINE_BUILD_SHARED=ON -DNUVIO_ENGINE_ENABLE_LIBTORRENT=OFF -DNUVIO_ENGINE_BUILD_TESTS=ON
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build vendor/engine/build/kovelyx --config Release --parallel 4
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ctest --test-dir vendor/engine/build/kovelyx -C Release --output-on-failure
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          'Moteur natif compilable depuis les sources sauvegardées. Le moteur P2P COMPLET nécessite encore les dépendances libtorrent et des tests séparés.' | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Sauvegarder la DLL de test (P2P désactivé)
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-engine-source-core-no-p2p
+          path: vendor/engine/build/kovelyx/**/nuvio_engine.dll
+          if-no-files-found: error
+          retention-days: 30
+  jvm:
+    name: Reconstruire et tester le module JVM depuis les sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: |
+            17
+            21
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Construire le JAR du moteur sauvegardé
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x apps/desktop/gradlew
+          apps/desktop/gradlew -p vendor/engine/platform/jvm test jar --no-daemon --stacktrace
+      - name: Archiver le JAR construit depuis Kovelyx
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-engine-jvm-source-build
+          path: vendor/engine/platform/jvm/build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 30
