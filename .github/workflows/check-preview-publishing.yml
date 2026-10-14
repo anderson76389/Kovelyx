@@ -1,0 +1,39 @@
+name: Valider la publication des EXE de test
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/publish-windows-preview.yml'
+      - '.github/workflows/check-preview-publishing.yml'
+      - 'scripts/publish-windows-preview.sh'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-windows-preview.yml'
+      - '.github/workflows/check-preview-publishing.yml'
+      - 'scripts/publish-windows-preview.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntaxe et sécurité Bash
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/publish-windows-preview.sh
+          shellcheck --severity=warning scripts/publish-windows-preview.sh
+      - name: Gardes-fous de publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'workflow_run:' .github/workflows/publish-windows-preview.yml
+          grep -Fq -- '--prerelease' scripts/publish-windows-preview.sh
+          grep -Fq 'sha256sum --check' scripts/publish-windows-preview.sh
+          grep -Fq '.conclusion == "success"' scripts/publish-windows-preview.sh

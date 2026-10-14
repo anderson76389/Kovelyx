@@ -48,6 +48,8 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 
 **Fichiers PC expérimentaux déjà compilés :** [🪟 Windows — EXE, MSI et portable](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908) · [🐧 Linux — AppImage x86-64](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
 
+**Préversions Windows :** dès qu'une compilation et ses tests automatisés réussissent, le `Setup.exe` est publié directement dans les [Releases GitHub](https://github.com/anderson76389/Kovelyx/releases) sans archive ZIP de GitHub Actions. Le MSI est une alternative ; la version portable conserve ses dépendances dans un ZIP. Ce sont des versions de test non signées, pas des versions stables. Linux nécessite encore ses propres vérifications.
+
 **Tous les téléchargements :** [GitHub Actions](https://github.com/anderson76389/Kovelyx/actions) · [Releases officielles](https://github.com/anderson76389/Kovelyx/releases) · [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
 
 > **Important :** sous Windows, le `Setup.exe` est un fichier unique **pour l'installation**. Le logiciel une fois installé contient normalement de nombreux fichiers internes (bibliothèques, Java, codecs). Linux ne lance pas les `.exe` Windows de façon native : le fichier unique adapté est une **AppImage**. Une AppImage peut encore nécessiter certaines bibliothèques présentes sur la distribution. **Un build réussi ne garantit pas toutes les fonctions en situation réelle.**

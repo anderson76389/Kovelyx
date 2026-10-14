@@ -1,0 +1,53 @@
+name: Publier automatiquement les EXE de test Windows
+
+on:
+  workflow_run:
+    workflows:
+      - "Kovelyx Windows - MSI et tests de packaging"
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-windows-preview.yml'
+      - 'scripts/publish-windows-preview.sh'
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: 'Optional successful Windows build run ID, blank selects the newest'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: kovelyx-windows-prereleases
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Mettre le Setup.exe directement dans Releases
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Sources du dépôt
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - name: Vérifier les scripts et notices
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/publish-windows-preview.sh
+          test -s docs/PROVENANCE.md
+          test -s apps/desktop/README.md
+      - name: Publier une préversion basée sur un build réussi
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_RUN_ID: ${{ github.event.workflow_run.id || inputs.build_run_id || '' }}
+        run: bash scripts/publish-windows-preview.sh
