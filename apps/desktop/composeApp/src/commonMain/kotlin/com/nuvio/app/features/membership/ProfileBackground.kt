@@ -1,6 +1,7 @@
 package com.nuvio.app.features.membership
 
 import com.nuvio.app.features.profiles.NuvioProfile
+import com.nuvio.app.features.profiles.ProfileLocalImages
 
 sealed interface ProfileBackgroundSelection {
     data class Catalog(val id: String) : ProfileBackgroundSelection
