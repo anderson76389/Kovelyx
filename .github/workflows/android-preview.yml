@@ -1,4 +1,4 @@
-name: Publier automatiquement les APK expérimentaux
+name: Publier les APK Kovelyx en préversion
 
 on:
   workflow_run:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       build_run_id:
-        description: "ID d'une compilation réussie sur main (Android + TV)"
+        description: "Identifiant du workflow de compilation contenant les deux APK"
         required: true
         type: string
 
@@ -17,114 +17,71 @@ permissions:
   actions: read
 
 concurrency:
-  group: kovelyx-preview-release
+  group: kovelyx-android-prerelease
   cancel-in-progress: false
 
 jobs:
-  android-preview:
-    name: Publier les APK produits et leurs SHA256
+  publish:
+    name: Vérifier les APK et créer une préversion
     if: ${{ github.event_name == 'workflow_dispatch' || ((github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure') && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      - name: Vérifier l'origine et le résultat de la compilation
+      - name: Vérifier les deux jobs Android
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event_name == 'workflow_dispatch' && inputs.build_run_id || github.event.workflow_run.id }}
         run: |
           set -euo pipefail
-          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::ID de compilation invalide"; exit 1; }
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > /tmp/run.json
-          jq -e --arg repo "$GITHUB_REPOSITORY"             '.head_repository.full_name==$repo and .head_branch=="main" and .status=="completed" and .name=="Compiler Kovelyx (APK et diagnostic Windows)"' /tmp/run.json >/dev/null || {
-              echo "::error::Le workflow de compilation doit avoir réussi depuis la branche main."; exit 1;
-            }
-          sha="$(jq -r '.head_sha' /tmp/run.json)"
-          [[ "$sha" =~ ^[a-f0-9]{40}$ ]] || exit 1
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" > /tmp/jobs.json
+          [[ "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::ID invalide"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" > /tmp/kv-run.json
+          jq -e --arg repo "$GITHUB_REPOSITORY" '.head_repository.full_name == $repo and .head_branch == "main" and .status == "completed" and .name == "Compiler Kovelyx (APK et diagnostic Windows)"' /tmp/kv-run.json >/dev/null || { echo "::error::Compilation non approuvée"; exit 1; }
+          sha="$(jq -r '.head_sha' /tmp/kv-run.json)"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" > /tmp/kv-jobs.json
           for name in "Android mobile - APK Full Debug" "Android TV - APK Full Debug"; do
-            jq -e --arg name "$name" '[.jobs[] | select(.name==$name and .conclusion=="success")] | length == 1' /tmp/jobs.json >/dev/null || {
-              echo "::error::Job non réussi : $name"; exit 1;
-            }
+            jq -e --arg name "$name" '[.jobs[] | select(.name == $name and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || { echo "::error::Compilation non réussie : $name"; exit 1; }
           done
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100" > /tmp/artifacts.json
-          for name in kovelyx-mobile-debug kovelyx-tv-debug; do
-            jq -e --arg name "$name" '[.artifacts[] | select(.name==$name and .expired==false)] | length == 1' /tmp/artifacts.json >/dev/null || {
-              echo "::error::Artefact manquant/expiré : $name"; exit 1;
-            }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100" > /tmp/kv-artifacts.json
+          for artifact in kovelyx-mobile-debug kovelyx-tv-debug; do
+            jq -e --arg name "$artifact" '[.artifacts[] | select(.name == $name and .expired == false)] | length == 1' /tmp/kv-artifacts.json >/dev/null || { echo "::error::Artefact absent : $artifact"; exit 1; }
           done
-          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
           echo "SOURCE_SHA=$sha" >> "$GITHUB_ENV"
+          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
           echo "TAG=preview-${sha:0:12}" >> "$GITHUB_ENV"
 
-      - name: Télécharger les vrais APK et vérifier leur format
+      - name: Télécharger et contrôler les APK
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p /tmp/kovelyx/mobile /tmp/kovelyx/tv dist
-          gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n kovelyx-mobile-debug -D /tmp/kovelyx/mobile
-          gh run download "$RUN_ID" -R "$GITHUB_REPOSITORY" -n kovelyx-tv-debug -D /tmp/kovelyx/tv
-          for entry in "mobile:Kovelyx-Mobile" "tv:Kovelyx-TV"; do
-            platform="${entry%%:*}"
-            prefix="${entry#*:}"
-            mapfile -d '' -t files < <(find "/tmp/kovelyx/$platform" -type f -name "*.apk" -print0)
-            echo "$platform : ${#files[@]} APK trouvés dans le build"
-            printf '%s\n' "${files[@]}"
-            if [[ "$platform" == "tv" ]]; then
-              # Gradle crée plusieurs APK ABI spécifiques + un APK universel.
-              # La Release grand public ne doit contenir que l'universel pour éviter
-              # de proposer au hasard un fichier incompatible avec la télévision.
-              mapfile -t universal < <(printf '%s\n' "${files[@]}" | grep -i 'universal.*\.apk
+          mkdir -p dist /tmp/kv-mobile /tmp/kv-tv
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-mobile-debug --dir /tmp/kv-mobile
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-debug --dir /tmp/kv-tv
+          mapfile -d '' -t mobile_files < <(find /tmp/kv-mobile -type f -iname '*.apk' -print0)
+          mapfile -d '' -t tv_files < <(find /tmp/kv-tv -type f -iname '*universal*.apk' -print0)
+          [[ "${#mobile_files[@]}" == 1 ]] || { echo "::error::Il faut exactement un APK mobile"; exit 1; }
+          [[ "${#tv_files[@]}" == 1 ]] || { echo "::error::Il faut exactement un APK TV universel"; exit 1; }
+          cp -- "${mobile_files[0]}" "dist/Kovelyx-Mobile-$TAG.apk"
+          cp -- "${tv_files[0]}" "dist/Kovelyx-TV-$TAG.apk"
+          for apk in dist/*.apk; do
             [[ "$(stat -c%s "$apk")" -gt 100000 ]] || { echo "::error::APK trop petit"; exit 1; }
-            file "$apk"
-            unzip -tq "$apk" >/dev/null || { echo "::error::Archive APK corrompue"; exit 1; }
-            name="$prefix-$TAG.apk"
-            cp "$apk" "dist/$name"
-            (cd dist && sha256sum "$name" > "$name.sha256")
+            unzip -tq "$apk" > /dev/null || { echo "::error::Fichier corrompu : $apk"; exit 1; }
+            (cd dist && sha256sum "$(basename "$apk")" > "$(basename "$apk").sha256")
+            echo "APK vérifié : $apk"
           done
-          echo "### APK de test prêts" >> "$GITHUB_STEP_SUMMARY"
-          echo "- TV et Android : fichiers ZIP/APK intègres, non testés sur appareils réels." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Sources : `$SOURCE_SHA`" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Créer une préversion GitHub (jamais stable)
+      - name: Publier la Release expérimentale
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Préversion $TAG déjà présente ; aucune modification ni remplacement silencieux."
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "La préversion existe déjà. Aucun écrasement."
             exit 0
           fi
-          gh release create "$TAG" dist/*.apk dist/*.sha256             --repo "$GITHUB_REPOSITORY"             --target "$SOURCE_SHA"             --title "Kovelyx $TAG · APK expérimentaux"             --prerelease             --notes "⚠️ PRÉVERSION DE DÉVELOPPEMENT, pas une version stable. Les APK ont été compilés, mais pas testés sur téléphone/TV. L'interface peut encore afficher des références Nuvio, des fonctionnalités peuvent ne pas fonctionner, et les services externes peuvent être nécessaires. Les APK de débogage peuvent être incompatibles avec une future signature de publication. Sauvegardez vos données et ne les installez pas sur votre appareil principal. Sources et licences disponibles dans ce même dépôt. SHA source : $SOURCE_SHA."
- || true)
-              [[ "${#universal[@]}" == "1" ]] || { echo "::error::Un APK universel TV attendu"; exit 1; }
-              apk="${universal[0]}"
-            else
-              [[ "${#files[@]}" == "1" ]] || { echo "::error::Un seul APK mobile attendu"; exit 1; }
-              apk="${files[0]}"
-            fi
-            [[ "$(stat -c%s "$apk")" -gt 100000 ]] || { echo "::error::APK trop petit"; exit 1; }
-            file "$apk"
-            unzip -tq "$apk" >/dev/null || { echo "::error::Archive APK corrompue"; exit 1; }
-            name="$prefix-$TAG.apk"
-            cp "$apk" "dist/$name"
-            (cd dist && sha256sum "$name" > "$name.sha256")
-          done
-          echo "### APK de test prêts" >> "$GITHUB_STEP_SUMMARY"
-          echo "- TV et Android : fichiers ZIP/APK intègres, non testés sur appareils réels." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Sources : `$SOURCE_SHA`" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Créer une préversion GitHub (jamais stable)
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Préversion $TAG déjà présente ; aucune modification ni remplacement silencieux."
-            exit 0
-          fi
-          gh release create "$TAG" dist/*.apk dist/*.sha256             --repo "$GITHUB_REPOSITORY"             --target "$SOURCE_SHA"             --title "Kovelyx $TAG · APK expérimentaux"             --prerelease             --notes "⚠️ PRÉVERSION DE DÉVELOPPEMENT, pas une version stable. Les APK ont été compilés, mais pas testés sur téléphone/TV. L'interface peut encore afficher des références Nuvio, des fonctionnalités peuvent ne pas fonctionner, et les services externes peuvent être nécessaires. Les APK de débogage peuvent être incompatibles avec une future signature de publication. Sauvegardez vos données et ne les installez pas sur votre appareil principal. Sources et licences disponibles dans ce même dépôt. SHA source : $SOURCE_SHA."
+          notes="PRÉVERSION EXPÉRIMENTALE. Sources : $SOURCE_SHA. APK Android et Android TV compilés et archives intègres, non testés sur appareils réels. Les mises à jour automatiques et la signature stable ne sont pas encore garanties. Certaines fonctions et dépendances Nuvio peuvent toujours être présentes. Sauvegardez vos données. Licences et sources dans ce dépôt."
+          gh release create "$TAG" dist/*.apk dist/*.sha256 --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title "Kovelyx $TAG · Android et TV (expérimental)" --prerelease --notes "$notes"
