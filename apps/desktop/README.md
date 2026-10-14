@@ -1,80 +1,31 @@
-<div align="center">
+# Kovelyx — Windows
 
-  <img src="https://nuvio.tv/assets/nuvio-app-logo-wordmark.webp" alt="Nuvio" width="320" />
+Application multimédia de bureau du projet **[Kovelyx](https://github.com/anderson76389/Kovelyx)**. **Priorité à Windows x64** ; les versions Android et TV seront abordées ensuite.
 
-  <p>
-    A free, open-source media app for Windows, macOS, and Linux.
-    <br />
-    Bring your own sources. Nuvio turns them into a library with artwork, ratings, subtitles, and your place saved on every screen.
-  </p>
+## État du développement (14 octobre 2026)
 
-  [Website](https://nuvio.tv) · [GitHub releases](https://github.com/NuvioMedia/NuvioDesktop/releases/latest) · [Support Nuvio](https://nuvio.tv/support)
+- Le code Kotlin Multiplatform / Compose Desktop est présent et un installateur MSI a déjà été compilé dans GitHub Actions.
+- Les contrôles du MSI et la création de l’archive portable sont en cours de stabilisation.
+- Le lancement, la lecture, les extensions, les thèmes et les paramètres ne sont **pas encore validés sur un PC réel**.
+- Le pipeline Windows produit, une fois toutes les vérifications réussies, un MSI et un ZIP portable avec son environnement Java. Ces fichiers restent des **artefacts expérimentaux**.
+- Le runtime vidéo MPV utilise actuellement un binaire archivé dont les sources et la licence doivent être vérifiées avant redistribution publique.
 
-</div>
+## Compiler sous Windows
 
-## ⚠️ Alpha Software - Slow Development - Testers Only
-
-Nuvio Desktop is currently in alpha and is intended only for testers. It is under development and is not suitable for daily use.
-
-Expect breaking changes with every update. Features, settings, stored data, and compatibility may change or stop working without notice. Do not rely on this build as your primary media app, and report any issues you encounter during testing.
-
-## Get Nuvio Desktop
-
-Download the latest build from [GitHub Releases](https://github.com/NuvioMedia/NuvioDesktop/releases/latest).
-
-- Windows: MSI installer
-- macOS: DMG installer
-- Linux: DEB, RPM, Flatpak, or AppImage
-
-## Build from source
-
-```bash
-git clone https://github.com/NuvioMedia/NuvioDesktop.git
-cd NuvioDesktop
-```
-
-### Run the app
-
-```bash
-./gradlew :composeApp:run
-```
-
-On Windows PowerShell:
+Prévoir Java 21, Python 3.12, les outils C++ Visual Studio, le SDK officiel Microsoft WebView2 et les bibliothèques natives vidéo nécessaires.
 
 ```powershell
-.\gradlew.bat :composeApp:run
+cd apps/desktop
+.\gradlew.bat :composeApp:packageReleaseMsi :composeApp:createReleaseDistributable --no-daemon
 ```
 
-### Package the app
+La commande locale n’installe pas automatiquement toutes les dépendances natives. Pour les prérequis du pipeline, consulter [le workflow Windows](../../.github/workflows/windows.yml).
 
-Build a release package for the current host:
+## Téléchargements et indépendance
 
-```bash
-./gradlew :composeApp:packageReleaseDistributionForCurrentOS
-```
+- [Compilations Windows et artefacts](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
+- [Releases Kovelyx](https://github.com/anderson76389/Kovelyx/releases) — préversions seulement après vérification de la licence et des installations
+- [État technique](../../docs/ETAT_TECHNIQUE.md) et [audit des services d’origine](../../docs/AUDIT_NUVIO.md)
+- [Provenance et licences](../../docs/PROVENANCE.md)
 
-For platform-specific packaging:
-
-Windows PowerShell:
-
-```powershell
-.\gradlew.bat :composeApp:packageReleaseMsi --rerun-tasks
-```
-
-macOS:
-
-```bash
-./scripts/build-macos-release-dmgs.sh --package-only
-```
-
-Linux:
-
-```bash
-./gradlew :composeApp:packageReleaseDeb
-```
-
-The shared app is built with Kotlin Multiplatform and Compose Multiplatform.
-
-## License
-
-[GNU General Public License v3.0](./LICENSE)
+Kovelyx provient initialement du code open source NuvioDesktop, sous GPLv3. L’indépendance complète à l’égard des services, comptes et binaires d’origine **reste à démontrer**. Conserver les crédits et notices applicables.

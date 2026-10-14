@@ -152,7 +152,7 @@ jobs:
             $view = $database.OpenView("SELECT Value FROM Property WHERE Property = '$name'")
             $view.Execute()
             $record = $view.Fetch()
-            $value = if ($null -eq $record) { '' } else { $record.StringData(1) }
+            $value = if ($null -eq $record) { '' } else { $record.StringData(1).Trim() }
             $view.Close()
             return $value
           }
@@ -160,7 +160,7 @@ jobs:
           $vendor = Read-Property 'Manufacturer'
           $upgrade = Read-Property 'UpgradeCode'
           Write-Host ('ProductName=' + $product + ', Manufacturer=' + $vendor + ', UpgradeCode=' + $upgrade)
-          if ($product -ne 'Kovelyx' -or $vendor -match 'Nuvio' -or $upgrade -match '395990ee-9b8a-3548-922c-e7a23a495b8d') { throw 'Ancienne identité Nuvio détectée dans le MSI' }
+          if ($product -ne 'Kovelyx' -or $vendor -ne 'Kovelyx' -or $upgrade -ne '{3F7AF095-1F5E-4D2B-AF6C-3F5C12B2C9A1}') { throw 'Identité MSI différente de Kovelyx' }
           New-Item -ItemType Directory -Path dist -Force | Out-Null
           $target = Join-Path 'dist' ('Kovelyx-Windows-' + $env:GITHUB_SHA + '.msi')
           Copy-Item -Path $msi.FullName -Destination $target
@@ -187,6 +187,7 @@ jobs:
           $target = Join-Path 'dist' ('Kovelyx-Windows-Portable-' + $env:GITHUB_SHA + '.zip')
           # Keep the top-level Kovelyx folder and its entire Java runtime.
           Compress-Archive -Path $appRoot -DestinationPath $target -CompressionLevel Optimal -Force
+          if ((Get-Item $target).Length -lt 1000000) { throw 'Archive portable trop petite' }
           $extract = Join-Path $env:RUNNER_TEMP 'kovelyx-portable-check'
           Expand-Archive $target $extract -Force
           $name = Split-Path $appRoot -Leaf
