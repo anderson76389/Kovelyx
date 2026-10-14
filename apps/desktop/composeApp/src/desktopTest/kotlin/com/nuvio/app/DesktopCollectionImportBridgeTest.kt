@@ -1,7 +1,9 @@
 package com.nuvio.app
 
-import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -30,18 +32,16 @@ class DesktopCollectionImportBridgeTest {
     }
 
     private fun post(origin: String, body: String): Int {
-        val connection = (URL("http://127.0.0.1:38761/import").openConnection() as HttpURLConnection)
-        connection.requestMethod = "POST"
-        connection.connectTimeout = 1000
-        connection.readTimeout = 1000
-        connection.setRequestProperty("Origin", origin)
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.doOutput = true
-        return try {
-            connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-            connection.responseCode
-        } finally {
-            connection.disconnect()
-        }
+        // HttpURLConnection drops Origin as a restricted header on some JDKs.
+        // java.net.http sets it explicitly, like a browser CORS request.
+        val request = HttpRequest.newBuilder()
+            .uri(URI("http://127.0.0.1:38761/import"))
+            .header("Origin", origin)
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build()
+        return HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.discarding())
+            .statusCode()
     }
 }
