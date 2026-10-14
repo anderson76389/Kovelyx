@@ -1,5 +1,6 @@
 package com.nuvio.app.features.tmdb
 
+import com.nuvio.app.isDesktop
 import com.nuvio.app.features.details.MetaDetailsRepository
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.watchprogress.ContinueWatchingEnrichmentCache
@@ -15,7 +16,7 @@ object TmdbSettingsRepository {
 
     private var enabled = false
     private var apiKey = ""
-    private var language = "en"
+    private var language = if (isDesktop) "fr-FR" else "en"
     private var useTrailers = true
     private var useArtwork = true
     private var useBasicInfo = true
@@ -57,8 +58,14 @@ object TmdbSettingsRepository {
         val normalized = value.trim()
         if (apiKey == normalized) return
         apiKey = normalized
-        publish()
         TmdbSettingsStorage.saveApiKey(normalized)
+        // Allow actual French descriptions to replace add-on English overviews
+        // as soon as a valid personal TMDB key is supplied on PC.
+        if (isDesktop && normalized.isNotBlank() && !enabled) {
+            enabled = true
+            TmdbSettingsStorage.saveEnabled(true)
+        }
+        publish()
         invalidateMetadata()
     }
 
@@ -69,6 +76,7 @@ object TmdbSettingsRepository {
         language = normalized
         publish()
         TmdbSettingsStorage.saveLanguage(normalized)
+        invalidateMetadata()
     }
 
     fun setUseTrailers(value: Boolean) = setBoolean(
@@ -165,10 +173,13 @@ object TmdbSettingsRepository {
         val wasLoaded = hasLoaded
         val previousApiKey = apiKey
         hasLoaded = true
-        enabled = TmdbSettingsStorage.loadEnabled() ?: false
+        enabled = TmdbSettingsStorage.loadEnabled()
+            ?: (isDesktop && (TmdbSettingsStorage.loadApiKey().orEmpty().isNotBlank() || TmdbConfig.API_KEY.isNotBlank()))
         apiKey = TmdbSettingsStorage.loadApiKey()?.trim().orEmpty()
         val storedLanguage = TmdbSettingsStorage.loadLanguage()
-        language = if (storedLanguage == null) "en" else normalizeLanguage(storedLanguage)
+        language = if (storedLanguage == null) {
+            if (isDesktop) "fr-FR" else "en"
+        } else normalizeLanguage(storedLanguage)
         useTrailers = TmdbSettingsStorage.loadUseTrailers() ?: true
         useArtwork = TmdbSettingsStorage.loadUseArtwork() ?: true
         useBasicInfo = TmdbSettingsStorage.loadUseBasicInfo() ?: true
