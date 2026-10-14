@@ -174,7 +174,7 @@ internal object DesktopCollectionImportBridge {
             if (provider == "none") {
                 CustomPosterUrlRepository.clearPattern()
             } else if (provider in setOf("rpdb", "bttr", "top") && pattern.isNotBlank()) {
-                val url = java.net.URI(pattern)
+                val url = java.net.URI(pattern.replace("{imdb_id}", "tt0137523"))
                 val domain = url.host?.lowercase().orEmpty()
                 val allowed = when (provider) {
                     "rpdb" -> domain == "api.ratingposterdb.com"
