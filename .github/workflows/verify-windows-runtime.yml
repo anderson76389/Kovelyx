@@ -1,0 +1,32 @@
+name: Vérifier l'indépendance du runtime vidéo Windows
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/restore-windows-mpv.ps1'
+      - '.github/workflows/verify-windows-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Restaurer MPV sans Nuvio depuis une Release Kovelyx
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Récupérer et contrôler la DLL depuis les Releases Kovelyx
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          ./scripts/restore-windows-mpv.ps1
+          $file = 'apps/desktop/composeApp/src/desktopMain/native/windows/runtime/libmpv-2.dll'
+          if (-not (Test-Path $file)) { throw 'DLL non restaurée.' }
+          $hash = (Get-FileHash $file -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($hash -ne '07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906') { throw 'SHA-256 invalide.' }
+          "### DLL restaurée depuis Kovelyx et contrôlée" >> $env:GITHUB_STEP_SUMMARY
+          "Ce test ne contacte aucun dépôt Nuvio." >> $env:GITHUB_STEP_SUMMARY
