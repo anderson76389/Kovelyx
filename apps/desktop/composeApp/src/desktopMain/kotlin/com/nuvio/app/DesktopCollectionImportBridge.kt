@@ -585,7 +585,11 @@ internal fun DesktopCollectionImportPrompt(isAppReady: Boolean) {
                             }
                             // Synchroniser le profil de compte avant de sauvegarder ses collections.
                             CollectionRepository.initialize()
-                            if (accountMode) CollectionSyncService.pullFromServer(chosen.profileIndex)
+                            if (accountMode) {
+                                check(CollectionSyncService.pullFromServerChecked(chosen.profileIndex)) {
+                                    "Impossible de charger les collections du compte. Import annulé pour protéger vos anciennes données."
+                                }
+                            }
                             val currentJson = CollectionRepository.exportToJson()
                             val finalJson = if (replaceCollections) collectionJson
                                 else DesktopCollectionImportBridge.mergeCollectionPayload(currentJson, collectionJson)
