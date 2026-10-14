@@ -15,7 +15,9 @@ Ce guide concerne **uniquement Windows et Linux**. Les anciennes sources Android
 
 ## Où récupérer les fichiers ?
 
+- [Build Windows validé (EXE, MSI, portable)](https://github.com/anderson76389/Kovelyx/actions/runs/38509512148/artifacts/11869860908)
 - [Compilations Windows](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
+- [Build Linux validé (AppImage x86-64)](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804)
 - [Compilations Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml)
 - [Releases](https://github.com/anderson76389/Kovelyx/releases) — uniquement les versions effectivement publiées
 - [Site Kovelyx](https://anderson76389.github.io/Kovelyx/)
