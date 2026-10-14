@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.awt.SwingWindow
 import androidx.compose.ui.configureSwingGlobalsForCompose
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -14,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
@@ -47,12 +50,37 @@ import com.nuvio.app.features.settings.AppIconRepository
 import com.nuvio.app.features.settings.applyDesktopRendererPreference
 import com.nuvio.app.features.settings.transparentPreviewResource
 import java.awt.Desktop
+import java.net.URI
 import javax.imageio.ImageIO
 import java.awt.Color as AwtColor
 import javax.swing.JComponent
 
 private val KovelyxDesktopNativeBackground = AwtColor(0x0D, 0x0D, 0x0D)
 private const val MacosDarkAquaAppearance = "NSAppearanceNameDarkAqua"
+
+// Use the Windows system browser for all external authorization and website links.
+private val kovelyxDesktopUriHandler = object : UriHandler {
+    override fun openUri(uri: String) {
+        val target = URI(uri.trim())
+        val scheme = target.scheme?.lowercase()
+        require(scheme == "https" || scheme == "http" || scheme == "mailto") {
+            "Protocole de lien externe non autorisé"
+        }
+        val openedByDesktop = runCatching {
+            if (!Desktop.isDesktopSupported()) return@runCatching false
+            val desktop = Desktop.getDesktop()
+            if (!desktop.isSupported(Desktop.Action.BROWSE)) return@runCatching false
+            desktop.browse(target)
+            true
+        }.getOrDefault(false)
+        if (openedByDesktop) return
+        if (DesktopHostOs.current == DesktopHostOs.WINDOWS && (scheme == "https" || scheme == "http")) {
+            ProcessBuilder("rundll32.exe", "url.dll,FileProtocolHandler", target.toString()).start()
+            return
+        }
+        throw IllegalStateException("Impossible d'ouvrir le navigateur par défaut")
+    }
+}
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
@@ -244,6 +272,7 @@ fun main(args: Array<String>) {
                 }
             }
 
+            CompositionLocalProvider(LocalUriHandler provides kovelyxDesktopUriHandler) {
             if (smokePlayerUrl == null) {
                 ProvideDesktopWindowInsets(isFullscreen = windowState.placement == WindowPlacement.Fullscreen) {
                     var appReady by remember { mutableStateOf(false) }
@@ -264,6 +293,7 @@ fun main(args: Array<String>) {
                         onError = {},
                     )
                 }
+            }
             }
         }
     }
@@ -316,5 +346,6 @@ private fun handleDesktopLaunchArgs(args: Array<String>) {
 }
 
 private fun isDesktopAppUrl(value: String): Boolean =
-    value.startsWith("nuvio://", ignoreCase = true) ||
+    value.startsWith("kovelyx://", ignoreCase = true) ||
+        value.startsWith("nuvio://", ignoreCase = true) ||
         value.startsWith("stremio://", ignoreCase = true)
