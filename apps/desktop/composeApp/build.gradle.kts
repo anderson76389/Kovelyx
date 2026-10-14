@@ -139,7 +139,7 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
                 |object SimklConfig {
                 |    const val CLIENT_ID = "${props.getProperty("SIMKL_CLIENT_ID", "")}"
                 |    const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
-                |    const val APP_NAME = "${props.getProperty("SIMKL_APP_NAME", "nuvio")}"
+                |    const val APP_NAME = "${props.getProperty("SIMKL_APP_NAME", "Kovelyx")}"
                 |}
                 """.trimMargin()
             )
@@ -152,7 +152,7 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
                 |package com.nuvio.app.features.discordrpc
                 |
                 |object DiscordConfig {
-                |    const val CLIENT_ID = "${props.getProperty("NUVIO_DISCORD_CLIENT_ID", "1538974392376369212")}" 
+                |    const val CLIENT_ID = "${props.getProperty("KOVELYX_DISCORD_CLIENT_ID", "")}" 
                 |}
                 """.trimMargin()
             )
@@ -478,7 +478,7 @@ val desktopReleaseVersionCode = (
     ?.toIntOrNull()
     ?: 1
 val desktopReleasePackageVersion = jpackageCompatibleVersion(desktopReleaseVersionName)
-val windowsMsiUpgradeUuid = "395990ee-9b8a-3548-922c-e7a23a495b8d"
+val windowsMsiUpgradeUuid = "3f7af095-1f5e-4d2b-af6c-3f5c12b2c9a1"
 val iosDistribution = (
     providers.gradleProperty("nuvio.ios.distribution").orNull
         ?: System.getenv("NUVIO_IOS_DISTRIBUTION")
@@ -1279,9 +1279,9 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
-            packageName = "Nuvio"
+            packageName = "Kovelyx"
             packageVersion = desktopReleasePackageVersion
-            vendor = "Nuvio Media"
+            vendor = "Kovelyx"
             if (isMacHost) {
                 appResourcesRootDir.set(macosPlayerAppResourcesRoot)
             }
@@ -1331,17 +1331,17 @@ compose.desktop {
                 }
             }
             windows {
-                iconFile.set(project.file("src/desktopMain/resources/icons/nuvio-app-icon-transparent.ico"))
+                iconFile.set(project.file("src/desktopMain/resources/icons/kovelyx.ico"))
                 upgradeUuid = windowsMsiUpgradeUuid
                 shortcut = true
                 menu = true
-                menuGroup = "Nuvio"
+                menuGroup = "Kovelyx"
             }
             linux {
                 iconFile.set(project.file("src/desktopMain/resources/icons/nuvio-app-icon-transparent.png"))
                 debMaintainer = "contact@nuvio.tv"
                 shortcut = true
-                menuGroup = "Nuvio"
+                menuGroup = "Kovelyx"
                 appCategory = "AudioVideo"
             }
         }
