@@ -35,6 +35,19 @@ jobs:
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Python pour créer le vrai logo Kovelyx
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Créer le PNG du lanceur Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'Pillow==11.3.0'
+          python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+          test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
+
       - name: Dépendances natives Linux
         working-directory: apps/desktop
         shell: bash
