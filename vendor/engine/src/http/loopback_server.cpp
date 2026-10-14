@@ -331,10 +331,10 @@ bool send_all(
     while (offset < contents.size() && !stop_token.stop_requested()) {
         const auto remaining = contents.size() - offset;
 #if defined(_WIN32)
-        const auto chunk = static_cast<int>((std::min)(
-            remaining,
-            static_cast<std::size_t>((std::numeric_limits<int>::max)())
-        ));
+        // Compatible avec les en-têtes Windows/MSVC qui définissent min/max.
+        // Évite les collisions de macros dans les compilations indépendantes.
+        const auto max_chunk = static_cast<std::size_t>((std::numeric_limits<int>::max)());
+        const auto chunk = static_cast<int>(remaining < max_chunk ? remaining : max_chunk);
         const auto written = send(socket, contents.data() + offset, chunk, 0);
         if (written == SOCKET_ERROR || written == 0) {
             return false;
