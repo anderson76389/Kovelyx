@@ -71,7 +71,7 @@ class LibraryRepositoryTest {
     }
 
     @Test
-    fun `library tabs include local Kovelyx library before Trakt tabs` {
+    fun `library tabs include local Kovelyx library before Trakt tabs`() {
         val traktTab = TrackingLibraryTab(
             key = "trakt:watchlist",
             title = "Watchlist",
