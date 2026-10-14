@@ -136,10 +136,17 @@ object NetworkStatusRepository {
             return NetworkCondition.NoInternet
         }
 
+        // Kovelyx peut fonctionner sans compte ni serveur Supabase :
+        // l'absence de serveur ne doit pas faire croire que TMDB/addons sont hors ligne.
+        val configuration = ServerConfigurationRepository.active.value
+        if (!shouldProbeKovelyxBackend(configuration)) {
+            return NetworkCondition.Online
+        }
+
         val supabaseReachable = SupabaseEndpointConfig.restEndpointUrls().any { url ->
             probeReachable(
                 url = url,
-                headers = mapOf("apikey" to ServerConfigurationRepository.active.value.publishableKey),
+                headers = mapOf("apikey" to configuration.publishableKey),
             )
         }
         if (!supabaseReachable) {
@@ -173,3 +180,7 @@ object NetworkStatusRepository {
     private fun NetworkCondition.isOfflineLike(): Boolean =
         this == NetworkCondition.NoInternet || this == NetworkCondition.ServersUnreachable
 }
+
+/** Un serveur de comptes absent n'est pas une panne de métadonnées ou d'Internet. */
+internal fun shouldProbeKovelyxBackend(configuration: ServerConfiguration): Boolean =
+    configuration.backendUrl.isNotBlank() && configuration.publishableKey.isNotBlank()
