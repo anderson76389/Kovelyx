@@ -11,6 +11,12 @@ on:
       - 'scripts/generate-compose-brand.py'
       - 'scripts/desktop-release-version.py'
       - '.github/workflows/windows.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'vendor/engine/**'
+      - '.github/workflows/windows.yml'
   workflow_dispatch:
 
 permissions:

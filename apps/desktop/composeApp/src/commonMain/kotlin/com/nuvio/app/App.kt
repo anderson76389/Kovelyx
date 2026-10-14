@@ -1,5 +1,6 @@
 package com.nuvio.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -47,9 +48,11 @@ fun App(
     onTabTitles: ((home: String, search: String, library: String, profile: String, switchProfile: String, addProfile: String) -> Unit)? = null,
     nativeProfileSwitcherController: NativeProfileSwitcherController? = null,
     appGateController: AppGateController? = null,
+    desktopOverlay: @Composable () -> Unit = {},
 ) {
     AppEnvironment {
-        AppGate(
+        Box(modifier = Modifier.fillMaxSize()) {
+            AppGate(
             initialTab = initialTab,
             initialRoute = initialRoute,
             useNativeNavigation = useNativeNavigation,
@@ -68,7 +71,9 @@ fun App(
             onTabTitles = onTabTitles,
             nativeProfileSwitcherController = nativeProfileSwitcherController,
             appGateController = appGateController,
-        )
+            )
+            desktopOverlay()
+        }
     }
 }
 
