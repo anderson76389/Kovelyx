@@ -122,9 +122,9 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
                 |package com.nuvio.app.features.trakt
                 |
                 |object TraktConfig {
-                |    const val CLIENT_ID = "${props.getProperty("TRAKT_CLIENT_ID", "")}" 
-                |    const val CLIENT_SECRET = "${props.getProperty("TRAKT_CLIENT_SECRET", "")}" 
-                |    const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}" 
+                |    const val CLIENT_ID = "${props.getProperty("KOVELYX_TRAKT_CLIENT_ID", System.getenv("KOVELYX_TRAKT_CLIENT_ID").orEmpty())}" 
+                |    const val CLIENT_SECRET = "${props.getProperty("KOVELYX_TRAKT_CLIENT_SECRET", System.getenv("KOVELYX_TRAKT_CLIENT_SECRET").orEmpty())}" 
+                |    const val REDIRECT_URI = "${props.getProperty("KOVELYX_TRAKT_REDIRECT_URI", "https://anderson76389.github.io/Kovelyx/auth/trakt")}" 
                 |}
                 """.trimMargin()
             )
@@ -138,7 +138,7 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
                 |
                 |object SimklConfig {
                 |    const val CLIENT_ID = "${props.getProperty("SIMKL_CLIENT_ID", "")}"
-                |    const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
+                |    const val REDIRECT_URI = "${props.getProperty("KOVELYX_SIMKL_REDIRECT_URI", "kovelyx://auth/simkl")}"
                 |    const val APP_NAME = "${props.getProperty("SIMKL_APP_NAME", "Kovelyx")}"
                 |}
                 """.trimMargin()
@@ -165,7 +165,7 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
                 |package com.nuvio.app.features.mdblist
                 |
                 |object MdbListConfig {
-                |    const val CLIENT_ID = "${props.getProperty("MDBLIST_CLIENT_ID", "")}" 
+                |    const val CLIENT_ID = "${props.getProperty("KOVELYX_MDBLIST_CLIENT_ID", System.getenv("KOVELYX_MDBLIST_CLIENT_ID").orEmpty())}" 
                 |}
                 """.trimMargin()
             )
@@ -564,9 +564,9 @@ val generateRuntimeConfigs = tasks.register<GenerateRuntimeConfigsTask>("generat
     appVersionCode.set(releaseAppVersionCode)
     desktopAppVersionName.set(desktopReleaseVersionName)
     desktopAppVersionCode.set(desktopReleaseVersionCode)
-    supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-    supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-    supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+    supabaseUrl.set(runtimeConfigValue("KOVELYX_SUPABASE_URL"))
+    supabaseAnonKey.set(runtimeConfigValue("KOVELYX_SUPABASE_PUBLISHABLE_KEY"))
+    supabaseFallbackUrl.set(runtimeConfigValue("KOVELYX_SUPABASE_FALLBACK_URL"))
     sentryDsn.set(runtimeConfigValue("SENTRY_DSN"))
     sentryDesktopDsn.set(runtimeConfigValue("SENTRY_DESKTOP_DSN"))
     tmdbApiKey.set(runtimeConfigValue("TMDB_API_KEY"))

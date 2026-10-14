@@ -1,15 +1,7 @@
 name: Kovelyx Linux - AppImage PC x86-64
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/desktop/**'
-      - '!apps/desktop/**/*.md'
-      - 'vendor/engine/**'
-      - '.github/workflows/linux.yml'
-      - 'scripts/generate-compose-brand.py'
-      - 'scripts/desktop-release-version.py'
+  # Linux paused while Kovelyx Windows is finalized. Manual runs only.
   workflow_dispatch:
 
 permissions:

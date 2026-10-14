@@ -52,7 +52,7 @@ import nuvio.composeapp.generated.resources.about_supporters_contributors_subtit
 import nuvio.composeapp.generated.resources.about_licenses_attributions_subtitle
 import org.jetbrains.compose.resources.stringResource
 
-private const val PRIVACY_POLICY_URL = "https://nuvio.tv/privacy-policy"
+private const val PRIVACY_POLICY_URL = "https://github.com/anderson76389/Kovelyx/blob/main/docs/COMPTES_ET_CONFIDENTIALITE.md"
 
 internal fun LazyListScope.settingsRootContent(
     isTablet: Boolean,

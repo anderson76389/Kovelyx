@@ -1,11 +1,7 @@
 name: Publier automatiquement AppImage Linux de test
 
 on:
-  workflow_run:
-    workflows:
-      - "Kovelyx Linux - AppImage PC x86-64"
-    types: [completed]
-    branches: [main]
+  # No automatic Linux releases while Windows is the sole target.
   workflow_dispatch:
     inputs:
       build_run_id:

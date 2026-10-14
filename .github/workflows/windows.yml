@@ -33,6 +33,11 @@ jobs:
     name: Compiler Kovelyx Windows
     runs-on: windows-latest
     timeout-minutes: 90
+    env:
+      KOVELYX_SUPABASE_URL: ${{ vars.KOVELYX_SUPABASE_URL }}
+      KOVELYX_SUPABASE_PUBLISHABLE_KEY: ${{ vars.KOVELYX_SUPABASE_PUBLISHABLE_KEY }}
+      KOVELYX_TRAKT_CLIENT_ID: ${{ vars.KOVELYX_TRAKT_CLIENT_ID }}
+      KOVELYX_MDBLIST_CLIENT_ID: ${{ vars.KOVELYX_MDBLIST_CLIENT_ID }}
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4

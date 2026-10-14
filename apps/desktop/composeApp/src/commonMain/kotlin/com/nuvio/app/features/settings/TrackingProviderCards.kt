@@ -207,17 +207,24 @@ internal fun TrackingProviderCards(
         }
         TraktProviderCard(
             uiState = traktUiState,
+            onCredentialsRequested = { showCredentialEditor = true },
             modifier = Modifier.fillMaxWidth(),
         )
-        SimklProviderCard(
-            uiState = simklUiState,
-            isSyncing = syncState.isLoading,
-            syncErrorMessage = syncState.errorMessage,
-            onSyncRequested = onSimklSyncRequested,
-            onInfoRequested = { showSyncInfo = true },
+        // Keep historical Simkl data intact, but hide the sign-in card on PC.
+        if (!isDesktop) {
+            SimklProviderCard(
+                uiState = simklUiState,
+                isSyncing = syncState.isLoading,
+                syncErrorMessage = syncState.errorMessage,
+                onSyncRequested = onSimklSyncRequested,
+                onInfoRequested = { showSyncInfo = true },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        MdbListProviderCard(
             modifier = Modifier.fillMaxWidth(),
+            onCredentialsRequested = { showCredentialEditor = true },
         )
-        MdbListProviderCard(Modifier.fillMaxWidth())
     }
 
     if (showSyncInfo) {
@@ -304,13 +311,31 @@ private fun KovelyxOAuthCredentialsDialog(
 @Composable
 private fun TraktProviderCard(
     uiState: TraktAuthUiState,
+    onCredentialsRequested: () -> Unit,
     modifier: Modifier,
 ) {
     val usesDeviceCodeFlow = uiState.usesDeviceCodeFlow
+    val browser = LocalUriHandler.current
+    val approvalCode = uiState.pendingDeviceUserCode
+    // Device authorization is asynchronous. Open Trakt automatically once
+    // a verified user code arrives, instead of requiring a second click.
+    androidx.compose.runtime.LaunchedEffect(isDesktop, approvalCode) {
+        if (isDesktop && !approvalCode.isNullOrBlank()) {
+            // Use the official verification URL returned by Trakt itself.
+            // Do not invent an undocumented /activate/<code> endpoint.
+            val officialUrl = uiState.pendingDeviceVerificationUrl
+                ?.takeIf {
+                    it.startsWith("https://trakt.tv/") ||
+                        it.startsWith("https://auth.trakt.tv/")
+                } ?: "https://trakt.tv/activate"
+            runCatching { browser.openUri(officialUrl) }
+        }
+    }
     TrackingProviderCard(
         brand = TrackingBrand.TRAKT,
         mode = uiState.mode.toTrackingConnectionCardMode(),
         credentialsConfigured = uiState.credentialsConfigured,
+        onCredentialsRequested = onCredentialsRequested.takeIf { isDesktop },
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_trakt_connected_as,
@@ -444,6 +469,7 @@ internal fun TrackingProviderCard(
     openLoginLabel: String,
     disconnectLabel: String,
     missingCredentialsMessage: String,
+    onCredentialsRequested: (() -> Unit)? = null,
     approvalCode: String? = null,
     authorizationCode: String? = null,
     approvalUrl: String? = null,
@@ -583,15 +609,18 @@ internal fun TrackingProviderCard(
                     TrackingBrandPrimaryButton(
                         label = connectLabel,
                         loading = isLoading,
-                        enabled = credentialsConfigured && !isLoading,
+                        enabled = !isLoading && (credentialsConfigured || onCredentialsRequested != null),
                         onClick = {
-                            actionScope.launch { openUrl(onConnectRequested()) }
+                            if (!credentialsConfigured) onCredentialsRequested?.invoke()
+                            else actionScope.launch { openUrl(onConnectRequested()) }
                         },
                     )
-                    if (!credentialsConfigured) {
+                    if (!credentialsConfigured && onCredentialsRequested == null) {
+                        TrackingBrandMessage(text = missingCredentialsMessage, isError = true)
+                    } else if (!credentialsConfigured) {
                         TrackingBrandMessage(
-                            text = missingCredentialsMessage,
-                            isError = true,
+                            text = "Configurez une seule fois vos identifiants d'application, puis connectez votre compte dans le navigateur.",
+                            isError = false,
                         )
                     }
                 }

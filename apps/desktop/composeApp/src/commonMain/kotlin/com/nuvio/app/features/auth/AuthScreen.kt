@@ -83,6 +83,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nuvio.app.core.network.ServerConfigurationRepository
+import com.nuvio.app.core.network.isKovelyxAccountBackendReady
+import com.nuvio.app.isDesktop
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.DeviceLinkAuthRepository
 import com.nuvio.app.core.auth.DeviceLinkAuthState
@@ -714,6 +717,8 @@ private fun AuthForm(
     onPasswordBoundsChange: (Rect) -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+    val accountServer by ServerConfigurationRepository.active.collectAsStateWithLifecycle()
+    val kovelyxAccountsReady = accountServer.isKovelyxAccountBackendReady()
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
@@ -757,6 +762,16 @@ private fun AuthForm(
             ),
         )
 
+        if (isDesktop && !kovelyxAccountsReady) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "Les comptes Kovelyx en ligne ne sont pas encore activés. " +
+                    "Aucune inscription ne sera envoyée à Nuvio. Vous pouvez continuer en mode invité.",
+                style = MaterialTheme.typography.bodySmall,
+                color = AuthTextSecondary,
+            )
+        }
+
         authError?.let { errorText ->
             Spacer(modifier = Modifier.height(12.dp))
             Text(
@@ -773,7 +788,7 @@ private fun AuthForm(
             Spacer(modifier = Modifier.height(14.dp * scale))
             AuthTermsAcknowledgement(
                 scale = scale,
-                onTermsClick = { uriHandler.openUri("https://nuvio.tv/terms") },
+                onTermsClick = { uriHandler.openUri("https://github.com/anderson76389/Kovelyx/blob/main/docs/COMPTES_ET_CONFIDENTIALITE.md") },
             )
         }
 
@@ -783,7 +798,7 @@ private fun AuthForm(
             text = if (isSignUp) stringResource(Res.string.compose_auth_create_account)
             else stringResource(Res.string.compose_auth_sign_in),
             isLoading = isLoading,
-            enabled = !isLoading,
+            enabled = !isLoading && (!isDesktop || kovelyxAccountsReady),
             height = metrics.primaryHeight,
             scale = scale,
             onClick = onSubmit,
