@@ -77,6 +77,55 @@ class DesktopCollectionImportBridgeTest {
         }
     }
 
+    @Test
+    fun bttrPosterPatternAndFrenchLanguageTravelWithImport() {
+        val payload = """{"collections":[],"settings":{
+            "posterProvider":"bttr","bttrGenre":false,"bttrRating":true,
+            "bttrQuality":true,"bttrAge":false,"bttrSource":"IM","bttrLanguage":"fr",
+            "tmdbLanguage":"fr","importMode":"account","importAction":"merge"
+        }}"""
+        val settings = DesktopCollectionImportBridge.extractSettings(payload)
+        assertEquals("fr", settings["tmdbLanguage"])
+        assertEquals("account", settings["importMode"])
+        assertEquals("merge", settings["importAction"])
+        assertEquals(
+            "https://btttr.cc/poster-rq/imdb/poster-default/{imdb_id}.jpg?lang=fr&rs=IM",
+            DesktopCollectionImportBridge.posterPattern(settings),
+        )
+        assertEquals(
+            null,
+            DesktopCollectionImportBridge.posterPattern(
+                mapOf("posterProvider" to "top", "topPosterKey" to "../unsafe")
+            )
+        )
+    }
+
+    @Test
+    fun nonDestructiveImportKeepsExistingCategoryArtworkAndFolderIds() {
+        val existing = """[
+            {"id":"a","title":"Mes films","backdropImageUrl":"https://example.org/old.jpg",
+                "folders":[{"id":"old","title":"Mes anciens films"},{"id":"shared","title":"Favoris"}]},
+            {"id":"b","title":"Autres","folders":[]}
+        ]"""
+        val incoming = """[
+            {"id":"a","title":"Nouvelle version","folders":[
+                {"id":"shared","title":"Ne doit pas écraser Favoris"},
+                {"id":"new","title":"Nouveaux films"}]},
+            {"id":"c","title":"Nouvelle catégorie","folders":[]}
+        ]"""
+        val merged = DesktopCollectionImportBridge.mergeCollectionPayload(existing, incoming)
+        val decoded = kotlinx.serialization.json.Json.parseToJsonElement(merged) as kotlinx.serialization.json.JsonArray
+        assertEquals(3, decoded.size)
+        val kept = decoded.first() as kotlinx.serialization.json.JsonObject
+        assertEquals("Mes films", (kept["title"] as kotlinx.serialization.json.JsonPrimitive).content)
+        assertEquals("https://example.org/old.jpg",
+            (kept["backdropImageUrl"] as kotlinx.serialization.json.JsonPrimitive).content)
+        val folders = kept["folders"] as kotlinx.serialization.json.JsonArray
+        assertEquals(3, folders.size)
+        assertEquals("Favoris", ((folders[1] as kotlinx.serialization.json.JsonObject)["title"]
+            as kotlinx.serialization.json.JsonPrimitive).content)
+    }
+
     private fun post(origin: String, body: String): Int {
         // HttpURLConnection drops Origin as a restricted header on some JDKs.
         // java.net.http sets it explicitly, like a browser CORS request.
