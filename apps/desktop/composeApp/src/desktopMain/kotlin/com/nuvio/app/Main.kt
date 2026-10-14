@@ -47,7 +47,7 @@ import javax.imageio.ImageIO
 import java.awt.Color as AwtColor
 import javax.swing.JComponent
 
-private val NuvioDesktopNativeBackground = AwtColor(0x0D, 0x0D, 0x0D)
+private val KovelyxDesktopNativeBackground = AwtColor(0x0D, 0x0D, 0x0D)
 private const val MacosDarkAquaAppearance = "NSAppearanceNameDarkAqua"
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -131,13 +131,18 @@ fun main(args: Array<String>) {
             },
             title = if (smokePlayerUrl == null) "Kovelyx" else "Kovelyx Player Smoke",
             state = windowState,
-            icon = painterResource(appIconState.selected.transparentPreviewResource),
+            // The very first native frame uses the Kovelyx icon, not the imported Nuvio asset.
+            icon = painterResource(
+                if (DesktopHostOs.current == DesktopHostOs.WINDOWS && appIconState.selected == AppIconOption.ORIGINAL)
+                    "icons/kovelyx.png"
+                else appIconState.selected.transparentPreviewResource,
+            ),
             init = ::configureMacosWindowBeforePeer,
         ) {
             SideEffect {
-                window.background = NuvioDesktopNativeBackground
-                window.rootPane.background = NuvioDesktopNativeBackground
-                window.contentPane.background = NuvioDesktopNativeBackground
+                window.background = KovelyxDesktopNativeBackground
+                window.rootPane.background = KovelyxDesktopNativeBackground
+                window.contentPane.background = KovelyxDesktopNativeBackground
                 (window.contentPane as? JComponent)?.isOpaque = true
             }
             LaunchedEffect(window, appIconState.selected) {
