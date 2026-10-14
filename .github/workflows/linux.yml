@@ -9,6 +9,7 @@ on:
       - 'vendor/engine/**'
       - '.github/workflows/linux.yml'
       - 'scripts/generate-compose-brand.py'
+      - 'scripts/desktop-release-version.py'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +27,15 @@ jobs:
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Version identique pour les formats Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
       - name: Java 21
         uses: actions/setup-java@v4
         with:
@@ -95,6 +104,7 @@ jobs:
           set -euo pipefail
           chmod +x ./gradlew
           ./gradlew :composeApp:packageReleaseAppImage \
+            "-Pnuvio.desktop.versionName=$KOVELYX_BUILD_VERSION" \
             --no-daemon --max-workers=2 --stacktrace \
             "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m"
 
@@ -151,6 +161,14 @@ jobs:
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Version identique pour les paquets Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
       - name: Java 21
         uses: actions/setup-java@v4
         with:
@@ -194,6 +212,7 @@ jobs:
           set -euo pipefail
           chmod +x ./gradlew
           ./gradlew :composeApp:packageReleaseDeb :composeApp:packageReleaseRpm \
+            "-Pnuvio.desktop.versionName=$KOVELYX_BUILD_VERSION" \
             --no-daemon --max-workers=2 --stacktrace \
             "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m"
       - name: Vérifier identité, architecture et fichiers réellement produits

@@ -194,8 +194,9 @@ private enum class DesktopUpdaterOs {
         val archFragments = desktopArchitectureFragments()
         return when (this) {
             WINDOWS -> AppUpdateAssetSelector(
-                fileExtensions = listOf(".msi", ".exe"),
-                preferredNameFragments = archFragments + listOf("windows", "win"),
+                // Prefer the single-file installer; never accidentally choose Linux/ARM or checksum files.
+                fileExtensions = listOf(".exe", ".msi"),
+                preferredNameFragments = listOf("Kovelyx-Windows-Setup-") + archFragments + listOf("windows"),
                 fallbackNameFragments = listOf("universal", "all"),
             )
             MACOS -> AppUpdateAssetSelector(

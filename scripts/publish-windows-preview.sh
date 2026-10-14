@@ -35,8 +35,10 @@ if ! jq -e --arg repo "$GITHUB_REPOSITORY" '
 fi
 
 source_sha="$(jq -r '.head_sha' build.json)"
-run_number="$(jq -r '.run_number' build.json)"
-tag="v0.1.0-alpha.$run_number"
+# Must match the version EMBEDDED into the installer, not a synthetic GitHub run tag.
+# The version helper reads source metadata from the exact commit that CI built.
+release_version="$(python3 scripts/desktop-release-version.py --commit "$source_sha")"
+tag="v$release_version"
 git merge-base --is-ancestor "$source_sha" HEAD || {
   echo "::error::Source commit is not in main history"
   exit 1
