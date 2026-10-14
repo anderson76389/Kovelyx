@@ -207,9 +207,8 @@ object AuthRepository {
         }
     }
 
-    private fun hasConfiguredBackend(): Boolean = ServerConfigurationRepository.active.value.let { config ->
-        config.backendUrl.isNotBlank() && config.publishableKey.isNotBlank()
-    }
+    private fun hasConfiguredBackend(): Boolean =
+        ServerConfigurationRepository.active.value.isKovelyxAccountBackendReady()
 
     fun reinitialize() {
         sessionStatusJob?.cancel()
