@@ -1,5 +1,6 @@
 package com.nuvio.app.features.settings
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nuvio.app.core.build.AppVersionPolicy
+import com.nuvio.app.isDesktop
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.compose_about_based_on_version_format
 import nuvio.composeapp.generated.resources.compose_about_made_with
@@ -28,17 +30,19 @@ internal fun SettingsAttribution(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = if (isTablet) 20.dp else 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        MemberBrandWordmark(
-            height = if (isTablet) 30.dp else 26.dp,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-        )
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            MemberBrandWordmark(
+                height = if (isTablet) 30.dp else 26.dp,
+            )
+        }
         Spacer(
             modifier = Modifier.height(if (isTablet) 10.dp else 8.dp),
         )
 
         Text(
-            text = stringResource(Res.string.compose_about_made_with),
+            text = if (isDesktop) "Kovelyx • application indépendante" else stringResource(Res.string.compose_about_made_with),
             modifier = Modifier.fillMaxWidth(),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

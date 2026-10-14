@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
 import com.nuvio.app.core.format.formatLocalDateTime
 import com.nuvio.app.features.mdblist.messageResource
 import com.nuvio.app.features.mdblist.MdbListAuthError
@@ -25,6 +26,7 @@ internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
     val accountStatus by MdbListTracker.account.status.collectAsStateWithLifecycle()
     val sync by MdbListTracker.sync.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
+    val credentialsRevision by KovelyxIntegrationCredentials.revision.collectAsStateWithLifecycle()
     val status = accountStatus.takeIf { it.scope == auth.scope }
     val syncStatus = sync.takeIf { it.scope == auth.scope }
     LaunchedEffect(auth.scope) {
@@ -37,7 +39,7 @@ internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
             auth.session != null -> TrackingConnectionCardMode.AWAITING_APPROVAL
             else -> TrackingConnectionCardMode.DISCONNECTED
         },
-        credentialsConfigured = MdbListTracker.auth.hasRequiredCredentials(),
+        credentialsConfigured = remember(credentialsRevision) { MdbListTracker.auth.hasRequiredCredentials() },
         isLoading = status?.isBusy == true,
         connectedLabel = stringResource(Res.string.settings_mdblist_connected_as, auth.user?.username ?: stringResource(Res.string.settings_mdblist_account_fallback)),
         connectedDescription = stringResource(Res.string.settings_mdblist_connected_description),

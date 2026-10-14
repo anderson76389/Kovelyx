@@ -1054,7 +1054,7 @@
     <string name="settings_trakt_features">FONCTIONNALITÉS</string>
     <string name="settings_trakt_finish_sign_in">Terminez la connexion Trakt dans votre navigateur</string>
     <string name="settings_trakt_intro_description">Suivez ce que vous regardez, enregistrez dans votre liste ou vos listes personnalisées et gardez votre bibliothèque synchronisée avec Trakt.</string>
-    <string name="settings_trakt_missing_credentials">Identifiants Trakt manquants dans local.properties (TRAKT_CLIENT_ID / TRAKT_CLIENT_SECRET).</string>
+    <string name="settings_trakt_missing_credentials">Trakt : cliquez sur « Configurer les clés Trakt et MDBList » puis saisissez vos identifiants d'application OAuth.</string>
     <string name="settings_trakt_open_login">Ouvrir la connexion Trakt</string>
     <string name="settings_trakt_save_actions_description">Vos actions d’enregistrement peuvent maintenant cibler la watchlist Trakt et vos listes personnelles.</string>
     <string name="settings_trakt_sign_in_description">Connectez-vous à Trakt pour activer l’enregistrement par liste et le mode bibliothèque Trakt.</string>
@@ -2562,7 +2562,7 @@
     <string name="settings_mdblist_approval_description">Autorisez la connexion depuis votre compte MDBList.</string>
     <string name="settings_mdblist_open_login">Ouvrir la page de connexion</string>
     <string name="settings_mdblist_disconnect">Déconnecter MDBList</string>
-    <string name="settings_mdblist_missing_credentials">Connexion MDBList indisponible dans cette version.</string>
+    <string name="settings_mdblist_missing_credentials">MDBList : saisissez votre Client ID dans « Configurer les clés Trakt et MDBList » pour activer la connexion.</string>
     <string name="settings_mdblist_sync_now">Synchroniser</string>
     <string name="settings_mdblist_visit">Visiter MDBList</string>
     <string name="settings_mdblist_unavailable">Impossible de synchroniser avec MDBList. Réessayez.</string>

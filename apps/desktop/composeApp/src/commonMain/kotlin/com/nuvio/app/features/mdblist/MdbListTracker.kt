@@ -1,6 +1,7 @@
 package com.nuvio.app.features.mdblist
 
-import com.nuvio.app.core.build.AppVersionConfig
+import com.nuvio.app.core.build.AppVersionPolicy
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.tracking.TrackingAuthProvider
 import com.nuvio.app.features.tracking.TrackingCapability
@@ -19,7 +20,7 @@ object MdbListTracker : TrackingAuthProvider {
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val activeProfile = MutableStateFlow(ProfileRepository.activeProfileId)
     internal val store = MdbListAuthStore(PlatformMdbListAuthPersistence, activeProfile.value)
-    private val configuration = MdbListConfiguration(MdbListConfig.CLIENT_ID, AppVersionConfig.VERSION_NAME)
+    private val configuration = MdbListConfiguration(KovelyxIntegrationCredentials.mdblistClientId, AppVersionPolicy.displayVersionName)
     private val http = MdbListHttpClient(MdbListNetworkEngine(configuration))
     val auth = MdbListAuthRepository(http, configuration, store)
     internal val api = MdbListApiClient(http, auth, store)
@@ -50,6 +51,13 @@ object MdbListTracker : TrackingAuthProvider {
                 authenticated.value = state.scope.profileId == activeProfile.value && state.isAuthenticated
             }
         }
+    }
+
+    /** Applied after the user saves their own MDBList application ID. */
+    fun refreshConfiguredCredentials() {
+        configuration.clientId = KovelyxIntegrationCredentials.mdblistClientId
+        account.stopPolling()
+        store.cancelSession()
     }
 
     fun register() {

@@ -1,6 +1,7 @@
 package com.nuvio.app.features.trakt
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
 import com.nuvio.app.features.addons.httpGetTextWithHeaders
 import com.nuvio.app.features.addons.httpPostJsonWithHeaders
 import com.nuvio.app.features.addons.httpRequestRaw
@@ -122,7 +123,14 @@ object TraktAuthRepository : TrackingAuthProvider {
     }
 
     fun hasRequiredCredentials(): Boolean =
-        TraktConfig.CLIENT_ID.isNotBlank() && TraktConfig.CLIENT_SECRET.isNotBlank()
+        KovelyxIntegrationCredentials.traktClientId.isNotBlank() && KovelyxIntegrationCredentials.traktClientSecret.isNotBlank()
+
+    /** Refresh the button state after user OAuth credentials change. */
+    fun refreshConfiguredCredentials() {
+        ensureLoaded()
+        onCancelAuthorization()
+        publish(errorMessage = null, statusMessage = null)
+    }
 
     fun onConnectRequested(profileId: Int = ProfileRepository.activeProfileId): String? {
         ensureLoaded(profileId)
@@ -179,8 +187,8 @@ object TraktAuthRepository : TrackingAuthProvider {
         val profileId = ProfileRepository.activeProfileId
         ensureLoaded(profileId)
         if (isDesktop) return
-        if (!callbackUrl.startsWith("${TraktConfig.REDIRECT_URI}?", ignoreCase = true) &&
-            !callbackUrl.equals(TraktConfig.REDIRECT_URI, ignoreCase = true)
+        if (!callbackUrl.startsWith("${KovelyxIntegrationCredentials.traktRedirectUri}?", ignoreCase = true) &&
+            !callbackUrl.equals(KovelyxIntegrationCredentials.traktRedirectUri, ignoreCase = true)
         ) {
             return
         }
@@ -197,7 +205,7 @@ object TraktAuthRepository : TrackingAuthProvider {
     }
 
     private fun isTraktAuthCallback(url: String): Boolean =
-        url == TraktConfig.REDIRECT_URI || url.startsWith("${TraktConfig.REDIRECT_URI}?")
+        url == KovelyxIntegrationCredentials.traktRedirectUri || url.startsWith("${KovelyxIntegrationCredentials.traktRedirectUri}?")
 
     suspend fun authorizedHeaders(profileId: Int = currentProfileId): Map<String, String>? {
         ensureLoaded(profileId)
@@ -211,7 +219,7 @@ object TraktAuthRepository : TrackingAuthProvider {
 
         return mapOf(
             "trakt-api-version" to API_VERSION,
-            "trakt-api-key" to TraktConfig.CLIENT_ID,
+            "trakt-api-key" to KovelyxIntegrationCredentials.traktClientId,
             "Authorization" to "Bearer $accessToken",
         )
     }
@@ -280,7 +288,7 @@ object TraktAuthRepository : TrackingAuthProvider {
 
     private suspend fun requestDeviceAuthorization(profileId: Int, generation: Long) {
         val body = json.encodeToString(
-            TraktDeviceCodeRequest(clientId = TraktConfig.CLIENT_ID),
+            TraktDeviceCodeRequest(clientId = KovelyxIntegrationCredentials.traktClientId),
         )
         val response = runCatching {
             postTraktJson<TraktDeviceCodeResponse>(
@@ -453,8 +461,8 @@ object TraktAuthRepository : TrackingAuthProvider {
         val body = json.encodeToString(
             TraktDeviceTokenRequest(
                 code = deviceCode,
-                clientId = TraktConfig.CLIENT_ID,
-                clientSecret = TraktConfig.CLIENT_SECRET,
+                clientId = KovelyxIntegrationCredentials.traktClientId,
+                clientSecret = KovelyxIntegrationCredentials.traktClientSecret,
             ),
         )
         val response = postTraktJson<TraktTokenResponse>(
@@ -548,9 +556,9 @@ object TraktAuthRepository : TrackingAuthProvider {
         val body = json.encodeToString(
             TraktAuthorizationCodeRequest(
                 code = code,
-                clientId = TraktConfig.CLIENT_ID,
-                clientSecret = TraktConfig.CLIENT_SECRET,
-                redirectUri = TraktConfig.REDIRECT_URI,
+                clientId = KovelyxIntegrationCredentials.traktClientId,
+                clientSecret = KovelyxIntegrationCredentials.traktClientSecret,
+                redirectUri = KovelyxIntegrationCredentials.traktRedirectUri,
             ),
         )
 
@@ -617,8 +625,8 @@ object TraktAuthRepository : TrackingAuthProvider {
             val body = json.encodeToString(
                 TraktRevokeRequest(
                     token = token,
-                    clientId = TraktConfig.CLIENT_ID,
-                    clientSecret = TraktConfig.CLIENT_SECRET,
+                    clientId = KovelyxIntegrationCredentials.traktClientId,
+                    clientSecret = KovelyxIntegrationCredentials.traktClientSecret,
                 ),
             )
             runCatching {
@@ -657,9 +665,9 @@ object TraktAuthRepository : TrackingAuthProvider {
         val body = json.encodeToString(
             TraktRefreshTokenRequest(
                 refreshToken = refreshToken,
-                clientId = TraktConfig.CLIENT_ID,
-                clientSecret = TraktConfig.CLIENT_SECRET,
-                redirectUri = TraktConfig.REDIRECT_URI,
+                clientId = KovelyxIntegrationCredentials.traktClientId,
+                clientSecret = KovelyxIntegrationCredentials.traktClientSecret,
+                redirectUri = KovelyxIntegrationCredentials.traktRedirectUri,
             ),
         )
 
@@ -797,8 +805,8 @@ object TraktAuthRepository : TrackingAuthProvider {
 
     private fun buildAuthorizationUrl(state: String): String {
         val responseType = "code"
-        val encodedClientId = TraktConfig.CLIENT_ID.encodeURLParameter()
-        val encodedRedirectUri = TraktConfig.REDIRECT_URI.encodeURLParameter()
+        val encodedClientId = KovelyxIntegrationCredentials.traktClientId.encodeURLParameter()
+        val encodedRedirectUri = KovelyxIntegrationCredentials.traktRedirectUri.encodeURLParameter()
         val encodedState = state.encodeURLParameter()
         return "$AUTHORIZE_URL?response_type=$responseType&client_id=$encodedClientId&redirect_uri=$encodedRedirectUri&state=$encodedState"
     }

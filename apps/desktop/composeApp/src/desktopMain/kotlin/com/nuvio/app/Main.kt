@@ -20,6 +20,8 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import androidx.compose.ui.unit.dp
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
+import com.nuvio.app.core.storage.DesktopStorage
 import com.nuvio.app.core.deeplink.handleAppUrl
 import com.nuvio.app.core.diagnostics.SentryInitializer
 import com.nuvio.app.core.ui.NuvioTheme
@@ -66,6 +68,19 @@ fun main(args: Array<String>) {
     if (System.getProperty("os.name", "").lowercase().contains("linux")) {
         runCatching { NativePlayerBridge.initGtkEarly() }
     }
+    // Load personal OAuth application keys before initializing integrations.
+    // Nothing is uploaded to the repository, and the app can run without keys.
+    val integrationStore = DesktopStorage.store("kovelyx_integrations")
+    KovelyxIntegrationCredentials.initializeDesktop(
+        clientId = integrationStore.getString("trakt_client_id").orEmpty(),
+        clientSecret = integrationStore.getString("trakt_client_secret").orEmpty(),
+        mdbListId = integrationStore.getString("mdblist_client_id").orEmpty(),
+        onSave = { traktId, traktSecret, mdbListId ->
+            integrationStore.putString("trakt_client_id", traktId)
+            integrationStore.putString("trakt_client_secret", traktSecret)
+            integrationStore.putString("mdblist_client_id", mdbListId)
+        },
+    )
     applyDesktopRendererPreference()
     SentryInitializer.start()
     configureDesktopQuickJsLibrary()
