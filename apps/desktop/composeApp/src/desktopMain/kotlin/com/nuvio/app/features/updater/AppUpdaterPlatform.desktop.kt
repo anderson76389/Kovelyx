@@ -389,14 +389,21 @@ internal fun appImageReplaceScript(
 ): String {
     val downloaded = singleQuote(downloadedPath)
     val target = singleQuote(appImagePath)
+    val stage = singleQuote("$appImagePath.kovelyx-staged-$currentPid")
+    val backup = singleQuote("$appImagePath.kovelyx-previous")
     return buildString {
+        // Stage an executable in the SAME folder as the target for atomic rename.
+        // The existing AppImage remains intact if copying or renaming fails.
+        append("if cp -f -- $downloaded $stage && chmod +x -- $stage; then ")
         append("i=0; ")
         append("while [ \$i -lt $appImageExitWaitTicks ] && kill -0 $currentPid 2>/dev/null; do ")
         append("sleep 0.1; i=\$((i+1)); ")
         append("done; ")
-        append("if cp -f -- $downloaded $target; then ")
-        append("chmod +x -- $target; rm -f -- $downloaded; exec $target; ")
-        append("else xdg-open $downloaded; fi")
+        append("if mv -f -- $target $backup; then ")
+        append("if mv -f -- $stage $target; then rm -f -- $downloaded; exec $target; ")
+        append("else mv -f -- $backup $target; xdg-open $downloaded; fi; ")
+        append("else rm -f -- $stage; xdg-open $downloaded; fi; ")
+        append("else rm -f -- $stage; xdg-open $downloaded; fi")
     }
 }
 

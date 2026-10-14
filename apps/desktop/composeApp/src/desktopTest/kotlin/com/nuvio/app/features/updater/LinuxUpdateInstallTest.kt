@@ -196,9 +196,10 @@ class LinuxUpdateInstallTest {
         val script = command[2]
         val downloadedPath = File("/tmp/updates/Nuvio.AppImage").absolutePath
         assertTrue(script.contains("kill -0 4242"))
-        assertTrue(script.contains("cp -f -- '$downloadedPath' '/home/user/Apps/Nuvio.AppImage'"))
+        assertTrue(script.contains("cp -f -- '$downloadedPath' '/home/user/Apps/Nuvio.AppImage.kovelyx-staged-4242'"))
+        assertTrue(script.contains("mv -f -- '/home/user/Apps/Nuvio.AppImage.kovelyx-staged-4242' '/home/user/Apps/Nuvio.AppImage'"))
         assertTrue(script.contains("exec '/home/user/Apps/Nuvio.AppImage'"))
-        assertTrue(script.contains("else xdg-open '$downloadedPath'"))
+        assertTrue(script.contains("xdg-open '$downloadedPath'"))
     }
 
     @Test
