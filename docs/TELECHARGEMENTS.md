@@ -16,6 +16,25 @@ Si ton navigateur n'affiche pas encore le site, vérifie une fois les paramètre
 
 **Ne sélectionne pas `GitHub Actions` comme source pour cette méthode.** Le workflow Kovelyx sert à mettre les fichiers à jour dans la branche `gh-pages` ; GitHub Pages se charge ensuite de l'hébergement. Aucun serveur personnel n'est nécessaire.
 
+## Préversions Android et TV
+
+Les deux jobs Android enregistrent leurs APK sous l'onglet **Artifacts** du workflow de compilation. Les artefacts sont conservés sept jours.
+
+Le workflow [Publier les APK Kovelyx en préversion](https://github.com/anderson76389/Kovelyx/actions/workflows/android-preview.yml) tente d'ajouter un **APK mobile et un APK TV universel** à une Release clairement marquée _expérimentale_. Il refuse les APK absents ou corrompus.
+
+**Limitation constatée le 14 octobre 2026 :** GitHub a renvoyé `HTTP 403 Resource not accessible by integration` lors de la création d'une Release avec son jeton GitHub Actions, bien que `contents: write` soit déclaré. Les APK existent dans les artefacts, mais la création automatique des Releases peut nécessiter un jeton dédié.
+
+Pour débloquer les Releases en cas de persistance de ce refus :
+
+1. Dans les paramètres de ton compte GitHub, crée un **Fine-grained personal access token** limité au dépôt `anderson76389/Kovelyx`, avec la permission du dépôt **Contents: Read and write** (et les autres permissions demandées uniquement si GitHub les exige).
+2. Ouvre les paramètres de **Kovelyx → Settings → Secrets and variables → Actions → New repository secret**.
+3. Nom du secret : **`KOVELYX_RELEASE_TOKEN`**. Colle la valeur uniquement dans le champ secret GitHub, jamais dans le code ni dans une conversation.
+4. Relance la publication depuis Actions en fournissant un identifiant de compilation dont **les deux jobs Android sont verts**.
+
+La procédure en mode automatique se sert de ce secret s'il existe ; sans lui, elle réutilise le jeton GitHub Actions intégré qui peut rester bloqué par les permissions effectives de ton dépôt.
+
+**Sécurité** : ce jeton permet d'écrire dans le dépôt. Limite sa durée de validité, évite les permissions supplémentaires et révoque-le s'il fuit. Aucun secret n'est requis pour simplement télécharger un APK.
+
 ## Où seront les vrais fichiers ?
 
 - **Android TV :** `Kovelyx-TV-vX.Y.Z-beta.N.apk`
