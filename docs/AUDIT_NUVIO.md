@@ -245,7 +245,7 @@ Fichiers inspectés : 4506
 - apps/desktop/store.json:18 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
 - Autres correspondances non détaillées : 49
 
-### Configuration générale (66 correspondances)
+### Configuration générale (64 correspondances)
 
 - apps/tv/app/build.gradle.kts:495 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
@@ -282,7 +282,6 @@ Fichiers inspectés : 4506
 - apps/mobile/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
 - apps/desktop/composeApp/build.gradle.kts:497 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
 - apps/desktop/composeApp/build.gradle.kts:1192 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
-- apps/desktop/composeApp/build.gradle.kts:1344 : debMaintainer = "contact@nuvio.tv"
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -310,7 +309,6 @@ Fichiers inspectés : 4506
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:99 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:115 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:133 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
-- apps/desktop/scripts/linux/verify-linux-deb.sh:29 : expected_maintainer="Nuvio Media <contact@nuvio.tv>"
 - apps/desktop/scripts/prepare-ios-dependencies.sh:8 : engine_root="${NUVIO_ENGINE_ROOT:-${repository_root}/../nuvio-engine}"
 - apps/desktop/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
 
