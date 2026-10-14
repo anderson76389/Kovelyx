@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DIRS = ["apps/tv", "apps/mobile", "apps/desktop"]
 EXT = {".kt",".kts",".java",".xml",".json",".properties",".yml",".yaml",".swift",".sh",".toml",".gradle",".plist"}
 SKIP = {"build",".git",".gradle","node_modules",".idea",".kotlin"}
-PATTERN = re.compile(r"(?i)nuvio\.tv|nuviomedia|nuvio://|nuvio-(?:engine|account)|NUVIO_SUPABASE|NUVIO_DISCORD")
+PATTERN = re.compile(r"(?i)(?<!com\.)nuvio\.tv|nuviomedia|nuvio://|nuvio-(?:engine|account)|NUVIO_SUPABASE|NUVIO_DISCORD")
 VARIABLE = re.compile(r"\bNUVIO_[A-Z_]+\b")
 GROUPS = ["Connexions et services", "Mises à jour et releases", "Liens annexes", "Archives et tests", "Configuration générale"]
 
