@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/dependency-audit.yml'
       - 'scripts/audit-dependencies.py'
+      - 'scripts/audit-nuvio.py'
   workflow_dispatch:
 
 permissions:
@@ -31,7 +32,9 @@ jobs:
         run: |
           set -euo pipefail
           python scripts/audit-dependencies.py
+          python scripts/audit-nuvio.py
           test -s docs/AUDIT_DEPENDANCES.md
+          test -s docs/AUDIT_NUVIO.md
           echo "### Références aux services Nuvio encore présentes" >> "$GITHUB_STEP_SUMMARY"
           grep -E 'Fichiers texte examinés' docs/AUDIT_DEPENDANCES.md >> "$GITHUB_STEP_SUMMARY" || true
       - name: Conserver le rapport dans les sources
@@ -40,7 +43,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/AUDIT_DEPENDANCES.md
+          git add docs/AUDIT_DEPENDANCES.md docs/AUDIT_NUVIO.md
           if git diff --cached --quiet; then
             echo "Rapport inchangé"
           else
