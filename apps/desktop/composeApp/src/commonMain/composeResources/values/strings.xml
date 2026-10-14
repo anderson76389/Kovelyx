@@ -1818,9 +1818,9 @@
     <string name="continue_watching_up_next_episode">Next Up • S%1$d E%2$d</string>
     <string name="detail_logo_content_description">%1$s logo</string>
     <string name="details_comments_load_failed">Failed to load comments</string>
-    <string name="details_load_failed_all_addons">Could not load details from any addon.</string>
+    <string name="details_load_failed_all_addons">Could not load this title: metadata providers did not respond. Check addons or TMDB configuration.</string>
     <string name="details_networks">Networks</string>
-    <string name="details_no_addon_meta">No addon provides meta for this content.</string>
+    <string name="details_no_addon_meta">No details found. Check metadata addons or configure TMDB in settings.</string>
     <string name="download_failed">Download failed</string>
     <string name="downloads_channel_description">Shows live download progress and controls.</string>
     <string name="downloads_channel_name">Downloads</string>
