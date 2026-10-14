@@ -5,7 +5,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/build.yml'
-      - 'apps/**'
+      - 'apps/tv/**'
+      - 'apps/mobile/**'
   workflow_dispatch:
     inputs:
       platform:
@@ -98,7 +99,7 @@ jobs:
 
   desktop:
     name: Windows - Vérification des prérequis MSI
-    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'desktop' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'desktop') }}
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
