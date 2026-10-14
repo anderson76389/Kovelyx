@@ -31,6 +31,25 @@ class DesktopCollectionImportBridgeTest {
         assertEquals(null, DesktopCollectionImportBridge.pending.value)
     }
 
+    @Test
+    fun setupEnvelopeKeepsCredentialsSeparateFromCollectionsAndRequiresConfirmation() {
+        DesktopCollectionImportBridge.start()
+        val payload = """{"collections":[{"id":"one","title":"Une","folders":[]}],
+            "settings":{"tmdbKey":"tmdb-private","mdblistKey":"mdb-private","realDebridKey":"rd-private"}}"""
+        val extracted = DesktopCollectionImportBridge.extractCollectionJson(payload)
+        assertEquals("""[{"id":"one","title":"Une","folders":[]}]""", extracted)
+        assertTrue(!extracted.orEmpty().contains("private"))
+        assertEquals(
+            mapOf("tmdbKey" to "tmdb-private","mdblistKey" to "mdb-private","realDebridKey" to "rd-private"),
+            DesktopCollectionImportBridge.extractSettings(payload),
+        )
+        assertEquals(202, post("https://anderson76389.github.io", payload))
+        assertNotNull(DesktopCollectionImportBridge.pending.value)
+        DesktopCollectionImportBridge.pending.value?.let(DesktopCollectionImportBridge::discard)
+        assertEquals(422, post("https://anderson76389.github.io", """{"settings":{"tmdbKey":"bad"}}"""))
+        assertEquals(null, DesktopCollectionImportBridge.pending.value)
+    }
+
     private fun post(origin: String, body: String): Int {
         // HttpURLConnection drops Origin as a restricted header on some JDKs.
         // java.net.http sets it explicitly, like a browser CORS request.
