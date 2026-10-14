@@ -89,8 +89,8 @@ class WatchProgressIdentityTest {
                 "title": "Show",
                 "seasonNumber": 1,
                 "episodeNumber": 2,
-                "lastPositionMs": 940,
-                "durationMs": 1000,
+                "lastPositionMs": 188000,
+                "durationMs": 200000,
                 "lastUpdatedEpochMs": 100
               }]
             }
@@ -98,7 +98,9 @@ class WatchProgressIdentityTest {
         )
 
         assertEquals("show_s1e2", decoded.single().progressKey)
-        assertEquals(940L, decoded.single().lastPositionMs)
+        // 1-second placeholder streams are intentionally excluded from completion.
+        // This example is a real-duration episode at 94% progress.
+        assertEquals(188000L, decoded.single().lastPositionMs)
         assertTrue(decoded.single().isCompleted)
     }
 
