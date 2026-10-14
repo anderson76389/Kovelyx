@@ -90,6 +90,8 @@ target_include_directories(
 target_compile_features(nuvio_engine PUBLIC cxx_std_20)
 target_link_libraries(nuvio_engine PUBLIC Threads::Threads)
 if(WIN32)
+    # Prevent Windows SDK min/max macros from corrupting standard C++ expressions.
+    target_compile_definitions(nuvio_engine PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
     target_link_libraries(nuvio_engine PRIVATE ws2_32 bcrypt crypt32)
     set_target_properties(nuvio_engine PROPERTIES PREFIX "")
     if(NUVIO_ENGINE_BUILD_SHARED)
