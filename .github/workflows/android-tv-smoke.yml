@@ -1,0 +1,87 @@
+name: Tester Kovelyx TV sur émulateur Android TV
+
+on:
+  workflow_run:
+    workflows:
+      - "Compiler Kovelyx (APK et diagnostic Windows)"
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: 'Identifiant du build TV réussi à tester'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: kovelyx-tv-smoke-${{ github.event.workflow_run.id || inputs.build_run_id || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  startup:
+    name: Installer et démarrer Kovelyx TV avec la télécommande
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion == 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Vérifier la compilation et récupérer le bon APK TV
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_ID: ${{ github.event.workflow_run.id || inputs.build_run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_ID" =~ ^[0-9]+$ ]] || { echo "::error::Identifiant de build invalide"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID" > /tmp/kovelyx-run.json
+          jq -e --arg repo "$GITHUB_REPOSITORY" '
+            .head_repository.full_name == $repo and
+            .head_branch == "main" and
+            .status == "completed" and
+            .name == "Compiler Kovelyx (APK et diagnostic Windows)"
+          ' /tmp/kovelyx-run.json > /dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kovelyx-jobs.json
+          jq -e '[.jobs[] | select(.name == "Android TV - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kovelyx-jobs.json >/dev/null || {
+            echo "::error::Aucun APK TV validé dans cette compilation"; exit 1;
+          }
+          mkdir -p /tmp/kovelyx-tv-apk
+          gh run download "$BUILD_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-debug --dir /tmp/kovelyx-tv-apk
+          mapfile -d '' apks < <(find /tmp/kovelyx-tv-apk -type f -iname '*universal*.apk' -print0)
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::APK TV universel attendu : ${#apks[@]} trouvés"; exit 1; }
+          unzip -tq "${apks[0]}" > /dev/null
+          echo "APK TV valide : ${apks[0]}"
+      - name: Accès KVM
+        run: |
+          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+      - name: Essai sur Android TV 34
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: android-tv
+          arch: x86_64
+          profile: tv_1080p
+          cores: 2
+          ram-size: 3072M
+          heap-size: 512M
+          disk-size: 6144M
+          disable-animations: true
+          script: |
+            adb install -r "$(find /tmp/kovelyx-tv-apk -type f -iname '*universal*.apk' -print -quit)"
+            adb shell monkey -p com.kovelyx.tv.debug -c android.intent.category.LEANBACK_LAUNCHER 1
+            sleep 25
+            adb shell pidof com.kovelyx.tv.debug
+            adb shell input keyevent KEYCODE_DPAD_RIGHT
+            adb shell input keyevent KEYCODE_DPAD_CENTER
+            adb shell screencap -p /sdcard/kovelyx-tv-smoke.png
+            adb pull /sdcard/kovelyx-tv-smoke.png /tmp/kovelyx-tv-smoke.png
+      - name: Sauvegarder la capture TV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-emulator-screenshot
+          path: /tmp/kovelyx-tv-smoke.png
+          if-no-files-found: ignore
+          retention-days: 30
