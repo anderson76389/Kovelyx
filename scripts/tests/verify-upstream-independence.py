@@ -56,10 +56,21 @@ ACCOUNT_ALLOW = {
     ),
 }
 
+# Référence de REJET uniquement : ce serveur historique est explicitement refusé
+# dans isOfficial() ; cette constante ne déclenche aucune requête.
+REJECT_ONLY_ALLOW = {
+    (
+        "apps/desktop/composeApp/src/commonMain/kotlin/"
+        "com/nuvio/app/core/network/ServerDiscovery.kt",
+        "https://api.nuvio.tv",
+    ),
+}
+
 # Les notices de licences/crédits doivent rester intactes.
 LEGAL_FILE_NAMES = ("license", "licence", "attribution", "provenance")
 violations: list[str] = []
 account_exceptions: list[str] = []
+rejection_only_exceptions: list[str] = []
 checked_files = 0
 
 candidate_files: list[Path] = []
@@ -88,6 +99,8 @@ for file in sorted(set(candidate_files)):
                 url = match.group(0)
                 if (relative, url) in ACCOUNT_ALLOW:
                     account_exceptions.append(f"{relative}:{line_no}")
+                elif (relative, url) in REJECT_ONLY_ALLOW and "canonicalOfficialBackend" in line:
+                    rejection_only_exceptions.append(f"{relative}:{line_no}")
                 else:
                     violations.append(f"{relative}:{line_no} : URL interdite {url}")
         if UPSTREAM_UPDATE_LITERAL.search(line):
@@ -97,6 +110,9 @@ print(f"Sources de production et build inspectés : {checked_files}")
 print(f"Exceptions temporaires pour le compte historique : {len(account_exceptions)}")
 for item in account_exceptions:
     print(f"  COMPTE SEULEMENT : {item}")
+print(f"Références d'identification d'URL interdites, sans appel réseau : {len(rejection_only_exceptions)}")
+for item in rejection_only_exceptions:
+    print(f"  REJET UNIQUEMENT : {item}")
 print(f"Connexions anciennes codées en dur hors comptes : {len(violations)}")
 for item in violations[:120]:
     print(f"  ECHEC : {item}")
