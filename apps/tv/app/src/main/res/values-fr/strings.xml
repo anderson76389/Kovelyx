@@ -2365,7 +2365,7 @@
     <string name="licenses_attributions_section_app">LICENCE DE L’APPLICATION</string>
     <string name="licenses_attributions_section_data">DONNÉES &amp; SERVICES</string>
     <string name="licenses_attributions_section_playback">LICENCES DE LECTURE ANDROID</string>
-    <string name="licenses_attributions_nuvio_title">Nuvio TV</string>
+    <string name="licenses_attributions_nuvio_title">Kovelyx — code source et licences</string>
     <string name="licenses_attributions_nuvio_body">Le code source et les conditions de licence sont disponibles dans le dépôt du projet. Distribué sous licence GNU General Public License v3.0.</string>
     <string name="licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>
     <string name="licenses_attributions_tmdb_body">Nuvio utilise l’API TMDB pour les métadonnées de films et de séries, les visuels, les bandes-annonces, la distribution, les détails de production, les collections et les recommandations. Ce produit utilise l’API TMDB mais n’est ni approuvé ni certifié par TMDB.</string>
