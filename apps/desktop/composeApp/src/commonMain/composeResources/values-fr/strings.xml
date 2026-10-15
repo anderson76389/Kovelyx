@@ -2055,7 +2055,7 @@
     <string name="collections_editor_tmdb_without_watch_providers">Identifiants des fournisseurs exclus</string>
     <string name="collections_editor_tmdb_without_watch_providers_helper">Exclure les titres disponibles chez ces fournisseurs TMDB dans la région sélectionnée.</string>
     <string name="collections_editor_tmdb_without_watch_providers_placeholder">8|337|350</string>
-    <string name="compose_about_based_on_version_format">Basé sur Nuvio %1$s</string>
+    <string name="compose_about_based_on_version_format">Version du moteur d’origine : %1$s</string>
     <string name="trailer_enter_fullscreen">Passer en plein écran</string>
     <string name="trailer_exit_fullscreen">Quitter le plein écran</string>
     <string name="player_seek_position">Position de lecture</string>
