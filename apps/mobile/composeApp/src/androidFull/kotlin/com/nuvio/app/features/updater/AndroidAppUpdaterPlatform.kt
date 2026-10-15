@@ -24,7 +24,7 @@ import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 object AndroidAppUpdaterPlatform {
-    private const val preferencesName = "nuvio_updater"
+    private const val preferencesName = "kovelyx_updater"
     private const val ignoredTagKey = "ignored_release_tag"
     private const val updateChannelKey = "update_channel"
 
