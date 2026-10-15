@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,9 +57,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
+import com.nuvio.app.isIos
+import com.nuvio.app.features.mdblist.MdbListTracker
 import com.nuvio.app.core.ui.DialogButton
 import com.nuvio.app.core.ui.DialogButtons
 import com.nuvio.app.core.ui.DialogButtonStyle
@@ -175,6 +180,9 @@ internal fun TrackingProviderCards(
     }.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var showSyncInfo by rememberSaveable { mutableStateOf(false) }
+    var showCredentialEditor by remember { mutableStateOf(false) }
+    // Refresh the content when credentials are updated by the user.
+    val credentialsRevision by KovelyxIntegrationCredentials.revision.collectAsStateWithLifecycle()
     val onSimklSyncRequested: () -> Unit = {
         scope.launch {
             WatchProgressSourceCoordinator.refreshProviderAndActiveSource(
@@ -191,6 +199,14 @@ internal fun TrackingProviderCards(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(if (isTablet) 16.dp else 12.dp),
     ) {
+        if (!isIos && KovelyxIntegrationCredentials.mobileConfigured) {
+            TextButton(
+                onClick = { showCredentialEditor = true },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Configurer les clés Trakt et MDBList")
+            }
+        }
         TraktProviderCard(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
@@ -208,6 +224,82 @@ internal fun TrackingProviderCards(
 
     if (showSyncInfo) {
         SimklSyncInfoDialog(onDismiss = { showSyncInfo = false })
+    }
+    if (showCredentialEditor && !isIos && KovelyxIntegrationCredentials.mobileConfigured) {
+        KovelyxOAuthCredentialsDialog(
+            onDismiss = { showCredentialEditor = false },
+            onSaved = {
+                TraktAuthRepository.refreshConfiguredCredentials()
+                MdbListTracker.refreshConfiguredCredentials()
+                showCredentialEditor = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun KovelyxOAuthCredentialsDialog(
+    onDismiss: () -> Unit,
+    onSaved: () -> Unit,
+) {
+    var traktId by remember { mutableStateOf(KovelyxIntegrationCredentials.mobileTraktClientId) }
+    var traktSecret by remember { mutableStateOf(KovelyxIntegrationCredentials.mobileTraktClientSecret) }
+    var mdbId by remember { mutableStateOf(KovelyxIntegrationCredentials.mobileMdbListClientId) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    DialogSurface(
+        title = "Connecter Trakt et MDBList à Kovelyx",
+        onDismissRequest = onDismiss,
+    ) {
+        Text(
+            "Utilisez vos propres identifiants d'application OAuth. Ils restent sur cet appareil Android, " +
+                "sans être transmis au dépôt GitHub. Connectez ensuite vos comptes avec les boutons.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        OutlinedTextField(
+            value = traktId,
+            onValueChange = { traktId = it; error = null },
+            label = { Text("Trakt — Client ID") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+        OutlinedTextField(
+            value = traktSecret,
+            onValueChange = { traktSecret = it; error = null },
+            label = { Text("Trakt — Client Secret") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+        OutlinedTextField(
+            value = mdbId,
+            onValueChange = { mdbId = it; error = null },
+            label = { Text("MDBList — Client ID") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+        )
+        Text(
+            "Obtenez vos identifiants sur Trakt et MDBList. " +
+                "Stockage privé local de Kovelyx, non chiffré : n'utilisez pas de clés partagées.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        DialogButtons {
+            DialogButton(text = "Annuler", onClick = onDismiss)
+            DialogButton(
+                text = "Enregistrer",
+                style = DialogButtonStyle.Primary,
+                onClick = {
+                    runCatching {
+                        check(KovelyxIntegrationCredentials.mobileConfigured) {
+                            "Le stockage local n'est pas disponible."
+                        }
+                        KovelyxIntegrationCredentials.updateMobile(traktId, traktSecret, mdbId)
+                    }.onSuccess { onSaved() }
+                        .onFailure { error = it.message ?: "Enregistrement impossible." }
+                },
+            )
+        }
     }
 }
 
