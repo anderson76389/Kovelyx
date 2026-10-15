@@ -105,15 +105,13 @@ Fichiers inspectés : 4517
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (49 correspondances)
+### Liens annexes (47 correspondances)
 
 - apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:310 : .baseUrl("https://placeholder.nuvio.tv/")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/AboutScreen.kt:162 : Uri.parse("https://nuvio.tv/privacy-policy")
 - apps/tv/local.example.properties:16 : SUPPORT_URL=https://nuvio.tv/support
 - apps/tv/local.example.properties:17 : PLAYBACK_REPORTS_BASE_URL=https://nuvio.tv/
-- apps/mobile/composeApp/build.gradle.kts:106 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
-- apps/mobile/composeApp/build.gradle.kts:120 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56 : append("nuvio://meta
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62 : fun buildDownloadsDeepLinkUrl(): String = "nuvio://downloads"
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107 : append("nuvio://external-player/infuse/$sessionId/success".encodeURLParameter())

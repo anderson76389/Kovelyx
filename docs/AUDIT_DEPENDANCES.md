@@ -125,7 +125,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia : **118**.
+Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia : **116**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -217,8 +217,6 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/store.json:277`
 - `apps/mobile/scripts/prepare-ios-dependencies.sh:25`
 - `apps/mobile/MPVKit/Package.swift:304`
-- `apps/mobile/composeApp/build.gradle.kts:106`
-- `apps/mobile/composeApp/build.gradle.kts:120`
 - `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/mobile/.github/ISSUE_TEMPLATE/config.yml:4`
 - `apps/mobile/.github/ISSUE_TEMPLATE/config.yml:7`
@@ -242,7 +240,9 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56`
-- …et 38 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
+- …et 36 autres correspondances (plafond d'affichage).
 
 ## Windows
 
