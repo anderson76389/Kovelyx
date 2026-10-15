@@ -7,7 +7,7 @@ Fichiers inspectés : 4520
 
 ## Inventaire des références à traiter
 
-### Connexions et services (110 correspondances)
+### Connexions et services (109 correspondances)
 
 - apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
 - apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
@@ -58,7 +58,6 @@ Fichiers inspectés : 4520
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2133 : <string name="custom_server_error_official_active">api.nuvio.tv 是官方伺服器，且已被選取。</string>
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2134 : <string name="custom_server_error_official_available">api.nuvio.tv 是官方伺服器。關閉此對話框並選擇「使用官方伺服器」以切換回去。</string>
 - apps/tv/local.example.properties:3 : NUVIO_SUPABASE_FALLBACK_URL=
-- apps/tv/local.example.properties:15 : SUPPORTERS_API_BASE_URL=https://nuvio.tv/
 - apps/mobile/composeApp/build.gradle.kts:325 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
 - apps/mobile/composeApp/build.gradle.kts:326 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
 - apps/mobile/composeApp/build.gradle.kts:327 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
@@ -89,7 +88,8 @@ Fichiers inspectés : 4520
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
 - apps/desktop/composeApp/build.gradle.kts:567 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
 - apps/desktop/composeApp/build.gradle.kts:568 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-- Autres correspondances non détaillées : 30
+- apps/desktop/composeApp/build.gradle.kts:569 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+- Autres correspondances non détaillées : 29
 
 ### Mises à jour et releases (8 correspondances)
 
@@ -102,12 +102,8 @@ Fichiers inspectés : 4520
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (46 correspondances)
+### Liens annexes (42 correspondances)
 
-- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
-- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/AboutScreen.kt:162 : Uri.parse("https://nuvio.tv/privacy-policy")
-- apps/tv/local.example.properties:16 : SUPPORT_URL=https://nuvio.tv/support
-- apps/tv/local.example.properties:17 : PLAYBACK_REPORTS_BASE_URL=https://nuvio.tv/
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56 : append("nuvio://meta
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62 : fun buildDownloadsDeepLinkUrl(): String = "nuvio://downloads"
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107 : append("nuvio://external-player/infuse/$sessionId/success".encodeURLParameter())

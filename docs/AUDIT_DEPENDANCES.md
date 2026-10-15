@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6783**.
+Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6778**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -29,9 +29,9 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 | `schemas.android.com` | 15 |
 | `image` | 14 |
 | `media.trakt.tv` | 14 |
+| `github.com` | 13 |
 | `simkl.com` | 13 |
 | `api.aioratings.com` | 13 |
-| `github.com` | 12 |
 | `example.test` | 12 |
 | `localhost` | 10 |
 | `image.tmdb.org` | 10 |
@@ -41,9 +41,6 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ### Références à vérifier en priorité
 
-- `apps/tv/local.example.properties:15`
-- `apps/tv/local.example.properties:16`
-- `apps/tv/local.example.properties:17`
 - `apps/tv/app/build.gradle.kts:100`
 - `apps/tv/app/build.gradle.kts:374`
 - `apps/tv/app/build.gradle.kts:406`
@@ -121,7 +118,10 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:24`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:25`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:26`
-- …et 6703 autres correspondances (plafond d'affichage).
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:27`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:28`
+- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:29`
+- …et 6698 autres correspondances (plafond d'affichage).
 
 ## Android
 
