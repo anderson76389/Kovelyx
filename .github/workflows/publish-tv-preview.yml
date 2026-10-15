@@ -1,0 +1,131 @@
+name: Publier APK Kovelyx TV testé en préversion
+
+on:
+  workflow_run:
+    workflows:
+      - "Tester Kovelyx TV sur émulateur Android TV"
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      smoke_run_id:
+        description: "Identifiant du test d'émulateur TV réussi (avec preuve)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: kovelyx-tv-releases
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Valider la preuve TV et publier l'APK universel
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Vérifier le test TV, la source et l'artefact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SMOKE_ID: ${{ github.event.workflow_run.id || inputs.smoke_run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SMOKE_ID" =~ ^[0-9]+$ ]] || { echo "::error::Identifiant de test TV invalide"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SMOKE_ID" > /tmp/smoke.json
+          jq -e --arg repo "$GITHUB_REPOSITORY" '
+            .head_repository.full_name == $repo and
+            .name == "Tester Kovelyx TV sur émulateur Android TV" and
+            .conclusion == "success" and
+            .status == "completed"
+          ' /tmp/smoke.json >/dev/null || { echo "::error::Le test TV n'est pas réussi"; exit 1; }
+          mkdir -p /tmp/kv-proof /tmp/kv-apk dist
+          gh run download "$SMOKE_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-build-proof --dir /tmp/kv-proof
+          test -s /tmp/kv-proof/kovelyx-tv-build-proof.json
+          BUILD_ID="$(jq -r '.build_run_id' /tmp/kv-proof/kovelyx-tv-build-proof.json)"
+          SOURCE_SHA="$(jq -r '.source_sha' /tmp/kv-proof/kovelyx-tv-build-proof.json)"
+          [[ "$BUILD_ID" =~ ^[0-9]+$ && "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] || exit 1
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID" > /tmp/kv-build.json
+          jq -e --arg repo "$GITHUB_REPOSITORY" --arg sha "$SOURCE_SHA" '
+            .head_repository.full_name == $repo and
+            .head_branch == "main" and
+            .head_sha == $sha and
+            .name == "Compiler Kovelyx (APK et diagnostic Windows)" and
+            .status == "completed"
+          ' /tmp/kv-build.json >/dev/null || { echo "::error::La source du build TV ne correspond pas au test"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
+          jq -e '[.jobs[] | select(.name == "Android TV - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null
+          gh run download "$BUILD_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-debug --dir /tmp/kv-apk
+          mapfile -d '' apks < <(find /tmp/kv-apk -type f -iname '*universal*.apk' -print0)
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::Un APK TV universel attendu"; exit 1; }
+          TAG="tv-preview-${SOURCE_SHA:0:12}"
+          APK_NAME="Kovelyx-TV-$TAG-universal.apk"
+          cp -- "${apks[0]}" "dist/$APK_NAME"
+          {
+            echo "SOURCE_SHA=$SOURCE_SHA"
+            echo "BUILD_ID=$BUILD_ID"
+            echo "SMOKE_ID=$SMOKE_ID"
+            echo "TAG=$TAG"
+            echo "APK_NAME=$APK_NAME"
+          } >> "$GITHUB_ENV"
+      - name: Vérifier le paquet Android TV et sa signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="dist/$APK_NAME"
+          [[ -s "$apk" && "$(stat -c '%s' "$apk")" -gt 1000000 ]] || exit 1
+          unzip -tq "$apk" >/dev/null
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose "$apk" >/dev/null
+          "$tools/aapt" dump badging "$apk" > /tmp/kv-tv-badging
+          grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging
+          grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging
+          (cd dist && sha256sum "$APK_NAME" > "$APK_NAME.sha256")
+          echo "✅ APK Android TV universel, signé et testé au démarrage sur émulateur" >> "$GITHUB_STEP_SUMMARY"
+      - name: Publier la préversion dans GitHub Releases
+        env:
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            existing="$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')"
+            if ! grep -Fxq "$APK_NAME" <<< "$existing"; then
+              gh release upload "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" --repo "$GITHUB_REPOSITORY"
+            fi
+            echo "Release TV vérifiée : $TAG" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          cat > /tmp/kv-tv-notes.md <<EOF
+          # Kovelyx TV - APK universel expérimental
+
+          - Préversion Android TV / Google TV / TV Box compatible Android 7+.
+          - APK Debug : archive, signature, package et capacité TV vérifiés.
+          - Installation, lancement et actions de télécommande testés sur émulateur Android TV.
+          - Aucun test de lecture complet, de compte ou de streaming réel garanti.
+          - Signature de test non pérenne : sauvegarder avant remplacement.
+          - Les comptes Kovelyx synchronisés seront intégrés plus tard.
+
+          Sources : $SOURCE_SHA
+          Build TV : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
+          Test émulateur : https://github.com/$GITHUB_REPOSITORY/actions/runs/$SMOKE_ID
+          Licence : https://github.com/$GITHUB_REPOSITORY/blob/main/docs/PROVENANCE.md
+          EOF
+          gh release create "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" \
+            --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" \
+            --title "Kovelyx TV — préversion $TAG" --prerelease --notes-file /tmp/kv-tv-notes.md
+          echo "✅ APK TV publié : https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
+      - name: Conserver le paquet vérifié si la Release est refusée
+        if: ${{ always() && env.APK_NAME != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-apk-verifie
+          path: |
+            dist/*.apk
+            dist/*.sha256
+          if-no-files-found: ignore
+          retention-days: 90
