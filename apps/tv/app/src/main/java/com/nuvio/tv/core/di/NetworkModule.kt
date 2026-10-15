@@ -307,7 +307,7 @@ object NetworkModule {
         moshi: Moshi
     ): Retrofit =
         Retrofit.Builder()
-            .baseUrl("https://placeholder.nuvio.tv/")
+            .baseUrl("https://example.invalid/")
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
