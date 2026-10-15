@@ -52,6 +52,9 @@ jobs:
           mapfile -d '' apks < <(find /tmp/kovelyx-tv-apk -type f -iname '*universal*.apk' -print0)
           [[ "${#apks[@]}" == 1 ]] || { echo "::error::APK TV universel attendu : ${#apks[@]} trouvés"; exit 1; }
           unzip -tq "${apks[0]}" > /dev/null
+          SOURCE_SHA="$(jq -r '.head_sha' /tmp/kovelyx-run.json)"
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+          jq -n --argjson build_run_id "$BUILD_ID" --arg source_sha "$SOURCE_SHA" '{build_run_id:$build_run_id,source_sha:$source_sha}' > /tmp/kovelyx-tv-build-proof.json
           echo "APK TV valide : ${apks[0]}"
       - name: Accès KVM
         run: |
@@ -77,6 +80,14 @@ jobs:
             adb shell input keyevent KEYCODE_DPAD_CENTER
             adb shell screencap -p /sdcard/kovelyx-tv-smoke.png
             adb pull /sdcard/kovelyx-tv-smoke.png /tmp/kovelyx-tv-smoke.png
+      - name: Enregistrer la preuve de compilation testée
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-build-proof
+          path: /tmp/kovelyx-tv-build-proof.json
+          if-no-files-found: error
+          retention-days: 90
       - name: Sauvegarder la capture TV
         if: always()
         uses: actions/upload-artifact@v4
