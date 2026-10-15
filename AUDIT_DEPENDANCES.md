@@ -125,15 +125,15 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia : **124**.
+Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **116**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `github.com` | 228 |
-| `example.com` | 169 |
+| `example.com` | 170 |
 | `www.themoviedb.org` | 110 |
-| `example.test` | 65 |
-| `schemas.android.com` | 42 |
+| `example.test` | 68 |
+| `schemas.android.com` | 47 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
 | `.` | 21 |
@@ -141,11 +141,11 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 | `api.trakt.tv` | 16 |
 | `mdblist.com` | 15 |
 | `api.aioratings.com` | 13 |
+| `backend.example.com` | 13 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
 | `simkl.com` | 12 |
 | `api.ratingposterdb.com` | 12 |
-| `backend.example.com` | 12 |
 | `pm` | 9 |
 | `img` | 9 |
 | `postersplus.example.com` | 9 |
@@ -153,12 +153,12 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 | `catalog.example` | 8 |
 | `trakt.tv` | 7 |
 | `www.youtube.com` | 6 |
+| `192.168.1.10` | 5 |
 | `a.com` | 5 |
-| `nuvio.tv` | 4 |
 | `fake.example` | 4 |
+| `v3-cinemeta.strem.io` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
-| `192.168.1.10` | 4 |
 
 ### Références à vérifier en priorité
 
@@ -217,8 +217,6 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/store.json:277`
 - `apps/mobile/scripts/prepare-ios-dependencies.sh:25`
 - `apps/mobile/MPVKit/Package.swift:304`
-- `apps/mobile/composeApp/build.gradle.kts:106`
-- `apps/mobile/composeApp/build.gradle.kts:120`
 - `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/mobile/.github/ISSUE_TEMPLATE/config.yml:4`
 - `apps/mobile/.github/ISSUE_TEMPLATE/config.yml:7`
@@ -239,10 +237,12 @@ Fichiers texte examinés : **1400** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/SettingsRootPage.kt:67`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/auth/AuthScreen.kt:776`
-- …et 44 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
+- …et 36 autres correspondances (plafond d'affichage).
 
 ## Windows
 
