@@ -76,13 +76,31 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+      - name: Tester les liens profonds Kovelyx TV
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
+      - name: Vérifier l'APK universel et son identité TV
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' apks < <(find apps/tv/app/build/outputs/apk/full/debug -maxdepth 1 -name '*universal*.apk' -print0)
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::Un seul APK universel TV attendu"; exit 1; }
+          unzip -tq "${apks[0]}" > /dev/null
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
+          "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
+          grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
+          grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging.txt
+          echo "APK Kovelyx TV universel, signé et identifié correctement" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK TV
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-tv-debug
           path: apps/tv/app/build/outputs/apk/full/debug/*.apk
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
 
   mobile:
     name: Android mobile - APK Full Debug
