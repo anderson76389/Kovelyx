@@ -16,7 +16,7 @@ object DeepLinkParser {
                 null
             }
         }
-        if (scheme != "nuvio") return null
+        // Accept old copied import links without registering the former scheme.\n        if (scheme != "kovelyx" && scheme != "nuvio") return null
 
         val host = parsedUrl.host?.lowercase().orEmpty()
         val pathSegments = parsedUrl.rawPath
