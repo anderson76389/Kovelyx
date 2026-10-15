@@ -129,7 +129,7 @@ object MetaDetailsRepository {
             val manifests = findReadyMetaManifests(type = type, id = metaLookupId)
 
             if (manifests.isEmpty()) {
-                val tmdbMeta = tryFetchTmdbFallbackMeta(type = type, id = id)
+                val tmdbMeta = tryFetchMetadataFallback(type = type, id = id, imdbLookupId = metaLookupId)
                 if (tmdbMeta != null) {
                     publishLoadedMeta(
                         requestKey = requestKey,
@@ -167,7 +167,7 @@ object MetaDetailsRepository {
                 }
             }
 
-            val tmdbMeta = tryFetchTmdbFallbackMeta(type = type, id = id)
+            val tmdbMeta = tryFetchMetadataFallback(type = type, id = id, imdbLookupId = metaLookupId)
             if (tmdbMeta != null) {
                 publishLoadedMeta(
                     requestKey = requestKey,
@@ -231,7 +231,7 @@ object MetaDetailsRepository {
             }
         }
 
-        return tryFetchTmdbFallbackMeta(type = type, id = id)?.also { result ->
+        return tryFetchMetadataFallback(type = type, id = id, imdbLookupId = metaLookupId)?.also { result ->
             if (cacheResult) {
                 cachedMetaByRequestKey[requestKey] = CachedMetaEntry(baseMeta = result)
             }
@@ -366,6 +366,20 @@ object MetaDetailsRepository {
         }
             ?.takeIf { it.isNotBlank() }
             ?: itemId
+    }
+
+    private suspend fun tryFetchMetadataFallback(
+        type: String,
+        id: String,
+        imdbLookupId: String,
+    ): MetaDetails? {
+        // Prefer the configured TMDB provider for the French description.
+        tryFetchTmdbFallbackMeta(type, id)?.let { return it }
+
+        // A public IMDb fallback keeps common movie/series details usable even
+        // when there are no installed metadata addons and no personal TMDB key.
+        // This is intentionally last resort: it never replaces the user's addons.
+        return PublicMetadataFallback.fetch(type, imdbLookupId)
     }
 
     private suspend fun tryFetchTmdbFallbackMeta(type: String, id: String): MetaDetails? =
