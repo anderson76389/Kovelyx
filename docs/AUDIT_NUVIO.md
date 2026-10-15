@@ -91,16 +91,13 @@ Fichiers inspectés : 4520
 - apps/desktop/composeApp/build.gradle.kts:568 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
 - Autres correspondances non détaillées : 30
 
-### Mises à jour et releases (11 correspondances)
+### Mises à jour et releases (8 correspondances)
 
-- apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/LicensesAttributionsScreen.kt:68 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioTV"
 - apps/mobile/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.5/Libmpv.xcframework.zip",
-- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
 - apps/mobile/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 - apps/desktop/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.4/Libmpv.xcframework.zip",
 - apps/desktop/composeApp/src/androidFull/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:12 : owner = "NuvioMedia",
 - apps/desktop/composeApp/src/androidPlaystore/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:15 : owner = "NuvioMedia",
-- apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:51 : private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.ios.kt:15 : owner = "NuvioMedia",
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"

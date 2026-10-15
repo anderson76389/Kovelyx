@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6785**.
+Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6784**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -121,11 +121,11 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:24`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:25`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:26`
-- …et 6705 autres correspondances (plafond d'affichage).
+- …et 6704 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **116**.
+Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **115**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -237,16 +237,16 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/settings/LicensesAttributionsPage.kt:50`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
-- …et 36 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
+- …et 35 autres correspondances (plafond d'affichage).
 
 ## Windows
 
-Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia : **126**.
+Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia : **125**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -363,7 +363,7 @@ Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59`
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- …et 46 autres correspondances (plafond d'affichage).
+- …et 45 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 
