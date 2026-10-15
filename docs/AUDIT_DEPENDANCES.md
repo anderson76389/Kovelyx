@@ -125,7 +125,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **113**.
+Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **111**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -228,25 +228,25 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
-- …et 33 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
+- …et 31 autres correspondances (plafond d'affichage).
 
 ## Windows
 
-Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia : **125**.
+Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia : **121**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -346,8 +346,6 @@ Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/.github/workflows/desktop-release.yml:941`
 - `apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17`
 - `apps/desktop/scripts/linux/test-linux-deb-tools.sh:30`
-- `apps/desktop/composeApp/src/androidPlaystore/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:15`
-- `apps/desktop/composeApp/src/androidFull/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.android.kt:12`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:39`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:40`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
@@ -363,7 +361,9 @@ Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59`
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- …et 45 autres correspondances (plafond d'affichage).
+- `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.ios.kt:15`
+- `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:50`
+- …et 41 autres correspondances (plafond d'affichage).
 
 ## Dépendances natives manquantes
 
