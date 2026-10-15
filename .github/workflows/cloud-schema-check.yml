@@ -1,0 +1,30 @@
+name: Vérifier la base de comptes Kovelyx
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/kovelyx-cloud/**'
+      - '.github/workflows/cloud-schema-check.yml'
+  pull_request:
+    paths:
+      - 'services/kovelyx-cloud/**'
+      - '.github/workflows/cloud-schema-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Garde-fous SQL et script de sauvegarde
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier les politiques RLS et le modèle de données
+        run: python3 services/kovelyx-cloud/tests/check_contract.py
+      - name: Vérifier la syntaxe du script de sauvegarde
+        run: bash -n services/kovelyx-cloud/scripts/backup-database.sh
+      - name: Signaler les tests restants avant la mise en service
+        run: echo 'Contrôles statiques réussis. Aucun serveur déployé et aucun test runtime RLS effectué.'
