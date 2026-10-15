@@ -102,9 +102,8 @@ Fichiers inspectés : 4520
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (47 correspondances)
+### Liens annexes (46 correspondances)
 
-- apps/tv/app/src/main/java/com/nuvio/tv/core/di/NetworkModule.kt:310 : .baseUrl("https://placeholder.nuvio.tv/")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/account/AuthQrSignInScreen.kt:689 : context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://nuvio.tv/terms")))
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/settings/AboutScreen.kt:162 : Uri.parse("https://nuvio.tv/privacy-policy")
 - apps/tv/local.example.properties:16 : SUPPORT_URL=https://nuvio.tv/support
