@@ -158,7 +158,7 @@ object ServerDiscoveryService {
                     url = discoveryUrl,
                     headers = mapOf(
                         "Accept" to "application/json",
-                        "User-Agent" to "Mobile/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
+                        "User-Agent" to "Kovelyx-Mobile/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
                     ),
                     body = "",
                     maxResponseBodyBytes = maxDocumentBytes + 1,
