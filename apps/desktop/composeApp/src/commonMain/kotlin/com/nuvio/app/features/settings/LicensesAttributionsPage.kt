@@ -48,7 +48,7 @@ private const val PremiumizeUrl = "https://www.premiumize.me"
 private const val TorboxUrl = "https://torbox.app"
 private const val MdbListUrl = "https://mdblist.com"
 private const val IntroDbUrl = "https://introdb.app/"
-private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioMobile"
+private const val KovelyxLegalUrl = "https://github.com/anderson76389/Kovelyx/blob/main/docs/PROVENANCE.md"
 private const val DesktopRepositoryUrl = "https://github.com/anderson76389/Kovelyx"
 private const val MpvUrl = "https://github.com/mpv-player/mpv"
 private const val MpvKitUrl = "https://github.com/mpvkit/MPVKit"
@@ -392,10 +392,10 @@ private fun attributionItems(): List<AttributionItem> = listOf(
 
 internal fun appLicenseItem(): LicenseItem =
     LicenseItem(
-        titleRes = if (isDesktop) Res.string.app_brand_name else Res.string.settings_licenses_attributions_nuvio_title,
+        titleRes = Res.string.app_brand_name,
         bodyRes = Res.string.settings_licenses_attributions_nuvio_body,
         licenseRes = Res.string.settings_licenses_attributions_nuvio_license,
-        link = if (isDesktop) DesktopRepositoryUrl else NuvioRepositoryUrl,
+        link = KovelyxLegalUrl,
     )
 
 internal fun platformLicenseItem(): LicenseItem =
