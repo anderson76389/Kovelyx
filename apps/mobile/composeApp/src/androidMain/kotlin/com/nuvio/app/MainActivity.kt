@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.SystemBarStyle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.nuvio.app.core.build.KovelyxIntegrationCredentials
 import com.nuvio.app.core.auth.AuthStorage
 import com.nuvio.app.core.network.ServerConfigurationStorage
 import com.nuvio.app.core.diagnostics.SentryInitializer
@@ -84,6 +85,25 @@ open class MainActivity : AppCompatActivity() {
             ),
         )
         ThemeSettingsStorage.initialize(applicationContext)
+        // Identifiants de l'application OAuth choisis par l'utilisateur : stockage privé local.
+        // Aucune clé d'un autre projet n'est incluse dans l'APK.
+        val oauthPreferences = applicationContext.getSharedPreferences(
+            "kovelyx_oauth_credentials", MODE_PRIVATE,
+        )
+        KovelyxIntegrationCredentials.initializeMobile(
+            clientId = oauthPreferences.getString("trakt_client_id", "").orEmpty(),
+            clientSecret = oauthPreferences.getString("trakt_client_secret", "").orEmpty(),
+            mdbListId = oauthPreferences.getString("mdblist_client_id", "").orEmpty(),
+            onSave = { traktId, traktSecret, mdblistId ->
+                check(
+                    oauthPreferences.edit()
+                        .putString("trakt_client_id", traktId)
+                        .putString("trakt_client_secret", traktSecret)
+                        .putString("mdblist_client_id", mdblistId)
+                        .commit()
+                ) { "Impossible de sauvegarder les identifiants OAuth sur cet appareil." }
+            },
+        )
         AppIconPlatform.initialize(applicationContext)
         SentrySettingsStorage.initialize(applicationContext)
         SentryInitializer.start(application)
