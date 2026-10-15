@@ -12,7 +12,7 @@
 
 [**⬇️ Télécharger Windows et Android**](#-télécharger-kovelyx) · [**📦 GitHub Releases**](https://github.com/anderson76389/Kovelyx/releases) · [**🌐 Site officiel**](https://anderson76389.github.io/Kovelyx/) · [**📖 Guide PC**](./docs/PC.md)
 
-[![Installer Kovelyx Windows](https://img.shields.io/badge/⬇_WINDOWS-Installer_EXE-754CE8?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases/download/v0.1.247-alpha/Kovelyx-Windows-Setup-v0.1.247-alpha.exe)
+[![Installer Kovelyx Windows](https://img.shields.io/badge/⬇_WINDOWS-Installer_EXE-754CE8?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases/download/v0.1.309-alpha/Kovelyx-Windows-Setup-v0.1.309-alpha.exe)
 [![APK Kovelyx Android](https://img.shields.io/badge/⬇_ANDROID-APK_universel-754CE8?style=for-the-badge&logo=android&logoColor=white)](https://github.com/anderson76389/Kovelyx/actions/runs/38761977979/artifacts/11986042090)
 [![GPL--3.0](https://img.shields.io/badge/Licence-GPLv3-49435C?style=for-the-badge)](./docs/PROVENANCE.md)
 
@@ -43,8 +43,8 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 <td width="50%" valign="top">
 <h3>🪟 Windows 10 / 11 — x64</h3>
 <p><strong>Installateur EXE en téléchargement direct depuis GitHub Releases.</strong></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/download/v0.1.247-alpha/Kovelyx-Windows-Setup-v0.1.247-alpha.exe"><strong>⬇️ Télécharger Kovelyx Windows (.exe)</strong></a></p>
-<p>Version vérifiée : <code>v0.1.247-alpha</code> · env. 192 Mo · <a href="https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.247-alpha">Release Windows</a>.</p>
+<p><a href="https://github.com/anderson76389/Kovelyx/releases/download/v0.1.309-alpha/Kovelyx-Windows-Setup-v0.1.309-alpha.exe"><strong>⬇️ Télécharger Kovelyx Windows (.exe)</strong></a></p>
+<p>Version vérifiée : <code>v0.1.309-alpha</code> · env. 192 Mo · <a href="https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha">Release Windows</a>.</p>
 </td>
 <td width="50%" valign="top">
 <h3>📱 Android 7+ — APK universel</h3>
@@ -59,14 +59,14 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 
 **📦 [Voir toutes les GitHub Releases](https://github.com/anderson76389/Kovelyx/releases) · 🌐 [Site de téléchargement](https://anderson76389.github.io/Kovelyx/) · 🔧 [Débloquer la publication des APK](./docs/RELEASES.md)**
 
-Windows possède également des formats secondaires **MSI** et **ZIP portable**, disponibles sur la [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.247-alpha). Ils ne constituent pas de nouvelles plateformes. La version TV n'est pas distribuée ici. Les anciens fichiers Linux restent dans l'historique des anciennes Releases.
+Windows possède également des formats secondaires **MSI** et **ZIP portable**, disponibles sur la [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha). Ils ne constituent pas de nouvelles plateformes. La version TV n'est pas distribuée ici. Les anciens fichiers Linux restent dans l'historique des anciennes Releases.
 
 **Vérifications réelles :** Windows dispose d'un build automatisé réussi ; Android a passé la compilation, la vérification de signature et d'identifiant, l'installation et le démarrage sur émulateur Android 34. **Cela ne garantit pas** toutes les fonctions multimédias, les connexions ou la compatibilité de chaque appareil. Le client Android n'est pas encore entièrement identique au client Windows.
 
 ### 🪟 Installation Windows
 
 1. Télécharge le **Setup.exe** ci-dessus depuis GitHub Releases (pas besoin de décompresser un ZIP).
-2. Vérifie l'origine GitHub et le [SHA-256 publié](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.247-alpha) avant de lancer le programme.
+2. Vérifie l'origine GitHub et le [SHA-256 publié](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha) avant de lancer le programme.
 3. La version portable exige d'extraire l'intégralité du ZIP ; les bibliothèques et le runtime restent nécessaires.
 
 ### 📱 Installation Android
