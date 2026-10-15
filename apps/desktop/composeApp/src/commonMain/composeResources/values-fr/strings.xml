@@ -482,7 +482,7 @@
     <string name="settings_licenses_attributions_section_app">LICENCE DE L’APP</string>
     <string name="settings_licenses_attributions_section_data">DONNÉES ET SERVICES</string>
     <string name="settings_licenses_attributions_section_playback">LICENCE DE LECTURE</string>
-    <string name="settings_licenses_attributions_nuvio_title">Nuvio Mobile</string>
+    <string name="settings_licenses_attributions_nuvio_title">Kovelyx — code source et licences</string>
     <string name="settings_licenses_attributions_nuvio_body">Composants issus du projet open source d’origine : licences et informations de provenance consultables dans le dépôt. Les obligations de crédit sont conservées.</string>
     <string name="settings_licenses_attributions_nuvio_license">Distribué sous la licence GNU General Public License v3.0.</string>
     <string name="settings_licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>
