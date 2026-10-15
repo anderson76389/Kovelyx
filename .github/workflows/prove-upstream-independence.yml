@@ -1,0 +1,148 @@
+name: Prouver l'indépendance de compilation sans serveurs Nuvio
+
+# Ce workflow produit des preuves de compilation/références statiques,
+# PAS une certification réseau du comportement sur appareils réels.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/prove-upstream-independence.yml'
+      - 'scripts/tests/verify-upstream-independence.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Codes actifs et configuration - aucun endpoint Nuvio hors comptes
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Vérifier toutes les sources et les références runtime
+        run: |
+          python3 scripts/tests/verify-upstream-independence.py
+          python3 scripts/audit-mobile-independence.py
+          python3 scripts/tests/audit-tv-nuvio-urls.py
+      - name: Consigner la limite de la preuve
+        run: |
+          {
+            echo '### Périmètre du contrôle statique'
+            echo '- Rejet des anciennes URLs explicites dans le code actif hors comptes historiques.'
+            echo '- Les packages et attributions historiques ne sont pas des appels réseau.'
+            echo '- Les URLs calculées, dépendances natives et services tiers nécessitent un test en cours d’exécution.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  mobile-blackout:
+    name: Android mobile - compiler avec les domaines Nuvio bloqués
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Interdire l'accès aux anciens serveurs et git clones NuvioMedia
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
+          echo "DNS Nuvio redirigé localement ; clones Git directs vers NuvioMedia redirigés vers un domaine invalide."
+      - name: Construire Android mobile sans l'amont Nuvio
+        working-directory: apps/mobile
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process
+      - name: Conserver la preuve de compilation
+        if: success()
+        run: |
+          echo '### APK Android mobile : compilation réussie, accès aux domaines Nuvio neutralisé dans ce runner' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Ne prouve pas encore le fonctionnement hors ligne des comptes ou des bibliothèques natives.' >> "$GITHUB_STEP_SUMMARY"
+
+  tv-blackout:
+    name: Android TV - compiler avec les domaines Nuvio bloqués
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Interdire l'accès aux anciens serveurs et git clones NuvioMedia
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
+      - name: Construire Android TV sans l'amont Nuvio
+        working-directory: apps/tv
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 \
+            -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process
+      - name: Conserver la preuve de compilation
+        if: success()
+        run: |
+          echo '### APK TV : compilation réussie, accès aux domaines Nuvio neutralisé dans ce runner' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Ne prouve pas encore le fonctionnement des vidéos/P2P dans un appareil TV réel.' >> "$GITHUB_STEP_SUMMARY"
+
+  windows-blackout:
+    name: Windows - tests Kotlin avec les domaines Nuvio bloqués
+    needs: static
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Bloquer les domaines Nuvio sur le runner Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
+          $domains = @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv')
+          foreach ($domain in $domains) {
+            Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $domain"
+            Add-Content -LiteralPath $hostsFile -Value "::1 $domain"
+          }
+          git config --global url.https://blocked-upstream.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/
+          if (-not (Select-String -Quiet -SimpleMatch '127.0.0.1 api.nuvio.tv' -Path $hostsFile)) {
+            throw 'Le domaine amont reste accessible : test non valable.'
+          }
+      - name: Exécuter les tests Desktop sans Nuvio
+        shell: pwsh
+        working-directory: apps/desktop
+        run: |
+          .\gradlew.bat :composeApp:desktopTest --no-daemon --max-workers=2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Conserver la preuve de tests Desktop
+        if: success()
+        shell: pwsh
+        run: |
+          '### Windows : tests Kotlin réussis avec les domaines Nuvio neutralisés dans le runner' >> $env:GITHUB_STEP_SUMMARY
+          'La compilation de l’EXE complet et un essai réseau de bout en bout restent nécessaires.' >> $env:GITHUB_STEP_SUMMARY
