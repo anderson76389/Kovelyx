@@ -9,7 +9,7 @@ Les deux projets partagent **1 590 fichiers de même chemin**, dont **1 307 iden
 | Domaine | Windows | Android téléphone | Niveau de vérification |
 |---|---|---|---|
 | Identité visuelle Kovelyx | Oui | Logos et splash comparés automatiquement | Audit CI |
-| Français | Traductions intégrées | Traductions françaises Windows reprises sur Android | Vérification de couverture |
+| Français | Traductions intégrées | Android mobile couvre toutes les clés de base vérifiées (2 410 / 2 410) ; TV dispose de 3 144 / 3 144 clés françaises | Contrôle statique et CI ; textes dynamiques à tester |
 | Installateur et mises à jour | EXE dans GitHub Releases | APK généré via Github Actions ; versions publiées historiquement | Publication à revérifier ; signature stable non configurée |
 | Profils | Sélection, fond/avatar **local** via explorateur de fichiers | Profils et URLs d'image, mais pas encore le sélecteur de fichier local équivalent | **Écart réel** |
 | Trakt/MDBList | Gestion OAuth / identifiants | Paramètres OAuth locaux ajoutés | Code compilé ; connexion réelle à tester |
@@ -29,8 +29,8 @@ Les deux projets partagent **1 590 fichiers de même chemin**, dont **1 307 iden
 | TV Leanback | `LEANBACK_LAUNCHER`, mode sans écran tactile requis |
 | Deep links | `kovelyx://` déclaré dans le manifeste ; parseur accepte également les anciennes URLs importées |
 | APK universel | Configuration Gradle `isUniversalApk = true`, architectures armeabi-v7a, arm64-v8a, x86, x86_64 |
-| Tests CI | Vérification ZIP, signature et nom Android ; test unitaire des liens Kovelyx ; émulateur Android TV, démarrage et touches de télécommande configurés |
-| Traductions TV | **127 textes français complémentaires** repris depuis le client Android. **435 chaînes encore sans traduction française dédiée** dans le fichier TV de référence ; des textes visibles historiques contiennent encore la marque d'origine |
+| Tests CI | Build TV et test Kotlin réussis sur une révision de référence ; émulateur Google TV et touches de télécommande validés pour la première préversion TV publiée. Les changements ultérieurs exigent un nouveau build |
+| Traductions TV | **3 144 chaînes françaises sur 3 144 chaînes par défaut**, sans clé manquante, avec contrôle CI dédié. Les textes de compte historique et certaines traductions de bibliothèques externes doivent encore être évalués en situation |
 | Lecteur/streaming | Build seul insuffisant : des tests avec des sources autorisées, audio, HDR, sous-titres, 4K et performances sont nécessaires |
 | Comptes | En attente comme demandé ; pas de promesse de sync Kovelyx active |
 
@@ -47,9 +47,9 @@ Les APK Debug GitHub Actions ne disposent pas encore d'une clé de signature sta
 
 ## Priorités avant de déclarer la parité fonctionnelle
 
-1. Stabiliser le pipeline TV : compiler, installer sur émulateur, vérifier le démarrage et le D-pad, puis publier le test sous **Releases**.
+1. **Réalisé sur la préversion initiale :** compiler, installer sur émulateur, vérifier le démarrage et le D-pad, puis publier l’APK dans **Releases**. À répéter pour les changements ultérieurs.
 2. Réaliser une première session réelle sur une TV Box (démarrage, navigation télécommande, codecs, sous-titres, réseaux).
-3. Terminer les 435 traductions TV manquantes et les textes visibles d'origine, sans retirer les licences GPL nécessaires.
+3. **Couverture française des ressources TV terminée (3 144 / 3 144)** ; poursuivre la relecture de qualité linguistique, les textes dynamiques non issus des ressources et les comptes historiques, en conservant les licences.
 4. Rendre les profils locaux Android équivalents à Windows, avec sélecteur de photos/fonds local qui sauvegarde les médias correctement.
 5. Unifier la politique de fournisseurs debrid et respecter les choix AllDebrid et Real-Debrid, en s'appuyant sur des implémentations **réelles**.
 6. Ajouter une signature pérenne pour les APK avant de promettre des mises à jour Android TV ou téléphone sans perte de données.
