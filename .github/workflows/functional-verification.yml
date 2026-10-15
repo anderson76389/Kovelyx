@@ -1,0 +1,78 @@
+name: Tester les fonctions Kotlin Android TV et Android mobile
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/functional-verification.yml'
+      - 'apps/mobile/composeApp/src/**'
+      - 'apps/tv/app/src/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-functional-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tv-unit:
+    name: Android TV - ensemble des tests unitaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Exécuter tous les tests TV (pas seulement les liens)
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Enregistrer le rapport des tests TV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-complete-unit-test-report
+          path: apps/tv/app/build/reports/tests/testFullDebugUnitTest/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  mobile-unit:
+    name: Android mobile - tests JVM de la cible Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Identifier et exécuter les tests Android Host
+        working-directory: apps/mobile
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :composeApp:tasks --all -Pnuvio.android.distribution=full --no-daemon > /tmp/kovelyx-mobile-tasks.txt
+          if grep -Eq '^testAndroidHostTest([[:space:]]|$)' /tmp/kovelyx-mobile-tasks.txt; then
+            ./gradlew :composeApp:testAndroidHostTest -Pnuvio.android.distribution=full --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process
+          else
+            echo "::error::Tâche testAndroidHostTest introuvable ; le contrôle mobile ne peut être annoncé comme réussi."
+            grep -i 'hostTest' /tmp/kovelyx-mobile-tasks.txt || true
+            exit 1
+          fi
+      - name: Enregistrer les rapports Android Host
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-mobile-android-host-test-report
+          path: apps/mobile/composeApp/build/reports/tests/
+          if-no-files-found: ignore
+          retention-days: 30
