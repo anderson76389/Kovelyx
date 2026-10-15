@@ -1,10 +1,12 @@
-name: Vérifier toutes les traductions françaises PC
+name: Vérifier les traductions françaises Windows et Android
 
 on:
   pull_request:
     paths:
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
+      - 'apps/mobile/composeApp/src/commonMain/composeResources/values/**'
+      - 'apps/mobile/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'scripts/tests/check-french-resources.py'
       - '.github/workflows/validate-french.yml'
   push:
@@ -12,6 +14,8 @@ on:
     paths:
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
+      - 'apps/mobile/composeApp/src/commonMain/composeResources/values/**'
+      - 'apps/mobile/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'scripts/tests/check-french-resources.py'
       - '.github/workflows/validate-french.yml'
   workflow_dispatch:
@@ -21,7 +25,7 @@ permissions:
 
 jobs:
   check:
-    name: Couverture française à 100 %
+    name: Couverture française PC et Android à 100 %
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -31,3 +35,4 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/tests/check-french-resources.py
+          python3 scripts/tests/check-french-resources.py --mobile
