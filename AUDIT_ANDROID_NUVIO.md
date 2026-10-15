@@ -13,7 +13,7 @@ Le contrôle `scripts/audit-mobile-independence.py` a réussi sur le dépôt Kov
 | URL `github.com/NuvioMedia/NuvioMobile` | **1**, conservée pour l'**attribution juridique** de la source d'origine |
 | Vérification des mises à jour | Pointe vers les **GitHub Releases du dépôt Kovelyx** |
 | Moteur Android | AAR `apps/mobile/composeApp/libs/lib-nuvio-engine-android-0.1.4.aar` conservé **localement**, avec des sources de moteur sauvegardées dans `vendor/engine` |
-| Nom du projet de compilation Gradle Android | `Kovelyx` |
+| Nom interne du projet Gradle Android | `Nuvio` **conservé uniquement pour le namespace des ressources Compose générées** ; l’application installée et ses identifiants sont Kovelyx. Son renommage isolé provoquait une erreur de compilation. |
 | Bibliothèques publiées par Nuvio sur un serveur distant obligatoires à l'exécution | Aucune **démontrée par l'inspection des sources Kotlin**, mais un test réseau de l'APK reste requis |
 
 Le test CI échouera désormais si une URL Nuvio non autorisée est ajoutée à du code Kotlin compilé. Il ne fait aucune requête vers Nuvio ; c'est une analyse de fichiers.
