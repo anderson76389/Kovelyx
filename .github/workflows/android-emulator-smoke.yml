@@ -38,7 +38,7 @@ jobs:
           if [ -e /dev/kvm ]; then
             sudo chmod 666 /dev/kvm
           fi
-      - name: Tester le démarrage réel sous Android 35
+      - name: Tester le démarrage réel sous Android 34
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -50,10 +50,10 @@ jobs:
           heap-size: 512M
           disable-animations: false
           script: |
-            set -e
-            apk="$(find /tmp/kv-apk -type f -name '*.apk' -print -quit)"
-            test -n "$apk"
-            adb install -r "$apk"
+            # android-emulator-runner exécute chaque ligne dans un shell indépendant.
+            # Ne jamais utiliser une variable définie sur une ligne précédente.
+            test -n "$(find /tmp/kv-apk -type f -name '*.apk' -print -quit)"
+            adb install -r "$(find /tmp/kv-apk -type f -name '*.apk' -print -quit)"
             adb shell monkey -p com.kovelyx.mobile.debug -c android.intent.category.LAUNCHER 1
             sleep 20
             adb shell pidof com.kovelyx.mobile.debug
