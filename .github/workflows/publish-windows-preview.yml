@@ -48,6 +48,6 @@ jobs:
       - name: Publier une préversion basée sur un build réussi
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
           BUILD_RUN_ID: ${{ github.event.workflow_run.id || inputs.build_run_id || '' }}
         run: bash scripts/publish-windows-preview.sh
