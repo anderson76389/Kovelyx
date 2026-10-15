@@ -21,10 +21,12 @@ L'APK Android est une **seule archive APK pour plusieurs architectures**, car le
 
 Le workflow [Publier APK Android](../.github/workflows/publish-android-debug.yml) a vérifié le fichier et sa signature, mais GitHub a refusé l'appel de création de Release avec **HTTP 403 (Resource not accessible by integration)**. Ce problème concerne l'autorisation du jeton Actions et non la validité de l'APK. **L'APK n'a donc pas été publié directement dans une Release.**
 
+**Nouveau test du 15 octobre 2026 :** même après activation des droits de publication annoncée, une nouvelle exécution du workflow a encore renvoyé **HTTP 403** ([journal GitHub Actions](https://github.com/anderson76389/Kovelyx/actions/runs/38785905465)). Le contrôle de l'APK reste vert, mais le job de publication est désormais **rouge** quand la Release échoue, plutôt que de déclarer un faux succès.
+
 Pour débloquer les prochaines publications automatiques, une personne administratrice du dépôt doit choisir **l'une** de ces solutions :
 
-1. Dans le dépôt GitHub, ouvrir **Settings → Actions → General → Workflow permissions** et, si l'option est disponible, sélectionner **Read and write permissions**, puis **Save**. Certaines organisations verrouillent cette option ; dans ce cas, il faut leur administrateur.
-2. Sinon, créer un **fine-grained personal access token** autorisé sur **ce dépôt uniquement**, avec **Contents: Read and write**. L'ajouter à **Settings → Secrets and variables → Actions → New repository secret**, avec le nom exact `KOVELYX_RELEASE_TOKEN`. Ne jamais commiter ni transmettre ce jeton dans une conversation ou dans le code.
+1. Vérifier la configuration **Settings → Actions → General → Workflow permissions → Read and write permissions**. Cette option a été activée, mais elle **n'a pas suffi** lors du dernier test : passer à la solution suivante si le 403 persiste.
+2. Créer un **fine-grained personal access token** dans les paramètres de son compte GitHub, avec accès au dépôt **anderson76389/Kovelyx uniquement** et permission **Contents: Read and write** ; choisir une date d'expiration raisonnable. Enregistrer sa valeur dans **Kovelyx → Settings → Secrets and variables → Actions → New repository secret**, nom exact `KOVELYX_RELEASE_TOKEN`. Ne jamais placer cette valeur dans le dépôt ou la conversation. Une fois configuré, relancer le workflow : **Actions → Préparer APK Android et publier dans Releases si autorisé → Run workflow**, en laissant l'identifiant vide.
 
 Une fois l'autorisation réglée :
 
