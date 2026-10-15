@@ -1,0 +1,26 @@
+name: Vérifier la parité visuelle Windows et Android
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/drawable/**'
+      - 'scripts/audit-kovelyx-android.py'
+      - '.github/workflows/audit-android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Logos, traductions, liens et noms Android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contrôler les ressources distribuées
+        run: python scripts/audit-kovelyx-android.py
