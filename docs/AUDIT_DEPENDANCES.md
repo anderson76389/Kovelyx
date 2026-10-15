@@ -125,7 +125,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **115**.
+Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **113**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -238,11 +238,11 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
-- …et 35 autres correspondances (plafond d'affichage).
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
+- …et 33 autres correspondances (plafond d'affichage).
 
 ## Windows
 

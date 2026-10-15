@@ -102,10 +102,8 @@ Fichiers inspectés : 4520
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (42 correspondances)
+### Liens annexes (40 correspondances)
 
-- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:56 : append("nuvio://meta
-- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/deeplink/AppUrlBridge.kt:62 : fun buildDownloadsDeepLinkUrl(): String = "nuvio://downloads"
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:107 : append("nuvio://external-player/infuse/$sessionId/success".encodeURLParameter())
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/player/InfusePlayback.kt:109 : append("nuvio://external-player/infuse/$sessionId/error".encodeURLParameter())
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13 : parseAppDeepLink("nuvio://meta
