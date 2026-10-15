@@ -129,7 +129,7 @@ Kovelyx/
 
 **Ne supprime pas les dossiers internes du logiciel installé** : la version Windows a besoin de son runtime, même si tu n'as téléchargé qu'un `.exe`.
 
-## 🧭 Feuille de route — Windows et Android
+## 🧭 Feuille de route — Windows, Android et TV Box
 
 - [x] Identité Kovelyx, branding du projet et site officiel
 - [x] Compilation Windows de l'installateur EXE, du MSI et du portable ZIP
@@ -140,7 +140,9 @@ Kovelyx/
 - [ ] Déployer et tester **Kovelyx Cloud** (compte unique, profils et synchronisation multi-appareils) avant d'activer l'inscription — [plan](./docs/COMPTE_UNIQUE.md) · [migration SQL](./services/kovelyx-cloud/)
 - [x] APK Android universel compilé, signé et lancé sur émulateur
 - [ ] Publier les nouveaux APK Android dans Releases dès que les droits GitHub le permettent
-- [ ] Finaliser la parité Windows / Android avant Android TV
+- [ ] Finaliser la parité fonctionnelle Windows / Android ([audit](./docs/ETAT_ANDROID_ET_TV.md))
+- [x] Préparer l'APK TV Box : identifiant Kovelyx, liens profonds, traductions partielles et compilation CI
+- [ ] Valider le démarrage et la télécommande sur émulateur Google TV avant une Release TV
 - [ ] Réduire les dépendances héritées ; documenter les licences natives avant publication stable
 - [ ] Releases signées et vérifiées, avec mises à jour compatibles
 
