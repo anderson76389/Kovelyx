@@ -65,7 +65,7 @@ import com.nuvio.tv.core.cloud.PremiumizeCloudLibraryPosterUrl
 import com.nuvio.tv.core.cloud.TorboxCloudLibraryPosterUrl
 import com.nuvio.tv.core.cloud.cloudLibraryDisplayArtworkUrl
 
-private const val NuvioRepositoryUrl = "https://github.com/NuvioMedia/NuvioTV"
+private const val KovelyxLegalUrl = "https://github.com/anderson76389/Kovelyx/blob/main/docs/PROVENANCE.md"
 private const val TmdbUrl = "https://www.themoviedb.org"
 private const val TraktUrl = "https://trakt.tv"
 private const val SimklUrl = "https://simkl.com"
@@ -367,7 +367,7 @@ private fun rememberUrlSvgPainter(url: String): Painter {
 private fun appLicenseItem() = LicenseAttributionItem(
     title = stringResource(R.string.licenses_attributions_nuvio_title),
     body = stringResource(R.string.licenses_attributions_nuvio_body),
-    url = NuvioRepositoryUrl
+    url = KovelyxLegalUrl
 )
 
 @Composable
