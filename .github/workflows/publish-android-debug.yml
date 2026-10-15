@@ -12,6 +12,10 @@ on:
       - "Compiler Kovelyx (APK et diagnostic Windows)"
     types: [completed]
     branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-android-debug.yml'
 
 permissions:
   actions: read
@@ -24,7 +28,7 @@ concurrency:
 jobs:
   publish:
     name: Vérifier et publier uniquement l'APK mobile de test
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion != 'cancelled') }}
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion == 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -95,7 +99,11 @@ jobs:
         run: |
           set -euo pipefail
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "La préversion existe déjà."
+            # A tag alone does not guarantee that its APK is downloadable.
+            if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fxq "$APK_NAME"; then
+              gh release upload "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" --repo "$GITHUB_REPOSITORY"
+            fi
+            echo "Préversion confirmée avec APK : $TAG."
             echo "RELEASE_PUBLISHED=true" >> "$GITHUB_ENV"
             exit 0
           fi
@@ -120,10 +128,11 @@ jobs:
             echo "RELEASE_PUBLISHED=false" >> "$GITHUB_ENV"
             echo "::warning::Création de Release refusée. Activer Settings > Actions > General > Workflow permissions > Read and write permissions, ou renseigner le secret KOVELYX_RELEASE_TOKEN (permission Contents: Read and write)."
             echo "⚠️ **APK validé mais aucune nouvelle Release publiée**. Télécharger le fichier depuis l'artefact Actions ci-dessous. Voir docs/RELEASES.md." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
 
       - name: Conserver l'APK de test même si Releases refuse la publication
-        if: ${{ success() }}
+        if: ${{ always() && env.APK_NAME != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-android-apk-direct
