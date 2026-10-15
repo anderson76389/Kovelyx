@@ -33,6 +33,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Vérifier le job de compilation mobile
+        id: mobile_build
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -58,9 +59,11 @@ jobs:
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] || exit 1
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
           jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || {
-            echo "::notice::Compilation mobile absente ou en échec. Aucune publication."
-            exit 1
+            echo "::notice::Aucune compilation mobile réussie dans cette exécution ; publication ignorée (TV uniquement ou build mobile échoué)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
           }
+          echo "ready=true" >> "$GITHUB_OUTPUT"
           mkdir -p /tmp/kv-mobile dist
           gh run download "$BUILD_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-mobile-debug --dir /tmp/kv-mobile
           count="$(find /tmp/kv-mobile -type f -name '*.apk' | wc -l)"
@@ -77,6 +80,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Contrôler l'APK et sa signature
+        if: steps.mobile_build.outputs.ready == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -93,6 +97,7 @@ jobs:
           echo "APK de test contrôlé (ZIP, signature, identifiant Android)." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Créer la Release expérimentale
+        if: steps.mobile_build.outputs.ready == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
@@ -132,7 +137,7 @@ jobs:
           fi
 
       - name: Conserver l'APK de test même si Releases refuse la publication
-        if: ${{ always() && env.APK_NAME != '' }}
+        if: ${{ always() && steps.mobile_build.outputs.ready == 'true' && env.APK_NAME != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-android-apk-direct
@@ -143,7 +148,7 @@ jobs:
           retention-days: 90
 
       - name: Vérifier que le téléchargement reste accessible
-        if: ${{ always() }}
+        if: ${{ always() && steps.mobile_build.outputs.ready == 'true' }}
         shell: bash
         run: |
           if [[ "${RELEASE_PUBLISHED:-false}" == "true" ]]; then
