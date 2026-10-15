@@ -8,6 +8,9 @@ on:
       - 'apps/tv/app/src/main/res/values/strings.xml'
       - 'apps/tv/app/src/main/res/values-fr/strings.xml'
       - 'scripts/tests/check-tv-french-resources.py'
+      - 'scripts/tests/audit-tv-nuvio-urls.py'
+      - 'apps/tv/app/src/main/java/**'
+      - 'apps/tv/app/src/full/java/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/drawable/**'
       - 'scripts/audit-kovelyx-android.py'
       - 'scripts/audit-mobile-independence.py'
@@ -32,3 +35,5 @@ jobs:
         run: python scripts/audit-mobile-independence.py
       - name: Vérifier la couverture française Android TV
         run: python scripts/tests/check-tv-french-resources.py
+      - name: Auditer les liens réseau Nuvio dans les sources Android TV
+        run: python scripts/tests/audit-tv-nuvio-urls.py
