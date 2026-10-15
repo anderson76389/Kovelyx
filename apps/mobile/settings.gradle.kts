@@ -1,4 +1,4 @@
-rootProject.name = "Nuvio"
+rootProject.name = "Kovelyx"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
