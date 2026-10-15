@@ -29,9 +29,29 @@ permissions:
   actions: read
 
 jobs:
+  changes:
+    name: Détecter les plateformes modifiées
+    runs-on: ubuntu-latest
+    outputs:
+      tv: ${{ steps.paths.outputs.tv }}
+      mobile: ${{ steps.paths.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: paths
+        with:
+          filters: |
+            tv:
+              - 'apps/tv/**'
+              - '.github/workflows/build.yml'
+            mobile:
+              - 'apps/mobile/**'
+              - '.github/workflows/build.yml'
+
   tv:
     name: Android TV - APK Full Debug
-    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'tv' }}
+    needs: changes
+    if: ${{ (github.event_name == 'push' && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -54,7 +74,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
       - name: Enregistrer les APK TV
         uses: actions/upload-artifact@v4
         with:
@@ -65,7 +85,8 @@ jobs:
 
   mobile:
     name: Android mobile - APK Full Debug
-    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'mobile' }}
+    needs: changes
+    if: ${{ (github.event_name == 'push' && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:

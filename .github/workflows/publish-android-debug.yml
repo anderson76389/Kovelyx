@@ -104,8 +104,23 @@ jobs:
           Build : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
           Licence et crédits : https://github.com/$GITHUB_REPOSITORY
           EOF
-          gh release create "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" \
+          if gh release create "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" \
             --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" \
             --title "Kovelyx Android experimental - $TAG" \
-            --prerelease --notes-file /tmp/kv-notes.md
-          echo "APK mobile publié dans les Releases Kovelyx." >> "$GITHUB_STEP_SUMMARY"
+            --prerelease --notes-file /tmp/kv-notes.md; then
+            echo "APK mobile publié dans les Releases Kovelyx." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Le jeton GitHub ne permet pas la création de Releases (403 éventuel). L'APK reste accessible dans les Artifacts de ce run."
+            echo "Publication dans Releases non confirmée : télécharger l'artifact APK." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Conserver l'APK de test même si Releases refuse la publication
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-android-apk-direct
+          path: |
+            dist/*.apk
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 30

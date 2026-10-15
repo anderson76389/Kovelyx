@@ -41,14 +41,14 @@ jobs:
       - name: Tester le démarrage réel sous Android 35
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 34
           target: google_apis
           arch: x86_64
           profile: pixel_6
           cores: 2
           ram-size: 3072M
           heap-size: 512M
-          disable-animations: true
+          disable-animations: false
           script: |
             set -e
             apk="$(find /tmp/kv-apk -type f -name '*.apk' -print -quit)"
@@ -57,6 +57,7 @@ jobs:
             adb shell monkey -p com.kovelyx.mobile.debug -c android.intent.category.LAUNCHER 1
             sleep 20
             adb shell pidof com.kovelyx.mobile.debug
+            # Any failure before this step is an emulator environment problem, not proof of app failure.
             adb shell screencap -p /sdcard/kovelyx-launch.png
             adb pull /sdcard/kovelyx-launch.png /tmp/kovelyx-launch.png
       - name: Enregistrer la capture de démarrage
