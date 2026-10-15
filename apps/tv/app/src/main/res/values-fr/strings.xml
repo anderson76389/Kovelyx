@@ -3258,7 +3258,7 @@
     <string name="tracking_mdblist_features_title">Fonctions MDBList</string>
     <string name="debug_member_tier_one">Membre de soutien</string>
     <string name="profile_editor_tab_background">Arrière-plan</string>
-    <string name="profile_background_member_note">Choisissez un fond depuis votre ordinateur dans Modifier le profil. Les images locales ne sont pas encore synchronisées entre appareils.</string>
+    <string name="profile_background_member_note">Les URL de fonds personnalisés nécessitent un panneau Web de compte compatible.</string>
     <string name="profile_avatar_category_supporter">Membre de soutien</string>
     <string name="profile_copy_settings_apply">Appliquer</string>
     <string name="addon_delete_confirm_title">Supprimer l’extension ?</string>
@@ -3292,8 +3292,8 @@
     <string name="official_server_title">Utiliser la configuration par défaut ?</string>
     <string name="official_server_description">L’application quittera le serveur personnalisé et reviendra à la configuration locale par défaut. Aucun compte en ligne Kovelyx n’est encore disponible sur cette configuration.</string>
     <string name="custom_server_error_invalid_url">Saisissez une URL de backend HTTP ou HTTPS valide.</string>
-    <string name="custom_server_error_official_active">Le serveur Kovelyx par défaut est déjà sélectionné. Aucun hébergement de comptes en ligne n’est configuré pour cette version.</string>
-    <string name="custom_server_error_official_available">Pour revenir au mode local Kovelyx, fermez cette fenêtre et choisissez « Utiliser la configuration par défaut ».</string>
+    <string name="custom_server_error_official_active">La configuration de serveur de comptes par défaut est déjà sélectionnée.</string>
+    <string name="custom_server_error_official_available">Pour revenir à la configuration de compte par défaut, fermez cette fenêtre et choisissez « Utiliser le serveur par défaut ».</string>
     <string name="custom_server_error_connection">Impossible de joindre le point de découverte. Vérifiez l’URL et la disponibilité du serveur.</string>
     <string name="custom_server_error_http">Le point de découverte a renvoyé le code HTTP %1$d.</string>
     <string name="custom_server_error_response_too_large">Le document de découverte dépasse la taille autorisée.</string>
