@@ -125,14 +125,14 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia : **116**.
+Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **116**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `github.com` | 228 |
 | `example.com` | 169 |
 | `www.themoviedb.org` | 110 |
-| `example.test` | 65 |
+| `example.test` | 68 |
 | `schemas.android.com` | 47 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
@@ -155,10 +155,10 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 | `www.youtube.com` | 6 |
 | `a.com` | 5 |
 | `fake.example` | 4 |
+| `v3-cinemeta.strem.io` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
 | `192.168.1.10` | 4 |
-| `host` | 4 |
 
 ### Références à vérifier en priorité
 
