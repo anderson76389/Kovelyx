@@ -6,7 +6,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 
 data class MdbListConfiguration(
-    val clientId: String,
+    var clientId: String,
     val appVersion: String,
     val baseUrl: String = "https://api.mdblist.com"
 )
