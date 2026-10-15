@@ -23,7 +23,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Application"
+rootProject.name = "Kovelyx-TV"
 include(":app")
 include(":baselineprofile")
 include(":ffmpeg-decoder-downmix")
