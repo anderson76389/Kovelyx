@@ -22,7 +22,8 @@ on:
 
 concurrency:
   group: kovelyx-build-${{ github.ref }}
-  cancel-in-progress: true
+  # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
+  cancel-in-progress: false
 
 permissions:
   contents: read
