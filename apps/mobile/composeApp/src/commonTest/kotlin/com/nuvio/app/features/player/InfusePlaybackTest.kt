@@ -36,8 +36,8 @@ class InfusePlaybackTest {
         assertEquals("125", url.parameters["position"])
         assertEquals("Series & Friends - S02E05 - Here + There", url.parameters["filename"])
         assertEquals(request.subtitles!!.map { it.url }, url.parameters.getAll("sub"))
-        assertEquals("nuvio://external-player/infuse/session-1/success", url.parameters["x-success"])
-        assertEquals("nuvio://external-player/infuse/session-1/error", url.parameters["x-error"])
+        assertEquals("kovelyx://external-player/infuse/session-1/success", url.parameters["x-success"])
+        assertEquals("kovelyx://external-player/infuse/session-1/error", url.parameters["x-error"])
         assertEquals("0", Url(buildInfusePlaybackUrl(request.copy(resumePositionMs = -1), "session-1")).parameters["position"])
     }
 
