@@ -87,14 +87,14 @@ val useLocalFfmpegDecoder = truthy(
         ?: env("USE_LOCAL_FFMPEG_DECODER")
         ?: localProperties.getProperty("USE_LOCAL_FFMPEG_DECODER")
 )
-val releaseStoreFilePath = env("NUVIO_RELEASE_STORE_FILE")
-    ?: localProperties.getProperty("NUVIO_RELEASE_STORE_FILE")
-val releaseKeyAliasValue = env("NUVIO_RELEASE_KEY_ALIAS")
-    ?: localProperties.getProperty("NUVIO_RELEASE_KEY_ALIAS", "nuviotv")
-val releaseKeyPasswordValue = env("NUVIO_RELEASE_KEY_PASSWORD")
-    ?: localProperties.getProperty("NUVIO_RELEASE_KEY_PASSWORD", "815787")
-val releaseStorePasswordValue = env("NUVIO_RELEASE_STORE_PASSWORD")
-    ?: localProperties.getProperty("NUVIO_RELEASE_STORE_PASSWORD", "815787")
+val releaseStoreFilePath = env("KOVELYX_RELEASE_STORE_FILE")
+    ?: localProperties.getProperty("KOVELYX_RELEASE_STORE_FILE")
+val releaseKeyAliasValue = env("KOVELYX_RELEASE_KEY_ALIAS")
+    ?: localProperties.getProperty("KOVELYX_RELEASE_KEY_ALIAS", "kovelyx")
+val releaseKeyPasswordValue = env("KOVELYX_RELEASE_KEY_PASSWORD")
+    ?: localProperties.getProperty("KOVELYX_RELEASE_KEY_PASSWORD", "")
+val releaseStorePasswordValue = env("KOVELYX_RELEASE_STORE_PASSWORD")
+    ?: localProperties.getProperty("KOVELYX_RELEASE_STORE_PASSWORD", "")
 
 android {
     namespace = "com.nuvio.tv"
@@ -187,7 +187,7 @@ android {
         create("release") {
             keyAlias = releaseKeyAliasValue
             keyPassword = releaseKeyPasswordValue
-            storeFile = releaseStoreFilePath?.let(::file) ?: file("../nuviotv.jks")
+            storeFile = releaseStoreFilePath?.let(::file) ?: file("../kovelyx-release.jks")
             storePassword = releaseStorePasswordValue
         }
     }
