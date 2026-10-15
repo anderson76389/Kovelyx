@@ -57,7 +57,7 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 
 > **Téléchargement Android :** le bouton conduit pour l'instant à un **artefact GitHub Actions** : télécharge le ZIP, décompresse-le, puis installe le fichier `.apk`. Connexion GitHub parfois nécessaire. **Expiration de cet artefact : 14 novembre 2026**. L'APK actuel n'a **pas** encore pu être ajouté à GitHub Releases (erreur GitHub **403**, droits de publication), contrairement à l'EXE Windows. Cela ne doit pas être présenté comme une publication réussie.
 
-**📦 [Voir toutes les GitHub Releases](https://github.com/anderson76389/Kovelyx/releases) · 🌐 [Site de téléchargement](https://anderson76389.github.io/Kovelyx/)**
+**📦 [Voir toutes les GitHub Releases](https://github.com/anderson76389/Kovelyx/releases) · 🌐 [Site de téléchargement](https://anderson76389.github.io/Kovelyx/) · 🔧 [Débloquer la publication des APK](./docs/RELEASES.md)**
 
 Windows possède également des formats secondaires **MSI** et **ZIP portable**, disponibles sur la [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.247-alpha). Ils ne constituent pas de nouvelles plateformes. La version TV n'est pas distribuée ici. Les anciens fichiers Linux restent dans l'historique des anciennes Releases.
 
@@ -73,7 +73,7 @@ Windows possède également des formats secondaires **MSI** et **ZIP portable**,
 
 1. Ouvre le **lien Android** ci-dessus sur GitHub et télécharge l'artefact (connexion éventuelle).
 2. Décompresse l'archive pour obtenir `Kovelyx-Android-android-preview-4ac59948e05c.apk`.
-3. Vérifie que ton appareil est sous Android 7.0 ou plus récent et accepte l'installation depuis cette source pour tester. Une application de débogage utilise une signature de test ; sauvegarde tes données avant un remplacement.
+3. Vérifie que ton appareil est sous Android 7.0 ou plus récent et accepte l'installation depuis cette source pour tester. **La signature Debug peut changer entre deux compilations**, ce qui peut empêcher une mise à jour sur place : sauvegarde les données avant un remplacement. L'APK Android TV et les téléviseurs ne sont pas encore certifiés.
 
 ### 🔄 Mises à jour intégrées à Kovelyx
 
