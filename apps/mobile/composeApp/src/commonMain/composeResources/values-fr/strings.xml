@@ -1004,7 +1004,7 @@
     <string name="settings_playback_threshold_percentage_description">Afficher la carte de l’épisode suivant lorsque la lecture atteint ce pourcentage.</string>
     <string name="settings_playback_threshold_percentage_value">%1$s %</string>
     <string name="settings_playback_timeout_instant">Instantané</string>
-    <string name="settings_playback_timeout_seconds">%1$ds</string>
+    <string name="settings_playback_timeout_seconds">%1$ss</string>
     <string name="settings_playback_timeout_unlimited">Illimité</string>
     <string name="settings_playback_tunneled_playback">Lecture tunnelisée</string>
     <string name="settings_playback_tunneled_playback_description">Active la lecture tunnelisée pour une latence réduite dans la synchronisation audio/vidéo.</string>
