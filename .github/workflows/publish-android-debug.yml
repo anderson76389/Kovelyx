@@ -131,7 +131,7 @@ jobs:
             dist/*.apk
             dist/*.sha256
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 90
 
       - name: Vérifier que le téléchargement reste accessible
         if: ${{ always() }}
