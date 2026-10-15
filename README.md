@@ -137,7 +137,7 @@ Kovelyx/
 - [x] Importation locale des photos et fonds de profil sur Windows (code)
 - [ ] Tests interactifs des lecteurs, codecs, sous-titres, extensions et réglages sur Windows
 - [ ] Résoudre les erreurs de chargement et tester les connexions Trakt/MDBList sur Windows
-- [ ] Déployer un serveur de comptes Kovelyx avant d'activer l'inscription synchronisée
+- [ ] Déployer et tester **Kovelyx Cloud** (compte unique, profils et synchronisation multi-appareils) avant d'activer l'inscription — [plan](./docs/COMPTE_UNIQUE.md) · [migration SQL](./services/kovelyx-cloud/)
 - [x] APK Android universel compilé, signé et lancé sur émulateur
 - [ ] Publier les nouveaux APK Android dans Releases dès que les droits GitHub le permettent
 - [ ] Finaliser la parité Windows / Android avant Android TV
