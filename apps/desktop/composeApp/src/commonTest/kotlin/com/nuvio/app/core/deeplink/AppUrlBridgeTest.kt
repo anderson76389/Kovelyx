@@ -7,6 +7,18 @@ import kotlin.test.assertNull
 class AppUrlBridgeTest {
 
     @Test
+    fun `emits Kovelyx links for metadata and downloads`() {
+        assertEquals("kovelyx://meta?type=series&id=tt0944947", buildMetaDeepLinkUrl("series", "tt0944947"))
+        assertEquals("kovelyx://downloads", buildDownloadsDeepLinkUrl())
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tt0944947"),
+            parseAppDeepLink("kovelyx://meta?type=series&id=tt0944947"),
+        )
+        assertEquals(AppDeepLink.Downloads, parseAppDeepLink("kovelyx://downloads"))
+    }
+
+
+    @Test
     fun `parses existing notification meta deeplink`() {
         assertEquals(
             AppDeepLink.Meta(type = "series", id = "tt0944947"),
