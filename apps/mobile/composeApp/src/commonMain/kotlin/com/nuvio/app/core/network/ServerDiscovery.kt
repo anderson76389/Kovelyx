@@ -47,7 +47,7 @@ private data class DiscoveryCapabilities(
 
 internal object ServerDiscoveryPolicy {
     private const val discoveryPath = "/.well-known/nuvio"
-    private const val canonicalOfficialBackend = "https://api.nuvio.tv"
+    private const val canonicalOfficialBackend = ""
     private val json = Json { ignoreUnknownKeys = true }
 
     fun discoveryUrl(input: String): String {

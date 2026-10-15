@@ -478,7 +478,7 @@
     <string name="settings_licenses_attributions_section_app">LICENCE DE L’APP</string>
     <string name="settings_licenses_attributions_section_data">DONNÉES ET SERVICES</string>
     <string name="settings_licenses_attributions_section_playback">LICENCE DE LECTURE</string>
-    <string name="settings_licenses_attributions_nuvio_title">Nuvio Mobile</string>
+    <string name="settings_licenses_attributions_nuvio_title">Code source et licences du projet</string>
     <string name="settings_licenses_attributions_nuvio_body">Le code source et les termes de la licence sont disponibles dans le dépôt du projet.</string>
     <string name="settings_licenses_attributions_nuvio_license">Distribué sous la licence GNU General Public License v3.0.</string>
     <string name="settings_licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>

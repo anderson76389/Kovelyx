@@ -354,7 +354,7 @@
     <string name="compose_auth_link_code_expired">This code expired.</string>
     <string name="compose_auth_link_creating_code">Creating code…</string>
     <string name="compose_auth_link_failed">Link sign-in failed.</string>
-    <string name="compose_auth_link_open">Open nuvio.tv/link</string>
+    <string name="compose_auth_link_open">Connexion par code indisponible sans serveur Kovelyx</string>
     <string name="compose_auth_link_open_failed">Couldn't open the link.</string>
     <string name="compose_auth_link_sign_in">Sign In with Link</string>
     <string name="compose_auth_link_signing_in">Signing in…</string>
@@ -397,8 +397,8 @@
     <string name="server_official_action">Use official server</string>
     <string name="server_switching">Switching…</string>
     <string name="server_error_invalid_url">Enter a valid HTTP or HTTPS Backend URL.</string>
-    <string name="server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
-    <string name="server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
+    <string name="server_error_official_active">The Kovelyx account server is already selected.</string>
+    <string name="server_error_official_available">A Kovelyx account server is not configured. You can continue without an account.</string>
     <string name="server_error_connection">Could not reach the discovery endpoint. Check the URL and server availability.</string>
     <string name="server_error_http">The discovery endpoint returned HTTP %1$d.</string>
     <string name="server_error_response_too_large">The discovery document is larger than allowed.</string>
@@ -577,7 +577,7 @@
     <string name="settings_licenses_attributions_haze_title">Haze 1.7.2</string>
     <string name="settings_licenses_attributions_haze_body">Used for background blur effects. Created by Chris Banes.</string>
     <string name="settings_licenses_attributions_haze_license">Licensed under the Apache License, Version 2.0.</string>
-    <string name="settings_licenses_attributions_nuvio_title">Nuvio Mobile</string>
+    <string name="settings_licenses_attributions_nuvio_title">Project source code and licenses</string>
     <string name="settings_licenses_attributions_nuvio_body">Source code and license terms are available in the project repository.</string>
     <string name="settings_licenses_attributions_nuvio_license">Licensed under the GNU General Public License v3.0.</string>
     <string name="settings_licenses_attributions_tmdb_title">The Movie Database (TMDB)</string>

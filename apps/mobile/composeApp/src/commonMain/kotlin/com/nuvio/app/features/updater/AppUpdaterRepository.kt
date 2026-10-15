@@ -91,7 +91,8 @@ internal object AppUpdaterRepository {
         supportedAbis: List<String>,
     ): GitHubAssetDto? {
         val apkAssets = assets.filter { asset ->
-            asset.name.startsWith("Kovelyx-Mobile-", ignoreCase = true) &&
+            (asset.name.startsWith("Kovelyx-Mobile-", ignoreCase = true) ||
+                 asset.name.startsWith("Kovelyx-Android-", ignoreCase = true)) &&
                 asset.name.endsWith(".apk", ignoreCase = true)
         }
         for (abi in supportedAbis) {
