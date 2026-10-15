@@ -130,7 +130,7 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `github.com` | 228 |
-| `example.com` | 169 |
+| `example.com` | 170 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 68 |
 | `schemas.android.com` | 47 |
@@ -141,11 +141,11 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 | `api.trakt.tv` | 16 |
 | `mdblist.com` | 15 |
 | `api.aioratings.com` | 13 |
+| `backend.example.com` | 13 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
 | `simkl.com` | 12 |
 | `api.ratingposterdb.com` | 12 |
-| `backend.example.com` | 12 |
 | `pm` | 9 |
 | `img` | 9 |
 | `postersplus.example.com` | 9 |
@@ -153,12 +153,12 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 | `catalog.example` | 8 |
 | `trakt.tv` | 7 |
 | `www.youtube.com` | 6 |
+| `192.168.1.10` | 5 |
 | `a.com` | 5 |
 | `fake.example` | 4 |
 | `v3-cinemeta.strem.io` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
-| `192.168.1.10` | 4 |
 
 ### Références à vérifier en priorité
 
