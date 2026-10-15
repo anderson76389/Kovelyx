@@ -129,13 +129,25 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+      - name: Vérifier l'APK mobile et l'identité Kovelyx
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' apks < <(find apps/mobile/androidApp/build/outputs/apk/full/debug -maxdepth 1 -type f -name '*.apk' -print0)
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::Un APK Android mobile unique attendu"; exit 1; }
+          unzip -tq "${apks[0]}" > /dev/null
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
+          "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
+          grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
+          echo "APK mobile universel, signé et identifié comme Kovelyx" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK mobiles
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-mobile-debug
           path: apps/mobile/androidApp/build/outputs/apk/full/debug/*.apk
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 30
 
   desktop:
     name: Windows - Vérification des prérequis MSI
