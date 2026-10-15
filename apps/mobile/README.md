@@ -21,4 +21,22 @@ L'APK est produit dans `androidApp/build/outputs/apk/full/debug/`.
 
 Les noms de packages historiques du code et les crédits de licences peuvent encore citer Nuvio, dont les attributions légales doivent être conservées.
 
+## Comparaison avec Windows et vérification
+
+Les projets Windows/Android partagent leurs modules Kotlin et ressources, mais
+ils **ne sont pas identiques fonction par fonction**. Le [rapport de parité](../../docs/ETAT_ANDROID_ET_TV.md)
+recense les écarts établis, notamment l'import local des images de profils et
+les fournisseurs debrid. Une réussite GitHub Actions prouve que l'APK se compile
+et/ou démarre sur émulateur ; elle ne valide pas toutes les fonctions réseau.
+
+Avant une annonce de version stable : vérifier la recherche et l'affichage de
+films/séries, le lecteur et les sous-titres, les extensions, les préférences,
+l'import des catalogues, les profils, les connexions et la récupération des
+mises à jour. **Les comptes Kovelyx seront traités en dernier.**
+
+Les nouvelles builds Android sont générées par le
+[workflow Android](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml)
+et leur démarrage vérifié par le
+[test d'émulateur](https://github.com/anderson76389/Kovelyx/actions/workflows/android-emulator-smoke.yml).
+
 Licence : [GPL-3.0](LICENSE).
