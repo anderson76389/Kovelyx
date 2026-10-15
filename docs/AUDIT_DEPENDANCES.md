@@ -8,7 +8,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 225 |
+| `example.com` | 226 |
 | `www.themoviedb.org` | 131 |
 | `trakt.tv` | 39 |
 | `media.example.com` | 37 |
@@ -16,8 +16,8 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 | `cdn.example` | 32 |
 | `www.imdb.com` | 31 |
 | `cdn.example.com` | 28 |
+| `backend.example.com` | 26 |
 | `...` | 26 |
-| `backend.example.com` | 25 |
 | `www.youtube.com` | 24 |
 | `addon.example` | 22 |
 | `.` | 20 |
