@@ -34,7 +34,7 @@ jobs:
             echo '### Périmètre du contrôle statique'
             echo '- Rejet des anciennes URLs explicites dans le code actif hors comptes historiques.'
             echo '- Les packages et attributions historiques ne sont pas des appels réseau.'
-            echo '- Les URLs calculées, dépendances natives et services tiers nécessitent un test en cours d’exécution.'
+            echo '- Les URLs calculées, dépendances natives et services tiers nécessitent un test pendant une execution réelle.'
           } >> "$GITHUB_STEP_SUMMARY"
 
   mobile-blackout:
@@ -145,4 +145,4 @@ jobs:
         shell: pwsh
         run: |
           '### Windows : tests Kotlin réussis avec les domaines Nuvio neutralisés dans le runner' >> $env:GITHUB_STEP_SUMMARY
-          'La compilation de l’EXE complet et un essai réseau de bout en bout restent nécessaires.' >> $env:GITHUB_STEP_SUMMARY
+          'La compilation du fichier EXE complet et un essai réseau de bout en bout restent nécessaires.' >> $env:GITHUB_STEP_SUMMARY
