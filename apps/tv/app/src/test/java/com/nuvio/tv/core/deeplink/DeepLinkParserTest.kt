@@ -7,7 +7,23 @@ import org.junit.Test
 
 class DeepLinkParserTest {
     @Test
-    fun parsesKovelyxMetaLink() {\n        assertEquals(\n            AppDeepLink.Meta(type = "series", id = "tt0944947"),\n            DeepLinkParser.parse("kovelyx://meta?type=series&id=tt0944947")\n        )\n    }\n\n    @Test\n    fun parsesKovelyxAddonLink() {\n        assertEquals(\n            AppDeepLink.AddonInstall("https://example.com/manifest.json"),\n            DeepLinkParser.parse("kovelyx://example.com/manifest.json")\n        )\n    }\n\n    @Test\n    fun parsesMetaQueryDeepLink() {
+    fun parsesKovelyxMetaLink() {
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tt0944947"),
+            DeepLinkParser.parse("kovelyx://meta?type=series&id=tt0944947")
+        )
+    }
+
+    @Test
+    fun parsesKovelyxAddonLink() {
+        assertEquals(
+            AppDeepLink.AddonInstall("https://example.com/manifest.json"),
+            DeepLinkParser.parse("kovelyx://example.com/manifest.json")
+        )
+    }
+
+    @Test
+    fun parsesMetaQueryDeepLink() {
         assertEquals(
             AppDeepLink.Meta(type = "series", id = "tt0944947"),
             DeepLinkParser.parse("nuvio://meta?type=series&id=tt0944947")
