@@ -27,11 +27,11 @@ Les arbres des commits d'origine signalent des `gitlink` sans URL exploitable da
 
 L'archive Git peut transporter des *pointeurs LFS* plutôt que le contenu binaire : c'est notamment pertinent pour les bibliothèques natives MPV de la version Desktop. Un pointeur LFS ne représente **pas** une sauvegarde autonome du fichier. Les objets requis devront être transférés vers un stockage contrôlé par Kovelyx, puis leur intégrité vérifiée.
 
-## Architecture locale sans backend Kovelyx
+## Infrastructure de comptes indépendante en préparation
 
-Le projet se concentre uniquement sur les trois clients : TV, Android et Windows. Aucun service de comptes, synchronisation entre appareils ou base de données personnelle à héberger n'est prévu.
+Le code client Windows, Android, Android TV, Linux et iOS doit converger vers **un compte Kovelyx facultatif et une synchronisation indépendante**. Les sources actuelles du backend historique ne sont pas fournies ici. Le [plan détaillé](./COMPTE_UNIQUE.md) et la [première migration SQL](../services/kovelyx-cloud/supabase/migrations/202610150001_kovelyx_accounts_and_sync.sql) sont disponibles, **sans serveur encore déployé et sans synchronisation Kovelyx opérationnelle**.
 
-Le dépôt `self-host` a été importé lors de la fondation du projet, puis **retiré du périmètre courant** à la demande du propriétaire. Son code demeure dans l'historique Git antérieur. L'accès aux services tiers utilisés par les catalogues, extensions ou métadonnées peut toujours nécessiter Internet.
+Le dépôt `self-host` ancien a été retiré du périmètre initial à la demande du propriétaire ; son code demeure dans l'historique Git. Un **nouveau** service `services/kovelyx-cloud/` constitue un développement distinct. Les services tiers de catalogues et de métadonnées peuvent toujours nécessiter Internet.
 
 ## Marques et licences
 
