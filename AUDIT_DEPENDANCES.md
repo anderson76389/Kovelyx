@@ -8,7 +8,7 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 224 |
+| `example.com` | 225 |
 | `www.themoviedb.org` | 131 |
 | `trakt.tv` | 39 |
 | `media.example.com` | 37 |
