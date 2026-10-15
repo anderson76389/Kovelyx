@@ -7,7 +7,7 @@ Fichiers inspectés : 4520
 
 ## Inventaire des références à traiter
 
-### Connexions et services (109 correspondances)
+### Connexions et services (107 correspondances)
 
 - apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
 - apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
@@ -15,8 +15,6 @@ Fichiers inspectés : 4520
 - apps/tv/app/build.gradle.kts:240 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
 - apps/tv/app/build.gradle.kts:241 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
 - apps/tv/app/build.gradle.kts:242 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
-- apps/tv/app/src/main/res/values/strings.xml:2236 : <string name="custom_server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
-- apps/tv/app/src/main/res/values/strings.xml:2237 : <string name="custom_server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2644 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2645 : <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
 - apps/tv/app/src/main/res/values-b+es+419/strings.xml:2204 : <string name="custom_server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
@@ -89,7 +87,9 @@ Fichiers inspectés : 4520
 - apps/desktop/composeApp/build.gradle.kts:567 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
 - apps/desktop/composeApp/build.gradle.kts:568 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
 - apps/desktop/composeApp/build.gradle.kts:569 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
-- Autres correspondances non détaillées : 29
+- apps/desktop/composeApp/src/commonMain/composeResources/values/strings.xml:407 : <string name="server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values/strings.xml:408 : <string name="server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
+- Autres correspondances non détaillées : 27
 
 ### Mises à jour et releases (6 correspondances)
 
@@ -307,12 +307,12 @@ Fichiers inspectés : 4520
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
 - NUVIO_SYNC : 126
-- NUVIO_RELEASE_STORE_FILE : 14
+- NUVIO_RELEASE_STORE_FILE : 12
 - NUVIO_IOS_DISTRIBUTION : 12
-- NUVIO_RELEASE_KEY_ALIAS : 10
-- NUVIO_RELEASE_KEY_PASSWORD : 10
-- NUVIO_RELEASE_STORE_PASSWORD : 10
 - NUVIO_JS : 10
+- NUVIO_RELEASE_KEY_ALIAS : 8
+- NUVIO_RELEASE_KEY_PASSWORD : 8
+- NUVIO_RELEASE_STORE_PASSWORD : 8
 - NUVIO_GRADLE_JVMARGS : 8
 - NUVIO_KOTLIN_NATIVE_JVMARGS : 8
 - NUVIO_SUPABASE_URL : 7
