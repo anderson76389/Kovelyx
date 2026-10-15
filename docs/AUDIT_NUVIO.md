@@ -3,11 +3,11 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4512
+Fichiers inspectés : 4517
 
 ## Inventaire des références à traiter
 
-### Connexions et services (113 correspondances)
+### Connexions et services (110 correspondances)
 
 - apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
 - apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
@@ -62,8 +62,6 @@ Fichiers inspectés : 4512
 - apps/mobile/composeApp/build.gradle.kts:325 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
 - apps/mobile/composeApp/build.gradle.kts:326 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
 - apps/mobile/composeApp/build.gradle.kts:327 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
-- apps/mobile/composeApp/src/commonMain/composeResources/values/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
-- apps/mobile/composeApp/src/commonMain/composeResources/values/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401 : <string name="server_error_official_active">api.nuvio.tv অফিসিয়াল সার্ভার এবং ইতিমধ্যেই নির্বাচিত।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402 : <string name="server_error_official_available">api.nuvio.tv হল অফিসিয়াল সার্ভার। এই ডায়ালগটি বন্ধ করুন এবং ফিরে যেতে অফিসিয়াল সার্ভার ব্যবহার করুন নির্বাচন করুন।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1983 : <string name="server_error_official_active">api.nuvio.tv je oficiální server a už je vybraný.</string>
@@ -89,7 +87,9 @@ Fichiers inspectés : 4512
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
-- Autres correspondances non détaillées : 33
+- apps/desktop/composeApp/build.gradle.kts:567 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
+- apps/desktop/composeApp/build.gradle.kts:568 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
+- Autres correspondances non détaillées : 30
 
 ### Mises à jour et releases (11 correspondances)
 
@@ -241,7 +241,7 @@ Fichiers inspectés : 4512
 - apps/desktop/store.json:18 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
 - Autres correspondances non détaillées : 49
 
-### Configuration générale (64 correspondances)
+### Configuration générale (63 correspondances)
 
 - apps/tv/app/build.gradle.kts:495 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
@@ -260,7 +260,6 @@ Fichiers inspectés : 4512
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidMain/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngine.android.kt:474 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/mobile/composeApp/src/androidMain/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngine.android.kt:475 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
-- apps/mobile/composeApp/src/commonMain/composeResources/values/strings.xml:357 : <string name="compose_auth_link_open">Open nuvio.tv/link</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352 : <string name="compose_auth_link_open">Отвори nuvio.tv/link</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358 : <string name="compose_auth_link_open">nuvio.tv/link খুলুন</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1951 : <string name="compose_auth_link_open">Otevřít nuvio.tv/link</string>
