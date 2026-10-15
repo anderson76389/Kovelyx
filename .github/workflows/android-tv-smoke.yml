@@ -59,12 +59,14 @@ jobs:
       - name: Accès KVM
         run: |
           if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
-      - name: Essai sur Android TV 34
+      - name: Essai sur Google TV 34 (Leanback)
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
-          target: android-tv
-          arch: x86_64
+          # Le SDK Android 34 n'expose pas android-tv/x86_64 sur les runners.
+          # Google TV API 34 propose une image x86 compatible Leanback.
+          target: google-tv
+          arch: x86
           profile: tv_1080p
           cores: 2
           ram-size: 3072M
