@@ -35,7 +35,7 @@ actual object ThemeSettingsStorage {
 
     fun initialize(context: Context) {
         preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
-        applySelectedAppLanguage(loadSelectedAppLanguage() ?: AppLanguage.DEVICE.code)
+        applySelectedAppLanguage(loadSelectedAppLanguage() ?: "fr")
     }
 
     actual fun loadSelectedTheme(): String? =
