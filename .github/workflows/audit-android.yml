@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - 'apps/mobile/**'
+      - 'apps/tv/app/src/main/res/values/strings.xml'
+      - 'apps/tv/app/src/main/res/values-fr/strings.xml'
+      - 'scripts/tests/check-tv-french-resources.py'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/drawable/**'
       - 'scripts/audit-kovelyx-android.py'
       - 'scripts/audit-mobile-independence.py'
@@ -27,3 +30,5 @@ jobs:
         run: python scripts/audit-kovelyx-android.py
       - name: Vérifier les connexions Nuvio hors comptes
         run: python scripts/audit-mobile-independence.py
+      - name: Vérifier la couverture française Android TV
+        run: python scripts/tests/check-tv-french-resources.py
