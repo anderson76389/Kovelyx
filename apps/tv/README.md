@@ -1,32 +1,63 @@
 <div align="center">
 
-  <img src="assets/brand/app_logo_wordmark.png" alt="Nuvio" width="300" />
+<img src="assets/brand/app_logo_wordmark.png" alt="Kovelyx TV" width="300">
 
-  <p>
-    A free, open-source media app for your phone, your desktop, and the TV you already own.
-    <br />
-    Bring your own sources. Nuvio turns them into a library with artwork, ratings, subtitles, and your place saved on every screen.
-  </p>
+# Kovelyx TV — Android TV et TV Box
 
-  [Website](https://nuvio.tv) · [GitHub releases](https://github.com/NuvioMedia/NuvioTV/releases/latest) · [Support Nuvio](https://nuvio.tv/support)
+Une interface multimédia conçue pour la **télécommande**, les téléviseurs
+Android TV, Google TV et les boîtiers compatibles Android 7+.
+
+**Préversion de développement.** Les comptes Kovelyx indépendants et la
+synchronisation multiplateforme seront intégrés plus tard, après la
+stabilisation des applications.
+
+[**🏠 Dépôt Kovelyx**](https://github.com/anderson76389/Kovelyx) ·
+[**📦 Releases**](https://github.com/anderson76389/Kovelyx/releases) ·
+[**🛠️ Builds TV**](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml)
 
 </div>
 
-## Get Nuvio TV
+## Où télécharger ?
 
-- [Android TV on Google Play](https://play.google.com/store/apps/details?id=com.nuvio.app)
-- [Android TV APK](https://github.com/NuvioMedia/NuvioTV/releases/latest)
+Les **APK TV** ne doivent être présentés comme prêts à distribuer qu'après
+compilation, contrôle de la signature et test de démarrage sur émulateur TV.
+Les premières compilations sont accessibles comme **artefacts GitHub Actions**
+(archive ZIP contenant un APK). Une future préversion dédiée apparaîtra dans
+[GitHub Releases](https://github.com/anderson76389/Kovelyx/releases)
+après validation.
 
-## Build from source
+**Ne pas installer l'APK Android téléphone en lieu et place de l'APK TV** :
+ils ont des interfaces et des identifiants distincts.
+
+## Ce qui fonctionne techniquement dans le code
+
+- Navigation et écrans prévus pour la télécommande (Android TV Leanback)
+- Bibliothèque, catalogues et fournisseurs de métadonnées configurables
+- Modules de lecture et de sous-titres ; comportement dépendant des sources
+- Extensions, profils et réglages locaux ; compte distant optionnel selon configuration
+- Couleurs et marque Kovelyx ; prise en charge du schéma `kovelyx://`
+
+L'inventaire n'est **pas** une garantie de fonctionnement de chaque fonction
+sur une box réelle. Voir les journaux et essais dans
+[GitHub Actions](https://github.com/anderson76389/Kovelyx/actions).
+
+## Compiler
 
 ```bash
-git clone https://github.com/NuvioMedia/NuvioTV.git
-cd NuvioTV
-./gradlew :app:assembleFullDebug
+git clone https://github.com/anderson76389/Kovelyx.git
+cd Kovelyx/apps/tv
+./gradlew :app:assembleFullDebug --no-daemon
 ```
 
-Nuvio TV is built with Kotlin, Jetpack Compose, TV Material 3, and Media3. Development requires Android Studio, a JDK, and the Android SDK.
+Prérequis : JDK 21 et Android SDK. Les fichiers APK sont générés dans
+`app/build/outputs/apk/full/debug/` (dont une version `universal.apk`).
 
-## License
+**Signature :** les builds Debug sont destinés uniquement aux essais. Ils
+ne garantissent pas une mise à jour sur place sans désinstaller l'ancienne
+application. Sauvegarder les données avant toute réinstallation.
 
-[GNU General Public License v3.0](./LICENSE)
+## Origine et licences
+
+Les sources, notices et licences obligatoires sont conservées dans le dépôt :
+[provenance](../../docs/PROVENANCE.md) et [GPLv3](LICENSE).
+Les mentions de licence n'impliquent aucune dépendance réseau à l'ancien projet.
