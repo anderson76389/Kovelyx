@@ -100,7 +100,7 @@ Fichiers inspectés : 4520
 - apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (36 correspondances)
+### Liens annexes (32 correspondances)
 
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
@@ -108,8 +108,6 @@ Fichiers inspectés : 4520
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57 : parseAppDeepLink("nuvio://imdb/series/tt0944947"),
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65 : parseAppDeepLink("nuvio://tmdb/tv/1399"),
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71 : assertNull(parseAppDeepLink("nuvio://auth/trakt
-- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:39 : assertEquals("nuvio://external-player/infuse/session-1/success", url.parameters["x-success"])
-- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:40 : assertEquals("nuvio://external-player/infuse/session-1/error", url.parameters["x-error"])
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153 : assertFalse(callbacks.handleUrl("nuvio://meta
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158 : assertTrue(callbacks.handleUrl("nuvio://external-player/infuse/session-1/success
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46 : redirectUri = "nuvio://auth/simkl",
@@ -120,14 +118,12 @@ Fichiers inspectés : 4520
 - apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 - apps/desktop/composeApp/build.gradle.kts:127 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
 - apps/desktop/composeApp/build.gradle.kts:141 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:13 : parseAppDeepLink("nuvio://meta
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:21 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:37 : parseAppDeepLink("nuvio://series/tt0944947"),
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:45 : parseAppDeepLink("nuvio://imdb/series/tt0944947"),
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:53 : parseAppDeepLink("nuvio://tmdb/tv/1399"),
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:59 : assertNull(parseAppDeepLink("nuvio://auth/trakt
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:39 : assertEquals("nuvio://external-player/infuse/session-1/success", url.parameters["x-success"])
-- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:40 : assertEquals("nuvio://external-player/infuse/session-1/error", url.parameters["x-error"])
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49 : parseAppDeepLink("nuvio://series/tt0944947"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57 : parseAppDeepLink("nuvio://imdb/series/tt0944947"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65 : parseAppDeepLink("nuvio://tmdb/tv/1399"),
+- apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71 : assertNull(parseAppDeepLink("nuvio://auth/trakt
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153 : assertFalse(callbacks.handleUrl("nuvio://meta
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158 : assertTrue(callbacks.handleUrl("nuvio://external-player/infuse/session-1/success
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46 : redirectUri = "nuvio://auth/simkl",
