@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Validate 100% French localization of every Kovelyx Desktop string module.
+"""Validate 100% French localization of Kovelyx Desktop and Android resources.
 
 Run directly from the repository root:
     python scripts/tests/check-french-resources.py
+    python scripts/tests/check-french-resources.py --mobile
 
 Preserves Compose/Android formatting markers, exact key names and XML validity.
 Do not replace missing translations with raw English: translate them deliberately.
@@ -17,7 +18,8 @@ import xml.etree.ElementTree as ET
 
 RESOURCE_ROOT = (
     Path(__file__).resolve().parents[2]
-    / "apps/desktop/composeApp/src/commonMain/composeResources"
+    / ("apps/mobile" if "--mobile" in sys.argv else "apps/desktop")
+    / "composeApp/src/commonMain/composeResources"
 )
 SOURCE_MODULES = (
     "strings.xml",
