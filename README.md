@@ -83,6 +83,8 @@ L'application vérifie les nouvelles **Releases GitHub** au démarrage et pério
 - **Windows portable :** le ZIP complet est téléchargé depuis Kovelyx, vérifié puis remplacé après fermeture, avec sauvegarde de l'ancienne copie pour revenir en arrière en cas de problème.
 - Les versions non compatibles ou non publiées ne sont pas proposées.
 
+**État des APK Android :** chaque compilation mobile réussie est destinée à devenir une préversion GitHub portant son propre identifiant de commit. **GitHub renvoie encore 403 lors de la création des nouvelles Releases Android** ([diagnostic](./docs/RELEASES.md)) ; l'artefact APK existe mais une autorisation supplémentaire est nécessaire. Ce système ne garantit pas encore la mise à jour sur place des APK Debug, qui peuvent avoir des signatures différentes.
+
 **Important :** ce mécanisme évite les téléchargements et installations manuels, mais **ce n'est pas une mise à jour différentielle** : il retélécharge encore le paquet complet. L'automatisation est intégrée au code ; chaque nouveau format doit être validé sur une machine réelle avant d'être considéré comme stable.
 
 ## ✨ Fonctions PC
@@ -94,7 +96,7 @@ L'application vérifie les nouvelles **Releases GitHub** au démarrage et pério
 | Plugins, extensions et sources configurées | Tests unitaires inclus ; dépend du fournisseur et du réseau |
 | Lecteur, audio, pistes et sous-titres | Infrastructure compilée ; tests réels avec différents fichiers/flux nécessaires |
 | Distribution Windows MSI + EXE + portable | **Build Windows complet réussi** |
-| Autonomie vis-à-vis de Nuvio | **Audit en cours**, certains composants techniques/dépendances demeurent |
+| Autonomie Android vis-à-vis de Nuvio | **858 sources Kotlin auditées : 0 URL Nuvio non autorisée** ; la connexion aux comptes et les crédits sont conservés. [Audit et limites](./docs/AUDIT_ANDROID_NUVIO.md) |
 
 Aucun catalogue ni contenu protégé n'est inclus avec l'application. L'utilisateur configure ses sources et respecte les droits applicables.
 
