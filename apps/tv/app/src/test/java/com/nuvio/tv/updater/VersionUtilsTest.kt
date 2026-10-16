@@ -36,6 +36,13 @@ class VersionUtilsTest {
     }
 
     @Test
+    fun tvSignedReleaseTagComparedWithLocalVersion() {
+        assertTrue(VersionUtils.isRemoteNewer("tv-v0.5.11-beta.2", "0.5.10"))
+        assertFalse(VersionUtils.isRemoteNewer("android-v9.9.9", "0.5.10"))
+        assertFalse(VersionUtils.isRemoteNewer("tv-preview-123456abcdef", "0.5.10"))
+    }
+
+    @Test
     fun `current beta naming is recognized as prerelease`() {
         assertTrue(VersionUtils.isPrerelease("0.8.12-beta"))
     }
