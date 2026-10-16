@@ -45,6 +45,9 @@ if ! grep -Eq '[1-9][0-9]*[.][0-9]+[.][0-9]+[.][0-9]+' <<< "$OTHER_DNS" ||
  adb shell getprop net.dns2 || true
  exit 1
 fi
+# Oublier les requetes DNS du controle prealable : les suivantes viennent
+# du lancement/navigateur de Kovelyx, pas de ce script de preverification.
+sudo truncate -s 0 /tmp/kovelyx-dns.log
 APK="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)"
 test -s "$APK"
 sha256sum "$APK" | tee "/tmp/kovelyx-blackout-proof/$MODE.apk.sha256"
@@ -78,5 +81,11 @@ if grep -A 22 -E 'FATAL EXCEPTION|Fatal signal|Process: com\.kovelyx\.' "/tmp/ko
  echo "::error::Crash de Kovelyx détecté dans les logs Android"
  exit 1
 fi
+if grep -Eqi 'query\[[A-Z0-9]+\].*([.]|^)nuvio[.]tv' /tmp/kovelyx-dns.log; then
+ echo "::error::Kovelyx a demande une resolution DNS Nuvio pendant sa navigation sans compte."
+ grep -Ei 'nuvio[.]tv' /tmp/kovelyx-dns.log | tail -n 25
+ exit 1
+fi
+echo "Aucune demande DNS Nuvio durant le lancement et la navigation sans compte (hors pretest)."
 echo "PASS : Nuvio DNS bloqué, DNS GitHub disponible, APK installé, navigation de base sans crash."
 echo "LIMITES : tests P2P, addons et API avec clés réelles toujours distincts."
