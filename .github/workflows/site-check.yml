@@ -9,6 +9,7 @@ on:
       - 'docs/site.js'
       - 'docs/brand/**'
       - '.github/workflows/site-check.yml'
+      - 'scripts/test-site-downloads.cjs'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +24,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier la syntaxe JavaScript
         run: node --check docs/site.js
+      - name: Tester les téléchargements Windows, Android et TV simulés
+        run: node scripts/test-site-downloads.cjs
       - name: Vérifier la page HTML et les liens internes
         shell: bash
         run: |
