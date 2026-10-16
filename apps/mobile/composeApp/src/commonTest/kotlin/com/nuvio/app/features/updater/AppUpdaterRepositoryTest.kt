@@ -14,7 +14,7 @@ class AppUpdaterRepositoryTest {
     @Test
     fun stableAcceptsReleasesFromAnyBranch() {
         listOf("main", "master", "cmp-rewrite", "1234567").forEach { branch ->
-            val response = """{
+            val response = """[{
                 "tag_name": "v1.1.0", "target_commitish": "$branch",
                 "assets": [{"name": "Kovelyx-Android-app.apk", "browser_download_url": "https://example.com/app.apk"}]
             }]"""
