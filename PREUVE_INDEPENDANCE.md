@@ -2,6 +2,33 @@
 
 Ce dossier sert à **mesurer** l'indépendance de trois applications. Il ne suffit pas de supprimer les noms « Nuvio » des menus et du code, ni de compiler un APK pour déclarer 100 % de réussite.
 
+## Résultats factuels de l'audit au 16 octobre 2026 (hors comptes)
+
+Ces résultats sont conservés avec le numéro d'exécution afin de ne pas confondre preuve historique et état d'une nouvelle compilation.
+
+| Vérification | Résultat obtenu | Preuve / limite |
+|---|---|---|
+| Vérification statique des sources actives et Gradle (2 646 fichiers examinés lors du contrôle initial) | Réussie pour les URL Nuvio explicites hors compte. Une ancienne URL était utilisée uniquement comme **valeur à rejeter** dans la détection de serveur, sans requête réseau. | [Exécution des tests](https://github.com/anderson76389/Kovelyx/actions/runs/38821480220). Ne couvre pas le code natif, les URLs reconstruites ni les autres formats de ressources. |
+| Android mobile, compilation avec `nuvio.tv` et sous-domaines connus bloqués | **Réussie** | [Compilation et filtrage](https://github.com/anderson76389/Kovelyx/actions/runs/38821542695). Les dépendances Kotlin/Android et AAR nécessaires à ce build étaient accessibles sans NuvioMedia. |
+| Android TV, compilation avec blocage Nuvio | **Réussie lors de deux exécutions** | [Compilation TV](https://github.com/anderson76389/Kovelyx/actions/runs/38821480220). Une nouvelle exécution peut être en cours ; consulter son résultat séparément. |
+| Windows, tests Desktop avec blocage Nuvio | **Réussis après fourniture du SDK WebView2 Microsoft** | [Workflow Windows corrigé](https://github.com/anderson76389/Kovelyx/actions/workflows/prove-upstream-independence.yml). Ne constitue pas une preuve de lancement d'un EXE complet dans le banc réseau. |
+| Copie des sources | **Vérifiée dans le dépôt** | Les trois applications et les sources du moteur sont présentes dans le monorepo, sans gitlink actif. |
+| Bibliothèques Android natives | **Copies AAR locales vérifiées dans les trois sources d'applications** | Une suppression des Releases amont ne supprime pas ces fichiers du dépôt Kovelyx ; la reproduction exacte de chaque AAR depuis ses sources est une vérification distincte, non acquise. |
+| Lecteur Windows natif | **DLL du moteur conservée localement + MPV restauré exclusivement depuis une Release Kovelyx vérifiée par SHA-256** | Une sauvegarde séparée de cette Release reste nécessaire pour se protéger aussi d'une panne ou suppression du dépôt Kovelyx. |
+| Reconstruction P2P complète | **Test dédié ajouté ; validation à consulter dans Actions** | [Tests du moteur](https://github.com/anderson76389/Kovelyx/actions/workflows/engine-source-test.yml). Le test précédent sans libtorrent ne prouvait pas la reconstruction du moteur P2P complet. |
+| Suppression des téléchargements d'origine dans les workflows actifs de sauvegarde | **Réalisée** | Les workflows d'import du moteur et des trois applications vérifient maintenant les **copies déjà présentes** au lieu de faire un `git fetch` chez NuvioMedia. |
+| Test runtime sans accès à Nuvio pour lecture, catalogue, profils locaux, addons et débridage | **Non réalisé exhaustivement** | Nécessite des scénarios sur les trois appareils et capture du trafic sortant, avec blocage de domaines/URLs effectif. |
+
+**Ce que cela prouve déjà :** si l'organisation NuvioMedia supprime ses sources et domaines, les copies et binaires *déjà archivés* dans Kovelyx ne disparaîtront pas par effet automatique. Les builds mobiles et TV ont été réalisés sous blocage des domaines connus.
+
+**Ce que cela ne prouve pas encore :** une disparition de Nuvio ne pourrait jamais affecter un chemin réseau caché dans une bibliothèque native ou un service non couvert par les tests. Il faut aussi reconstruire les lecteurs natifs intégraux et valider les mises à jour et la reprise des données.
+
+### Références Nuvio qui ne sont PAS des dépendances réseau
+
+Les packages historiques `com.nuvio.*`, chemins de cache `nuvio-engine`, licences GPL et documents `docs/PROVENANCE.md` servent à la compatibilité et à l'attribution. Les renommer sans migration pourrait faire perdre des réglages et casser l'interface Java/native. La présence d'un lien vers les sources historiques dans une attribution ne signifie pas que Kovelyx télécharge ces sources.
+
+Des fichiers de distribution iOS historiques tels que `apps/mobile/store.json` ou `apps/desktop/store.json` peuvent encore référencer de vieilles IPA de Nuvio : ils **ne constituent pas** une source de mise à jour des APK Android ni de l'EXE Windows. Ils ne doivent pas être présentés comme une distribution iOS Kovelyx. Le périmètre actuel est Windows/Android mobile/Android TV.
+
 ## Définition précise
 
 La disparition de `nuvio.tv`, `api.nuvio.tv`, des autres serveurs NuvioMedia et de leurs dépôts et Releases **ne doit pas empêcher** Kovelyx de :
