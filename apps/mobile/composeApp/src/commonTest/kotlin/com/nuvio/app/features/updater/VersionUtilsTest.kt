@@ -36,6 +36,14 @@ class VersionUtilsTest {
     }
 
     @Test
+    fun signedAndroidReleaseTagsCompareWithInstalledVersion() {
+        assertTrue(VersionUtils.isRemoteNewer("android-v0.6.0-beta.1", "0.5.11"))
+        assertFalse(VersionUtils.isRemoteNewer("android-v0.5.10", "0.5.11"))
+        assertFalse(VersionUtils.isRemoteNewer("tv-v9.0.0", "0.5.11"))
+        assertFalse(VersionUtils.isRemoteNewer("android-preview-aabbccddee11", "0.5.11"))
+    }
+
+    @Test
     fun `current beta naming is recognized as prerelease`() {
         assertTrue(VersionUtils.isPrerelease("0.8.12-beta"))
     }
