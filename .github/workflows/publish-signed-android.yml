@@ -18,11 +18,10 @@ concurrency:
 jobs:
   build-and-publish:
     name: APK release signe - ${{ matrix.platform }}
-    if: ${{ inputs.platform == 'all' || inputs.platform == matrix.platform }}
     strategy:
       fail-fast: false
       matrix:
-        platform: [mobile, tv]
+        platform: ${{ fromJSON(inputs.platform == 'all' && '["mobile","tv"]' || format('["{0}"]', inputs.platform)) }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     env:
@@ -44,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           for name in KOVELYX_ANDROID_KEYSTORE_BASE64 KOVELYX_RELEASE_STORE_PASSWORD KOVELYX_RELEASE_KEY_ALIAS KOVELYX_RELEASE_KEY_PASSWORD KOVELYX_ANDROID_CERT_SHA256; do
-            test -n "$(! test -z "$(printenv "$name")" && echo defined)" || {
+            [[ -n "$(printenv "$name")" ]] || {
               echo "::error::Secret manquant : $name. Voir docs/SIGNATURE_ANDROID.md"
               exit 1
             }
@@ -88,8 +87,8 @@ jobs:
           fi
           mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -name '*universal*release*.apk' -print0)
           [[ "${{ matrix.platform }}" == mobile || "${{ matrix.platform }}" == tv ]] || exit 1
-          [[ "$(( #{#apks[@]} ))" == 1 ]] || { echo "::error::APK universel manquant ou ambigu"; exit 1; }
-          apk="#{apks[0]}"
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::APK universel manquant ou ambigu"; exit 1; }
+          apk="${apks[0]}"
           unzip -tq "$apk"
           tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
           "$tools/apksigner" verify --verbose "$apk" >/dev/null
