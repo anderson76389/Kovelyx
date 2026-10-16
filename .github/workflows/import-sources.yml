@@ -1,52 +1,38 @@
-name: Importer les 3 applications Kovelyx
+name: Vérifier les archives autonomes des trois applications Kovelyx
 
+# Vérification locale seulement : ne contacte jamais les dépôts NuvioMedia.
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/import-sources.yml'
-      - 'scripts/import-upstream.sh'
+      - 'docs/PROVENANCE.md'
+      - 'apps/tv/.kovelyx-source.txt'
+      - 'apps/mobile/.kovelyx-source.txt'
+      - 'apps/desktop/.kovelyx-source.txt'
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: kovelyx-source-import
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  import:
-    name: Copier les sources des trois clients
+  verify-snapshots:
+    name: Sources Windows, Android et Android TV préservées localement
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 10
     steps:
-      - name: Récupérer le dépôt Kovelyx
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 1
-
-      - name: Préparer Git
-        shell: bash
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global core.autocrlf false
-
-      - name: Importer les archives publiques (sans écraser les dossiers existants)
-        shell: bash
-        run: bash scripts/import-upstream.sh
-
-      - name: Contrôler les trois imports
+      - uses: actions/checkout@v4
+      - name: Vérifier les sources et licences dans Kovelyx, sans réseau Nuvio
         shell: bash
         run: |
           set -euo pipefail
-          for path in apps/tv apps/mobile apps/desktop; do
-            test -s "$path/LICENSE"
-            test -s "$path/.kovelyx-source.txt"
-            echo "$path OK: $(cat "$path/.kovelyx-source.txt")"
+          for app in tv mobile desktop; do
+            test -s "apps/$app/LICENSE" || { echo "::error::Licence manquante : $app"; exit 1; }
+            test -s "apps/$app/.kovelyx-source.txt" || { echo "::error::Provenance manquante : $app"; exit 1; }
+            count="$(find "apps/$app" -type f -name '*.kt' | wc -l)"
+            (( count > 50 )) || { echo "::error::Sources Kotlin incomplètes : $app"; exit 1; }
+            echo "### apps/$app — $count fichiers Kotlin sauvegardés" >> "$GITHUB_STEP_SUMMARY"
           done
           test -s apps/mobile/MPVKit/LICENSE
           test -s apps/desktop/MPVKit/LICENSE
-          echo "Import source fini. Les builds et la chaîne vidéo restent à valider."
+          echo "Archives autonomes présentes, aucun téléchargement depuis l'amont." >> "$GITHUB_STEP_SUMMARY"
