@@ -39,6 +39,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/restore-android-signing.py
+      - name: Calculer le certificat public de la cle enregistree
+        shell: bash
+        run: |
+          set -euo pipefail
           keytool -list -v -keystore "$RUNNER_TEMP/kovelyx-release.jks" \
             -storepass "$KOVELYX_RELEASE_STORE_PASSWORD" \
             -alias "$KOVELYX_RELEASE_KEY_ALIAS" >/tmp/kovelyx-certificat.txt
