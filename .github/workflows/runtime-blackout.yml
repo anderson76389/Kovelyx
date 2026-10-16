@@ -28,12 +28,14 @@ jobs:
             api_target: google_apis
             api_arch: x86_64
             device_profile: pixel_6
+            emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim'
           - platform: tv
             release_prefix: tv-preview-
             apk_glob: 'Kovelyx-TV-*-universal.apk'
             api_target: google-tv
             api_arch: x86
             device_profile: tv_1080p
+            emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
     steps:
       - uses: actions/checkout@v4
       - name: Telecharger la derniere APK de la plateforme dans les Releases Kovelyx
@@ -92,7 +94,7 @@ jobs:
           heap-size: 512M
           disk-size: 6144M
           disable-animations: true
-          emulator-options: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
+          emulator-options: ${{ matrix.emulator_dns }}
           script: bash scripts/tests/runtime-blackout-android.sh ${{ matrix.platform }}
       - name: Archiver DNS, screenshots, checksums et journaux de l'application
         if: always()
