@@ -107,9 +107,11 @@ jobs:
           file="$prefix-$tag-universal.apk"
           cp "$apk" "dist/$file"
           (cd dist && sha256sum "$file" > "$file.sha256")
-          echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
-          echo "KOVELYX_RELEASE_APK=$file" >> "$GITHUB_ENV"
-          echo "KOVELYX_RELEASE_VERSION_CODE=$version_code" >> "$GITHUB_ENV"
+          {
+            echo "KOVELYX_RELEASE_TAG=$tag"
+            echo "KOVELYX_RELEASE_APK=$file"
+            echo "KOVELYX_RELEASE_VERSION_CODE=$version_code"
+          } >> "$GITHUB_ENV"
           echo "APK : $file (versionCode $version_code), certificat identique a l'empreinte privee en secret." >> "$GITHUB_STEP_SUMMARY"
       - name: Publier la version signee seulement si le depot l'autorise
         shell: bash
