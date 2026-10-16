@@ -52,7 +52,11 @@ internal object VersionUtils {
 
     fun normalize(raw: String?): String {
         if (raw.isNullOrBlank()) return ""
-        return raw.trim().removePrefix("v").removePrefix("V")
+        val trimmed = raw.trim()
+        val platformVersion = if (trimmed.startsWith("android-", ignoreCase = true)) {
+            trimmed.substring(8)
+        } else trimmed
+        return platformVersion.removePrefix("v").removePrefix("V")
     }
 
     fun parse(raw: String?): SemanticVersion? {
