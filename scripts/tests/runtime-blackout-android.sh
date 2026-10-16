@@ -33,7 +33,7 @@ fi
 # L'AVD peut annoncer son boot avant que sa pile reseau soit disponible.
 OTHER_DNS=""
 for attempt in 1 2 3 4 5 6 7; do
- OTHER_DNS="$(adb shell ping -4 -c 1 -W 2 api.github.com 2>&1 || true)"
+ OTHER_DNS="$(adb shell ping -c 1 -W 2 api.github.com 2>&1 || true)"
  if grep -Eq '[1-9][0-9]*[.][0-9]+[.][0-9]+[.][0-9]+' <<< "$OTHER_DNS" &&
     ! grep -Eq '0[.]0[.]0[.]0|127[.]0[.]0[.]1' <<< "$OTHER_DNS"; then
   echo "GitHub DNS: $OTHER_DNS"
