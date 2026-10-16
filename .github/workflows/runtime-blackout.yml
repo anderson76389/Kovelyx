@@ -28,7 +28,7 @@ jobs:
             api_target: google_apis
             api_arch: x86_64
             device_profile: pixel_6
-            emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim'
+            emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
           - platform: tv
             release_prefix: tv-preview-
             apk_glob: 'Kovelyx-TV-*-universal.apk'
