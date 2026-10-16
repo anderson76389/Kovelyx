@@ -75,3 +75,43 @@ jobs:
           path: vendor/engine/platform/jvm/build/libs/*.jar
           if-no-files-found: error
           retention-days: 30
+
+  cpp-full-upstream-blackout:
+    name: Moteur P2P complet - reconstruire sans dépôts NuvioMedia
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Paquets de compilation opensource
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ninja-build cmake libssl-dev zlib1g-dev git
+      - name: Rendre les serveurs Nuvio inaccessibles
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts >/dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts >/dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+      - name: Compiler le code source P2P avec libtorrent et Boost indépendants
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S vendor/engine -B /tmp/kovelyx-full-engine -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DNUVIO_ENGINE_BUILD_SHARED=ON \
+            -DNUVIO_ENGINE_ENABLE_LIBTORRENT=ON \
+            -DNUVIO_ENGINE_BUILD_TESTS=ON
+          cmake --build /tmp/kovelyx-full-engine --parallel 2
+          ctest --test-dir /tmp/kovelyx-full-engine --output-on-failure
+      - name: Preuve technique
+        if: success()
+        run: |
+          {
+            echo '### Cœur P2P complet reconstruit depuis les sources présentes dans Kovelyx'
+            echo '- Dépendances tierces libtorrent et Boost : sources indépendantes de NuvioMedia, épinglées.'
+            echo '- Domaines Nuvio bloqués et remotes Git NuvioMedia désactivées pendant la compilation.'
+            echo '- Ne valide pas encore la reconstruction Android AAR multi-ABI ou la DLL Windows complète.'
+          } >> "$GITHUB_STEP_SUMMARY"
