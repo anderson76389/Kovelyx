@@ -21,11 +21,13 @@ class UpdateRepository @Inject constructor(
 
             val releases = when (channel) {
                 UpdateChannel.STABLE -> {
-                    val response = gitHubReleaseApi.getLatestRelease(owner = owner, repo = repo)
+                    // Le "latest" global peut être Windows, Android mobile ou TV.
+                    // La sélection doit examiner les assets de chaque plateforme.
+                    val response = gitHubReleaseApi.getReleases(owner = owner, repo = repo)
                     if (!response.isSuccessful) {
                         error("GitHub API error: ${response.code()}")
                     }
-                    listOf(response.body() ?: error("Empty GitHub release response"))
+                    response.body() ?: error("Empty GitHub release response")
                 }
                 UpdateChannel.BETA -> {
                     val response = gitHubReleaseApi.getReleases(owner = owner, repo = repo)
