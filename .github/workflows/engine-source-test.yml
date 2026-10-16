@@ -102,6 +102,7 @@ jobs:
           cmake -S vendor/engine -B /tmp/kovelyx-full-engine -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DNUVIO_ENGINE_BUILD_SHARED=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DNUVIO_ENGINE_ENABLE_LIBTORRENT=ON \
             -DNUVIO_ENGINE_BUILD_TESTS=ON
           cmake --build /tmp/kovelyx-full-engine --parallel 2
