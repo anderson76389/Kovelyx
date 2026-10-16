@@ -16,12 +16,18 @@ adb wait-for-device
 adb shell settings put global private_dns_mode off
 OLD_DNS="$(adb shell ping -c 1 -W 2 api.nuvio.tv 2>&1 || true)"
 echo "Nuvio DNS: $OLD_DNS"
-if grep -Eq '0\.0\.0\.0|127\.0\.0\.1|::1' <<< "$OLD_DNS" && grep -qi 'api.nuvio.tv' /tmp/kovelyx-dns.log; then
- echo "DNS Nuvio repond avec une adresse locale de blocage ; requete presente dans les journaux."
-elif grep -Eqi 'unknown host|not known|no address associated|Name or service not known' <<< "$OLD_DNS" && grep -qi 'api.nuvio.tv' /tmp/kovelyx-dns.log; then
- echo "DNS Nuvio rejete dans l'emulateur ; requete prouvee dans les journaux du DNS filtrant."
+DNS_BEFORE="${KOVELYX_DNS_BASELINE:-0}"
+DNS_AFTER="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
+if (( DNS_AFTER <= DNS_BEFORE )); then
+ echo "::error::Aucune requete Nuvio de l'emulateur n'est visible dans le DNS filtre."
+ exit 1
+fi
+if grep -Eq '0\.0\.0\.0|127\.0\.0\.1|::1' <<< "$OLD_DNS"; then
+ echo "DNS Nuvio redirige vers une adresse locale par le DNS filtre."
+elif grep -Eqi 'unknown host|not known|no address associated|Name or service not known' <<< "$OLD_DNS"; then
+ echo "DNS Nuvio refuse dans l'emulateur."
 else
- echo "::error::DNS Nuvio non confirme dans l'emulateur : test invalide"
+ echo "::error::Le domaine Nuvio reste utilisable ou son blocage est indemontrable."
  exit 1
 fi
 # L'AVD peut annoncer son boot avant que sa pile reseau soit disponible.
@@ -45,9 +51,9 @@ if ! grep -Eq '[1-9][0-9]*[.][0-9]+[.][0-9]+[.][0-9]+' <<< "$OTHER_DNS" ||
  adb shell getprop net.dns2 || true
  exit 1
 fi
-# Oublier les requetes DNS du controle prealable : les suivantes viennent
-# du lancement/navigateur de Kovelyx, pas de ce script de preverification.
-sudo truncate -s 0 /tmp/kovelyx-dns.log
+# Memoire du trafic Nuvio avant le lancement de Kovelyx : la demande
+# envoyee par le test de blocage doit etre exclue du comptage final.
+APP_DNS_BEFORE="$(grep -Eci 'query\[[A-Z0-9]+\].*nuvio[.]tv' /tmp/kovelyx-dns.log || true)"
 APK="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)"
 test -s "$APK"
 sha256sum "$APK" | tee "/tmp/kovelyx-blackout-proof/$MODE.apk.sha256"
@@ -81,8 +87,9 @@ if grep -A 22 -E 'FATAL EXCEPTION|Fatal signal|Process: com\.kovelyx\.' "/tmp/ko
  echo "::error::Crash de Kovelyx détecté dans les logs Android"
  exit 1
 fi
-if grep -Eqi 'query\[[A-Z0-9]+\].*([.]|^)nuvio[.]tv' /tmp/kovelyx-dns.log; then
- echo "::error::Kovelyx a demande une resolution DNS Nuvio pendant sa navigation sans compte."
+APP_DNS_AFTER="$(grep -Eci 'query\[[A-Z0-9]+\].*nuvio[.]tv' /tmp/kovelyx-dns.log || true)"
+if (( APP_DNS_AFTER > APP_DNS_BEFORE )); then
+ echo "::error::L'APK a demande un domaine Nuvio durant la navigation sans compte."
  grep -Ei 'nuvio[.]tv' /tmp/kovelyx-dns.log | tail -n 25
  exit 1
 fi
