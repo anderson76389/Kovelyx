@@ -273,3 +273,50 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
 .release-card .release-link:hover{background:#3d2a54}
 .release-items:has([data-release-status="android"]){grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(max-width:710px){.release-items:has([data-release-status="android"]){grid-template-columns:1fr}.hero-download-note{text-align:left}}
+
+
+/* Centre de téléchargement : trois cartes, trois versions indépendantes. */
+.hero-download-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;margin-top:28px}
+.hero-download-actions .button{min-width:200px;justify-content:center;text-align:center}
+.hero-download-actions .button:hover{transform:translateY(-2px)}
+.hero-download-note{max-width:760px;margin-inline:auto;color:#bdb1d2}
+.platform-tabs{flex-wrap:wrap}
+.platform-tabs button{justify-content:center;min-height:52px}
+.platform-tabs button[data-platform="tv"] .platform-icon{color:#d1b2ff}
+.release-items,.release-items:has([data-release-status="android"]){display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.release-card{position:relative;display:flex;flex-direction:column;min-width:0;min-height:290px;overflow:hidden;border:1px solid #403457;border-radius:23px;padding:25px;background:radial-gradient(circle at 20% 0%,rgba(146,92,248,.16),transparent 60%),linear-gradient(150deg,#1b1729 0%,#10111b 100%);box-shadow:0 20px 55px #0002;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.release-card:hover{transform:translateY(-4px);border-color:#9c73ed;box-shadow:0 24px 65px rgba(58,29,91,.3)}
+.release-card::after{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;background:linear-gradient(90deg,transparent,#bb8dff,transparent);opacity:.8}
+.release-topline{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.release-topline .platform-icon{width:26px;height:26px;color:#e1ccff}
+.release-topline span{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:850;color:#c19cf5}
+.release-card h3{display:flex;flex-direction:column;align-items:flex-start;gap:6px;font-size:25px;letter-spacing:-.045em;margin:0 0 16px;line-height:1.1}
+.release-card h3 small{font-size:12px;color:#aaa2ba;font-weight:600;letter-spacing:normal}
+.release-card .release-status{min-height:0;margin:0 0 11px;color:#d3baf5;font-size:12px;line-height:1.55}
+.release-card .release-filename{margin:0 0 17px;padding:10px 12px;min-height:42px;overflow-wrap:anywhere;border-radius:9px;border:1px solid #322a42;background:#0c0d15;font-size:11px;color:#aea5c2;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.release-card .release-card-actions{margin-top:auto;display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.release-card .release-link{font-size:13px;flex:1 0 100%;min-height:47px;border-radius:11px;background:#a679ef;border:1px solid #bd96f9;color:#150d20;text-decoration:none;text-align:center}
+.release-card .release-link:hover{background:#cfb0ff}
+.release-card .msi-link,.release-card .portable-link{display:inline-block;padding:6px 1px;text-decoration:none;font-size:12px;color:#d5c2f3}
+.release-card .msi-link:hover,.release-card .portable-link:hover{text-decoration:underline}
+.release-card .msi-link[hidden],.release-card .portable-link[hidden]{display:none}
+.release-card .release-more{margin-top:18px;align-self:flex-start;color:#a99abc;font-size:11px;text-decoration:underline}
+.release-card .release-more:hover{color:#ead9ff}
+@media(max-width:980px){
+  .release-items,.release-items:has([data-release-status="android"]){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .release-card:last-child{grid-column:auto}
+}
+@media(max-width:710px){
+  .release-items,.release-items:has([data-release-status="android"]){grid-template-columns:1fr}
+  .release-card{min-height:0;padding:24px}
+  .platform-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .platform-tabs button{min-width:0;flex-direction:column;gap:5px;font-size:10px;padding:10px 6px}
+  .hero-download-actions .button{width:100%}
+}
+@media(max-width:380px){
+  .platform-tabs button{font-size:9px;line-height:1.3}
+}
+@media(prefers-reduced-motion:reduce){
+  .release-card,.hero-download-actions .button{transition:none}
+  .release-card:hover,.hero-download-actions .button:hover{transform:none}
+}
