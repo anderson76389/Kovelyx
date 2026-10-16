@@ -8,6 +8,14 @@ plugins {
     `maven-publish`
 }
 
+// Le moteur cible Java 17 : imposer aussi 17 au compilateur Kotlin, y
+// compris quand le workflow GitHub est execute avec un JDK 21.
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
 val opensslVersion = "3.5.7"
 val androidNdkVersion = "29.0.14206865"
 val engineRepository = rootProject.layout.projectDirectory.dir("../..")
