@@ -59,6 +59,20 @@ class ReleaseSelectorTest {
         assertEquals(listOf("1.1.0"), selected.map { it.tagName })
     }
 
+    @Test
+    fun signedAndroidTagsAreVersionsButDebugPreviewHashesAreNot() {
+        val releases = listOf(
+            release("android-v1.4.0-beta.3", prerelease = true),
+            release("android-preview-abcdef123456", prerelease = true),
+            release("tv-v9.9.9", prerelease = true),
+            release("android-v1.3.0")
+        )
+        assertEquals(
+            listOf("android-v1.4.0-beta.3", "android-v1.3.0"),
+            ReleaseSelector.eligibleReleases(releases, UpdateChannel.BETA).map { it.tagName }
+        )
+    }
+
     private fun release(
         tag: String,
         name: String = tag,
