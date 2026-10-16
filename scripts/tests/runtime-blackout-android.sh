@@ -69,14 +69,14 @@ adb shell pidof "$PACKAGE" || { echo "::error::Application arrêtée au démarra
 adb shell screencap -p "/sdcard/$MODE-first.png"
 adb pull "/sdcard/$MODE-first.png" "/tmp/kovelyx-blackout-proof/$MODE-first.png"
 if [[ "$MODE" == tv ]]; then
- for key in KEYCODE_DPAD_RIGHT KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER KEYCODE_BACK KEYCODE_DPAD_LEFT KEYCODE_DPAD_CENTER; do
+ for key in KEYCODE_DPAD_RIGHT KEYCODE_DPAD_DOWN KEYCODE_DPAD_CENTER KEYCODE_DPAD_UP KEYCODE_DPAD_LEFT KEYCODE_DPAD_CENTER; do
   adb shell input keyevent "$key"
   sleep 1
  done
 else
  adb shell input keyevent KEYCODE_DPAD_DOWN
  adb shell input keyevent KEYCODE_DPAD_RIGHT
- adb shell input keyevent KEYCODE_BACK
+ adb shell input keyevent KEYCODE_DPAD_UP
 fi
 sleep 8
 adb shell pidof "$PACKAGE" || { echo "::error::Application arrêtée pendant la navigation"; exit 1; }
