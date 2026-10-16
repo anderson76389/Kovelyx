@@ -51,3 +51,20 @@ jobs:
           GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
           BUILD_RUN_ID: ${{ github.event.workflow_run.id || inputs.build_run_id || '' }}
         run: bash scripts/publish-windows-preview.sh
+
+      # La publication en Releases peut être refusée (HTTP 403) même quand
+      # les installateurs sont valides. Ne pas jeter ces fichiers vérifiés.
+      - name: Conserver les installateurs si GitHub bloque la Release
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-windows-publication-secours
+          path: |
+            dist/*.exe
+            dist/*.exe.sha256
+            dist/*.msi
+            dist/*.msi.sha256
+            dist/*.zip
+            dist/*.zip.sha256
+          if-no-files-found: ignore
+          retention-days: 7
