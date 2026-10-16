@@ -60,6 +60,20 @@ class ReleaseSelectorTest {
         assertEquals(listOf("1.1.0"), selected.map { it.tagName })
     }
 
+    @Test
+    fun signedTvTagsAreVersionsButDebugPreviewHashesAreNot() {
+        val releases = listOf(
+            release("tv-v1.4.0-beta.3", prerelease = true),
+            release("tv-preview-abcdef123456", prerelease = true),
+            release("android-v9.9.9", prerelease = true),
+            release("tv-v1.3.0")
+        )
+        assertEquals(
+            listOf("tv-v1.4.0-beta.3", "tv-v1.3.0"),
+            ReleaseSelector.eligibleReleases(releases, UpdateChannel.BETA).map { it.tagName }
+        )
+    }
+
     private fun release(
         tag: String,
         name: String = tag,
