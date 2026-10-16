@@ -16,8 +16,8 @@ adb wait-for-device
 adb shell settings put global private_dns_mode off
 OLD_DNS="$(adb shell ping -c 1 -W 2 api.nuvio.tv 2>&1 || true)"
 echo "Nuvio DNS: $OLD_DNS"
-if grep -q '0\.0\.0\.0' <<< "$OLD_DNS"; then
- echo "DNS Nuvio repond avec l'adresse de blocage."
+if grep -Eq '0\.0\.0\.0|127\.0\.0\.1|::1' <<< "$OLD_DNS" && grep -qi 'api.nuvio.tv' /tmp/kovelyx-dns.log; then
+ echo "DNS Nuvio repond avec une adresse locale de blocage ; requete presente dans les journaux."
 elif grep -Eqi 'unknown host|not known|no address associated|Name or service not known' <<< "$OLD_DNS" && grep -qi 'api.nuvio.tv' /tmp/kovelyx-dns.log; then
  echo "DNS Nuvio rejete dans l'emulateur ; requete prouvee dans les journaux du DNS filtrant."
 else
