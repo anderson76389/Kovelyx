@@ -22,6 +22,13 @@ option(
     ${NUVIO_ENGINE_BUILD_TESTS_DEFAULT}
 )
 
+# La version P2P partagée lie libtorrent statique : ses objets doivent être
+# compilés en PIC sous Linux, sinon ld échoue avec R_X86_64_TPOFF32.
+# L'option est conservée dans le projet source, pas seulement dans la CI.
+if(NUVIO_ENGINE_BUILD_SHARED AND NUVIO_ENGINE_ENABLE_LIBTORRENT)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 set(NUVIO_ENGINE_LIBRARY_TYPE STATIC)
 if(NUVIO_ENGINE_BUILD_SHARED)
     set(NUVIO_ENGINE_LIBRARY_TYPE SHARED)
