@@ -7,10 +7,10 @@ Trois plateformes, **un seul dépôt** et des fichiers d’installation distinct
 | Plateforme | Fichier | Contrôle effectué | Téléchargement |
 |---|---|---|---|
 | Windows x64 | `Kovelyx-Windows-Setup-v0.1.377-alpha.exe` | EXE, MSI et ZIP portable publiés ; lancement de la version portable avec les DNS Nuvio bloqués sur runner Windows réussi. Ne démontre pas la lecture de toutes les sources. | [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.377-alpha) |
-| Android mobile 7+ | `Kovelyx-Android-android-preview-d863d3012c93.apk` | APK publiée et compilation indépendante réussie ; la preuve du test runtime avec DNS filtré est encore incomplète. | [APK Android](https://github.com/anderson76389/Kovelyx/releases/tag/android-preview-d863d3012c93) |
+| Android mobile 7+ | `Kovelyx-Android-android-preview-d863d3012c93.apk` | APK publiée, compilation autonome réussie, puis installation, démarrage et navigation sur émulateur avec DNS Nuvio bloqué validés ; pas encore de test multimédia complet. | [APK Android](https://github.com/anderson76389/Kovelyx/releases/tag/android-preview-d863d3012c93) |
 | Android TV / Google TV 7+ | `Kovelyx-TV-tv-preview-58bf54ff901a-universal.apk` | APK universelle publiée, installée et lancée sur émulateur TV, navigation télécommande sous filtrage DNS Nuvio réussie. | [APK Android TV](https://github.com/anderson76389/Kovelyx/releases/tag/tv-preview-58bf54ff901a) |
 
-**Preuve runtime TV :** [exécution GitHub Actions](https://github.com/anderson76389/Kovelyx/actions/runs/38921298221). **Preuve Windows :** [démarrage réel sous blocage Nuvio](https://github.com/anderson76389/Kovelyx/actions/runs/38918493653). Les tests sont limités à ces versions et scénarios, pas à toutes les fonctions multimédias.
+**Preuve runtime mobile et TV :** [exécution GitHub Actions](https://github.com/anderson76389/Kovelyx/actions/runs/38922387126). **Preuve Windows :** [démarrage réel sous blocage Nuvio](https://github.com/anderson76389/Kovelyx/actions/runs/38918493653). Les tests sont limités à ces versions et scénarios, pas à toutes les fonctions multimédias.
 
 Les APK sont **des préversions Debug** : ils doivent encore être testés avec des sources, des profils et des appareils réels. **Ne pas installer la version Android mobile sur une TV Box à la place de la version TV.** Les deux utilisent des interfaces et des identifiants différents.
 
