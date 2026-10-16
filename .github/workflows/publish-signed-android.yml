@@ -1,0 +1,150 @@
+name: Publier APK Android signes par la cle Kovelyx (opt-in)
+# Publication des versions release, jamais depuis une cle Debug ephemeral.
+# Lancer manuellement APRES ajout des secrets prives. Ne remplace pas les APK existants.
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Plateforme a publier
+        required: true
+        type: choice
+        options: [all, mobile, tv]
+        default: all
+permissions:
+  contents: write
+concurrency:
+  group: kovelyx-signed-android-releases
+  cancel-in-progress: false
+jobs:
+  build-and-publish:
+    name: APK release signe - ${{ matrix.platform }}
+    if: ${{ inputs.platform == 'all' || inputs.platform == matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [mobile, tv]
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      KOVELYX_ANDROID_KEYSTORE_BASE64: ${{ secrets.KOVELYX_ANDROID_KEYSTORE_BASE64 }}
+      KOVELYX_RELEASE_STORE_PASSWORD: ${{ secrets.KOVELYX_RELEASE_STORE_PASSWORD }}
+      KOVELYX_RELEASE_KEY_ALIAS: ${{ secrets.KOVELYX_RELEASE_KEY_ALIAS }}
+      KOVELYX_RELEASE_KEY_PASSWORD: ${{ secrets.KOVELYX_RELEASE_KEY_PASSWORD }}
+      KOVELYX_ANDROID_CERT_SHA256: ${{ secrets.KOVELYX_ANDROID_CERT_SHA256 }}
+      CI_SIGNED_ANDROID: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verifier les cinq secrets et restaurer la cle privee seulement en RAM runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in KOVELYX_ANDROID_KEYSTORE_BASE64 KOVELYX_RELEASE_STORE_PASSWORD KOVELYX_RELEASE_KEY_ALIAS KOVELYX_RELEASE_KEY_PASSWORD KOVELYX_ANDROID_CERT_SHA256; do
+            test -n "$(! test -z "$(printenv "$name")" && echo defined)" || {
+              echo "::error::Secret manquant : $name. Voir docs/SIGNATURE_ANDROID.md"
+              exit 1
+            }
+          done
+          chmod 700 "$RUNNER_TEMP"
+          export KOVELYX_RELEASE_STORE_FILE="$RUNNER_TEMP/kovelyx-release.jks"
+          echo "$KOVELYX_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KOVELYX_RELEASE_STORE_FILE"
+          chmod 600 "$KOVELYX_RELEASE_STORE_FILE"
+          keytool -list -keystore "$KOVELYX_RELEASE_STORE_FILE" \
+            -storepass "$KOVELYX_RELEASE_STORE_PASSWORD" \
+            -alias "$KOVELYX_RELEASE_KEY_ALIAS" >/dev/null
+          echo "KOVELYX_RELEASE_STORE_FILE=$KOVELYX_RELEASE_STORE_FILE" >> "$GITHUB_ENV"
+      - name: Compiler le paquet release de Kovelyx
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.platform }}" == "mobile" ]]; then
+            cd apps/mobile
+            chmod +x gradlew
+            ./gradlew :androidApp:assembleFullRelease --no-daemon --max-workers=2 \
+              -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
+          else
+            cd apps/tv
+            chmod +x gradlew
+            ./gradlew :app:assembleFullRelease --no-daemon --max-workers=1 \
+              -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+          fi
+      - name: Valider package, signatures, empreinte de certificat et identite
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          if [[ "${{ matrix.platform }}" == mobile ]]; then
+            output=apps/mobile/androidApp/build/outputs/apk/full/release
+            application_id=com.kovelyx.mobile
+            prefix=Kovelyx-Android
+          else
+            output=apps/tv/app/build/outputs/apk/full/release
+            application_id=com.kovelyx.tv
+            prefix=Kovelyx-TV
+          fi
+          mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -name '*universal*release*.apk' -print0)
+          [[ "${{ matrix.platform }}" == mobile || "${{ matrix.platform }}" == tv ]] || exit 1
+          [[ "$(( #{#apks[@]} ))" == 1 ]] || { echo "::error::APK universel manquant ou ambigu"; exit 1; }
+          apk="#{apks[0]}"
+          unzip -tq "$apk"
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose "$apk" >/dev/null
+          "$tools/apksigner" verify --print-certs "$apk" > /tmp/kv-signer.txt
+          actual="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' /tmp/kv-signer.txt | head -n1 | tr '[:upper:]' '[:lower:]')"
+          expected="$(echo "$KOVELYX_ANDROID_CERT_SHA256" | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          [[ -n "$actual" && "$actual" == "$expected" ]] || { echo "::error::Le certificat APK ne correspond pas au certificat Kovelyx epingle"; exit 1; }
+          "$tools/aapt" dump badging "$apk" > /tmp/kv-badging.txt
+          grep -F "package: name='$application_id'" /tmp/kv-badging.txt
+          version_name="$(sed -n "s/.*versionName='\([^']*\)'.*/\1/p" /tmp/kv-badging.txt | head -n1)"
+          version_code="$(sed -n "s/.*versionCode='\([^']*\)'.*/\1/p" /tmp/kv-badging.txt | head -n1)"
+          [[ "$version_name" =~ ^[0-9]+[.][0-9]+[.][0-9]+(-[0-9A-Za-z.-]+)?$ && "$version_code" =~ ^[1-9][0-9]*$ ]] || {
+            echo "::error::Version Android non conforme au format SemVer"; exit 1;
+          }
+          tag="v$version_name"
+          file="$prefix-$tag-universal.apk"
+          cp "$apk" "dist/$file"
+          (cd dist && sha256sum "$file" > "$file.sha256")
+          echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+          echo "KOVELYX_RELEASE_APK=$file" >> "$GITHUB_ENV"
+          echo "KOVELYX_RELEASE_VERSION_CODE=$version_code" >> "$GITHUB_ENV"
+          echo "APK : $file (versionCode $version_code), certificat identique a l'empreinte privee en secret." >> "$GITHUB_STEP_SUMMARY"
+      - name: Publier la version signee seulement si le depot l'autorise
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          tag="$KOVELYX_RELEASE_TAG"
+          file="$KOVELYX_RELEASE_APK"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            is_pre="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)"
+            [[ "$is_pre" == true ]] || { echo "::error::Release stable existante : aucun changement automatique"; exit 1; }
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fxq "$file"; then
+              echo "::error::Cette version APK existe deja. Incrementez versionName et versionCode avant un nouveau build."
+              exit 1
+            fi
+            gh release upload "$tag" "dist/$file" "dist/$file.sha256" --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$tag" "dist/$file" "dist/$file.sha256" --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "Kovelyx Android signe - $tag" --prerelease \
+              --notes "APK Release signe avec le certificat Kovelyx permanent. VersionCode : $KOVELYX_RELEASE_VERSION_CODE. Preversion : tests reels et sauvegarde recommandes. Versions Debug anterieures non compatibles avec une mise a jour directe."
+          fi
+          echo "Release signee disponible : https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag" >> "$GITHUB_STEP_SUMMARY"
+      - name: Sauvegarder les APK signes si GitHub renvoie HTTP 403
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-signed-${{ matrix.platform }}-backup
+          path: |
+            dist/*.apk
+            dist/*.apk.sha256
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Supprimer la copie locale de la cle du runner
+        if: ${{ always() }}
+        shell: bash
+        run: rm -f "$RUNNER_TEMP/kovelyx-release.jks"
