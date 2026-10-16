@@ -75,7 +75,8 @@ jobs:
           sudo chmod 644 /tmp/kovelyx-dns.log
           dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
           dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$'
-          sudo truncate -s 0 /tmp/kovelyx-dns.log
+          initial_nuvio_queries="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
+          echo "KOVELYX_DNS_BASELINE=$initial_nuvio_queries" >> "$GITHUB_ENV"
           echo "Resolution locale du DNS de filtrage validee."
       - name: Autoriser l'acceleration materielle KVM
         run: if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
@@ -103,46 +104,7 @@ jobs:
             /tmp/kovelyx-dns.log
           if-no-files-found: ignore
           retention-days: 21
-      - name: Rediger les limites du test
-        if: success()
-        run: |
-          {
-            echo "### ${{ matrix.platform }} : test Nuvio DNS bloque reussi"
-            echo '- Un APK provenant des Releases Kovelyx a demarre et accepte une navigation de base.'
-            echo '- Le domaine historique renvoie une adresse de blocage dans l emulation, les services tiers restent resolubles.'
-            echo '- Cette preuve ne valide pas des catalogues/debridage exigeant une cle ou un compte, ni tous les codecs.'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          # Repartir d'un journal vide : les prochaines requetes doivent venir
-          # de l'emulateur, pas des commandes de prevalidation faites sur l'hote.
-          sudo truncate -s 0 /tmp/kovelyx-dns.log
-          echo "Resolution locale du DNS de filtrage validee."
-      - name: Autoriser l'acceleration materielle KVM
-        run: if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
-      - name: Tester sur Android avec filtrage DNS Nuvio, autres services autorises
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: ${{ matrix.api_target }}
-          arch: ${{ matrix.api_arch }}
-          profile: ${{ matrix.device_profile }}
-          cores: 2
-          ram-size: 3072M
-          heap-size: 512M
-          disk-size: 6144M
-          disable-animations: true
-          emulator-options: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
-          script: bash scripts/tests/runtime-blackout-android.sh ${{ matrix.platform }}
-      - name: Archiver DNS, screenshots, checksums et journaux de l'application
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kovelyx-nuvio-blocked-emulator-${{ matrix.platform }}
-          path: |
-            /tmp/kovelyx-blackout-proof/
-            /tmp/kovelyx-dns.log
-          if-no-files-found: ignore
-          retention-days: 21
+          overwrite: true
       - name: Rediger les limites du test
         if: success()
         run: |
