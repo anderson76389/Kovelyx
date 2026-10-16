@@ -23,6 +23,23 @@ Ces résultats sont conservés avec le numéro d'exécution afin de ne pas confo
 
 **Ce que cela ne prouve pas encore :** une disparition de Nuvio ne pourrait jamais affecter un chemin réseau caché dans une bibliothèque native ou un service non couvert par les tests. Il faut aussi reconstruire les lecteurs natifs intégraux et valider les mises à jour et la reprise des données.
 
+### Contrôle des workflows et des binaires déjà sauvegardés
+
+Le **16 octobre 2026**, les **27 workflows actifs** de `.github/workflows/` ont été examinés pour les URLs explicites NuvioMedia et `nuvio.tv`. Les seules références relevées dans les workflows actifs correspondaient à des **règles qui interdisent volontairement ces domaines pendant les tests**. Les anciens workflows d'import ont été remplacés par des vérifications de fichiers locaux ; ils ne téléchargent plus de sources Nuvio.
+
+Copies locales relevées dans le dépôt :
+
+- `apps/tv/app/libs/` : **15 fichiers**, dont le moteur Android `lib-nuvio-engine-android-0.1.4.aar` (nom historique).
+- `apps/mobile/composeApp/libs/` : **13 fichiers**, dont une copie du même moteur Android.
+- `apps/desktop/composeApp/libs/` : **14 fichiers**, dont le JAR JVM du moteur.
+- `apps/desktop/composeApp/src/desktopMain/native/windows/engine/nuvio_engine.dll` : copie du moteur natif Windows présente.
+- `vendor/engine/` : **145 fichiers** pour les sources du moteur, dont CMake, fichiers C++, tests et notices de licence.
+- Le lecteur `libmpv-2.dll` (115 320 296 octets) est restauré **depuis les propres Releases Kovelyx**, avec vérification de sa taille et du SHA-256 `07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906`.
+
+**Interprétation :** même si NuvioMedia efface ses dépôts, la disparition de l'origine ne supprime pas ces copies stockées chez Kovelyx. Les liens anciens conservés à titre de provenance ne sont pas des liens téléchargés pendant les builds ordinaires. Pour protéger aussi l'hypothèse distincte d'une disparition de GitHub/Kovelyx, conserver **une seconde sauvegarde personnelle des sources, des APK, de l'EXE et de la DLL MPV**.
+
+La disponibilité de fichiers binaires ne prouve toujours pas que chacun peut être reconstruit exactement à partir de sources correspondantes ; le job P2P complet est dédié à cette vérification.
+
 ### Références Nuvio qui ne sont PAS des dépendances réseau
 
 Les packages historiques `com.nuvio.*`, chemins de cache `nuvio-engine`, licences GPL et documents `docs/PROVENANCE.md` servent à la compatibilité et à l'attribution. Les renommer sans migration pourrait faire perdre des réglages et casser l'interface Java/native. La présence d'un lien vers les sources historiques dans une attribution ne signifie pas que Kovelyx télécharge ces sources.
