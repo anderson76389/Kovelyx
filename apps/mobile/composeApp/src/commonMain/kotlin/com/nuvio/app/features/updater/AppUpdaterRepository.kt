@@ -57,7 +57,7 @@ internal object AppUpdaterRepository {
     }
 
     internal fun releasePath(channel: UpdateChannel): String = when (channel) {
-        UpdateChannel.STABLE -> "releases/latest"
+        UpdateChannel.STABLE -> "releases?per_page=100"
         UpdateChannel.BETA -> "releases?per_page=100"
     }
 
@@ -66,10 +66,7 @@ internal object AppUpdaterRepository {
         channel: UpdateChannel,
         supportedAbis: List<String>,
     ): AppUpdate? {
-        val releases = when (channel) {
-            UpdateChannel.STABLE -> listOf(json.decodeFromString<GitHubReleaseDto>(responseBody))
-            UpdateChannel.BETA -> json.decodeFromString<List<GitHubReleaseDto>>(responseBody)
-        }
+        val releases = json.decodeFromString<List<GitHubReleaseDto>>(responseBody)
         return ReleaseSelector.eligibleReleases(releases, channel).firstNotNullOfOrNull { release ->
             val asset = chooseBestApkAsset(release.assets, supportedAbis) ?: return@firstNotNullOfOrNull null
             val tag = release.tagName?.takeIf { VersionUtils.parse(it) != null }
