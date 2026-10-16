@@ -34,6 +34,12 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Injecter le Supabase personnel Kovelyx (facultatif)
+        shell: bash
+        env:
+          KOVELYX_CLOUD_URL: ${{ secrets.KOVELYX_CLOUD_URL }}
+          KOVELYX_CLOUD_PUBLISHABLE_KEY: ${{ secrets.KOVELYX_CLOUD_PUBLISHABLE_KEY }}
+        run: python3 scripts/configure-cloud-build.py --platform ${{ matrix.platform }}
       - name: Restaurer la signature depuis UN secret GitHub
         shell: bash
         run: |
