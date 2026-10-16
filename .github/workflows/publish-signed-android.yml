@@ -25,11 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 150
     env:
-      KOVELYX_ANDROID_KEYSTORE_BASE64: ${{ secrets.KOVELYX_ANDROID_KEYSTORE_BASE64 }}
-      KOVELYX_RELEASE_STORE_PASSWORD: ${{ secrets.KOVELYX_RELEASE_STORE_PASSWORD }}
-      KOVELYX_RELEASE_KEY_ALIAS: ${{ secrets.KOVELYX_RELEASE_KEY_ALIAS }}
-      KOVELYX_RELEASE_KEY_PASSWORD: ${{ secrets.KOVELYX_RELEASE_KEY_PASSWORD }}
-      KOVELYX_ANDROID_CERT_SHA256: ${{ secrets.KOVELYX_ANDROID_CERT_SHA256 }}
+      KOVELYX_ANDROID_SIGNING_BUNDLE: ${{ secrets.KOVELYX_ANDROID_SIGNING_BUNDLE }}
       CI_SIGNED_ANDROID: 'true'
     steps:
       - uses: actions/checkout@v4
@@ -38,24 +34,17 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Verifier les cinq secrets et restaurer la cle privee seulement en RAM runner
+      - name: Restaurer la signature depuis UN secret GitHub
         shell: bash
         run: |
           set -euo pipefail
-          for name in KOVELYX_ANDROID_KEYSTORE_BASE64 KOVELYX_RELEASE_STORE_PASSWORD KOVELYX_RELEASE_KEY_ALIAS KOVELYX_RELEASE_KEY_PASSWORD KOVELYX_ANDROID_CERT_SHA256; do
-            [[ -n "$(printenv "$name")" ]] || {
-              echo "::error::Secret manquant : $name. Voir docs/SIGNATURE_ANDROID.md"
-              exit 1
-            }
-          done
-          chmod 700 "$RUNNER_TEMP"
-          export KOVELYX_RELEASE_STORE_FILE="$RUNNER_TEMP/kovelyx-release.jks"
-          echo "$KOVELYX_ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KOVELYX_RELEASE_STORE_FILE"
-          chmod 600 "$KOVELYX_RELEASE_STORE_FILE"
-          keytool -list -keystore "$KOVELYX_RELEASE_STORE_FILE" \
+          python3 scripts/restore-android-signing.py
+          keytool -list -v -keystore "$RUNNER_TEMP/kovelyx-release.jks" \
             -storepass "$KOVELYX_RELEASE_STORE_PASSWORD" \
-            -alias "$KOVELYX_RELEASE_KEY_ALIAS" >/dev/null
-          echo "KOVELYX_RELEASE_STORE_FILE=$KOVELYX_RELEASE_STORE_FILE" >> "$GITHUB_ENV"
+            -alias "$KOVELYX_RELEASE_KEY_ALIAS" >/tmp/kovelyx-certificat.txt
+          fp="$(sed -n 's/.*SHA256: //p' /tmp/kovelyx-certificat.txt | tr -d ':[:space:]')"
+          [[ "$fp" =~ ^[a-fA-F0-9]{64}$ ]] || { echo "::error::Certificat invalide"; exit 1; }
+          echo "KOVELYX_ANDROID_CERT_SHA256=$fp" >> "$GITHUB_ENV"
       - name: Compiler le paquet release de Kovelyx
         shell: bash
         run: |
