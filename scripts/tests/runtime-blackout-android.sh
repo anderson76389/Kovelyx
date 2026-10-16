@@ -24,14 +24,25 @@ else
  echo "::error::DNS Nuvio non confirme dans l'emulateur : test invalide"
  exit 1
 fi
-OTHER_DNS="$(adb shell ping -c 1 -W 2 api.github.com 2>&1 || true)"
-echo "GitHub DNS: $OTHER_DNS"
-if ! grep -Eq '[1-9][0-9]*\.[0-9]+\.[0-9]+\.[0-9]+' <<< "$OTHER_DNS"; then
- echo "::error::Résolution DNS des autres services absente"
- exit 1
-fi
-if grep -Eq '0\.0\.0\.0|127\.0\.0\.1' <<< "$OTHER_DNS"; then
- echo "::error::DNS tiers bloqué aussi ; test invalide"
+# L'AVD peut annoncer son boot avant que sa pile reseau soit disponible.
+OTHER_DNS=""
+for attempt in 1 2 3 4 5 6 7; do
+ OTHER_DNS="$(adb shell ping -4 -c 1 -W 2 api.github.com 2>&1 || true)"
+ if grep -Eq '[1-9][0-9]*[.][0-9]+[.][0-9]+[.][0-9]+' <<< "$OTHER_DNS" &&
+    ! grep -Eq '0[.]0[.]0[.]0|127[.]0[.]0[.]1' <<< "$OTHER_DNS"; then
+  echo "GitHub DNS: $OTHER_DNS"
+  break
+ fi
+ echo "Attente de la resolution DNS des services tiers ($attempt) : $OTHER_DNS"
+ sleep 8
+done
+if ! grep -Eq '[1-9][0-9]*[.][0-9]+[.][0-9]+[.][0-9]+' <<< "$OTHER_DNS" ||
+   grep -Eq '0[.]0[.]0[.]0|127[.]0[.]0[.]1' <<< "$OTHER_DNS"; then
+ echo "::error::DNS tiers indisponible : test invalide, Nuvio seul ne peut pas etre isole"
+ echo "=== Journal DNS de filtrage (dernières requêtes) ==="
+ tail -n 60 /tmp/kovelyx-dns.log || true
+ adb shell getprop net.dns1 || true
+ adb shell getprop net.dns2 || true
  exit 1
 fi
 APK="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)"
