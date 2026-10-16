@@ -74,7 +74,9 @@ jobs:
           sudo dnsmasq --conf-file=/tmp/kovelyx-dnsmasq.conf --pid-file=/tmp/kovelyx-dnsmasq.pid
           sudo chmod 644 /tmp/kovelyx-dns.log
           dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
-          dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+
+          dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$'
+          sudo truncate -s 0 /tmp/kovelyx-dns.log
+          echo "Resolution locale du DNS de filtrage validee."
       - name: Autoriser l'acceleration materielle KVM
         run: if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
       - name: Tester sur Android avec filtrage DNS Nuvio, autres services autorises
