@@ -134,11 +134,29 @@ jobs:
           if (-not (Select-String -Quiet -SimpleMatch '127.0.0.1 api.nuvio.tv' -Path $hostsFile)) {
             throw 'Le domaine amont reste accessible : test non valable.'
           }
+      - name: Installer les en-têtes Microsoft WebView2 depuis NuGet officiel
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = '1.0.2739.15'
+          $destination = Join-Path $env:RUNNER_TEMP 'kovelyx-webview2'
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          $archive = Join-Path $destination 'sdk.zip'
+          Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/$version" -OutFile $archive
+          $sdk = Join-Path $destination 'sdk'
+          Expand-Archive -Path $archive -DestinationPath $sdk -Force
+          if (-not (Test-Path (Join-Path $sdk 'build/native/include/WebView2.h'))) {
+            throw 'WebView2.h manquant dans le SDK Microsoft officiel.'
+          }
+          if (-not (Test-Path (Join-Path $sdk 'build/native/x64/WebView2Loader.dll.lib'))) {
+            throw 'WebView2Loader.dll.lib manquant dans le SDK Microsoft officiel.'
+          }
+          "WEBVIEW_DIR=$sdk" >> $env:GITHUB_ENV
       - name: Exécuter les tests Desktop sans Nuvio
         shell: pwsh
         working-directory: apps/desktop
         run: |
-          .\gradlew.bat :composeApp:desktopTest --no-daemon --max-workers=2
+          .\gradlew.bat :composeApp:desktopTest --no-daemon --max-workers=2 "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Conserver la preuve de tests Desktop
         if: success()
