@@ -22,9 +22,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  tv-build-present:
+    name: Ne pas tester la TV apres un build uniquement mobile
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.detect.outputs.ready }}
+    steps:
+      - name: Verifier que le build contient une vraie compilation TV
+        id: detect
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILD_ID: ${{ github.event.workflow_run.id || inputs.build_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_ID" =~ ^[0-9]+$ ]] || exit 1
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/jobs.json
+          if jq -e '[.jobs[] | select(.name == "Android TV - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/jobs.json >/dev/null; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_EVENT_NAME" == workflow_run ]]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Compilation TV ignoree : le build initial ne contenait que les modifications mobile.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::error::Le build TV selectionne n a pas reussi."
+            exit 1
+          fi
   startup:
     name: Installer et démarrer Kovelyx TV avec la télécommande
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion == 'success') }}
+    needs: tv-build-present
+    if: ${{ needs.tv-build-present.outputs.ready == 'true' && (github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion == 'success')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
