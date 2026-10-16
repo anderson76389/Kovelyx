@@ -2,6 +2,19 @@
 
 Ce dossier sert à **mesurer** l'indépendance de trois applications. Il ne suffit pas de supprimer les noms « Nuvio » des menus et du code, ni de compiler un APK pour déclarer 100 % de réussite.
 
+## Résultat du contrôle DNS relancé le 16 octobre 2026
+
+**Réussite des deux émulateurs Android, mobile et TV**, dans [l'exécution 38922387126](https://github.com/anderson76389/Kovelyx/actions/runs/38922387126) : les deux jobs ont téléchargé leurs APK depuis les propres Releases Kovelyx, attendu la disponibilité du DNS tiers, confirmé par une **requête DNS surveillée** que les sous-domaines Nuvio étaient filtrés, puis installé, lancé et navigué dans l'application. Les journaux indiquent l'absence de nouveaux accès DNS vers Nuvio durant la navigation et l'absence de crash sur la période contrôlée.
+
+- APK mobile contrôlée : `android-preview-d863d3012c93`.
+- APK TV contrôlée : `tv-preview-58bf54ff901a`.
+- Windows : le test de lancement de la distribution portable sous blocage Nuvio est réussi dans [38918493653](https://github.com/anderson76389/Kovelyx/actions/runs/38918493653).
+- Reconstruction autonome déjà obtenue : **JAR JVM** et **cœur C++ Linux avec P2P/libtorrent actif** ; voir [38920193102](https://github.com/anderson76389/Kovelyx/actions/runs/38920193102) pour le statut du dernier ensemble de jobs.
+- Limites : ces tests de démarrage et navigation **ne couvrent pas** toutes les lectures, codecs, extensions, API protégées, Trakt/MDBList et débridage ; la reproduction de la DLL Windows P2P intégrale et des AAR Android multi-ABI depuis des sources reste à prouver. Les comptes historiques sont volontairement exclus.
+- Mise à jour : l'updater Windows pointe uniquement sur `anderson76389/Kovelyx`, vérifie l'URL d'origine GitHub et l'empreinte SHA-256 ; toutefois la publication d'une **nouvelle** Release Windows a rencontré un HTTP 403 en [38921809378](https://github.com/anderson76389/Kovelyx/actions/runs/38921809378). Le secours conserve les installateurs vérifiés en artefact éphémère ; les droits GitHub de publication doivent être corrigés pour reprendre l'auto-publication.
+
+**Conclusion précise :** la disparition des domaines et dépôts de Nuvio ne bloque pas le démarrage et la navigation basique testés de ces trois applications. Ne pas en déduire une garantie totale pour chaque service, extension, moteur natif et future mise à jour.
+
 ## Résultats factuels de l'audit au 16 octobre 2026 (hors comptes)
 
 ### Complément : tests du moteur natif et lancement des exécutables
