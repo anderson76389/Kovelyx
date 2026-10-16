@@ -1,5 +1,7 @@
 # Kovelyx — dossier de preuve d'indépendance vis-à-vis de Nuvio
 
+> **État mis à jour le 17 octobre 2026 :** les trois démarrages sans Nuvio sont démontrés, **pas** l'indépendance de toutes les fonctions. Des usages Supabase au-delà de l'authentification, deux reconstructions natives incomplètes et des mises à jour APK Preview non compatibles restent à qualifier. Lire le [bilan croisé Windows / Android / TV](./AUDIT_INDEPENDANCE_3_VERSIONS.md) avant toute déclaration « 100 % autonome hors comptes ».
+
 Ce dossier sert à **mesurer** l'indépendance de trois applications. Il ne suffit pas de supprimer les noms « Nuvio » des menus et du code, ni de compiler un APK pour déclarer 100 % de réussite.
 
 ## Résultat du contrôle DNS relancé le 16 octobre 2026
