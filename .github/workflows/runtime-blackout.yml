@@ -1,0 +1,111 @@
+name: Tester les APK Kovelyx avec les DNS Nuvio interdits
+
+# Smoke tests d'execution reelle : catalogue et video avec API privee ne sont
+# pas certifies par ce test. Voir docs/PREUVE_INDEPENDANCE.md.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/runtime-blackout.yml'
+      - 'scripts/tests/runtime-blackout-android.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emulator-blackout:
+    name: DNS Nuvio bloque sur emulateur - ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: mobile
+            release_prefix: android-preview-
+            apk_glob: 'Kovelyx-Android-*.apk'
+            api_target: google_apis
+            api_arch: x86_64
+            device_profile: pixel_6
+          - platform: tv
+            release_prefix: tv-preview-
+            apk_glob: 'Kovelyx-TV-*-universal.apk'
+            api_target: google-tv
+            api_arch: x86
+            device_profile: tv_1080p
+    steps:
+      - uses: actions/checkout@v4
+      - name: Telecharger la derniere APK de la plateforme dans les Releases Kovelyx
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PREFIX: ${{ matrix.release_prefix }}
+          APK_GLOB: ${{ matrix.apk_glob }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > /tmp/kovelyx-releases.json
+          tag="$(jq -r --arg prefix "$RELEASE_PREFIX" '[.[] | select(.draft == false and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .tag_name // empty' /tmp/kovelyx-releases.json)"
+          test -n "$tag" || { echo "::error::Aucune Release APK Kovelyx pour $RELEASE_PREFIX"; exit 1; }
+          echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+          mkdir -p /tmp/kovelyx-runtime-apk
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern "$APK_GLOB" --dir /tmp/kovelyx-runtime-apk
+          count="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' | wc -l)"
+          [[ "$count" == 1 ]] || { echo "::error::Un seul APK attendu : $count"; exit 1; }
+          unzip -tq "$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)" >/dev/null
+          echo "Version testee : $tag" >> "$GITHUB_STEP_SUMMARY"
+      - name: Installer un DNS local qui bloque uniquement nuvio.tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends dnsmasq-base dnsutils
+          cat > /tmp/kovelyx-dnsmasq.conf <<'DNS'
+          no-hosts
+          listen-address=127.0.0.1
+          bind-interfaces
+          cache-size=0
+          address=/nuvio.tv/0.0.0.0
+          address=/nuvio.tv/::
+          log-queries
+          log-facility=/tmp/kovelyx-dns.log
+          DNS
+          sudo dnsmasq --conf-file=/tmp/kovelyx-dnsmasq.conf --pid-file=/tmp/kovelyx-dnsmasq.pid
+          dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
+          dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
+          echo "Resolution locale du DNS de filtrage validee."
+      - name: Autoriser l'acceleration materielle KVM
+        run: if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+      - name: Tester sur Android avec filtrage DNS Nuvio, autres services autorises
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: ${{ matrix.api_target }}
+          arch: ${{ matrix.api_arch }}
+          profile: ${{ matrix.device_profile }}
+          cores: 2
+          ram-size: 3072M
+          heap-size: 512M
+          disk-size: 6144M
+          disable-animations: true
+          emulator-options: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
+          script: bash scripts/tests/runtime-blackout-android.sh ${{ matrix.platform }}
+      - name: Archiver DNS, screenshots, checksums et journaux de l'application
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-nuvio-blocked-emulator-${{ matrix.platform }}
+          path: |
+            /tmp/kovelyx-blackout-proof/
+            /tmp/kovelyx-dns.log
+          if-no-files-found: ignore
+          retention-days: 21
+      - name: Rediger les limites du test
+        if: success()
+        run: |
+          {
+            echo "### ${{ matrix.platform }} : test Nuvio DNS bloque reussi"
+            echo '- Un APK provenant des Releases Kovelyx a demarre et accepte une navigation de base.'
+            echo '- Le domaine historique renvoie une adresse de blocage dans l emulation, les services tiers restent resolubles.'
+            echo '- Cette preuve ne valide pas des catalogues/debridage exigeant une cle ou un compte, ni tous les codecs.'
+          } >> "$GITHUB_STEP_SUMMARY"
