@@ -1,130 +1,225 @@
 (() => {
   "use strict";
+
+  // Source unique des téléchargements : les assets de Releases réellement publiées.
+  // Jamais un tag figé, jamais un lien ZIP GitHub Actions ni le « latest » global
+  // (les Releases Windows, Android et TV sont publiées indépendamment).
   const repo = "anderson76389/Kovelyx";
   const github = "https://github.com/" + repo;
+  const releasesPage = github + "/releases";
+  const api = "https://api.github.com/repos/" + repo + "/releases?per_page=100";
+  const validDownload = /^https:\/\/github\.com\/anderson76389\/Kovelyx\/releases\/download\/[^/]+\/[^/?#]+$/i;
   const patterns = {
-    desktop: /^kovelyx[-_](?:windows|desktop)[-_].+\.(?:exe|msi)$/i,
-    android: /^kovelyx[-_](?:android|mobile)[-_].+\.apk$/i
+    desktop: /^Kovelyx-Windows-Setup-.+\.exe$/i,
+    windowsMsi: /^Kovelyx-Windows-.+\.msi$/i,
+    windowsZip: /^Kovelyx-Windows-Portable-.+\.zip$/i,
+    android: /^Kovelyx-(?:Android|Mobile)-.+\.apk$/i,
+    tv: /^Kovelyx-(?:TV|Android-TV|AndroidTV)-.+\.apk$/i
   };
+  const platformOrder = ["desktop", "android", "tv"];
   const config = {
-    desktop: {label:"01 / WINDOWS",title:"Kovelyx pour Windows.",desc:"L'application de bureau pour Windows 10 et 11. Installeur EXE complet, MSI et archive portable.",tags:["Windows x64","Installeur EXE","MSI et portable"],device:"desktop",suffix:"Windows"},
-    android: {label:"02 / ANDROID",title:"Kovelyx pour Android.",desc:"Un seul APK universel de test pour Android 7.0 ou plus récent (ARM64, ARMv7 et x86). Installation et démarrage validés sur émulateur, fonctions à confirmer sur appareils.",tags:["Android 7+","APK universel","Version de test"],device:"phone",suffix:"l'APK Android"}
-  };
-  const tabs = [...document.querySelectorAll('[role="tab"][data-platform]')];
-  const title = document.getElementById("panel-title");
-  const label = document.getElementById("panel-label");
-  const desc = document.getElementById("panel-description");
-  const tags = document.getElementById("panel-tags");
-  const visual = document.getElementById("panel-device");
-  const panel = document.getElementById("platform-showcase");
-  const link = document.getElementById("platform-download");
-  const disabled = document.getElementById("download-disabled");
-  const portableLink = document.getElementById("platform-portable");
-  const details = document.getElementById("download-meta");
-  const releaseItems = [...document.querySelectorAll("[data-release-status]")];
-  let currentPlatform = "desktop";
-  const versions = { desktop: null, android: null };
-  let availabilityState = "loading";
-  let portableAsset = null;
-  const portablePattern = /^kovelyx[-_](?:windows|desktop)[-_]portable[-_].+\.zip$/i;
-  const releaseAssetUrl = /^https:\/\/github\.com\/anderson76389\/Kovelyx\/releases\/download\//i;
-  // Secours temporaire : APK compile, signe et demarre sur emulation mais Release refusee (403).
-  // L'artefact Actions expire : ne pas presenter ce lien comme une Release directe.
-  const androidFallback = {
-    expiresAt: Date.parse("2026-11-14T15:37:57Z"),
-    createdAt: Date.parse("2026-10-15T15:38:02Z"),
-    url: github + "/actions/runs/38761977979/artifacts/11986042090",
-    selected: {
-      source: "artifact",
-      release: {tag_name:"4ac59948e05c", prerelease:true},
-      asset: {name:"Kovelyx-Android-android-preview-4ac59948e05c.apk",size:156187827,browser_download_url:github + "/actions/runs/38761977979/artifacts/11986042090"}
+    desktop: {
+      label: "01 / WINDOWS",
+      title: "Kovelyx pour Windows.",
+      desc: "Pour Windows 10 et 11 en 64 bits. Installateur EXE, MSI et version portable ZIP suivant les fichiers réellement disponibles.",
+      tags: ["Windows 10 / 11", "64 bits", "EXE · MSI · Portable"],
+      device: "desktop",
+      button: "Télécharger Windows EXE"
+    },
+    android: {
+      label: "02 / ANDROID MOBILE",
+      title: "Kovelyx pour Android.",
+      desc: "Pour téléphone ou tablette Android 7 et versions ultérieures. APK distinct de la version télévision ; installation et fonctions encore en test.",
+      tags: ["Android 7+", "Téléphones et tablettes", "APK"],
+      device: "phone",
+      button: "Télécharger l'APK Android"
+    },
+    tv: {
+      label: "03 / ANDROID TV",
+      title: "Kovelyx pour Android TV.",
+      desc: "Pour Android TV, Google TV et TV Box Android compatibles, avec une interface conçue pour la télécommande. APK séparé de la version mobile.",
+      tags: ["Android TV / Google TV", "TV Box", "Télécommande"],
+      device: "tv",
+      button: "Télécharger l'APK TV"
     }
   };
-  const heroWindows = document.getElementById("hero-windows-download");
-  const heroAndroid = document.getElementById("hero-android-download");
 
-  function sizeText(bytes) { return (bytes / 1048576).toLocaleString("fr-FR", {maximumFractionDigits:1}) + " Mo"; }
-  function findMatchingRelease(releases, platform) {
+  const $ = id => document.getElementById(id);
+  const tabs = [...document.querySelectorAll('[role="tab"][data-platform]')];
+  const releaseCards = [...document.querySelectorAll("[data-release-status]")];
+  const versions = {desktop: null, android: null, tv: null};
+  let availabilityState = "loading";
+  let currentPlatform = "desktop";
+
+  function sizeText(bytes) {
+    return (bytes / 1048576).toLocaleString("fr-FR", {maximumFractionDigits: 1}) + " Mo";
+  }
+  function releaseTime(release) {
+    const time = Date.parse(release.published_at || release.created_at || "");
+    return Number.isFinite(time) ? time : 0;
+  }
+  function validAsset(asset, pattern) {
+    return asset && typeof asset.name === "string" &&
+      asset.state === "uploaded" && Number.isFinite(asset.size) &&
+      asset.size > 1000000 &&
+      pattern.test(asset.name) && validDownload.test(asset.browser_download_url || "");
+  }
+  function findAsset(release, pattern) {
+    return (release.assets || []).find(asset => validAsset(asset, pattern)) || null;
+  }
+  function findForPlatform(releases, platform) {
     for (const release of releases) {
       if (release.draft || !Array.isArray(release.assets)) continue;
-      const candidates = platform === "desktop"
-        ? [...release.assets].sort((a, b) => Number(/\.exe$/i.test(b.name || "")) - Number(/\.exe$/i.test(a.name || "")))
-        : release.assets;
-      for (const asset of candidates) {
-        const url = asset.browser_download_url || "";
-        if (asset.state === "uploaded" && asset.size > 100000 &&
-            patterns[platform].test(asset.name) &&
-            releaseAssetUrl.test(url)) {
-          return {release, asset};
-        }
+      // Préférer l'installateur EXE au MSI pour Windows. Ne jamais confondre APK TV et mobile.
+      let asset = findAsset(release, patterns[platform]);
+      if (platform === "desktop" && !asset) asset = findAsset(release, patterns.windowsMsi);
+      if (asset) {
+        return {
+          release,
+          asset,
+          extras: platform === "desktop" ? {
+            msi: findAsset(release, patterns.windowsMsi),
+            portable: findAsset(release, patterns.windowsZip)
+          } : {}
+        };
       }
     }
     return null;
   }
-  function findPortableAsset(release) {
-    if (!release || !Array.isArray(release.assets)) return null;
-    return release.assets.find(a => a.state === "uploaded" && a.size > 100000 && portablePattern.test(a.name) && releaseAssetUrl.test(a.browser_download_url || "")) || null;
+  function versionStatus(match) {
+    if (!match) {
+      if (availabilityState === "loading") return "Recherche des versions publiées…";
+      if (availabilityState === "error") return "Vérification indisponible : voir GitHub Releases";
+      return "Aucun fichier téléchargeable publié pour cette plateforme.";
+    }
+    return match.release.tag_name + " · " +
+      (match.release.prerelease ? "Préversion expérimentale" : "Version publiée") +
+      " · " + sizeText(match.asset.size);
   }
-  function statusText(selected) {
-    if (!selected) return availabilityState === "error" ? "Vérification indisponible" : availabilityState === "loading" ? "Vérification des versions…" : "Pas de version publiée";
-    if (selected.source === "artifact") return "Build " + selected.release.tag_name + " · APK dans une archive GitHub Actions (expire le 14 novembre 2026)";
-    return selected.release.tag_name + " · " + (selected.release.prerelease ? "Préversion" : "Version publiée");
+  function safeLink(node, match, text, fallbackText) {
+    if (!node) return;
+    node.href = match ? match.asset.browser_download_url : releasesPage;
+    node.textContent = match ? text : fallbackText;
+    node.removeAttribute("download"); // Autoriser les redirections officielles GitHub.
+    node.setAttribute("rel", "noopener noreferrer");
   }
-  function isAndroidFallbackAvailable() { return Date.now() < androidFallback.expiresAt; }
-  function chooseAndroid(releaseMatch) {
-    if (!isAndroidFallbackAvailable()) return releaseMatch;
-    const time = releaseMatch ? Date.parse(releaseMatch.release.published_at || releaseMatch.release.created_at || "") : 0;
-    return time >= androidFallback.createdAt ? releaseMatch : androidFallback.selected;
-  }
-  function updateHeroLinks() {
-    if (heroWindows && versions.desktop) heroWindows.href = versions.desktop.asset.browser_download_url;
-    if (!heroAndroid) return;
-    if (versions.android) {
-      heroAndroid.href = versions.android.asset.browser_download_url;
-      heroAndroid.textContent = versions.android.source === "artifact" ? "↓ Android APK (ZIP Actions)" : "↓ Android APK (direct)";
-    } else if (!isAndroidFallbackAvailable()) {
-      heroAndroid.href = github + "/releases";
-      heroAndroid.textContent = "Android · voir les Releases";
+  function updateHero() {
+    const items = [
+      ["hero-windows-download", "desktop", "↓ Télécharger Windows EXE"],
+      ["hero-android-download", "android", "↓ Télécharger Android APK"],
+      ["hero-tv-download", "tv", "↓ Télécharger Android TV APK"]
+    ];
+    for (const [id, platform, text] of items) {
+      const match = versions[platform];
+      const title = match && platform === "desktop" && /\.msi$/i.test(match.asset.name)
+        ? "↓ Télécharger Windows MSI" : text;
+      safeLink($(id), match, title, "Voir les Releases " + (platform === "desktop" ? "Windows" : platform === "android" ? "Android" : "TV") + " ↗");
+    }
+    const note = $("hero-download-note");
+    if (note) {
+      note.textContent = availabilityState === "loaded"
+        ? "Liens récupérés depuis les fichiers publiés sur GitHub. Chaque plateforme évolue indépendamment ; les versions sont encore expérimentales."
+        : availabilityState === "error"
+          ? "GitHub ne répond pas pour le moment. Les boutons ouvrent la liste officielle des Releases."
+          : "Vérification des téléchargements publiés sur GitHub…";
     }
   }
   function setPlatform(platform, focus = false) {
     const item = config[platform];
     if (!item) return;
     currentPlatform = platform;
-    tabs.forEach(t => {
-      const isActive = t.dataset.platform === platform;
-      t.setAttribute("aria-selected", String(isActive));
-      t.tabIndex = isActive ? 0 : -1;
-      if (focus && isActive) t.focus();
+    tabs.forEach(tab => {
+      const selected = tab.dataset.platform === platform;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      if (selected && focus) tab.focus();
     });
-    panel.setAttribute("aria-labelledby", "tab-" + platform);
-    label.textContent = item.label;
-    title.textContent = item.title;
-    desc.textContent = item.desc;
-    tags.replaceChildren(...item.tags.map(tag => { const span = document.createElement("span"); span.textContent = tag; return span; }));
-    visual.className = "device " + item.device;
-    const matched = versions[platform];
-    details.textContent = matched ? statusText(matched) + " · " + sizeText(matched.asset.size) : statusText(null);
-    if (portableLink) {
-      const showPortable = platform === "desktop" && matched && portableAsset;
-      portableLink.hidden = !showPortable;
-      if (showPortable) portableLink.href = portableAsset.browser_download_url;
-      else portableLink.removeAttribute("href");
+    const panel = $("platform-showcase");
+    if (panel) panel.setAttribute("aria-labelledby", "tab-" + platform);
+    $("panel-label").textContent = item.label;
+    $("panel-title").textContent = item.title;
+    $("panel-description").textContent = item.desc;
+    $("panel-tags").replaceChildren(...item.tags.map(tag => {
+      const span = document.createElement("span");
+      span.textContent = tag;
+      return span;
+    }));
+    $("panel-device").className = "device " + item.device;
+    const match = versions[platform];
+    $("download-meta").textContent = versionStatus(match);
+    const primary = $("platform-download");
+    const disabled = $("download-disabled");
+    const portable = $("platform-portable");
+    const msi = $("platform-msi");
+    const release = $("platform-release");
+    if (release) release.href = match ? match.release.html_url : releasesPage;
+    if (portable) {
+      const asset = platform === "desktop" ? match?.extras?.portable : null;
+      portable.hidden = !asset;
+      if (asset) portable.href = asset.browser_download_url;
+      else portable.removeAttribute("href");
     }
-    if (matched) {
-      link.href = matched.asset.browser_download_url;
-      link.textContent = matched.source === "artifact" ? "↓ APK Android (ZIP Actions)" : "↓ Télécharger " +
-        (platform === "desktop" && /\.exe$/i.test(matched.asset.name) ? "l'installateur EXE" : item.suffix);
-      link.hidden = false;
+    if (msi) {
+      const asset = platform === "desktop" && /\.exe$/i.test(match?.asset?.name || "") ? match?.extras?.msi : null;
+      msi.hidden = !asset;
+      if (asset) msi.href = asset.browser_download_url;
+      else msi.removeAttribute("href");
+    }
+    if (match) {
+      primary.hidden = false;
+      primary.href = match.asset.browser_download_url;
+      primary.textContent = platform === "desktop" && /\.msi$/i.test(match.asset.name)
+        ? "↓ Télécharger Windows MSI" : "↓ " + item.button;
+      primary.setAttribute("rel", "noopener noreferrer");
       disabled.hidden = true;
     } else {
-      link.hidden = true;
-      link.removeAttribute("href");
+      primary.hidden = true;
+      primary.removeAttribute("href");
       disabled.hidden = false;
-      disabled.textContent = availabilityState === "loading" ? "Vérification en cours…" : "Bientôt disponible";
+      disabled.textContent = availabilityState === "loading"
+        ? "Vérification des fichiers…" : "Consulter les Releases ↗";
+      if (disabled.tagName === "A") disabled.href = releasesPage;
     }
   }
-  tabs.forEach((tab,index) => {
+  function renderReleaseCards() {
+    releaseCards.forEach(card => {
+      const platform = card.dataset.releaseStatus;
+      const match = versions[platform];
+      if (!Object.hasOwn(config, platform)) return;
+      const status = card.querySelector(".release-status");
+      const action = card.querySelector(".release-link");
+      const name = card.querySelector(".release-filename");
+      const more = card.querySelector(".release-more");
+      const portable = card.querySelector(".portable-link");
+      const msi = card.querySelector(".msi-link");
+      if (status) status.textContent = versionStatus(match);
+      if (name) name.textContent = match ? match.asset.name : "Fichier en cours de vérification";
+      safeLink(action, match, "↓ Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : "APK"), "Voir les Releases ↗");
+      if (more) more.href = match ? match.release.html_url : releasesPage;
+      for (const [node, asset] of [[portable, match?.extras?.portable],
+                                  [msi, platform === "desktop" && /\.exe$/i.test(match?.asset.name || "") ? match?.extras?.msi : null]]) {
+        if (node) {
+          node.hidden = !asset;
+          if (asset) node.href = asset.browser_download_url;
+          else node.removeAttribute("href");
+        }
+      }
+    });
+  }
+  function render() {
+    setPlatform(currentPlatform);
+    renderReleaseCards();
+    updateHero();
+    const mode = $("release-loading");
+    if (mode) {
+      mode.textContent = availabilityState === "loaded"
+        ? "Fichiers vérifiés parmi les Releases GitHub ; les trois versions sont suivies indépendamment."
+        : availabilityState === "error"
+          ? "Impossible de consulter les Releases en direct. Les liens ouvrent la liste GitHub officielle."
+          : "Recherche des dernières Releases…";
+    }
+  }
+  tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => setPlatform(tab.dataset.platform));
     tab.addEventListener("keydown", event => {
       let next;
@@ -134,61 +229,26 @@
       else if (event.key === "End") next = tabs.length - 1;
       else return;
       event.preventDefault();
-      setPlatform(tabs[next].dataset.platform,true);
+      setPlatform(tabs[next].dataset.platform, true);
     });
   });
-  function renderReleaseCards() {
-    releaseItems.forEach(card => {
-      const p = card.dataset.releaseStatus;
-      const match = versions[p];
-      const state = card.querySelector(".release-status");
-      const action = card.querySelector(".release-link");
-      const portableAction = card.querySelector(".portable-link");
-      if (portableAction) {
-        portableAction.hidden = !(p === "desktop" && match && portableAsset);
-        if (!portableAction.hidden) portableAction.href = portableAsset.browser_download_url;
-        else portableAction.removeAttribute("href");
-      }
-      if (match) {
-        state.textContent = statusText(match);
-        action.textContent = match.source === "artifact" ? "Récupérer l'APK (ZIP Actions) →" :
-          p === "desktop" && /\.exe$/i.test(match.asset.name) ? "Télécharger EXE →" : "Télécharger APK →";
-        action.href = match.asset.browser_download_url;
-        action.hidden = false;
-      } else {
-        state.textContent = statusText(null);
-        action.textContent = "Voir les Releases →";
-        action.href = github + "/releases";
-        action.hidden = false;
-      }
-    });
-  }
-  const mode = document.getElementById("release-loading");
-  versions.android = chooseAndroid(null);
-  setPlatform(currentPlatform);
-  renderReleaseCards();
-  updateHeroLinks();
-  fetch("https://api.github.com/repos/" + repo + "/releases?per_page=50", {
-    headers: {"Accept":"application/vnd.github+json"}
-  })
-    .then(r => { if (!r.ok) throw new Error("Échec du chargement des Releases"); return r.json(); })
+
+  render(); // Liens de secours vers /releases tant que la requête n'a pas abouti.
+  fetch(api, {headers: {"Accept": "application/vnd.github+json"}, cache: "no-store"})
+    .then(response => {
+      if (!response.ok) throw new Error("GitHub Releases indisponible");
+      return response.json();
+    })
     .then(releases => {
-      if (!Array.isArray(releases)) throw new Error("Réponse GitHub inattendue");
-      releases.sort((a,b) => new Date(b.published_at || b.created_at || 0) - new Date(a.published_at || a.created_at || 0));
-      versions.desktop = findMatchingRelease(releases, "desktop");
-      versions.android = chooseAndroid(findMatchingRelease(releases, "android"));
-      portableAsset = findPortableAsset(versions.desktop?.release);
+      if (!Array.isArray(releases)) throw new Error("Format de Releases inattendu");
+      // La dernière publication de chaque plateforme, pas la dernière Release globale.
+      releases.sort((a, b) => releaseTime(b) - releaseTime(a));
+      platformOrder.forEach(platform => { versions[platform] = findForPlatform(releases, platform); });
       availabilityState = "loaded";
-      if (mode) mode.textContent = releases.length ? "Versions vérifiées depuis GitHub Releases." : "Aucune Release Kovelyx publiée pour le moment.";
-      setPlatform(currentPlatform);
-      renderReleaseCards();
-      updateHeroLinks();
+      render();
     })
     .catch(() => {
       availabilityState = "error";
-      if (mode) mode.textContent = "GitHub est momentanément inaccessible : consultez directement les Releases.";
-      setPlatform(currentPlatform);
-      renderReleaseCards();
-      updateHeroLinks();
+      render();
     });
 })();
