@@ -119,7 +119,9 @@ jobs:
             echo "127.0.0.1 $domain" | sudo tee -a /etc/hosts >/dev/null
           done
           git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
-          sdkmanager --install 'ndk;29.0.14206865' 'cmake;4.1.2' 'platforms;android-36' 'build-tools;36.0.0'
+          sdkmanager_bin="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)"
+          [[ -x "$sdkmanager_bin" ]] || { echo "::error::Android SDK commandline-tools introuvable"; exit 1; }
+          "$sdkmanager_bin" --install 'ndk;29.0.14206865' 'cmake;4.1.2' 'platforms;android-36' 'build-tools;36.0.0'
       - name: Construire AAR depuis vendor/engine
         working-directory: vendor/engine/platform/android
         shell: bash
