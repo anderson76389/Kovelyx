@@ -12,9 +12,9 @@
 
 [**⬇️ Télécharger Windows, Android et TV**](#-télécharger-kovelyx) · [**📦 GitHub Releases**](https://github.com/anderson76389/Kovelyx/releases) · [**🌐 Site officiel**](https://anderson76389.github.io/Kovelyx/) · [**📖 Guide PC**](./docs/PC.md)
 
-[![Installer Kovelyx Windows](https://img.shields.io/badge/⬇_WINDOWS-Installer_EXE-754CE8?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases/download/v0.1.309-alpha/Kovelyx-Windows-Setup-v0.1.309-alpha.exe)
-[![APK Kovelyx Android](https://img.shields.io/badge/⬇_ANDROID-APK_universel-754CE8?style=for-the-badge&logo=android&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases/tag/android-preview-0e43cbe05227)
-[![APK Kovelyx Android TV](https://img.shields.io/badge/⬇_ANDROID_TV-APK_universel-754CE8?style=for-the-badge&logo=androidtv&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases/tag/tv-preview-9c6ec281a980)
+[![Installer Kovelyx Windows](https://img.shields.io/badge/⬇_WINDOWS-Installer_EXE-754CE8?style=for-the-badge&logo=windows11&logoColor=white)](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes)
+[![APK Kovelyx Android](https://img.shields.io/badge/⬇_ANDROID-APK_universel-754CE8?style=for-the-badge&logo=android&logoColor=white)](https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes)
+[![APK Kovelyx Android TV](https://img.shields.io/badge/⬇_ANDROID_TV-APK_universel-754CE8?style=for-the-badge&logo=androidtv&logoColor=white)](https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes)
 [![GPL--3.0](https://img.shields.io/badge/Licence-GPLv3-49435C?style=for-the-badge)](./docs/PROVENANCE.md)
 
 [![Compilation Windows](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml)
@@ -37,22 +37,22 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 
 ## ⬇️ Télécharger Kovelyx
 
-**Trois téléchargements distincts : Windows, Android mobile et Android TV.** Il s’agit de **préversions expérimentales**, pas de versions stables. La TV a été démarrée sur émulateur avec navigation à la télécommande ; il reste à tester toutes les fonctions sur appareil.
+**Trois téléchargements distincts et toujours à jour : Windows, Android mobile et Android TV.** Il s’agit de **préversions expérimentales**, pas de versions stables. La TV a été démarrée sur émulateur avec navigation à la télécommande ; il reste à tester toutes les fonctions sur appareil.
 
 <table>
 <tr>
 <td width="33%" valign="top"><h3>🪟 Windows 10 / 11 — x64</h3>
 <p><strong>EXE installable, MSI ou ZIP portable.</strong></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/download/v0.1.309-alpha/Kovelyx-Windows-Setup-v0.1.309-alpha.exe"><strong>⬇️ Télécharger Windows (.exe)</strong></a></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha">Release Windows</a></p></td>
+<p><a href="https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes"><strong>⬇️ Télécharger Windows (.exe)</strong></a></p>
+<p><a href="https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes">Release Windows</a></p></td>
 <td width="33%" valign="top"><h3>📱 Android mobile — 7+</h3>
 <p><strong>APK universel pour téléphone et tablette.</strong></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/download/android-preview-0e43cbe05227/Kovelyx-Android-android-preview-0e43cbe05227.apk"><strong>⬇️ Télécharger Android (.apk)</strong></a></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/tag/android-preview-0e43cbe05227">Release Android</a></p></td>
+<p><a href="https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes"><strong>⬇️ Télécharger Android (.apk)</strong></a></p>
+<p><a href="https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes">Release Android</a></p></td>
 <td width="33%" valign="top"><h3>📺 Android TV / TV Box — 7+</h3>
 <p><strong>APK universel adapté à la télécommande.</strong></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/download/tv-preview-9c6ec281a980/Kovelyx-TV-tv-preview-9c6ec281a980-universal.apk"><strong>⬇️ Télécharger TV (.apk)</strong></a></p>
-<p><a href="https://github.com/anderson76389/Kovelyx/releases/tag/tv-preview-9c6ec281a980">Release TV testée sur émulateur</a></p></td>
+<p><a href="https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes"><strong>⬇️ Télécharger TV (.apk)</strong></a></p>
+<p><a href="https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes">Release TV testée sur émulateur</a></p></td>
 </tr>
 </table>
 
@@ -60,19 +60,19 @@ Des films, des séries, des bibliothèques et des sources configurables dans une
 
 **📦 [Voir toutes les GitHub Releases](https://github.com/anderson76389/Kovelyx/releases) · 🌐 [Site de téléchargement](https://anderson76389.github.io/Kovelyx/) · 🔧 [Débloquer la publication des APK](./docs/RELEASES.md)**
 
-Windows possède également des formats secondaires **MSI** et **ZIP portable**, disponibles sur la [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha). Ils ne constituent pas de nouvelles plateformes. La version TV dispose de son propre APK publié. Les anciens fichiers Linux restent dans l'historique des anciennes Releases.
+Windows possède également des formats secondaires **MSI** et **ZIP portable**, disponibles sur la [page Windows du site](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes). Ils ne constituent pas de nouvelles plateformes. La version TV dispose de son propre APK publié. Le site sélectionne les dernières Releases par plateforme, sans inscrire de numéros de version dans ces boutons. Les anciens fichiers Linux restent dans l'historique des anciennes Releases.
 
 **Vérifications réelles :** Windows dispose d'un build automatisé réussi ; Android a passé la compilation, la vérification de signature et d'identifiant, l'installation et le démarrage sur émulateur Android 34. **Cela ne garantit pas** toutes les fonctions multimédias, les connexions ou la compatibilité de chaque appareil. Le client Android n'est pas encore entièrement identique au client Windows.
 
 ### 🪟 Installation Windows
 
 1. Télécharge le **Setup.exe** ci-dessus depuis GitHub Releases (pas besoin de décompresser un ZIP).
-2. Vérifie l'origine GitHub et le [SHA-256 publié](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha) avant de lancer le programme.
+2. Vérifie l'origine GitHub et le [SHA-256 publié](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes) avant de lancer le programme.
 3. La version portable exige d'extraire l'intégralité du ZIP ; les bibliothèques et le runtime restent nécessaires.
 
 ### 📱 Installation Android et Android TV
 
-1. Télécharge l’APK correspondant à ton appareil dans la Release ci-dessus.
+1. Télécharge l’APK correspondant à ton appareil depuis la page Kovelyx indiquée ci-dessus, qui sélectionne la dernière Release valide.
 2. Autorise l’installation depuis la source choisie sur le téléphone ou la TV Box, puis installe le fichier.
 3. Sur télévision, utilise **Kovelyx-TV-…universal.apk** (interface télécommande). La version mobile est distincte.
 
