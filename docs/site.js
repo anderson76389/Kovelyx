@@ -49,7 +49,9 @@
   const releaseCards = [...document.querySelectorAll("[data-release-status]")];
   const versions = {desktop: null, android: null, tv: null};
   let availabilityState = "loading";
-  let currentPlatform = "desktop";
+  // Liens du README : ?plateforme=desktop|android|tv#plateformes.
+  const requestedPlatform = new URLSearchParams(window.location.search).get("plateforme");
+  let currentPlatform = platformOrder.includes(requestedPlatform) ? requestedPlatform : "desktop";
 
   function sizeText(bytes) {
     return (bytes / 1048576).toLocaleString("fr-FR", {maximumFractionDigits: 1}) + " Mo";
