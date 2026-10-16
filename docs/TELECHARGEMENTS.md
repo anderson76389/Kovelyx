@@ -1,60 +1,39 @@
-# Télécharger Kovelyx
+# Kovelyx — télécharger Windows, Android et Android TV
 
-Ce dépôt fournit une page de téléchargement statique depuis `docs/index.html`. Elle **ne crée pas de faux téléchargements** : elle consulte la liste des Releases GitHub et n'affiche un bouton actif que lorsqu'un APK ou MSI existe réellement.
+Le site officiel est hébergé gratuitement sur GitHub Pages : **https://anderson76389.github.io/Kovelyx/**.
 
-## Publication du site (branche gh-pages)
+Les trois applications évoluent indépendamment dans le même dépôt. Le site identifie **les véritables fichiers des Releases**, sans conserver de tag ou de numéro de version obsolète dans les boutons.
 
-Le site est maintenu dans `docs/` sur `main` et synchronisé automatiquement dans la branche [`gh-pages`](https://github.com/anderson76389/Kovelyx/tree/gh-pages) par le workflow [Publier le site Kovelyx](https://github.com/anderson76389/Kovelyx/actions/workflows/pages.yml).
+| Appareil | Page de téléchargement | Format |
+|---|---|---|
+| Windows 10/11 x64 | [Télécharger Windows](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes) | `Kovelyx-Windows-Setup-*.exe`, MSI et ZIP portable |
+| Android mobile / tablette | [Télécharger Android](https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes) | `Kovelyx-Android-*.apk` ou `Kovelyx-Mobile-*.apk` |
+| Android TV / Google TV / TV Box | [Télécharger Android TV](https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes) | `Kovelyx-TV-*.apk` |
 
-**GitHub Actions a confirmé la synchronisation et GitHub Pages a également signalé un déploiement réussi.** L'adresse cible est **https://anderson76389.github.io/Kovelyx/**.
+## Comment les téléchargements restent à jour
 
-Si ton navigateur n'affiche pas encore le site, vérifie une fois les paramètres [Settings → Pages](https://github.com/anderson76389/Kovelyx/settings/pages) :
+Au chargement, `docs/site.js` appelle `https://api.github.com/repos/anderson76389/Kovelyx/releases?per_page=100` et trie les Releases par publication. Pour chaque plateforme, il recherche séparément un **asset réel, publié, complet** et provenant des téléchargements GitHub du dépôt Kovelyx. Il préfère le `.exe` au `.msi` dans une même Release Windows et montre aussi le ZIP portable et le MSI s'ils sont présents.
 
-1. **Build and deployment** → **Source : Deploy from a branch**.
-2. **Branch : gh-pages**, dossier **/(root)**, puis **Save**.
-3. Laisse GitHub terminer son propre workflow `pages build and deployment`.
+Exemples de tags possibles : `v0.1.377-alpha` (Windows), `android-preview-...` (mobile), `tv-preview-...` (TV). Les futures Releases Android signées sont également reconnues, si elles utilisent les préfixes de noms d'assets prévus.
 
-**Ne sélectionne pas `GitHub Actions` comme source pour cette méthode.** Le workflow Kovelyx sert à mettre les fichiers à jour dans la branche `gh-pages` ; GitHub Pages se charge ensuite de l'hébergement. Aucun serveur personnel n'est nécessaire.
+- **Nouvelle Release d'une plateforme :** au prochain chargement du site, son nouveau fichier devient prioritaire sur l'ancienne version de cette plateforme.
+- **Build réussi mais pas de Release :** aucun faux bouton de téléchargement ne s'affiche pour ce build.
+- **GitHub indisponible, limite API ou JavaScript désactivé :** les liens de secours renvoient vers la [liste officielle des Releases](https://github.com/anderson76389/Kovelyx/releases), **jamais vers un ancien APK ou EXE**.
+- **Publication 403 :** le site ne peut pas inventer une Release manquante ; vérifier les permissions de GitHub Actions ou l'artefact temporaire de build.
+- **Fichier absent sur la plateforme :** la carte indique l'absence de fichier publié et renvoie vers Releases plutôt que d'associer un APK TV à Android mobile.
 
-## Préversions Android et TV
+Le site ne met pas automatiquement à jour les applications **déjà installées**. Leur mécanisme de mise à jour intégré et la compatibilité de signatures Android sont des vérifications distinctes.
 
-Les deux jobs Android enregistrent leurs APK sous l'onglet **Artifacts** du workflow de compilation. Les artefacts sont conservés sept jours.
+## Publication automatique du site GitHub Pages
 
-Le workflow [Publier les APK Kovelyx en préversion](https://github.com/anderson76389/Kovelyx/actions/workflows/android-preview.yml) tente d'ajouter un **APK mobile et un APK TV universel** à une Release clairement marquée _expérimentale_. Il refuse les APK absents ou corrompus.
+Le code source statique du site est dans `docs/index.html`, `docs/site.css` et `docs/site.js`. À chaque modification dans `docs/`, le workflow [Publier le site](https://github.com/anderson76389/Kovelyx/actions/workflows/pages.yml) synchronise le dossier vers la branche `gh-pages` ; GitHub Pages diffuse ensuite le site.
 
-**Limitation constatée le 14 octobre 2026 :** GitHub a renvoyé `HTTP 403 Resource not accessible by integration` lors de la création d'une Release avec son jeton GitHub Actions, bien que `contents: write` soit déclaré. Les APK existent dans les artefacts, mais la création automatique des Releases peut nécessiter un jeton dédié.
+Paramètre initial : **Settings → Pages → Deploy from a branch → gh-pages → /(root)**. Aucune installation de serveur externe n'est requise.
 
-Pour débloquer les Releases en cas de persistance de ce refus :
+Le test [Tester le site Kovelyx](https://github.com/anderson76389/Kovelyx/actions/workflows/site-check.yml) vérifie la syntaxe, les ressources, les liens locaux et la sélection simulée d'assets Windows, Android et TV, y compris le comportement de secours réseau. Les tests ne remplacent pas un essai réel d'installation sur chaque appareil.
 
-1. Dans les paramètres de ton compte GitHub, crée un **Fine-grained personal access token** limité au dépôt `anderson76389/Kovelyx`, avec la permission du dépôt **Contents: Read and write** (et les autres permissions demandées uniquement si GitHub les exige).
-2. Ouvre les paramètres de **Kovelyx → Settings → Secrets and variables → Actions → New repository secret**.
-3. Nom du secret : **`KOVELYX_RELEASE_TOKEN`**. Colle la valeur uniquement dans le champ secret GitHub, jamais dans le code ni dans une conversation.
-4. Relance la publication depuis Actions en fournissant un identifiant de compilation dont **les deux jobs Android sont verts**.
+## Versions de test et signatures
 
-La procédure en mode automatique se sert de ce secret s'il existe ; sans lui, elle réutilise le jeton GitHub Actions intégré qui peut rester bloqué par les permissions effectives de ton dépôt.
+Les anciennes APK Debug ne constituent pas des applications Android signées pour une distribution permanente : elles peuvent avoir un identifiant différent des APK Release. Sauvegarder les paramètres et données avant de changer de canal. Pour les formats, la signature et les limites de publication, consulter [Releases et signatures](./RELEASES.md).
 
-**Sécurité** : ce jeton permet d'écrire dans le dépôt. Limite sa durée de validité, évite les permissions supplémentaires et révoque-le s'il fuit. Aucun secret n'est requis pour simplement télécharger un APK.
-
-## Où seront les vrais fichiers ?
-
-- **Android TV :** `Kovelyx-TV-vX.Y.Z-beta.N.apk`
-- **Android mobile :** `Kovelyx-Mobile-vX.Y.Z-beta.N.apk`
-- **Windows :** `Kovelyx-Windows-vX.Y.Z-beta.N.msi`
-
-Les noms correspondent exactement aux fichiers publiés par le workflow [Publier une préversion](../.github/workflows/publish-test-release.yml). Cette publication est **manuelle** et nécessite un artefact issu d'un build réussi, la validation du testeur et la vérification des droits de redistribution.
-
-## Pourquoi les téléchargements sont-ils indisponibles ?
-
-Une copie du code source ne suffit pas à créer des exécutables. Les premières compilations ont notamment rencontré :
-
-- Android TV : un fichier de signature de l'application d'origine absent. Le build de débogage a été configuré pour utiliser la signature de développement.
-- Android : le fichier de configuration locale facultatif était traité comme obligatoire par Gradle ; la déclaration a été corrigée.
-- Windows : une DLL vidéo native d'environ 115 Mo manque dans Git. Elle a été inventoriée avec son empreinte SHA-256 ; il faut une restauration vérifiée et conforme aux licences avant la génération d'un MSI.
-
-Les deux compilations Android et Android TV ont déjà réussi sur un build de référence ; cela **ne garantit pas encore leur bon fonctionnement sur appareil réel**. Windows reste en attente de sa bibliothèque native. Le résultat réel est visible dans [Actions](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml).
-
-## Attention aux préversions
-
-Les builds de débogage Android sont destinés aux essais et ne possèdent pas encore nécessairement une clé de signature de distribution stable. Il peut être nécessaire de désinstaller une version de test avant d'en installer une autre, entraînant la perte de ses données locales. **Ne pas s'en servir comme application principale sans sauvegarde préalable.**
-
-Les Releases sont un stockage de fichiers applicatifs. Elles n'impliquent aucune synchronisation en ligne entre appareils ni serveur personnel.
+Les logiciels sont des clients multimédias, sans catalogues ni films fournis dans les binaires. Les crédits et notices de licences des composants doivent être conservés.
