@@ -4,6 +4,19 @@ Ce dossier sert à **mesurer** l'indépendance de trois applications. Il ne suff
 
 ## Résultats factuels de l'audit au 16 octobre 2026 (hors comptes)
 
+### Complément : tests du moteur natif et lancement des exécutables
+
+| Preuve | Résultat constaté | Exécution |
+|---|---|---|
+| Moteur P2P **Linux partagé** avec libtorrent et Boost, versions épinglées, compilé à partir de `vendor/engine` et avec les dépôts Nuvio interdits | **Réussi**, après correction `CMAKE_POSITION_INDEPENDENT_CODE=ON` nécessaire pour libtorrent statique lié dans une bibliothèque partagée | [38917131987](https://github.com/anderson76389/Kovelyx/actions/runs/38917131987) |
+| Inspecter les DLL, JAR, AAR et membres natifs locaux des trois applications pour les anciennes URL Nuvio/NuvioMedia en clair | **Réussi : aucun endpoint historique en clair** dans les fichiers inclus examinés | [38917898204](https://github.com/anderson76389/Kovelyx/actions/runs/38917898204) |
+| Télécharger la version **Windows portable publiée**, bloquer `nuvio.tv` et ses sous-domaines dans Windows, puis lancer le vrai EXE | **Réussi : processus démarré et encore vivant après 25 secondes**, avec résolution GitHub non bloquée | [38918493653](https://github.com/anderson76389/Kovelyx/actions/runs/38918493653) |
+| Android mobile + Android TV : APK **publiés**, émulateurs filtrant le DNS Nuvio, navigation basique, vérification du processus, captures et journal DNS | **Test de contrôle ajouté**. Vérifier le résultat du run le plus récent dans Actions ; les anciennes exécutions avaient des erreurs de banc DNS, pas une preuve de crash applicatif | [Workflow Android runtime](https://github.com/anderson76389/Kovelyx/actions/workflows/runtime-blackout.yml) |
+
+Attention : le moteur P2P testé est la cible **Linux**. La DLL Windows P2P complète et les AAR Android de toutes les architectures ne sont pas encore reconstruits depuis le code source dans ce test, même si leurs copies binaires nécessaires aux applications sont déjà conservées chez Kovelyx. Un test de lancement sans compte ne couvre ni toutes les extensions ni toutes les vidéos et API protégées. Il faut distinguer ces scénarios pour ne pas annoncer une certification irréaliste.
+
+
+
 Ces résultats sont conservés avec le numéro d'exécution afin de ne pas confondre preuve historique et état d'une nouvelle compilation.
 
 | Vérification | Résultat obtenu | Preuve / limite |
