@@ -2,13 +2,15 @@
 
 Trois plateformes, **un seul dépôt** et des fichiers d’installation distincts : Windows x64, Android mobile et Android TV / TV Box.
 
-## Téléchargements vérifiés dans GitHub Releases — 15 octobre 2026
+## Téléchargements vérifiés dans GitHub Releases — 16 octobre 2026
 
-| Plateforme | Fichier | Preuve disponible | Téléchargement |
+| Plateforme | Fichier | Contrôle effectué | Téléchargement |
 |---|---|---|---|
-| Windows x64 | `Kovelyx-Windows-Setup-v0.1.309-alpha.exe` | Release avec EXE, MSI et ZIP portable ; tests du programme sur machine réelle toujours nécessaires | [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.309-alpha) |
-| Android mobile 7+ | `Kovelyx-Android-android-preview-0e43cbe05227.apk` | APK de test publié ; la parité fonctionnelle et la mise à jour transparente ne sont pas garanties | [APK Android](https://github.com/anderson76389/Kovelyx/releases/tag/android-preview-0e43cbe05227) |
-| Android TV / Google TV 7+ | `Kovelyx-TV-tv-preview-9c6ec281a980-universal.apk` | Compilation signée et test de lancement/navigation basique sur émulateur Google TV réussis | [APK Android TV](https://github.com/anderson76389/Kovelyx/releases/tag/tv-preview-9c6ec281a980) |
+| Windows x64 | `Kovelyx-Windows-Setup-v0.1.377-alpha.exe` | EXE, MSI et ZIP portable publiés ; lancement de la version portable avec les DNS Nuvio bloqués sur runner Windows réussi. Ne démontre pas la lecture de toutes les sources. | [Release Windows](https://github.com/anderson76389/Kovelyx/releases/tag/v0.1.377-alpha) |
+| Android mobile 7+ | `Kovelyx-Android-android-preview-d863d3012c93.apk` | APK publiée et compilation indépendante réussie ; la preuve du test runtime avec DNS filtré est encore incomplète. | [APK Android](https://github.com/anderson76389/Kovelyx/releases/tag/android-preview-d863d3012c93) |
+| Android TV / Google TV 7+ | `Kovelyx-TV-tv-preview-58bf54ff901a-universal.apk` | APK universelle publiée, installée et lancée sur émulateur TV, navigation télécommande sous filtrage DNS Nuvio réussie. | [APK Android TV](https://github.com/anderson76389/Kovelyx/releases/tag/tv-preview-58bf54ff901a) |
+
+**Preuve runtime TV :** [exécution GitHub Actions](https://github.com/anderson76389/Kovelyx/actions/runs/38921298221). **Preuve Windows :** [démarrage réel sous blocage Nuvio](https://github.com/anderson76389/Kovelyx/actions/runs/38918493653). Les tests sont limités à ces versions et scénarios, pas à toutes les fonctions multimédias.
 
 Les APK sont **des préversions Debug** : ils doivent encore être testés avec des sources, des profils et des appareils réels. **Ne pas installer la version Android mobile sur une TV Box à la place de la version TV.** Les deux utilisent des interfaces et des identifiants différents.
 
@@ -25,6 +27,12 @@ Les anciens workflows ont rencontré des erreurs HTTP 403 lors de la création d
 Si une **nouvelle** publication échoue avec une erreur 403, vérifier les droits `Settings → Actions → General → Workflow permissions` et, uniquement si nécessaire, configurer un jeton GitHub aux permissions minimales dans le secret `KOVELYX_RELEASE_TOKEN`. Ne jamais publier ce secret dans le dépôt ou le chat.
 
 Un échec peut aussi indiquer qu’aucun APK de la plateforme visée n’a été compilé lors du commit : les workflows ont été ajustés pour distinguer ce cas d’un échec réel de l’application.
+
+## Publication Windows refusée pour les nouveaux builds
+
+Un build Windows peut réussir sa compilation et ses vérifications SHA-256, puis recevoir **HTTP 403 `Resource not accessible by integration`** pendant `gh release create`. Exemple vérifié : [38921809378](https://github.com/anderson76389/Kovelyx/actions/runs/38921809378). Cela concerne la permission de création de Releases, pas un plantage de l'EXE.
+
+Le workflow de publication conserve désormais les fichiers `dist/` en **artefact de secours (7 jours)** lorsqu'une nouvelle publication est refusée ; ce n'est pas une Release durable. Pour rétablir les nouvelles Releases, régler `Settings → Actions → General → Workflow permissions → Read and write permissions` ou ajouter un secret `KOVELYX_RELEASE_TOKEN` avec `Contents: Read and write`. Ne pas diffuser ce jeton. Les Releases antérieures restent téléchargeables.
 
 ## Signature Android et mises à jour
 
