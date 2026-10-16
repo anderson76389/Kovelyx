@@ -1,0 +1,153 @@
+name: Reconstruire les moteurs natifs Windows et Android sans Nuvio
+# Preuve technique sans remplacement des binaires utilises dans les apps.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/rebuild-native-independent.yml']
+permissions:
+  contents: read
+jobs:
+  windows-p2p:
+    name: Windows x64 - P2P complet depuis les sources
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bloquer les anciens domaines
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($domain in @('nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'www.nuvio.tv')) {
+            Add-Content -Path "$env:WINDIR\System32\drivers\etc\hosts" -Value "127.0.0.1 $domain"
+          }
+          git config --global url.https://blocked-upstream.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/
+          if (-not (Test-Path vendor/engine/LICENSE)) { throw 'Sources moteur absentes' }
+      - name: Compiler OpenSSL depuis le tarball verifie
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Get-Command perl -ErrorAction SilentlyContinue)) {
+            choco install strawberryperl -y --no-progress
+            $env:PATH = "C:\Strawberry\perl\bin;$env:PATH"
+          }
+          $vswhere = 'C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe'
+          $vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vs) { throw 'Visual Studio C++ introuvable' }
+          $version = '3.5.7'
+          $expected = 'a8c0d28a529ca480f9f36cf5792e2cd21984552a3c8e4aa11a24aa31aeac98e8'
+          $root = Join-Path $env:RUNNER_TEMP 'kv-openssl'
+          New-Item $root -ItemType Directory -Force | Out-Null
+          $archive = Join-Path $root 'src.tar.gz'
+          Invoke-WebRequest -Uri "https://github.com/openssl/openssl/releases/download/openssl-$version/openssl-$version.tar.gz" -OutFile $archive
+          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { throw 'Archive OpenSSL invalide' }
+          & tar -xzf $archive -C $root
+          if ($LASTEXITCODE -ne 0) { throw 'Extraction OpenSSL echouee' }
+          $source = Join-Path $root "openssl-$version"
+          $install = Join-Path $root 'install'
+          $vsdev = Join-Path $vs 'Common7/Tools/VsDevCmd.bat'
+          $batch = Join-Path $root 'openssl.cmd'
+          @(
+            '@echo off',
+            ('call "' + $vsdev + '" -arch=x64 -host_arch=x64'),
+            'if errorlevel 1 exit /b 1',
+            ('cd /d "' + $source + '"'),
+            ('perl Configure VC-WIN64A no-shared no-asm --prefix="' + $install + '" --openssldir="' + $install + '"'),
+            'if errorlevel 1 exit /b 1',
+            'nmake /nologo',
+            'if errorlevel 1 exit /b 1',
+            'nmake /nologo install_sw',
+            'exit /b %errorlevel%'
+          ) | Set-Content -Path $batch -Encoding ASCII
+          & cmd /c $batch
+          if ($LASTEXITCODE -ne 0) { throw 'Compilation OpenSSL echouee' }
+          if (-not (Test-Path (Join-Path $install 'lib/libssl.lib'))) { throw 'libssl.lib introuvable' }
+          "KOVELYX_OPENSSL_ROOT=$install" >> $env:GITHUB_ENV
+      - name: Compiler le moteur Windows avec libtorrent
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $vswhere = 'C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe'
+          $vs = & $vswhere -latest -products '*' -property installationPath
+          $vsdev = Join-Path $vs 'Common7/Tools/VsDevCmd.bat'
+          $build = Join-Path $env:RUNNER_TEMP 'kv-engine-windows-p2p'
+          $batch = Join-Path $env:RUNNER_TEMP 'kv-p2p.cmd'
+          @(
+            '@echo off',
+            ('call "' + $vsdev + '" -arch=x64 -host_arch=x64'),
+            'if errorlevel 1 exit /b 1',
+            ('cmake -S vendor/engine -B "' + $build + '" -G Ninja -DCMAKE_BUILD_TYPE=Release -DNUVIO_ENGINE_BUILD_SHARED=ON -DNUVIO_ENGINE_ENABLE_LIBTORRENT=ON -DNUVIO_ENGINE_BUILD_TESTS=ON -DOPENSSL_ROOT_DIR="' + $env:KOVELYX_OPENSSL_ROOT + '" -DOPENSSL_USE_STATIC_LIBS=TRUE'),
+            'if errorlevel 1 exit /b 1',
+            ('cmake --build "' + $build + '" --parallel 2'),
+            'if errorlevel 1 exit /b 1',
+            ('ctest --test-dir "' + $build + '" --output-on-failure'),
+            'exit /b %errorlevel%'
+          ) | Set-Content -Path $batch -Encoding ASCII
+          & cmd /c $batch
+          if ($LASTEXITCODE -ne 0) { throw 'Build ou tests P2P echoues' }
+          $dll = @(Get-ChildItem -Path $build -Filter 'nuvio_engine.dll' -Recurse -File)
+          if ($dll.Count -ne 1) { throw "DLL introuvable ou ambigue: $($dll.Count)" }
+          New-Item native-proof/windows -ItemType Directory -Force | Out-Null
+          Copy-Item $dll[0].FullName native-proof/windows/nuvio_engine.dll
+          (Get-FileHash native-proof/windows/nuvio_engine.dll -Algorithm SHA256).Hash |
+            Set-Content native-proof/windows/sha256.txt
+          "Moteur Windows P2P compile et tests CTest valides sous blocage Nuvio." >> $env:GITHUB_STEP_SUMMARY
+      - name: Conserver DLL de preuve, sans remplacer la DLL de production
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-native-windows-p2p-preuve
+          path: native-proof/windows/
+          if-no-files-found: ignore
+          retention-days: 30
+  android-aar:
+    name: Android - reconstruire AAR natif 4 architectures
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Bloquer Nuvio et installer NDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          for domain in nuvio.tv api.nuvio.tv cdn.nuvio.tv auth.nuvio.tv www.nuvio.tv; do
+            echo "127.0.0.1 $domain" | sudo tee -a /etc/hosts >/dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          sdkmanager --install 'ndk;29.0.14206865' 'cmake;4.1.2' 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Construire AAR depuis vendor/engine
+        working-directory: vendor/engine/platform/android
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          NUVIO_BUILD_JOBS=2 ./gradlew :engine:assembleRelease --no-daemon --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+      - name: Verifier la presence des quatre ABI
+        shell: bash
+        run: |
+          set -euo pipefail
+          aar=vendor/engine/platform/android/engine/build/outputs/aar/engine-release.aar
+          test -s "$aar"
+          unzip -tq "$aar" >/dev/null
+          unzip -Z -1 "$aar" > /tmp/kv-aar-list.txt
+          for abi in armeabi-v7a arm64-v8a x86 x86_64; do
+            grep -Fx "jni/$abi/libnuvio_engine.so" /tmp/kv-aar-list.txt
+          done
+          mkdir -p native-proof/android
+          cp "$aar" native-proof/android/kovelyx-engine-source-built.aar
+          sha256sum native-proof/android/*.aar > native-proof/android/sha256.txt
+          echo "AAR reconstruit depuis le moteur local pour 4 ABI, non encore injecte dans les applications." >> "$GITHUB_STEP_SUMMARY"
+      - name: Conserver AAR de preuve sans le distribuer
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-native-android-multiabi-preuve
+          path: native-proof/android/
+          if-no-files-found: ignore
+          retention-days: 30
