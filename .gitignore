@@ -3,6 +3,7 @@
 **/.env.*
 !**/.env.example
 **/local.properties
+**/dev.properties
 **/local.dev.properties
 **/sentry.properties
 **/*.jks
