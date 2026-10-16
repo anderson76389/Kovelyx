@@ -13,39 +13,23 @@ exec > >(tee "/tmp/kovelyx-blackout-proof/$MODE.txt") 2>&1
 echo "=== Test Kovelyx $MODE avec Nuvio bloqué ==="
 echo "Release: $KOVELYX_RELEASE_TAG"
 adb wait-for-device
-if [[ "$MODE" == "mobile" ]]; then
-  # Google APIs x86_64 est une image Android userdebug : autoriser la modification
-  # du hosts interne pour que TOUS les sockets mobiles utilisent leur DNS normal,
-  # mais que les anciens domaines Nuvio se résolvent localement.
-  adb root
-  adb wait-for-device
-  adb remount
-  adb shell "printf '%s\n' '127.0.0.1 nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv' >> /system/etc/hosts"
-  adb shell cat /system/etc/hosts | grep -F "api.nuvio.tv"
-fi
+# Les deux émulateurs emploient le DNS dnsmasq du runner. Ne pas écrire
+# /system/etc/hosts : les images Android modernes refusent souvent adb remount.
 adb shell settings put global private_dns_mode off
 OLD_DNS="$(adb shell ping -c 1 -W 2 api.nuvio.tv 2>&1 || true)"
 echo "Nuvio DNS: $OLD_DNS"
-if [[ "$MODE" == "mobile" ]]; then
-  if ! grep -Eq '127[.]0[.]0[.]1|0[.]0[.]0[.]0|unknown host' <<< "$OLD_DNS"; then
-    echo "::error::Le hosts Android mobile ne bloque pas Nuvio."
-    exit 1
-  fi
-  echo "Blocage Nuvio appliqué localement dans le hosts Android mobile."
+DNS_BEFORE="${KOVELYX_DNS_BASELINE:-0}"
+DNS_AFTER="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
+if (( DNS_AFTER <= DNS_BEFORE )); then
+  echo "::error::Le DNS de filtrage n'est pas utilisé par l'émulateur $MODE."
+  exit 1
+fi
+if grep -Eq '0[.]0[.]0[.]0|127[.]0[.]0[.]1|::1' <<< "$OLD_DNS" ||
+   grep -Eqi 'unknown host|not known|no address associated' <<< "$OLD_DNS"; then
+  echo "Le DNS de $MODE refuse bien les domaines Nuvio."
 else
-  DNS_BEFORE="${KOVELYX_DNS_BASELINE:-0}"
-  DNS_AFTER="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
-  if (( DNS_AFTER <= DNS_BEFORE )); then
-    echo "::error::Aucune requête Nuvio de la TV n'est visible dans le DNS filtré."
-    exit 1
-  fi
-  if grep -Eq '0[.]0[.]0[.]0|127[.]0[.]0[.]1|::1' <<< "$OLD_DNS" ||
-     grep -Eqi 'unknown host|not known|no address associated' <<< "$OLD_DNS"; then
-    echo "Nuvio refusé par le DNS filtré de la TV."
-  else
-    echo "::error::Le domaine Nuvio est toujours joignable sur la TV."
-    exit 1
-  fi
+  echo "::error::Le domaine Nuvio est toujours joignable sur $MODE."
+  exit 1
 fi
 # L'AVD peut annoncer son boot avant que sa pile reseau soit disponible.
 OTHER_DNS=""
@@ -105,11 +89,11 @@ if grep -A 22 -E 'FATAL EXCEPTION|Fatal signal|Process: com\.kovelyx\.' "/tmp/ko
  exit 1
 fi
 APP_DNS_AFTER="$(grep -Eci 'query\[[A-Z0-9]+\].*nuvio[.]tv' /tmp/kovelyx-dns.log || true)"
-if [[ "$MODE" == tv ]] && (( APP_DNS_AFTER > APP_DNS_BEFORE )); then
+if (( APP_DNS_AFTER > APP_DNS_BEFORE )); then
  echo "::error::L'APK a demande un domaine Nuvio durant la navigation sans compte."
  grep -Ei 'nuvio[.]tv' /tmp/kovelyx-dns.log | tail -n 25
  exit 1
 fi
-echo "Aucun DNS Nuvio pendant la navigation TV ou anciens domaines neutralisés dans Android mobile."
+echo "Aucun DNS Nuvio pendant la navigation de Kovelyx sur les deux émulateurs."
 echo "PASS : Nuvio DNS bloqué, DNS GitHub disponible, APK installé, navigation de base sans crash."
 echo "LIMITES : tests P2P, addons et API avec clés réelles toujours distincts."
