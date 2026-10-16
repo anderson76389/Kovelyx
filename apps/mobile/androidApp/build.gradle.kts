@@ -24,11 +24,24 @@ val localProps = Properties().apply {
     val propsFile = rootProject.file("local.properties")
     if (propsFile.exists()) propsFile.inputStream().use { load(it) }
 }
-val releaseStoreFile = localProps.getProperty("NUVIO_RELEASE_STORE_FILE")?.takeIf { it.isNotBlank() }
-val releaseStorePassword = localProps.getProperty("NUVIO_RELEASE_STORE_PASSWORD")?.takeIf { it.isNotBlank() }
-val releaseKeyAlias = localProps.getProperty("NUVIO_RELEASE_KEY_ALIAS")?.takeIf { it.isNotBlank() }
-val releaseKeyPassword = localProps.getProperty("NUVIO_RELEASE_KEY_PASSWORD")?.takeIf { it.isNotBlank() }
+// Kovelyx release signing is opt-in and read from CI secrets; legacy local
+// property names remain supported for development without changing old builds.
+fun releaseSigningValue(name: String, previousName: String): String? =
+    providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
+        ?: localProps.getProperty(name)?.takeIf { it.isNotBlank() }
+        ?: localProps.getProperty(previousName)?.takeIf { it.isNotBlank() }
+
+val releaseStoreFile = releaseSigningValue("KOVELYX_RELEASE_STORE_FILE", "NUVIO_RELEASE_STORE_FILE")
+val releaseStorePassword = releaseSigningValue("KOVELYX_RELEASE_STORE_PASSWORD", "NUVIO_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = releaseSigningValue("KOVELYX_RELEASE_KEY_ALIAS", "NUVIO_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = releaseSigningValue("KOVELYX_RELEASE_KEY_PASSWORD", "NUVIO_RELEASE_KEY_PASSWORD")
 val releaseKeystore = releaseStoreFile?.let(rootProject::file)
+if (providers.environmentVariable("CI_SIGNED_ANDROID").orNull == "true") {
+    require(releaseKeystore?.isFile == true && releaseStorePassword != null &&
+        releaseKeyAlias != null && releaseKeyPassword != null) {
+        "Kovelyx signed build requires all release keystore credentials."
+    }
+}
 fun envOrLocalProperty(key: String): String? =
     providers.environmentVariable(key).orNull?.trim()?.takeIf { it.isNotBlank() }
         ?: localProps.getProperty(key)?.trim()?.takeIf { it.isNotBlank() }
@@ -114,7 +127,8 @@ android {
             isEnable = buildsReleaseApks
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            isUniversalApk = false
+            // Keep a single-file APK compatible with all ABIs in addition to splits.
+            isUniversalApk = buildsReleaseApks
         }
     }
 
