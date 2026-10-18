@@ -47,6 +47,13 @@ CREATE TABLE IF NOT EXISTS "verification" (
 );
 CREATE INDEX IF NOT EXISTS idx_kv_verification_identifier ON "verification"("identifier");
 
+CREATE TABLE IF NOT EXISTS "rateLimit" (
+  "id" TEXT PRIMARY KEY NOT NULL,
+  "key" TEXT NOT NULL UNIQUE,
+  "count" INTEGER NOT NULL,
+  "lastRequest" INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS kv_profiles (
   id TEXT PRIMARY KEY NOT NULL,
   owner_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
