@@ -42,7 +42,18 @@ for platform in TARGETS if args.platform == "all" else (args.platform,):
         dest = ROOT / relative
         lines = dest.read_text(encoding="utf-8").splitlines() if dest.exists() else []
         # Ne pas écraser les réglages locaux des autres services.
-        lines = [line for line in lines if line.split("=",1)[0].strip() != "KOVELYX_CLOUD_URL"]
-        dest.write_text("\n".join([*lines, "KOVELYX_CLOUD_URL=" + url]) + "\n", encoding="utf-8")
+        disabled = {
+            "KOVELYX_CLOUD_URL", "NUVIO_SUPABASE_URL",
+            "NUVIO_SUPABASE_ANON_KEY", "NUVIO_SUPABASE_FALLBACK_URL",
+            "SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_FALLBACK_URL",
+        }
+        lines = [line for line in lines if line.split("=",1)[0].strip() not in disabled]
+        lines += [
+            "KOVELYX_CLOUD_URL=" + url,
+            "NUVIO_SUPABASE_URL=",
+            "NUVIO_SUPABASE_ANON_KEY=",
+            "NUVIO_SUPABASE_FALLBACK_URL=",
+        ]
+        dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
         os.chmod(dest, 0o600)
     print("Worker Cloudflare configuré pour " + platform + " : " + host)
