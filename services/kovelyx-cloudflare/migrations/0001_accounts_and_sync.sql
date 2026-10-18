@@ -61,19 +61,21 @@ CREATE TABLE IF NOT EXISTS kv_profiles (
   avatar_path TEXT,
   background_path TEXT,
   created_at INTEGER NOT NULL,
-  updated_at INTEGER NOT NULL
+  updated_at INTEGER NOT NULL,
+  UNIQUE(owner_id,id)
 );
 CREATE INDEX IF NOT EXISTS idx_kv_profiles_owner ON kv_profiles(owner_id);
 
 CREATE TABLE IF NOT EXISTS kv_sync (
   owner_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
-  profile_id TEXT NOT NULL REFERENCES kv_profiles(id) ON DELETE CASCADE,
+  profile_id TEXT NOT NULL,
   category TEXT NOT NULL CHECK(category IN ('library','favorites','watch_progress','catalogues','preferences','profile_settings','addons','plugins')),
   item_key TEXT NOT NULL CHECK(length(item_key) BETWEEN 1 AND 200),
   payload TEXT NOT NULL CHECK(length(payload) <= 32768),
   revision INTEGER NOT NULL DEFAULT 1,
   deleted INTEGER NOT NULL DEFAULT 0,
   updated_at INTEGER NOT NULL,
-  PRIMARY KEY(owner_id, profile_id, category, item_key)
+  PRIMARY KEY(owner_id, profile_id, category, item_key),
+  FOREIGN KEY(owner_id, profile_id) REFERENCES kv_profiles(owner_id, id) ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS idx_kv_sync_by_owner ON kv_sync(owner_id, profile_id, updated_at);
