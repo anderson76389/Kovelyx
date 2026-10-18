@@ -61,8 +61,11 @@ class ServerConfigurationStore @Inject constructor(
         backendUrl = BuildConfig.SUPABASE_URL.trimEnd('/'),
         publishableKey = BuildConfig.SUPABASE_ANON_KEY,
         capabilities = ServerCapabilities(
-            emailPasswordAuth = false,
-            tvLogin = true
+            // Cloudflare D1 dispose du formulaire email/mot de passe.
+            // L'ancien QR/RPC Supabase n'existe pas sur le Worker.
+            emailPasswordAuth = BuildConfig.KOVELYX_CLOUD_URL.isNotBlank(),
+            tvLogin = BuildConfig.KOVELYX_CLOUD_URL.isBlank() &&
+                BuildConfig.SUPABASE_URL.isNotBlank()
         ),
         isCustom = false,
         fallbackBackendUrl = BuildConfig.SUPABASE_FALLBACK_URL.trim().trimEnd('/').takeIf { it.isNotBlank() },
