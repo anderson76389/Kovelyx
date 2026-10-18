@@ -47,11 +47,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Injecter le Supabase personnel Kovelyx dans Windows (facultatif)
+      - name: Configurer le Worker Cloudflare Kovelyx dans Windows (facultatif)
         shell: pwsh
         env:
-          KOVELYX_CLOUD_URL: ${{ secrets.KOVELYX_CLOUD_URL }}
-          KOVELYX_CLOUD_PUBLISHABLE_KEY: ${{ secrets.KOVELYX_CLOUD_PUBLISHABLE_KEY }}
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL }}
         run: python scripts/configure-cloud-build.py --platform desktop
       - name: Version de la compilation Windows
         shell: pwsh
