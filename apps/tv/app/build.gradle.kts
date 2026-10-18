@@ -109,6 +109,7 @@ android {
         versionCode = 1068
         versionName = "1.1.0-beta.5"
 
+        buildConfigField("String", "KOVELYX_CLOUD_URL", buildConfigString(localProperties.getProperty("KOVELYX_CLOUD_URL", "")))
         buildConfigField("String", "PARENTAL_GUIDE_API_URL", "\"${localProperties.getProperty("PARENTAL_GUIDE_API_URL", "")}\"")
         buildConfigField("String", "INTRODB_API_URL", "\"${localProperties.getProperty("INTRODB_API_URL", "")}\"")
         buildConfigField("String", "TRAILER_API_URL", "\"${localProperties.getProperty("TRAILER_API_URL", "")}\"")
