@@ -1,3 +1,5 @@
+> **CHANGEMENT D'ARCHITECTURE (18 octobre 2026) :** le système de comptes cible est maintenant **[Kovelyx Cloudflare (Workers + D1 + Better Auth)](../services/kovelyx-cloudflare/README.md)**. Les paragraphes historiques recommandant Supabase ci-dessous ne constituent **plus la procédure active**. Les trois formulaires de connexion ont commencé leur migration, mais la synchronisation des fonctionnalités et la persistance sûre des sessions restent à développer et tester.
+
 # Kovelyx Cloud : compte unique Windows, Android, Android TV, Linux et iOS
 
 État au **15 octobre 2026** : **architecture et première migration SQL déposées**, mais **aucun serveur Kovelyx Cloud n'est encore déployé**, aucun compte Kovelyx indépendant n'a encore été créé, et la synchronisation multiplateforme n'est **pas** opérationnelle. Ne pas demander aux utilisateurs de créer un compte avant déploiement complet.

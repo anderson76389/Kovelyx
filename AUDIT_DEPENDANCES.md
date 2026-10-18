@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia : **6776**.
+Fichiers texte examinés : **1359** ; références statiques à Nuvio/NuvioMedia : **6778**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -42,8 +42,8 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 ### Références à vérifier en priorité
 
 - `apps/tv/app/build.gradle.kts:100`
-- `apps/tv/app/build.gradle.kts:374`
-- `apps/tv/app/build.gradle.kts:406`
+- `apps/tv/app/build.gradle.kts:375`
+- `apps/tv/app/build.gradle.kts:407`
 - `apps/tv/baselineprofile/build.gradle.kts:8`
 - `apps/tv/scripts/perf_baseline.sh:22`
 - `apps/tv/scripts/perf_baseline.sh:27`
@@ -121,11 +121,11 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:27`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:28`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:29`
-- …et 6696 autres correspondances (plafond d'affichage).
+- …et 6698 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia : **109**.
+Fichiers texte examinés : **1409** ; références statiques à Nuvio/NuvioMedia : **109**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -246,7 +246,7 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia : **119**.
+Fichiers texte examinés : **1786** ; références statiques à Nuvio/NuvioMedia : **119**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -338,8 +338,8 @@ Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/store.json:277`
 - `apps/desktop/scripts/prepare-ios-dependencies.sh:25`
 - `apps/desktop/MPVKit/Package.swift:304`
-- `apps/desktop/composeApp/build.gradle.kts:127`
-- `apps/desktop/composeApp/build.gradle.kts:141`
+- `apps/desktop/composeApp/build.gradle.kts:144`
+- `apps/desktop/composeApp/build.gradle.kts:158`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:4`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:7`

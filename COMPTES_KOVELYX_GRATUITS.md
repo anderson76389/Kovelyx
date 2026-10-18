@@ -1,4 +1,16 @@
-# Créer ses propres comptes Kovelyx gratuitement (Windows, Android et Android TV)
+# Tutoriel officiel : comptes Kovelyx gratuits via Cloudflare
+
+Le projet **a abandonné Supabase comme solution cible des nouveaux comptes**. Le tutoriel Supabase ci-dessous est **archivé et obsolète** : **ne suivez pas ses étapes et ne créez plus de secrets Supabase dans GitHub Actions**.
+
+➡️ **[Guide actuel : installer Kovelyx Cloud sur Cloudflare Workers + D1](../services/kovelyx-cloudflare/README.md)**.
+
+La migration des applications n'est pas encore achevée pour toutes les fonctions de synchronisation. Des bibliothèques Supabase héritées restent dans le code tant que leurs remplaçants n'ont pas été testés.
+
+---
+
+<details><summary>Ancien tutoriel Supabase (historique uniquement)</summary>
+
+## Créer ses propres comptes Kovelyx gratuitement (Windows, Android et Android TV)
 
 > **Guide utilisateur — octobre 2026.** Le compte sera dans **votre projet Supabase** et non sur les serveurs Nuvio. Le code des trois clients a déjà des mécanismes d'authentification Supabase, et les workflows Kovelyx peuvent injecter *votre* URL et *votre* clé publique. **Important : les RPC de synchronisation historiques ne sont PAS compatibles automatiquement avec le schéma Kovelyx Cloud.** Créer un projet et se connecter avec un même e-mail ne signifie pas encore que vos profils, collections, historique, médias et débridages sont synchronisés.
 
@@ -100,3 +112,6 @@ Un compte Supabase Admin → Users confirme la **création**, pas à lui seul le
 La connexion à **un seul compte** sur plusieurs appareils peut s'appuyer sur Supabase Auth dès que la compilation est réellement branchée et testée. Les **profils, favoris, historique, progression, addons, catalogues, photos, fonds, suppression de compte et échanges TV** exigent encore une **migration du code existant vers les tables et procédures Kovelyx Cloud**, des politiques de stockage privées et des tests réels. Cette étape ne peut pas être remplacée par une simple clé API ou une requête SQL.
 
 **N'affichez pas « synchronisation totale » dans les applications avant d'avoir validé ces parcours.**
+
+
+</details>
