@@ -28,10 +28,10 @@ cd /workspaces/Kovelyx
 git pull --ff-only
 cd services/kovelyx-cloudflare
 npm install
-npx wrangler login
+npx wrangler login --device --browser=false
 ```
 
-Acceptez la connexion Cloudflare dans le navigateur. **Aucun abonnement payant n'est nécessaire pour créer un Worker Free + D1.**
+Wrangler affiche un lien et un code d'autorisation dans le terminal. Ouvrez ce lien dans votre navigateur et validez le code. Cette méthode officielle de connexion **ne requiert pas `localhost:8976`** et fonctionne dans GitHub Codespaces. Ensuite, vérifiez la connexion avec `npx wrangler whoami`. **Aucun abonnement payant n'est nécessaire pour créer un Worker Free + D1.**
 
 ### 2. Créer votre base D1
 
