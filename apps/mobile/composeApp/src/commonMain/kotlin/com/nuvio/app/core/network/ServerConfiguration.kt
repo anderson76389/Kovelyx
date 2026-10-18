@@ -1,5 +1,6 @@
 package com.nuvio.app.core.network
 
+import com.nuvio.app.core.cloud.CloudflareConfig
 import com.nuvio.app.core.build.AppFeaturePolicy
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +53,8 @@ internal fun officialConfiguration() = ServerConfiguration(
     backendUrl = SupabaseConfig.URL.trim().trimEnd('/'),
     publishableKey = SupabaseConfig.ANON_KEY.trim(),
     capabilities = ServerCapabilities(
-        emailPasswordAuth = SupabaseConfig.URL.isNotBlank() && SupabaseConfig.ANON_KEY.isNotBlank(),
+        emailPasswordAuth = CloudflareConfig.URL.isNotBlank() ||
+            (SupabaseConfig.URL.isNotBlank() && SupabaseConfig.ANON_KEY.isNotBlank()),
         tvLogin = false,
     ),
     isCustom = false,
