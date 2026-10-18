@@ -103,7 +103,12 @@ class AuthManager @Inject constructor(
     private var startupAuthCompleted = false
 
     init {
-        observeSessionStatus()
+        if (CloudflareTvAccountClient.enabled) {
+            // Ne pas faire observer les sessions du SDK Supabase historique.
+            _authState.value = AuthState.SignedOut
+        } else {
+            observeSessionStatus()
+        }
     }
 
     private fun observeSessionStatus() {
@@ -271,6 +276,7 @@ class AuthManager @Inject constructor(
      * For direct users, returns their own user ID.
      */
     suspend fun getEffectiveUserId(fallbackToOwnIdOnFailure: Boolean = true): String? {
+        if (CloudflareTvAccountClient.enabled) return currentUserId
         val userId = currentUserId ?: return null
         if (cachedEffectiveUserSourceUserId != userId) {
             cachedEffectiveUserId = null
@@ -314,6 +320,9 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
+        if (CloudflareTvAccountClient.enabled) return runCatching {
+            CloudflareTvAccountClient.signUp(email, password)
+        }
         val diagnostics = AuthDiagnosticsSession(
             authDiagnosticReportRepository,
             "signup",
@@ -345,6 +354,10 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
+        if (CloudflareTvAccountClient.enabled) return runCatching {
+            val account = CloudflareTvAccountClient.signIn(email, password)
+            _authState.value = AuthState.FullAccount(userId = account.id, email = account.email)
+        }
         val diagnostics = AuthDiagnosticsSession(
             authDiagnosticReportRepository,
             "password_login",
@@ -375,6 +388,15 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signOut(explicit: Boolean = true) {
+        if (CloudflareTvAccountClient.enabled) {
+            try {
+                CloudflareTvAccountClient.signOut()
+            } finally {
+                _authState.value = AuthState.SignedOut
+                accountLocalDataResetService.clearAfterSignOut()
+            }
+            return
+        }
         sessionValidator.reset()
         if (explicit) {
             authSessionNoticeDataStore.markNuvioExplicitLogout()
@@ -393,6 +415,11 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun prepareForServerSwitch(): Result<Unit> {
+        if (CloudflareTvAccountClient.enabled) {
+            CloudflareTvAccountClient.clearLocalSession()
+            _authState.value = AuthState.SignedOut
+            return Result.success(Unit)
+        }
         val hadSession = auth.currentSessionOrNull() != null || _authState.value is AuthState.FullAccount
         sessionValidator.reset()
         val sessionClearResult = runCatching { auth.clearSession() }
@@ -421,6 +448,7 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun refreshSessionIfJwtExpired(error: Throwable): Boolean {
+        if (CloudflareTvAccountClient.enabled) return false
         if (!error.isJwtExpiredAuthError()) return false
         val refreshToken = auth.currentSessionOrNull()?.refreshToken?.takeIf { it.isNotBlank() }
             ?: run {
