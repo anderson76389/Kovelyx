@@ -1,3 +1,5 @@
+> **ARCHIVE HISTORIQUE :** cette architecture Supabase a été abandonnée pour la nouvelle solution **[Cloudflare Workers + D1](../kovelyx-cloudflare/README.md)**. Ne pas exécuter les migrations Supabase ni déployer ce dossier pour Kovelyx. Il est conservé provisoirement afin de ne pas casser les références et de pouvoir comparer les anciens contrats pendant la migration.
+
 # Kovelyx Cloud — serveur de comptes propre au projet
 
 **État : socle de base de données créé, aucun serveur déployé, synchronisation des clients NON connectée.**
