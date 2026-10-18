@@ -31,9 +31,9 @@ internal object CloudflareTvAccountClient {
             check(enabled) { "Kovelyx Cloudflare non configuré" }
             val json = JSONObject().put("email", email.trim()).put("password", password)
             if (endpoint == "sign-up") json.put("name", email.substringBefore('@').take(48).ifBlank { "Kovelyx" })
+            val route = if (endpoint == "sign-up") "sign-up/email" else "sign-in/email"
             val request = Request.Builder()
-                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/" +
-                    if (endpoint == "sign-up") "sign-up/email" else "sign-in/email")
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/" + route)
                 .header("Accept", "application/json")
                 .post(json.toString().toRequestBody("application/json".toMediaType()))
                 .build()
