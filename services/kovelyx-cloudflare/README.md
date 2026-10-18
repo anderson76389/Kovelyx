@@ -15,6 +15,22 @@ Oui, Cloudflare Workers Free + D1 n'a pas la règle Supabase de suspension du pr
 
 Sources : [Workers limites](https://developers.cloudflare.com/workers/platform/limits/), [tarifs D1](https://developers.cloudflare.com/d1/platform/pricing/).
 
+## Installation simplifiée — après autorisation Cloudflare
+
+**Si `npx wrangler whoami` fonctionne déjà dans Codespaces**, il n'est pas nécessaire de se reconnecter. Ouvrir le terminal du Codespace et coller **une seule commande** :
+
+```bash
+cd /workspaces/Kovelyx && git pull --ff-only && cd services/kovelyx-cloudflare && npm install && node scripts/setup.mjs
+```
+
+Le script [`scripts/setup.mjs`](./scripts/setup.mjs) contrôle votre connexion, crée `kovelyx-accounts` dans l'Union européenne si la base n'existe pas, écrit son identifiant public dans `wrangler.toml`, applique la migration D1, déploie le Worker et crée un secret Better Auth **seulement s'il manque**. Il n'affiche pas le secret et ne demande pas de mot de passe utilisateur. **Les inscriptions restent fermées** après le déploiement.
+
+Une fois terminé, copiez l'URL HTTPS `https://kovelyx-cloud....workers.dev` donnée par Wrangler et testez-la en ajoutant `/health`. Si une étape échoue, relevez le **message d'erreur sans aucune clé ou mot de passe** puis reprenez le script après correction : il réutilise la base et le secret déjà présents.
+
+**Important :** l'identifiant public D1 est inscrit dans le `wrangler.toml` de votre Codespace, pas automatiquement envoyé dans GitHub. Pour retrouver ce réglage après suppression du Codespace, sauvegardez l'ID D1 ou validez seulement ce changement dans votre dépôt après contrôle. Ne commitez jamais les fichiers contenant des secrets.
+
+Les sections ci-dessous constituent la **méthode détaillée alternative**, pas des étapes supplémentaires obligatoires si le script a réussi.
+
 ## Installation complète gratuite via GitHub Codespaces
 
 **Prérequis :** votre compte Cloudflare, accès propriétaire au repo Kovelyx, et Node.js 22 minimum dans GitHub Codespaces. Ne jamais copier une clé ou un mot de passe dans GitHub ou la conversation.
