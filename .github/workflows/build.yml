@@ -70,11 +70,10 @@ jobs:
           test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Injecter le Supabase personnel Kovelyx dans Android TV (facultatif)
+      - name: Configurer le Worker Cloudflare Kovelyx dans Android TV (facultatif)
         shell: bash
         env:
-          KOVELYX_CLOUD_URL: ${{ secrets.KOVELYX_CLOUD_URL }}
-          KOVELYX_CLOUD_PUBLISHABLE_KEY: ${{ secrets.KOVELYX_CLOUD_PUBLISHABLE_KEY }}
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL }}
         run: python3 scripts/configure-cloud-build.py --platform tv
       - name: Compiler Android TV
         working-directory: apps/tv
@@ -129,11 +128,10 @@ jobs:
           test -d "${ANDROID_HOME:-/usr/local/lib/android/sdk}"
       - name: Gradle
         uses: gradle/actions/setup-gradle@v4
-      - name: Injecter le Supabase personnel Kovelyx dans Android mobile (facultatif)
+      - name: Configurer le Worker Cloudflare Kovelyx dans Android mobile (facultatif)
         shell: bash
         env:
-          KOVELYX_CLOUD_URL: ${{ secrets.KOVELYX_CLOUD_URL }}
-          KOVELYX_CLOUD_PUBLISHABLE_KEY: ${{ secrets.KOVELYX_CLOUD_PUBLISHABLE_KEY }}
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL }}
         run: python3 scripts/configure-cloud-build.py --platform mobile
       - name: Compiler Android mobile
         working-directory: apps/mobile
