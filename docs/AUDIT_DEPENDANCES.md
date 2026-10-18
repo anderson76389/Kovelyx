@@ -42,8 +42,8 @@ Fichiers texte examinés : **1358** ; références statiques à Nuvio/NuvioMedia
 ### Références à vérifier en priorité
 
 - `apps/tv/app/build.gradle.kts:100`
-- `apps/tv/app/build.gradle.kts:374`
-- `apps/tv/app/build.gradle.kts:406`
+- `apps/tv/app/build.gradle.kts:375`
+- `apps/tv/app/build.gradle.kts:407`
 - `apps/tv/baselineprofile/build.gradle.kts:8`
 - `apps/tv/scripts/perf_baseline.sh:22`
 - `apps/tv/scripts/perf_baseline.sh:27`

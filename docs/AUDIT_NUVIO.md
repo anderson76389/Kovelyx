@@ -9,12 +9,12 @@ Fichiers inspectés : 4522
 
 ### Connexions et services (107 correspondances)
 
-- apps/tv/app/build.gradle.kts:205 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
-- apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
-- apps/tv/app/build.gradle.kts:207 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
-- apps/tv/app/build.gradle.kts:240 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
-- apps/tv/app/build.gradle.kts:241 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
-- apps/tv/app/build.gradle.kts:242 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
+- apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
+- apps/tv/app/build.gradle.kts:207 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
+- apps/tv/app/build.gradle.kts:208 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
+- apps/tv/app/build.gradle.kts:241 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
+- apps/tv/app/build.gradle.kts:242 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
+- apps/tv/app/build.gradle.kts:243 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
 - apps/tv/app/src/main/res/values-ar/strings.xml:2644 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2645 : <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
 - apps/tv/app/src/main/res/values-b+es+419/strings.xml:2204 : <string name="custom_server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
@@ -221,7 +221,7 @@ Fichiers inspectés : 4522
 
 ### Configuration générale (63 correspondances)
 
-- apps/tv/app/build.gradle.kts:495 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
+- apps/tv/app/build.gradle.kts:496 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Color.kt:55 : data class NuvioMediaColors(
