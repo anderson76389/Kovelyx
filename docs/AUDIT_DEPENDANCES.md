@@ -246,7 +246,7 @@ Fichiers texte examinés : **1408** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia : **119**.
+Fichiers texte examinés : **1786** ; références statiques à Nuvio/NuvioMedia : **119**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |

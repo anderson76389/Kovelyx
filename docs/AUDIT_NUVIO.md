@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4520
+Fichiers inspectés : 4521
 
 ## Inventaire des références à traiter
 
@@ -56,9 +56,9 @@ Fichiers inspectés : 4520
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2133 : <string name="custom_server_error_official_active">api.nuvio.tv 是官方伺服器，且已被選取。</string>
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2134 : <string name="custom_server_error_official_available">api.nuvio.tv 是官方伺服器。關閉此對話框並選擇「使用官方伺服器」以切換回去。</string>
 - apps/tv/local.example.properties:3 : NUVIO_SUPABASE_FALLBACK_URL=
-- apps/mobile/composeApp/build.gradle.kts:325 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-- apps/mobile/composeApp/build.gradle.kts:326 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-- apps/mobile/composeApp/build.gradle.kts:327 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+- apps/mobile/composeApp/build.gradle.kts:342 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
+- apps/mobile/composeApp/build.gradle.kts:343 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
+- apps/mobile/composeApp/build.gradle.kts:344 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401 : <string name="server_error_official_active">api.nuvio.tv অফিসিয়াল সার্ভার এবং ইতিমধ্যেই নির্বাচিত।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402 : <string name="server_error_official_available">api.nuvio.tv হল অফিসিয়াল সার্ভার। এই ডায়ালগটি বন্ধ করুন এবং ফিরে যেতে অফিসিয়াল সার্ভার ব্যবহার করুন নির্বাচন করুন।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1983 : <string name="server_error_official_active">api.nuvio.tv je oficiální server a už je vybraný.</string>
@@ -232,7 +232,7 @@ Fichiers inspectés : 4520
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Theme.kt:174 : val media: NuvioMediaTokens
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Theme.kt:175 : get() = NuvioMedia.tokens
 - apps/tv/app/src/main/res/values-nl/strings.xml:1531 : <string name="profile_pin_overlay_forgot_hint">Pincode vergeten
-- apps/mobile/composeApp/build.gradle.kts:260 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
+- apps/mobile/composeApp/build.gradle.kts:277 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -301,8 +301,8 @@ Fichiers inspectés : 4520
 ## Références de packages Kotlin historiques
 
 - apps/tv : 6728 lignes.
-- apps/mobile : 6942 lignes.
-- apps/desktop : 7858 lignes.
+- apps/mobile : 6943 lignes.
+- apps/desktop : 7860 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
