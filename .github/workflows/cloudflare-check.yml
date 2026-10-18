@@ -25,6 +25,9 @@ jobs:
         run: |
           python -m py_compile scripts/configure-cloud-build.py
           python services/kovelyx-cloudflare/tests/check-d1-schema.py
+      - name: Vérifier le script installation Cloudflare
+        working-directory: services/kovelyx-cloudflare
+        run: node --check scripts/setup.mjs
       - name: Installer les dépendances Worker
         working-directory: services/kovelyx-cloudflare
         run: npm install --no-audit --no-fund
