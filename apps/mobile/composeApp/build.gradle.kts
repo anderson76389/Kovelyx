@@ -38,6 +38,9 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
     abstract val supabaseFallbackUrl: Property<String>
 
     @get:Input
+    abstract val cloudflareUrl: Property<String>
+
+    @get:Input
     abstract val sentryDsn: Property<String>
 
     @get:Input
@@ -62,6 +65,20 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
                 |    const val URL = "${supabaseUrl.get()}"
                 |    const val ANON_KEY = "${supabaseAnonKey.get()}"
                 |    const val FALLBACK_URL = "${supabaseFallbackUrl.get()}"
+                |}
+                """.trimMargin()
+            )
+        }
+
+        // URL publique du vrai Worker D1, séparée du SDK Supabase hérité.
+        outDir.resolve("com/nuvio/app/core/cloud").apply {
+            mkdirs()
+            resolve("CloudflareConfig.kt").writeText(
+                """
+                |package com.nuvio.app.core.cloud
+                |
+                |object CloudflareConfig {
+                |    const val URL = "${cloudflareUrl.get()}"
                 |}
                 """.trimMargin()
             )
@@ -325,6 +342,7 @@ val generateRuntimeConfigs = tasks.register<GenerateRuntimeConfigsTask>("generat
     supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
     supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
     supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+    cloudflareUrl.set(runtimeConfigValue("KOVELYX_CLOUD_URL"))
     sentryDsn.set(runtimeConfigValue("SENTRY_DSN"))
     tmdbApiKey.set(runtimeConfigValue("TMDB_API_KEY"))
     sentryEnvironment.set(
