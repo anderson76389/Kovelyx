@@ -1,6 +1,8 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
 import io.github.jan.supabase.auth.auth
@@ -50,6 +52,15 @@ object AuthRepository {
             )
         }
 
+        if (CloudflareAccountClient.enabled) {
+            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            return
+        }
+        val backend = ServerConfigurationRepository.active.value
+        if (backend.backendUrl.isBlank() || backend.publishableKey.isBlank()) {
+            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            return
+        }
         sessionStatusJob = scope.launch {
             SupabaseProvider.client.auth.sessionStatus.collect { status ->
                 if (AuthStorage.loadAnonymousUserId() != null) return@collect
@@ -113,6 +124,10 @@ object AuthRepository {
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            CloudflareAccountClient.signUp(email, password)
+            return@runCatching Unit
+        }
         SupabaseProvider.client.auth.signUpWith(Email) {
             this.email = email
             this.password = password
@@ -126,6 +141,14 @@ object AuthRepository {
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            val account = CloudflareAccountClient.signIn(email, password)
+            AuthStorage.clearAnonymousUserId()
+            _state.value = AuthState.Authenticated(
+                userId = account.userId, email = account.email, isAnonymous = false
+            )
+            return@runCatching Unit
+        }
         SupabaseProvider.client.auth.signInWith(Email) {
             this.email = email
             this.password = password
@@ -138,6 +161,13 @@ object AuthRepository {
 
     suspend fun signOut(): Result<Unit> {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            val logout = runCatching { CloudflareAccountClient.signOut() }
+            AuthStorage.clearAnonymousUserId()
+            val cleanup = runCatching { LocalAccountDataCleaner.wipe() }
+            _state.value = AuthState.Unauthenticated
+            return if (logout.isFailure) logout else cleanup
+        }
         val anonymousRead = runCatching { AuthStorage.loadAnonymousUserId() }
         val wasAnonymous = anonymousRead.getOrNull() != null
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
@@ -178,6 +208,12 @@ object AuthRepository {
 
     suspend fun prepareForServerSwitch(): Result<Unit> {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            CloudflareAccountClient.clearLocalSession()
+            AuthStorage.clearAnonymousUserId()
+            _state.value = AuthState.Unauthenticated
+            return Result.success(Unit)
+        }
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
         validatedRemoteUserId = null
         val sessionClear = runCatching { SupabaseProvider.client.auth.clearSession() }
@@ -198,6 +234,7 @@ object AuthRepository {
     }
 
     suspend fun signOutIfSessionInvalid(error: Throwable, source: String): Boolean {
+        if (CloudflareAccountClient.enabled) return false
         if (!isInvalidRemoteSessionError(error)) return false
 
         log.w(error) { "$source failed because the current Supabase account/session is no longer valid; clearing local auth" }
@@ -223,6 +260,9 @@ object AuthRepository {
 
     suspend fun deleteAccount(): Result<Unit> = runCatching {
         _error.value = null
+        check(!CloudflareAccountClient.enabled) {
+            "Suppression du compte Cloudflare pas encore disponible."
+        }
         SupabaseProvider.client.functions.invoke("delete-account")
         SupabaseProvider.client.auth.signOut()
         validatedRemoteUserId = null
