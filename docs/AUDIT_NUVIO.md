@@ -301,8 +301,8 @@ Fichiers inspectés : 4523
 ## Références de packages Kotlin historiques
 
 - apps/tv : 6730 lignes.
-- apps/mobile : 6947 lignes.
-- apps/desktop : 7861 lignes.
+- apps/mobile : 6948 lignes.
+- apps/desktop : 7862 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
