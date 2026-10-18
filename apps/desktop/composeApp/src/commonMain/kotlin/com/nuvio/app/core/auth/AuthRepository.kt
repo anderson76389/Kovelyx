@@ -1,6 +1,7 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
@@ -49,6 +50,14 @@ object AuthRepository {
                 email = null,
                 isAnonymous = true,
             )
+        }
+
+        // Cloudflare et Supabase ne partagent AUCUN protocole d'authentification.
+        // Tant que le jeton n'est pas stocke de façon chiffrée, les utilisateurs
+        // du Worker se reconnectent après chaque redémarrage de l'application.
+        if (CloudflareAccountClient.enabled) {
+            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            return
         }
 
         // Guest accounts live entirely on this device. A missing backend must
@@ -121,6 +130,10 @@ object AuthRepository {
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            CloudflareAccountClient.signUp(email, password)
+            return@runCatching Unit
+        }
         check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
         SupabaseProvider.client.auth.signUpWith(Email) {
             this.email = email
@@ -135,6 +148,14 @@ object AuthRepository {
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> = runCatching {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            val account = CloudflareAccountClient.signIn(email, password)
+            AuthStorage.clearAnonymousUserId()
+            _state.value = AuthState.Authenticated(
+                userId = account.userId, email = account.email, isAnonymous = false
+            )
+            return@runCatching Unit
+        }
         check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
         SupabaseProvider.client.auth.signInWith(Email) {
             this.email = email
@@ -148,6 +169,13 @@ object AuthRepository {
 
     suspend fun signOut(): Result<Unit> {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            val logout = runCatching { CloudflareAccountClient.signOut() }
+            AuthStorage.clearAnonymousUserId()
+            val cleanup = runCatching { LocalAccountDataCleaner.wipe() }
+            _state.value = AuthState.Unauthenticated
+            return if (logout.isFailure) logout else cleanup
+        }
         val anonymousRead = runCatching { AuthStorage.loadAnonymousUserId() }
         val wasAnonymous = anonymousRead.getOrNull() != null
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
@@ -188,6 +216,12 @@ object AuthRepository {
 
     suspend fun prepareForServerSwitch(): Result<Unit> {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            CloudflareAccountClient.clearLocalSession()
+            AuthStorage.clearAnonymousUserId()
+            _state.value = AuthState.Unauthenticated
+            return Result.success(Unit)
+        }
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
         validatedRemoteUserId = null
         val sessionClear = if (!hasConfiguredBackend()) Result.success(Unit)
@@ -199,7 +233,8 @@ object AuthRepository {
         return if (failure == null) Result.success(Unit) else Result.failure(failure)
     }
 
-    private fun hasConfiguredBackend(): Boolean = ServerConfigurationRepository.active.value.let { config ->
+    private fun hasConfiguredBackend(): Boolean = CloudflareAccountClient.enabled ||
+        ServerConfigurationRepository.active.value.let { config ->
         config.backendUrl.isNotBlank() && config.publishableKey.isNotBlank()
     }
 
@@ -213,6 +248,7 @@ object AuthRepository {
     }
 
     suspend fun signOutIfSessionInvalid(error: Throwable, source: String): Boolean {
+        if (CloudflareAccountClient.enabled) return false
         if (!isInvalidRemoteSessionError(error)) return false
 
         log.w(error) { "$source failed because the current Supabase account/session is no longer valid; clearing local auth" }
@@ -238,6 +274,9 @@ object AuthRepository {
 
     suspend fun deleteAccount(): Result<Unit> = runCatching {
         _error.value = null
+        check(!CloudflareAccountClient.enabled) {
+            "Suppression du compte Cloudflare non disponible tant que l'API securisee n'est pas integree."
+        }
         SupabaseProvider.client.functions.invoke("delete-account")
         SupabaseProvider.client.auth.signOut()
         validatedRemoteUserId = null
