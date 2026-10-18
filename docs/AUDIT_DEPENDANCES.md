@@ -338,8 +338,8 @@ Fichiers texte examinés : **1785** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/store.json:277`
 - `apps/desktop/scripts/prepare-ios-dependencies.sh:25`
 - `apps/desktop/MPVKit/Package.swift:304`
-- `apps/desktop/composeApp/build.gradle.kts:127`
-- `apps/desktop/composeApp/build.gradle.kts:141`
+- `apps/desktop/composeApp/build.gradle.kts:144`
+- `apps/desktop/composeApp/build.gradle.kts:158`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:4`
 - `apps/desktop/.github/ISSUE_TEMPLATE/config.yml:7`

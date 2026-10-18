@@ -84,9 +84,9 @@ Fichiers inspectés : 4520
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
-- apps/desktop/composeApp/build.gradle.kts:567 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-- apps/desktop/composeApp/build.gradle.kts:568 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-- apps/desktop/composeApp/build.gradle.kts:569 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+- apps/desktop/composeApp/build.gradle.kts:584 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
+- apps/desktop/composeApp/build.gradle.kts:585 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
+- apps/desktop/composeApp/build.gradle.kts:586 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
 - apps/desktop/composeApp/src/commonMain/composeResources/values/strings.xml:407 : <string name="server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values/strings.xml:408 : <string name="server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
 - Autres correspondances non détaillées : 27
@@ -116,8 +116,8 @@ Fichiers inspectés : 4520
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
-- apps/desktop/composeApp/build.gradle.kts:127 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
-- apps/desktop/composeApp/build.gradle.kts:141 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
+- apps/desktop/composeApp/build.gradle.kts:144 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
+- apps/desktop/composeApp/build.gradle.kts:158 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49 : parseAppDeepLink("nuvio://series/tt0944947"),
@@ -253,8 +253,8 @@ Fichiers inspectés : 4520
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357 : <string name="compose_auth_link_open">Mở nuvio.tv/link</string>
 - apps/mobile/scripts/prepare-ios-dependencies.sh:8 : engine_root="${NUVIO_ENGINE_ROOT:-${repository_root}/../nuvio-engine}"
 - apps/mobile/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
-- apps/desktop/composeApp/build.gradle.kts:497 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
-- apps/desktop/composeApp/build.gradle.kts:1192 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
+- apps/desktop/composeApp/build.gradle.kts:514 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
+- apps/desktop/composeApp/build.gradle.kts:1210 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -302,7 +302,7 @@ Fichiers inspectés : 4520
 
 - apps/tv : 6728 lignes.
 - apps/mobile : 6942 lignes.
-- apps/desktop : 7857 lignes.
+- apps/desktop : 7858 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
