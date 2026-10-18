@@ -23,6 +23,12 @@
 
 ---
 
+## ☁️ Comptes Kovelyx Cloudflare (en développement)
+
+Le nouveau serveur de comptes utilise **Cloudflare Workers + D1 + Better Auth**, **pas les serveurs de Nuvio ni Supabase** pour les nouveaux comptes. Le code du serveur, les premières connexions des applications et les routes de synchronisation sont dans ce dépôt. **Les anciennes fonctions ne sont pas toutes migrées et aucune synchronisation totale n'est annoncée avant les tests.**
+
+**[Tutoriel Cloudflare gratuit : installation avec GitHub Codespaces](./services/kovelyx-cloudflare/README.md)** · [CI de tests Cloudflare](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-check.yml)
+
 ## ✦ Pourquoi Kovelyx ?
 
 Des films, des séries, des bibliothèques et des sources configurables dans une interface pensée pour le bureau. Notre priorité : **garder la maîtrise du code, des paramètres et des builds**, et proposer des fichiers simples à installer ou à lancer.
