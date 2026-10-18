@@ -1,0 +1,80 @@
+package com.nuvio.tv.core.auth
+
+import com.nuvio.tv.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.util.concurrent.TimeUnit
+
+/**
+ * Client indépendant Workers / Better Auth : PAS de jeton Supabase.
+ * Préversion : les sessions sont en mémoire et ne survivent pas au redémarrage,
+ * jusqu'à la mise en place d'un coffre chiffré Android Keystore.
+ */
+internal object CloudflareTvAccountClient {
+    data class Account(val id: String, val email: String, val bearerToken: String)
+    val enabled: Boolean get() = BuildConfig.KOVELYX_CLOUD_URL.startsWith("https://")
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .followRedirects(false)
+        .build()
+    var account: Account? = null
+        private set
+
+    private suspend fun post(endpoint: String, email: String, password: String): Pair<JSONObject,String> =
+        withContext(Dispatchers.IO) {
+            check(enabled) { "Kovelyx Cloudflare non configuré" }
+            val json = JSONObject().put("email", email.trim()).put("password", password)
+            if (endpoint == "sign-up") json.put("name", email.substringBefore('@').take(48).ifBlank { "Kovelyx" })
+            val request = Request.Builder()
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/" +
+                    if (endpoint == "sign-up") "sign-up/email" else "sign-in/email")
+                .header("Accept", "application/json")
+                .post(json.toString().toRequestBody("application/json".toMediaType()))
+                .build()
+            client.newCall(request).execute().use { response ->
+                val body = response.body?.string().orEmpty()
+                check(response.isSuccessful) { "Kovelyx Cloud : HTTP ${response.code}" }
+                JSONObject(body) to response.header("set-auth-token").orEmpty()
+            }
+        }
+
+    suspend fun signUp(email: String, password: String) {
+        post("sign-up", email, password)
+    }
+
+    suspend fun signIn(email: String, password: String): Account {
+        val (body, headerToken) = post("sign-in", email, password)
+        val user = body.optJSONObject("user") ?: error("Kovelyx Cloud : utilisateur absent")
+        val id = user.optString("id")
+        val address = user.optString("email")
+        val token = headerToken.ifBlank { body.optString("token") }
+        check(id.isNotBlank() && address.isNotBlank() && token.length >= 16) {
+            "Kovelyx Cloud : jeton invalide"
+        }
+        return Account(id, address, token).also { account = it }
+    }
+
+    suspend fun signOut() {
+        val old = account
+        account = null
+        if (old == null || !enabled) return
+        withContext(Dispatchers.IO) {
+            val request = Request.Builder()
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/sign-out")
+                .header("Authorization", "Bearer ${old.bearerToken}")
+                .post("{}".toRequestBody("application/json".toMediaType()))
+                .build()
+            client.newCall(request).execute().close()
+        }
+    }
+
+    fun clearLocalSession() {
+        account = null
+    }
+}
