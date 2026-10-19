@@ -118,6 +118,76 @@ try {
   assert.equal(page.status,200);
   assert.equal(page.data.items.length,1);
   assert.equal(page.data.items[0].revision,2);
+
+  // Simuler les contrats de données d'un PC, d'un mobile et d'une TV via de
+  // VRAIES requêtes HTTP au même Worker+D1. Ce n'est pas un essai matériel.
+  const mobileEntry={
+    profileId:id,category:"library",itemKey:"movie:202",
+    payload:{item:{
+      id:"202",type:"movie",name:"Ajout Android",savedAtEpochMs:1720010200000,
+      poster:"https://image.tmdb.org/t/p/w500/poster.jpg"
+    }},deleted:false,revision:0
+  };
+  const fromMobile=await req("/v1/sync","POST",mobileEntry,alice.token);
+  assert.equal(fromMobile.status,201,"Android-like metadata must be stored");
+  assert.equal(fromMobile.data.revision,1);
+  const tvEntry={
+    profileId:id,category:"library",itemKey:"series:303",
+    payload:{item:{id:"303",type:"series",name:"Ajout Android TV",savedAtEpochMs:1720010300000}},
+    deleted:false,revision:0
+  };
+  const fromTv=await req("/v1/sync","POST",tvEntry,alice.token);
+  assert.equal(fromTv.status,201,"TV-like metadata must be stored");
+
+  const crossDevicePage1=await req(
+    "/v1/sync?profileId="+id+"&category=library&limit=1","GET",null,alice.token);
+  assert.equal(crossDevicePage1.status,200);
+  assert.equal(crossDevicePage1.data.items.length,1);
+  assert.equal(crossDevicePage1.data.partial,true);
+  assert.equal(crossDevicePage1.data.nextCursor,"movie:101");
+  assert.equal(crossDevicePage1.data.items[0].payload.item.id,"101");
+  const crossDevicePage2=await req(
+    "/v1/sync?profileId="+id+"&category=library&limit=1&after="+
+      encodeURIComponent(crossDevicePage1.data.nextCursor),"GET",null,alice.token);
+  assert.equal(crossDevicePage2.status,200);
+  assert.equal(crossDevicePage2.data.items[0].payload.item.name,"Ajout Android");
+  assert.equal(crossDevicePage2.data.nextCursor,"movie:202");
+  const crossDevicePage3=await req(
+    "/v1/sync?profileId="+id+"&category=library&limit=1&after="+
+      encodeURIComponent(crossDevicePage2.data.nextCursor),"GET",null,alice.token);
+  assert.equal(crossDevicePage3.status,200);
+  assert.equal(crossDevicePage3.data.items[0].payload.item.name,"Ajout Android TV");
+  assert.equal(crossDevicePage3.data.partial,false);
+  assert.equal(crossDevicePage3.data.nextCursor,null);
+
+  // Suppression Windows transmise aux autres clients comme une tombstone :
+  // le modèle TV doit la voir sans effacer les autres lignes.
+  const deletion=await req("/v1/sync","POST",{
+    profileId:id,category:"library",itemKey:"movie:101",
+    payload:{},deleted:true,revision:2
+  },alice.token);
+  assert.equal(deletion.status,200);
+  assert.equal(deletion.data.revision,3);
+  const afterDelete=await req(
+    "/v1/sync?profileId="+id+"&category=library&limit=100","GET",null,alice.token);
+  assert.equal(afterDelete.status,200);
+  assert.equal(afterDelete.data.items.length,3);
+  const tombstone=afterDelete.data.items.find(x=>x.itemKey==="movie:101");
+  assert.equal(tombstone.deleted,true);
+  assert.equal(tombstone.revision,3);
+  assert.equal(afterDelete.data.items.find(x=>x.itemKey==="movie:202").deleted,false);
+  assert.equal(afterDelete.data.items.find(x=>x.itemKey==="series:303").deleted,false);
+
+  // Un téléphone hors ligne gardant la révision 2 ne peut pas ressusciter le
+  // favori supprimé à la révision 3 par une réécriture aveugle.
+  const staleMobile=await req("/v1/sync","POST",{
+    ...input,revision:2,payload:{item:{id:"101",type:"movie",name:"Vieille version"}}
+  },alice.token);
+  assert.equal(staleMobile.status,409);
+  assert.equal(staleMobile.data?.current?.revision,3);
+  const secondAccountWrite=await req("/v1/sync","POST",mobileEntry,bob.token);
+  assert.equal(secondAccountWrite.status,404,"No cross-account write to another profile");
+
   const deniedMedia=await req("/v1/media?profileId="+id+"&kind=avatar","GET",null,bob.token);
   assert.equal(deniedMedia.status,503,"R2 disabled by design on ephemeral Worker");
   const accountName=await req("/v1/profiles/update","POST",
@@ -128,7 +198,7 @@ try {
   const signOut=await req("/api/auth/sign-out","POST",{},alice.token);
   assert.ok(signOut.status>=200&&signOut.status<300);
   assert.equal((await req("/v1/me","GET",null,alice.token)).status,401,"Signout invalidates token");
-  console.log("PASS: two real local Better Auth accounts, bearer login/logout, profile isolation, rename, D1 CAS, sync pagination, disabled R2");
+  console.log("PASS: two real local Better Auth accounts, bearer login/logout, profile isolation, rename, D1 CAS, 3 simulated clients, multi-page D1, CAS conflicts, deletion tombstone, cross-account isolation, disabled R2");
 } finally {
   if (worker?.pid) {
     // Sous Linux, -pid désigne notre groupe dédié, jamais celui du runner.
