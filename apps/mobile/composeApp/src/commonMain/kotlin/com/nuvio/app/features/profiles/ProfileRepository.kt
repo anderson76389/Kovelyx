@@ -365,6 +365,19 @@ object ProfileRepository {
                     ProfileCloudMediaTransfer.upload(profile.id,profile.profileBackgroundUrl!!,true)
                 }.onFailure { log.w(it) { "Envoi fond R2 impossible : copie locale conservée" } }
             }
+            // Une sélection « par défaut » doit également retirer le fichier
+            // distant, sinon la TV afficherait encore l'ancien avatar/fond.
+            val previous=localByIndex[profile.profileIndex]
+            if(!oldAvatar.isNullOrBlank() && previous?.avatarUrl!=profile.avatarUrl &&
+                !ProfileLocalImages.isManagedUri(profile.avatarUrl.orEmpty())) {
+                runCatching { ProfileCloudMediaTransfer.remove(profile.id,false) }
+                    .onFailure { log.w(it) { "Avatar R2 ancien encore conservé" } }
+            }
+            if(!oldBackground.isNullOrBlank() && previous?.profileBackgroundUrl!=profile.profileBackgroundUrl &&
+                !ProfileLocalImages.isManagedUri(profile.profileBackgroundUrl.orEmpty())) {
+                runCatching { ProfileCloudMediaTransfer.remove(profile.id,true) }
+                    .onFailure { log.w(it) { "Fond R2 ancien encore conservé" } }
+            }
         }
         val result = synced.sortedBy { it.profileIndex }
         _state.value = _state.value.copy(
