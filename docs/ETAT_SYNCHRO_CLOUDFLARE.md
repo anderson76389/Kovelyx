@@ -17,7 +17,15 @@ _Mise à jour : 19 octobre 2026. Ce document décrit le code de la branche de mi
 - Les fonctions de synchronisation Supabase incompatibles ne doivent pas s'exécuter pour les comptes Cloudflare dans les chemins de profils/PIN/bibliothèque modifiés.
 - Windows/Android mobile : première implémentation de la **bibliothèque locale** sur D1 (GET paginé par catégorie et écriture avec contrôle de révision). La première connexion importe les éléments du cloud sans exporter automatiquement les anciennes bibliothèques de l'appareil. Après initialisation, les ajouts et suppressions *effectués dans la bibliothèque locale* peuvent être envoyés au serveur avec refus des conflits (409). Les éléments du cloud sont importés de façon additive; les tombstones ne retirent un titre que s'il était déjà connu sur le même profil.
 - Les bibliothèques et caches de profils Windows/Android sont désormais isolés par ID du compte pour éviter de mélanger anciens favoris invités et nouveau compte.
-- Android TV : consultation des noms de profils Cloudflare déjà existante, sans import automatique dans les profils TV. Les actions de liaison par code historiques sont bloquées sur Cloudflare tant qu'il n'existe pas de nouveau protocole.
+- Android TV : consultation des noms de profils Cloudflare déjà existante, sans import automatique dans les profils TV. Les actions de liaison par code historiques sont bloquées sur Cloudflare tant qu'il n'existe pas de nouveau protocole. Les entrées de synchronisation bibliothèque historiquement reliées à Supabase refusent toute requête en mode Cloudflare, tandis que la bibliothèque locale reste utilisable.
+
+## Présentation des applications sur cette branche
+
+- Les noms affichés par les variantes de développement mobiles et TV sont désormais « **Kovelyx** » (suppression de « Kovelyx (test) » et « Nuvio Debug »). Le package MSI Windows était déjà « Kovelyx ».
+- Le logo du chargement Compose est ancré au **centre réel** de son écran sur Windows, mobile et TV ; l'indicateur est affiché en dessous sans déplacer le logo.
+- Une vérification statique des labels et positions est ajoutée aux tests de marque, et les APK Android sont contrôlés par `aapt` pour vérifier le **vrai nom installé**.
+- Les identifiants `com.kovelyx.*` restent inchangés : pas de réinitialisation d'application ni de confusion avec les données existantes.
+- Reste à confirmer le rendu optique sur les appareils réels, notamment les premières images du splash natif Android.
 
 ## Limites réelles
 
