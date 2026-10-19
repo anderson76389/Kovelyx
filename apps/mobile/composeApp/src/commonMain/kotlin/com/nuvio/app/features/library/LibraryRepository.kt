@@ -2,6 +2,7 @@ package com.nuvio.app.features.library
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.library.sync.LibrarySyncAdapter
@@ -215,6 +216,10 @@ object LibraryRepository {
             publish()
             return
         }
+
+        // La bibliothèque distante Cloudflare dispose d'un schéma différent.
+        // Conserver les données locales jusqu'à l'arrivée de l'adaptateur D1.
+        if (CloudflareAccountClient.enabled) return
 
         nuvioSyncMutex.withLock {
             val serializedToken = activeOperationToken(profileId) ?: return@withLock
@@ -546,6 +551,7 @@ object LibraryRepository {
         snapshot: LibraryLocalSnapshot,
         delayMs: Long = pushDebounceMs,
     ) {
+        if (CloudflareAccountClient.enabled) return // Ne jamais envoyer au Supabase historique.
         if (!snapshot.hasPendingPush) return
         val authState = AuthRepository.state.value
         val profileId = snapshot.token.profileId
