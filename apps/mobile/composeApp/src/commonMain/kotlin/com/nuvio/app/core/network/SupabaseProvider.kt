@@ -1,6 +1,7 @@
 package com.nuvio.app.core.network
 
 import com.nuvio.app.core.build.AppVersionConfig
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
@@ -22,8 +23,16 @@ object SupabaseProvider {
 
     @OptIn(SupabaseInternal::class)
     val client: SupabaseClient
-        get() = synchronized(clientLock) {
-            cachedClient ?: createClient().also { cachedClient = it }
+        get() {
+            // Protection centrale : aucune fonction non encore migrée ne doit
+            // pouvoir utiliser l'ancien protocole de compte pendant une
+            // session Kovelyx Cloudflare. Cela ne simule PAS une synchronisation.
+            check(!CloudflareAccountClient.enabled) {
+                "Synchronisation Supabase historique désactivée : fonction non migrée vers Kovelyx D1"
+            }
+            return synchronized(clientLock) {
+                cachedClient ?: createClient().also { cachedClient = it }
+            }
         }
 
     @OptIn(SupabaseInternal::class)
