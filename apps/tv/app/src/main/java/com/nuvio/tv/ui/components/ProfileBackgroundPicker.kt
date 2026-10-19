@@ -233,6 +233,8 @@ fun CustomProfileBackgroundImage(
             modifier=modifier,
             factory={ ctx ->
                 VideoView(ctx).apply {
+                    isFocusable=false
+                    isFocusableInTouchMode=false
                     setVideoURI(android.net.Uri.parse(imageUrl))
                     setOnPreparedListener { player ->
                         player.isLooping=true
