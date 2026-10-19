@@ -6,6 +6,7 @@ import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.domain.model.PosterShape
 import com.nuvio.tv.domain.model.SavedLibraryItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
@@ -228,6 +229,8 @@ internal object CloudflareTvLibraryStore {
                     if (!valid(updated)) return@withLock
                     _state.value = updated
                     save(context, updated)
+                } catch (cancel: CancellationException) {
+                    throw cancel
                 } catch (error: Exception) {
                     Log.w("KovelyxCloudTvLibrary", "Écriture conservée en attente (réseau/conflit)", error)
                 }
@@ -255,7 +258,12 @@ internal object CloudflareTvLibraryStore {
             }
         }
         // Le changement local est déjà durable même si le serveur refuse.
-        runCatching { refresh(context, localProfileId) }
-            .onFailure { Log.w("KovelyxCloudTvLibrary", "Synchronisation reportée", it) }
+        try {
+            refresh(context, localProfileId)
+        } catch (cancel: CancellationException) {
+            throw cancel
+        } catch (error: Exception) {
+            Log.w("KovelyxCloudTvLibrary", "Synchronisation reportée", error)
+        }
     }
 }

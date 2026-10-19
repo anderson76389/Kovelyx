@@ -95,21 +95,25 @@ class LibraryRepositoryImpl @Inject constructor(
                             CloudflareTvLibraryStore.reset()
                             return@collectLatest
                         }
-                        try {
-                            val remote = CloudflareTvAccountClient.getCloudProfiles()
-                            val bindings = CloudflareTvProfileBinding.resolve(
-                                locals.map { CloudflareTvProfileBinding.Local(it.id, it.name) },
-                                remote.map { CloudflareTvProfileBinding.Remote(it.id, it.name) }
-                            )
-                            val uuid = bindings[localId]
-                            if (uuid == null) CloudflareTvLibraryStore.reset()
-                            else CloudflareTvLibraryStore.bind(appContext, localId, uuid)
-                        } catch (cancel: CancellationException) {
-                            throw cancel
-                        } catch (error: Exception) {
-                            // Un réseau indisponible n'efface ni la bibliothèque
-                            // invitée ni le cache local du compte authentifié.
-                            Log.w("CloudflareTvLibrary", "Lecture D1 reportée", error)
+                        // Reprise différée après panne réseau sans demander
+                        // à l'utilisateur de rouvrir les paramètres du compte.
+                        while (CloudflareTvAccountClient.account?.id == auth.userId) {
+                            try {
+                                val remote = CloudflareTvAccountClient.getCloudProfiles()
+                                val bindings = CloudflareTvProfileBinding.resolve(
+                                    locals.map { CloudflareTvProfileBinding.Local(it.id, it.name) },
+                                    remote.map { CloudflareTvProfileBinding.Remote(it.id, it.name) }
+                                )
+                                val uuid = bindings[localId]
+                                if (uuid == null) CloudflareTvLibraryStore.reset()
+                                else CloudflareTvLibraryStore.bind(appContext, localId, uuid)
+                            } catch (cancel: CancellationException) {
+                                throw cancel
+                            } catch (error: Exception) {
+                                // Aucun transfert invité, aucune suppression sur panne réseau.
+                                Log.w("CloudflareTvLibrary", "Lecture D1 reportée", error)
+                            }
+                            delay(300_000L) // maximum 12 vérifications par heure de TV active
                         }
                     }
             }
