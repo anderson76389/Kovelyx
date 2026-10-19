@@ -148,12 +148,27 @@ object ProfileRepository {
                     val profile = item.jsonObject
                     val id = profile["id"]?.jsonPrimitive?.content.orEmpty()
                     val name = profile["displayName"]?.jsonPrimitive?.content.orEmpty()
-                    if (id.length != 36 || name.isBlank()) null else NuvioProfile(
-                        id = id,
-                        userId = account.userId,
-                        profileIndex = index + 1,
-                        name = name,
-                    )
+                    if (id.length != 36 || name.isBlank()) null else {
+                        // R2 reste privé : récupérer le fichier avec le jeton,
+                        // stocker sa copie locale avant de l'afficher.
+                        suspend fun media(kind: String, background: Boolean): String? {
+                            val path = profile[kind]?.jsonPrimitive?.contentOrNull
+                                ?.takeIf { it.isNotBlank() } ?: return null
+                            return runCatching {
+                                ProfileCloudMediaTransfer.download(id,background,path)
+                            }.onFailure { error ->
+                                log.w(error) { "Média R2 indisponible, profil local préservé" }
+                            }.getOrNull()
+                        }
+                        NuvioProfile(
+                            id = id,
+                            userId = account.userId,
+                            profileIndex = index + 1,
+                            name = name,
+                            avatarUrl = media("avatarPath",false),
+                            profileBackgroundUrl = media("backgroundPath",true),
+                        )
+                    }
                 }
             if (_state.value.profiles.isNotEmpty()) {
                 // Ne modifier que les noms des UUID connus. Les contenus,
@@ -161,7 +176,15 @@ object ProfileRepository {
                 val local = _state.value.profiles
                 val remoteById = remote.associateBy { it.id }
                 val kept = local.map { profile ->
-                    remoteById[profile.id]?.let { profile.copy(name = it.name) } ?: profile
+                    remoteById[profile.id]?.let { fromCloud ->
+                        profile.copy(
+                            name = fromCloud.name,
+                            avatarUrl = profile.avatarUrl?.takeIf(ProfileLocalImages::isManagedUri)
+                                ?: fromCloud.avatarUrl ?: profile.avatarUrl,
+                            profileBackgroundUrl = profile.profileBackgroundUrl?.takeIf(ProfileLocalImages::isManagedUri)
+                                ?: fromCloud.profileBackgroundUrl ?: profile.profileBackgroundUrl,
+                        )
+                    } ?: profile
                 }
                 val usedIndexes = kept.map { it.profileIndex }.toMutableSet()
                 val imported = remote.filterNot { cloud -> kept.any { it.id == cloud.id } }
@@ -341,6 +364,27 @@ object ProfileRepository {
                 usesPrimaryAddons = item.usesPrimaryAddons,
                 usesPrimaryPlugins = item.usesPrimaryPlugins,
             )
+        }
+        // Les médias personnels restent sur l'appareil quand R2 n'est pas
+        // configuré. Une erreur réseau n'efface ni les profils ni les fichiers.
+        for (profile in synced) {
+            val previous = remoteById[profile.id]
+            val oldAvatar = previous?.get("avatarPath")?.jsonPrimitive?.contentOrNull
+            val oldBackground = previous?.get("backgroundPath")?.jsonPrimitive?.contentOrNull
+            if (ProfileLocalImages.isManagedUri(profile.avatarUrl.orEmpty()) &&
+                (oldAvatar.isNullOrBlank() ||
+                 localByIndex[profile.profileIndex]?.avatarUrl != profile.avatarUrl)) {
+                runCatching {
+                    ProfileCloudMediaTransfer.upload(profile.id,profile.avatarUrl!!,false)
+                }.onFailure { log.w(it) { "Envoi avatar R2 impossible : copie locale conservée" } }
+            }
+            if (ProfileLocalImages.isManagedUri(profile.profileBackgroundUrl.orEmpty()) &&
+                (oldBackground.isNullOrBlank() ||
+                 localByIndex[profile.profileIndex]?.profileBackgroundUrl != profile.profileBackgroundUrl)) {
+                runCatching {
+                    ProfileCloudMediaTransfer.upload(profile.id,profile.profileBackgroundUrl!!,true)
+                }.onFailure { log.w(it) { "Envoi fond R2 impossible : copie locale conservée" } }
+            }
         }
         val result = synced.sortedBy { it.profileIndex }
         _state.value = _state.value.copy(
