@@ -74,6 +74,25 @@ internal object CloudflareTvAccountClient {
         }
     }
 
+    suspend fun getCloudProfileNames(): List<String> = withContext(Dispatchers.IO) {
+        val loggedIn = checkNotNull(account) { "Compte Kovelyx Cloud non connecté" }
+        check(enabled) { "Kovelyx Cloudflare non configuré" }
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles")
+            .header("Authorization", "Bearer ${loggedIn.bearerToken}")
+            .header("Accept", "application/json")
+            .get()
+            .build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Kovelyx Cloud : profils HTTP ${response.code}" }
+            val json = JSONObject(response.body?.string().orEmpty())
+            val profiles = json.optJSONArray("profiles") ?: return@use emptyList()
+            (0 until profiles.length()).mapNotNull { index ->
+                profiles.optJSONObject(index)?.optString("displayName")?.takeIf { it.isNotBlank() }
+            }
+        }
+    }
+
     fun clearLocalSession() {
         account = null
     }
