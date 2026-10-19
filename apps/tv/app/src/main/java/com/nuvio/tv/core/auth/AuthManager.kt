@@ -393,7 +393,9 @@ class AuthManager @Inject constructor(
                 CloudflareTvAccountClient.signOut()
             } finally {
                 _authState.value = AuthState.SignedOut
-                accountLocalDataResetService.clearAfterSignOut()
+                // Ne pas supprimer les favoris/profils locaux à la déconnexion :
+                // la sauvegarde Cloudflare D1 n'est pas encore migrée et testée.
+                // Les caches locaux restent à isoler avant multi-utilisateur partagé.
             }
             return
         }
