@@ -37,7 +37,12 @@ try {
       "--ip","127.0.0.1","--port","8765",
       "--var","BETTER_AUTH_SECRET:"+("local-only-"+salt+"-long-enough-for-auth"),
       "--var","KOVELYX_REGISTRATION_OPEN:true"
-    ],{cwd:root,env:{...process.env,WRANGLER_SEND_METRICS:"false"},stdio:["ignore","pipe","pipe"]});
+    ],{
+      cwd:root,env:{...process.env,WRANGLER_SEND_METRICS:"false"},
+      // npm/npx démarre Wrangler + workerd descendants. Sans groupe isolé,
+      // tuer seulement npm laisse des pipes ouverts et fait expirer le job CI.
+      detached:true,stdio:["ignore","pipe","pipe"]
+    });
   for(const stream of [worker.stdout,worker.stderr])
     stream.on("data",b=>{logs=(logs+b.toString()).slice(-5000)});
   let reachable=false;
@@ -125,7 +130,20 @@ try {
   assert.equal((await req("/v1/me","GET",null,alice.token)).status,401,"Signout invalidates token");
   console.log("PASS: two real local Better Auth accounts, bearer login/logout, profile isolation, rename, D1 CAS, sync pagination, disabled R2");
 } finally {
-  if(worker){worker.kill("SIGTERM");await sleep(700); if(worker.exitCode===null)worker.kill("SIGKILL")}
+  if (worker?.pid) {
+    // Sous Linux, -pid désigne notre groupe dédié, jamais celui du runner.
+    // Fermer tous les descendants npx -> wrangler -> workerd et leurs pipes.
+    const terminate=(signal)=>{
+      try {process.kill(-worker.pid,signal)}
+      catch(error) {if(error.code!=="ESRCH") throw error}
+    };
+    terminate("SIGTERM");
+    await sleep(300);
+    terminate("SIGKILL");
+    worker.stdout?.destroy();
+    worker.stderr?.destroy();
+    worker.unref();
+  }
   rmSync(config,{force:true});
   rmSync(testDir,{force:true,recursive:true});
 }
