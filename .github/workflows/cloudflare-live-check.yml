@@ -1,0 +1,52 @@
+name: Vérifier le Worker Cloudflare Kovelyx déployé
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cloudflare-live-check.yml'
+      - 'services/kovelyx-cloudflare/src/**'
+      - 'services/kovelyx-cloudflare/migrations/**'
+permissions:
+  contents: read
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+    steps:
+      - name: Vérifier disponibilité HTTPS et réponse JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --location --retry 3 --retry-all-errors --retry-delay 2 \
+            --max-time 20 --connect-timeout 10 \
+            --header 'Accept: application/json' \
+            "${KOVELYX_CLOUDFLARE_URL%/}/health" -o /tmp/kv-health.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/kv-health.json', encoding='utf-8') as f:
+              status=json.load(f)
+          assert status.get('service') == 'Kovelyx Cloud', status
+          assert status.get('status') == 'ok', status
+          assert status.get('provider') == 'Cloudflare D1', status
+          print('Worker Kovelyx Cloud OK : /health status=ok')
+          PY
+      - name: Refuser les données privées sans jeton
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sSL -o /tmp/kv-auth.json -w '%{http_code}' --max-time 20 \
+            "${KOVELYX_CLOUDFLARE_URL%/}/v1/me")"
+          echo "Code HTTP attendu : 401, reçu : $code"
+          [[ "$code" == "401" ]] || { cat /tmp/kv-auth.json; exit 1; }
+      - name: Interdire une origine web étrangère
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sSL -o /tmp/kv-origin.json -w '%{http_code}' --max-time 20 \
+            -H 'Origin: https://untrusted.example' \
+            "${KOVELYX_CLOUDFLARE_URL%/}/v1/me")"
+          echo "Code HTTP attendu : 403, reçu : $code"
+          [[ "$code" == "403" ]] || { cat /tmp/kv-origin.json; exit 1; }
