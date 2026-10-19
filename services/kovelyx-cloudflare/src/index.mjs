@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
-import { jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
+import { CATEGORIES, jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
 
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
@@ -59,6 +59,31 @@ async function handleSync(request, env, user, url) {
     const profileId = url.searchParams.get("profileId") || "";
     if (!/^[a-f0-9-]{36}$/i.test(profileId) || !await ownedProfile(env, user.id, profileId))
       return jsonResponse({error:"Profil introuvable"},404);
+    const requestedCategory = url.searchParams.get("category");
+    if (requestedCategory !== null) {
+      if (!CATEGORIES.has(requestedCategory)) return jsonResponse({error:"Catégorie invalide"},400);
+      const cursor = url.searchParams.get("after") || "";
+      const requestedLimit = Number(url.searchParams.get("limit") || "100");
+      if (cursor.length > 200 || !Number.isSafeInteger(requestedLimit) ||
+          requestedLimit < 1 || requestedLimit > 100)
+        return jsonResponse({error:"Pagination invalide"},400);
+      const result = await env.DB.prepare(
+        "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
+        "FROM kv_sync WHERE owner_id=? AND profile_id=? AND category=? AND item_key>? "+
+        "ORDER BY item_key LIMIT ?"
+      ).bind(user.id,profileId,requestedCategory,cursor,requestedLimit+1).all();
+      const rows = result.results || [];
+      const page = rows.slice(0,requestedLimit);
+      return jsonResponse({
+        items: page.map(row => ({
+          ...row, payload:JSON.parse(row.payload), deleted:row.deleted===1
+        })),
+        limit:requestedLimit,
+        partial:rows.length>requestedLimit,
+        nextCursor:rows.length>requestedLimit ? page[page.length-1].itemKey : null
+      });
+    }
+    // Legacy endpoint remains usable for older diagnostic clients only.
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
       "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY updated_at, category, item_key LIMIT 500"
