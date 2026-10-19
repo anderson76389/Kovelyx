@@ -145,6 +145,18 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    private fun loadCloudflareProfilesReadOnly() {
+        viewModelScope.launch {
+            runCatching { CloudflareTvAccountClient.getCloudProfileNames() }
+                .onSuccess { names ->
+                    _uiState.update { it.copy(cloudProfileNames = names) }
+                }
+                .onFailure { error ->
+                    Log.w(TAG, "Kovelyx Cloud : lecture profils indisponible ; aucun changement local", error)
+                }
+        }
+    }
+
     fun signUp(email: String, password: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
