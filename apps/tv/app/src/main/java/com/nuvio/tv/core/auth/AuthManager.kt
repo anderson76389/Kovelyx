@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.auth
 
+import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.BuildConfig
@@ -49,6 +50,7 @@ import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicLong
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -85,7 +87,8 @@ class AuthManager @Inject constructor(
     private val authSessionNoticeDataStore: AuthSessionNoticeDataStore,
     private val accountLocalDataResetService: AccountLocalDataResetService,
     private val authDiagnosticReportRepository: AuthDiagnosticReportRepository,
-    private val serverConfiguration: ServerConfiguration
+    private val serverConfiguration: ServerConfiguration,
+    @ApplicationContext private val appContext: Context
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val json = Json { ignoreUnknownKeys = true }
@@ -104,8 +107,19 @@ class AuthManager @Inject constructor(
 
     init {
         if (CloudflareTvAccountClient.enabled) {
-            // Ne pas faire observer les sessions du SDK Supabase historique.
-            _authState.value = AuthState.SignedOut
+            // Pas de SDK Supabase ; authentifier la session chiffrée sur Workers.
+            scope.launch {
+                val restored = runCatching {
+                    CloudflareTvAccountClient.restoreVerified(appContext)
+                }.onFailure { error ->
+                    Log.w(TAG, "Kovelyx Cloud : session locale indisponible", error)
+                }.getOrNull()
+                // Ne pas remplacer un état qui a changé pendant la vérification.
+                if (_authState.value is AuthState.Loading) {
+                    _authState.value = if (restored == null) AuthState.SignedOut
+                    else AuthState.FullAccount(userId = restored.id, email = restored.email)
+                }
+            }
         } else {
             observeSessionStatus()
         }
@@ -355,7 +369,7 @@ class AuthManager @Inject constructor(
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
         if (CloudflareTvAccountClient.enabled) return runCatching {
-            val account = CloudflareTvAccountClient.signIn(email, password)
+            val account = CloudflareTvAccountClient.signIn(appContext, email, password)
             _authState.value = AuthState.FullAccount(userId = account.id, email = account.email)
         }
         val diagnostics = AuthDiagnosticsSession(
@@ -390,7 +404,7 @@ class AuthManager @Inject constructor(
     suspend fun signOut(explicit: Boolean = true) {
         if (CloudflareTvAccountClient.enabled) {
             try {
-                CloudflareTvAccountClient.signOut()
+                CloudflareTvAccountClient.signOut(appContext)
             } finally {
                 _authState.value = AuthState.SignedOut
                 // Ne pas supprimer les favoris/profils locaux à la déconnexion :
@@ -418,7 +432,7 @@ class AuthManager @Inject constructor(
 
     suspend fun prepareForServerSwitch(): Result<Unit> {
         if (CloudflareTvAccountClient.enabled) {
-            CloudflareTvAccountClient.clearLocalSession()
+            CloudflareTvAccountClient.clearLocalSession(appContext)
             _authState.value = AuthState.SignedOut
             return Result.success(Unit)
         }

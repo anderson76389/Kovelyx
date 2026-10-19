@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Client indépendant Workers / Better Auth : PAS de jeton Supabase.
- * Préversion : les sessions sont en mémoire et ne survivent pas au redémarrage,
- * jusqu'à la mise en place d'un coffre chiffré Android Keystore.
+ * La session est conservée localement sous AES-GCM AndroidKeyStore et validée
+ * auprès de Cloudflare avant toute restauration d'identité.
  */
 internal object CloudflareTvAccountClient {
     data class Account(val id: String, val email: String, val bearerToken: String)
@@ -49,7 +49,7 @@ internal object CloudflareTvAccountClient {
         post("sign-up", email, password)
     }
 
-    suspend fun signIn(email: String, password: String): Account {
+    suspend fun signIn(context: android.content.Context, email: String, password: String): Account {
         val (body, headerToken) = post("sign-in", email, password)
         val user = body.optJSONObject("user") ?: error("Kovelyx Cloud : utilisateur absent")
         val id = user.optString("id")
@@ -58,12 +58,16 @@ internal object CloudflareTvAccountClient {
         check(id.isNotBlank() && address.isNotBlank() && token.length >= 16) {
             "Kovelyx Cloud : jeton invalide"
         }
-        return Account(id, address, token).also { account = it }
+        return Account(id, address, token).also {
+            TvCloudSessionVault.save(context, it)
+            account = it
+        }
     }
 
-    suspend fun signOut() {
+    suspend fun signOut(context: android.content.Context) {
         val old = account
         account = null
+        TvCloudSessionVault.clear(context)
         if (old == null || !enabled) return
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
@@ -160,7 +164,42 @@ internal object CloudflareTvAccountClient {
         }
     }
 
-    fun clearLocalSession() {
+    /** Ne connecte pas l'utilisateur avant confirmation par GET /v1/me. */
+    suspend fun restoreVerified(context: android.content.Context): Account? = withContext(Dispatchers.IO) {
+        if (!enabled) return@withContext null
+        account?.let { return@withContext it }
+        val saved = TvCloudSessionVault.read(context) ?: return@withContext null
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/me")
+            .header("Authorization", "Bearer ${saved.bearerToken}")
+            .header("Accept", "application/json")
+            .get().build()
+        try {
+            client.newCall(request).execute().use { response ->
+                when (response.code) {
+                    200 -> {
+                        val user = JSONObject(response.body?.string().orEmpty())
+                        if (user.optString("id") != saved.id ||
+                            !user.optString("email").equals(saved.email, ignoreCase = true)) {
+                            TvCloudSessionVault.clear(context)
+                            null
+                        } else account ?: saved.also { account = it }
+                    }
+                    401, 403 -> {
+                        TvCloudSessionVault.clear(context)
+                        null
+                    }
+                    else -> null
+                }
+            }
+        } catch (_: Exception) {
+            // Une panne réseau conserve le coffre, sans autoriser la session.
+            null
+        }
+    }
+
+    fun clearLocalSession(context: android.content.Context) {
         account = null
+        TvCloudSessionVault.clear(context)
     }
 }
