@@ -111,7 +111,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
     var parallelChunkSizeKb: Int = PlayerSettings.DEFAULT_PARALLEL_CHUNK_SIZE_KB
     // Gated by the parallel network toggle because its only use is the native memory argument to
     // the chunk data source, which nothing else builds.
-    var nuvioPerformanceModeEnabled: Boolean = PlayerSettings.DEFAULT_NUVIO_PERFORMANCE_MODE_ENABLED
+    var nuvioPerformanceModeEnabled: Boolean = PlayerSettings.DEFAULT_NUVIO_PERFORMANCE_MODE_ENABLED &&
+        TvMedia3SafetyPolicy.allowNativeAllocation
 
     // The engine runs off the setting whether or not the parallel gate above passed, so the log
     // reports this rather than the gated flag.

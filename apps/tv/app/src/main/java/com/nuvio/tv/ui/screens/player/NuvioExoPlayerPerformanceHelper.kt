@@ -34,7 +34,7 @@ object NuvioExoPlayerPerformanceHelper {
     var enabled: Boolean = false
         set(value) {
             val supported = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
-            val newValue = value && supported
+            val newValue = value && supported && TvMedia3SafetyPolicy.allowNativeAllocation
             field = newValue
             // Préserver les optimisations réseau, mais exclure l'allocateur natif
             // jusqu'à reconstruction de l'AAR corrigé (libération tardive après reset).
@@ -134,7 +134,7 @@ object NuvioExoPlayerPerformanceHelper {
         }
 
         val effectiveBufferMb = when {
-            settings.nuvioPerformanceModeEnabled -> {
+            settings.nuvioPerformanceModeEnabled && TvMedia3SafetyPolicy.allowNativeAllocation -> {
                 if (customBuffers && !settings.bufferBudgetManaged) {
                     MemoryBudget.effectiveBufferMb(bufferSettings.targetBufferSizeMb)
                 } else {
