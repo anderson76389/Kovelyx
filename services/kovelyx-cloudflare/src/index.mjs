@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import { CATEGORIES, jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
+import {handleProfileMedia} from "./media.mjs";
 
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
@@ -215,6 +216,7 @@ export default {
       if (url.pathname === "/v1/profiles" || url.pathname === "/v1/profiles/update" ||
           url.pathname === "/v1/profiles/delete")
         return respond(await handleProfiles(request,env,user,url));
+      if (url.pathname === "/v1/media") return respond(await handleProfileMedia(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {
