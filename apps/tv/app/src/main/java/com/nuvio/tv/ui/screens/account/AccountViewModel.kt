@@ -147,13 +147,40 @@ class AccountViewModel @Inject constructor(
 
     private fun loadCloudflareProfilesReadOnly() {
         viewModelScope.launch {
-            runCatching { CloudflareTvAccountClient.getCloudProfileNames() }
-                .onSuccess { names ->
-                    _uiState.update { it.copy(cloudProfileNames = names) }
+            runCatching {
+                val remote=CloudflareTvAccountClient.getCloudProfiles()
+                _uiState.update { it.copy(cloudProfileNames = remote.map { cloud -> cloud.name }) }
+                val local=profileManager.profiles.value
+                val oneToOne=remote.size==1 && local.size==1
+                // N'associer jamais par un ID numérique : D1 utilise des UUID.
+                // Correspondance explicite par nom UNIQUE, sauf le seul profil
+                // principal par défaut et le seul profil distant.
+                for (cloud in remote) {
+                    val matching=local.filter { it.name==cloud.name }
+                    val target=when {
+                        matching.size==1 && remote.count { it.name==cloud.name }==1 -> matching.first()
+                        oneToOne && cloud==remote.first() &&
+                            local.first().avatarUrl.isNullOrBlank() &&
+                            local.first().profileBackgroundUrl.isNullOrBlank() -> local.first()
+                        else -> null
+                    } ?: continue
+                    val avatar=runCatching {
+                        CloudflareTvAccountClient.downloadMedia(context,cloud,false)
+                    }.onFailure { Log.w(TAG,"Avatar R2 absent : média TV local conservé",it) }.getOrNull()
+                    val background=runCatching {
+                        CloudflareTvAccountClient.downloadMedia(context,cloud,true)
+                    }.onFailure { Log.w(TAG,"Fond R2 absent : média TV local conservé",it) }.getOrNull()
+                    if(avatar!=null || background!=null) {
+                        profileManager.updateProfile(target.copy(
+                            // Le nom local n'est pas modifié automatiquement.
+                            avatarUrl=avatar ?: target.avatarUrl,
+                            profileBackgroundUrl=background ?: target.profileBackgroundUrl,
+                        ))
+                    }
                 }
-                .onFailure { error ->
-                    Log.w(TAG, "Kovelyx Cloud : lecture profils indisponible ; aucun changement local", error)
-                }
+            }.onFailure { error ->
+                Log.w(TAG,"Kovelyx Cloud : médias non disponibles, profils TV locaux préservés",error)
+            }
         }
     }
 
