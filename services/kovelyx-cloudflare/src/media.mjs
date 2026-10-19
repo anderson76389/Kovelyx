@@ -57,8 +57,8 @@ export async function handleProfileMedia(request,env,user,url) {
   await env.MEDIA.put(key,bytes,{httpMetadata:{contentType:mime}});
   const column=kind==="avatar"?"avatar_path":"background_path";
   const saved=await env.DB.prepare(
-    `UPDATE kv_profiles SET ${column}=?,updated_at=? WHERE owner_id=? AND id=?`
-  ).bind(key,Date.now(),user.id,profileId).run();
+    `UPDATE kv_profiles SET ${column}=?,updated_at=? WHERE owner_id=? AND id=? AND ${column} IS ?`
+  ).bind(key,Date.now(),user.id,profileId,profile[field]).run();
   if(saved.meta?.changes!==1) {
     await env.MEDIA.delete(key);
     return respond({error:"Profil modifié pendant l'import"},409);
