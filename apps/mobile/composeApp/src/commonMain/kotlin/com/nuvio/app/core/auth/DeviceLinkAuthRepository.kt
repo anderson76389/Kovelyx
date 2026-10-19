@@ -1,6 +1,7 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.ServerConfiguration
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
@@ -62,6 +63,12 @@ object DeviceLinkAuthRepository {
 
     @OptIn(ExperimentalUuidApi::class)
     fun start() {
+        // Le protocole Supabase de connexion par code n'est PAS le protocole
+        // Cloudflare Better Auth. N'envoyer aucune requête vers l'ancien backend.
+        if (CloudflareAccountClient.enabled) {
+            _state.value = DeviceLinkAuthState.Failed(DeviceLinkAuthFailure.Start)
+            return
+        }
         if (_state.value is DeviceLinkAuthState.Starting || _state.value is DeviceLinkAuthState.Waiting) return
 
         activeJob?.cancel()
