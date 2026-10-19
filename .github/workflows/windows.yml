@@ -25,8 +25,9 @@ permissions:
 
 concurrency:
   group: kovelyx-windows-${{ github.ref }}
-  # The packaging job can take >30 min; preserve it for a useful diagnostic.
-  cancel-in-progress: false
+  # Sur PR, ne compiler que le dernier commit. Sur main et workflow_dispatch,
+  # préserver chaque build et les Releases pour leur traçabilité.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   desktop:
