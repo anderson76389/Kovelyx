@@ -50,7 +50,7 @@ jobs:
       - name: Configurer le Worker Cloudflare Kovelyx dans Windows (facultatif)
         shell: pwsh
         env:
-          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL }}
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
         run: python scripts/configure-cloud-build.py --platform desktop
       - name: Version de la compilation Windows
         shell: pwsh
