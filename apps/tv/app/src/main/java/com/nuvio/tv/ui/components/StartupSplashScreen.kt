@@ -14,13 +14,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.nuvio.tv.R
 import com.nuvio.tv.ui.theme.NuvioTheme
 
@@ -41,24 +36,12 @@ fun StartupSplashScreen(
 
     Box(modifier = modifier.fillMaxSize().background(Color.Black)) {
         if (!profileBackgroundUrl.isNullOrBlank()) {
-            val imageData: Any = if (profileBackgroundUrl.startsWith("file:")) {
-                java.io.File(java.net.URI(profileBackgroundUrl))
-            } else {
-                profileBackgroundUrl
-            }
-            val request = ImageRequest.Builder(LocalContext.current)
-                .data(imageData)
-                .crossfade(false)
-            if (backgroundCacheKey != null) {
-                request.memoryCacheKey(backgroundCacheKey)
-                    .diskCacheKey(backgroundCacheKey)
-                    .placeholderMemoryCacheKey(backgroundCacheKey)
-            }
-            AsyncImage(
-                model = request.build(),
+            // Réutiliser le rendu de profil : GIF animés et vidéos locales
+            // en boucle silencieuse, avec un fond image en secours.
+            CustomProfileBackgroundImage(
+                imageUrl = profileBackgroundUrl,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                modifier = Modifier.fillMaxSize()
             )
         } else if (!skipGradient) {
             val baseBg = Color(0xFF121212)
