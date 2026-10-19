@@ -197,6 +197,12 @@ class AccountViewModel @Inject constructor(
     }
 
     fun generateSyncCode(pin: String) {
+        if (CloudflareTvAccountClient.enabled) {
+            _uiState.update {
+                it.copy(error = "La liaison par code TV nécessite encore le nouveau protocole Cloudflare.")
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             if (!authManager.isAuthenticated) {
@@ -216,6 +222,12 @@ class AccountViewModel @Inject constructor(
     }
 
     fun getSyncCode(pin: String) {
+        if (CloudflareTvAccountClient.enabled) {
+            _uiState.update {
+                it.copy(error = "La liaison par code TV nécessite encore le nouveau protocole Cloudflare.")
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             syncRepository.getSyncCode(pin).fold(
@@ -230,6 +242,12 @@ class AccountViewModel @Inject constructor(
     }
 
     fun claimSyncCode(code: String, pin: String) {
+        if (CloudflareTvAccountClient.enabled) {
+            _uiState.update {
+                it.copy(error = "La liaison par code TV nécessite encore le nouveau protocole Cloudflare.")
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             if (!authManager.isAuthenticated) {
