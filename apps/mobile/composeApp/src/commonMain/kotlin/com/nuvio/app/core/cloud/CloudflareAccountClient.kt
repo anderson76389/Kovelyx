@@ -43,7 +43,10 @@ object CloudflareAccountClient {
         )
         if (response.status !in 200..299) {
             val description = runCatching {
-                json.parseToJsonElement(response.body).jsonObject["message"]?.jsonPrimitive?.content
+                json.parseToJsonElement(response.body).jsonObject.let { body ->
+                    body["message"]?.jsonPrimitive?.content
+                        ?: body["error"]?.jsonPrimitive?.content
+                }
             }.getOrNull().orEmpty()
             error("Kovelyx Cloud : HTTP ${response.status}" + if (description.isNotBlank()) " — $description" else "")
         }
