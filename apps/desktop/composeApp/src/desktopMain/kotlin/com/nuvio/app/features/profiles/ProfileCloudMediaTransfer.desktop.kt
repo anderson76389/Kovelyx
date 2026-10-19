@@ -35,6 +35,18 @@ internal actual object ProfileCloudMediaTransfer {
         }
     }
 
+    actual suspend fun remove(profileId:String, background:Boolean) {
+        withContext(Dispatchers.IO) {
+            val connection=request(profileId,background)
+            try {
+                connection.requestMethod="DELETE"
+                check(connection.responseCode in 200..299) {
+                    "Suppression R2 HTTP ${connection.responseCode}"
+                }
+            } finally { connection.disconnect() }
+        }
+    }
+
     actual suspend fun upload(profileId:String, mediaUri:String, background:Boolean) {
         if(!ProfileLocalImages.isManagedUri(mediaUri)) return
         withContext(Dispatchers.IO) {
