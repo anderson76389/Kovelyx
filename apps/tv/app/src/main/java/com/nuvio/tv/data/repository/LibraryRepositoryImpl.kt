@@ -7,6 +7,7 @@ import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.sync.LibrarySyncService
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import com.nuvio.tv.core.tracking.TrackingListManager
 import com.nuvio.tv.core.tracking.TrackingLibraryProviderRegistry
 import com.nuvio.tv.core.tracking.TrackingMembershipApplyResult
@@ -115,22 +116,27 @@ class LibraryRepositoryImpl @Inject constructor(
             if (provider != null) {
                 provider.items
             } else {
-                libraryPreferences.libraryItems.map { items ->
+                combine(
+                    libraryPreferences.libraryItems,
+                    CloudflareTvLibraryStore.state,
+                    profileManager.activeProfileId
+                ) { guestItems, cloud, selectedProfileId ->
+                    val activeAccount = CloudflareTvAccountClient.account
+                    // Aucune bibliothèque invitée n'est présentée comme appartenant à D1.
+                    val items = if (CloudflareTvAccountClient.enabled && activeAccount != null) {
+                        cloud?.takeIf {
+                            it.ownerId == activeAccount.id &&
+                                it.localProfileId == selectedProfileId
+                        }?.items?.values?.toList().orEmpty()
+                    } else guestItems
                     items.map { saved ->
                         LibraryEntry(
-                            id = saved.id,
-                            type = saved.type,
-                            name = saved.name,
-                            poster = saved.poster,
-                            posterShape = saved.posterShape,
-                            background = saved.background,
-                            logo = saved.logo,
-                            description = saved.description,
-                            releaseInfo = saved.releaseInfo,
-                            imdbRating = saved.imdbRating,
-                            genres = saved.genres,
-                            addonBaseUrl = saved.addonBaseUrl,
-                            listedAt = saved.addedAt,
+                            id = saved.id, type = saved.type, name = saved.name,
+                            poster = saved.poster, posterShape = saved.posterShape,
+                            background = saved.background, logo = saved.logo,
+                            description = saved.description, releaseInfo = saved.releaseInfo,
+                            imdbRating = saved.imdbRating, genres = saved.genres,
+                            addonBaseUrl = saved.addonBaseUrl, listedAt = saved.addedAt,
                             rawPosterUrl = saved.poster
                         )
                     }
@@ -164,7 +170,11 @@ class LibraryRepositoryImpl @Inject constructor(
                 provider.observeMembership(itemId, itemType)
                     .map { memberships -> memberships.isNotEmpty() }
             } else {
-                libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
+                if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null)
+                    libraryItems.map { items ->
+                        items.any { it.id == itemId && it.type.equals(itemType, ignoreCase = true) }
+                    }
+                else libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
             }
         }.distinctUntilChanged()
     }
@@ -182,7 +192,11 @@ class LibraryRepositoryImpl @Inject constructor(
                     }
                 }
             } else {
-                libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
+                if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null)
+                    libraryItems.map { items ->
+                        items.any { it.id == itemId && it.type.equals(itemType, ignoreCase = true) }
+                    }
+                else libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
             }
         }.distinctUntilChanged()
     }
@@ -214,6 +228,10 @@ class LibraryRepositoryImpl @Inject constructor(
         }
 
         val profileId = profileManager.activeProfileId.value
+        if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+            CloudflareTvLibraryStore.toggle(appContext, profileId, item.toSavedLibraryItem())
+            return TrackingMembershipApplyResult()
+        }
         val isInLocal = libraryPreferences.containsItem(
             itemId = item.itemId,
             itemType = item.itemType,
@@ -237,7 +255,10 @@ class LibraryRepositoryImpl @Inject constructor(
 
     override suspend fun getMembershipSnapshot(item: LibraryEntryInput): ListMembershipSnapshot {
         val profileId = profileManager.activeProfileId.value
-        val inLocal = libraryPreferences.containsItem(
+        val inLocal = if (CloudflareTvAccountClient.enabled &&
+            CloudflareTvAccountClient.account != null) {
+            CloudflareTvLibraryStore.contains(profileId, item.itemId, item.itemType)
+        } else libraryPreferences.containsItem(
             itemId = item.itemId,
             itemType = item.itemType,
             profileId = profileId
@@ -283,12 +304,18 @@ class LibraryRepositoryImpl @Inject constructor(
 
         val profileId = profileManager.activeProfileId.value
         val localDesired = desired[LOCAL_LIBRARY_LIST_KEY] == true
-        val currentlyInLocal = libraryPreferences.containsItem(
+        val cloudMode = CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null
+        val currentlyInLocal = if (cloudMode)
+            CloudflareTvLibraryStore.contains(profileId, item.itemId, item.itemType)
+        else libraryPreferences.containsItem(
             itemId = item.itemId,
             itemType = item.itemType,
             profileId = profileId
         )
         if (localDesired != currentlyInLocal) {
+            if (cloudMode) {
+                CloudflareTvLibraryStore.toggle(appContext, profileId, item.toSavedLibraryItem())
+            } else {
             if (localDesired) {
                 libraryPreferences.addItem(
                     item = item.toSavedLibraryItem(),
@@ -302,6 +329,7 @@ class LibraryRepositoryImpl @Inject constructor(
                 )
             }
             triggerRemoteSync(profileId)
+            }
         }
 
         val failures = dispatchTrackingMembershipChanges(
@@ -352,9 +380,12 @@ class LibraryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun refreshNow() {
-        sourceMode.first().providerId
-            ?.let(trackingProviders::provider)
-            ?.refresh(TrackingRefreshIntent.USER_INITIATED)
+        val providerId = sourceMode.first().providerId
+        if (providerId != null) {
+            trackingProviders.provider(providerId)?.refresh(TrackingRefreshIntent.USER_INITIATED)
+        } else if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+            CloudflareTvLibraryStore.refresh(appContext, profileManager.activeProfileId.value)
+        }
     }
 
 

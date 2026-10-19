@@ -23,7 +23,8 @@ internal object CloudflareTvAccountClient {
         .readTimeout(30, TimeUnit.SECONDS)
         .followRedirects(false)
         .build()
-    var account: Account? = null
+    private val sessionLock = Any()
+    @Volatile var account: Account? = null
         private set
 
     private suspend fun post(endpoint: String, email: String, password: String): Pair<JSONObject,String> =
@@ -59,15 +60,20 @@ internal object CloudflareTvAccountClient {
             "Kovelyx Cloud : jeton invalide"
         }
         return Account(id, address, token).also {
-            TvCloudSessionVault.save(context, it)
-            account = it
+            synchronized(sessionLock) {
+                TvCloudSessionVault.save(context, it)
+                account = it
+            }
         }
     }
 
     suspend fun signOut(context: android.content.Context) {
-        val old = account
-        account = null
-        TvCloudSessionVault.clear(context)
+        val old = synchronized(sessionLock) {
+            val previous = account
+            account = null
+            TvCloudSessionVault.clear(context)
+            previous
+        }
         if (old == null || !enabled) return
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
@@ -179,15 +185,23 @@ internal object CloudflareTvAccountClient {
                 when (response.code) {
                     200 -> {
                         val user = JSONObject(response.body?.string().orEmpty())
-                        if (user.optString("id") != saved.id ||
-                            !user.optString("email").equals(saved.email, ignoreCase = true)) {
-                            TvCloudSessionVault.clear(context)
-                            null
-                        } else account ?: saved.also { account = it }
+                        synchronized(sessionLock) {
+                            if (TvCloudSessionVault.read(context) != saved) {
+                                // L'utilisateur a pu se déconnecter pendant la requête.
+                                account
+                            } else if (user.optString("id") != saved.id ||
+                                !user.optString("email").equals(saved.email, ignoreCase = true)) {
+                                TvCloudSessionVault.clear(context)
+                                null
+                            } else {
+                                account ?: saved.also { account = it }
+                            }
+                        }
                     }
-                    401, 403 -> {
-                        TvCloudSessionVault.clear(context)
-                        null
+                    401, 403 -> synchronized(sessionLock) {
+                        if (TvCloudSessionVault.read(context) == saved)
+                            TvCloudSessionVault.clear(context)
+                        account
                     }
                     else -> null
                 }
@@ -199,7 +213,74 @@ internal object CloudflareTvAccountClient {
     }
 
     fun clearLocalSession(context: android.content.Context) {
-        account = null
-        TvCloudSessionVault.clear(context)
+        synchronized(sessionLock) {
+            account = null
+            TvCloudSessionVault.clear(context)
+        }
+    }
+
+    /** Lecture D1 paginée ; aucun accès à l'ancienne bibliothèque Supabase. */
+    suspend fun readLibrary(profileId: String): List<JSONObject> = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val token = checkNotNull(account).bearerToken
+        val rows = mutableListOf<JSONObject>()
+        var cursor: String? = null
+        repeat(100) {
+            val query = cursor?.let {
+                "&after=" + java.net.URLEncoder.encode(it, "UTF-8")
+            }.orEmpty()
+            val request = Request.Builder()
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
+                    "/v1/sync?profileId=$profileId&category=library&limit=100$query")
+                .header("Authorization", "Bearer $token")
+                .header("Accept", "application/json")
+                .get().build()
+            val page = client.newCall(request).execute().use { response ->
+                check(response.code == 200) { "Bibliothèque Cloud TV HTTP ${response.code}" }
+                JSONObject(response.body?.string().orEmpty())
+            }
+            check(account?.bearerToken == token) { "Compte changé pendant la lecture" }
+            val items = page.getJSONArray("items")
+            require(items.length() <= 100)
+            for (index in 0 until items.length()) rows.add(items.getJSONObject(index))
+            require(rows.size <= 10000)
+            val next = page.optString("nextCursor").takeUnless { it.isBlank() || it == "null" }
+            if (next == null) {
+                check(!page.optBoolean("partial", false)) { "Réponse D1 tronquée" }
+                return@withContext rows
+            }
+            check(next != cursor && next.length <= 200) { "Pagination D1 incohérente" }
+            cursor = next
+        }
+        error("Limite de 10 000 entrées atteinte, ne pas appliquer une réponse partielle")
+    }
+
+    /** Ecriture optimiste avec contrôle de révision (409 = conserver la mutation locale). */
+    suspend fun writeLibrary(
+        profileId: String, itemKey: String, item: JSONObject?,
+        revision: Int, deleted: Boolean
+    ): Int = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require(itemKey.length in 1..200 && revision >= 0)
+        val token = checkNotNull(account).bearerToken
+        val payload = JSONObject()
+        if (!deleted) payload.put("item", checkNotNull(item))
+        val body = JSONObject()
+            .put("profileId", profileId).put("category", "library")
+            .put("itemKey", itemKey).put("revision", revision)
+            .put("deleted", deleted).put("payload", payload)
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/sync")
+            .header("Authorization", "Bearer $token")
+            .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            .header("Accept", "application/json")
+            .post(body.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+        val response = client.newCall(request).execute().use { result ->
+            check(result.isSuccessful) { "Écriture D1 HTTP ${result.code} (conflit conservé)" }
+            JSONObject(result.body?.string().orEmpty())
+        }
+        check(account?.bearerToken == token) { "Compte changé pendant l'écriture" }
+        response.getInt("revision").also { check(it > revision) }
     }
 }
