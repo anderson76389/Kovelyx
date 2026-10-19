@@ -25,7 +25,10 @@ for app in ("desktop", "mobile"):
 tv_root = ROOT / "apps/tv/app/src/main/java/com/nuvio/tv"
 tv = (tv_root / "core/auth/CloudflareTvAccountClient.kt").read_text(encoding="utf-8")
 library_tv = (tv_root / "core/sync/LibrarySyncService.kt").read_text(encoding="utf-8")
-assert "signIn(email: String, password: String)" in tv
+assert "signIn(context: android.content.Context, email: String, password: String)" in tv
+vault = (tv_root / "core/auth/TvCloudSessionVault.kt").read_text(encoding="utf-8")
+assert "AndroidKeyStore" in vault and "AES/GCM/NoPadding" in vault
+assert "restoreVerified" in tv and '"/v1/me"' in tv
 assert "if (CloudflareTvAccountClient.enabled)" in library_tv
 assert "Bibliothèque TV Cloudflare D1 non activée" in library_tv
 print("TV: compte Cloudflare et garde-fou bibliothèque héritée présents")
