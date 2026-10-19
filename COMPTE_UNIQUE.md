@@ -2,7 +2,7 @@
 
 # Kovelyx Cloud : compte unique Windows, Android, Android TV, Linux et iOS
 
-État au **15 octobre 2026** : **architecture et première migration SQL déposées**, mais **aucun serveur Kovelyx Cloud n'est encore déployé**, aucun compte Kovelyx indépendant n'a encore été créé, et la synchronisation multiplateforme n'est **pas** opérationnelle. Ne pas demander aux utilisateurs de créer un compte avant déploiement complet.
+État historique du 15 octobre 2026 : un premier schéma Supabase avait été rédigé. **Mise à jour du 19 octobre : Worker + D1 Cloudflare déployés et premier compte/profil testés.** La synchronisation complète Windows / Android / TV n'est pas opérationnelle : elle est migrée progressivement et ne doit jamais écraser les données locales.
 
 ## Objectif
 

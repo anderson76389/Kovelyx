@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1359** ; références statiques à Nuvio/NuvioMedia : **6778**.
+Fichiers texte examinés : **1359** ; références statiques à Nuvio/NuvioMedia : **6784**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -121,7 +121,7 @@ Fichiers texte examinés : **1359** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:27`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:28`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:29`
-- …et 6698 autres correspondances (plafond d'affichage).
+- …et 6704 autres correspondances (plafond d'affichage).
 
 ## Android
 
