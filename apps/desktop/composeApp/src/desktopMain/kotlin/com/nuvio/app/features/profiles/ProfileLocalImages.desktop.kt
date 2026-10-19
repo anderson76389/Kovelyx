@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 
 /**
  * Local, private Windows images. This does NOT upload photographs to Supabase.
- * The file chooser accepts common raster formats, validates decoded dimensions
+ * The file chooser accepts image, animation and video formats, validates their headers
  * and stores an optimized copy inside %APPDATA%/Kovelyx/profile-media.
  */
 internal actual object ProfileLocalImages {
@@ -43,7 +43,7 @@ internal actual object ProfileLocalImages {
                     fileSelectionMode = JFileChooser.FILES_ONLY
                     isMultiSelectionEnabled = false
                     isAcceptAllFileFilterUsed = false
-                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, GIF, BMP)", "jpg", "jpeg", "png", "gif", "bmp")
+                    fileFilter = FileNameExtensionFilter("Médias (JPG, PNG, GIF, WebP, BMP, MP4, WebM, MOV)", "jpg", "jpeg", "png", "gif", "webp", "bmp", "mp4", "webm", "mov")
                 }
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     selectedPath = chooser.selectedFile?.toPath()
@@ -51,26 +51,46 @@ internal actual object ProfileLocalImages {
             }
 
             val original = selectedPath ?: return@withContext null
-            require(Files.isRegularFile(original) && Files.size(original) in 1..12_000_000L) {
-                "L'image doit être un fichier de 12 Mo maximum."
+            require(Files.isRegularFile(original) && Files.size(original) in 1..20_000_000L) {
+                "Le fichier doit faire 20 Mo maximum."
             }
-            val resized = readAndResize(original, background)
+            // IMPORTANT: ImageIO.read(GIF) supprime les animations. On conserve
+            // les GIF, WebP animés et vidéos dans leur format original.
+            val magic = Files.newInputStream(original).use { input ->
+                val bytes = ByteArray(16)
+                input.read(bytes)
+                bytes
+            }
+            fun ascii(offset: Int, count: Int) = String(magic, offset, count, Charsets.US_ASCII)
+            val format = when {
+                magic[0] == 0xff.toByte() && magic[1] == 0xd8.toByte() -> "jpg"
+                magic[0] == 0x89.toByte() && ascii(1,3) == "PNG" -> "png"
+                ascii(0,4) == "GIF8" -> "gif"
+                ascii(0,4) == "RIFF" && ascii(8,4) == "WEBP" -> "webp"
+                ascii(4,4) == "ftyp" -> if (original.fileName.toString().endsWith(".mov",true)) "mov" else "mp4"
+                magic[0]==0x1a.toByte() && magic[1]==0x45.toByte() &&
+                    magic[2]==0xdf.toByte() && magic[3]==0xa3.toByte() -> "webm"
+                ascii(0,2) == "BM" -> "bmp"
+                else -> error("Format non reconnu : JPG, PNG, GIF, WebP, BMP, MP4, WebM, MOV.")
+            }
+            val keepOriginal = format in setOf("gif","webp","mp4","webm","mov")
+            val extension = if (keepOriginal) format else if (background) "jpg" else "png"
             val target = imageDir.resolve(
                 (if (background) "background-" else "avatar-") +
-                    UUID.randomUUID().toString() + if (background) ".jpg" else ".png"
+                    UUID.randomUUID().toString() + ".$extension"
             )
             Files.createDirectories(imageDir)
             val pending = Files.createTempFile(imageDir, "kovelyx-import-", ".tmp")
             try {
-                Files.newOutputStream(pending).use { output ->
-                    check(ImageIO.write(resized, if (background) "jpg" else "png", output)) {
-                        "L'encodeur de l'image n'est pas disponible."
+                if (keepOriginal) Files.copy(original,pending,StandardCopyOption.REPLACE_EXISTING)
+                else {
+                    val resized = readAndResize(original, background)
+                    Files.newOutputStream(pending).use { output ->
+                        check(ImageIO.write(resized, extension, output)) { "Encodeur d'image indisponible." }
                     }
                 }
-                Files.move(pending, target, StandardCopyOption.REPLACE_EXISTING)
-            } finally {
-                Files.deleteIfExists(pending)
-            }
+                Files.move(pending,target,StandardCopyOption.REPLACE_EXISTING)
+            } finally { Files.deleteIfExists(pending) }
             target.toUri().toString()
         }
     }
@@ -122,8 +142,8 @@ internal actual object ProfileLocalImages {
         return runCatching {
             val path = Path.of(URI(url)).toAbsolutePath().normalize()
             path.startsWith(imageDir) && Files.isRegularFile(path) &&
-                (path.fileName.toString().lowercase(Locale.ROOT).endsWith(".png") ||
-                    path.fileName.toString().lowercase(Locale.ROOT).endsWith(".jpg"))
+                path.fileName.toString().substringAfterLast('.', "").lowercase(Locale.ROOT) in
+                    setOf("png", "jpg", "gif", "webp", "mp4", "webm", "mov")
         }.getOrDefault(false)
     }
 
