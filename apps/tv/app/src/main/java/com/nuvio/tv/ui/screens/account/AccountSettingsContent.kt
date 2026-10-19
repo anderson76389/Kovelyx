@@ -154,6 +154,18 @@ private fun SignedInAccountSettingsContent(
                 AccountInlineNote(text = stringResource(R.string.account_sync_restart_note))
             }
 
+            if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) {
+                item(key = "cloud_profiles") {
+                    AccountInlineNote(
+                        text = if (uiState.cloudProfileNames.isEmpty()) {
+                            "Profils Cloudflare : aucun profil distant chargé"
+                        } else {
+                            "Profils Cloudflare : " + uiState.cloudProfileNames.joinToString(", ")
+                        }
+                    )
+                }
+            }
+
             val overview = uiState.syncOverview
             if (overview != null) {
                 item(key = "account_sync_overview") { SyncOverviewCard(overview) }
