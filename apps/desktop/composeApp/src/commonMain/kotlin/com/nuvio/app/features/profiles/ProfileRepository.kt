@@ -366,7 +366,7 @@ object ProfileRepository {
                 )
             }
         }
-        if (CloudflareAccountClient.enabled) {
+        if (CloudflareAccountClient.enabled && !AuthRepository.state.value.isAnonymous) {
             runCatching { pushCloudflareProfiles(profiles) }.onFailure { error ->
                 log.e(error) { "Mise à jour des profils Cloudflare refusée ; données locales préservées" }
             }
@@ -483,7 +483,7 @@ object ProfileRepository {
             ProfileLocalImages.saveImage(owner, profileIndex, true, null)
         }
 
-        if (CloudflareAccountClient.enabled) {
+        if (CloudflareAccountClient.enabled && !AuthRepository.state.value.isAnonymous) {
             val current = _state.value.profiles.find { it.profileIndex == profileIndex } ?: return
             // La suppression est déclenchée explicitement depuis l'interface.
             // Si D1 refuse, conserver intégralement les données de cet appareil.
