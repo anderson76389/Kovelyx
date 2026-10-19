@@ -60,7 +60,16 @@ fun ProfileAvatarCircle(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (imageRequest != null) {
+        val avatarIsVideo = avatarImageUrl?.substringBefore('?')?.lowercase()?.let {
+            it.endsWith(".mp4") || it.endsWith(".webm") || it.endsWith(".mov")
+        } == true
+        if (avatarIsVideo && avatarImageUrl != null) {
+            CustomProfileBackgroundImage(
+                imageUrl=avatarImageUrl,
+                contentDescription=name,
+                modifier=Modifier.size(size).clip(CircleShape)
+            )
+        } else if (imageRequest != null) {
             AsyncImage(
                 model = imageRequest,
                 contentDescription = name,
