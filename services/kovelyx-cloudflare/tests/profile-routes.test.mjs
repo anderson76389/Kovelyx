@@ -26,10 +26,12 @@ function fakeDatabase() {
                 return {meta:{changes:p?1:0}};
               }
               if (sql.startsWith("DELETE FROM kv_profiles")) {
-                const [id,owner,checkedOwner] = args;
+                const [id,owner,checkedOwner,principalOwner] = args;
                 assert.equal(owner,checkedOwner);
+                assert.equal(owner,principalOwner);
                 const matches = profiles.findIndex(p=>p.id===id && p.owner_id===owner);
-                const canDelete = profiles.filter(p=>p.owner_id===owner).length>1;
+                const owned = profiles.filter(p=>p.owner_id===owner);
+                const canDelete = owned.length>1 && owned[0]?.id!==id;
                 if (matches<0 || !canDelete) return {meta:{changes:0}};
                 profiles.splice(matches,1);
                 return {meta:{changes:1}};
@@ -78,6 +80,8 @@ test("profile deletion is account-scoped and cannot remove last profile",async()
   const db=fakeDatabase();
   const [otherReq,otherUrl]=request("/v1/profiles/delete",{profileId:OTHER});
   assert.equal((await handleProfiles(otherReq,{DB:db},{id:"alice"},otherUrl)).status,404);
+  const [primaryReq,primaryUrl]=request("/v1/profiles/delete",{profileId:MAIN});
+  assert.equal((await handleProfiles(primaryReq,{DB:db},{id:"alice"},primaryUrl)).status,409);
   const [secondReq,secondUrl]=request("/v1/profiles/delete",{profileId:SECOND});
   assert.equal((await handleProfiles(secondReq,{DB:db},{id:"alice"},secondUrl)).status,200);
   const [lastReq,lastUrl]=request("/v1/profiles/delete",{profileId:MAIN});
