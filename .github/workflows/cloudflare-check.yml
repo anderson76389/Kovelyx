@@ -6,6 +6,12 @@ on:
       - 'services/kovelyx-cloudflare/**'
       - 'scripts/configure-cloud-build.py'
       - '.github/workflows/cloudflare-check.yml'
+  pull_request:
+    paths:
+      - 'services/kovelyx-cloudflare/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/**'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/**'
+      - '.github/workflows/cloudflare-check.yml'
   workflow_dispatch:
 permissions:
   contents: read
