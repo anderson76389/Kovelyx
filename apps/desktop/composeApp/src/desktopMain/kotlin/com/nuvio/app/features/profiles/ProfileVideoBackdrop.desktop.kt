@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
+import com.nuvio.app.features.player.PlayerControlsState
 import com.nuvio.app.features.player.desktop.NativePlayerController
 import com.nuvio.app.features.player.desktop.NativePlayerHost
 import kotlinx.coroutines.delay
@@ -24,7 +25,14 @@ import kotlinx.coroutines.isActive
 internal actual fun ProfileVideoBackdrop(url: String, modifier: Modifier) {
     val host = remember { NativePlayerHost() }
     val controller = remember(host) {
-        NativePlayerController(host, muteEmbeddedProfileMedia = true)
+        NativePlayerController(host, muteEmbeddedProfileMedia = true).apply {
+            // Le fond est décoratif : jamais de WebView de contrôles visible.
+            updateControls(PlayerControlsState(
+                controlsVisible = false,
+                pauseOverlayEnabled = false,
+                volumeLevel = 0f,
+            ))
+        }
     }
     var ready by remember(host) { mutableStateOf(false) }
 
