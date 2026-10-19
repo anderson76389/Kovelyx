@@ -104,6 +104,10 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
           grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
+          grep -F "application-label:'Kovelyx'" /tmp/kv-tv-badging.txt
+          if grep -Eiq "application-label.*(\\(test\\)|Nuvio Debug)" /tmp/kv-tv-badging.txt; then
+            echo "::error::Étiquette TV de préproduction incorrecte"; exit 1
+          fi
           grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging.txt
           echo "APK Kovelyx TV universel, signé et identifié correctement" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK TV
@@ -157,6 +161,10 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
           grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
+          grep -F "application-label:'Kovelyx'" /tmp/kv-android-badging
+          if grep -Eiq "application-label.*(\\(test\\)|Nuvio Debug)" /tmp/kv-android-badging; then
+            echo "::error::Étiquette mobile de préproduction incorrecte"; exit 1
+          fi
           echo "APK mobile universel, signé et identifié comme Kovelyx" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK mobiles
         uses: actions/upload-artifact@v4
