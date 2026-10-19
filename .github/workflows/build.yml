@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - 'apps/mobile/**'
+      - 'apps/tv/**'
       - '.github/workflows/build.yml'
   workflow_dispatch:
     inputs:
@@ -58,7 +59,7 @@ jobs:
   tv:
     name: Android TV - APK Full Debug
     needs: changes
-    if: ${{ (github.event_name == 'push' && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
+    if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
