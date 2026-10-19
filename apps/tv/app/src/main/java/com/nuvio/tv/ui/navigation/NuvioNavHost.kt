@@ -52,6 +52,8 @@ import com.nuvio.tv.ui.screens.settings.TmdbSettingsScreen
 import com.nuvio.tv.ui.screens.stream.StreamScreen
 import com.nuvio.tv.ui.screens.home.ContinueWatchingItem
 import com.nuvio.tv.ui.screens.account.AuthQrSignInScreen
+import com.nuvio.tv.ui.screens.account.AuthSignInScreen
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.ui.screens.cast.CastDetailScreen
 import com.nuvio.tv.ui.screens.profile.ProfileSelectionMode
 import com.nuvio.tv.ui.screens.profile.ProfileSelectionScreen
@@ -1204,7 +1206,12 @@ private fun PlaybackNavHost(
                 showBuiltInHeader = !hideBuiltInHeaders,
                 onNavigateToAddons = { navController.navigate(Screen.AddonManager.route) },
                 onNavigateToPlugins = { navController.navigate(Screen.Plugins.route) },
-                onNavigateToAuthQrSignIn = { navController.navigate(Screen.AuthQrSignIn.route) },
+                onNavigateToAuthQrSignIn = {
+                    navController.navigate(
+                        if (CloudflareTvAccountClient.enabled) Screen.AuthSignIn.route
+                        else Screen.AuthQrSignIn.route
+                    )
+                },
                 onNavigateToManageProfiles = { navController.navigate(Screen.ManageProfiles.route) },
                 onNavigateToSupportersContributors = {
                     navController.navigate(Screen.SupportersContributors.route)
@@ -1337,21 +1344,33 @@ private fun PlaybackNavHost(
         }
 
         composable(Screen.Account.route) {
-            AuthQrSignInScreen(
-                onBackPress = { navController.popBackStack() }
-            )
+            if (CloudflareTvAccountClient.enabled) {
+                AuthSignInScreen(
+                    onBackPress = { navController.popBackStack() },
+                    onSuccess = { navController.popBackStack() }
+                )
+            } else {
+                AuthQrSignInScreen(onBackPress = { navController.popBackStack() })
+            }
         }
 
         composable(Screen.AuthSignIn.route) {
-            AuthQrSignInScreen(
-                onBackPress = { navController.popBackStack() }
+            AuthSignInScreen(
+                onBackPress = { navController.popBackStack() },
+                onNavigateToQrSignIn = { navController.navigate(Screen.AuthQrSignIn.route) },
+                onSuccess = { navController.popBackStack() }
             )
         }
 
         composable(Screen.AuthQrSignIn.route) {
-            AuthQrSignInScreen(
-                onBackPress = { navController.popBackStack() }
-            )
+            if (CloudflareTvAccountClient.enabled) {
+                AuthSignInScreen(
+                    onBackPress = { navController.popBackStack() },
+                    onSuccess = { navController.popBackStack() }
+                )
+            } else {
+                AuthQrSignInScreen(onBackPress = { navController.popBackStack() })
+            }
         }
 
         composable(Screen.LayoutSettings.route) {
