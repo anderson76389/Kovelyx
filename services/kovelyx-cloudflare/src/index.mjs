@@ -99,7 +99,38 @@ async function handleSync(request, env, user, url) {
   ).bind(user.id, body.profileId, body.category, body.itemKey).first();
   return jsonResponse({error:"Conflit de synchronisation",current:latest},409);
 }
-async function handleProfiles(request,env,user) {
+async function handleProfiles(request,env,user,url) {
+  const route = url.pathname;
+  // Toute mutation reste limitée au compte authentifié.
+  if (route === "/v1/profiles/update" || route === "/v1/profiles/delete") {
+    if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
+    const body = await readJson(request);
+    if (!body || typeof body.profileId !== "string" ||
+        !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(body.profileId))
+      return jsonResponse({error:"Identifiant de profil invalide"},400);
+    if (route === "/v1/profiles/update") {
+      if (!validProfileName(body.displayName))
+        return jsonResponse({error:"Nom de profil invalide"},400);
+      const name = body.displayName.trim();
+      const now = Date.now();
+      const updated = await env.DB.prepare(
+        "UPDATE kv_profiles SET display_name=?,updated_at=? WHERE id=? AND owner_id=?"
+      ).bind(name,now,body.profileId,user.id).run();
+      if (updated.meta?.changes !== 1) return jsonResponse({error:"Profil introuvable"},404);
+      return jsonResponse({profile:{id:body.profileId,displayName:name,updatedAt:now}});
+    }
+    // Suppression explicite seulement : les lignes kv_sync du profil sont effacées
+    // par la contrainte ON DELETE CASCADE. Le dernier profil est préservé.
+    const deleted = await env.DB.prepare(
+      "DELETE FROM kv_profiles WHERE id=? AND owner_id=? " +
+      "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
+    ).bind(body.profileId,user.id,user.id).run();
+    if (deleted.meta?.changes === 1) return jsonResponse({deleted:true});
+    if (!await ownedProfile(env,user.id,body.profileId))
+      return jsonResponse({error:"Profil introuvable"},404);
+    return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
+  }
+  if (route !== "/v1/profiles") return jsonResponse({error:"Route inconnue"},404);
   if (request.method === "GET") {
     const result = await env.DB.prepare(
       "SELECT id,display_name AS displayName,avatar_path AS avatarPath,"+
@@ -155,7 +186,9 @@ export default {
       if (!user) return respond(jsonResponse({error:"Authentification requise"},401));
       if (url.pathname === "/v1/me" && request.method === "GET")
         return respond(jsonResponse({id:user.id,email:user.email,name:user.name}));
-      if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user));
+      if (url.pathname === "/v1/profiles" || url.pathname === "/v1/profiles/update" ||
+          url.pathname === "/v1/profiles/delete")
+        return respond(await handleProfiles(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {
