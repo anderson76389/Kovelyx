@@ -543,7 +543,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                     true,
                     C.DEFAULT_BUFFER_SEGMENT_SIZE,
                     64,
-                    playerSettings.nuvioPerformanceModeEnabled
+                    playerSettings.nuvioPerformanceModeEnabled &&
+                        TvMedia3SafetyPolicy.allowNativeAllocation
                 )
                 // Both engines report through the same sampler, so whichever built last owns it.
                 NuvioExoPlayerPerformanceHelper.liveAllocator = allocator

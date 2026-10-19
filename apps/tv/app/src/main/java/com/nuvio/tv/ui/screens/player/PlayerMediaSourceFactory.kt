@@ -240,7 +240,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
                 .coerceAtMost(com.nuvio.tv.ui.screens.settings.MemoryBudget.tierMaxChunkMb * 1024)
                 .toLong() * 1024L
             val effectiveNative =
-                nuvioPerformanceModeEnabled || NuvioEngineConfig.get().isNativeAllocationEnabled()
+                TvMedia3SafetyPolicy.allowNativeAllocation &&
+                    (nuvioPerformanceModeEnabled || NuvioEngineConfig.get().isNativeAllocationEnabled())
             ParallelRangeDataSource.Factory(
                 okHttpFactory,
                 sessionConnections,

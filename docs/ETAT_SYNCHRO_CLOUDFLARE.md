@@ -75,3 +75,12 @@ Ce code nécessite que **le nouveau Worker D1 avec pagination de catégorie soit
 
 - **Reconnexion et relance TV :** le dépôt teste la présence des catégories cloud au changement d'utilisateur/profil et périodiquement toutes les cinq minutes tant que l'application TV reste active ; les erreurs réseau sont conservées pour nouvelle tentative. Les annulations de coroutines ne sont pas traitées comme de simples erreurs réseau.
 - **Défauts du moteur TV mis en évidence par tests réels du runner :** le test serveur localhost reçoit un code HTTP 400 lorsqu'il envoie 404 ; le test allocateur conserve 196 608 octets après reset/libération tardive. Ces deux défauts de la bibliothèque Media3 locale restent des échecs à corriger dans le moteur précompilé ; les tests n'ont pas été supprimés ni rendus artificiellement verts.
+
+
+### Sécurisation du lecteur Android TV — moteur Media3 précompilé
+
+Le runner GitHub montre deux défauts **dans les archives AAR vendoriées**, indépendants de Cloudflare : `LocalhostZeroCopyDataSource` interprète une réponse HTTP 404 comme 400, et `DefaultAllocator` conserve 196 608 octets après libération tardive en mode natif.
+
+**Correctif de l'application, distinct d'une recompilation Media3 :** la nouvelle `SafeLoopbackDataSource` route HTTP(S) localhost/127.0.0.1/::1 via OkHttp et préserve les schémas de fichiers standards via `DefaultDataSource`. Les allocations directes natives des chemins de lecture TV, remises en cache et bandes-annonces sont **temporairement désactivées** ; les fonctions réseau et de lecture classiques restent configurables. Le code choisit le mode heap plutôt que le mode natif bogué. Les tests de la nouvelle politique vérifient la sélection et la propagation des erreurs.
+
+**Important :** les deux tests originaux des AAR sont volontairement conservés et peuvent encore échouer, car le contournement ne modifie pas leurs classes internes. Le correctif final des AAR nécessite les sources correspondantes ou une reconstruction traçable de leur fork Media3. Aucune garantie de lecture 100 % sur toutes les box n'est donnée avant tests physiques. Ces mécanismes visent à éviter les deux bogues connus dans les chemins effectivement utilisés par Kovelyx, sans faire croire que les binaires historiques sont réparés.
