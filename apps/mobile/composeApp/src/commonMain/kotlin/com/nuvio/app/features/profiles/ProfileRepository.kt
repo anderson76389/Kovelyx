@@ -367,13 +367,13 @@ object ProfileRepository {
             }
             // Une sélection « par défaut » doit également retirer le fichier
             // distant, sinon la TV afficherait encore l'ancien avatar/fond.
-            val previous=localByIndex[profile.profileIndex]
-            if(!oldAvatar.isNullOrBlank() && previous?.avatarUrl!=profile.avatarUrl &&
+            val previousLocalProfile=localByIndex[profile.profileIndex]
+            if(!oldAvatar.isNullOrBlank() && previousLocalProfile?.avatarUrl!=profile.avatarUrl &&
                 !ProfileLocalImages.isManagedUri(profile.avatarUrl.orEmpty())) {
                 runCatching { ProfileCloudMediaTransfer.remove(profile.id,false) }
                     .onFailure { log.w(it) { "Avatar R2 ancien encore conservé" } }
             }
-            if(!oldBackground.isNullOrBlank() && previous?.profileBackgroundUrl!=profile.profileBackgroundUrl &&
+            if(!oldBackground.isNullOrBlank() && previousLocalProfile?.profileBackgroundUrl!=profile.profileBackgroundUrl &&
                 !ProfileLocalImages.isManagedUri(profile.profileBackgroundUrl.orEmpty())) {
                 runCatching { ProfileCloudMediaTransfer.remove(profile.id,true) }
                     .onFailure { log.w(it) { "Fond R2 ancien encore conservé" } }
