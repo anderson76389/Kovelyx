@@ -122,6 +122,7 @@ class AccountViewModel @Inject constructor(
                         loadSyncOverview()
                     }
                 } else if (CloudflareTvAccountClient.enabled) {
+                    profileManager.clearCloudMedia()
                     _uiState.update { it.copy(cloudProfileNames = emptyList()) }
                 }
             }
@@ -171,11 +172,9 @@ class AccountViewModel @Inject constructor(
                         CloudflareTvAccountClient.downloadMedia(context,cloud,true)
                     }.onFailure { Log.w(TAG,"Fond R2 absent : média TV local conservé",it) }.getOrNull()
                     if(avatar!=null || background!=null) {
-                        profileManager.updateProfile(target.copy(
-                            // Le nom local n'est pas modifié automatiquement.
-                            avatarUrl=avatar ?: target.avatarUrl,
-                            profileBackgroundUrl=background ?: target.profileBackgroundUrl,
-                        ))
+                        // Modifications purement en mémoire, séparées des
+                        // profils invités persistants de la télévision.
+                        profileManager.setCloudMedia(target.id,avatar,background)
                     }
                 }
             }.onFailure { error ->
