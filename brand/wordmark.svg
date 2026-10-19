@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 890 190" width="890" height="190" role="img" aria-labelledby="title desc">
-<title id="title">Kovelyx — Your media. Your world.</title><desc id="desc">Signature Kovelyx en lettres blanches et violettes avec icône K à gauche.</desc>
+<title id="title">Kovelyx — Votre univers multimédia.</title><desc id="desc">Signature Kovelyx en lettres blanches et violettes avec icône K à gauche.</desc>
 <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2=".7"><stop stop-color="#DAC0FF"/><stop offset=".48" stop-color="#BC74FF"/><stop offset="1" stop-color="#8759F8"/></linearGradient></defs>
 <g transform="translate(0 4) scale(.33)">
   <path d="M138 97C117 97 104 112 104 135V371C104 392 117 409 139 416L189 431V126C189 111 172 101 155 98L138 97Z" fill="#AA68FB"/>
@@ -10,5 +10,5 @@
 </g>
 <text x="170" y="108" font-family="Arial,Helvetica,sans-serif" font-size="111" font-weight="900" letter-spacing="-4" fill="#F5F3FF">KOVE</text>
 <text x="505" y="108" font-family="Arial,Helvetica,sans-serif" font-size="111" font-weight="900" letter-spacing="-4" fill="url(#g)">LYX</text>
-<text x="177" y="151" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="600" letter-spacing="9" fill="#B8A7DC">YOUR MEDIA. YOUR WORLD.</text>
+<text x="177" y="151" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="600" letter-spacing="9" fill="#B8A7DC">VOTRE UNIVERS. VOS ÉCRANS.</text>
 </svg>

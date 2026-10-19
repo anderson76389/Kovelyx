@@ -1,33 +1,42 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="366" viewBox="0 0 1280 366" role="img" aria-labelledby="title subtitle">
-<title id="title">KOVELYX</title><desc id="subtitle">Votre univers multimédia — Windows, Android et Android TV</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="520" viewBox="0 0 1440 520" role="img" aria-labelledby="title subtitle">
+<title id="title">Kovelyx — Votre univers multimédia</title><desc id="subtitle">Identité graphique Kovelyx violet nuit avec interfaces conceptuelles Windows, Android et Android TV. Visuels illustratifs, non contractuels.</desc>
 <defs>
-<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0D1021"/><stop offset=".52" stop-color="#070A17"/><stop offset="1" stop-color="#100927"/></linearGradient>
-<linearGradient id="purple" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#F6D6FF"/><stop offset=".32" stop-color="#B578FF"/><stop offset="1" stop-color="#7059FF"/></linearGradient>
-<linearGradient id="k" x1=".1" y1="0" x2=".8" y2="1"><stop stop-color="#F2C9FF"/><stop offset=".45" stop-color="#9C5CFC"/><stop offset="1" stop-color="#584DF5"/></linearGradient>
-<radialGradient id="halo"><stop stop-color="#743CF5" stop-opacity=".24"/><stop offset="1" stop-color="#743CF5" stop-opacity="0"/></radialGradient>
-<pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#B6B0FF" stroke-opacity=".035"/></pattern>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101126"/><stop offset=".55" stop-color="#070916"/><stop offset="1" stop-color="#140D2F"/></linearGradient>
+<linearGradient id="textGrad" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#EAD3FF"/><stop offset=".45" stop-color="#B378FF"/><stop offset="1" stop-color="#7C72FF"/></linearGradient>
+<linearGradient id="screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#202456"/><stop offset=".53" stop-color="#4A317D"/><stop offset="1" stop-color="#955DA6"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#8059FB" stop-opacity=".36"/><stop offset="1" stop-color="#8059FB" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="46" height="46" patternUnits="userSpaceOnUse"><path d="M46 0H0V46" fill="none" stroke="#9C89DE" stroke-opacity=".052"/></pattern>
+<filter id="shadow" x="-35%" y="-35%" width="170%" height="180%"><feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity=".63"/></filter>
+<clipPath id="tvClip"><rect x="912" y="105" width="418" height="232" rx="10"/></clipPath>
+<clipPath id="pcClip"><rect x="781" y="259" width="358" height="164" rx="8"/></clipPath>
+<linearGradient id="logoStem" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#F8DFFF"/><stop offset=".36" stop-color="#B56AFF"/><stop offset="1" stop-color="#6043F4"/></linearGradient><linearGradient id="logoTop" x1=".1" y1="0" x2="1" y2=".9"><stop stop-color="#DFA7FF"/><stop offset=".43" stop-color="#B24BF8"/><stop offset="1" stop-color="#7947FA"/></linearGradient><linearGradient id="logoBottom" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#966AFF"/><stop offset=".58" stop-color="#693BEF"/><stop offset="1" stop-color="#4537BF"/></linearGradient>
 </defs>
-<rect width="1280" height="366" rx="28" fill="url(#bg)"/>
-<rect width="1280" height="366" rx="28" fill="url(#grid)"/>
-<circle cx="1132" cy="135" r="320" fill="url(#halo)"/>
-<circle cx="1190" cy="55" r="180" stroke="#9978FC" stroke-opacity=".12" fill="none" stroke-width="2"/>
-<circle cx="1190" cy="55" r="120" stroke="#9978FC" stroke-opacity=".09" fill="none" stroke-width="2"/>
-<rect x="48" y="63" width="220" height="228" rx="51" fill="#100F26" stroke="#9274FA" stroke-opacity=".65" stroke-width="2"/>
-<rect x="57" y="72" width="202" height="210" rx="45" fill="#14102A"/>
-<path d="M120 113 Q106 116 106 136 L106 235 Q106 254 123 259 L144 265 L144 125 Q142 113 120 113Z" fill="url(#k)"/>
-<path d="M142 165 L203 120 Q221 108 238 126 Q249 143 230 157 L164 204Z" fill="#BD66FF"/>
-<path d="M145 186 L236 235 Q253 246 238 261 Q226 273 208 262 L143 220Z" fill="#7B58FA"/>
-<path d="M144 169 L181 190 L144 218Z" fill="#E0A4FF"/>
-<text x="315" y="166" font-family="Arial,Helvetica,sans-serif" font-size="95" font-weight="800" letter-spacing="4" fill="#F6F6FD">KOVE</text>
-<text x="621" y="166" font-family="Arial,Helvetica,sans-serif" font-size="95" font-weight="800" letter-spacing="4" fill="url(#purple)">LYX</text>
-<text x="322" y="207" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="500" letter-spacing="8" fill="#B8B3D3">YOUR MEDIA. YOUR WORLD.</text>
-<rect x="319" y="242" width="171" height="43" rx="21.5" fill="#1C1733" stroke="#7B5BDD" stroke-opacity=".66"/>
-<circle cx="342" cy="264" r="5" fill="#AD81FF"/><text x="358" y="271" font-size="17" fill="#E9E0FF" font-family="Arial,Helvetica,sans-serif">ANDROID TV</text>
-<rect x="503" y="242" width="155" height="43" rx="21.5" fill="#1C1733" stroke="#7B5BDD" stroke-opacity=".66"/>
-<circle cx="526" cy="264" r="5" fill="#AD81FF"/><text x="542" y="271" font-size="17" fill="#E9E0FF" font-family="Arial,Helvetica,sans-serif">ANDROID</text>
-<rect x="670" y="242" width="167" height="43" rx="21.5" fill="#1C1733" stroke="#7B5BDD" stroke-opacity=".66"/>
-<circle cx="693" cy="264" r="5" fill="#AD81FF"/><text x="709" y="271" font-size="17" fill="#E9E0FF" font-family="Arial,Helvetica,sans-serif">WINDOWS</text>
-<path d="M1035 0 L910 366" stroke="#AB81FC" stroke-opacity=".05" stroke-width="70"/>
-<path d="M1086 0 L961 366" stroke="#AB81FC" stroke-opacity=".06" stroke-width="30"/>
-<rect x="1.5" y="1.5" width="1277" height="363" rx="27" stroke="#A790FF" stroke-opacity=".22" stroke-width="3" fill="none"/>
+<rect width="1440" height="520" rx="26" fill="url(#bg)"/><rect width="1440" height="520" rx="26" fill="url(#grid)"/>
+<circle cx="1102" cy="272" r="445" fill="url(#glow)"/><circle cx="1240" cy="135" r="303" fill="none" stroke="#AD83FF" stroke-opacity=".17" stroke-width="2"/><circle cx="1240" cy="135" r="225" fill="none" stroke="#AD83FF" stroke-opacity=".09" stroke-width="2"/>
+<path d="M0 480C310 380 458 600 825 441S1199 348 1440 418V520H0Z" fill="#483080" fill-opacity=".13"/><path d="M0 480C310 380 458 600 825 441S1199 348 1440 418" fill="none" stroke="#A879FF" stroke-opacity=".25" stroke-width="2"/>
+<rect x="82" y="57" width="80" height="80" rx="20" fill="#171329" stroke="#B68CFA" stroke-opacity=".35"/>
+<svg x="82" y="57" width="80" height="80" viewBox="0 0 512 512"><path d="M138 97C117 97 104 112 104 135V371C104 392 117 409 139 416L189 431V126C189 111 172 101 155 98L138 97Z" fill="url(#logoStem)"/><path d="M188 232L339 109C356 95 376 95 391 108L411 125C430 142 429 164 410 180L242 308L188 283V232Z" fill="url(#logoTop)"/><path d="M187 244L411 344C434 355 439 379 418 397L399 414C382 429 366 430 345 418L188 334V244Z" fill="url(#logoBottom)"/><path d="M187 218L270 264L188 322L187 218Z" fill="#F7D1FF"/><path d="M192 239L241 266L192 302Z" fill="#6E39EC"/></svg>
+<text x="177" y="110" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700" letter-spacing="6" fill="#BEB4E3">ÉDITION MULTIPLATEFORME</text>
+<text x="76" y="258" font-family="Arial,Helvetica,sans-serif" font-size="106" font-weight="900" letter-spacing="-3" fill="#FAF7FF">KOVE</text>
+<text x="390" y="258" font-family="Arial,Helvetica,sans-serif" font-size="106" font-weight="900" letter-spacing="-3" fill="url(#textGrad)">LYX</text>
+<text x="83" y="307" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#D6CDEB" letter-spacing=".7">Votre univers multimédia, sur tous vos écrans.</text>
+<path d="M83 340H590" stroke="#9C79DF" stroke-opacity=".3"/>
+<g font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#E2D4FF">
+<rect x="83" y="368" width="145" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="104" cy="389" r="4.5" fill="#C6A1FF"/><text x="118" y="395">WINDOWS</text>
+<rect x="241" y="368" width="146" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="262" cy="389" r="4.5" fill="#C6A1FF"/><text x="276" y="395">ANDROID</text>
+<rect x="400" y="368" width="178" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="421" cy="389" r="4.5" fill="#C6A1FF"/><text x="435" y="395">ANDROID TV</text>
+</g>
+<text x="83" y="455" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="600" letter-spacing="2" fill="#9F96C4">CODE OUVERT  •  SOURCES PERSONNALISABLES</text>
+<g filter="url(#shadow)">
+<rect x="900" y="92" width="442" height="260" rx="19" fill="#090A15" stroke="#AE9CEF" stroke-opacity=".8" stroke-width="3"/>
+<g clip-path="url(#tvClip)"><rect x="912" y="105" width="418" height="232" fill="#111326"/><rect x="912" y="105" width="94" height="232" fill="#101124"/><circle cx="934" cy="131" r="7" fill="#B990FF"/><rect x="952" y="127" width="39" height="8" rx="4" fill="#6B598F"/><rect x="924" y="165" width="67" height="13" rx="6" fill="#6249A4"/><rect x="925" y="196" width="53" height="7" rx="3" fill="#403A61"/><rect x="925" y="215" width="47" height="7" rx="3" fill="#403A61"/><rect x="1017" y="117" width="298" height="129" rx="10" fill="url(#screen)"/><circle cx="1251" cy="147" r="80" fill="#D8A1FF" fill-opacity=".12"/><path d="M1017 222L1119 137 1182 201 1245 146 1315 214V246H1017Z" fill="#111A43" fill-opacity=".86"/><path d="M1017 241L1102 187 1170 229 1223 178 1315 241V246H1017Z" fill="#130F35"/><rect x="1020" y="259" width="83" height="60" rx="6" fill="#44366F"/><rect x="1112" y="259" width="83" height="60" rx="6" fill="#253D69"/><rect x="1204" y="259" width="83" height="60" rx="6" fill="#7D467F"/><circle cx="1066" cy="275" r="18" fill="#BE7BEA" fill-opacity=".36"/><circle cx="1167" cy="272" r="23" fill="#8093E8" fill-opacity=".28"/><circle cx="1249" cy="277" r="21" fill="#F49ABA" fill-opacity=".25"/></g>
+<rect x="1086" y="352" width="68" height="17" rx="3" fill="#211B38"/><rect x="1047" y="367" width="146" height="8" rx="4" fill="#514165"/>
+</g>
+<g filter="url(#shadow)">
+<rect x="769" y="248" width="385" height="191" rx="14" fill="#0C0D1B" stroke="#B399EE" stroke-width="2.6"/>
+<g clip-path="url(#pcClip)"><rect x="781" y="259" width="358" height="164" fill="#111326"/><rect x="781" y="259" width="68" height="164" fill="#151329"/><rect x="792" y="273" width="36" height="8" rx="4" fill="#9A7EEC"/><rect x="792" y="293" width="44" height="6" rx="3" fill="#43365F"/><rect x="792" y="308" width="36" height="6" rx="3" fill="#43365F"/><rect x="860" y="270" width="266" height="84" rx="7" fill="url(#screen)"/><circle cx="1058" cy="294" r="50" fill="#DCA5FF" fill-opacity=".2"/><path d="M861 339L920 287 970 329 1038 291 1126 339V354H861Z" fill="#1A204B"/><rect x="860" y="364" width="77" height="50" rx="5" fill="#39296A"/><rect x="948" y="364" width="77" height="50" rx="5" fill="#6C4C84"/><rect x="1036" y="364" width="90" height="50" rx="5" fill="#303A77"/></g>
+<path d="M802 441H1117L1140 450H777Z" fill="#574771"/><path d="M782 452H1138Q1128 459 1110 459H811Q792 459 782 452Z" fill="#272039"/>
+</g>
+<g filter="url(#shadow)"><rect x="1184" y="245" width="129" height="234" rx="25" fill="#080A16" stroke="#C19DFE" stroke-opacity=".9" stroke-width="3"/><rect x="1192" y="256" width="113" height="212" rx="17" fill="#111228"/><rect x="1228" y="259" width="41" height="6" rx="3" fill="#050710"/><rect x="1199" y="278" width="99" height="72" rx="9" fill="url(#screen)"/><circle cx="1274" cy="296" r="24" fill="#D4B7FF" fill-opacity=".38"/><path d="M1199 343L1234 305 1262 333 1298 313V350H1199Z" fill="#2A2456"/><rect x="1200" y="364" width="45" height="43" rx="5" fill="#614788"/><rect x="1251" y="364" width="46" height="43" rx="5" fill="#343F73"/><rect x="1200" y="413" width="45" height="40" rx="5" fill="#443264"/><rect x="1251" y="413" width="46" height="40" rx="5" fill="#744C92"/></g>
+<rect x="1.5" y="1.5" width="1437" height="517" rx="24" stroke="#B39BE8" stroke-opacity=".19" stroke-width="3" fill="none"/>
 </svg>
