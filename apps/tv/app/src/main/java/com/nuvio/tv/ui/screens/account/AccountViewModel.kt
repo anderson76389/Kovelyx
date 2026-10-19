@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nuvio.tv.R
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticsSession
 import com.nuvio.tv.core.logging.bodySnippetForLog
 import com.nuvio.tv.core.logging.diagnosticSummary
@@ -94,7 +95,8 @@ class AccountViewModel @Inject constructor(
     private var qrLoginExchangeInFlight: Boolean = false
 
     val usesEmailPasswordLogin: Boolean
-        get() = serverConfiguration.isCustom && serverConfiguration.capabilities.emailPasswordAuth
+        get() = CloudflareTvAccountClient.enabled ||
+            (serverConfiguration.isCustom && serverConfiguration.capabilities.emailPasswordAuth)
 
     init {
         observeAuthState()
@@ -113,7 +115,7 @@ class AccountViewModel @Inject constructor(
                     )
                 }
                 updateEffectiveOwnerId(state)
-                if (state is AuthState.FullAccount) {
+                if (state is AuthState.FullAccount && !CloudflareTvAccountClient.enabled) {
                     loadConnectedStats()
                     loadSyncOverview()
                 }
@@ -143,7 +145,9 @@ class AccountViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             authManager.signUpWithEmail(email, password).fold(
                 onSuccess = {
-                    pushLocalDataToRemote()
+                    // L'inscription n'est pas une connexion; les anciennes RPC ne sont
+                    // pas compatibles D1. Ne transférer aucune donnée sans confirmation.
+                    if (!CloudflareTvAccountClient.enabled) pushLocalDataToRemote()
                     _uiState.update { it.copy(isLoading = false) }
                 },
                 onFailure = { e ->
@@ -158,10 +162,14 @@ class AccountViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             authManager.signInWithEmail(email, password).fold(
                 onSuccess = {
-                    pullRemoteData().onFailure { e ->
-                        Log.e("AccountViewModel", "signIn: pullRemoteData failed, continuing signed-in flow", e)
+                    if (!CloudflareTvAccountClient.enabled) {
+                        pullRemoteData().onFailure { e ->
+                            Log.e("AccountViewModel", "signIn: pullRemoteData failed, continuing signed-in flow", e)
+                        }
+                        loadConnectedStats()
                     }
-                    loadConnectedStats()
+                    // Le compte Cloudflare reste connecté sans lancer de RPC Supabase
+                    // ni écraser les bibliothèques locales avant la migration D1.
                     _uiState.update { it.copy(isLoading = false) }
                 },
                 onFailure = { e ->
@@ -241,6 +249,7 @@ class AccountViewModel @Inject constructor(
     }
 
     fun loadLinkedDevices() {
+        if (CloudflareTvAccountClient.enabled) return
         viewModelScope.launch {
             syncRepository.getLinkedDevices().fold(
                 onSuccess = { devices ->
