@@ -34,7 +34,7 @@ Sur le commit `b121079d` de la PR #40, les workflows suivants ont été verts :
 
 Le Worker public déployé a passé son contrôle **non authentifié** : `/health`, `/api/auth/get-session`, refus HTTP 401 sur `/v1/me` sans jeton et HTTP 403 avec une origine non autorisée. Cela ne teste pas le mot de passe ni la base d'un vrai utilisateur.
 
-Le CI comprend désormais un test **Worker + D1 locaux jetables** pour vérifier un scénario complet avec **deux comptes factices**, signin/signout, profil, contrôle de propriété et révisions de bibliothèque. Même s'il est vert, un essai réel du même compte sur PC, mobile et TV reste nécessaire.
+Le CI comprend désormais un test **Worker + D1 locaux jetables** avec **deux comptes factices** ; la création de compte, la connexion/déconnexion, la lecture de la session, l'isolement des profils, le renommage, les révisions CAS et la pagination sont **réellement passés**. Run [39295543457](https://github.com/anderson76389/Kovelyx/actions/runs/39295543457). Ce test a aussi détecté puis fait corriger le défaut d'en-tête `Origin` manquant sur les applications natives. **Le Worker de production n'a PAS été redéployé avec ces corrections.** Un essai réel du même compte sur PC, mobile et TV reste nécessaire.
 
 ## 3. Synchronisation
 
@@ -70,6 +70,15 @@ Le backend D1 propose des catégories (`library`, `favorites`, `watch_progress`,
 - TMDB, MDBList, Trakt, YouTube, addons tiers, débrideurs et services de traduction sont **des fournisseurs externes distincts de Nuvio**. Si leur API tombe, les fonctions qui les utilisent peuvent échouer même si Nuvio disparaît sans conséquence.
 
 Les crédits/licences obligatoires ne doivent pas être supprimés : ils ne constituent pas une dépendance de fonctionnement.
+
+## 5. Audit élargi des tests applicatifs
+
+Lancement de la suite Android mobile complète (run [39294007737](https://github.com/anderson76389/Kovelyx/actions/runs/39294007737)) : **1 663 tests exécutés, 5 initialement en échec**.
+
+- Un test d'affichage des notes et un test de migration d'ancienne progression utilisaient un clip de **1 seconde**, alors que l'application applique volontairement une protection contre les vidéos courtes (moins de 121 s), souvent des erreurs de source. Données de test remplacées par de véritables durées d'épisode, sans supprimer cette protection.
+- Trois tests de mise à jour Android utilisaient le stockage historique `nuvio_updater` au lieu du vrai stockage applicatif `kovelyx_updater` ; leurs préparations ont été corrigées.
+- Les modifications correspondent aux fichiers de test, et **ne suffisent pas à garantir les fonctions tant que leur nouvelle suite n'est pas verte**. Les builds APK et les tests des fonctions sont des vérifications distinctes.
+- Contrôle sans serveurs Nuvio : le contrôle statique des sources actives est passé ; la compilation hors Nuvio pour chaque plateforme est lancée séparément. Ce n'est pas une preuve du streaming réel des addons.
 
 ## 5. Ce que les tests automatiques n'ont pas prouvé
 
