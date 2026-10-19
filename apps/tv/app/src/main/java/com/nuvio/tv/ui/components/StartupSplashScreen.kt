@@ -1,12 +1,10 @@
 package com.nuvio.tv.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -95,18 +93,25 @@ fun StartupSplashScreen(
             )
         }
 
-        Column(
+        // Positionne la marque au centre réel de l'écran, sans inclure
+        // l'indicateur de progression dans le calcul du centrage.
+        Box(
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            contentAlignment = Alignment.Center
         ) {
             BrandWordmark(
-                modifier = Modifier.height(48.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .height(48.dp),
                 contentDescription = stringResource(R.string.cd_nuvio_logo),
                 drawableOverride = brandWordmarkRes
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxl))
-            LoadingIndicator(modifier = Modifier.size(NuvioTheme.spacing.xxxl))
+            LoadingIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .offset(y = 88.dp)
+                    .size(NuvioTheme.spacing.xxxl)
+            )
         }
     }
 }
