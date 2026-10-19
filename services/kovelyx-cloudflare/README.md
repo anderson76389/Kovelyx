@@ -128,6 +128,24 @@ printf 'false' | npx wrangler secret put KOVELYX_REGISTRATION_OPEN
 
 Ne laissez pas les inscriptions publiques ouvertes sans anti-bot (Cloudflare Turnstile), confirmation e-mail et politique de confidentialité adaptée.
 
+### 8 bis. Assistant sécurisé pour créer le premier compte (recommandé)
+
+Après le déploiement réussi et la vérification `/health`, retournez dans **le Codespace** et exécutez :
+
+```bash
+cd /workspaces/Kovelyx && git pull --ff-only && cd services/kovelyx-cloudflare && python3 scripts/first-account.py
+```
+
+Le terminal vous demandera l'adresse e-mail puis **deux fois le mot de passe sans l'afficher**. Cet assistant ouvre temporairement les inscriptions, crée votre utilisateur sur votre Worker, **referme les inscriptions**, vérifie la connexion par jeton et crée un profil `Principal` dans D1. Il ne publie ni e-mail ni mot de passe dans GitHub.
+
+Ne partagez pas les sorties contenant des identifiants, et surtout aucun jeton. Si le script échoue après avoir ouvert les inscriptions, assurez-vous que l'accès est fermé en exécutant :
+
+```bash
+printf 'false' | npx wrangler secret put KOVELYX_REGISTRATION_OPEN
+```
+
+**Attention :** le premier compte ne signifie pas encore que les favoris/historiques de toutes les applications sont synchronisés. Les adaptations des clients et les tests sur appareils restent nécessaires.
+
 ### 9. Faire ses sauvegardes
 
 Les données **restent chez Cloudflare, pas sur GitHub Pages**. Exportez régulièrement un dump privé de D1 avec Wrangler ou une méthode prise en charge par Cloudflare, stockez-le hors de GitHub, puis testez sa restauration. Les comptes **ne sont pas garantis à vie sans sauvegardes** ni contrôle de l'hébergement.
