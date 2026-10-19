@@ -54,7 +54,7 @@ async function ownedProfile(env, userId, profileId) {
   return env.DB.prepare("SELECT id FROM kv_profiles WHERE id=? AND owner_id=?")
     .bind(profileId, userId).first();
 }
-async function handleSync(request, env, user, url) {
+export async function handleSync(request, env, user, url) {
   if (request.method === "GET") {
     const profileId = url.searchParams.get("profileId") || "";
     if (!/^[a-f0-9-]{36}$/i.test(profileId) || !await ownedProfile(env, user.id, profileId))
