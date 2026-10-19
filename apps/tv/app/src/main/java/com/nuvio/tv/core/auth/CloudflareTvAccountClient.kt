@@ -1,6 +1,8 @@
 package com.nuvio.tv.core.auth
 
 import com.nuvio.tv.BuildConfig
+import android.util.Log
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -82,7 +84,17 @@ internal object CloudflareTvAccountClient {
                 .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
                 .post("{}".toRequestBody("application/json".toMediaType()))
                 .build()
-            client.newCall(request).execute().close()
+            try {
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.w("KovelyxTvAuth", "Révocation distante refusée HTTP ${response.code} ; session locale effacée")
+                    }
+                }
+            } catch (error: IOException) {
+                // Hors ligne : ne jamais garder une session affichée comme connectée
+                // en attendant la disponibilité du serveur.
+                Log.w("KovelyxTvAuth", "Révocation distante différée (session locale effacée)", error)
+            }
         }
     }
 
@@ -99,6 +111,7 @@ internal object CloudflareTvAccountClient {
         client.newCall(request).execute().use { response ->
             check(response.isSuccessful) { "Kovelyx Cloud : profils HTTP ${response.code}" }
             val json=JSONObject(response.body?.string().orEmpty())
+            check(account == loggedIn) { "Compte changé pendant la lecture des profils" }
             val profiles=json.optJSONArray("profiles") ?: return@use emptyList()
             (0 until profiles.length()).mapNotNull { index ->
                 val row=profiles.optJSONObject(index) ?: return@mapNotNull null

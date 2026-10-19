@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticEventListenerFactory
 import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticsSession
 import com.nuvio.tv.core.auth.diagnostics.authDiagnosticFilteredBody
@@ -406,6 +407,7 @@ class AuthManager @Inject constructor(
             try {
                 CloudflareTvAccountClient.signOut(appContext)
             } finally {
+                CloudflareTvLibraryStore.reset()
                 _authState.value = AuthState.SignedOut
                 // Ne pas supprimer les favoris/profils locaux à la déconnexion :
                 // la sauvegarde Cloudflare D1 n'est pas encore migrée et testée.
@@ -433,6 +435,7 @@ class AuthManager @Inject constructor(
     suspend fun prepareForServerSwitch(): Result<Unit> {
         if (CloudflareTvAccountClient.enabled) {
             CloudflareTvAccountClient.clearLocalSession(appContext)
+            CloudflareTvLibraryStore.reset()
             _authState.value = AuthState.SignedOut
             return Result.success(Unit)
         }

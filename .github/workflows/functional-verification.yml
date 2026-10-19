@@ -49,6 +49,39 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
 
+
+  tv-cloud-player-smoke:
+    name: Android TV - parcours Kovelyx sûrs (hors défauts AAR diagnostiqués)
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Tests ciblés lecteur HTTP réel, mémoire sûre et isolation des profils D1
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
+            --tests 'com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicyTest' \
+            --tests 'com.nuvio.tv.ui.screens.player.SafeLoopbackHttpIntegrationTest' \
+            --tests 'com.nuvio.tv.core.sync.CloudflareTvProfileBindingTest'
+      - name: Archiver la preuve des tests ciblés
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-cloud-player-smoke-report
+          path: apps/tv/app/build/reports/tests/testFullDebugUnitTest/
+          if-no-files-found: ignore
+          retention-days: 30
+
   mobile-unit:
     name: Android mobile - tests JVM de la cible Android
     runs-on: ubuntu-latest

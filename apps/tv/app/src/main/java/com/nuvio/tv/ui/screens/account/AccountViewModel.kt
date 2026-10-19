@@ -165,8 +165,11 @@ class AccountViewModel @Inject constructor(
     private fun loadCloudflareProfilesReadOnly() {
         viewModelScope.launch {
             runCatching {
+                val owner = checkNotNull(CloudflareTvAccountClient.account) { "Compte TV déconnecté" }
                 val remote=CloudflareTvAccountClient.getCloudProfiles()
-                checkNotNull(CloudflareTvAccountClient.account) { "Compte TV déconnecté" }
+                check(CloudflareTvAccountClient.account == owner) {
+                    "Le compte Kovelyx a changé pendant le chargement des profils"
+                }
                 _uiState.update { it.copy(cloudProfileNames = remote.map { cloud -> cloud.name }) }
                 val local=profileManager.profiles.value
                 // La bibliothèque D1 est reliée par LibraryRepositoryImpl,
@@ -190,6 +193,9 @@ class AccountViewModel @Inject constructor(
                     val background=runCatching {
                         CloudflareTvAccountClient.downloadMedia(context,cloud,true)
                     }.onFailure { Log.w(TAG,"Fond R2 absent : média TV local conservé",it) }.getOrNull()
+                    check(CloudflareTvAccountClient.account == owner) {
+                        "Le compte Kovelyx a changé pendant le transfert de média privé"
+                    }
                     if(avatar!=null || background!=null) {
                         // Modifications purement en mémoire, séparées des
                         // profils invités persistants de la télévision.
@@ -323,8 +329,14 @@ class AccountViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch {
-            authManager.signOut()
-            _uiState.update { it.copy(connectedStats = null, isStatsLoading = false) }
+            try {
+                authManager.signOut()
+            } catch (error: Exception) {
+                Log.w(TAG, "Déconnexion locale Kovelyx : un contrôle est nécessaire", error)
+                _uiState.update { it.copy(error = userFriendlyError(error)) }
+            } finally {
+                _uiState.update { it.copy(connectedStats = null, isStatsLoading = false) }
+            }
         }
     }
 

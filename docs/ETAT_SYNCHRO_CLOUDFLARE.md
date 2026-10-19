@@ -84,3 +84,12 @@ Le runner GitHub montre deux défauts **dans les archives AAR vendoriées**, ind
 **Correctif de l'application, distinct d'une recompilation Media3 :** la nouvelle `SafeLoopbackDataSource` route HTTP(S) localhost/127.0.0.1/::1 via OkHttp et préserve les schémas de fichiers standards via `DefaultDataSource`. Les allocations directes natives des chemins de lecture TV, remises en cache et bandes-annonces sont **temporairement désactivées** ; les fonctions réseau et de lecture classiques restent configurables. Le code choisit le mode heap plutôt que le mode natif bogué. Les tests de la nouvelle politique vérifient la sélection et la propagation des erreurs.
 
 **Important :** les deux tests originaux des AAR sont volontairement conservés et peuvent encore échouer, car le contournement ne modifie pas leurs classes internes. Le correctif final des AAR nécessite les sources correspondantes ou une reconstruction traçable de leur fork Media3. Aucune garantie de lecture 100 % sur toutes les box n'est donnée avant tests physiques. Ces mécanismes visent à éviter les deux bogues connus dans les chemins effectivement utilisés par Kovelyx, sans faire croire que les binaires historiques sont réparés.
+
+
+### Fiabilité multi-comptes TV et contrôle dédié du lecteur — 20 octobre 2026
+
+La déconnexion TV efface d'abord le jeton chiffré de l'appareil puis tente la révocation serveur. Une coupure réseau lors de cette dernière étape ne doit plus interrompre l'écran de déconnexion : le cache affiché du compte est vidé immédiatement, sans effacer les bibliothèques invitées ni les modifications D1 en attente. Une révocation serveur indisponible reste une limite explicite : les sessions invalidées localement ne sont pas garanties révoquées côté Workers tant que le réseau est coupé.
+
+Les réponses `/v1/profiles` et les médias privés sont maintenant vérifiés contre le compte exact ayant lancé leur chargement. Si l'utilisateur se déconnecte ou passe sur un second compte au milieu du chargement, l'interface n'applique pas d'anciennes informations de profils ou d'avatar au nouvel utilisateur.
+
+Un job CI TV **ciblé** a été ajouté pour les tests de la route HTTP locale réelle, du mode de mémoire sûr et de l'association des profils D1. Le job complet avec les deux tests de défauts historiques AAR **reste activé et rouge** tant que les archives Media3 ne sont pas réparées : ne pas confondre un test fonctionnel ciblé vert avec une certification globale. Aucun APK public n'a été publié lors de cette étape.
