@@ -37,7 +37,7 @@ jobs:
       - name: Configurer le Worker Cloudflare Kovelyx (facultatif)
         shell: bash
         env:
-          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL }}
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
         run: python3 scripts/configure-cloud-build.py --platform ${{ matrix.platform }}
       - name: Restaurer la signature depuis UN secret GitHub
         shell: bash
