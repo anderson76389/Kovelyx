@@ -10,7 +10,7 @@ function ctx() {
  const state={old:null,owner:"alice",objects:new Map(),writes:[]};
  const DB={prepare(sql){return {bind(...args){return {
   async first(){return args[0]===state.owner&&args[1]===id?{avatarPath:state.old,backgroundPath:null}:null},
-  async run(){state.writes.push({sql,args});state.old=args[0];return {meta:{changes:1}}}
+  async run(){state.writes.push({sql,args});state.old=sql.includes("=NULL")?null:args[0];return {meta:{changes:1}}}
  }}}}};
  const MEDIA={
    async put(k,bytes,info){state.objects.set(k,{body:bytes,httpMetadata:info.httpMetadata});},
@@ -48,4 +48,15 @@ test("disabled R2 never accepts write; invalid formats and profile identifiers f
  assert.equal(state.writes.length,0);
  const bad=url();bad.searchParams.set("profileId","../alice");
  assert.equal((await handleProfileMedia(new Request(bad),env,{id:"alice"},bad)).status,400);
+});
+
+test("explicit owner delete clears R2 path and prevents stale TV media",async()=>{
+ const {env,state}=ctx();
+ await handleProfileMedia(new Request(url(),{method:"PUT",headers:{"content-type":"image/gif"},body:gif}),env,{id:"alice"},url());
+ assert.equal(state.objects.size,1);
+ const removed=await handleProfileMedia(new Request(url(),{method:"DELETE"}),env,{id:"alice"},url());
+ assert.equal(removed.status,200);
+ assert.equal(state.objects.size,0);
+ assert.equal(state.old,null);
+ assert.equal((await handleProfileMedia(new Request(url()),env,{id:"alice"},url())).status,404);
 });
