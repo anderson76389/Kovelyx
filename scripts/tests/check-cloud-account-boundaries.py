@@ -31,7 +31,20 @@ assert "AndroidKeyStore" in vault and "AES/GCM/NoPadding" in vault
 assert "restoreVerified" in tv and '"/v1/me"' in tv
 assert "if (CloudflareTvAccountClient.enabled)" in library_tv
 assert "Bibliothèque TV Cloudflare D1 non activée" in library_tv
-print("TV: compte Cloudflare et garde-fou bibliothèque héritée présents")
+cloud_store = (tv_root / "core/sync/CloudflareTvLibraryStore.kt").read_text(encoding="utf-8")
+profile_matcher = (tv_root / "core/sync/CloudflareTvProfileBinding.kt").read_text(encoding="utf-8")
+tv_repo = (tv_root / "data/repository/LibraryRepositoryImpl.kt").read_text(encoding="utf-8")
+tv_account = (tv_root / "ui/screens/account/AccountViewModel.kt").read_text(encoding="utf-8")
+assert "readLibrary" in tv and "writeLibrary" in tv
+assert "CloudflareTvLibraryStore.bind" in tv_repo
+assert "CloudflareTvLibraryStore.toggle" in tv_repo
+assert "CloudflareTvProfileBinding.resolve" in tv_repo
+assert "pendingDeletes" in cloud_store and "currentRev" in cloud_store
+assert "cloud?.takeIf" in tv_repo and "guestItems" in tv_repo
+assert "CloudflareTvLibraryStore.reset()" in tv_account
+assert "locals.size == 1 && remotes.size == 1" in profile_matcher
+print("TV: session sécurisée, bibliothèque D1 distincte et association non ambiguë détectées")
+print("NOTE: contrôle statique uniquement; la compilation, l'essai réel et les conflits D1 restent à valider")
 
 backend = (ROOT / "services/kovelyx-cloudflare/src/index.mjs").read_text(encoding="utf-8")
 contract = (ROOT / "services/kovelyx-cloudflare/src/contract.mjs").read_text(encoding="utf-8")

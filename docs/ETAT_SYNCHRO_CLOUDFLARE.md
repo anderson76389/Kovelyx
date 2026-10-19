@@ -50,15 +50,25 @@ Ce code nécessite que **le nouveau Worker D1 avec pagination de catégorie soit
 
 - **TV, branche uniquement :** un coffre de session AES-GCM AndroidKeyStore a été ajouté dans `TvCloudSessionVault.kt`. Le mot de passe n'est pas stocké ; le jeton n'est accepté au redémarrage qu'après validation HTTPS `/v1/me`.
 - La déconnexion efface la valeur chiffrée enregistrée sur l'appareil. Une panne du Worker empêche la reconnexion automatique sans effacer systématiquement le coffre.
-- **État de preuve :** le code est sur la PR, pas dans les APK publics. Les contrôles Cloudflare ont réussi sur le commit `aa832c22`. La compilation TV, la concurrence déconnexion/restauration, l'AndroidKeyStore sur TV Box réelle et les démarrages successifs ne sont pas encore validés en conditions réelles.
-- **TV et D1 :** les profils peuvent être lus, mais le raccordement des bibliothèques locales (ID entier) aux profils D1 (UUID) reste absent. Aucun import/suppression automatique n'est activé afin d'éviter les mélanges entre utilisateurs ou la perte de favoris.
+- **État de preuve :** le code est sur la PR, pas dans les APK publics. Le coffre est chiffré, sa restauration vérifie `/v1/me`, et une protection supplémentaire empêche de ressusciter une session effacée pendant la requête. La compilation, le comportement avec l'AndroidKeyStore sur TV Box réelle, la reconnexion et les transferts effectifs restent à confirmer.
+- **TV et D1 :** un premier adaptateur de bibliothèque bidirectionnel a été ajouté **sur la branche uniquement** : association prudente UUID/identifiant TV, cache séparé par compte, import distant, mutations CAS et reprise des écritures différées. Les données invitées ne sont pas importées automatiquement. **Compilation finale, conflits et parcours réel multi-appareils non encore certifiés.**
 - **Windows et Android :** les premiers adaptateurs de bibliothèque D1 restent expérimentaux ; leur présence dans les sources n'établit pas une synchronisation multi-appareils vérifiée.
 - **À ne pas faire :** fusionner/publier ou déployer un nouveau Worker en considérant la synchronisation terminée. Conserver la sauvegarde D1 et les profils locaux. Le service de comptes hébergé n'a pas été modifié durant cette étape.
 
 ### Critères d'acceptation prioritaires
 
 1. Valider sur TV réelle deux redémarrages avec jeton valide, puis les cas jeton révoqué, réseau absent, changement de compte et déconnexion pendant une restauration.
-2. Garantir l'isolation des bibliothèques locales selon le compte avant d'activer l'import D1 sur TV ; mapper explicitement et durablement UUID cloud et profil local.
+2. Vérifier l'isolation du cache D1 TV lors d'un changement de compte, les associations 1:1 et par nom unique, et ajouter un choix explicite pour les cas ambigus sans jamais migrer silencieusement le catalogue invité.
 3. Tester le scénario Windows → Android → TV → Windows sur un compte de test, avec les mêmes favoris et progressions, puis un conflit, un mode hors ligne et un second utilisateur distinct.
 4. Résoudre les échecs des tests unitaires TV concernant la source HTTP 404, l'allocateur Media3, l'API soutiens non configurée et la configuration Trakt.
 5. Publier uniquement un build signé et vérifié après un résultat CI vert, puis tester la mise à jour sans effacement des données.
+
+
+### Ajout sur la PR nº 40 — bibliothèque Cloudflare Android TV
+
+- `CloudflareTvProfileBinding` associe les profils uniquement avec une relation non ambiguë : un seul profil de chaque côté, ou correspondance unique des noms lorsque plusieurs profils existent. Les homonymes restent non associés et leurs données ne sont pas mélangées.
+- `CloudflareTvLibraryStore` utilise une sauvegarde locale **par propriétaire et UUID cloud** distincte de la bibliothèque invitée. L'ancien magasin TV n'est pas effacé ni envoyé automatiquement à D1.
+- Le client lit la catégorie D1 `library` par pages avec limites, puis transforme le même format réduit de métadonnées que les applications PC/mobile. Les modifications TV sont sauvegardées localement avant l'envoi et utilisent la révision CAS ; en cas de conflit, elles restent en attente.
+- La bibliothèque locale affichée en mode compte est celle de D1 (cache du compte), tandis que le mode invité conserve son stockage historique. Le déclenchement de la lecture est lié à l'état de connexion et au profil actif, pas seulement à l'ouverture des paramètres du compte.
+- **Limites majeures :** seuls les favoris de la bibliothèque locale sont concernés ; pas encore de sync TV des progressions, épisodes vus, listes externes, paramètres, addons ou secrets. Pas de transfert de médias tant que R2 est désactivé. Aucun appareil physique ni transfert PC–mobile–TV n'a été testé pendant cette étape. Les profils ambigus exigent encore un futur choix explicite.
+- **Production inchangée :** ne pas distribuer cette branche avant une suite CI verte et le déploiement du Worker D1 compatible, après sauvegarde de la base existante.

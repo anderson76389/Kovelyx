@@ -8,6 +8,7 @@ import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.sync.LibrarySyncService
 import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
+import com.nuvio.tv.core.sync.CloudflareTvProfileBinding
 import com.nuvio.tv.core.tracking.TrackingListManager
 import com.nuvio.tv.core.tracking.TrackingLibraryProviderRegistry
 import com.nuvio.tv.core.tracking.TrackingMembershipApplyResult
@@ -29,16 +30,19 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.domain.model.ListMembershipChanges
 import com.nuvio.tv.domain.model.ListMembershipSnapshot
 import com.nuvio.tv.domain.model.SavedLibraryItem
+import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.domain.model.LibraryListPrivacy
 import com.nuvio.tv.domain.repository.LibraryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -74,6 +78,43 @@ class LibraryRepositoryImpl @Inject constructor(
         set(value) { _isSyncingFromRemote.value = value }
     @Volatile
     var hasCompletedInitialPull = false
+
+    init {
+        if (CloudflareTvAccountClient.enabled) {
+            // Démarrage et changement de profil fonctionnent aussi sans ouvrir
+            // l'écran Compte. Ne jamais transférer les données du mode invité.
+            syncScope.launch {
+                combine(
+                    authManager.authState,
+                    profileManager.activeProfileId,
+                    profileManager.profiles
+                ) { state, localId, locals -> Triple(state, localId, locals) }
+                    .collectLatest { (auth, localId, locals) ->
+                        val cloud = CloudflareTvAccountClient.account
+                        if (auth !is AuthState.FullAccount || cloud?.id != auth.userId) {
+                            CloudflareTvLibraryStore.reset()
+                            return@collectLatest
+                        }
+                        try {
+                            val remote = CloudflareTvAccountClient.getCloudProfiles()
+                            val bindings = CloudflareTvProfileBinding.resolve(
+                                locals.map { CloudflareTvProfileBinding.Local(it.id, it.name) },
+                                remote.map { CloudflareTvProfileBinding.Remote(it.id, it.name) }
+                            )
+                            val uuid = bindings[localId]
+                            if (uuid == null) CloudflareTvLibraryStore.reset()
+                            else CloudflareTvLibraryStore.bind(appContext, localId, uuid)
+                        } catch (cancel: CancellationException) {
+                            throw cancel
+                        } catch (error: Exception) {
+                            // Un réseau indisponible n'efface ni la bibliothèque
+                            // invitée ni le cache local du compte authentifié.
+                            Log.w("CloudflareTvLibrary", "Lecture D1 reportée", error)
+                        }
+                    }
+            }
+        }
+    }
 
     private fun triggerRemoteSync(profileId: Int) {
         // La synchronisation distante historique utilise Supabase.

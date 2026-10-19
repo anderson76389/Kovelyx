@@ -20,7 +20,6 @@ import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.sync.AddonSyncService
 import com.nuvio.tv.core.sync.LibrarySyncService
 import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
-import com.nuvio.tv.core.sync.CloudflareTvProfileBinding
 import com.nuvio.tv.core.sync.PluginSyncService
 import com.nuvio.tv.core.sync.WatchProgressSyncService
 import com.nuvio.tv.core.sync.WatchedItemsSyncService
@@ -170,20 +169,8 @@ class AccountViewModel @Inject constructor(
                 checkNotNull(CloudflareTvAccountClient.account) { "Compte TV déconnecté" }
                 _uiState.update { it.copy(cloudProfileNames = remote.map { cloud -> cloud.name }) }
                 val local=profileManager.profiles.value
-                val bindings = CloudflareTvProfileBinding.resolve(
-                    local.map { CloudflareTvProfileBinding.Local(it.id, it.name) },
-                    remote.map { CloudflareTvProfileBinding.Remote(it.id, it.name) }
-                )
-                val activeUuid = bindings[profileManager.activeProfileId.value]
-                if (activeUuid == null) {
-                    // Pas de profil cloud non ambigu : ne montrer aucune bibliothèque
-                    // d'un autre compte ni exporter les anciens favoris invités.
-                    CloudflareTvLibraryStore.reset()
-                } else {
-                    CloudflareTvLibraryStore.bind(
-                        context, profileManager.activeProfileId.value, activeUuid
-                    )
-                }
+                // La bibliothèque D1 est reliée par LibraryRepositoryImpl,
+                // indépendamment de l'ouverture de cet écran de compte.
                 val oneToOne=remote.size==1 && local.size==1
                 // N'associer jamais par un ID numérique : D1 utilise des UUID.
                 // Correspondance explicite par nom UNIQUE, sauf le seul profil
