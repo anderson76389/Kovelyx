@@ -164,9 +164,12 @@ object AuthRepository {
         if (CloudflareAccountClient.enabled) {
             val logout = runCatching { CloudflareAccountClient.signOut() }
             AuthStorage.clearAnonymousUserId()
-            val cleanup = runCatching { LocalAccountDataCleaner.wipe() }
+            // Ne jamais effacer les profils, la bibliothèque ou la progression
+            // avant la migration de stockage/synchronisation vers D1.
+            // La fermeture de session ne garantit PAS encore l'isolation locale
+            // entre plusieurs utilisateurs sur le même appareil.
             _state.value = AuthState.Unauthenticated
-            return if (logout.isFailure) logout else cleanup
+            return logout
         }
         val anonymousRead = runCatching { AuthStorage.loadAnonymousUserId() }
         val wasAnonymous = anonymousRead.getOrNull() != null
