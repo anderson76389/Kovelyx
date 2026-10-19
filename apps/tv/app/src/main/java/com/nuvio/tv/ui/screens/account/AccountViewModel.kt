@@ -115,9 +115,14 @@ class AccountViewModel @Inject constructor(
                     )
                 }
                 updateEffectiveOwnerId(state)
-                if (state is AuthState.FullAccount && !CloudflareTvAccountClient.enabled) {
-                    loadConnectedStats()
-                    loadSyncOverview()
+                if (state is AuthState.FullAccount) {
+                    if (CloudflareTvAccountClient.enabled) loadCloudflareProfilesReadOnly()
+                    else {
+                        loadConnectedStats()
+                        loadSyncOverview()
+                    }
+                } else if (CloudflareTvAccountClient.enabled) {
+                    _uiState.update { it.copy(cloudProfileNames = emptyList()) }
                 }
             }
         }
