@@ -7,6 +7,11 @@ on:
       - '.github/workflows/build.yml'
       - 'apps/tv/**'
       - 'apps/mobile/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
     inputs:
       platform:
@@ -28,6 +33,7 @@ concurrency:
 permissions:
   contents: read
   actions: read
+  pull-requests: read
 
 jobs:
   changes:
@@ -110,7 +116,7 @@ jobs:
   mobile:
     name: Android mobile - APK Full Debug
     needs: changes
-    if: ${{ (github.event_name == 'push' && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
+    if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
