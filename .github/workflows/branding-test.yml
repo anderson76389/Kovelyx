@@ -4,11 +4,27 @@ on:
   pull_request:
     paths:
       - 'scripts/generate-compose-brand.py'
+      - 'apps/mobile/androidApp/src/debug/res/values/strings.xml'
+      - 'apps/desktop/androidApp/src/debug/res/values/strings.xml'
+      - 'apps/desktop/composeApp/src/androidMain/res/values/strings.xml'
+      - 'apps/tv/app/src/debug/res/values/strings.xml'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/AppShellComponents.kt'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/AppShellComponents.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/ui/components/StartupSplashScreen.kt'
+      - 'scripts/check-kovelyx-launch-branding.py'
       - '.github/workflows/branding-test.yml'
   push:
     branches: [main]
     paths:
       - 'scripts/generate-compose-brand.py'
+      - 'apps/mobile/androidApp/src/debug/res/values/strings.xml'
+      - 'apps/desktop/androidApp/src/debug/res/values/strings.xml'
+      - 'apps/desktop/composeApp/src/androidMain/res/values/strings.xml'
+      - 'apps/tv/app/src/debug/res/values/strings.xml'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/AppShellComponents.kt'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/AppShellComponents.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/ui/components/StartupSplashScreen.kt'
+      - 'scripts/check-kovelyx-launch-branding.py'
       - '.github/workflows/branding-test.yml'
   workflow_dispatch:
 
@@ -47,3 +63,5 @@ jobs:
           assert ImageChops.difference(Image.open(base/'app_icon_original.png'),Image.open(base/'app_icon_emerald.png')).convert('RGB').getbbox()
           print('OK: six variantes distinctes et splash wordmark Kovelyx')
           PY
+      - name: Vérifier les libellés des applications et le centrage du démarrage
+        run: python scripts/check-kovelyx-launch-branding.py
