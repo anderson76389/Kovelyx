@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -208,23 +209,24 @@ internal fun ContinueWatchingItem.isCloudLibraryContinueWatchingItem(): Boolean 
 internal fun AppLoadingContent(
     modifier: Modifier = Modifier,
 ) {
-    val tokens = MaterialTheme.nuvio
+    // Centrer la marque seule : un empilement logo + indicateur décalait
+    // visuellement le logo au-dessus du centre de l'écran.
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AppBrandWordmark(
-                contentDescription = stringResource(Res.string.app_brand_name),
-                modifier = Modifier
-                    .fillMaxWidth(0.48f)
-                    .height(44.dp),
-            )
-            Spacer(modifier = Modifier.height(tokens.spacing.sectionGap))
-            NuvioLoadingIndicator()
-        }
+        AppBrandWordmark(
+            contentDescription = stringResource(Res.string.app_brand_name),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.48f)
+                .height(44.dp),
+        )
+        NuvioLoadingIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 76.dp),
+        )
     }
 }
 
