@@ -51,7 +51,10 @@ try {
   assert.ok(reachable,"Local Worker not reachable: "+logs);
   async function req(path,method="GET",body=null,token=null) {
     const headers={Accept:"application/json"};
-    if(body!==null) headers["Content-Type"]="application/json";
+    if(body!==null) {
+      headers["Content-Type"]="application/json";
+      headers.Origin=base; // Same Worker origin as Windows / Android native clients.
+    }
     if(token) headers.Authorization="Bearer "+token;
     const response=await fetch(base+path,{
       method,headers,body:body===null?undefined:JSON.stringify(body),
