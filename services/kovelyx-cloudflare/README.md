@@ -2,7 +2,7 @@
 
 **Objectif :** ne plus utiliser les serveurs de comptes Nuvio ni un hébergement Supabase. Ce dossier contient un Worker Cloudflare, une base D1, les tables Better Auth et des endpoints de profils et synchronisation.
 
-**État réel : socle serveur implémenté, non déployé sur votre compte Cloudflare et non validé en conditions réelles.** Les nouvelles applis disposent de premiers adaptateurs pour le formulaire e-mail. Les écrans, caches, profils, lecteurs et anciennes RPC Supabase **ne sont pas encore tous migrés**. Le mode invité reste disponible. Les sessions Cloudflare des premières versions sont en mémoire seulement : il faut se reconnecter après avoir fermé l'application. Les flux QR/code TV et la récupération de mot de passe ne sont pas prêts.
+**État réel au 19 octobre 2026 : Worker Cloudflare et D1 déployés et accessibles ; la création, la connexion, la lecture de l'identité et la création du profil « Principal » ont réussi depuis Codespaces sur le vrai serveur.** La connexion a passé ce test technique, mais les anciennes fonctions de synchronisation des applications ne sont pas encore toutes migrées. [Tests publics automatiques](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-live-check.yml). Les nouvelles applis disposent de premiers adaptateurs pour le formulaire e-mail. Les écrans, caches, profils, lecteurs et anciennes RPC Supabase **ne sont pas encore tous migrés**. Le mode invité reste disponible. Les sessions Cloudflare des premières versions sont en mémoire seulement : il faut se reconnecter après avoir fermé l'application. Les flux QR/code TV et la récupération de mot de passe ne sont pas prêts.
 
 ## Un hébergement gratuit sans pause 7 jours ?
 
