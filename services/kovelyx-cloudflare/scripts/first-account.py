@@ -22,7 +22,12 @@ TIMEOUT = 25
 
 def api(method: str, path: str, payload=None, *, token=None):
     data = None if payload is None else json.dumps(payload).encode("utf-8")
-    headers = {"Accept": "application/json"}
+    # urllib utilise "Python-urllib/3.x" par défaut, que Cloudflare peut
+    # bloquer à l'edge (403) même lorsque /health répond 200 depuis curl.
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "KovelyxCloudSetup/1.0",
+    }
     if data is not None:
         headers["Content-Type"] = "application/json"
     if token:
@@ -33,8 +38,18 @@ def api(method: str, path: str, payload=None, *, token=None):
             body = response.read(180000)
             return json.loads(body) if body else None, response.headers
     except HTTPError as error:
-        # Do not print request body, passwords, email or authentication headers.
-        raise RuntimeError("Le serveur a répondu HTTP " + str(error.code) + " sur " + path) from error
+        # Ne jamais afficher la réponse entière d'une route d'authentification.
+        # Sur /health, un 403 provient en général du CDN et non de Better Auth.
+        if error.code == 403 and path == "/health":
+            raise RuntimeError(
+                "Cloudflare bloque l'appel Python à /health (403). "
+                "Vérifiez dans Codespaces : curl -i " + BASE + "/health. "
+                "Le script emploie maintenant un User-Agent dédié."
+            ) from error
+        raise RuntimeError(
+            "Le serveur a répondu HTTP " + str(error.code) + " sur " + path +
+            (". Inscriptions fermées ou requête refusée." if error.code == 403 else "")
+        ) from error
     except URLError as error:
         raise RuntimeError("Le serveur Kovelyx n'est pas accessible par HTTPS") from error
 
