@@ -25,7 +25,7 @@ function makeAuth(request, env) {
     database: env.DB,
     baseURL: new URL(request.url).origin,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: ["https://anderson76389.github.io"],
+    trustedOrigins: [new URL(request.url).origin, "https://anderson76389.github.io"],
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
@@ -183,7 +183,8 @@ export async function handleProfiles(request,env,user,url) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("origin");
-    if (!isAllowedOrigin(origin)) return jsonResponse({error:"Origine interdite"},403);
+    if (!isAllowedOrigin(origin, new URL(request.url).origin))
+      return jsonResponse({error:"Origine interdite"},403);
     const headers = corsHeaders(origin);
     if (request.method === "OPTIONS")
       return new Response(null,{status:204,headers});
