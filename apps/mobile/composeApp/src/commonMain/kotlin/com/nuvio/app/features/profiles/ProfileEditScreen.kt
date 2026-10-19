@@ -471,12 +471,19 @@ private fun ProfileIdentityCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     if (customAvatarUrl != null) {
-                        AsyncImage(
-                            model = customAvatarUrl,
-                            contentDescription = name,
-                            modifier = Modifier.size(88.dp).clip(CircleShape),
-                            contentScale = ContentScale.Crop,
-                        )
+                        if(isProfileVideo(customAvatarUrl)) {
+                            ProfileVideoBackdrop(
+                                url=customAvatarUrl,
+                                modifier=Modifier.size(88.dp).clip(CircleShape),
+                            )
+                        } else {
+                            AsyncImage(
+                                model = customAvatarUrl,
+                                contentDescription = name,
+                                modifier = Modifier.size(88.dp).clip(CircleShape),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
                     } else if (selectedAvatar != null) {
                         AsyncImage(
                             model = avatarImageUrl(selectedAvatar),
