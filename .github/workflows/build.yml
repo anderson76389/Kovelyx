@@ -92,7 +92,7 @@ jobs:
         working-directory: apps/tv
         shell: bash
         run: |
-          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --tests 'com.nuvio.tv.domain.model.ProfileBackgroundTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
       - name: Vérifier l'APK universel et son identité TV
         shell: bash
         run: |
