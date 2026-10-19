@@ -253,6 +253,37 @@ internal class LibraryLocalState {
         snapshotLocked()
     }
 
+    /**
+     * Fusion additive Cloudflare, séparée des curseurs historiques Supabase.
+     * Les suppressions distantes ne sont appliquées que lorsque le client a
+     * déjà connu la clé sur ce compte/profil; les mutations locales gagnent.
+     */
+    fun applyCloudItems(
+        expected: LibraryLocalSnapshot,
+        remoteAdditions: Collection<LibraryItem>,
+        confirmedRemoteDeletions: Set<String>,
+    ): LibraryLocalSnapshot? = synchronized(lock) {
+        if (!isCurrentLocked(expected)) return@synchronized null
+        var changed = false
+        for (key in confirmedRemoteDeletions) {
+            if (key !in pendingUpsertKeysByKey && key !in pendingDeleteKeysByKey) {
+                if (itemsById.remove(key) != null) changed = true
+            }
+        }
+        for (item in remoteAdditions) {
+            val key = libraryItemKey(item.id, item.type)
+            if (key !in pendingDeleteKeysByKey && key !in itemsById) {
+                itemsById[key] = item
+                changed = true
+            }
+        }
+        if (changed) {
+            revision += 1L
+            contentRevision += 1L
+        }
+        snapshotLocked()
+    }
+
     fun upsert(item: LibraryItem): LibraryLocalSnapshot = synchronized(lock) {
         val key = libraryItemKey(item.id, item.type)
         itemsById[key] = item
