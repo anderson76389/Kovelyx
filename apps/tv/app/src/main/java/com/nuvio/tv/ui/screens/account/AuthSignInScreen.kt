@@ -15,6 +15,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.domain.model.AuthState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -32,9 +44,26 @@ import com.nuvio.tv.R
 fun AuthSignInScreen(
     onBackPress: () -> Unit = {},
     onNavigateToQrSignIn: () -> Unit = {},
-    onSuccess: () -> Unit = {}
+    onSuccess: () -> Unit = {},
+    viewModel: AccountViewModel = hiltViewModel()
 ) {
     BackHandler { onBackPress() }
+    val cloudflareEnabled = CloudflareTvAccountClient.enabled
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    val canSignIn = email.isNotBlank() && password.isNotBlank() && !uiState.isLoading
+    val submit = {
+        if (canSignIn && cloudflareEnabled) {
+            viewModel.signIn(email.trim(), password)
+        }
+    }
+    LaunchedEffect(uiState.authState) {
+        if (cloudflareEnabled && uiState.authState is AuthState.FullAccount) {
+            password = ""
+            onSuccess()
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -57,8 +86,69 @@ fun AuthSignInScreen(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = stringResource(R.string.auth_signin_tv_disabled),
+            if (cloudflareEnabled) {
+                Text(
+                    text = "Connectez-vous avec votre compte Kovelyx Cloud.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = NuvioTheme.colors.TextSecondary,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(18.dp))
+                InputField(
+                    value = email,
+                    onValueChange = { email = it },
+                    placeholder = "Adresse e-mail",
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                InputField(
+                    value = password,
+                    onValueChange = { password = it },
+                    placeholder = "Mot de passe",
+                    keyboardType = KeyboardType.Password,
+                    isPassword = true,
+                    imeAction = ImeAction.Done,
+                    onImeAction = submit,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                uiState.error?.let { failure ->
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = failure,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = NuvioTheme.colors.Error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                Button(
+                    onClick = submit,
+                    enabled = canSignIn,
+                    colors = ButtonDefaults.colors(
+                        containerColor = NuvioTheme.colors.Secondary,
+                        focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
+                        contentColor = NuvioTheme.colors.OnSecondary,
+                        focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (uiState.isLoading) "Connexion…" else "Se connecter",
+                        modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs)
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Les données locales ne seront pas écrasées. La synchronisation automatique est encore en développement.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NuvioTheme.colors.TextTertiary,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.auth_signin_tv_disabled),
                 style = MaterialTheme.typography.bodyMedium,
                 color = NuvioTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center
@@ -80,6 +170,7 @@ fun AuthSignInScreen(
                     modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs),
                     fontWeight = FontWeight.Medium
                 )
+            }
             }
         }
     }
