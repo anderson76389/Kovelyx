@@ -44,6 +44,16 @@ export async function handleProfileMedia(request,env,user,url) {
       "cache-control":"private, no-store","x-content-type-options":"nosniff"
     }});
   }
+  if(request.method==="DELETE") {
+    const column=kind==="avatar"?"avatar_path":"background_path";
+    if(!profile[field]) return respond({removed:true});
+    const removed=await env.DB.prepare(
+      `UPDATE kv_profiles SET ${column}=NULL,updated_at=? WHERE owner_id=? AND id=? AND ${column} IS ?`
+    ).bind(Date.now(),user.id,profileId,profile[field]).run();
+    if(removed.meta?.changes!==1) return respond({error:"Modification concurrente du média"},409);
+    await env.MEDIA.delete(profile[field]).catch(()=>{});
+    return respond({removed:true});
+  }
   if(request.method!=="PUT") return respond({error:"Méthode non autorisée"},405);
   const mime=(request.headers.get("content-type")||"").split(";")[0].trim().toLowerCase();
   const announced=Number(request.headers.get("content-length")||0);
