@@ -37,6 +37,13 @@ for filename in COMPOSE_STARTUP:
     assert loading.count(".align(Alignment.Center)") >= 2, filename
     assert ".offset(y = 76.dp)" in loading, filename
 
+for app in ("mobile", "desktop"):
+    source = (ROOT / f"apps/{app}/composeApp/src/commonMain/kotlin/com/nuvio/app/AppGate.kt").read_text(encoding="utf-8")
+    loading = source.split("AppGateScreen.Loading.name -> {", 1)[1].split(
+        "AppGateScreen.Auth.name -> {", 1
+    )[0]
+    assert "AppLoadingContent(modifier = Modifier.fillMaxSize())" in loading, app
+
 tv = (ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/ui/components/StartupSplashScreen.kt").read_text(encoding="utf-8")
 startup = tv.split("        // Positionne la marque", 1)[1]
 assert startup.count(".align(Alignment.Center)") >= 2
