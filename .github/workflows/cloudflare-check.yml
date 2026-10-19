@@ -11,6 +11,12 @@ on:
       - 'services/kovelyx-cloudflare/**'
       - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/**'
       - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/**'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/SupabaseProvider.kt'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/SupabaseProvider.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/auth/**'
+      - 'scripts/tests/check-cloud-account-boundaries.py'
       - '.github/workflows/cloudflare-check.yml'
   workflow_dispatch:
 permissions:
@@ -33,6 +39,8 @@ jobs:
           python -m py_compile services/kovelyx-cloudflare/scripts/first-account.py
           python services/kovelyx-cloudflare/tests/test_first_account_request.py
           python services/kovelyx-cloudflare/tests/check-d1-schema.py
+      - name: Vérifier la séparation des comptes et le blocage Nuvio
+        run: python scripts/tests/check-cloud-account-boundaries.py
       - name: Vérifier le script installation Cloudflare
         working-directory: services/kovelyx-cloudflare
         run: node --check scripts/setup.mjs
