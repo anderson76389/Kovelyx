@@ -44,3 +44,21 @@ La branche ne déploie pas automatiquement le Worker, ne crée pas de compte sup
 ## Important : ordre de déploiement
 
 Ce code nécessite que **le nouveau Worker D1 avec pagination de catégorie soit déployé avant les nouveaux APK/EXE**. Les anciens clients ne connaissent pas le nouveau curseur de pagination. Ne jamais lancer les versions de préproduction sur les données définitives sans sauvegarde de D1 et des profils locaux. Aucune Release ne peut être qualifiée de « synchronisation complète » tant que la connexion, la bibliothèque et les redémarrages réels sur deux appareils n'ont pas été testés.
+
+
+## Focus compte et Android TV — avancée du 19 octobre 2026
+
+- **TV, branche uniquement :** un coffre de session AES-GCM AndroidKeyStore a été ajouté dans `TvCloudSessionVault.kt`. Le mot de passe n'est pas stocké ; le jeton n'est accepté au redémarrage qu'après validation HTTPS `/v1/me`.
+- La déconnexion efface la valeur chiffrée enregistrée sur l'appareil. Une panne du Worker empêche la reconnexion automatique sans effacer systématiquement le coffre.
+- **État de preuve :** le code est sur la PR, pas dans les APK publics. Les contrôles Cloudflare ont réussi sur le commit `aa832c22`. La compilation TV, la concurrence déconnexion/restauration, l'AndroidKeyStore sur TV Box réelle et les démarrages successifs ne sont pas encore validés en conditions réelles.
+- **TV et D1 :** les profils peuvent être lus, mais le raccordement des bibliothèques locales (ID entier) aux profils D1 (UUID) reste absent. Aucun import/suppression automatique n'est activé afin d'éviter les mélanges entre utilisateurs ou la perte de favoris.
+- **Windows et Android :** les premiers adaptateurs de bibliothèque D1 restent expérimentaux ; leur présence dans les sources n'établit pas une synchronisation multi-appareils vérifiée.
+- **À ne pas faire :** fusionner/publier ou déployer un nouveau Worker en considérant la synchronisation terminée. Conserver la sauvegarde D1 et les profils locaux. Le service de comptes hébergé n'a pas été modifié durant cette étape.
+
+### Critères d'acceptation prioritaires
+
+1. Valider sur TV réelle deux redémarrages avec jeton valide, puis les cas jeton révoqué, réseau absent, changement de compte et déconnexion pendant une restauration.
+2. Garantir l'isolation des bibliothèques locales selon le compte avant d'activer l'import D1 sur TV ; mapper explicitement et durablement UUID cloud et profil local.
+3. Tester le scénario Windows → Android → TV → Windows sur un compte de test, avec les mêmes favoris et progressions, puis un conflit, un mode hors ligne et un second utilisateur distinct.
+4. Résoudre les échecs des tests unitaires TV concernant la source HTTP 404, l'allocateur Media3, l'API soutiens non configurée et la configuration Trakt.
+5. Publier uniquement un build signé et vérifié après un résultat CI vert, puis tester la mise à jour sans effacement des données.
