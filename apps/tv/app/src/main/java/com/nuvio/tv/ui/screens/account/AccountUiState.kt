@@ -40,6 +40,8 @@ data class AccountUiState(
     val generatedSyncCode: String? = null,
     val syncClaimSuccess: Boolean = false,
     val linkedDevices: List<SupabaseLinkedDevice> = emptyList(),
+    // Liste distante uniquement : aucun profil local remplacé automatiquement.
+    val cloudProfileNames: List<String> = emptyList(),
     val effectiveOwnerId: String? = null,
     val connectedStats: AccountConnectedStats? = null,
     val syncOverview: SyncOverview? = null,
