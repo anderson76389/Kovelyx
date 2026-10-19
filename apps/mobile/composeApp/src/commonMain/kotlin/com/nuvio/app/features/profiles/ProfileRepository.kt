@@ -1,6 +1,7 @@
 package com.nuvio.app.features.profiles
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.auth.isAnonymous
@@ -50,6 +51,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
@@ -121,7 +125,57 @@ object ProfileRepository {
         _state.value = ProfileState()
     }
 
+    /**
+     * Importation non destructive des noms/IDs D1.
+     * Les collections et préférences locales restent intactes et les listes
+     * déjà présentes ne sont jamais remplacées automatiquement.
+     */
+    private suspend fun pullCloudflareProfilesWithoutOverwritingLocalData() {
+        val account = AuthRepository.state.value as? AuthState.Authenticated ?: return
+        if (account.isAnonymous) {
+            _state.value = _state.value.copy(isLoaded = true)
+            return
+        }
+        try {
+            val data = CloudflareAccountClient.accountProfiles()
+            val remote = data["profiles"]?.jsonArray.orEmpty()
+                .take(MAX_PROFILES)
+                .mapIndexedNotNull { index, item ->
+                    val profile = item.jsonObject
+                    val id = profile["id"]?.jsonPrimitive?.content.orEmpty()
+                    val name = profile["displayName"]?.jsonPrimitive?.content.orEmpty()
+                    if (id.length != 36 || name.isBlank()) null else NuvioProfile(
+                        id = id,
+                        userId = account.userId,
+                        profileIndex = index + 1,
+                        name = name,
+                    )
+                }
+            if (_state.value.profiles.isNotEmpty()) {
+                // Conserver les noms, préférences et historiques de cet appareil.
+                _state.value = _state.value.copy(isLoaded = true)
+                return
+            }
+            _state.value = _state.value.copy(
+                profiles = remote,
+                isLoaded = true,
+                activeProfile = remote.firstOrNull(),
+            )
+            remote.firstOrNull()?.let {
+                activeProfileIndex = it.profileIndex
+                persist()
+            }
+        } catch (error: Throwable) {
+            log.e(error) { "Impossible de lire les profils Kovelyx Cloudflare : données locales préservées" }
+            _state.value = _state.value.copy(isLoaded = true)
+        }
+    }
+
     suspend fun pullProfiles() {
+        if (CloudflareAccountClient.enabled) {
+            pullCloudflareProfilesWithoutOverwritingLocalData()
+            return
+        }
         if (AuthRepository.state.value.isAnonymous) {
             if (!_state.value.isLoaded) {
                 _state.value = _state.value.copy(isLoaded = true)
