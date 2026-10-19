@@ -1,6 +1,7 @@
 package com.nuvio.tv.data.repository
 
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.R
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.network.NetworkResult
@@ -74,6 +75,9 @@ class LibraryRepositoryImpl @Inject constructor(
     var hasCompletedInitialPull = false
 
     private fun triggerRemoteSync(profileId: Int) {
+        // La synchronisation distante historique utilise Supabase.
+        // Conserver les modifications uniquement sur l'appareil en mode D1.
+        if (CloudflareTvAccountClient.enabled) return
         if (!hasCompletedInitialPull) return
         if (!authManager.isAuthenticated) return
         syncJob?.cancel()
