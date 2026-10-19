@@ -2,6 +2,8 @@ package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.features.library.LibraryRepository
+import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
@@ -150,10 +152,26 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             val account = CloudflareAccountClient.signIn(email, password)
+            // Les bibliothèques invité et autres comptes restent sur disque,
+            // mais ne doivent pas être présentées sous la nouvelle identité.
+            LibraryRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             _state.value = AuthState.Authenticated(
                 userId = account.userId, email = account.email, isAnonymous = false
             )
+            scope.launch {
+                runCatching {
+                    ProfileRepository.ensureLoaded(account.userId)
+                    ProfileRepository.pullProfiles()
+                    ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
+                        LibraryRepository.ensureLoaded()
+                        LibraryRepository.synchronizeCloudflareLibrary(profileId)
+                    }
+                }.onFailure { failure ->
+                    log.w(failure) { "Kovelyx Cloud : récupération initiale non disponible, données locales intactes" }
+                }
+            }
             return@runCatching Unit
         }
         check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
@@ -171,6 +189,8 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             val logout = runCatching { CloudflareAccountClient.signOut() }
+            LibraryRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             // Ne jamais effacer les profils, la bibliothèque ou la progression
             // avant la migration de stockage/synchronisation vers D1.
@@ -221,6 +241,8 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             CloudflareAccountClient.clearLocalSession()
+            LibraryRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             _state.value = AuthState.Unauthenticated
             return Result.success(Unit)
