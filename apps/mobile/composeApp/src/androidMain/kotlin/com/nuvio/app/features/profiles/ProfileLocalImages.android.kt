@@ -24,6 +24,7 @@ import kotlin.coroutines.resumeWithException
 internal actual object ProfileLocalImages {
     private const val MAX_BYTES = 20L * 1024L * 1024L
     private var appContext: Context? = null
+    val mediaContext: Context? get() = appContext
     private var chooser: ActivityResultLauncher<Array<String>>? = null
     private var awaiting: Continuation<Uri?>? = null
 
