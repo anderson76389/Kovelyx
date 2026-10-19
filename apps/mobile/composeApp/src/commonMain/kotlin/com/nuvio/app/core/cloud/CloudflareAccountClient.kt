@@ -1,8 +1,12 @@
 package com.nuvio.app.core.cloud
 
 import com.nuvio.app.features.addons.httpRequestRaw
+import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
@@ -134,6 +138,75 @@ object CloudflareAccountClient {
         check(profileWrite("/v1/profiles/delete", body.toString())["deleted"]?.jsonPrimitive?.booleanOrNull == true) {
             "Suppression du profil non confirmée"
         }
+    }
+
+
+    /**
+     * Parcourt entièrement une catégorie D1. Chaque page est bornée (100 lignes)
+     * et l'index évolue par item_key, sans confondre révision individuelle et curseur global.
+     * En cas d'erreur réseau/pagination, on ne renvoie jamais un jeu partiel.
+     */
+    suspend fun syncCategory(profileId: String, category: String): List<JsonObject> {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[0-9a-fA-F-]{36}"))) { "Profil cloud invalide" }
+        require(category in setOf("library", "favorites", "watch_progress",
+            "catalogues", "preferences", "profile_settings", "addons", "plugins"))
+        val items = mutableListOf<JsonObject>()
+        var after: String? = null
+        repeat(100) {
+            val suffix = after?.let { "&after=${it.encodeURLParameter()}" }.orEmpty()
+            val response = httpRequestRaw(
+                method = "GET",
+                url = base() + "/v1/sync?profileId=$profileId&category=$category&limit=100$suffix",
+                headers = mapOf(
+                    "Accept" to "application/json",
+                    "Authorization" to "Bearer ${active.bearerToken}"
+                ),
+                body = "", followRedirects = false, maxResponseBodyBytes = 1048576
+            )
+            check(response.status == 200) { "Kovelyx Cloud : lecture $category HTTP ${response.status}" }
+            val page = json.parseToJsonElement(response.body).jsonObject
+            val rows = page["items"]?.jsonArray ?: error("Réponse de synchronisation invalide")
+            items += rows.map { it.jsonObject }
+            val next = page["nextCursor"]?.jsonPrimitive?.contentOrNull
+                ?.takeIf { it.isNotBlank() }
+            if (next == null) {
+                check(page["partial"]?.jsonPrimitive?.booleanOrNull != true) {
+                    "Réponse de synchronisation incomplète"
+                }
+                return items
+            }
+            check(next != after && next.length <= 200) { "Pagination cloud incohérente" }
+            after = next
+        }
+        error("Trop d'éléments pour la synchronisation : données locales préservées")
+    }
+
+    suspend fun writeSync(
+        profileId: String,
+        category: String,
+        itemKey: String,
+        payload: JsonObject,
+        revision: Int,
+        deleted: Boolean
+    ): Int {
+        require(profileId.matches(Regex("[0-9a-fA-F-]{36}"))) { "Profil cloud invalide" }
+        require(category in setOf("library", "favorites", "watch_progress",
+            "catalogues", "preferences", "profile_settings", "addons", "plugins"))
+        require(itemKey.isNotBlank() && itemKey.length <= 200)
+        require(revision >= 0)
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("category", category)
+            put("itemKey", itemKey)
+            put("payload", payload)
+            put("revision", revision)
+            put("deleted", deleted)
+        }
+        val (result, _) = request("/v1/sync", body.toString(),
+            checkNotNull(session).bearerToken)
+        return json.parseToJsonElement(result).jsonObject["revision"]
+            ?.jsonPrimitive?.intOrNull ?: error("Révision D1 non confirmée")
     }
 
     suspend fun synchronizeRaw(profileId: String): JsonObject {
