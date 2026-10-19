@@ -48,6 +48,24 @@ class CloudflareTvProfileBindingTest {
         assertTrue(links.isEmpty())
     }
 
+    @Test fun cachedCloudProfileBindingIsScopedToAccountAndLocalProfile() {
+        val first = CloudflareTvLibraryStore.bindingKey(
+            "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", 1
+        )
+        val otherAccount = CloudflareTvLibraryStore.bindingKey(
+            "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb", 1
+        )
+        val otherLocalProfile = CloudflareTvLibraryStore.bindingKey(
+            "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", 2
+        )
+        assertTrue(first.startsWith("binding_"))
+        assertTrue(first != otherAccount)
+        assertTrue(first != otherLocalProfile)
+        assertEquals(first, CloudflareTvLibraryStore.bindingKey(
+            "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", 1
+        ))
+    }
+
     @Test fun malformedOrDuplicatedIdentifiersCannotBeLinked() {
         assertTrue(CloudflareTvProfileBinding.resolve(
             listOf(CloudflareTvProfileBinding.Local(1, "Principal")),

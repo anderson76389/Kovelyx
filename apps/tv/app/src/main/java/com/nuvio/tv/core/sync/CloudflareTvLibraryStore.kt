@@ -59,10 +59,47 @@ internal object CloudflareTvLibraryStore {
         isBound(localProfileId) &&
             _state.value?.items?.containsKey(key(id, type)) == true
 
-    private fun storageKey(view: View): String {
-        val raw = (view.ownerId + "|" + view.cloudProfileId).toByteArray()
-        return MessageDigest.getInstance("SHA-256").digest(raw)
+    private fun digest(value: String): String =
+        MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
             .joinToString("") { "%02x".format(it) }
+
+    // Conserver exactement l'ancienne clé pour ne jamais perdre les favoris
+    // ni les mutations en attente lors de l'installation du correctif.
+    private fun storageKey(view: View): String =
+        digest(view.ownerId + "|" + view.cloudProfileId)
+
+    // Chaque association vérifiée par /v1/profiles reste cantonnée au même
+    // compte et au même profil local. Aucun couplage par position de liste.
+    internal fun bindingKey(ownerId: String, localProfileId: Int): String =
+        "binding_" + digest(ownerId + "|" + localProfileId)
+
+    private fun preferences(context: Context) =
+        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    /** Cache local seulement, accessible après vérification de la session Better Auth. */
+    suspend fun restoreVerifiedBinding(context: Context, localProfileId: Int): Boolean =
+        withContext(Dispatchers.IO) {
+            val account = CloudflareTvAccountClient.account ?: return@withContext false
+            if (localProfileId !in 1..6) return@withContext false
+            val cloudId = preferences(context)
+                .getString(bindingKey(account.id, localProfileId), null)
+                ?: return@withContext false
+            if (!cloudId.matches(Regex("[0-9a-fA-F-]{36}"))) return@withContext false
+            mutex.withLock {
+                if (CloudflareTvAccountClient.account != account) return@withLock false
+                val cached = _state.value
+                if (cached?.ownerId != account.id || cached?.localProfileId != localProfileId ||
+                    cached?.cloudProfileId != cloudId) {
+                    _state.value = restore(context, account.id, localProfileId, cloudId)
+                }
+                true
+            }
+        }
+
+    fun forgetBinding(context: Context, ownerId: String, localProfileId: Int) {
+        preferences(context).edit().remove(bindingKey(ownerId, localProfileId)).apply()
+        val current = _state.value
+        if (current?.ownerId == ownerId && current.localProfileId == localProfileId) reset()
     }
 
     private fun safePoster(value: String?): String? =
@@ -166,6 +203,12 @@ internal object CloudflareTvLibraryStore {
         require(cloudProfileId.matches(Regex("[0-9a-fA-F-]{36}")))
         withContext(Dispatchers.IO) {
             mutex.withLock {
+                check(CloudflareTvAccountClient.account == acc) { "Compte TV changé" }
+                // L'association actuelle a été vérifiée par /v1/profiles.
+                check(preferences(context).edit()
+                    .putString(bindingKey(acc.id, localProfileId), cloudProfileId).commit()) {
+                    "Impossible de sauvegarder l'association de profil TV"
+                }
                 val current = _state.value
                 if (current?.ownerId != acc.id || current.cloudProfileId != cloudProfileId ||
                     current.localProfileId != localProfileId) {
@@ -202,7 +245,21 @@ internal object CloudflareTvLibraryStore {
             for ((id, row) in remoteByKey) {
                 val remoteRev = row.getInt("revision")
                 if (id in pending) {
-                    if ((revisions[id] ?: 0) != remoteRev) conflicts++
+                    val pendingDelete = pending[id] == true
+                    // La requête TV peut avoir été acceptée par D1 juste avant
+                    // une coupure réseau : reconnaître le résultat exact évite
+                    // un conflit permanent après redémarrage.
+                    val sameResult = row.getBoolean("deleted") == pendingDelete &&
+                        (pendingDelete || items[id]?.let { local ->
+                            row.optJSONObject("payload")?.optJSONObject("item")?.toString() ==
+                                itemJson(local).toString()
+                        } == true)
+                    if (sameResult) {
+                        pending.remove(id)
+                        revisions[id] = remoteRev
+                    } else if ((revisions[id] ?: 0) != remoteRev) {
+                        conflicts++
+                    }
                     continue
                 }
                 if (row.getBoolean("deleted")) items.remove(id)

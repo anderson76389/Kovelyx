@@ -37,6 +37,13 @@ tv_repo = (tv_root / "data/repository/LibraryRepositoryImpl.kt").read_text(encod
 tv_account = (tv_root / "ui/screens/account/AccountViewModel.kt").read_text(encoding="utf-8")
 assert "readLibrary" in tv and "writeLibrary" in tv
 assert "CloudflareTvLibraryStore.bind" in tv_repo
+assert "restoreVerifiedBinding" in tv_repo
+assert "forgetBinding" in tv_repo
+assert "bindingKey(ownerId: String, localProfileId: Int)" in cloud_store
+assert "sameResult" in cloud_store and "pending.remove(id)" in cloud_store
+auth_tv = (tv_root / "core/auth/AuthManager.kt").read_text(encoding="utf-8")
+assert "TvCloudSessionVault.read(appContext)" in auth_tv
+assert "backoffMs" in auth_tv
 assert "CloudflareTvLibraryStore.toggle" in tv_repo
 assert "CloudflareTvProfileBinding.resolve" in tv_repo
 assert "pendingDeletes" in cloud_store and "currentRev" in cloud_store

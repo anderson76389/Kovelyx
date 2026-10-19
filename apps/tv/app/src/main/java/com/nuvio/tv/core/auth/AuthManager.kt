@@ -108,17 +108,42 @@ class AuthManager @Inject constructor(
 
     init {
         if (CloudflareTvAccountClient.enabled) {
-            // Pas de SDK Supabase ; authentifier la session chiffrée sur Workers.
+            // Ne jamais accepter un jeton sans /v1/me. Si le Worker est simplement
+            // hors ligne, garder le coffre chiffré et réessayer sans intervention TV.
             scope.launch {
-                val restored = runCatching {
-                    CloudflareTvAccountClient.restoreVerified(appContext)
-                }.onFailure { error ->
-                    Log.w(TAG, "Kovelyx Cloud : session locale indisponible", error)
-                }.getOrNull()
-                // Ne pas remplacer un état qui a changé pendant la vérification.
-                if (_authState.value is AuthState.Loading) {
-                    _authState.value = if (restored == null) AuthState.SignedOut
-                    else AuthState.FullAccount(userId = restored.id, email = restored.email)
+                var backoffMs = 15_000L
+                while (true) {
+                    val state = _authState.value
+                    if (state !is AuthState.Loading && state !is AuthState.SignedOut) break
+                    val saved = TvCloudSessionVault.read(appContext)
+                    if (saved == null) {
+                        if (state is AuthState.Loading) _authState.value = AuthState.SignedOut
+                        break // Déconnexion explicite ou jeton définitivement invalidé.
+                    }
+                    val restored = try {
+                        CloudflareTvAccountClient.restoreVerified(appContext)
+                    } catch (cancel: CancellationException) {
+                        throw cancel
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Kovelyx Cloud : restauration différée", error)
+                        null
+                    }
+                    if (restored != null && CloudflareTvAccountClient.account == restored) {
+                        val latest = _authState.value
+                        if (latest is AuthState.Loading || latest is AuthState.SignedOut) {
+                            // Une déconnexion peut avoir effacé le coffre durant le GET.
+                            if (TvCloudSessionVault.read(appContext) == restored) {
+                                _authState.value = AuthState.FullAccount(
+                                    userId = restored.id, email = restored.email
+                                )
+                            }
+                        }
+                        break
+                    }
+                    if (_authState.value is AuthState.Loading) _authState.value = AuthState.SignedOut
+                    if (TvCloudSessionVault.read(appContext) != saved) break
+                    kotlinx.coroutines.delay(backoffMs)
+                    backoffMs = (backoffMs * 2).coerceAtMost(300_000L)
                 }
             }
         } else {

@@ -93,3 +93,12 @@ La déconnexion TV efface d'abord le jeton chiffré de l'appareil puis tente la 
 Les réponses `/v1/profiles` et les médias privés sont maintenant vérifiés contre le compte exact ayant lancé leur chargement. Si l'utilisateur se déconnecte ou passe sur un second compte au milieu du chargement, l'interface n'applique pas d'anciennes informations de profils ou d'avatar au nouvel utilisateur.
 
 Un job CI TV **ciblé** a été ajouté pour les tests de la route HTTP locale réelle, du mode de mémoire sûr et de l'association des profils D1. Le job complet avec les deux tests de défauts historiques AAR **reste activé et rouge** tant que les archives Media3 ne sont pas réparées : ne pas confondre un test fonctionnel ciblé vert avec une certification globale. Aucun APK public n'a été publié lors de cette étape.
+
+### Fiabilité hors ligne de la TV — corrections du 20 octobre 2026
+
+- La session TV est toujours **vérifiée** par `/v1/me`, sans authentification à partir d'un simple fichier local. Après une panne réseau temporaire lors du démarrage, le gestionnaire de comptes réessaie automatiquement avec un délai exponentiel plafonné à cinq minutes. Une déconnexion explicite ou un jeton définitivement invalidé arrête les tentatives.
+- Une fois le compte validé, l'association **déjà vérifiée** entre le profil local TV et son UUID D1 est conservée séparément pour chaque propriétaire. Si `/v1/profiles` devient indisponible, la bibliothèque cloud peut être restaurée depuis son cache local sans importer celle du mode invité. Si la liste distante est disponible et dément l'association, celle-ci est supprimée.
+- Les clés du cache de bibliothèque D1 précédemment utilisées sont **conservées à l'identique**, pour ne pas effacer les ajouts ou suppressions en attente au moment d'une mise à jour.
+- Lorsqu'une requête D1 a été acceptée mais que la TV n'a pas reçu la réponse, la synchronisation peut reconnaître une mutation distante de contenu identique et acquitter l'opération en attente. Un conflit de contenu divergent reste en attente et **n'est pas écrasé silencieusement**.
+- La panne du job GitHub Actions de démarrage Google TV identifiée sur le run `39340712242` venait du shell `/bin/sh` qui ne prend pas en charge `set -o pipefail` ; le script utilise désormais `set -eu`. Ce défaut CI ne prouvait pas un plantage de Kovelyx.
+- Les vérifications sur une véritable box et la synchronisation des progressions de lecture restent non démontrées. Aucune Release ni migration sur la base D1 de production n'a été faite.

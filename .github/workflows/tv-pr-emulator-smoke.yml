@@ -69,7 +69,9 @@ jobs:
           disk-size: 6144M
           disable-animations: true
           script: |
-            set -euo pipefail
+            # android-emulator-runner utilise /bin/sh pour cette section.
+            # pipefail est une option Bash et fait échouer l'essai avant adb.
+            set -eu
             adb install -r /tmp/kovelyx-tv-pr/kovelyx-tv-test.apk
             adb shell monkey -p com.kovelyx.tv.debug -c android.intent.category.LEANBACK_LAUNCHER 1
             sleep 25

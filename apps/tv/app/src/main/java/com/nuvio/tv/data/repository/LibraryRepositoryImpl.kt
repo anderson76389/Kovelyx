@@ -95,8 +95,16 @@ class LibraryRepositoryImpl @Inject constructor(
                             CloudflareTvLibraryStore.reset()
                             return@collectLatest
                         }
-                        // Reprise différée après panne réseau sans demander
-                        // à l'utilisateur de rouvrir les paramètres du compte.
+                        // Le compte est déjà vérifié par /v1/me. Si le Worker
+                        // des profils est hors ligne, utiliser la dernière association
+                        // validée sans envoyer les favoris invités vers D1.
+                        try {
+                            CloudflareTvLibraryStore.restoreVerifiedBinding(appContext, localId)
+                        } catch (cancel: CancellationException) {
+                            throw cancel
+                        } catch (error: Exception) {
+                            Log.w("CloudflareTvLibrary", "Cache TV indisponible", error)
+                        }
                         while (CloudflareTvAccountClient.account?.id == auth.userId) {
                             try {
                                 val remote = CloudflareTvAccountClient.getCloudProfiles()
@@ -105,15 +113,23 @@ class LibraryRepositoryImpl @Inject constructor(
                                     remote.map { CloudflareTvProfileBinding.Remote(it.id, it.name) }
                                 )
                                 val uuid = bindings[localId]
-                                if (uuid == null) CloudflareTvLibraryStore.reset()
-                                else CloudflareTvLibraryStore.bind(appContext, localId, uuid)
+                                if (uuid == null) {
+                                    // La liste distante est connue et l'association
+                                    // n'est plus sûre : retirer le lien conservé.
+                                    CloudflareTvLibraryStore.forgetBinding(
+                                        appContext, auth.userId, localId
+                                    )
+                                } else {
+                                    CloudflareTvLibraryStore.bind(appContext, localId, uuid)
+                                }
                             } catch (cancel: CancellationException) {
                                 throw cancel
                             } catch (error: Exception) {
-                                // Aucun transfert invité, aucune suppression sur panne réseau.
+                                // Les écritures non envoyées et le cache D1 restent
+                                // préservés pour les prochaines tentatives.
                                 Log.w("CloudflareTvLibrary", "Lecture D1 reportée", error)
                             }
-                            delay(300_000L) // maximum 12 vérifications par heure de TV active
+                            delay(300_000L)
                         }
                     }
             }
