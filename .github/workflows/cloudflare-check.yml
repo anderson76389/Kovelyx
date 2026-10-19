@@ -24,6 +24,7 @@ jobs:
       - name: Vérifier la syntaxe Python et le schéma SQLite D1
         run: |
           python -m py_compile scripts/configure-cloud-build.py
+          python -m py_compile services/kovelyx-cloudflare/scripts/first-account.py
           python services/kovelyx-cloudflare/tests/check-d1-schema.py
       - name: Vérifier le script installation Cloudflare
         working-directory: services/kovelyx-cloudflare
