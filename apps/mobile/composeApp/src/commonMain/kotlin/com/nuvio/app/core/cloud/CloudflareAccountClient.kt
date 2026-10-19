@@ -102,6 +102,37 @@ object CloudflareAccountClient {
         return json.parseToJsonElement(response.body).jsonObject
     }
 
+
+    private suspend fun profileWrite(path: String, body: String): JsonObject {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val (response, _) = request(path, body, active.bearerToken)
+        return json.parseToJsonElement(response).jsonObject
+    }
+
+    suspend fun createAccountProfile(name: String): JsonObject {
+        require(name.isNotBlank() && name.trim().length <= 64) { "Nom de profil invalide" }
+        val body = buildJsonObject { put("displayName", name.trim()) }
+        return checkNotNull(profileWrite("/v1/profiles", body.toString())["profile"]).jsonObject
+    }
+
+    suspend fun renameAccountProfile(profileId: String, name: String) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Profil invalide" }
+        require(name.isNotBlank() && name.trim().length <= 64) { "Nom de profil invalide" }
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("displayName", name.trim())
+        }
+        checkNotNull(profileWrite("/v1/profiles/update", body.toString())["profile"])
+    }
+
+    suspend fun deleteAccountProfile(profileId: String) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Profil invalide" }
+        val body = buildJsonObject { put("profileId", profileId) }
+        check(profileWrite("/v1/profiles/delete", body.toString())["deleted"]?.jsonPrimitive?.booleanOrNull == true) {
+            "Suppression du profil non confirmée"
+        }
+    }
+
     suspend fun synchronizeRaw(profileId: String): JsonObject {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Identifiant de profil invalide" }
