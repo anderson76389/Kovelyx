@@ -123,12 +123,13 @@ export async function handleProfiles(request,env,user,url) {
     // par la contrainte ON DELETE CASCADE. Le dernier profil est préservé.
     const deleted = await env.DB.prepare(
       "DELETE FROM kv_profiles WHERE id=? AND owner_id=? " +
-      "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
-    ).bind(body.profileId,user.id,user.id).run();
+      "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1 " +
+      "AND id!=(SELECT id FROM kv_profiles WHERE owner_id=? ORDER BY created_at,id LIMIT 1)"
+    ).bind(body.profileId,user.id,user.id,user.id).run();
     if (deleted.meta?.changes === 1) return jsonResponse({deleted:true});
     if (!await ownedProfile(env,user.id,body.profileId))
       return jsonResponse({error:"Profil introuvable"},404);
-    return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
+    return jsonResponse({error:"Le profil principal ou dernier profil ne peut pas être supprimé"},409);
   }
   if (route !== "/v1/profiles") return jsonResponse({error:"Route inconnue"},404);
   if (request.method === "GET") {
