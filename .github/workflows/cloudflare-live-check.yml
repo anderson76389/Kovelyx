@@ -33,6 +33,22 @@ jobs:
           assert status.get('provider') == 'Cloudflare D1', status
           print('Worker Kovelyx Cloud OK : /health status=ok')
           PY
+      - name: Vérifier route Better Auth sans créer de compte
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/kv-session.json -w '%{http_code}' --max-time 20 \
+            -H 'Accept: application/json' \
+            "${KOVELYX_CLOUDFLARE_URL%/}/api/auth/get-session")"
+          echo "Code Better Auth attendu : 200, reçu : $code"
+          [[ "$code" == "200" ]] || { cat /tmp/kv-session.json; exit 1; }
+          python3 - <<'PY'
+          import json
+          with open('/tmp/kv-session.json',encoding='utf-8') as file:
+              body = json.load(file)
+          assert body is None or body.get('session') is None, 'Une session ne doit pas être créée anonymement.'
+          print('Better Auth route GET-session disponible sans compte.')
+          PY
       - name: Refuser les données privées sans jeton
         shell: bash
         run: |
