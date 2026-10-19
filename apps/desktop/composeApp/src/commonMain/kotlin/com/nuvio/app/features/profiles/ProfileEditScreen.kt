@@ -158,7 +158,7 @@ fun ProfileEditScreen(
                     )
                     if (ProfileLocalImages.supported) {
                         NuvioPrimaryButton(
-                            text = "Choisir une photo depuis mon PC",
+                            text = "Importer une photo, un GIF ou une vidéo",
                             onClick = {
                                 scope.launch {
                                     try {
@@ -175,7 +175,7 @@ fun ProfileEditScreen(
                         )
                         if (ProfileLocalImages.isManagedUri(avatarUrl)) {
                             Text(
-                                text = "Photo personnelle enregistrée sur cet ordinateur.",
+                                text = "Média personnel conservé sur cet ordinateur. Synchronisation TV avec R2 configuré.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -492,12 +492,19 @@ private fun ProfileIdentityCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     if (customAvatarUrl != null) {
-                        AsyncImage(
-                            model = customAvatarUrl,
-                            contentDescription = name,
-                            modifier = Modifier.size(88.dp).clip(CircleShape),
-                            contentScale = ContentScale.Crop,
-                        )
+                        if(isProfileVideo(customAvatarUrl)) {
+                            ProfileVideoBackdrop(
+                                url=customAvatarUrl,
+                                modifier=Modifier.size(88.dp).clip(CircleShape),
+                            )
+                        } else {
+                            AsyncImage(
+                                model = customAvatarUrl,
+                                contentDescription = name,
+                                modifier = Modifier.size(88.dp).clip(CircleShape),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
                     } else if (selectedAvatar != null) {
                         AsyncImage(
                             model = avatarImageUrl(selectedAvatar),
