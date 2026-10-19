@@ -99,7 +99,7 @@ async function handleSync(request, env, user, url) {
   ).bind(user.id, body.profileId, body.category, body.itemKey).first();
   return jsonResponse({error:"Conflit de synchronisation",current:latest},409);
 }
-async function handleProfiles(request,env,user,url) {
+export async function handleProfiles(request,env,user,url) {
   const route = url.pathname;
   // Toute mutation reste limitée au compte authentifié.
   if (route === "/v1/profiles/update" || route === "/v1/profiles/delete") {
