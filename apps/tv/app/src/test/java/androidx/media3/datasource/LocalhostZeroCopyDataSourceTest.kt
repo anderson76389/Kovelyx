@@ -217,9 +217,14 @@ class LocalhostZeroCopyDataSourceTest {
             .build()
         
         try {
-            assertThrows(HttpDataSource.InvalidResponseCodeException::class.java) {
+            val failure = assertThrows(HttpDataSource.HttpDataSourceException::class.java) {
                 dataSource.open(dataSpec)
             }
+            // Vérifier la réponse 404 même si le transport enveloppe l'exception.
+            val code = generateSequence(failure as Throwable) { it.cause }
+                .filterIsInstance<HttpDataSource.InvalidResponseCodeException>()
+                .firstOrNull()?.responseCode
+            assertEquals(404, code)
         } finally {
             dataSource.close()
             serverSocket.close()

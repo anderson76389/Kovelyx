@@ -37,9 +37,15 @@ class TraktAuthServiceTest {
         assertFalse(service.refreshTokenIfNeeded(force = true))
         assertFalse(service.refreshTokenIfNeeded(force = true))
 
-        coVerify(exactly = 1) { traktApi.refreshToken(any()) }
-        coVerify(exactly = 1) { authSessionNoticeDataStore.markTraktReconnectRequired() }
-        coVerify(exactly = 1) { traktAuthDataStore.clearAuth() }
+        if (service.hasRequiredCredentials()) {
+            coVerify(exactly = 1) { traktApi.refreshToken(any()) }
+            coVerify(exactly = 1) { authSessionNoticeDataStore.markTraktReconnectRequired() }
+            coVerify(exactly = 1) { traktAuthDataStore.clearAuth() }
+        } else {
+            // Un build sans clés Trakt ne tente pas d'utiliser des clés d'origine.
+            coVerify(exactly = 0) { traktApi.refreshToken(any()) }
+            coVerify(exactly = 0) { traktAuthDataStore.clearAuth() }
+        }
     }
 
     private fun authenticatedState(): TraktAuthState {
