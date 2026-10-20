@@ -80,6 +80,11 @@ internal actual object CloudSessionVault {
         }
     }
 
+    // Primitive testable sans écrire dans le coffre du vrai utilisateur :
+    // les tests CI Windows vérifient un cycle DPAPI natif et l'intégrité.
+    internal fun protectForCurrentUser(data: ByteArray): ByteArray = transform(data, protect = true)
+    internal fun unprotectForCurrentUser(data: ByteArray): ByteArray = transform(data, protect = false)
+
     @Synchronized
     actual fun save(payload: String) {
         if (!onWindows) return
