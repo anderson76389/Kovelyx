@@ -84,10 +84,9 @@ jobs:
             adb shell screencap -p /sdcard/kovelyx-tv-pr.png
             adb pull /sdcard/kovelyx-tv-pr.png /tmp/kovelyx-tv-pr/screenshot.png
             adb logcat -d -v brief -s AndroidRuntime:E > /tmp/kovelyx-tv-pr/androidruntime.txt
-            if grep -F "FATAL EXCEPTION" /tmp/kovelyx-tv-pr/androidruntime.txt; then
-              echo "::error::Crash AndroidRuntime détecté sur l'émulateur"
-              exit 1
-            fi
+            # android-emulator-runner exécute chaque ligne sous /bin/sh -c :
+            # garder la condition sur une seule ligne pour éviter 'expecting fi'.
+            if grep -Fq "FATAL EXCEPTION" /tmp/kovelyx-tv-pr/androidruntime.txt; then echo "::error::Crash AndroidRuntime détecté sur l'émulateur"; exit 1; fi
       - name: Archiver preuves TV, capture et signature SHA-256
         if: always()
         uses: actions/upload-artifact@v4
