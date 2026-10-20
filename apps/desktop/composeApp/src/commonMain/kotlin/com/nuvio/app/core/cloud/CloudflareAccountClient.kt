@@ -12,6 +12,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlin.concurrent.Volatile
 
 /**
  * API Cloudflare D1 / Better Auth Kovelyx. Ne pas injecter une URL workers.dev
@@ -24,7 +25,11 @@ import kotlinx.serialization.json.put
 object CloudflareAccountClient {
     data class Session(val userId: String, val email: String, val bearerToken: String)
     private val json = Json { ignoreUnknownKeys = true }
-    private var session: Session? = null
+    @Volatile private var session: Session? = null
+
+    private fun requireUnchangedAccount(active: Session) {
+        check(session === active) { "Compte Kovelyx changé pendant l'opération cloud" }
+    }
 
     val enabled: Boolean get() = CloudflareConfig.URL.startsWith("https://")
     val currentSession: Session? get() = session
@@ -109,14 +114,18 @@ object CloudflareAccountClient {
             body = "", followRedirects = false, maxResponseBodyBytes = 131072
         )
         check(response.status == 200) { "Kovelyx Cloud : profils indisponibles (HTTP ${response.status})" }
-        return json.parseToJsonElement(response.body).jsonObject
+        val result = json.parseToJsonElement(response.body).jsonObject
+        requireUnchangedAccount(active)
+        return result
     }
 
 
     private suspend fun profileWrite(path: String, body: String): JsonObject {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         val (response, _) = request(path, body, active.bearerToken)
-        return json.parseToJsonElement(response).jsonObject
+        val result = json.parseToJsonElement(response).jsonObject
+        requireUnchangedAccount(active)
+        return result
     }
 
     suspend fun createAccountProfile(name: String): JsonObject {
@@ -168,6 +177,7 @@ object CloudflareAccountClient {
                 body = "", followRedirects = false, maxResponseBodyBytes = 1048576
             )
             check(response.status == 200) { "Kovelyx Cloud : lecture $category HTTP ${response.status}" }
+            requireUnchangedAccount(active)
             val page = json.parseToJsonElement(response.body).jsonObject
             val rows = page["items"]?.jsonArray ?: error("Réponse de synchronisation invalide")
             items += rows.map { it.jsonObject }
@@ -177,6 +187,7 @@ object CloudflareAccountClient {
                 check(page["partial"]?.jsonPrimitive?.booleanOrNull != true) {
                     "Réponse de synchronisation incomplète"
                 }
+                requireUnchangedAccount(active)
                 return items
             }
             check(next != after && next.length <= 200) { "Pagination cloud incohérente" }
@@ -206,8 +217,9 @@ object CloudflareAccountClient {
             put("revision", revision)
             put("deleted", deleted)
         }
-        val (result, _) = request("/v1/sync", body.toString(),
-            checkNotNull(session).bearerToken)
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val (result, _) = request("/v1/sync", body.toString(), active.bearerToken)
+        requireUnchangedAccount(active)
         return json.parseToJsonElement(result).jsonObject["revision"]
             ?.jsonPrimitive?.intOrNull ?: error("Révision D1 non confirmée")
     }
@@ -221,6 +233,8 @@ object CloudflareAccountClient {
             body = "", followRedirects = false, maxResponseBodyBytes = 1048576
         )
         check(response.status == 200) { "Kovelyx Cloud : synchronisation indisponible (HTTP ${response.status})" }
-        return json.parseToJsonElement(response.body).jsonObject
+        val result = json.parseToJsonElement(response.body).jsonObject
+        requireUnchangedAccount(active)
+        return result
     }
 }
