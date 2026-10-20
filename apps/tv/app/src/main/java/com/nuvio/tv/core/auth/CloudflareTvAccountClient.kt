@@ -149,8 +149,10 @@ internal object CloudflareTvAccountClient {
             .digest((loggedIn.id+"|"+profile.id+"|"+path).toByteArray())
             .take(16).joinToString("") { "%02x".format(it) }
         val cached=java.io.File(cacheDir,(if(background)"background-" else "avatar-")+"cloud-$hash.$ext")
-        if(cached.isFile && cached.length() in 1..(20L*1024*1024))
+        if(cached.isFile && cached.length() in 1..(20L*1024*1024)) {
+            check(account == loggedIn) { "Compte changé pendant le chargement du média" }
             return@withContext cached.toURI().toString()
+        }
         val kind=if(background)"background" else "avatar"
         val req=Request.Builder()
             .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/')+
@@ -179,7 +181,14 @@ internal object CloudflareTvAccountClient {
                     }
                 } ?: error("Média cloud vide")
                 check(tmp.length() in 1..(20L*1024*1024))
+                // La session peut changer pendant le téléchargement R2.
+                // Ne pas exposer l'avatar du compte A au compte B.
+                check(account == loggedIn) { "Compte changé pendant le téléchargement du média" }
                 check(tmp.renameTo(cached)) { "Impossible de sauvegarder le média TV" }
+                if (account != loggedIn) {
+                    cached.delete()
+                    error("Compte changé avant l'affichage du média")
+                }
                 cached.toURI().toString()
             } finally { tmp.delete() }
         }
