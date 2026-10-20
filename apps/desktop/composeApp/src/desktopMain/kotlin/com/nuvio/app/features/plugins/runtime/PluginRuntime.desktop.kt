@@ -2,15 +2,17 @@ package com.nuvio.app.features.plugins.runtime
 
 import com.dokar.quickjs.QuickJs
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
+import java.util.concurrent.Executors
 
-// Chaque exécution QuickJS a son propre contexte natif, mais la création de
-// dizaines de runtimes en parallèle sature Windows et déclenche le délai de
-// sécurité des scrapers pendant le stress test. Garder des threads IO (les
-// ponts JS peuvent attendre des I/O), avec une concurrence native bornée.
-// La file d'attente est en dehors du withTimeout propre à chaque scraper.
-private const val MAX_PARALLEL_DESKTOP_QUICKJS = 4
+// QuickJS uses native execution contexts that need deterministic thread
+// affinity across coroutine suspensions (not provided by Dispatchers.IO).
+// A dedicated JVM worker prevents thread migration when JS promises complete.
+// Calls are cooperatively interleaved while awaiting I/O; the shared scraper
+// semaphore still limits the number of active runtimes.
 internal val pluginDispatcher: CoroutineDispatcher =
-    Dispatchers.IO.limitedParallelism(MAX_PARALLEL_DESKTOP_QUICKJS)
+    Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "kovelyx-quickjs-worker").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
 
 internal fun QuickJs.configurePluginRuntime() = Unit
