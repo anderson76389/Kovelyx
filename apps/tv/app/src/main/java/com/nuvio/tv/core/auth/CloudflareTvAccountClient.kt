@@ -72,8 +72,10 @@ internal object CloudflareTvAccountClient {
     suspend fun signOut(context: android.content.Context) {
         val old = synchronized(sessionLock) {
             val previous = account
-            account = null
+            // Ne jamais afficher une déconnexion réussie si l'effacement du
+            // coffre a échoué : sinon l'ancien compte réapparaît au redémarrage.
             TvCloudSessionVault.clear(context)
+            account = null
             previous
         }
         if (old == null || !enabled) return
@@ -227,8 +229,9 @@ internal object CloudflareTvAccountClient {
 
     fun clearLocalSession(context: android.content.Context) {
         synchronized(sessionLock) {
-            account = null
+            // Le jeton chiffré doit disparaître avant de publier l'état invité.
             TvCloudSessionVault.clear(context)
+            account = null
         }
     }
 
