@@ -8,9 +8,12 @@ actual object AuthStorage {
     private const val KEY_ANONYMOUS_USER_ID = "anonymous_user_id"
 
     private var preferences: SharedPreferences? = null
+    private var applicationContext: Context? = null
+    internal val cloudAppContext: Context? get() = applicationContext
 
     fun initialize(context: Context) {
-        preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        applicationContext = context.applicationContext
+        preferences = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
     actual fun loadAnonymousUserId(): String? =

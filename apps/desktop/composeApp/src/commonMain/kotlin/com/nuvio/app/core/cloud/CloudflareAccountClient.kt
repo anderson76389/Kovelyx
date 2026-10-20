@@ -93,16 +93,79 @@ object CloudflareAccountClient {
         check(id.isNotBlank() && realEmail.isNotBlank() && token.length >= 16) {
             "Kovelyx Cloud : session de connexion invalide"
         }
-        return Session(id, realEmail, token).also { session = it }
+        return Session(id, realEmail, token).also { signed ->
+            val sealedPayload = buildJsonObject {
+                put("server", base())
+                put("id", signed.userId)
+                put("email", signed.email)
+                put("token", signed.bearerToken)
+            }.toString()
+            CloudSessionVault.save(sealedPayload)
+            session = signed
+        }
+    }
+
+    /**
+     * Ne jamais restaurer une identité à partir du seul stockage local :
+     * le Worker valide d'abord le jeton auprès de /v1/me.
+     * Réseau indisponible : on garde le coffre mais reste déconnecté.
+     */
+    suspend fun restoreVerified(): Session? {
+        if (!enabled || session != null) return session
+        val sealed = CloudSessionVault.load() ?: return null
+        val candidate = runCatching {
+            val saved = json.parseToJsonElement(sealed).jsonObject
+            check(saved["server"]?.jsonPrimitive?.content == base())
+            val id = saved["id"]?.jsonPrimitive?.content.orEmpty()
+            val email = saved["email"]?.jsonPrimitive?.content.orEmpty()
+            val token = saved["token"]?.jsonPrimitive?.content.orEmpty()
+            check(id.isNotBlank() && email.contains('@') && token.length >= 16)
+            Session(id, email, token)
+        }.getOrElse {
+            if (CloudSessionVault.load() == sealed) CloudSessionVault.clear()
+            return null
+        }
+        return try {
+            val response = httpRequestRaw(
+                method = "GET", url = base() + "/v1/me",
+                headers = mapOf("Authorization" to "Bearer " + candidate.bearerToken,
+                    "Accept" to "application/json"),
+                body = "", followRedirects = false, maxResponseBodyBytes = 131072
+            )
+            if (response.status == 200) {
+                val user = json.parseToJsonElement(response.body).jsonObject
+                if (user["id"]?.jsonPrimitive?.content == candidate.userId &&
+                    user["email"]?.jsonPrimitive?.content.equals(candidate.email, ignoreCase = true)) {
+                    if (session == null && CloudSessionVault.load() == sealed) {
+                        session = candidate
+                    }
+                    session
+                } else {
+                    if (CloudSessionVault.load() == sealed) CloudSessionVault.clear()
+                    null
+                }
+            } else {
+                if (response.status == 401 || response.status == 403) {
+                    if (CloudSessionVault.load() == sealed) CloudSessionVault.clear()
+                }
+                null
+            }
+        } catch (error: Exception) {
+            if (error is kotlinx.coroutines.CancellationException) throw error
+            // Une déconnexion forcée sur simple échec réseau détruirait les sessions.
+            null
+        }
     }
 
     suspend fun signOut() {
         val old = session
+        CloudSessionVault.clear()
         session = null
         if (old != null) request("/api/auth/sign-out", "{}", old.bearerToken)
     }
 
     fun clearLocalSession() {
+        CloudSessionVault.clear()
         session = null
     }
 

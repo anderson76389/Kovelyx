@@ -54,11 +54,36 @@ object AuthRepository {
             )
         }
 
-        // Cloudflare et Supabase ne partagent AUCUN protocole d'authentification.
-        // Tant que le jeton n'est pas stocke de façon chiffrée, les utilisateurs
-        // du Worker se reconnectent après chaque redémarrage de l'application.
+        // Les comptes invités sont conservés séparément. Une session Cloudflare
+        // n'est restaurée qu'après validation du jeton sur le Worker HTTPS.
         if (CloudflareAccountClient.enabled) {
-            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            if (savedAnonId == null) {
+                scope.launch {
+                    val restored = CloudflareAccountClient.restoreVerified()
+                    if (_state.value != AuthState.Loading) return@launch
+                    if (restored == null) {
+                        _state.value = AuthState.Unauthenticated
+                    } else {
+                        LibraryRepository.clearLocalState()
+                        ProfileRepository.clearInMemory()
+                        _state.value = AuthState.Authenticated(
+                            userId = restored.userId,
+                            email = restored.email,
+                            isAnonymous = false,
+                        )
+                        runCatching {
+                            ProfileRepository.ensureLoaded(restored.userId)
+                            ProfileRepository.pullProfiles()
+                            ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
+                                LibraryRepository.ensureLoaded()
+                                LibraryRepository.synchronizeCloudflareLibrary(profileId)
+                            }
+                        }.onFailure { error ->
+                            log.w(error) { "Cloudflare : profils/bibliothèque à retenter, données locales préservées" }
+                        }
+                    }
+                }
+            }
             return
         }
 
@@ -121,6 +146,13 @@ object AuthRepository {
     @OptIn(ExperimentalUuidApi::class)
     fun signInAnonymously() {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            // Un choix explicite du mode invité ne doit pas laisser actif
+            // le jeton d'un ancien compte du même appareil.
+            CloudflareAccountClient.clearLocalSession()
+            LibraryRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
+        }
         val userId = Uuid.random().toString()
         AuthStorage.saveAnonymousUserId(userId)
         _state.value = AuthState.Authenticated(
