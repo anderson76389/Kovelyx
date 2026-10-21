@@ -102,3 +102,13 @@ Un job CI TV **ciblé** a été ajouté pour les tests de la route HTTP locale r
 - Lorsqu'une requête D1 a été acceptée mais que la TV n'a pas reçu la réponse, la synchronisation peut reconnaître une mutation distante de contenu identique et acquitter l'opération en attente. Un conflit de contenu divergent reste en attente et **n'est pas écrasé silencieusement**.
 - La panne du job GitHub Actions de démarrage Google TV identifiée sur le run `39340712242` venait du shell `/bin/sh` qui ne prend pas en charge `set -o pipefail` ; le script utilise désormais `set -eu`. Ce défaut CI ne prouvait pas un plantage de Kovelyx.
 - Les vérifications sur une véritable box et la synchronisation des progressions de lecture restent non démontrées. Aucune Release ni migration sur la base D1 de production n'a été faite.
+
+
+## Conclusion de stabilisation — 21 octobre 2026
+
+- Les builds Windows (MSI/EXE/portable), Android mobile et Android TV ont été produits dans GitHub Actions pour le commit `4b7f7162` et la suite Windows, incluant un essai DPAPI réel, était verte.
+- Les contrôles Worker/D1 et de compilation sans domaines Nuvio étaient verts sur ce commit. Le test TV sur émulateur a été lancé, mais il faut utiliser son résultat GitHub final pour certifier ce commit.
+- La suite TV complète conserve **deux échecs reproductibles sur 2 080 tests** : `LocalhostZeroCopyDataSourceTest.testHttpError404` (HTTP 400 à la place de 404) et `DefaultAllocatorTest.testLateReleasedAllocationsMemoryLeak` (mémoire native non rendue). Ces tests interrogent directement des classes des **AAR Media3 binaires historiques**. Les chemins de lecture de l'application ont déjà un contournement testé (OkHttp pour localhost, pas d'allocation native), mais les AAR eux-mêmes ne sont pas réparés.
+- Le correctif `60be75de` propage les annulations de coroutine pendant la restauration de compte TV ; auparavant, une interruption pouvait être masquée en échec réseau. Valider le build TV après ce commit.
+- Les scénarios D1 multi-utilisateurs reproduits localement, y compris `watch_progress`, ne constituent **pas** un essai de synchronisation de progression réalisé entre applications installées sur trois appareils.
+- **Statut pour distribution :** préversions testables uniquement. Pour certifier une version stable : obtenir les sources exactes des classes modifiées dans l'AAR et reconstruire celui-ci, ou remplacer cette dépendance de manière compatible ; compléter les adaptateurs de progression/media, vérifier DPAPI/KeyStore sur vrais appareils et démontrer un transfert réel. Ne pas supprimer/ignorer les tests AAR pour obtenir artificiellement une CI verte. Aucune donnée D1 de production n'a été modifiée ici.
