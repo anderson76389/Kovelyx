@@ -7,6 +7,10 @@ on:
       - 'scripts/media3/**'
       - 'apps/tv/app/build.gradle.kts'
       - 'apps/tv/app/src/test/java/androidx/media3/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/player/StreamAutoPlaySelector.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/data/repository/SupportersRepository.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/SupportersRepositoryTest.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/TraktAuthServiceTest.kt'
   push:
     branches: [main]
     paths:
@@ -14,6 +18,10 @@ on:
       - 'scripts/media3/**'
       - 'apps/tv/app/build.gradle.kts'
       - 'apps/tv/app/src/test/java/androidx/media3/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/player/StreamAutoPlaySelector.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/data/repository/SupportersRepository.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/SupportersRepositoryTest.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/TraktAuthServiceTest.kt'
   workflow_dispatch:
 permissions:
   contents: read
