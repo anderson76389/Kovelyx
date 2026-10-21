@@ -205,12 +205,17 @@ class PlayerMediaSourceFactoryTest {
         assertTrue(PlayerMediaSourceFactory.isLoopbackUrl("http://localhost:51234/stream/movie.mkv"))
         assertTrue(PlayerMediaSourceFactory.isLoopbackUrl("http://[::1]:51234/stream/movie.mkv"))
         assertTrue(PlayerMediaSourceFactory.isLoopbackUrl("http://127.0.0.1:8080/stream/video.mkv?token=abc"))
+        assertTrue(PlayerMediaSourceFactory.isLoopbackUrl("http://127.0.0.2:8080/stream/video.mkv"))
+        assertTrue(PlayerMediaSourceFactory.isLoopbackUrl("http://127.255.255.254:8080/stream/video.mkv"))
+        assertTrue(PlayerMediaSourceFactory.isLoopbackUrl("http://[0:0:0:0:0:0:0:1]:8080/stream/video.mkv"))
     }
 
     @Test
     fun `isLoopbackUrl returns false for external and non-loopback urls`() {
         assertFalse(PlayerMediaSourceFactory.isLoopbackUrl("https://debrid.example.com/stream/movie.mkv"))
         assertFalse(PlayerMediaSourceFactory.isLoopbackUrl("http://192.168.1.100:8091/stream?link=123"))
+        assertFalse(PlayerMediaSourceFactory.isLoopbackUrl("http://128.0.0.1:8091/stream"))
+        assertFalse(PlayerMediaSourceFactory.isLoopbackUrl("http://127.0.0.1.example.com:8091/stream"))
         assertFalse(PlayerMediaSourceFactory.isLoopbackUrl(""))
     }
 
