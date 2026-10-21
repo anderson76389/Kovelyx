@@ -50,10 +50,21 @@ internal object CloudflareWatchProgressCodec {
     }
 
     fun payload(entry: WatchProgressEntry): JsonObject {
+        val progressKey = entry.resolvedProgressKey()
+        // Les identifiants de lecture de certaines extensions sont des URL
+        // signées : ils ne doivent pas partir dans le cloud.
+        require(progressKey.isNotBlank() && progressKey.length <= 200 &&
+            "://" !in progressKey && '?' !in progressKey)
+        require(entry.parentMetaId.isNotBlank() && entry.parentMetaId.length <= 200 &&
+            "://" !in entry.parentMetaId && '?' !in entry.parentMetaId)
+        val safeVideoId = entry.videoId.takeIf {
+            it.length <= 200 && "://" !in it && '?' !in it
+        } ?: entry.parentMetaId
         // Ne synchroniser aucune URL de flux/addon ni information fournisseur
         // susceptible de contenir une clé personnelle ou un token temporaire.
         val public = entry.copy(
             title = entry.title.take(300),
+            videoId = safeVideoId,
             logo = safeTmdbImage(entry.logo),
             poster = safeTmdbImage(entry.poster),
             background = safeTmdbImage(entry.background),

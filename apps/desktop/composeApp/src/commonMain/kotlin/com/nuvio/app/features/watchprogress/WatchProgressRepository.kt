@@ -690,11 +690,17 @@ object WatchProgressRepository {
             )[key]
             val newer = remote?.entry
             if (newer != null && newer.lastUpdatedEpochMs >= entry.lastUpdatedEpochMs) {
-                if (currentProfileId == profileId && isActiveOperation(profileId, profileGeneration)) {
-                    upsertLocalEntry(newer)
-                    clearProgressDirty(key)
-                    publish()
-                    persist()
+                if (currentProfileId == profileId && isActiveOperation(profileId, profileGeneration) &&
+                    CloudflareAccountClient.currentSession?.userId == auth.userId) {
+                    // Un second scrobble local peut arriver pendant le GET :
+                    // ne jamais écraser une progression plus récente.
+                    val current = localEntry(key)
+                    if (current == null || current.lastUpdatedEpochMs <= entry.lastUpdatedEpochMs) {
+                        upsertLocalEntry(newer)
+                        clearProgressDirty(key)
+                        publish()
+                        persist()
+                    }
                 }
                 return@withLock
             }
