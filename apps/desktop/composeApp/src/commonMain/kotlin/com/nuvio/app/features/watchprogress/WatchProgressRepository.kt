@@ -3,6 +3,7 @@ package com.nuvio.app.features.watchprogress
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.addons.AddonManifest
 import com.nuvio.app.features.addons.AddonRepository
@@ -253,6 +254,7 @@ object WatchProgressRepository {
     private val metadataResolutionRetryCoordinator = MetadataResolutionRetryCoordinator()
     private val providerMetadataOverlay = ProviderProgressMetadataOverlay()
     private val nuvioPullMutex = Mutex()
+    private val cloudProgressWriteMutex = Mutex()
     private var lastSuccessfulPushEpochMs = 0L
     private var deltaCursorEventId = 0L
     private var deltaInitialized = false
@@ -308,6 +310,15 @@ object WatchProgressRepository {
         )
         loadFromDisk(profileId)
         TrackingProviderRegistry.progressProviders().forEach(TrackingProgressProvider::onProfileChanged)
+        if (CloudflareAccountClient.enabled) {
+            accountScopeSnapshot().launch {
+                runCatching { pullFromServer(profileId) }
+                    .onFailure { error ->
+                        if (error is CancellationException) throw error
+                        log.w(error) { "Kovelyx Cloud : progression locale intacte" }
+                    }
+            }
+        }
     }
 
     fun clearLocalState() {
@@ -536,6 +547,9 @@ object WatchProgressRepository {
 
         return nuvioPullMutex.withLock {
             try {
+                if (CloudflareAccountClient.enabled) {
+                    return@withLock synchronizeCloudflareProgress(profileId, operationGeneration)
+                }
                 if (force) {
                     pullNuvioSnapshotFromServer(
                         profileId = profileId,
@@ -556,6 +570,98 @@ object WatchProgressRepository {
             }
         }
     }
+
+    /**
+     * Fusion additive entre les appareils du même compte ; jamais d'import
+     * silencieux des anciennes données invitées. Les écritures non confirmées
+     * restent sales et seront retentées au prochain rafraîchissement.
+     */
+    private suspend fun synchronizeCloudflareProgress(profileId: Int, generation: Long): Boolean {
+        val auth = AuthRepository.state.value as? AuthState.Authenticated ?: return false
+        if (auth.isAnonymous || CloudflareAccountClient.currentSession?.userId != auth.userId)
+            return false
+        val cloudProfile = ProfileRepository.state.value.profiles
+            .firstOrNull { it.profileIndex == profileId && it.id.matches(Regex("[a-fA-F0-9-]{36}")) }
+            ?: return false
+        val accountId = auth.userId
+        val rows = CloudflareAccountClient.syncCategory(cloudProfile.id, "watch_progress")
+        val remote = CloudflareWatchProgressCodec.decode(rows)
+        if (!isActiveOperation(profileId, generation) ||
+            CloudflareAccountClient.currentSession?.userId != accountId) return false
+
+        val dirty = dirtyProgressKeysSnapshot()
+        for ((key, row) in remote) {
+            if (key in dirty) {
+                val local = localEntry(key)
+                if (!row.deleted && row.entry != null && local != null &&
+                    row.entry.lastUpdatedEpochMs >= local.lastUpdatedEpochMs) {
+                    upsertLocalEntry(row.entry)
+                    clearProgressDirty(key)
+                }
+                continue
+            }
+            val local = localEntry(key)
+            if (row.deleted) removeLocalEntry(key)
+            else if (row.entry != null &&
+                (local == null || row.entry.lastUpdatedEpochMs > local.lastUpdatedEpochMs))
+                upsertLocalEntry(row.entry)
+        }
+        hasLoadedNuvioRemoteProgress = true
+        publish()
+        persist()
+
+        // Rattraper les progrès modifiés pendant une coupure réseau.
+        for (key in dirtyProgressKeysSnapshot()) {
+            val local = localEntry(key) ?: continue
+            if (!isActiveOperation(profileId, generation) ||
+                CloudflareAccountClient.currentSession?.userId != accountId) return false
+            runCatching { pushCloudflareProgress(profileId, local) }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    log.w(error) { "Progression cloud en attente, aucune perte locale" }
+                }
+        }
+        return true
+    }
+
+    /** Contrôle CAS D1 : un second appareil ne peut écraser un progrès plus récent. */
+    private suspend fun pushCloudflareProgress(profileId: Int, entry: WatchProgressEntry) =
+        cloudProgressWriteMutex.withLock {
+            val auth = AuthRepository.state.value as? AuthState.Authenticated
+                ?: return@withLock
+            if (auth.isAnonymous || CloudflareAccountClient.currentSession?.userId != auth.userId)
+                return@withLock
+            val cloudProfile = ProfileRepository.state.value.profiles
+                .firstOrNull { it.profileIndex == profileId && it.id.matches(Regex("[a-fA-F0-9-]{36}")) }
+                ?: return@withLock
+            val key = entry.resolvedProgressKey()
+            if (key.isBlank() || key.length > 200) return@withLock
+            val remote = CloudflareWatchProgressCodec.decode(
+                CloudflareAccountClient.syncCategory(cloudProfile.id, "watch_progress")
+            )[key]
+            val newer = remote?.entry
+            if (newer != null && newer.lastUpdatedEpochMs >= entry.lastUpdatedEpochMs) {
+                if (currentProfileId == profileId && isActiveOperation(profileId, profileGeneration)) {
+                    upsertLocalEntry(newer)
+                    clearProgressDirty(key)
+                    publish()
+                    persist()
+                }
+                return@withLock
+            }
+            CloudflareAccountClient.writeSync(
+                cloudProfile.id, "watch_progress", key,
+                CloudflareWatchProgressCodec.payload(entry),
+                revision = remote?.revision ?: 0,
+                deleted = false
+            )
+            if (CloudflareAccountClient.currentSession?.userId == auth.userId)
+                recordSuccessfulPush(
+                    profileId = profileId,
+                    operationGeneration = profileGeneration.takeIf { currentProfileId == profileId },
+                    entries = listOf(entry)
+                )
+        }
 
     private suspend fun pullNuvioSnapshotFromServer(
         profileId: Int,
@@ -1403,6 +1509,16 @@ object WatchProgressRepository {
 
     private fun pushScrobbleToServer(entry: WatchProgressEntry, profileId: Int) {
         if (ServerItemRef.isServerId(entry.parentMetaId)) return
+        if (CloudflareAccountClient.enabled) {
+            accountScopeSnapshot().launch {
+                runCatching { pushCloudflareProgress(profileId, entry) }
+                    .onFailure { error ->
+                        if (error is CancellationException) throw error
+                        log.w(error) { "Progression D1 non envoyée ; sauvegarde locale conservée" }
+                    }
+            }
+            return
+        }
         val operationGeneration = profileGeneration.takeIf { profileId == currentProfileId }
         accountScopeSnapshot().launch {
             runCatching {
@@ -1419,6 +1535,11 @@ object WatchProgressRepository {
     }
 
     private fun pushDeleteToServer(entries: Collection<WatchProgressEntry>) {
+        if (CloudflareAccountClient.enabled) {
+            // Les suppressions D1 exigent un tombstone CAS ; jamais de retour
+            // vers l'ancien Supabase pendant une session Kovelyx.
+            return
+        }
         if (activeSource.providerId != null) return
         val entries = entries.filterNot { ServerItemRef.isServerId(it.parentMetaId) }
         val profileId = currentProfileId
