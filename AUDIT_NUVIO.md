@@ -221,7 +221,7 @@ Fichiers inspectés : 4523
 
 ### Configuration générale (63 correspondances)
 
-- apps/tv/app/build.gradle.kts:496 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
+- apps/tv/app/build.gradle.kts:529 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Color.kt:55 : data class NuvioMediaColors(
@@ -300,8 +300,8 @@ Fichiers inspectés : 4523
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6736 lignes.
-- apps/mobile : 6949 lignes.
+- apps/tv : 6737 lignes.
+- apps/mobile : 6950 lignes.
 - apps/desktop : 7864 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
