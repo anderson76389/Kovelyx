@@ -196,6 +196,13 @@ class LocalhostZeroCopyDataSourceTest {
         thread {
             try {
                 val client = serverSocket.accept()
+                // Respecter le protocole HTTP : attendre la ligne de requête
+                // et les en-têtes avant d'envoyer la réponse 404.
+                val reader = client.getInputStream().bufferedReader()
+                while (true) {
+                    val line = reader.readLine()
+                    if (line.isNullOrEmpty()) break
+                }
                 val out = client.getOutputStream()
                 out.write(responseHeaders.toByteArray())
                 out.flush()
@@ -217,12 +224,64 @@ class LocalhostZeroCopyDataSourceTest {
             .build()
         
         try {
-            assertThrows(HttpDataSource.InvalidResponseCodeException::class.java) {
+            val failure = assertThrows(HttpDataSource.HttpDataSourceException::class.java) {
                 dataSource.open(dataSpec)
             }
+            // Vérifier la réponse 404 même si le transport enveloppe l'exception.
+            val code = generateSequence(failure as Throwable) { it.cause }
+                .filterIsInstance<HttpDataSource.InvalidResponseCodeException>()
+                .firstOrNull()?.responseCode
+            assertEquals(404, code)
         } finally {
             dataSource.close()
             serverSocket.close()
         }
     }
+
+    @Test
+    fun testOtherHttpErrorStatusCodesStayIntact() {
+        for (status in listOf(403, 416, 500, 503)) {
+            ServerSocket(0).use { server ->
+                server.soTimeout = 5000
+                val port = server.localPort
+                val worker = thread(isDaemon = true, name = "kovelyx-http-$status") {
+                    runCatching {
+                        server.accept().use { client ->
+                            client.soTimeout = 5000
+                            val input = client.getInputStream().bufferedReader()
+                            while (true) {
+                                val line = input.readLine()
+                                if (line.isNullOrEmpty()) break
+                            }
+                            val response = "HTTP/1.1 $status Test\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                            client.getOutputStream().apply {
+                                write(response.toByteArray(Charsets.US_ASCII))
+                                flush()
+                            }
+                        }
+                    }
+                }
+                val uri = mockk<Uri>()
+                every { uri.host } returns "127.0.0.1"
+                every { uri.port } returns port
+                every { uri.path } returns "/missing.mp4"
+                every { uri.query } returns null
+                val source = LocalhostZeroCopyDataSource()
+                try {
+                    val failure = assertThrows(HttpDataSource.HttpDataSourceException::class.java) {
+                        source.open(DataSpec.Builder().setUri(uri).build())
+                    }
+                    val actual = generateSequence(failure as Throwable) { it.cause }
+                        .filterIsInstance<HttpDataSource.InvalidResponseCodeException>()
+                        .firstOrNull()?.responseCode
+                    assertEquals("HTTP $status doit être conservé", status, actual)
+                } finally {
+                    source.close()
+                    server.close()
+                    worker.join(5000)
+                }
+            }
+        }
+    }
+
 }
