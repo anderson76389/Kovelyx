@@ -6,6 +6,12 @@ on:
     paths:
       - 'apps/desktop/**'
       - '!apps/desktop/**/*.md'
+      - 'apps/mobile/**'
+      - 'apps/tv/**'
+      - 'scripts/media3/**'
+      - 'scripts/publish-unified-preview.sh'
+      - '.github/workflows/publish-unified-preview.yml'
+      - '.github/workflows/build.yml'
       - 'vendor/engine/**'
       - 'scripts/generate-windows-icon.py'
       - 'scripts/generate-compose-brand.py'
