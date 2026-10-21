@@ -11,8 +11,10 @@ internal actual object WatchProgressStorage {
     private fun scopedKey(profileId: Int): String {
         val auth = AuthRepository.state.value as? AuthState.Authenticated
         val owner = auth?.userId?.takeIf {
-            CloudflareAccountClient.enabled && !auth.isAnonymous &&
-                CloudflareAccountClient.currentSession?.userId == it
+            // L'identité de stockage reste celle de l'état Auth même
+            // pendant la déconnexion (jeton déjà effacé) : ne jamais
+            // retomber sur la clé des invités entre deux transitions.
+            CloudflareAccountClient.enabled && !auth.isAnonymous
         }
         return accountScopedProgressStorageKey(
             legacyKey = "watch_progress_$profileId", profileId = profileId, cloudOwnerId = owner
