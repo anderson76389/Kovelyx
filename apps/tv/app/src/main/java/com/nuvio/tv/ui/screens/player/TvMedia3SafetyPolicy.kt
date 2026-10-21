@@ -22,7 +22,7 @@ internal object TvMedia3SafetyPolicy {
         return octets.size == 4 && octets[0] == "127" &&
             octets.drop(1).all { part ->
                 part.isNotEmpty() && part.all(Char::isDigit) &&
-                    part.toIntOrNull() in 0..255
+                    (part.toIntOrNull()?.let { it in 0..255 } == true)
             }
     }
 }
