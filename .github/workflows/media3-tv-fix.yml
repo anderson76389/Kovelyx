@@ -65,14 +65,18 @@ jobs:
         run: |
           set -euo pipefail
           ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      # Build Media3 even when an unrelated full-TV unit test fails. The
+      # workflow remains RED on those failures: no tests are skipped or hidden.
       - name: Construire l'APK TV à partir des AAR réparés
+        id: build_media3_tv
+        if: ${{ success() || failure() }}
         working-directory: apps/tv
         shell: bash
         run: |
           set -euo pipefail
           ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
       - name: Conserver l'APK de validation
-        if: success()
+        if: ${{ always() && steps.build_media3_tv.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-tv-media3-fixed-debug-apk
