@@ -7,6 +7,13 @@ on:
       - '.github/workflows/build.yml'
       - 'apps/tv/**'
       - 'apps/mobile/**'
+      - 'apps/desktop/**'
+      - 'vendor/engine/**'
+      - 'scripts/media3/**'
+      - 'scripts/desktop-release-version.py'
+      - 'scripts/publish-unified-preview.sh'
+      - '.github/workflows/publish-unified-preview.yml'
+      - '.github/workflows/windows.yml'
   workflow_dispatch:
     inputs:
       platform:
@@ -44,9 +51,23 @@ jobs:
           filters: |
             tv:
               - 'apps/tv/**'
+              - 'apps/mobile/**'
+              - 'apps/desktop/**'
+              - 'vendor/engine/**'
+              - 'scripts/media3/**'
+              - 'scripts/desktop-release-version.py'
+              - 'scripts/publish-unified-preview.sh'
+              - '.github/workflows/publish-unified-preview.yml'
               - '.github/workflows/build.yml'
             mobile:
+              - 'apps/tv/**'
               - 'apps/mobile/**'
+              - 'apps/desktop/**'
+              - 'vendor/engine/**'
+              - 'scripts/media3/**'
+              - 'scripts/desktop-release-version.py'
+              - 'scripts/publish-unified-preview.sh'
+              - '.github/workflows/publish-unified-preview.yml'
               - '.github/workflows/build.yml'
 
   tv:
