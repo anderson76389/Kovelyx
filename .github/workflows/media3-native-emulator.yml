@@ -46,16 +46,9 @@ jobs:
           disk-size: 6144M
           disable-animations: true
           script: |
-            # Emulator runner executes this script with /bin/sh, not Bash.
-            set -eu
-            cd apps/tv
-            chmod +x gradlew
-            # Run on a real Android runtime, not merely mocked JVM classes.
-            # Two native-memory lifecycle regressions plus real direct-buffer copies.
-            ./gradlew :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 \
-              -Pkotlin.compiler.execution.strategy=in-process \
-              -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
-              -Pandroid.testInstrumentationRunnerArguments.class="androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak,androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle,androidx.media3.exoplayer.source.SampleDataQueueNativeTest"
+            # Emulator runner starts a separate /bin/sh for EACH command line.
+            # Keep cwd and Gradle invocation in the SAME shell command.
+            chmod +x apps/tv/gradlew && ./apps/tv/gradlew -p apps/tv :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class="androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak,androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle,androidx.media3.exoplayer.source.SampleDataQueueNativeTest"
       - name: Préserver les résultats et diagnostics
         if: always()
         uses: actions/upload-artifact@v4
