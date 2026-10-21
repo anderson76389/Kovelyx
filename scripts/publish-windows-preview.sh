@@ -121,6 +121,12 @@ else
     dist/*.exe dist/*.exe.sha256 dist/*.msi dist/*.msi.sha256 dist/*.zip dist/*.zip.sha256
 fi
 
+# Immutable proof consumed by the multi-platform publisher. It binds the
+# already-published Windows release to the successful source build.
+jq -n --arg tag "$tag" --arg source_sha "$source_sha" --argjson build_run_id "$run_id" \
+  '{tag:$tag,source_sha:$source_sha,build_run_id:$build_run_id}' \
+  > dist/kovelyx-windows-release-proof.json
+
 echo "Published Windows preview: $tag"
 {
   echo "### Windows preview $tag"
