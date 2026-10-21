@@ -356,6 +356,39 @@ composeCompiler {
     stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability_config.conf"))
 }
 
+// Media3 TV : réparer de façon reproductible les deux classes binaires historiques.
+// Les fichiers d'origine dans libs/ restent inchangés et leur SHA-256 est vérifié.
+// Les AAR corrigés sont générés en build/, donc jamais dans les sources publiées.
+val media3PatchedDir = layout.buildDirectory.dir("generated/kovelyx-media3")
+val media3PatcherSource = rootProject.file("../../scripts/media3/Media3AarPatcher.java")
+val media3HttpHelperSource = rootProject.file("../../scripts/media3/KovelyxHttpStatus.java")
+val prepareKovelyxMedia3Aars = tasks.register<Exec>("prepareKovelyxMedia3Aars") {
+    inputs.files(
+        file("libs/lib-exoplayer-release.aar"),
+        file("libs/lib-datasource-release.aar"),
+        media3PatcherSource,
+        media3HttpHelperSource
+    )
+    outputs.files(
+        media3PatchedDir.map { it.file("lib-exoplayer-release.aar") },
+        media3PatchedDir.map { it.file("lib-datasource-release.aar") }
+    )
+    executable = "java"
+    args(
+        "--add-exports=java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED",
+        media3PatcherSource.absolutePath,
+        file("libs").absolutePath,
+        media3PatchedDir.get().asFile.absolutePath,
+        media3HttpHelperSource.absolutePath
+    )
+}
+// Les AAR doivent exister avant résolution des classpaths Kotlin et Java.
+tasks.configureEach {
+    if (name == "preBuild" || name.startsWith("compile")) {
+        dependsOn(prepareKovelyxMedia3Aars)
+    }
+}
+
 // Globally exclude stock media3 modules — replaced by local :nuvio-exoplayer-engine module
 configurations.all {
     exclude(group = "androidx.media3", module = "media3-exoplayer")
@@ -479,9 +512,9 @@ dependencies {
     // Nuvio Engine local AARs (replaces lib-exoplayer, lib-common, lib-datasource, lib-datasource-okhttp, lib-exoplayer-hls, lib-extractor)
     implementation(files(
         "libs/lib-common-release.aar",
-        "libs/lib-datasource-release.aar",
+        media3PatchedDir.get().file("lib-datasource-release.aar").asFile,
         "libs/lib-datasource-okhttp-release.aar",
-        "libs/lib-exoplayer-release.aar",
+        media3PatchedDir.get().file("lib-exoplayer-release.aar").asFile,
         "libs/lib-exoplayer-hls-release.aar",
         "libs/lib-extractor-release.aar"
     ))
