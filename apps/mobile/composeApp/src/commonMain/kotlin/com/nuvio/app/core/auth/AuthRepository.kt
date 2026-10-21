@@ -66,7 +66,7 @@ object AuthRepository {
                         _state.value = AuthState.Unauthenticated
                     } else {
                         LibraryRepository.clearLocalState()
-            WatchProgressRepository.clearLocalState()
+                        WatchProgressRepository.clearLocalState()
                         ProfileRepository.clearInMemory()
                         _state.value = AuthState.Authenticated(
                             userId = restored.userId,
@@ -79,8 +79,7 @@ object AuthRepository {
                             ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
                                 LibraryRepository.ensureLoaded()
                                 LibraryRepository.synchronizeCloudflareLibrary(profileId)
-                        WatchProgressRepository.pullFromServer(profileId)
-                        WatchProgressRepository.pullFromServer(profileId)
+                                WatchProgressRepository.pullFromServer(profileId)
                             }
                         }.onFailure { error ->
                             log.w(error) { "Cloudflare : profils/bibliothèque à retenter, données locales préservées" }
@@ -201,6 +200,7 @@ object AuthRepository {
                     ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
                         LibraryRepository.ensureLoaded()
                         LibraryRepository.synchronizeCloudflareLibrary(profileId)
+                        WatchProgressRepository.pullFromServer(profileId)
                     }
                 }.onFailure { failure ->
                     log.w(failure) { "Kovelyx Cloud : récupération initiale non disponible, données locales intactes" }
