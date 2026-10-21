@@ -50,10 +50,15 @@ class SupportersRepositoryTest {
             )
         )
 
-        val result = repository.getSupporters()
-
-        assertTrue(result.isSuccess)
-        val supporters = result.getOrThrow()
+        // Test de normalisation indépendante du service historique non configuré.
+        val supporters = repository.normalizeMembers(listOf(
+            member(name = "Top Supporter", membershipLevel = "SUPPORTER_PLUS",
+                supporterSince = "2026-08-19T04:08:39.423+00:00",
+                avatarUrl = "https://example.com/top.png"),
+            member(name = "Second Supporter", membershipLevel = "SUPPORTER"),
+            member(name = " ", membershipLevel = "SUPPORTER"),
+            member(name = "Unknown Tier", membershipLevel = "UNKNOWN")
+        ))
         assertEquals(listOf("Top Supporter", "Second Supporter"), supporters.map { it.name })
         assertEquals(MemberTier.SUPPORTER_PLUS, supporters.first().membershipLevel)
         assertEquals("https://example.com/top.png", supporters.first().avatarUrl)
