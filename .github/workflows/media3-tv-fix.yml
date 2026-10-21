@@ -19,7 +19,7 @@ permissions:
   contents: read
 concurrency:
   group: kovelyx-media3-verification
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   media3-tests-and-apk:
     name: Tester les AAR corrigés et construire la TV
