@@ -96,6 +96,15 @@ val releaseKeyPasswordValue = env("KOVELYX_RELEASE_KEY_PASSWORD")
 val releaseStorePasswordValue = env("KOVELYX_RELEASE_STORE_PASSWORD")
     ?: localProperties.getProperty("KOVELYX_RELEASE_STORE_PASSWORD", "")
 
+// Release CI supplies these two values from the same SHA as desktop/mobile.
+// A direct local Gradle build retains the historical TV version by default.
+val kovelyxSharedVersionName = providers.gradleProperty("kovelyx.app.versionName").orNull
+    ?: "1.1.0-beta.5"
+val kovelyxSharedVersionCode = providers.gradleProperty("kovelyx.app.versionCode").orNull?.let { raw ->
+    raw.toIntOrNull()?.takeIf { it > 1068 }
+        ?: error("Kovelyx shared Android TV versionCode must be > 1068")
+} ?: 1068
+
 android {
     namespace = "com.nuvio.tv"
     compileSdk = 36
@@ -106,8 +115,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1068
-        versionName = "1.1.0-beta.5"
+        versionCode = kovelyxSharedVersionCode
+        versionName = kovelyxSharedVersionName
 
         buildConfigField("String", "KOVELYX_CLOUD_URL", buildConfigString(localProperties.getProperty("KOVELYX_CLOUD_URL", "")))
         buildConfigField("String", "PARENTAL_GUIDE_API_URL", "\"${localProperties.getProperty("PARENTAL_GUIDE_API_URL", "")}\"")
