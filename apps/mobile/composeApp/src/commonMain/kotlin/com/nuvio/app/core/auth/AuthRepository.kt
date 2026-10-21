@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.features.library.LibraryRepository
 import com.nuvio.app.features.profiles.ProfileRepository
+import com.nuvio.app.features.watchprogress.WatchProgressRepository
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
@@ -65,6 +66,7 @@ object AuthRepository {
                         _state.value = AuthState.Unauthenticated
                     } else {
                         LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
                         ProfileRepository.clearInMemory()
                         _state.value = AuthState.Authenticated(
                             userId = restored.userId,
@@ -148,6 +150,7 @@ object AuthRepository {
             // le jeton d'un ancien compte du même appareil.
             CloudflareAccountClient.clearLocalSession()
             LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
             ProfileRepository.clearInMemory()
         }
         val userId = Uuid.random().toString()
@@ -183,6 +186,7 @@ object AuthRepository {
             // Les bibliothèques invité et autres comptes restent sur disque,
             // mais ne doivent pas être présentées sous la nouvelle identité.
             LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
             ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             _state.value = AuthState.Authenticated(
@@ -217,6 +221,7 @@ object AuthRepository {
         if (CloudflareAccountClient.enabled) {
             val logout = runCatching { CloudflareAccountClient.signOut() }
             LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
             ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             // Ne jamais effacer les profils, la bibliothèque ou la progression
@@ -269,6 +274,7 @@ object AuthRepository {
         if (CloudflareAccountClient.enabled) {
             CloudflareAccountClient.clearLocalSession()
             LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
             ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             _state.value = AuthState.Unauthenticated
