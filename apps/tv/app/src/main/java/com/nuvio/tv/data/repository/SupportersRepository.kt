@@ -30,11 +30,12 @@ class SupportersRepository @Inject constructor(
             error(appContext.getString(com.nuvio.tv.R.string.supporters_error_api_http, response.code()))
         }
 
-        response.body()
-            ?.top
-            ?.members
-            .orEmpty()
-            .mapNotNull { member ->
+        normalizeMembers(response.body()?.top?.members.orEmpty())
+    }
+
+    // Fonction métier vérifiable sans dépendre d'un endpoint Nuvio désactivé.
+    internal fun normalizeMembers(members: List<com.nuvio.tv.data.remote.dto.SupportersWallMemberDto>): List<SupporterMember> =
+        members.mapNotNull { member ->
                 val name = member.displayName?.trim().orEmpty()
                 val membershipLevel = MemberTier.entries.firstOrNull {
                     it.name == member.membershipLevel?.trim()
@@ -52,5 +53,4 @@ class SupportersRepository @Inject constructor(
             .mapIndexed { index, supporter ->
                 supporter.copy(key = "${supporter.key}#$index")
             }
-    }
 }
