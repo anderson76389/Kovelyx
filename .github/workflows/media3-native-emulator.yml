@@ -46,7 +46,8 @@ jobs:
           disk-size: 6144M
           disable-animations: true
           script: |
-            set -euo pipefail
+            # Emulator runner executes this script with /bin/sh, not Bash.
+            set -eu
             cd apps/tv
             chmod +x gradlew
             # Run on a real Android runtime, not merely mocked JVM classes.
