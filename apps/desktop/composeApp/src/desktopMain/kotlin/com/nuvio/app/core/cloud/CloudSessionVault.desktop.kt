@@ -27,7 +27,9 @@ internal actual object CloudSessionVault {
 
     private val store by lazy { DesktopStorage.store("kovelyx_cloud_secure_session_v1") }
 
-    private interface Crypt32 : StdCallLibrary {
+    // JNA instancie ces interfaces et structures par réflexion : elles doivent
+    // être visibles depuis son ClassLoader, sinon IllegalAccessException.
+    interface Crypt32 : StdCallLibrary {
         fun CryptProtectData(
             input: DataBlob, description: WString?, entropy: Pointer?,
             reserved: Pointer?, prompt: Pointer?, flags: Int, output: DataBlob
@@ -39,11 +41,11 @@ internal actual object CloudSessionVault {
         ): Boolean
     }
 
-    private interface Kernel32 : StdCallLibrary {
+    interface Kernel32 : StdCallLibrary {
         fun LocalFree(pointer: Pointer?): Pointer?
     }
 
-    private class DataBlob() : Structure() {
+    class DataBlob() : Structure() {
         @JvmField var cbData: Int = 0
         @JvmField var pbData: Pointer? = null
         override fun getFieldOrder(): List<String> = listOf("cbData", "pbData")
