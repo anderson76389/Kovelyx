@@ -53,12 +53,13 @@ class Media3VideoDecodeSmokeTest {
         val ready = AtomicBoolean(false)
         val videoSizeSeen = AtomicBoolean(false)
         val problem = AtomicReference<PlaybackException?>()
-        lateinit var player: ExoPlayer
+        var player: ExoPlayer? = null
 
         try {
             instrumentation.runOnMainSync {
-                player = ExoPlayer.Builder(context).build()
-                player.addListener(object : Player.Listener {
+                val activePlayer = ExoPlayer.Builder(context).build()
+                player = activePlayer
+                activePlayer.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY) ready.set(true)
                         if (state == Player.STATE_ENDED) done.countDown()
@@ -75,9 +76,9 @@ class Media3VideoDecodeSmokeTest {
                         done.countDown()
                     }
                 })
-                player.setMediaItem(MediaItem.fromUri(Uri.fromFile(mp4File)))
-                player.prepare()
-                player.play()
+                activePlayer.setMediaItem(MediaItem.fromUri(Uri.fromFile(mp4File)))
+                activePlayer.prepare()
+                activePlayer.play()
             }
 
             val finished = done.await(35, TimeUnit.SECONDS)
@@ -86,13 +87,14 @@ class Media3VideoDecodeSmokeTest {
             assertTrue("Media3 never reached READY", ready.get())
             assertTrue("H.264 video dimensions were not recognized", videoSizeSeen.get())
             instrumentation.runOnMainSync {
-                assertEquals("video/avc", player.videoFormat?.sampleMimeType)
-                assertTrue("Unexpected video duration", player.duration in 1_800L..2_500L)
-                assertEquals(Player.STATE_ENDED, player.playbackState)
+                val activePlayer = checkNotNull(player)
+                assertEquals("video/avc", activePlayer.videoFormat?.sampleMimeType)
+                assertTrue("Unexpected video duration", activePlayer.duration in 1_800L..2_500L)
+                assertEquals(Player.STATE_ENDED, activePlayer.playbackState)
             }
         } finally {
-            if (::player.isInitialized) {
-                instrumentation.runOnMainSync { player.release() }
+            player?.let { activePlayer ->
+                instrumentation.runOnMainSync { activePlayer.release() }
             }
             mp4File.delete()
         }
