@@ -6,11 +6,6 @@ on:
       - "Kovelyx Windows - MSI et tests de packaging"
     types: [completed]
     branches: [main]
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/publish-windows-preview.yml'
-      - 'scripts/publish-windows-preview.sh'
   workflow_dispatch:
     inputs:
       build_run_id:
@@ -51,6 +46,15 @@ jobs:
           GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
           BUILD_RUN_ID: ${{ github.event.workflow_run.id || inputs.build_run_id || '' }}
         run: bash scripts/publish-windows-preview.sh
+
+      - name: Publier la preuve exacte de la Release Windows
+        if: ${{ success() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-windows-release-proof
+          path: dist/kovelyx-windows-release-proof.json
+          if-no-files-found: error
+          retention-days: 90
 
       # La publication en Releases peut être refusée (HTTP 403) même quand
       # les installateurs sont valides. Ne pas jeter ces fichiers vérifiés.
