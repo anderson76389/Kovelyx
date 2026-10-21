@@ -15,6 +15,14 @@ internal object TvMedia3SafetyPolicy {
         if (!scheme.equals("http", ignoreCase = true) &&
             !scheme.equals("https", ignoreCase = true)) return false
         val normalized = host?.trim('[', ']')?.lowercase() ?: return false
-        return normalized == "127.0.0.1" || normalized == "::1" || normalized == "localhost"
+        // Couvrir toutes les variantes loopback, sans résolution DNS.
+        if (normalized == "localhost" || normalized == "::1" ||
+            normalized == "0:0:0:0:0:0:0:1") return true
+        val octets = normalized.split('.')
+        return octets.size == 4 && octets[0] == "127" &&
+            octets.drop(1).all { part ->
+                part.isNotEmpty() && part.all(Char::isDigit) &&
+                    part.toIntOrNull() in 0..255
+            }
     }
 }
