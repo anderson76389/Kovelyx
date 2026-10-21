@@ -52,7 +52,7 @@ jobs:
           shellcheck --severity=warning scripts/publish-unified-preview.sh
           shellcheck --severity=warning scripts/publish-windows-preview.sh
           grep -Fq -- '--prerelease' scripts/publish-windows-preview.sh
-          grep -Fq 'source_sha == $sha' scripts/publish-unified-preview.sh
+          grep -Fq "source_sha == \$sha" scripts/publish-unified-preview.sh
           grep -Fq 'apk' scripts/publish-unified-preview.sh
 
   publish:
