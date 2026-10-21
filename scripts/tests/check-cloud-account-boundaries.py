@@ -50,6 +50,19 @@ assert "pendingDeletes" in cloud_store and "currentRev" in cloud_store
 assert "cloud?.takeIf" in tv_repo and "guestItems" in tv_repo
 assert "CloudflareTvLibraryStore.reset()" in tv_account
 assert "locals.size == 1 && remotes.size == 1" in profile_matcher
+for relative in (
+    "core/sync/WatchProgressSyncService.kt",
+    "core/sync/WatchedItemsSyncService.kt",
+):
+    source = (tv_root / relative).read_text(encoding="utf-8")
+    assert "CloudflareTvAccountClient.enabled" in source, f"{relative}: Cloudflare guard absent"
+    assert "check(!CloudflareTvAccountClient.enabled)" in source, f"{relative}: RPC Supabase non bloqué"
+    for name in ("pushToRemote", "pullFromRemote", "syncDeltaFromRemote", "syncSnapshotFromRemote"):
+        begin = source.find("suspend fun " + name + "(")
+        assert begin >= 0, f"{relative}: {name} absent"
+        end = source.find("return@withContext Result.failure(", begin)
+        assert 0 <= end - begin < 600, f"{relative}: {name} non bloqué en mode Cloudflare"
+print("TV: progression et historique Supabase bloqués pour les comptes Cloudflare")
 print("TV: session sécurisée, bibliothèque D1 distincte et association non ambiguë détectées")
 print("NOTE: contrôle statique uniquement; la compilation, l'essai réel et les conflits D1 restent à valider")
 

@@ -2,6 +2,7 @@ package com.nuvio.tv.core.sync
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tracking.TrackingProgressProviderRegistry
 import com.nuvio.tv.core.tracking.providerId
@@ -63,6 +64,11 @@ class WatchedItemsSyncService @Inject constructor(
     }
 
     private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
+        // Barrière de secours : aucun RPC historique ne doit atteindre Supabase
+        // pour un compte Kovelyx Cloudflare, même depuis un nouvel appelant.
+        check(!CloudflareTvAccountClient.enabled) {
+            "Synchronisation TV Supabase désactivée pour les comptes Kovelyx"
+        }
         return try {
             block()
         } catch (e: Exception) {
@@ -72,6 +78,7 @@ class WatchedItemsSyncService @Inject constructor(
     }
 
     private suspend fun shouldUseSupabaseWatchProgressSync(profileId: Int): Boolean {
+        if (CloudflareTvAccountClient.enabled) return false
         val source = traktSettingsDataStore.getWatchProgressSource(profileId)
         val providerId = source.providerId ?: return true
         return trackingProviderRegistry.provider(providerId)?.isAuthenticated?.first() != true
@@ -108,6 +115,13 @@ class WatchedItemsSyncService @Inject constructor(
     }
 
     suspend fun pushToRemote(profileId: Int = profileManager.activeProfileId.value): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         outboundSyncMutex(profileId).withLock {
             pushToRemoteLocked(profileId)
         }
@@ -134,6 +148,13 @@ class WatchedItemsSyncService @Inject constructor(
         updateLastSuccessfulPush: Boolean = false,
         profileId: Int = profileManager.activeProfileId.value
     ): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         outboundSyncMutex(profileId).withLock {
             pushItemsToRemoteLocked(items, updateLastSuccessfulPush, profileId)
         }
@@ -185,6 +206,13 @@ class WatchedItemsSyncService @Inject constructor(
     suspend fun pullFromRemote(
         profileId: Int = profileManager.activeProfileId.value
     ): Result<List<WatchedItem>> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         try {
             Log.d(TAG, "pullFromRemote: starting full watched items snapshot for profile $profileId")
             if (!shouldUseSupabaseWatchProgressSync(profileId)) {
@@ -233,6 +261,13 @@ class WatchedItemsSyncService @Inject constructor(
     suspend fun syncDeltaFromRemote(
         profileId: Int = profileManager.activeProfileId.value
     ): Result<WatchedItemsRemoteSyncResult> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         deltaSyncMutex.withLock {
             syncDeltaFromRemoteLocked(profileId)
         }
@@ -241,6 +276,13 @@ class WatchedItemsSyncService @Inject constructor(
     suspend fun syncSnapshotFromRemote(
         profileId: Int = profileManager.activeProfileId.value
     ): Result<WatchedItemsRemoteSyncResult> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         deltaSyncMutex.withLock {
             syncSnapshotFromRemoteLocked(profileId)
         }
@@ -407,6 +449,13 @@ class WatchedItemsSyncService @Inject constructor(
         episode: Int?,
         profileId: Int = profileManager.activeProfileId.value
     ): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         outboundSyncMutex(profileId).withLock {
             deleteKeysFromRemoteLocked(
                 keys = listOf(WatchedMutationKey(contentId, season, episode)),
@@ -420,6 +469,13 @@ class WatchedItemsSyncService @Inject constructor(
         episodes: List<Pair<Int, Int>>,
         profileId: Int = profileManager.activeProfileId.value
     ): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException(
+                    "Progression / historique TV Cloudflare D1 non encore synchronisé : données locales conservées"
+                )
+            )
+        }
         outboundSyncMutex(profileId).withLock {
             deleteKeysFromRemoteLocked(
                 keys = episodes.map { (season, episode) ->
