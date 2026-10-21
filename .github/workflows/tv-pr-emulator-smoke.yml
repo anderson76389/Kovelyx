@@ -86,7 +86,9 @@ jobs:
             adb logcat -d -v brief -s AndroidRuntime:E > /tmp/kovelyx-tv-pr/androidruntime.txt
             # android-emulator-runner exécute chaque ligne sous /bin/sh -c :
             # garder la condition sur une seule ligne pour éviter 'expecting fi'.
-            if grep -Fq "FATAL EXCEPTION" /tmp/kovelyx-tv-pr/androidruntime.txt; then echo "::error::Crash AndroidRuntime détecté sur l'émulateur"; exit 1; fi
+            # Vérifier uniquement le crash de notre processus, pas celui du service Google TV.
+            if grep -Fq "Process: com.kovelyx.tv.debug," /tmp/kovelyx-tv-pr/androidruntime.txt; then echo "::error::Crash du processus Kovelyx"; exit 1; fi
+            if grep -Fq "FATAL EXCEPTION" /tmp/kovelyx-tv-pr/androidruntime.txt; then echo "::warning::Crash d'un processus Google TV tiers (preuve conservée)"; fi
       - name: Archiver preuves TV, capture et signature SHA-256
         if: always()
         uses: actions/upload-artifact@v4
