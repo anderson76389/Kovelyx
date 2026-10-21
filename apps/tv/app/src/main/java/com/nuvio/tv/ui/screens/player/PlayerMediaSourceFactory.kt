@@ -579,8 +579,10 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         }
 
         internal fun isLoopbackUrl(url: String): Boolean {
-            val host = url.toHttpUrlOrNull()?.host ?: return false
-            return host == "127.0.0.1" || host == "::1" || host.equals("localhost", ignoreCase = true)
+            val parsed = url.toHttpUrlOrNull() ?: return false
+            // Keep the extended read timeout and SafeLoopbackDataSource routing in
+            // agreement: 127/8 and canonical IPv6 loopback are local too.
+            return TvMedia3SafetyPolicy.useSafeLoopbackHttp(parsed.scheme, parsed.host)
         }
 
         fun parseHeaders(headers: String?): Map<String, String> {
