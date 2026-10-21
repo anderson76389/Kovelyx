@@ -41,6 +41,30 @@ jobs:
           ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
             --tests 'androidx.media3.exoplayer.upstream.DefaultAllocatorTest' \
             --tests 'androidx.media3.datasource.LocalhostZeroCopyDataSourceTest'
+      - name: Vérifier les AAR réellement reconstruits
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in \
+            "lib-exoplayer-release.aar|androidx/media3/exoplayer/upstream/DefaultAllocator.class" \
+            "lib-datasource-release.aar|androidx/media3/datasource/KovelyxHttpStatus.class"; do
+            aar="${spec%%|*}"
+            clazz="${spec#*|}"
+            patched="app/build/generated/kovelyx-media3/$aar"
+            original="app/libs/$aar"
+            test -s "$patched"
+            test -s "$original"
+            test "$(sha256sum "$patched" | cut -d ' ' -f1)" != "$(sha256sum "$original" | cut -d ' ' -f1)"
+            unzip -p "$patched" classes.jar > /tmp/kovelyx-media3.jar
+            jar tf /tmp/kovelyx-media3.jar | grep -Fx "$clazz"
+          done
+      - name: Repasser la suite de tests TV complète
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
       - name: Construire l'APK TV à partir des AAR réparés
         working-directory: apps/tv
         shell: bash
