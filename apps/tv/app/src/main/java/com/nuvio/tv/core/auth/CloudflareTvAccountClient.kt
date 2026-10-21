@@ -230,7 +230,10 @@ internal object CloudflareTvAccountClient {
                     else -> null
                 }
             }
-        } catch (_: Exception) {
+        } catch (error: Exception) {
+            // L'annulation (déconnexion/navigation) ne doit jamais être cachée
+            // comme une panne réseau : elle doit interrompre la restauration.
+            if (error is kotlinx.coroutines.CancellationException) throw error
             // Une panne réseau conserve le coffre, sans autoriser la session.
             null
         }
