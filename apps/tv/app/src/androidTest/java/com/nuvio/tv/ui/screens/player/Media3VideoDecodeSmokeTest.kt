@@ -1,6 +1,10 @@
 package com.nuvio.tv.ui.screens.player
 
+import android.graphics.ImageFormat
+import android.media.ImageReader
 import android.net.Uri
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Base64
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -20,6 +24,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Actual Media3/MediaCodec device test. Replays a tiny 2-second 96x96 H.264 MP4
@@ -52,6 +57,16 @@ class Media3VideoDecodeSmokeTest {
         val done = CountDownLatch(1)
         val ready = AtomicBoolean(false)
         val videoSizeSeen = AtomicBoolean(false)
+        val decodedFrames = AtomicInteger(0)
+        val drainThread = HandlerThread("kovelyx-h264-output-drain").apply { start() }
+        val imageReader = ImageReader.newInstance(96, 96, ImageFormat.PRIVATE, 4)
+        imageReader.setOnImageAvailableListener({ reader ->
+            val image = reader.acquireLatestImage()
+            if (image != null) {
+                decodedFrames.incrementAndGet()
+                image.close()
+            }
+        }, Handler(drainThread.looper))
         val problem = AtomicReference<PlaybackException?>()
         var player: ExoPlayer? = null
 
@@ -59,6 +74,8 @@ class Media3VideoDecodeSmokeTest {
             instrumentation.runOnMainSync {
                 val activePlayer = ExoPlayer.Builder(context).build()
                 player = activePlayer
+                // A real decoder output surface, drained for every frame to avoid a stalled BufferQueue.
+                activePlayer.setVideoSurface(imageReader.surface)
                 activePlayer.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
                         if (state == Player.STATE_READY) ready.set(true)
@@ -86,6 +103,7 @@ class Media3VideoDecodeSmokeTest {
             assertNull("Media3 decoder or extractor reported an error", problem.get())
             assertTrue("Media3 never reached READY", ready.get())
             assertTrue("H.264 video dimensions were not recognized", videoSizeSeen.get())
+            assertTrue("The decoder did not emit any video frame to the output surface", decodedFrames.get() > 0)
             instrumentation.runOnMainSync {
                 val activePlayer = checkNotNull(player)
                 assertEquals("video/avc", activePlayer.videoFormat?.sampleMimeType)
@@ -96,6 +114,8 @@ class Media3VideoDecodeSmokeTest {
             player?.let { activePlayer ->
                 instrumentation.runOnMainSync { activePlayer.release() }
             }
+            imageReader.close()
+            drainThread.quitSafely()
             mp4File.delete()
         }
     }
