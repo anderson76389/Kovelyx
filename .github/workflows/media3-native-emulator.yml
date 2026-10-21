@@ -33,7 +33,7 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -e /dev/kvm ]]; then sudo chmod 666 /dev/kvm; fi
-      - name: Exécuter les tests natifs Media3 sur Google TV 34
+      - name: Tester le décodage vidéo H264 et la mémoire Media3 sur Google TV 34
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -48,7 +48,7 @@ jobs:
           script: |
             # Emulator runner starts a separate /bin/sh for EACH command line.
             # Keep cwd and Gradle invocation in the SAME shell command.
-            chmod +x apps/tv/gradlew && ./apps/tv/gradlew -p apps/tv :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class="androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak,androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle,androidx.media3.exoplayer.source.SampleDataQueueNativeTest"
+            chmod +x apps/tv/gradlew && ./apps/tv/gradlew -p apps/tv :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class="androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak,androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle,androidx.media3.exoplayer.source.SampleDataQueueNativeTest,com.nuvio.tv.ui.screens.player.Media3VideoDecodeSmokeTest"
       - name: Préserver les résultats et diagnostics
         if: always()
         uses: actions/upload-artifact@v4
