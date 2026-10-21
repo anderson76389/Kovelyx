@@ -188,6 +188,49 @@ try {
   const secondAccountWrite=await req("/v1/sync","POST",mobileEntry,bob.token);
   assert.equal(secondAccountWrite.status,404,"No cross-account write to another profile");
 
+  // Windows écrit la reprise, Android la relit et la met à jour ; un second
+  // compte ne doit jamais lire ou effacer cette progression.
+  const resume={
+    profileId:id,category:"watch_progress",itemKey:"603",
+    payload:{entry:{
+      contentType:"movie",parentMetaId:"603",parentMetaType:"movie",
+      videoId:"603",title:"Reprise Kovelyx",lastPositionMs:45000,
+      durationMs:120000,lastUpdatedEpochMs:1720010400000,
+      source:"local",isCompleted:false
+    }},
+    deleted:false,revision:0
+  };
+  const desktopResume=await req("/v1/sync","POST",resume,alice.token);
+  assert.equal(desktopResume.status,201,"Windows progress create");
+  assert.equal(desktopResume.data.revision,1);
+  const androidProgress=await req(
+    "/v1/sync?profileId="+id+"&category=watch_progress&limit=100",
+    "GET",null,alice.token);
+  assert.equal(androidProgress.status,200);
+  assert.equal(androidProgress.data.items.length,1);
+  assert.equal(androidProgress.data.items[0].payload.entry.lastPositionMs,45000);
+  const androidResume=await req("/v1/sync","POST",{
+    ...resume,revision:1,payload:{entry:{
+      ...resume.payload.entry,lastPositionMs:70000,lastUpdatedEpochMs:1720010405000
+    }}
+  },alice.token);
+  assert.equal(androidResume.status,200,"Android progress update");
+  assert.equal(androidResume.data.revision,2);
+  const staleDesktop=await req("/v1/sync","POST",resume,alice.token);
+  assert.equal(staleDesktop.status,409,"Ancienne reprise refusée (CAS)");
+  const forbiddenProgress=await req(
+    "/v1/sync?profileId="+id+"&category=watch_progress","GET",null,bob.token);
+  assert.equal(forbiddenProgress.status,404,"Progressions inter-comptes isolées");
+  const progressDelete=await req("/v1/sync","POST",{
+    profileId:id,category:"watch_progress",itemKey:"603",
+    payload:{},deleted:true,revision:2
+  },alice.token);
+  assert.equal(progressDelete.status,200,"Suppression du progrès persistée");
+  const progressAfterDelete=await req(
+    "/v1/sync?profileId="+id+"&category=watch_progress","GET",null,alice.token);
+  assert.equal(progressAfterDelete.data.items[0].deleted,true);
+  assert.equal(progressAfterDelete.data.items[0].revision,3);
+
   const deniedMedia=await req("/v1/media?profileId="+id+"&kind=avatar","GET",null,bob.token);
   assert.equal(deniedMedia.status,503,"R2 disabled by design on ephemeral Worker");
   const accountName=await req("/v1/profiles/update","POST",
