@@ -79,6 +79,8 @@ object AuthRepository {
                             ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
                                 LibraryRepository.ensureLoaded()
                                 LibraryRepository.synchronizeCloudflareLibrary(profileId)
+                        WatchProgressRepository.pullFromServer(profileId)
+                        WatchProgressRepository.pullFromServer(profileId)
                             }
                         }.onFailure { error ->
                             log.w(error) { "Cloudflare : profils/bibliothèque à retenter, données locales préservées" }

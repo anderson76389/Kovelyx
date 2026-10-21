@@ -11,6 +11,9 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 
+/** Tombstones D1 conservés après fermeture pour éviter de ressusciter une suppression hors ligne. */
+internal const val CLOUD_DELETED_PROGRESS_PREFIX = "cloud_deleted:"
+
 /** Métadonnées minimales, jamais les URL privées, cookies ou infos de lecteur. */
 internal data class CloudProgressRow(val revision: Int, val deleted: Boolean, val entry: WatchProgressEntry?)
 

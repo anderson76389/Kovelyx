@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.cloud.CloudflareAccountClient
+import kotlinx.serialization.json.buildJsonObject
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.addons.AddonManifest
 import com.nuvio.app.features.addons.AddonRepository
@@ -591,6 +592,9 @@ object WatchProgressRepository {
 
         val dirty = dirtyProgressKeysSnapshot()
         for ((key, row) in remote) {
+            // Une suppression encore à transmettre depuis cet appareil
+            // ne doit jamais être annulée par l'ancien snapshot distant.
+            if (CLOUD_DELETED_PROGRESS_PREFIX + key in dirty) continue
             if (key in dirty) {
                 val local = localEntry(key)
                 if (!row.deleted && row.entry != null && local != null &&
@@ -610,8 +614,23 @@ object WatchProgressRepository {
         publish()
         persist()
 
+        // Envoyer les suppressions tombstone CAS différées (y compris hors ligne).
+        for (pending in dirtyProgressKeysSnapshot().filter {
+            it.startsWith(CLOUD_DELETED_PROGRESS_PREFIX)
+        }) {
+            if (!isActiveOperation(profileId, generation) ||
+                CloudflareAccountClient.currentSession?.userId != accountId) return false
+            val key = pending.removePrefix(CLOUD_DELETED_PROGRESS_PREFIX)
+            runCatching { pushCloudflareDelete(profileId, key) }
+                .onFailure { error ->
+                    if (error is CancellationException) throw error
+                    log.w(error) { "Suppression cloud en attente ; état local conservé" }
+                }
+        }
         // Rattraper les progrès modifiés pendant une coupure réseau.
-        for (key in dirtyProgressKeysSnapshot()) {
+        for (key in dirtyProgressKeysSnapshot().filterNot {
+            it.startsWith(CLOUD_DELETED_PROGRESS_PREFIX)
+        }) {
             val local = localEntry(key) ?: continue
             if (!isActiveOperation(profileId, generation) ||
                 CloudflareAccountClient.currentSession?.userId != accountId) return false
@@ -623,6 +642,36 @@ object WatchProgressRepository {
         }
         return true
     }
+
+    /** Suppression persistante. Ne pas restaurer un épisode supprimé hors ligne. */
+    private suspend fun pushCloudflareDelete(profileId: Int, key: String) =
+        cloudProgressWriteMutex.withLock {
+            val auth = AuthRepository.state.value as? AuthState.Authenticated
+                ?: return@withLock
+            if (auth.isAnonymous || CloudflareAccountClient.currentSession?.userId != auth.userId)
+                return@withLock
+            if (key.isBlank() || key.length > 200) return@withLock
+            val cloudProfile = ProfileRepository.state.value.profiles
+                .firstOrNull { it.profileIndex == profileId && it.id.matches(Regex("[a-fA-F0-9-]{36}")) }
+                ?: return@withLock
+            val remote = CloudflareWatchProgressCodec.decode(
+                CloudflareAccountClient.syncCategory(cloudProfile.id, "watch_progress")
+            )[key]
+            if (remote?.deleted != true) {
+                CloudflareAccountClient.writeSync(
+                    cloudProfile.id, "watch_progress", key,
+                    buildJsonObject { },
+                    revision = remote?.revision ?: 0, deleted = true
+                )
+            }
+            if (CloudflareAccountClient.currentSession?.userId == auth.userId &&
+                currentProfileId == profileId && isActiveOperation(profileId, profileGeneration)) {
+                synchronized(entriesLock) {
+                    dirtyProgressKeys.remove(CLOUD_DELETED_PROGRESS_PREFIX + key)
+                }
+                persist()
+            }
+        }
 
     /** Contrôle CAS D1 : un second appareil ne peut écraser un progrès plus récent. */
     private suspend fun pushCloudflareProgress(profileId: Int, entry: WatchProgressEntry) =
@@ -1536,8 +1585,26 @@ object WatchProgressRepository {
 
     private fun pushDeleteToServer(entries: Collection<WatchProgressEntry>) {
         if (CloudflareAccountClient.enabled) {
-            // Les suppressions D1 exigent un tombstone CAS ; jamais de retour
-            // vers l'ancien Supabase pendant une session Kovelyx.
+            val profileId = currentProfileId
+            val keys = entries.map(WatchProgressEntry::resolvedProgressKey)
+                .filter { it.isNotBlank() && it.length <= 200 }
+            if (keys.isEmpty()) return
+            synchronized(entriesLock) {
+                keys.forEach { key ->
+                    dirtyProgressKeys.remove(key)
+                    dirtyProgressKeys.add(CLOUD_DELETED_PROGRESS_PREFIX + key)
+                }
+            }
+            persist()
+            accountScopeSnapshot().launch {
+                keys.forEach { key ->
+                    runCatching { pushCloudflareDelete(profileId, key) }
+                        .onFailure { error ->
+                            if (error is CancellationException) throw error
+                            log.w(error) { "Suppression D1 différée jusqu'à la prochaine synchronisation" }
+                        }
+                }
+            }
             return
         }
         if (activeSource.providerId != null) return
@@ -1723,12 +1790,17 @@ object WatchProgressRepository {
     private fun replaceDirtyProgressKeys(keys: Collection<String>) {
         synchronized(entriesLock) {
             dirtyProgressKeys = keys
-                .filterTo(mutableSetOf()) { key -> key in entriesByProgressKey }
+                .filterTo(mutableSetOf()) { key ->
+                    key in entriesByProgressKey ||
+                        (key.startsWith(CLOUD_DELETED_PROGRESS_PREFIX) &&
+                            key.length in (CLOUD_DELETED_PROGRESS_PREFIX.length + 1)..(CLOUD_DELETED_PROGRESS_PREFIX.length + 200))
+                }
         }
     }
 
     private fun markProgressDirty(entry: WatchProgressEntry) {
         synchronized(entriesLock) {
+            dirtyProgressKeys.remove(CLOUD_DELETED_PROGRESS_PREFIX + entry.resolvedProgressKey())
             dirtyProgressKeys += entry.resolvedProgressKey()
         }
     }
