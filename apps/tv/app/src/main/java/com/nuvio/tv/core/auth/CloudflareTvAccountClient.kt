@@ -1,6 +1,9 @@
 package com.nuvio.tv.core.auth
 
 import com.nuvio.tv.BuildConfig
+import android.content.Context
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -12,8 +15,8 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Client indépendant Workers / Better Auth : PAS de jeton Supabase.
- * Préversion : les sessions sont en mémoire et ne survivent pas au redémarrage,
- * jusqu'à la mise en place d'un coffre chiffré Android Keystore.
+ * La session native est conservée chiffrée par Android Keystore, puis
+ * vérifiée avec /v1/me avant d'être rétablie après un redémarrage.
  */
 internal object CloudflareTvAccountClient {
     data class Account(val id: String, val email: String, val bearerToken: String)
@@ -23,8 +26,49 @@ internal object CloudflareTvAccountClient {
         .readTimeout(30, TimeUnit.SECONDS)
         .followRedirects(false)
         .build()
+    @Volatile
     var account: Account? = null
         private set
+    private var sessionStore: CloudflareTvSessionStore? = null
+
+    /** Called from AuthManager at process startup; never assumes a valid remote session. */
+    suspend fun restoreSession(context: Context): Account? = withContext(Dispatchers.IO) {
+        sessionStore = CloudflareTvSessionStore(context)
+        val saved = sessionStore?.load(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            ?: return@withContext null
+        if (!enabled) return@withContext null
+        try {
+            val request = Request.Builder()
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/me")
+                .header("Authorization", "Bearer ${saved.bearerToken}")
+                .header("Accept", "application/json")
+                .get()
+                .build()
+            client.newCall(request).execute().use { response ->
+                if (response.code == 401 || response.code == 403) {
+                    sessionStore?.clear()
+                    return@withContext null
+                }
+                if (!response.isSuccessful) {
+                    Log.w("KovelyxTvAuth", "Vérification de session temporairement indisponible : HTTP ${response.code}")
+                    return@withContext null
+                }
+                val me = JSONObject(response.body?.string().orEmpty())
+                if (me.optString("id") != saved.id) {
+                    sessionStore?.clear()
+                    return@withContext null
+                }
+                if (account == null) account = saved
+                account
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            // Network failure: keep encrypted credentials for the next launch.
+            Log.w("KovelyxTvAuth", "Impossible de vérifier la session sauvegardée", error)
+            null
+        }
+    }
 
     private suspend fun post(endpoint: String, email: String, password: String): Pair<JSONObject,String> =
         withContext(Dispatchers.IO) {
@@ -59,12 +103,20 @@ internal object CloudflareTvAccountClient {
         check(id.isNotBlank() && address.isNotBlank() && token.length >= 16) {
             "Kovelyx Cloud : jeton invalide"
         }
-        return Account(id, address, token).also { account = it }
+        return Account(id, address, token).also { signedIn ->
+            account = signedIn
+            runCatching {
+                sessionStore?.save(signedIn, BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            }.onFailure { error ->
+                Log.w("KovelyxTvAuth", "Session connectée mais stockage chiffré indisponible", error)
+            }
+        }
     }
 
     suspend fun signOut() {
         val old = account
         account = null
+        sessionStore?.clear()
         if (old == null || !enabled) return
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
@@ -101,5 +153,6 @@ internal object CloudflareTvAccountClient {
 
     fun clearLocalSession() {
         account = null
+        sessionStore?.clear()
     }
 }
