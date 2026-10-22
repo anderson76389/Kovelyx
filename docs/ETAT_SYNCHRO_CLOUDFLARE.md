@@ -1,5 +1,14 @@
 # Kovelyx Cloudflare — état de la synchronisation
 
+## Avancée du 22 octobre 2026 — vérification des reprises sur Android TV
+
+Sur la PR nº 40, un **aperçu cloud TV en lecture seule** a été ajouté dans l'écran Compte : chaque profil D1 accessible au compte connecté affiche séparément le nombre d'éléments en bibliothèque et le nombre de reprises non supprimées. Le bouton *Actualiser les données cloud* relit les catégories `library` et `watch_progress` en pagination avec authentification Better Auth et vérification de la session avant acceptation du résultat. Une erreur réseau affiche un état d'indisponibilité ; aucune donnée invitée TV n'est écrasée.
+
+Cela **ne signifie pas que les positions de lecture se synchronisent dans le lecteur TV**. Il reste à brancher un adaptateur TV de progression véritablement isolé par compte/profil, définir un traitement des suppressions et conflits CAS hors ligne, tester la reprise dans le lecteur et valider le scénario Windows ↔ Android ↔ Android TV sur appareils réels. Les identifiants privés des sources et les mots de passe ne doivent jamais être envoyés dans les charges de synchronisation.
+
+La branche de migration possède déjà le stockage chiffré de session sur Windows (DPAPI) et Android/TV (AndroidKeyStore), avec validation des jetons avant restauration. **La branche `main` et les Releases publiques ne doivent pas être confondues avec cette PR non fusionnée.** Aucun déploiement Worker/D1/R2, aucune migration utilisateur et aucune publication de binaires de production ne sont effectués par cet ajout.
+
+
 _Mise à jour : 19 octobre 2026. Ce document décrit le code de la branche de migration, pas une fonctionnalité déjà déployée dans les Releases._
 
 ## Preuves disponibles
