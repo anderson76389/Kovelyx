@@ -35,8 +35,8 @@ internal object CloudflareTvAccountClient {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/" + route)
                 .header("Accept", "application/json")
-                // Better Auth exige l\u0027origine HTTPS pour les POST natifs.
-                .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd(\u0027/\u0027))
+                // Better Auth exige l'origine HTTPS pour les POST natifs.
+                .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
                 .post(json.toString().toRequestBody("application/json".toMediaType()))
                 .build()
             client.newCall(request).execute().use { response ->
@@ -70,7 +70,7 @@ internal object CloudflareTvAccountClient {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/sign-out")
                 .header("Authorization", "Bearer ${old.bearerToken}")
-                .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd(\u0027/\u0027))
+                .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
                 .post("{}".toRequestBody("application/json".toMediaType()))
                 .build()
             client.newCall(request).execute().use { response ->
