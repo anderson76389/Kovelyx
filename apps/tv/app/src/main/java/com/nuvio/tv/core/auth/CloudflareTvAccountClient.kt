@@ -373,6 +373,35 @@ internal object CloudflareTvAccountClient {
         result.getInt("revision").also { check(it > revision) }
     }
 
+    /** Reprise film/épisode, format identique aux clients Compose Windows/Android. */
+    suspend fun writeProgress(
+        profileId: String, itemKey: String, entry: JSONObject?,
+        revision: Int, deleted: Boolean
+    ): Int = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require(itemKey.length in 1..200 && revision >= 0)
+        val owner = checkNotNull(account) { "Compte TV non connecté" }
+        val payload = JSONObject()
+        if (!deleted) payload.put("entry", checkNotNull(entry))
+        val body = JSONObject().put("profileId", profileId)
+            .put("category", "watch_progress").put("itemKey", itemKey)
+            .put("revision", revision).put("deleted", deleted)
+            .put("payload", payload)
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/sync")
+            .header("Authorization", "Bearer ${owner.bearerToken}")
+            .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            .header("Accept", "application/json")
+            .post(body.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+        val result = client.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Écriture progression D1 HTTP ${response.code}" }
+            JSONObject(response.body?.string().orEmpty())
+        }
+        check(account == owner) { "Compte changé pendant l'écriture progression" }
+        result.getInt("revision").also { check(it > revision) }
+    }
+
     /** Ecriture optimiste avec contrôle de révision (409 = conserver la mutation locale). */
     suspend fun writeLibrary(
         profileId: String, itemKey: String, item: JSONObject?,
