@@ -287,6 +287,73 @@ object CloudflareAccountClient {
             ?.jsonPrimitive?.intOrNull ?: error("Révision D1 non confirmée")
     }
 
+    /**
+     * Historique de visionnage propre au compte. Route dédiée /v1/watched :
+     * elle conserve le statut vu même après suppression d'une reprise.
+     */
+    suspend fun readWatched(profileId: String): List<JsonObject> {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val items = mutableListOf<JsonObject>()
+        var after: String? = null
+        repeat(100) {
+            val suffix = after?.let { "&after=${it.encodeURLParameter()}" }.orEmpty()
+            val response = httpRequestRaw(
+                method = "GET",
+                url = base() + "/v1/watched?profileId=$profileId&limit=100$suffix",
+                headers = mapOf(
+                    "Accept" to "application/json",
+                    "Authorization" to "Bearer ${active.bearerToken}"
+                ),
+                body = "", followRedirects = false, maxResponseBodyBytes = 1048576
+            )
+            check(response.status == 200) {
+                "Kovelyx Cloud : historique indisponible (HTTP ${response.status})"
+            }
+            requireUnchangedAccount(active)
+            val page = json.parseToJsonElement(response.body).jsonObject
+            val rows = page["items"]?.jsonArray ?: error("Historique D1 invalide")
+            check(rows.size <= 100)
+            items += rows.map { it.jsonObject }
+            check(items.size <= 10000)
+            val next = page["nextCursor"]?.jsonPrimitive?.contentOrNull
+                ?.takeIf(String::isNotBlank)
+            if (next == null) {
+                check(page["partial"]?.jsonPrimitive?.booleanOrNull != true) {
+                    "Historique D1 tronqué"
+                }
+                requireUnchangedAccount(active)
+                return items
+            }
+            check(next != after && next.length <= 200)
+            after = next
+        }
+        error("Limite d'historique dépassée : conserver les données locales")
+    }
+
+    suspend fun writeWatched(
+        profileId: String,
+        itemKey: String,
+        payload: JsonObject,
+        revision: Int,
+        deleted: Boolean
+    ): Int {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require(itemKey.length in 1..200 && revision >= 0)
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("itemKey", itemKey)
+            put("payload", payload)
+            put("revision", revision)
+            put("deleted", deleted)
+        }
+        val (response, _) = request("/v1/watched", body.toString(), active.bearerToken)
+        requireUnchangedAccount(active)
+        return json.parseToJsonElement(response).jsonObject["revision"]
+            ?.jsonPrimitive?.intOrNull ?: error("Révision de visionnage non confirmée")
+    }
+
     suspend fun synchronizeRaw(profileId: String): JsonObject {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Identifiant de profil invalide" }
