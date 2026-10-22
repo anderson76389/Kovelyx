@@ -1,0 +1,50 @@
+name: Vérifier import Android et déconnexion Windows
+
+on:
+  push:
+    branches:
+      - fix/profiles-import-logout-20261022
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'apps/desktop/**'
+      - '.github/workflows/profile-media-logout-check.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-profile-fixes-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    name: Compiler APK Android et exécuter les tests JVM
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Configurer le backend Kovelyx
+        env:
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+        run: python3 scripts/configure-cloud-build.py --platform mobile
+      - name: Compiler Android et exécuter les tests
+        working-directory: apps/mobile
+        run: |
+          chmod +x gradlew
+          ./gradlew :androidApp:assembleFullDebug :composeApp:testAndroidHostTest \
+            -Pnuvio.android.distribution=full \
+            --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
+      - name: Conserver les rapports JVM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: profils-android-test-reports
+          path: apps/mobile/composeApp/build/reports/tests/testAndroidHostTest/
+          if-no-files-found: ignore
