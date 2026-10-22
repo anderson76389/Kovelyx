@@ -20,7 +20,7 @@ enum class WatchProgressSource {
 
     companion object {
         fun fromStorage(value: String?): WatchProgressSource =
-            entries.firstOrNull { it.name == value && it != SIMKL } ?: WatchProgressSource.NUVIO_SYNC
+            if (value == SIMKL.name) NUVIO_SYNC else entries.firstOrNull { it.name == value } ?: DEFAULT_WATCH_PROGRESS_SOURCE
     }
 }
 
@@ -28,7 +28,8 @@ val DEFAULT_WATCH_PROGRESS_SOURCE: WatchProgressSource = WatchProgressSource.TRA
 val DEFAULT_LIBRARY_SOURCE_MODE: LibrarySourceMode = LibrarySourceMode.TRAKT
 
 fun librarySourceModeFromStorage(value: String?): LibrarySourceMode =
-    LibrarySourceMode.entries.firstOrNull { it.name == value && it != LibrarySourceMode.SIMKL } ?: LibrarySourceMode.LOCAL
+    if (value == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL
+    else LibrarySourceMode.entries.firstOrNull { it.name == value } ?: DEFAULT_LIBRARY_SOURCE_MODE
 
 val LibrarySourceMode.providerId: TrackingProviderId?
     get() = when (this) {

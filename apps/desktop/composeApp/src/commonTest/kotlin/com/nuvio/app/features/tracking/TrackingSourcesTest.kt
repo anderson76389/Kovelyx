@@ -20,7 +20,7 @@ class TrackingSourcesTest {
             effectiveWatchProgressSource(WatchProgressSource.SIMKL) { false },
         )
         assertEquals(
-            WatchProgressSource.SIMKL,
+            WatchProgressSource.NUVIO_SYNC,
             effectiveWatchProgressSource(WatchProgressSource.SIMKL) { it == TrackingProviderId.SIMKL },
         )
     }
@@ -32,7 +32,7 @@ class TrackingSourcesTest {
             effectiveLibrarySourceMode(LibrarySourceMode.SIMKL) { false },
         )
         assertEquals(
-            LibrarySourceMode.SIMKL,
+            LibrarySourceMode.LOCAL,
             effectiveLibrarySourceMode(LibrarySourceMode.SIMKL) { it == TrackingProviderId.SIMKL },
         )
     }
