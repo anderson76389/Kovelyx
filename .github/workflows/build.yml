@@ -14,6 +14,14 @@ on:
       - 'scripts/publish-unified-preview.sh'
       - '.github/workflows/publish-unified-preview.yml'
       - '.github/workflows/windows.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/tv/**'
+      - 'apps/mobile/**'
+      - 'apps/desktop/composeApp/Configuration/DesktopVersion.properties'
+      - '.github/workflows/build.yml'
+      - 'scripts/desktop-release-version.py'
   workflow_dispatch:
     inputs:
       platform:
@@ -30,11 +38,12 @@ on:
 concurrency:
   group: kovelyx-build-${{ github.ref }}
   # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
   actions: read
+  pull-requests: read
 
 jobs:
   changes:
@@ -73,12 +82,23 @@ jobs:
   tv:
     name: Android TV - APK Full Debug
     needs: changes
-    if: ${{ (github.event_name == 'push' && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
+    if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aligner la version Android sur la Release Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          count="$(git rev-list --count HEAD)"
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+          echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
       - name: Java 21
         uses: actions/setup-java@v4
         with:
@@ -101,7 +121,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Tester les liens profonds Kovelyx TV
         working-directory: apps/tv
         shell: bash
@@ -119,6 +139,8 @@ jobs:
           "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
           grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
           grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging.txt
+          grep -F "versionName='$KOVELYX_BUILD_VERSION'" /tmp/kv-tv-badging.txt
+          grep -F "versionCode='$KOVELYX_BUILD_CODE'" /tmp/kv-tv-badging.txt
           echo "APK Kovelyx TV universel, signé et identifié correctement" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK TV
         uses: actions/upload-artifact@v4
@@ -131,12 +153,23 @@ jobs:
   mobile:
     name: Android mobile - APK Full Debug
     needs: changes
-    if: ${{ (github.event_name == 'push' && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
+    if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aligner la version Android sur la Release Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          count="$(git rev-list --count HEAD)"
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+          echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
       - name: Java 21
         uses: actions/setup-java@v4
         with:
@@ -159,7 +192,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Vérifier l'APK mobile et l'identité Kovelyx
         shell: bash
         run: |
@@ -171,6 +204,8 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
           grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
+          grep -F "versionName='$KOVELYX_BUILD_VERSION'" /tmp/kv-android-badging
+          grep -F "versionCode='$KOVELYX_BUILD_CODE'" /tmp/kv-android-badging
           echo "APK mobile universel, signé et identifié comme Kovelyx" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK mobiles
         uses: actions/upload-artifact@v4

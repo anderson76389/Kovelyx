@@ -32,7 +32,7 @@ permissions:
 concurrency:
   group: kovelyx-windows-${{ github.ref }}
   # The packaging job can take >30 min; preserve it for a useful diagnostic.
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   desktop:
