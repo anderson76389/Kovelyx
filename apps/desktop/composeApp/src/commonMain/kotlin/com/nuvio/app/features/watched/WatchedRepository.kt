@@ -1516,8 +1516,19 @@ object WatchedRepository {
                 continue
             }
             if (row != null && row.updatedAt > deletedAt) {
-                // Une modification plus récente faite depuis un autre écran
-                // ne doit pas être détruite par une suppression hors ligne.
+                // Un autre appareil a regardé à nouveau après notre retrait.
+                // Réconcilier ici évite une tombstone bloquée pour toujours.
+                row.watchedItem?.let { later ->
+                    if (!stillCurrent()) return@withLock false
+                    itemsStore.update { local, _, dirty, _ ->
+                        val localKey = watchedItemKey(later.type, later.id, later.season, later.episode)
+                        local[localKey] = later
+                        dirty.remove(localKey)
+                    }
+                    cloudPendingDeletes.remove(cloudKey, deletedAt)
+                    publish()
+                    persist()
+                }
                 continue
             }
             try {
@@ -1555,8 +1566,18 @@ object WatchedRepository {
                 persist()
                 continue
             }
-            if (row != null && row.watchedItem == null && row.updatedAt > item.markedAtEpochMs)
+            if (row != null && row.watchedItem == null && row.updatedAt > item.markedAtEpochMs) {
+                // Un « non vu » plus récent que le marquage local l'emporte.
+                itemsStore.update { local, _, dirty, _ ->
+                    if (local[localKey] == item) {
+                        local.remove(localKey)
+                        dirty.remove(localKey)
+                    }
+                }
+                publish()
+                persist()
                 continue
+            }
             try {
                 CloudflareAccountClient.writeWatched(
                     cloudProfile.id, cloudKey, cloudWatchedPayload(item),
