@@ -23,6 +23,9 @@ private data class PendingWatchedUpsert(
     val item: WatchedItem
 )
 
+private data class TimedProgressDelete(val key: String, val deletedAt: Long)
+private data class TimedWatchedDelete(val key: WatchedMutationKey, val deletedAt: Long)
+
 @Singleton
 class WatchStateMutationStore @Inject constructor(
     private val factory: ProfileDataStoreFactory
@@ -36,6 +39,8 @@ class WatchStateMutationStore @Inject constructor(
     private val progressDeletesKey = stringSetPreferencesKey("progress_deletes")
     private val watchedUpsertsKey = stringSetPreferencesKey("watched_upserts")
     private val watchedDeletesKey = stringSetPreferencesKey("watched_deletes")
+    private val progressDeleteTimesKey = stringSetPreferencesKey("progress_delete_times_cloud")
+    private val watchedDeleteTimesKey = stringSetPreferencesKey("watched_delete_times_cloud")
 
     private fun store(profileId: Int) = factory.get(profileId, FEATURE)
 
@@ -54,6 +59,8 @@ class WatchStateMutationStore @Inject constructor(
                 gson.toJson(PendingProgressUpsert(key, progress))
             }.toSet()
             preferences[progressDeletesKey] = preferences[progressDeletesKey].orEmpty() - entries.keys
+            preferences[progressDeleteTimesKey] = parseProgressDeleteTimes(preferences[progressDeleteTimesKey])
+                .minus(entries.keys).map { (k, ms) -> gson.toJson(TimedProgressDelete(k, ms)) }.toSet()
         }
     }
 
@@ -66,6 +73,11 @@ class WatchStateMutationStore @Inject constructor(
                 gson.toJson(PendingProgressUpsert(key, progress))
             }.toSet()
             preferences[progressDeletesKey] = preferences[progressDeletesKey].orEmpty() + normalized
+            val times = parseProgressDeleteTimes(preferences[progressDeleteTimesKey]).toMutableMap()
+            normalized.forEach { times[it] = System.currentTimeMillis() }
+            preferences[progressDeleteTimesKey] = times.map { (k, ms) ->
+                gson.toJson(TimedProgressDelete(k, ms))
+            }.toSet()
         }
     }
 
@@ -77,6 +89,9 @@ class WatchStateMutationStore @Inject constructor(
     suspend fun pendingProgressDeletes(profileId: Int): Set<String> {
         return store(profileId).data.first()[progressDeletesKey].orEmpty()
     }
+
+    suspend fun pendingProgressDeleteTimes(profileId: Int): Map<String, Long> =
+        parseProgressDeleteTimes(store(profileId).data.first()[progressDeleteTimesKey])
 
     suspend fun acknowledgeProgressUpserts(
         entries: Map<String, WatchProgress>,
@@ -98,6 +113,8 @@ class WatchStateMutationStore @Inject constructor(
         if (keys.isEmpty()) return
         store(profileId).edit { preferences ->
             preferences[progressDeletesKey] = preferences[progressDeletesKey].orEmpty() - keys.toSet()
+            preferences[progressDeleteTimesKey] = parseProgressDeleteTimes(preferences[progressDeleteTimesKey])
+                .minus(keys.toSet()).map { (k, ms) -> gson.toJson(TimedProgressDelete(k, ms)) }.toSet()
         }
     }
 
@@ -117,6 +134,8 @@ class WatchStateMutationStore @Inject constructor(
                 .minus(upsertKeys)
                 .map(gson::toJson)
                 .toSet()
+            preferences[watchedDeleteTimesKey] = parseWatchedDeleteTimes(preferences[watchedDeleteTimesKey])
+                .minus(upsertKeys).map { (k, ms) -> gson.toJson(TimedWatchedDelete(k, ms)) }.toSet()
         }
     }
 
@@ -131,6 +150,11 @@ class WatchStateMutationStore @Inject constructor(
             preferences[watchedDeletesKey] = (parseWatchedDeletes(preferences[watchedDeletesKey]) + normalized)
                 .map(gson::toJson)
                 .toSet()
+            val times = parseWatchedDeleteTimes(preferences[watchedDeleteTimesKey]).toMutableMap()
+            normalized.forEach { times[it] = System.currentTimeMillis() }
+            preferences[watchedDeleteTimesKey] = times.map { (k, ms) ->
+                gson.toJson(TimedWatchedDelete(k, ms))
+            }.toSet()
         }
     }
 
@@ -142,6 +166,9 @@ class WatchStateMutationStore @Inject constructor(
     suspend fun pendingWatchedDeletes(profileId: Int): Set<WatchedMutationKey> {
         return parseWatchedDeletes(store(profileId).data.first()[watchedDeletesKey])
     }
+
+    suspend fun pendingWatchedDeleteTimes(profileId: Int): Map<WatchedMutationKey, Long> =
+        parseWatchedDeleteTimes(store(profileId).data.first()[watchedDeleteTimesKey])
 
     suspend fun acknowledgeWatchedUpserts(items: Collection<WatchedItem>, profileId: Int) {
         if (items.isEmpty()) return
@@ -167,6 +194,8 @@ class WatchStateMutationStore @Inject constructor(
                 .minus(keys.toSet())
                 .map(gson::toJson)
                 .toSet()
+            preferences[watchedDeleteTimesKey] = parseWatchedDeleteTimes(preferences[watchedDeleteTimesKey])
+                .minus(keys.toSet()).map { (k, ms) -> gson.toJson(TimedWatchedDelete(k, ms)) }.toSet()
         }
     }
 
@@ -181,6 +210,18 @@ class WatchStateMutationStore @Inject constructor(
         return !preferences[watchedUpsertsKey].isNullOrEmpty() ||
             !preferences[watchedDeletesKey].isNullOrEmpty()
     }
+
+    private fun parseProgressDeleteTimes(raw: Set<String>?): Map<String, Long> =
+        raw.orEmpty().mapNotNull { json ->
+            runCatching { gson.fromJson(json, TimedProgressDelete::class.java) }.getOrNull()
+        }.filter { it.key.isNotBlank() && it.deletedAt > 0L }
+            .associate { it.key to it.deletedAt }
+
+    private fun parseWatchedDeleteTimes(raw: Set<String>?): Map<WatchedMutationKey, Long> =
+        raw.orEmpty().mapNotNull { json ->
+            runCatching { gson.fromJson(json, TimedWatchedDelete::class.java) }.getOrNull()
+        }.filter { it.deletedAt > 0L }
+            .associate { it.key to it.deletedAt }
 
     private fun parseProgressUpserts(raw: Set<String>?): Map<String, WatchProgress> {
         return raw.orEmpty().mapNotNull { json ->
