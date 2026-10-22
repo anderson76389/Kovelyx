@@ -20,6 +20,12 @@ for app in ("desktop", "mobile"):
     assert "if (CloudflareAccountClient.enabled)" in device, f"{app}: ancien lien par code non bloqué"
     assert "synchronizeCloudflareLibrary" in library, f"{app}: bibliothèque D1 absente"
     assert "https://nuvio.tv/link" not in device, f"{app}: ancien lien Nuvio encore présent"
+    watched_store = (root / "features/watched/WatchedStorage.kt").read_text(encoding="utf-8")
+    assert "accountScopedWatchedStorageKey" in watched_store
+    assert "WatchedRepository.clearLocalState()" in account, f"{app}: vue historique non purgée"
+    watched_android = (ROOT / "apps" / app /
+        "composeApp/src/androidMain/kotlin/com/nuvio/app/features/watched/WatchedStorage.android.kt").read_text(encoding="utf-8")
+    assert "accountScopedWatchedStorageKey" in watched_android
     print(f"{app}: compte Cloudflare isolé du client Supabase et lien Nuvio désactivé")
 
 tv_root = ROOT / "apps/tv/app/src/main/java/com/nuvio/tv"
