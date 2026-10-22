@@ -231,6 +231,65 @@ try {
   assert.equal(progressAfterDelete.data.items[0].deleted,true);
   assert.equal(progressAfterDelete.data.items[0].revision,3);
 
+
+  // Historique VU indépendant du point de reprise : même si un film est effacé
+  // de la ligne watch_progress, son statut vu demeure conservé.
+  const watchedMovie={
+    profileId:id,itemKey:"tt-demo-film",
+    payload:{item:{
+      contentId:"tt-demo-film",contentType:"movie",title:"Film terminé",
+      season:null,episode:null,watchedAt:1720010500000
+    }},
+    deleted:false,revision:0
+  };
+  const filmWatched=await req("/v1/watched","POST",watchedMovie,alice.token);
+  assert.equal(filmWatched.status,201,"Windows marks movie watched");
+  const watchedEpisode={
+    profileId:id,itemKey:"tt-demo-serie_s2e4",
+    payload:{item:{
+      contentId:"tt-demo-serie",contentType:"series",title:"Épisode terminé",
+      season:2,episode:4,watchedAt:1720010600000
+    }},
+    deleted:false,revision:0
+  };
+  assert.equal((await req("/v1/watched","POST",watchedEpisode,alice.token)).status,201,
+    "Android marks one episode watched");
+  const firstWatchedPage=await req(
+    "/v1/watched?profileId="+id+"&limit=1","GET",null,alice.token);
+  assert.equal(firstWatchedPage.status,200);
+  assert.equal(firstWatchedPage.data.items.length,1);
+  assert.equal(firstWatchedPage.data.partial,true);
+  const secondWatchedPage=await req(
+    "/v1/watched?profileId="+id+"&limit=1&after="+
+      encodeURIComponent(firstWatchedPage.data.nextCursor),"GET",null,alice.token);
+  assert.equal(secondWatchedPage.status,200);
+  assert.equal(secondWatchedPage.data.partial,false);
+  assert.equal(secondWatchedPage.data.items.length,1);
+  const watchedRows=[...firstWatchedPage.data.items,...secondWatchedPage.data.items];
+  assert.ok(watchedRows.some(row=>row.itemKey==="tt-demo-film"&&!row.deleted));
+  assert.ok(watchedRows.some(row=>row.itemKey==="tt-demo-serie_s2e4"&&!row.deleted));
+  assert.equal((await req("/v1/watched?profileId="+id,"GET",null,bob.token)).status,404);
+  assert.equal((await req("/v1/watched","POST",watchedMovie,bob.token)).status,404);
+  assert.equal((await req("/v1/watched","POST",watchedMovie,alice.token)).status,409,
+    "Stale revision must never overwrite watched state");
+  const unwatch=await req("/v1/watched","POST",{
+    ...watchedMovie,payload:{},deleted:true,revision:1
+  },alice.token);
+  assert.equal(unwatch.status,200,"Explicit unwatch creates a tombstone");
+  assert.equal(unwatch.data.revision,2);
+  assert.equal((await req("/v1/watched","POST",{...watchedMovie,revision:1},alice.token)).status,409,
+    "Old offline client cannot restore an explicitly unwatched movie");
+  assert.equal((await req("/v1/watched","POST",{
+    ...watchedEpisode,payload:{item:{...watchedEpisode.payload.item,accessToken:"secret"}}
+  },alice.token)).status,400,"Credentials never travel inside watched payloads");
+  assert.equal((await req("/v1/watched","POST",{
+    ...watchedEpisode,itemKey:"other-movie"
+  },alice.token)).status,400,"Wrong media identity rejected");
+  const watchedAfterProgressDeletion=await req(
+    "/v1/watched?profileId="+id+"&limit=100","GET",null,alice.token);
+  assert.ok(watchedAfterProgressDeletion.data.items.some(row=>
+    row.itemKey==="tt-demo-serie_s2e4"&&!row.deleted));
+
   const deniedMedia=await req("/v1/media?profileId="+id+"&kind=avatar","GET",null,bob.token);
   assert.equal(deniedMedia.status,503,"R2 disabled by design on ephemeral Worker");
   const accountName=await req("/v1/profiles/update","POST",
@@ -241,7 +300,7 @@ try {
   const signOut=await req("/api/auth/sign-out","POST",{},alice.token);
   assert.ok(signOut.status>=200&&signOut.status<300);
   assert.equal((await req("/v1/me","GET",null,alice.token)).status,401,"Signout invalidates token");
-  console.log("PASS: two real local Better Auth accounts, bearer login/logout, profile isolation, rename, D1 CAS, 3 simulated clients, multi-page D1, CAS conflicts, deletion tombstone, cross-account isolation, disabled R2");
+  console.log("PASS: two real local Better Auth accounts, bearer login/logout, profile isolation, rename, D1 CAS, 3 simulated clients, multi-page D1, CAS conflicts, deletion tombstone, cross-account isolation, watched history separated from progress, disabled R2");
 } finally {
   if (worker?.pid) {
     // Sous Linux, -pid désigne notre groupe dédié, jamais celui du runner.
