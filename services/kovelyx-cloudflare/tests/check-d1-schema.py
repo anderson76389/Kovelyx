@@ -4,14 +4,15 @@ from pathlib import Path
 import sqlite3
 import unittest
 
-migration = Path(__file__).parents[1] / "migrations/0001_accounts_and_sync.sql"
+migrations = sorted((Path(__file__).parents[1] / "migrations").glob("*.sql"))
 
 
 class CloudflareDatabase(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(":memory:")
         self.db.execute("PRAGMA foreign_keys=ON")
-        self.db.executescript(migration.read_text(encoding="utf-8"))
+        for migration in migrations:
+            self.db.executescript(migration.read_text(encoding="utf-8"))
         for user in ("alice", "bob"):
             self.db.execute(
                 'INSERT INTO "user" (id,name,email,emailVerified,createdAt,updatedAt) VALUES (?,?,?,?,?,?)',
@@ -55,6 +56,27 @@ class CloudflareDatabase(unittest.TestCase):
             ("alice","alice-profile","favorites","item",1)
         )
         self.assertEqual(stale.rowcount,0)
+
+    def test_watched_history_category_and_parent_cascade(self):
+        self.db.execute(
+            "INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,updated_at) "
+            "VALUES ('alice','alice-profile','watched_items','series:100:1:2','{}',1)"
+        )
+        self.db.execute("DELETE FROM kv_profiles WHERE owner_id='alice'")
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM kv_sync WHERE owner_id='alice'").fetchone()[0], 0
+        )
+
+    def test_migration_preserves_existing_rows(self):
+        self.db.execute(
+            "INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,revision,updated_at) "
+            "VALUES ('alice','alice-profile','library','movie:one','{}',4,1)"
+        )
+        self.assertEqual(
+            self.db.execute(
+                "SELECT revision FROM kv_sync WHERE owner_id='alice' AND category='library'"
+            ).fetchone()[0], 4
+        )
 
     def test_no_credentials_category(self):
         with self.assertRaises(sqlite3.IntegrityError):
