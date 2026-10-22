@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.di
 
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.auth.TransientAuthRefreshException
 import com.nuvio.tv.core.auth.shouldRetryAuthRefreshResponse
 import com.nuvio.tv.core.network.BackendRateLimitCoordinator
@@ -50,9 +51,14 @@ object SupabaseModule {
     ): SupabaseClient = runBlocking(Dispatchers.IO) {
         val userAgent = "Kovelyx-TV/${BuildConfig.VERSION_NAME.ifBlank { "dev" }}"
         val rateLimitCoordinator = BackendRateLimitCoordinator()
+        // Hilt instancie historiquement Supabase même pour un compte D1.
+        // Utiliser une origine réservée NON routable évite une URL vide au
+        // démarrage, sans restaurer ni contacter les comptes Nuvio historiques.
+        // Les services RPC hérités refusent explicitement le mode Cloudflare.
+        val legacyDisabled = CloudflareTvAccountClient.enabled
         createSupabaseClient(
-            supabaseUrl = serverConfiguration.backendUrl,
-            supabaseKey = serverConfiguration.publishableKey
+            supabaseUrl = if (legacyDisabled) "https://supabase-disabled.invalid" else serverConfiguration.backendUrl,
+            supabaseKey = if (legacyDisabled) "kovelyx-no-legacy-supabase-token" else serverConfiguration.publishableKey
         ) {
             httpConfig {
                 install(BackendRateLimitPlugin) {
@@ -98,9 +104,9 @@ object SupabaseModule {
                 }
             }
             install(Auth) {
-                alwaysAutoRefresh = true
-                autoLoadFromStorage = true
-                autoSaveToStorage = true
+                alwaysAutoRefresh = !legacyDisabled
+                autoLoadFromStorage = !legacyDisabled
+                autoSaveToStorage = !legacyDisabled
                 enableLifecycleCallbacks = false
             }
             install(Postgrest)

@@ -32,8 +32,8 @@ class DebridStreamFormatterTest {
             addonName = "Addon",
             addonLogo = null,
             debridCacheStatus = StreamDebridCacheStatus(
-                providerId = DebridProviders.TORBOX_ID,
-                providerName = "Torbox",
+                providerId = DebridProviders.PREMIUMIZE_ID,
+                providerName = "Premiumize",
                 state = StreamDebridCacheState.CACHED,
                 cachedName = "Movie.2026.1080p.mkv",
                 cachedSize = 1_500_000_000L
@@ -42,8 +42,8 @@ class DebridStreamFormatterTest {
 
         val formatted = formatter.format(stream, DebridSettings())
 
-        assertEquals("FHD TB Instant", formatted.name)
-        assertTrue(formatted.description.orEmpty().contains("Ready (TB)"))
+        assertEquals("FHD PM Instant", formatted.name)
+        assertTrue(formatted.description.orEmpty().contains("Ready (PM)"))
         assertTrue(formatted.description.orEmpty().contains("Movie.2026.1080p.mkv"))
     }
 }

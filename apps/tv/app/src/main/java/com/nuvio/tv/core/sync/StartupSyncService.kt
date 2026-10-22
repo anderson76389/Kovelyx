@@ -1,8 +1,11 @@
 package com.nuvio.tv.core.sync
 
 import android.os.SystemClock
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.plugin.PluginManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.StartupSyncPreferences
@@ -55,6 +58,7 @@ class StartupSyncService @Inject constructor(
     private val collectionSyncService: CollectionSyncService,
     private val homeCatalogSettingsSyncService: HomeCatalogSettingsSyncService,
     private val watchProgressSyncService: WatchProgressSyncService,
+    private val cloudWatchSyncService: CloudflareTvWatchSyncService,
     private val librarySyncService: LibrarySyncService,
     private val watchedItemsSyncService: WatchedItemsSyncService,
     private val profileSettingsSyncService: ProfileSettingsSyncService,
@@ -67,7 +71,8 @@ class StartupSyncService @Inject constructor(
     private val watchProgressPreferences: WatchProgressPreferences,
     private val profileManager: ProfileManager,
     private val startupSyncPreferences: StartupSyncPreferences,
-    private val cwEnrichmentCache: com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache
+    private val cwEnrichmentCache: com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache,
+    @ApplicationContext private val appContext: Context
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var startupPullJob: Job? = null
@@ -207,6 +212,10 @@ class StartupSyncService @Inject constructor(
                 "plugins" -> pullRealtimePlugins(profileId)
                 "library" -> pullNuvioLibrary(profileId)
                 "watch_progress" -> {
+                    if (CloudflareTvAccountClient.enabled) {
+                        cloudWatchSyncService.sync(profileId)
+                        return@launch
+                    }
                     syncWatchProgressDelta(
                         profileId = profileId,
                         pushUnsynced = false,
@@ -214,6 +223,10 @@ class StartupSyncService @Inject constructor(
                     )
                 }
                 "watched_items" -> {
+                    if (CloudflareTvAccountClient.enabled) {
+                        cloudWatchSyncService.sync(profileId)
+                        return@launch
+                    }
                     if (watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)) {
                         pullWatchedItemsDelta(profileId = profileId, pushUnsynced = false)
                     } else {
@@ -305,6 +318,13 @@ class StartupSyncService @Inject constructor(
 
     private suspend fun pullPeriodicWatchState(): Boolean {
         if (authManager.authState.value !is AuthState.FullAccount) return false
+        if (CloudflareTvAccountClient.enabled) {
+            val pid = profileManager.activeProfileId.value
+            val success = cloudWatchSyncService.sync(pid)
+            watchProgressRepository.hasCompletedInitialPull = true
+            watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
+            return success
+        }
 
         val profileId = profileManager.activeProfileId.value
         val shouldUseSupabaseWatchProgressSync = watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)
@@ -333,6 +353,18 @@ class StartupSyncService @Inject constructor(
         if (authManager.authState.value !is AuthState.FullAccount) return false
 
         val profileId = profileManager.activeProfileId.value
+        if (CloudflareTvAccountClient.enabled) {
+            if (!CloudflareTvLibraryStore.isBound(profileId)) return false
+            return try {
+                CloudflareTvLibraryStore.refresh(appContext, profileId)
+                true
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (error: Exception) {
+                Log.w(TAG, "Bibliothèque cloud conservée ; rafraîchissement reporté", error)
+                false
+            }
+        }
         Log.d(TAG, "Periodic library pull requested profile=$profileId")
         return pullNuvioLibrary(profileId)
     }
@@ -431,6 +463,27 @@ class StartupSyncService @Inject constructor(
     ): Result<Unit> {
         try {
             val profileId = profileManager.activeProfileId.value
+            if (CloudflareTvAccountClient.enabled) {
+                // Ne pas déclencher les anciennes RPC Supabase : la bibliothèque
+                // se charge via CloudflareTvLibraryStore et les reprises via D1.
+                val success = cloudWatchSyncService.sync(profileId)
+                val librarySuccess = if (CloudflareTvLibraryStore.isBound(profileId)) {
+                    try {
+                        CloudflareTvLibraryStore.refresh(appContext, profileId)
+                        true
+                    } catch (cancel: CancellationException) {
+                        throw cancel
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Bibliothèque D1 conservée ; prochain essai", error)
+                        false
+                    }
+                } else false
+                watchProgressRepository.hasCompletedInitialPull = true
+                watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
+                libraryRepository.hasCompletedInitialPull = true
+                return if (success && librarySuccess) Result.success(Unit)
+                    else Result.failure(IllegalStateException("Synchronisation D1 incomplète ou profil non associé"))
+            }
             val syncState = startupSyncPreferences.getState(profileId)
             val canUseWarmSync = !force &&
                 lastPulledKey == pullKey(userId) &&

@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
@@ -93,6 +95,10 @@ class HomeCatalogSettingsSyncService @Inject constructor(
     private var cachedSharedSettings: CachedSharedSettings? = null
 
     private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
+        // Compte Kovelyx D1 : ne jamais appeler les anciennes RPC Supabase.
+        check(!CloudflareTvAccountClient.enabled) {
+            "Fonction de synchronisation historique non migrée vers Kovelyx Cloudflare"
+        }
         return try {
             block()
         } catch (e: Exception) {

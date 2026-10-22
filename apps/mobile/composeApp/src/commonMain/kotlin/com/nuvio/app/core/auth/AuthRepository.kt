@@ -2,6 +2,10 @@ package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.features.library.LibraryRepository
+import com.nuvio.app.features.profiles.ProfileRepository
+import com.nuvio.app.features.watchprogress.WatchProgressRepository
+import com.nuvio.app.features.watched.WatchedRepository
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.storage.LocalAccountDataCleaner
@@ -52,8 +56,39 @@ object AuthRepository {
             )
         }
 
+        // Les comptes invités sont conservés séparément. Une session Cloudflare
+        // n'est restaurée qu'après validation du jeton sur le Worker HTTPS.
         if (CloudflareAccountClient.enabled) {
-            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            if (savedAnonId == null) {
+                scope.launch {
+                    val restored = CloudflareAccountClient.restoreVerified()
+                    if (_state.value != AuthState.Loading) return@launch
+                    if (restored == null) {
+                        _state.value = AuthState.Unauthenticated
+                    } else {
+                        LibraryRepository.clearLocalState()
+                        WatchProgressRepository.clearLocalState()
+            WatchedRepository.clearLocalState()
+                        ProfileRepository.clearInMemory()
+                        _state.value = AuthState.Authenticated(
+                            userId = restored.userId,
+                            email = restored.email,
+                            isAnonymous = false,
+                        )
+                        runCatching {
+                            ProfileRepository.ensureLoaded(restored.userId)
+                            ProfileRepository.pullProfiles()
+                            ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
+                                LibraryRepository.ensureLoaded()
+                                LibraryRepository.synchronizeCloudflareLibrary(profileId)
+                                WatchProgressRepository.pullFromServer(profileId)
+                            }
+                        }.onFailure { error ->
+                            log.w(error) { "Cloudflare : profils/bibliothèque à retenter, données locales préservées" }
+                        }
+                    }
+                }
+            }
             return
         }
         val backend = ServerConfigurationRepository.active.value
@@ -113,6 +148,15 @@ object AuthRepository {
     @OptIn(ExperimentalUuidApi::class)
     fun signInAnonymously() {
         _error.value = null
+        if (CloudflareAccountClient.enabled) {
+            // Un choix explicite du mode invité ne doit pas laisser actif
+            // le jeton d'un ancien compte du même appareil.
+            CloudflareAccountClient.clearLocalSession()
+            LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
+            WatchedRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
+        }
         val userId = Uuid.random().toString()
         AuthStorage.saveAnonymousUserId(userId)
         _state.value = AuthState.Authenticated(
@@ -143,10 +187,29 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             val account = CloudflareAccountClient.signIn(email, password)
+            // Les bibliothèques invité et autres comptes restent sur disque,
+            // mais ne doivent pas être présentées sous la nouvelle identité.
+            LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
+            WatchedRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             _state.value = AuthState.Authenticated(
                 userId = account.userId, email = account.email, isAnonymous = false
             )
+            scope.launch {
+                runCatching {
+                    ProfileRepository.ensureLoaded(account.userId)
+                    ProfileRepository.pullProfiles()
+                    ProfileRepository.state.value.activeProfile?.profileIndex?.let { profileId ->
+                        LibraryRepository.ensureLoaded()
+                        LibraryRepository.synchronizeCloudflareLibrary(profileId)
+                        WatchProgressRepository.pullFromServer(profileId)
+                    }
+                }.onFailure { failure ->
+                    log.w(failure) { "Kovelyx Cloud : récupération initiale non disponible, données locales intactes" }
+                }
+            }
             return@runCatching Unit
         }
         SupabaseProvider.client.auth.signInWith(Email) {
@@ -163,6 +226,10 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             val logout = runCatching { CloudflareAccountClient.signOut() }
+            LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
+            WatchedRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             // Ne jamais effacer les profils, la bibliothèque ou la progression
             // avant la migration de stockage/synchronisation vers D1.
@@ -213,6 +280,10 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             CloudflareAccountClient.clearLocalSession()
+            LibraryRepository.clearLocalState()
+            WatchProgressRepository.clearLocalState()
+            WatchedRepository.clearLocalState()
+            ProfileRepository.clearInMemory()
             AuthStorage.clearAnonymousUserId()
             _state.value = AuthState.Unauthenticated
             return Result.success(Unit)

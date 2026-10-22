@@ -49,6 +49,10 @@ internal data class StoredWatchedPayload(
     val deltaCursorEventId: Long = 0L,
     val deltaInitialized: Boolean = false,
     val dirtyWatchedKeys: Set<String> = emptySet(),
+    /** Suppressions hors ligne (clé D1 -> heure de l'action). */
+    val cloudPendingDeletes: Map<String, Long> = emptyMap(),
+    /** Premier import D1 terminé pour ce compte/profil uniquement. */
+    val cloudInitialized: Boolean = false,
     val providerPayloads: Map<String, StoredProviderWatchedPayload> = emptyMap(),
 )
 

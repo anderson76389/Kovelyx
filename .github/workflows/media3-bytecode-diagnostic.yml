@@ -1,0 +1,51 @@
+name: Diagnostiquer les AAR Media3 Kovelyx TV
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/media3-bytecode-diagnostic.yml'
+      - 'apps/tv/app/libs/**'
+      - 'scripts/media3/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-vendored-media3:
+    name: Examiner les signatures et instructions des AAR concernés
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Désassembler les classes Media3 historiques sans lancer l'application
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/kovelyx-media3
+          for spec in \
+            "lib-exoplayer-release.aar|androidx.media3.exoplayer.upstream.DefaultAllocator" \
+            "lib-datasource-release.aar|androidx.media3.datasource.LocalhostZeroCopyDataSource"; do
+            aar="${spec%%|*}"
+            clazz="${spec#*|}"
+            path="apps/tv/app/libs/$aar"
+            echo "::group::$aar : $clazz"
+            sha256sum "$path"
+            unzip -p "$path" classes.jar > "/tmp/kovelyx-media3/${aar%.aar}.jar"
+            jar tf "/tmp/kovelyx-media3/${aar%.aar}.jar" | grep -F "${clazz//.//}.class"
+            javap -p -c -s -classpath "/tmp/kovelyx-media3/${aar%.aar}.jar" "$clazz" \
+              > "/tmp/kovelyx-media3/${clazz##*.}.txt"
+            cat "/tmp/kovelyx-media3/${clazz##*.}.txt"
+            echo "::endgroup::"
+          done
+      - name: Archiver la preuve brute pour reconstruire sans supposition
+        uses: actions/upload-artifact@v4
+        with:
+          name: media3-vendored-bytecode-proof
+          path: /tmp/kovelyx-media3/*.txt
+          retention-days: 30

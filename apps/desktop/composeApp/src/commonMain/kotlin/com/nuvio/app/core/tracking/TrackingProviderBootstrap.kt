@@ -20,15 +20,7 @@ fun ensureTrackingProvidersRegistered() {
     MdbListTracker.register()
     TraktAuthRepository.descriptor
     TraktScrobbleRepository.ensureRegistered()
-    SimklAuthRepository.descriptor
-    SimklSyncRepository.state
-    SimklLibraryRepository.uiState
-    SimklProgressRepository.uiState
-    SimklMutationRepository.ensureRegistered()
     TrackingProviderRegistry.registerLibraryProvider(TraktTrackingLibraryProvider)
-    TrackingProviderRegistry.registerLibraryProvider(SimklTrackingLibraryProvider)
     TrackingProviderRegistry.registerWatchedProvider(TraktWatchedSyncAdapter)
-    TrackingProviderRegistry.registerWatchedProvider(SimklWatchedSyncAdapter)
     TrackingProviderRegistry.registerProgressProvider(TraktTrackingProgressProvider)
-    TrackingProviderRegistry.registerProgressProvider(SimklTrackingProgressProvider)
 }

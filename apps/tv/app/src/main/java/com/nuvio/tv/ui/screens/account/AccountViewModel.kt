@@ -19,6 +19,7 @@ import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.qr.QrCodeGenerator
 import com.nuvio.tv.core.sync.AddonSyncService
 import com.nuvio.tv.core.sync.LibrarySyncService
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import com.nuvio.tv.core.sync.PluginSyncService
 import com.nuvio.tv.core.sync.WatchProgressSyncService
 import com.nuvio.tv.core.sync.WatchedItemsSyncService
@@ -101,6 +102,7 @@ class AccountViewModel @Inject constructor(
     init {
         observeAuthState()
         observeProfileNames()
+        observeCloudProfileSelection()
     }
 
     private fun observeAuthState() {
@@ -122,8 +124,23 @@ class AccountViewModel @Inject constructor(
                         loadSyncOverview()
                     }
                 } else if (CloudflareTvAccountClient.enabled) {
-                    _uiState.update { it.copy(cloudProfileNames = emptyList()) }
+                    CloudflareTvLibraryStore.reset()
+                    profileManager.clearCloudMedia()
+                    _uiState.update { it.copy(cloudProfileNames = emptyList(), cloudSyncPreview = emptyList(), cloudPreviewLoading = false, cloudPreviewError = false) }
                 }
+            }
+        }
+    }
+
+    private fun observeCloudProfileSelection() {
+        viewModelScope.launch {
+            var previous: Int? = null
+            profileManager.activeProfileId.collect { profileId ->
+                if (previous != null && previous != profileId &&
+                    CloudflareTvAccountClient.enabled && authManager.isAuthenticated) {
+                    loadCloudflareProfilesReadOnly()
+                }
+                previous = profileId
             }
         }
     }
@@ -147,13 +164,111 @@ class AccountViewModel @Inject constructor(
 
     private fun loadCloudflareProfilesReadOnly() {
         viewModelScope.launch {
-            runCatching { CloudflareTvAccountClient.getCloudProfileNames() }
-                .onSuccess { names ->
-                    _uiState.update { it.copy(cloudProfileNames = names) }
+            runCatching {
+                val owner = checkNotNull(CloudflareTvAccountClient.account) { "Compte TV déconnecté" }
+                val remote=CloudflareTvAccountClient.getCloudProfiles()
+                check(CloudflareTvAccountClient.account == owner) {
+                    "Le compte Kovelyx a changé pendant le chargement des profils"
                 }
-                .onFailure { error ->
-                    Log.w(TAG, "Kovelyx Cloud : lecture profils indisponible ; aucun changement local", error)
+                _uiState.update { it.copy(cloudProfileNames = remote.map { cloud -> cloud.name }) }
+                refreshCloudflareSyncPreview(remote, owner)
+                val local=profileManager.profiles.value
+                // La bibliothèque D1 est reliée par LibraryRepositoryImpl,
+                // indépendamment de l'ouverture de cet écran de compte.
+                val oneToOne=remote.size==1 && local.size==1
+                // N'associer jamais par un ID numérique : D1 utilise des UUID.
+                // Correspondance explicite par nom UNIQUE, sauf le seul profil
+                // principal par défaut et le seul profil distant.
+                for (cloud in remote) {
+                    val matching=local.filter { it.name==cloud.name }
+                    val target=when {
+                        matching.size==1 && remote.count { it.name==cloud.name }==1 -> matching.first()
+                        oneToOne && cloud==remote.first() &&
+                            local.first().avatarUrl.isNullOrBlank() &&
+                            local.first().profileBackgroundUrl.isNullOrBlank() -> local.first()
+                        else -> null
+                    } ?: continue
+                    val avatar=runCatching {
+                        CloudflareTvAccountClient.downloadMedia(context,cloud,false)
+                    }.onFailure { Log.w(TAG,"Avatar R2 absent : média TV local conservé",it) }.getOrNull()
+                    val background=runCatching {
+                        CloudflareTvAccountClient.downloadMedia(context,cloud,true)
+                    }.onFailure { Log.w(TAG,"Fond R2 absent : média TV local conservé",it) }.getOrNull()
+                    check(CloudflareTvAccountClient.account == owner) {
+                        "Le compte Kovelyx a changé pendant le transfert de média privé"
+                    }
+                    if(avatar!=null || background!=null) {
+                        // Modifications purement en mémoire, séparées des
+                        // profils invités persistants de la télévision.
+                        profileManager.setCloudMedia(target.id,avatar,background)
+                    }
                 }
+            }.onFailure { error ->
+                Log.w(TAG,"Kovelyx Cloud : médias non disponibles, profils TV locaux préservés",error)
+            }
+        }
+    }
+
+    /** L'aperçu vérifie les données du même compte, sans écritures ni import local. */
+    fun refreshCloudflareSyncPreview() {
+        if (CloudflareTvAccountClient.enabled && authManager.isAuthenticated) {
+            loadCloudflareProfilesReadOnly()
+        }
+    }
+
+    private fun refreshCloudflareSyncPreview(
+        profiles: List<CloudflareTvAccountClient.CloudProfile>,
+        owner: CloudflareTvAccountClient.Account
+    ) {
+        _uiState.update {
+            it.copy(cloudPreviewLoading = true, cloudPreviewError = false, cloudSyncPreview = emptyList())
+        }
+        viewModelScope.launch {
+            try {
+                val previews = profiles.map { profile ->
+                    check(CloudflareTvAccountClient.account == owner) {
+                        "Compte changé pendant la lecture des données synchronisées"
+                    }
+                    val library = CloudflareTvAccountClient.readLibrary(profile.id)
+                        .count { !it.getBoolean("deleted") }
+                    val progress = CloudflareTvAccountClient.readProgress(profile.id)
+                        .count { !it.getBoolean("deleted") }
+                    // Nouvelle table additive : si le Worker n'a pas encore
+                    // sa migration 0002, conserver les deux compteurs précédents.
+                    val watched = try {
+                        CloudflareTvAccountClient.readWatched(profile.id)
+                            .count { !it.getBoolean("deleted") }
+                    } catch (cancel: kotlinx.coroutines.CancellationException) {
+                        throw cancel
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Historique D1 non disponible pour ce profil", error)
+                        null
+                    }
+                    CloudProfileSyncPreview(profile.name, library, progress, watched)
+                }
+                if (CloudflareTvAccountClient.account == owner) {
+                    _uiState.update {
+                        it.copy(
+                            cloudSyncPreview = previews,
+                            cloudPreviewLoading = false,
+                            cloudPreviewError = false
+                        )
+                    }
+                }
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (CloudflareTvAccountClient.account == owner) {
+                    Log.w(TAG, "Aperçu D1 TV indisponible, aucun contenu local modifié", error)
+                    _uiState.update {
+                        it.copy(
+                            cloudSyncPreview = emptyList(),
+                            cloudPreviewLoading = false,
+                            cloudPreviewError = true
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -197,6 +312,12 @@ class AccountViewModel @Inject constructor(
     }
 
     fun generateSyncCode(pin: String) {
+        if (CloudflareTvAccountClient.enabled) {
+            _uiState.update {
+                it.copy(error = "La liaison par code TV nécessite encore le nouveau protocole Cloudflare.")
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             if (!authManager.isAuthenticated) {
@@ -216,6 +337,12 @@ class AccountViewModel @Inject constructor(
     }
 
     fun getSyncCode(pin: String) {
+        if (CloudflareTvAccountClient.enabled) {
+            _uiState.update {
+                it.copy(error = "La liaison par code TV nécessite encore le nouveau protocole Cloudflare.")
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             syncRepository.getSyncCode(pin).fold(
@@ -230,6 +357,12 @@ class AccountViewModel @Inject constructor(
     }
 
     fun claimSyncCode(code: String, pin: String) {
+        if (CloudflareTvAccountClient.enabled) {
+            _uiState.update {
+                it.copy(error = "La liaison par code TV nécessite encore le nouveau protocole Cloudflare.")
+            }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             if (!authManager.isAuthenticated) {
@@ -260,8 +393,14 @@ class AccountViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch {
-            authManager.signOut()
-            _uiState.update { it.copy(connectedStats = null, isStatsLoading = false) }
+            try {
+                authManager.signOut()
+            } catch (error: Exception) {
+                Log.w(TAG, "Déconnexion locale Kovelyx : un contrôle est nécessaire", error)
+                _uiState.update { it.copy(error = userFriendlyError(error)) }
+            } finally {
+                _uiState.update { it.copy(connectedStats = null, isStatsLoading = false) }
+            }
         }
     }
 

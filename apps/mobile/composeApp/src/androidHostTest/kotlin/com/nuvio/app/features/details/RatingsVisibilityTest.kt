@@ -133,8 +133,9 @@ class RatingsVisibilityTest {
                     title = meta.name,
                     seasonNumber = 1,
                     episodeNumber = 1,
-                    lastPositionMs = 950,
-                    durationMs = 1000,
+                    // 95% d'un vrai épisode (pas un clip d'erreur < 2 min).
+                    lastPositionMs = 190_000,
+                    durationMs = 200_000,
                     lastUpdatedEpochMs = 1,
                 ))
             }

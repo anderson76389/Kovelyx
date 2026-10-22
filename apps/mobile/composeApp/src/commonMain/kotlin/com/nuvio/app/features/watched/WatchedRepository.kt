@@ -2,6 +2,17 @@ package com.nuvio.app.features.watched
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.longOrNull
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.put
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.details.MetaDetails
@@ -156,6 +167,9 @@ object WatchedRepository {
     private var deltaInitialized: Boolean = false
     internal var syncAdapter: WatchedSyncAdapter = SupabaseWatchedSyncAdapter
     private var extraKeysObserverJob: Job? = null
+    private val cloudWatchedMutex = Mutex()
+    private val cloudPendingDeletes = mutableMapOf<String, Long>()
+    private var cloudInitialized = false
 
     fun ensureLoaded() {
         ensureTrackingProvidersRegistered()
@@ -198,6 +212,8 @@ object WatchedRepository {
             dirtyNuvioKeys.clear()
             dirtyProviderKeys.clear()
         }
+        cloudPendingDeletes.clear()
+        cloudInitialized = false
         nuvioFullyWatchedSeriesKeys = emptySet()
         providerFullyWatchedSeriesKeys.clear()
         expandedSiblingKeys = emptySet()
@@ -209,6 +225,8 @@ object WatchedRepository {
         lastSuccessfulPushEpochMs = 0L
         deltaCursorEventId = 0L
         deltaInitialized = false
+        cloudPendingDeletes.clear()
+        cloudInitialized = false
         _fullyWatchedSeriesKeys.value = emptySet()
         _uiState.value = WatchedUiState()
     }
@@ -247,6 +265,8 @@ object WatchedRepository {
             lastSuccessfulPushEpochMs = storedPayload.lastSuccessfulPushEpochMs
             deltaCursorEventId = storedPayload.deltaCursorEventId
             deltaInitialized = storedPayload.deltaInitialized
+            cloudPendingDeletes.putAll(storedPayload.cloudPendingDeletes)
+            cloudInitialized = storedPayload.cloudInitialized
             val restoredItems = storedPayload.items
                 .map(WatchedItem::normalizedMarkedAt)
                 .associateBy { watchedItemKey(it.type, it.id, it.season, it.episode) }
@@ -381,6 +401,16 @@ object WatchedRepository {
             "Watched refresh request profile=$profileId requestedSource=$source effectiveSource=$effectiveSource " +
                 "forceSnapshot=$forceSnapshot profileGeneration=$profileGeneration " +
                 "sourceGeneration=$sourceGeneration"
+        }
+        if (CloudflareAccountClient.enabled && effectiveSource.providerId == null) {
+            return try {
+                synchronizeCloudflareWatched(profileId, operation)
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (error: Exception) {
+                log.w(error) { "Historique cloud inaccessible : aucune donnée locale écrasée" }
+                false
+            }
         }
         if (effectiveSource.providerId == null) {
             val authState = AuthRepository.state.value
@@ -802,6 +832,9 @@ object WatchedRepository {
                 dirtyKeys += key
             }
         }
+        if (CloudflareAccountClient.enabled && source.providerId == null) {
+            timestampedItems.forEach { item -> cloudWatchedKey(item)?.let(cloudPendingDeletes::remove) }
+        }
         publish()
         persist()
         if (syncRemote) {
@@ -879,6 +912,14 @@ object WatchedRepository {
                 }?.also { dirtyKeys.remove(matchingKey) }
             }
             removed to extraKeysChanged
+        }
+        if (CloudflareAccountClient.enabled && source.providerId == null && syncRemote) {
+            val now = WatchedClock.nowEpochMs()
+            items.forEach { item -> cloudWatchedKey(item)?.let { cloudPendingDeletes[it] = now } }
+            if (removedItems.isEmpty()) {
+                persist()
+                requestCloudflareWatchedSync(currentProfileId)
+            }
         }
         if (removedItems.isNotEmpty()) {
             publish()
@@ -1219,6 +1260,8 @@ object WatchedRepository {
                 deltaCursorEventId = deltaCursorEventId,
                 deltaInitialized = deltaInitialized,
                 dirtyWatchedKeys = dirtyNuvioKeys.toSet(),
+                cloudPendingDeletes = cloudPendingDeletes.toMap(),
+                cloudInitialized = cloudInitialized,
                 providerPayloads = providerIds.associate { providerId ->
                     val items = providerItems[providerId]
                         .orEmpty()
@@ -1282,6 +1325,10 @@ object WatchedRepository {
     ): WatchedPushOutcome {
         val (serverItems, items) = items.partition(ServerWatched::isServerItem)
         if (trackerHistorySync == WatchedTrackerHistorySync.Mirror) ServerWatched.apply(serverItems, played = true)
+        if (CloudflareAccountClient.enabled && source.providerId == null) {
+            requestCloudflareWatchedSync(profileId)
+            return WatchedPushOutcome()
+        }
         if (items.isEmpty()) return WatchedPushOutcome(nuvioSyncSucceeded = true)
         var nuvioSyncSucceeded = false
         val succeededTrackerProviderIds = linkedSetOf<TrackingProviderId>()
@@ -1321,6 +1368,10 @@ object WatchedRepository {
     ) {
         val (serverItems, items) = items.partition(ServerWatched::isServerItem)
         ServerWatched.apply(serverItems, played = false)
+        if (CloudflareAccountClient.enabled && source.providerId == null) {
+            requestCloudflareWatchedSync(profileId)
+            return
+        }
         if (items.isEmpty()) return
         if (source.providerId == null) {
             try {
@@ -1339,6 +1390,226 @@ object WatchedRepository {
                 throw error
             } catch (error: Throwable) {
                 log.e(error) { "Failed to delete watched items from ${provider.providerId.storageId}" }
+            }
+        }
+    }
+
+
+    private data class CloudWatchedRow(
+        val revision: Int,
+        val updatedAt: Long,
+        val watchedItem: WatchedItem?
+    )
+
+    private fun cloudWatchedKey(item: WatchedItem): String? {
+        val id = item.id.trim()
+        if (id.isEmpty() || id.length > 150 ||
+            id.any { it.isWhitespace() || it in "/\\?#" }) return null
+        if ((item.season == null) != (item.episode == null)) return null
+        if ((item.season ?: 0) < 0 || (item.episode ?: 0) < 0) return null
+        val key = if (item.season != null && item.episode != null)
+            "${id}_s${item.season}e${item.episode}" else id
+        return key.takeIf { it.length <= 200 }
+    }
+
+    private fun cloudWatchedPayload(item: WatchedItem) = buildJsonObject {
+        put("item", buildJsonObject {
+            put("contentId", item.id.trim())
+            put("contentType", if (item.type.equals("movie", true) ||
+                item.type.equals("film", true)) "movie" else "series")
+            put("title", item.name.ifBlank { item.id }.take(300))
+            item.season?.let { put("season", it) }
+            item.episode?.let { put("episode", it) }
+            put("watchedAt", item.markedAtEpochMs.coerceAtLeast(1L))
+        })
+    }
+
+    private fun readCloudWatchedRow(raw: JsonObject): Pair<String, CloudWatchedRow> {
+        val key = raw["itemKey"]?.jsonPrimitive?.content
+            ?: error("Historique D1 : clé absente")
+        val rev = raw["revision"]?.jsonPrimitive?.intOrNull
+            ?: error("Historique D1 : révision absente")
+        require(rev > 0 && key.length in 1..200)
+        val updated = raw["updatedAt"]?.jsonPrimitive?.longOrNull ?: 0L
+        val deleted = raw["deleted"]?.jsonPrimitive?.booleanOrNull == true
+        if (deleted) return key to CloudWatchedRow(rev, updated, null)
+        val value = raw["payload"]?.jsonObject?.get("item")?.jsonObject
+            ?: error("Historique D1 : données absentes")
+        val id = value["contentId"]?.jsonPrimitive?.content.orEmpty()
+        val type = value["contentType"]?.jsonPrimitive?.content.orEmpty()
+        val name = value["title"]?.jsonPrimitive?.content.orEmpty()
+        val season = value["season"]?.jsonPrimitive?.intOrNull
+        val episode = value["episode"]?.jsonPrimitive?.intOrNull
+        val watchedAt = value["watchedAt"]?.jsonPrimitive?.longOrNull ?: 0L
+        require(type in setOf("movie", "series", "tv") && name.isNotBlank() && watchedAt > 0)
+        val item = WatchedItem(
+            id = id, type = type, name = name, season = season, episode = episode,
+            markedAtEpochMs = watchedAt
+        )
+        require(cloudWatchedKey(item) == key) { "Historique D1 : mauvaise identité" }
+        return key to CloudWatchedRow(rev, updated, item)
+    }
+
+    private suspend fun synchronizeCloudflareWatched(
+        profileId: Int, operation: WatchedRefreshOperation
+    ): Boolean = cloudWatchedMutex.withLock {
+        val auth = AuthRepository.state.value as? AuthState.Authenticated
+            ?: return@withLock false
+        if (auth.isAnonymous || CloudflareAccountClient.currentSession?.userId != auth.userId)
+            return@withLock false
+        val cloudProfile = ProfileRepository.state.value.profiles.firstOrNull {
+            it.profileIndex == profileId && it.id.matches(Regex("[a-fA-F0-9-]{36}"))
+        } ?: return@withLock false
+        val owner = auth.userId
+        fun stillCurrent(): Boolean =
+            isActiveOperation(operation) &&
+                CloudflareAccountClient.currentSession?.userId == owner &&
+                (AuthRepository.state.value as? AuthState.Authenticated)?.userId == owner
+
+        // Une page manquante ou un jeton invalide ne remplace jamais le local.
+        val remote = CloudflareAccountClient.readWatched(cloudProfile.id)
+            .map(::readCloudWatchedRow).toMap()
+        if (!stillCurrent()) return@withLock false
+
+        itemsStore.update { local, _, dirty, _ ->
+            for ((key, row) in remote) {
+                if (key in cloudPendingDeletes) continue
+                val matching = local.entries.firstOrNull { (_, item) ->
+                    cloudWatchedKey(item) == key
+                }
+                val existing = matching?.value
+                val existingKey = matching?.key
+                val incoming = row.watchedItem
+                if (incoming == null) {
+                    if (existingKey != null) {
+                        if (existingKey in dirty && (existing?.markedAtEpochMs ?: 0L) > row.updatedAt)
+                            continue
+                        local.remove(existingKey)
+                        dirty.remove(existingKey)
+                    }
+                } else if (existing == null) {
+                    local[watchedItemKey(incoming.type, incoming.id, incoming.season, incoming.episode)] = incoming
+                } else if (existingKey !in dirty || incoming.markedAtEpochMs >= existing.markedAtEpochMs) {
+                    if (existingKey != null) {
+                        local[existingKey] = incoming.copy(type = existing.type)
+                        dirty.remove(existingKey)
+                    }
+                }
+            }
+            // Les anciens marqueurs écrits déjà sous ce compte Cloudflare
+            // sont migrés une seule fois, jamais ceux d'un profil invité.
+            if (!cloudInitialized) {
+                local.forEach { (localKey, item) ->
+                    if (cloudWatchedKey(item) !in remote) dirty += localKey
+                }
+            }
+        }
+        cloudInitialized = true
+        nuvioHasLoaded = true
+        nuvioHasLoadedRemote = true
+        publish()
+        persist()
+
+        for ((cloudKey, deletedAt) in cloudPendingDeletes.toMap()) {
+            if (!stillCurrent()) return@withLock false
+            val row = remote[cloudKey]
+            if (row?.watchedItem == null && row != null) {
+                cloudPendingDeletes.remove(cloudKey, deletedAt)
+                persist()
+                continue
+            }
+            if (row != null && row.updatedAt > deletedAt) {
+                // Un autre appareil a regardé à nouveau après notre retrait.
+                // Réconcilier ici évite une tombstone bloquée pour toujours.
+                row.watchedItem?.let { later ->
+                    if (!stillCurrent()) return@withLock false
+                    itemsStore.update { local, _, dirty, _ ->
+                        val localKey = watchedItemKey(later.type, later.id, later.season, later.episode)
+                        local[localKey] = later
+                        dirty.remove(localKey)
+                    }
+                    cloudPendingDeletes.remove(cloudKey, deletedAt)
+                    publish()
+                    persist()
+                }
+                continue
+            }
+            try {
+                CloudflareAccountClient.writeWatched(
+                    cloudProfile.id, cloudKey, buildJsonObject {},
+                    row?.revision ?: 0, true
+                )
+                if (!stillCurrent()) return@withLock false
+                cloudPendingDeletes.remove(cloudKey, deletedAt)
+                persist()
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (error: Exception) {
+                log.w(error) { "Suppression vu D1 conservée hors ligne" }
+            }
+        }
+
+        val pending = itemsStore.read { local, _, dirty, _ ->
+            local.filterKeys { it in dirty }.toMap()
+        }
+        for ((localKey, item) in pending) {
+            val cloudKey = cloudWatchedKey(item) ?: continue
+            if (!stillCurrent()) return@withLock false
+            if (cloudKey in cloudPendingDeletes) continue
+            val row = remote[cloudKey]
+            if (row?.watchedItem != null &&
+                row.watchedItem.markedAtEpochMs >= item.markedAtEpochMs) {
+                itemsStore.update { local, _, dirty, _ ->
+                    if (local[localKey] == item) {
+                        local[localKey] = row.watchedItem.copy(type = item.type)
+                        dirty.remove(localKey)
+                    }
+                }
+                publish()
+                persist()
+                continue
+            }
+            if (row != null && row.watchedItem == null && row.updatedAt > item.markedAtEpochMs) {
+                // Un « non vu » plus récent que le marquage local l'emporte.
+                itemsStore.update { local, _, dirty, _ ->
+                    if (local[localKey] == item) {
+                        local.remove(localKey)
+                        dirty.remove(localKey)
+                    }
+                }
+                publish()
+                persist()
+                continue
+            }
+            try {
+                CloudflareAccountClient.writeWatched(
+                    cloudProfile.id, cloudKey, cloudWatchedPayload(item),
+                    row?.revision ?: 0, false
+                )
+                if (!stillCurrent()) return@withLock false
+                itemsStore.update { local, _, dirty, _ ->
+                    if (local[localKey] == item) dirty.remove(localKey)
+                }
+                persist()
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (error: Exception) {
+                log.w(error) { "Marquage vu D1 conservé hors ligne (CAS ou réseau)" }
+            }
+        }
+        true
+    }
+
+    private fun requestCloudflareWatchedSync(profileId: Int) {
+        if (!CloudflareAccountClient.enabled) return
+        accountScopeSnapshot().launch {
+            val operation = newRefreshOperation(profileId) ?: return@launch
+            try {
+                synchronizeCloudflareWatched(profileId, operation)
+            } catch (cancel: CancellationException) {
+                throw cancel
+            } catch (error: Exception) {
+                log.w(error) { "Historique vu local conservé en attente" }
             }
         }
     }

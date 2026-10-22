@@ -54,6 +54,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
@@ -144,16 +145,60 @@ object ProfileRepository {
                     val profile = item.jsonObject
                     val id = profile["id"]?.jsonPrimitive?.content.orEmpty()
                     val name = profile["displayName"]?.jsonPrimitive?.content.orEmpty()
-                    if (id.length != 36 || name.isBlank()) null else NuvioProfile(
-                        id = id,
-                        userId = account.userId,
-                        profileIndex = index + 1,
-                        name = name,
-                    )
+                    if (id.length != 36 || name.isBlank()) null else {
+                        // R2 reste privé : récupérer le fichier avec le jeton,
+                        // stocker sa copie locale avant de l'afficher.
+                        suspend fun media(kind: String, background: Boolean): String? {
+                            val path = profile[kind]?.jsonPrimitive?.contentOrNull
+                                ?.takeIf { it.isNotBlank() } ?: return null
+                            return runCatching {
+                                ProfileCloudMediaTransfer.download(id,background,path)
+                            }.onFailure { error ->
+                                log.w(error) { "Média R2 indisponible, profil local préservé" }
+                            }.getOrNull()
+                        }
+                        NuvioProfile(
+                            id = id,
+                            userId = account.userId,
+                            profileIndex = index + 1,
+                            name = name,
+                            avatarUrl = media("avatarPath",false),
+                            profileBackgroundUrl = media("backgroundPath",true),
+                        )
+                    }
                 }
             if (_state.value.profiles.isNotEmpty()) {
-                // Conserver les noms, préférences et historiques de cet appareil.
-                _state.value = _state.value.copy(isLoaded = true)
+                // Ne modifier que les noms des UUID connus. Les contenus,
+                // indices et préférences locales ne sont jamais remplacés.
+                val local = _state.value.profiles
+                val remoteById = remote.associateBy { it.id }
+                val kept = local.map { profile ->
+                    remoteById[profile.id]?.let { fromCloud ->
+                        profile.copy(
+                            name = fromCloud.name,
+                            avatarUrl = profile.avatarUrl?.takeIf(ProfileLocalImages::isManagedUri)
+                                ?: fromCloud.avatarUrl ?: profile.avatarUrl,
+                            profileBackgroundUrl = profile.profileBackgroundUrl?.takeIf(ProfileLocalImages::isManagedUri)
+                                ?: fromCloud.profileBackgroundUrl ?: profile.profileBackgroundUrl,
+                        )
+                    } ?: profile
+                }
+                val usedIndexes = kept.map { it.profileIndex }.toMutableSet()
+                val imported = remote.filterNot { cloud -> kept.any { it.id == cloud.id } }
+                    .mapNotNull { cloud ->
+                        val free = (1..MAX_PROFILES).firstOrNull { it !in usedIndexes }
+                            ?: return@mapNotNull null
+                        usedIndexes.add(free)
+                        cloud.copy(profileIndex = free)
+                    }
+                val merged = (kept + imported).sortedBy { it.profileIndex }
+                _state.value = _state.value.copy(
+                    profiles = merged,
+                    isLoaded = true,
+                    activeProfile = merged.find { it.profileIndex == activeProfileIndex }
+                        ?: merged.firstOrNull(),
+                )
+                persist()
                 return
             }
             _state.value = _state.value.copy(
@@ -248,7 +293,120 @@ object ProfileRepository {
         ProfileSettingsSync.onProfileChanged()
     }
 
+
+    /**
+     * Les identifiants Cloudflare (UUID) sont conservés dans les profils locaux.
+     * Les données locales ne sont pas effacées et les profils non identifiés
+     * ne sont jamais associés automatiquement à un autre profil distant.
+     */
+    private suspend fun pushCloudflareProfiles(payloads: List<ProfilePushPayload>) {
+        val account = AuthRepository.state.value as? AuthState.Authenticated
+            ?: error("Compte Kovelyx non connecté")
+        check(!account.isAnonymous) { "Synchronisation réservée aux comptes Kovelyx" }
+        val remoteProfiles = CloudflareAccountClient.accountProfiles()["profiles"]?.jsonArray.orEmpty()
+            .map { it.jsonObject }
+        val remoteById = remoteProfiles.associateBy { it["id"]?.jsonPrimitive?.content.orEmpty() }
+        val localByIndex = _state.value.profiles.associateBy { it.profileIndex }
+        val synced = mutableListOf<NuvioProfile>()
+
+        for (item in payloads) {
+            val current = localByIndex[item.profileIndex]
+            val knownId = current?.id?.takeIf { remoteById.containsKey(it) }
+            val id = if (knownId != null) {
+                val remoteName = remoteById.getValue(knownId)["displayName"]?.jsonPrimitive?.content.orEmpty()
+                if (remoteName != item.name.trim()) {
+                    CloudflareAccountClient.renameAccountProfile(knownId, item.name)
+                }
+                knownId
+            } else {
+                // Une liste distante déjà remplie ne doit pas être réattribuée
+                // par indice : demander une nouvelle lecture, sans écrasement.
+                check(item.profileIndex > remoteProfiles.size) {
+                    "Profils cloud à actualiser avant de créer un profil"
+                }
+                check(remoteProfiles.size + synced.count { it.id !in remoteById } < MAX_PROFILES) {
+                    "Nombre maximal de profils Kovelyx atteint"
+                }
+                CloudflareAccountClient.createAccountProfile(item.name)["id"]
+                    ?.jsonPrimitive?.content?.takeIf { it.length == 36 }
+                    ?: error("Création du profil cloud non confirmée")
+            }
+            synced += (current ?: NuvioProfile()).copy(
+                id = id,
+                userId = account.userId,
+                profileIndex = item.profileIndex,
+                name = item.name.trim(),
+                avatarColorHex = item.avatarColorHex,
+                avatarId = item.avatarId,
+                avatarUrl = item.avatarUrl,
+                profileBackgroundId = item.profileBackgroundId,
+                profileBackgroundUrl = item.profileBackgroundUrl,
+                usesPrimaryAddons = item.usesPrimaryAddons,
+                usesPrimaryPlugins = item.usesPrimaryPlugins,
+            )
+        }
+        // Les médias personnels restent sur l'appareil quand R2 n'est pas
+        // configuré. Une erreur réseau n'efface ni les profils ni les fichiers.
+        for (profile in synced) {
+            val previous = remoteById[profile.id]
+            val oldAvatar = previous?.get("avatarPath")?.jsonPrimitive?.contentOrNull
+            val oldBackground = previous?.get("backgroundPath")?.jsonPrimitive?.contentOrNull
+            if (ProfileLocalImages.isManagedUri(profile.avatarUrl.orEmpty()) &&
+                (oldAvatar.isNullOrBlank() ||
+                 localByIndex[profile.profileIndex]?.avatarUrl != profile.avatarUrl)) {
+                runCatching {
+                    ProfileCloudMediaTransfer.upload(profile.id,profile.avatarUrl!!,false)
+                }.onFailure { log.w(it) { "Envoi avatar R2 impossible : copie locale conservée" } }
+            }
+            if (ProfileLocalImages.isManagedUri(profile.profileBackgroundUrl.orEmpty()) &&
+                (oldBackground.isNullOrBlank() ||
+                 localByIndex[profile.profileIndex]?.profileBackgroundUrl != profile.profileBackgroundUrl)) {
+                runCatching {
+                    ProfileCloudMediaTransfer.upload(profile.id,profile.profileBackgroundUrl!!,true)
+                }.onFailure { log.w(it) { "Envoi fond R2 impossible : copie locale conservée" } }
+            }
+            // Une sélection « par défaut » doit également retirer le fichier
+            // distant, sinon la TV afficherait encore l'ancien avatar/fond.
+            val previousLocalProfile=localByIndex[profile.profileIndex]
+            if(!oldAvatar.isNullOrBlank() && previousLocalProfile?.avatarUrl!=profile.avatarUrl &&
+                !ProfileLocalImages.isManagedUri(profile.avatarUrl.orEmpty())) {
+                runCatching { ProfileCloudMediaTransfer.remove(profile.id,false) }
+                    .onFailure { log.w(it) { "Avatar R2 ancien encore conservé" } }
+            }
+            if(!oldBackground.isNullOrBlank() && previousLocalProfile?.profileBackgroundUrl!=profile.profileBackgroundUrl &&
+                !ProfileLocalImages.isManagedUri(profile.profileBackgroundUrl.orEmpty())) {
+                runCatching { ProfileCloudMediaTransfer.remove(profile.id,true) }
+                    .onFailure { log.w(it) { "Fond R2 ancien encore conservé" } }
+            }
+        }
+        val result = synced.sortedBy { it.profileIndex }
+        _state.value = _state.value.copy(
+            profiles = result,
+            isLoaded = true,
+            activeProfile = result.find { it.profileIndex == activeProfileIndex } ?: result.firstOrNull(),
+        )
+        _state.value.activeProfile?.let { activeProfileIndex = it.profileIndex }
+        persist()
+    }
+
     suspend fun pushProfiles(profiles: List<ProfilePushPayload>) {
+        val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId.orEmpty()
+        if (owner.isNotBlank()) profiles.forEach { item ->
+            ProfileLocalImages.saveImage(
+                owner,item.profileIndex,false,
+                item.avatarUrl?.takeIf(ProfileLocalImages::isManagedUri)
+            )
+            ProfileLocalImages.saveImage(
+                owner,item.profileIndex,true,
+                item.profileBackgroundUrl?.takeIf(ProfileLocalImages::isManagedUri)
+            )
+        }
+        if (CloudflareAccountClient.enabled && !AuthRepository.state.value.isAnonymous) {
+            runCatching { pushCloudflareProfiles(profiles) }.onFailure { error ->
+                log.e(error) { "Mise à jour des profils Cloudflare refusée ; données locales préservées" }
+            }
+            return
+        }
         if (AuthRepository.state.value.isAnonymous) {
             applyPayloadsLocally(profiles)
             return
@@ -342,6 +500,30 @@ object ProfileRepository {
     }
 
     suspend fun deleteProfile(profileIndex: Int) {
+
+        if (CloudflareAccountClient.enabled && !AuthRepository.state.value.isAnonymous) {
+            val current = _state.value.profiles.find { it.profileIndex == profileIndex } ?: return
+            // La suppression est déclenchée explicitement depuis l'interface.
+            // Si D1 refuse, conserver intégralement les données de cet appareil.
+            try {
+                check(current.id.length == 36) { "Profil distant non identifié" }
+                CloudflareAccountClient.deleteAccountProfile(current.id)
+            } catch (error: Throwable) {
+                log.e(error) { "Impossible de supprimer le profil Kovelyx Cloud : données conservées" }
+                return
+            }
+            val remaining = _state.value.profiles.filterNot { it.profileIndex == profileIndex }
+            ProfilePinCacheStorage.removePayload(profileIndex)
+            ServerRepository.removeProfile(profileIndex)
+            activeProfileIndex = remaining.firstOrNull { it.profileIndex == activeProfileIndex }?.profileIndex
+                ?: remaining.firstOrNull()?.profileIndex ?: 1
+            _state.value = _state.value.copy(
+                profiles = remaining,
+                activeProfile = remaining.find { it.profileIndex == activeProfileIndex },
+            )
+            persist()
+            return
+        }
         if (AuthRepository.state.value.isAnonymous) {
             val remaining = _state.value.profiles.filter { it.profileIndex != profileIndex }
             ProfilePinCacheStorage.removePayload(profileIndex)
@@ -371,6 +553,7 @@ object ProfileRepository {
     }
 
     suspend fun verifyPin(profileIndex: Int, pin: String): PinVerifyResult {
+        if (CloudflareAccountClient.enabled) return verifyPinLocally(profileIndex, pin)
         if (AuthRepository.state.value !is AuthState.Authenticated) {
             return verifyPinLocally(profileIndex, pin)
         }
@@ -394,6 +577,9 @@ object ProfileRepository {
     }
 
     suspend fun setPin(profileIndex: Int, pin: String, currentPin: String? = null): PinVerifyResult {
+        if (CloudflareAccountClient.enabled) return PinVerifyResult(
+            unlocked = false, message = "Les codes PIN cloud ne sont pas encore disponibles."
+        )
         if (AuthRepository.state.value !is AuthState.Authenticated) {
             return PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_set_requires_internet))
         }
@@ -416,6 +602,9 @@ object ProfileRepository {
     }
 
     suspend fun clearPin(profileIndex: Int, currentPin: String? = null): PinVerifyResult {
+        if (CloudflareAccountClient.enabled) return PinVerifyResult(
+            unlocked = false, message = "Les codes PIN cloud ne sont pas encore disponibles."
+        )
         if (AuthRepository.state.value !is AuthState.Authenticated) {
             return PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_clear_requires_internet))
         }
@@ -437,6 +626,10 @@ object ProfileRepository {
     }
 
     suspend fun clearPinWithPassword(profileIndex: Int, accountPassword: String) {
+        if (CloudflareAccountClient.enabled) {
+            log.w { "Réinitialisation du PIN non disponible sur Cloudflare D1" }
+            return
+        }
         runCatching {
             val params = buildJsonObject {
                 put("p_account_password", accountPassword)
@@ -451,6 +644,7 @@ object ProfileRepository {
     }
 
     suspend fun pullProfileLocks(): List<ProfileLockState> {
+        if (CloudflareAccountClient.enabled) return emptyList()
         return runCatching {
             val result = SupabaseProvider.client.postgrest.rpc("sync_pull_profile_locks")
             result.decodeList<ProfileLockState>()

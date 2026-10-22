@@ -13,11 +13,11 @@ class TrackingProviderRegistryTest {
         val trakt = FakeProvider(TrackingProviderId.TRAKT, authenticated = false, scrobble = true)
         val registry = TrackingProviderRegistry(listOf(simkl, trakt))
 
-        assertEquals(listOf(TrackingProviderId.TRAKT, TrackingProviderId.SIMKL), registry.providers().map { it.descriptor.id })
-        assertEquals(setOf(TrackingProviderId.SIMKL), registry.connectedProviderIds())
-        assertEquals(listOf(TrackingProviderId.SIMKL), registry.connectedScrobblers().map { it.providerId })
+        assertEquals(listOf(TrackingProviderId.TRAKT), registry.providers().map { it.descriptor.id })
+        assertEquals(emptySet<TrackingProviderId>(), registry.connectedProviderIds())
+        assertEquals(emptyList<TrackingProviderId>(), registry.connectedScrobblers().map { it.providerId })
         assertFalse(registry.isAuthenticated(TrackingProviderId.TRAKT))
-        assertTrue(registry.isAuthenticated(TrackingProviderId.SIMKL))
+        assertFalse(registry.isAuthenticated(TrackingProviderId.SIMKL))
     }
 
     @Test(expected = IllegalArgumentException::class)

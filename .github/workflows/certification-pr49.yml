@@ -1,0 +1,171 @@
+name: Certifier Kovelyx FR, comptes, Android, Windows et TV sans deploiement
+
+# Executes the branch HEAD even when PR #40 cannot produce a merge ref.
+# No release, no Cloudflare deployment, no D1 production migration or credentials.
+on:
+  push:
+    branches:
+      - fix/alldebrid-only-cloud-fr-20261023
+
+permissions:
+  contents: read
+
+concurrency:
+  group: certification-kovelyx-fr-account-safe
+  cancel-in-progress: true
+
+jobs:
+  cloud-local:
+    name: Worker D1 local, comptes et limites Nuvio
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verifier les frontieres avec Nuvio
+        run: |
+          python scripts/tests/verify-upstream-independence.py
+          python scripts/tests/check-cloud-account-boundaries.py
+          python services/kovelyx-cloudflare/tests/check-d1-schema.py
+      - name: Installer les dependances du Worker (aucun secret)
+        working-directory: services/kovelyx-cloudflare
+        run: npm install --no-audit --no-fund
+      - name: Tests de contrat et securite
+        working-directory: services/kovelyx-cloudflare
+        run: npm test
+      - name: Vrai Worker Better Auth et D1 jetables locaux
+        working-directory: services/kovelyx-cloudflare
+        timeout-minutes: 8
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: node tests/local-account-e2e.mjs
+      - name: Compiler le Worker sans deploiement
+        working-directory: services/kovelyx-cloudflare
+        run: npx wrangler deploy --dry-run --outdir /tmp/kovelyx-pr49-dry-run
+
+  android:
+    name: APK Android et tests JVM
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Bloquer les domaines Nuvio au build
+        run: |
+          for host in nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+      - name: Compiler Android et executer les tests
+        working-directory: apps/mobile
+        run: |
+          chmod +x gradlew
+          ./gradlew :androidApp:assembleFullDebug :composeApp:testAndroidHostTest --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
+      - name: Conserver le rapport JVM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr49-android-test-report
+          path: apps/mobile/composeApp/build/reports/tests/testAndroidHostTest/
+          if-no-files-found: ignore
+
+  tv:
+    name: APK Android TV et tests unitaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Bloquer les domaines Nuvio au build
+        run: |
+          for host in nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+      - name: Compiler Android TV et executer les tests
+        working-directory: apps/tv
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleFullDebug :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Conserver le rapport TV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr49-tv-test-report
+          path: apps/tv/app/build/reports/tests/testFullDebugUnitTest/
+          if-no-files-found: ignore
+
+  windows:
+    name: Tests Windows sans serveurs Nuvio
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Bloquer les domaines historiques
+        shell: pwsh
+        run: |
+          $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
+          foreach ($domain in @('nuvio.tv','api.nuvio.tv','auth.nuvio.tv','cdn.nuvio.tv')) {
+            Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $domain"
+          }
+          git config --global url.https://blocked-upstream.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/
+      - name: Installer le SDK WebView2 officiel pour les tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $destination = Join-Path $env:RUNNER_TEMP 'kv-webview-sdk'
+          New-Item -ItemType Directory -Force -Path $destination | Out-Null
+          $archive = Join-Path $destination 'sdk.zip'
+          Invoke-WebRequest -Uri 'https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/1.0.2739.15' -OutFile $archive
+          $sdk = Join-Path $destination 'sdk'
+          Expand-Archive -Path $archive -DestinationPath $sdk -Force
+          if (-not (Test-Path (Join-Path $sdk 'build/native/include/WebView2.h'))) { throw 'SDK WebView2 manquant' }
+          "WEBVIEW_DIR=$sdk" >> $env:GITHUB_ENV
+      - name: Executer les tests du client Windows
+        shell: pwsh
+        working-directory: apps/desktop
+        run: |
+          .\gradlew.bat :composeApp:desktopTest --no-daemon --max-workers=2 "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+  french:
+    name: Traductions françaises et intégrité XML des trois applications
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contrôler la couverture en français sur Windows et Android
+        run: |
+          python3 scripts/tests/check-french-resources.py
+          python3 scripts/tests/check-french-resources.py --mobile
+      - name: Contrôler toutes les clés et les XML Android TV
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          p=Path("apps/tv/app/src/main/res")
+          def names(folder):
+              tree=ET.parse(p/folder/"strings.xml")
+              return {n.attrib["name"] for n in tree.getroot().findall("string")}
+          english, french = names("values"), names("values-fr")
+          assert english==french, f"Clés TV non traduites : {sorted(english-french)[:15]}"
+          print(f"{len(french)} clés Android TV françaises présentes.")
+          PY

@@ -86,6 +86,8 @@ object TrackingProviderRegistry {
     val connectedProviderIds: StateFlow<Set<TrackingProviderId>> = _connectedProviderIds.asStateFlow()
 
     fun register(provider: TrackingAuthProvider) {
+        // Interdiction centrale des anciennes connexions, même via un ancien profil.
+        if (provider.providerId == TrackingProviderId.SIMKL) return
         val previousJob = synchronized(lock) {
             authProviders[provider.descriptor.id] = provider
             profileStores += provider
@@ -105,31 +107,31 @@ object TrackingProviderRegistry {
     }
 
     fun registerProfileStore(store: TrackingProfileStore) = synchronized(lock) {
-        profileStores += store
+        if (store.providerId != TrackingProviderId.SIMKL) profileStores += store
     }
 
     fun registerListWriter(writer: TrackingListWriter) = synchronized(lock) {
-        listWriters[writer.providerId] = writer
+        if (writer.providerId != TrackingProviderId.SIMKL) listWriters[writer.providerId] = writer
     }
 
     fun registerHistoryWriter(writer: TrackingHistoryWriter) = synchronized(lock) {
-        historyWriters[writer.providerId] = writer
+        if (writer.providerId != TrackingProviderId.SIMKL) historyWriters[writer.providerId] = writer
     }
 
     fun registerScrobbler(scrobbler: TrackingScrobbler) = synchronized(lock) {
-        scrobblers[scrobbler.providerId] = scrobbler
+        if (scrobbler.providerId != TrackingProviderId.SIMKL) scrobblers[scrobbler.providerId] = scrobbler
     }
 
     fun registerLibraryProvider(provider: TrackingLibraryProvider) = synchronized(lock) {
-        libraryProviders[provider.providerId] = provider
+        if (provider.providerId != TrackingProviderId.SIMKL) libraryProviders[provider.providerId] = provider
     }
 
     fun registerWatchedProvider(provider: TrackingWatchedProvider) = synchronized(lock) {
-        watchedProviders[provider.providerId] = provider
+        if (provider.providerId != TrackingProviderId.SIMKL) watchedProviders[provider.providerId] = provider
     }
 
     fun registerProgressProvider(provider: TrackingProgressProvider) = synchronized(lock) {
-        progressProviders[provider.providerId] = provider
+        if (provider.providerId != TrackingProviderId.SIMKL) progressProviders[provider.providerId] = provider
     }
 
     fun authProvider(id: TrackingProviderId): TrackingAuthProvider? = synchronized(lock) {

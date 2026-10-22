@@ -69,12 +69,16 @@ fun ProfileBackgroundBackdrop(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            AsyncImage(
-                model = backgroundModel,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-            )
+            if(backgroundModel is String && isProfileVideo(backgroundModel)) {
+                ProfileVideoBackdrop(url=backgroundModel,modifier=Modifier.fillMaxSize())
+            } else {
+                AsyncImage(
+                    model = backgroundModel,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()

@@ -44,9 +44,11 @@ internal object WatchProgressCodec {
                     .sortedWith(watchProgressEntryFreshnessComparator.reversed())
                 storedPayload.copy(
                     entries = migratedEntries,
-                    dirtyProgressKeys = storedPayload.dirtyProgressKeys.intersect(
-                        migratedEntries.mapTo(mutableSetOf()) { entry -> entry.resolvedProgressKey() },
-                    ),
+                    dirtyProgressKeys = storedPayload.dirtyProgressKeys.filterTo(mutableSetOf()) { key ->
+                        key in migratedEntries.mapTo(mutableSetOf()) { entry -> entry.resolvedProgressKey() } ||
+                            (key.startsWith(CLOUD_DELETED_PROGRESS_PREFIX) &&
+                                key.length in (CLOUD_DELETED_PROGRESS_PREFIX.length + 1)..(CLOUD_DELETED_PROGRESS_PREFIX.length + 200))
+                    },
                 )
             }
         }.getOrDefault(StoredWatchProgressPayload())

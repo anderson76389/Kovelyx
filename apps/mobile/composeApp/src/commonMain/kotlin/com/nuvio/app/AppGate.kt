@@ -424,9 +424,10 @@ internal fun AppGate(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(MaterialTheme.nuvio.colors.background),
-                        contentAlignment = Alignment.Center,
                     ) {
-                        NuvioLoadingIndicator()
+                        // Afficher le même logo vraiment centré dès l'initialisation
+                        // du compte, pas uniquement pendant le chargement du catalogue.
+                        AppLoadingContent(modifier = Modifier.fillMaxSize())
                     }
                 }
                 AppGateScreen.Auth.name -> {

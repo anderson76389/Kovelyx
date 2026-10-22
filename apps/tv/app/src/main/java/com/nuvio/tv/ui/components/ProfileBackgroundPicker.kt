@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.viewinterop.AndroidView
+import android.widget.VideoView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -222,17 +224,48 @@ fun CustomProfileBackgroundImage(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    AsyncImage(
-        model = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .memoryCacheKey("custom-profile-background-$imageUrl")
-            .diskCacheKey("custom-profile-background-$imageUrl")
-            .diskCachePolicy(CachePolicy.ENABLED)
-            .allowRgb565(false)
-            .crossfade(true)
-            .build(),
-        contentDescription = contentDescription,
-        modifier = modifier,
-        contentScale = ContentScale.Crop
-    )
+    val video = imageUrl.substringBefore('?').lowercase().let {
+        it.endsWith(".mp4") || it.endsWith(".webm") || it.endsWith(".mov")
+    }
+    if(video) {
+        // Vidéo locale privée : lecture en boucle et sans son.
+        AndroidView(
+            modifier=modifier,
+            factory={ ctx ->
+                VideoView(ctx).apply {
+                    isFocusable=false
+                    isFocusableInTouchMode=false
+                    setVideoURI(android.net.Uri.parse(imageUrl))
+                    setOnPreparedListener { player ->
+                        player.isLooping=true
+                        player.setVolume(0f,0f)
+                        start()
+                    }
+                    setOnErrorListener { _,_,_ -> true }
+                }
+            },
+            update={ view ->
+                if(view.tag!=imageUrl) {
+                    view.tag=imageUrl
+                    view.setVideoURI(android.net.Uri.parse(imageUrl))
+                    view.start()
+                }
+            },
+            onRelease={ it.stopPlayback() }
+        )
+    } else {
+        AsyncImage(
+            model = ImageRequest.Builder(context)
+                .data(imageUrl)
+                .memoryCacheKey("custom-profile-background-$imageUrl")
+                .diskCacheKey("custom-profile-background-$imageUrl")
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .allowRgb565(false)
+                .crossfade(true)
+                .build(),
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
+    }
 }
