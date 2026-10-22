@@ -883,7 +883,7 @@
     <string name="trakt_library_source_trakt">Trakt</string>
     <string name="trakt_library_source_nuvio">Bibliothèque Kovelyx</string>
     <string name="trakt_library_source_trakt_selected">Bibliothèque Trakt sélectionnée</string>
-    <string name="trakt_library_source_nuvio_selected">Bibliothèque Kovelyx sélectionnée</string>
+    <string name="trakt_library_source_nuvio_selected">Bibliothèque locale sélectionnée</string>
     <string name="trakt_setting_on">Activé</string>
     <string name="trakt_setting_off">Désactivé</string>
     <string name="trakt_watch_progress_trakt_selected">Source de progression définie sur Trakt</string>
