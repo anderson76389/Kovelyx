@@ -14,6 +14,12 @@ on:
       - 'scripts/publish-unified-preview.sh'
       - '.github/workflows/publish-unified-preview.yml'
       - '.github/workflows/windows.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'apps/tv/**'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
     inputs:
       platform:
@@ -29,12 +35,14 @@ on:
 
 concurrency:
   group: kovelyx-build-${{ github.ref }}
-  # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
-  cancel-in-progress: false
+  # Sur PR, ne compiler que le dernier commit. Sur main et workflow_dispatch,
+  # préserver chaque build et les Releases pour leur traçabilité.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
   actions: read
+  pull-requests: read
 
 jobs:
   changes:
@@ -73,7 +81,7 @@ jobs:
   tv:
     name: Android TV - APK Full Debug
     needs: changes
-    if: ${{ (github.event_name == 'push' && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
+    if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -106,7 +114,7 @@ jobs:
         working-directory: apps/tv
         shell: bash
         run: |
-          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --tests 'com.nuvio.tv.domain.model.ProfileBackgroundTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
       - name: Vérifier l'APK universel et son identité TV
         shell: bash
         run: |
@@ -118,6 +126,10 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
           grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
+          grep -F "application-label:'Kovelyx'" /tmp/kv-tv-badging.txt
+          if grep -Eiq "application-label.*(\\(test\\)|Nuvio Debug)" /tmp/kv-tv-badging.txt; then
+            echo "::error::Étiquette TV de préproduction incorrecte"; exit 1
+          fi
           grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging.txt
           echo "APK Kovelyx TV universel, signé et identifié correctement" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK TV
@@ -131,7 +143,7 @@ jobs:
   mobile:
     name: Android mobile - APK Full Debug
     needs: changes
-    if: ${{ (github.event_name == 'push' && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
+    if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -171,6 +183,10 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
           grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
+          grep -F "application-label:'Kovelyx'" /tmp/kv-android-badging
+          if grep -Eiq "application-label.*(\\(test\\)|Nuvio Debug)" /tmp/kv-android-badging; then
+            echo "::error::Étiquette mobile de préproduction incorrecte"; exit 1
+          fi
           echo "APK mobile universel, signé et identifié comme Kovelyx" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK mobiles
         uses: actions/upload-artifact@v4

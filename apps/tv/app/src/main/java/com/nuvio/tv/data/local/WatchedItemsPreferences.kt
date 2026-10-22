@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import com.google.gson.Gson
 import com.nuvio.tv.data.mediaserver.ServerItemRef
 import com.nuvio.tv.domain.model.WatchedItem
@@ -13,6 +15,7 @@ import com.nuvio.tv.domain.model.WatchedMutationKey
 import com.nuvio.tv.domain.model.mutationKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -102,7 +105,11 @@ class WatchedItemsPreferences @Inject constructor(
         Log.d(TAG, "setDeltaState: profile=$profileId cursor=${cursor.coerceAtLeast(0L)} initialized=$initialized")
     }
 
-    internal val allItems: Flow<List<WatchedItem>> = profileManager.activeProfileId.flatMapLatest { pid ->
+    internal val allItems: Flow<List<WatchedItem>> = combine(
+        profileManager.activeProfileId,
+        CloudflareTvAccountClient.ownerId,
+        CloudflareTvLibraryStore.state
+    ) { pid, _, _ -> pid }.flatMapLatest { pid ->
         observeAllItems(pid)
     }
 

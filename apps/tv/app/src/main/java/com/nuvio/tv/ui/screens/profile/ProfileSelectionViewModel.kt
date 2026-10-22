@@ -54,7 +54,7 @@ class ProfileSelectionViewModel @Inject constructor(
     private val themeDataStore: com.nuvio.tv.data.local.ThemeDataStore
 ) : ViewModel() {
     val activeProfileId: StateFlow<Int> = profileManager.activeProfileId
-    val profiles: StateFlow<List<UserProfile>> = profileManager.profiles
+    val profiles: StateFlow<List<UserProfile>> = profileManager.displayProfiles
 
     val canAddProfile: Boolean
         get() = profileManager.canCreateProfile

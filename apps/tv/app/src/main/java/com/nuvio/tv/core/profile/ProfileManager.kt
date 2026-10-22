@@ -12,6 +12,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -56,8 +58,33 @@ class ProfileManager @Inject constructor(
             UserProfile(id = 1, name = context.getString(R.string.profile_default_name, 1), avatarColorHex = "#1E88E5")
         ))
 
+    // L'avatar et le fond d'un compte Cloudflare ne doivent JAMAIS être écrits
+    // dans le DataStore global de la TV : à la déconnexion ou au redémarrage,
+    // une autre personne pourrait sinon voir ces médias personnels.
+    private val cloudMedia = MutableStateFlow<Map<Int,Pair<String?,String?>>>(emptyMap())
+
+    val displayProfiles: StateFlow<List<UserProfile>> = combine(profiles,cloudMedia) { saved,overrides ->
+        saved.map { profile ->
+            overrides[profile.id]?.let { (avatar,background) ->
+                profile.copy(
+                    avatarUrl=avatar ?: profile.avatarUrl,
+                    profileBackgroundUrl=background ?: profile.profileBackgroundUrl,
+                )
+            } ?: profile
+        }
+    }.stateIn(scope,SharingStarted.Eagerly,profiles.value)
+
+    fun setCloudMedia(profileId:Int,avatar:String?,background:String?) {
+        if(avatar==null && background==null) return
+        cloudMedia.value=cloudMedia.value+(profileId to (avatar to background))
+    }
+
+    fun clearCloudMedia() {
+        cloudMedia.value=emptyMap()
+    }
+
     val activeProfile: UserProfile?
-        get() = profiles.value.find { it.id == activeProfileId.value }
+        get() = displayProfiles.value.find { it.id == activeProfileId.value }
 
     val isPrimaryProfileActive: Boolean
         get() = activeProfileId.value == 1

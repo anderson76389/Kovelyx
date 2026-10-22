@@ -1,8 +1,10 @@
 package com.nuvio.tv.core.auth
 
+import android.content.Context
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticEventListenerFactory
 import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticsSession
 import com.nuvio.tv.core.auth.diagnostics.authDiagnosticFilteredBody
@@ -49,6 +51,7 @@ import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicLong
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -85,7 +88,8 @@ class AuthManager @Inject constructor(
     private val authSessionNoticeDataStore: AuthSessionNoticeDataStore,
     private val accountLocalDataResetService: AccountLocalDataResetService,
     private val authDiagnosticReportRepository: AuthDiagnosticReportRepository,
-    private val serverConfiguration: ServerConfiguration
+    private val serverConfiguration: ServerConfiguration,
+    @ApplicationContext private val appContext: Context
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val json = Json { ignoreUnknownKeys = true }
@@ -104,8 +108,44 @@ class AuthManager @Inject constructor(
 
     init {
         if (CloudflareTvAccountClient.enabled) {
-            // Ne pas faire observer les sessions du SDK Supabase historique.
-            _authState.value = AuthState.SignedOut
+            // Ne jamais accepter un jeton sans /v1/me. Si le Worker est simplement
+            // hors ligne, garder le coffre chiffré et réessayer sans intervention TV.
+            scope.launch {
+                var backoffMs = 15_000L
+                while (true) {
+                    val state = _authState.value
+                    if (state !is AuthState.Loading && state !is AuthState.SignedOut) break
+                    val saved = TvCloudSessionVault.read(appContext)
+                    if (saved == null) {
+                        if (state is AuthState.Loading) _authState.value = AuthState.SignedOut
+                        break // Déconnexion explicite ou jeton définitivement invalidé.
+                    }
+                    val restored = try {
+                        CloudflareTvAccountClient.restoreVerified(appContext)
+                    } catch (cancel: CancellationException) {
+                        throw cancel
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Kovelyx Cloud : restauration différée", error)
+                        null
+                    }
+                    if (restored != null && CloudflareTvAccountClient.account == restored) {
+                        val latest = _authState.value
+                        if (latest is AuthState.Loading || latest is AuthState.SignedOut) {
+                            // Une déconnexion peut avoir effacé le coffre durant le GET.
+                            if (TvCloudSessionVault.read(appContext) == restored) {
+                                _authState.value = AuthState.FullAccount(
+                                    userId = restored.id, email = restored.email
+                                )
+                            }
+                        }
+                        break
+                    }
+                    if (_authState.value is AuthState.Loading) _authState.value = AuthState.SignedOut
+                    if (TvCloudSessionVault.read(appContext) != saved) break
+                    kotlinx.coroutines.delay(backoffMs)
+                    backoffMs = (backoffMs * 2).coerceAtMost(300_000L)
+                }
+            }
         } else {
             observeSessionStatus()
         }
@@ -355,7 +395,7 @@ class AuthManager @Inject constructor(
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
         if (CloudflareTvAccountClient.enabled) return runCatching {
-            val account = CloudflareTvAccountClient.signIn(email, password)
+            val account = CloudflareTvAccountClient.signIn(appContext, email, password)
             _authState.value = AuthState.FullAccount(userId = account.id, email = account.email)
         }
         val diagnostics = AuthDiagnosticsSession(
@@ -390,8 +430,9 @@ class AuthManager @Inject constructor(
     suspend fun signOut(explicit: Boolean = true) {
         if (CloudflareTvAccountClient.enabled) {
             try {
-                CloudflareTvAccountClient.signOut()
+                CloudflareTvAccountClient.signOut(appContext)
             } finally {
+                CloudflareTvLibraryStore.reset()
                 _authState.value = AuthState.SignedOut
                 // Ne pas supprimer les favoris/profils locaux à la déconnexion :
                 // la sauvegarde Cloudflare D1 n'est pas encore migrée et testée.
@@ -418,7 +459,8 @@ class AuthManager @Inject constructor(
 
     suspend fun prepareForServerSwitch(): Result<Unit> {
         if (CloudflareTvAccountClient.enabled) {
-            CloudflareTvAccountClient.clearLocalSession()
+            CloudflareTvAccountClient.clearLocalSession(appContext)
+            CloudflareTvLibraryStore.reset()
             _authState.value = AuthState.SignedOut
             return Result.success(Unit)
         }

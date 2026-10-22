@@ -1,11 +1,14 @@
 package com.nuvio.tv.data.repository
 
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.R
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.sync.LibrarySyncService
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
+import com.nuvio.tv.core.sync.CloudflareTvProfileBinding
 import com.nuvio.tv.core.tracking.TrackingListManager
 import com.nuvio.tv.core.tracking.TrackingLibraryProviderRegistry
 import com.nuvio.tv.core.tracking.TrackingMembershipApplyResult
@@ -27,16 +30,19 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 import com.nuvio.tv.domain.model.ListMembershipChanges
 import com.nuvio.tv.domain.model.ListMembershipSnapshot
 import com.nuvio.tv.domain.model.SavedLibraryItem
+import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.domain.model.LibraryListPrivacy
 import com.nuvio.tv.domain.repository.LibraryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -73,7 +79,67 @@ class LibraryRepositoryImpl @Inject constructor(
     @Volatile
     var hasCompletedInitialPull = false
 
+    init {
+        if (CloudflareTvAccountClient.enabled) {
+            // Démarrage et changement de profil fonctionnent aussi sans ouvrir
+            // l'écran Compte. Ne jamais transférer les données du mode invité.
+            syncScope.launch {
+                combine(
+                    authManager.authState,
+                    profileManager.activeProfileId,
+                    profileManager.profiles
+                ) { state, localId, locals -> Triple(state, localId, locals) }
+                    .collectLatest { (auth, localId, locals) ->
+                        val cloud = CloudflareTvAccountClient.account
+                        if (auth !is AuthState.FullAccount || cloud?.id != auth.userId) {
+                            CloudflareTvLibraryStore.reset()
+                            return@collectLatest
+                        }
+                        // Le compte est déjà vérifié par /v1/me. Si le Worker
+                        // des profils est hors ligne, utiliser la dernière association
+                        // validée sans envoyer les favoris invités vers D1.
+                        try {
+                            CloudflareTvLibraryStore.restoreVerifiedBinding(appContext, localId)
+                        } catch (cancel: CancellationException) {
+                            throw cancel
+                        } catch (error: Exception) {
+                            Log.w("CloudflareTvLibrary", "Cache TV indisponible", error)
+                        }
+                        while (CloudflareTvAccountClient.account?.id == auth.userId) {
+                            try {
+                                val remote = CloudflareTvAccountClient.getCloudProfiles()
+                                val bindings = CloudflareTvProfileBinding.resolve(
+                                    locals.map { CloudflareTvProfileBinding.Local(it.id, it.name) },
+                                    remote.map { CloudflareTvProfileBinding.Remote(it.id, it.name) }
+                                )
+                                val uuid = bindings[localId]
+                                if (uuid == null) {
+                                    // La liste distante est connue et l'association
+                                    // n'est plus sûre : retirer le lien conservé.
+                                    CloudflareTvLibraryStore.forgetBinding(
+                                        appContext, auth.userId, localId
+                                    )
+                                } else {
+                                    CloudflareTvLibraryStore.bind(appContext, localId, uuid)
+                                }
+                            } catch (cancel: CancellationException) {
+                                throw cancel
+                            } catch (error: Exception) {
+                                // Les écritures non envoyées et le cache D1 restent
+                                // préservés pour les prochaines tentatives.
+                                Log.w("CloudflareTvLibrary", "Lecture D1 reportée", error)
+                            }
+                            delay(300_000L)
+                        }
+                    }
+            }
+        }
+    }
+
     private fun triggerRemoteSync(profileId: Int) {
+        // La synchronisation distante historique utilise Supabase.
+        // Conserver les modifications uniquement sur l'appareil en mode D1.
+        if (CloudflareTvAccountClient.enabled) return
         if (!hasCompletedInitialPull) return
         if (!authManager.isAuthenticated) return
         syncJob?.cancel()
@@ -111,22 +177,27 @@ class LibraryRepositoryImpl @Inject constructor(
             if (provider != null) {
                 provider.items
             } else {
-                libraryPreferences.libraryItems.map { items ->
+                combine(
+                    libraryPreferences.libraryItems,
+                    CloudflareTvLibraryStore.state,
+                    profileManager.activeProfileId
+                ) { guestItems, cloud, selectedProfileId ->
+                    val activeAccount = CloudflareTvAccountClient.account
+                    // Aucune bibliothèque invitée n'est présentée comme appartenant à D1.
+                    val items = if (CloudflareTvAccountClient.enabled && activeAccount != null) {
+                        cloud?.takeIf {
+                            it.ownerId == activeAccount.id &&
+                                it.localProfileId == selectedProfileId
+                        }?.items?.values?.toList().orEmpty()
+                    } else guestItems
                     items.map { saved ->
                         LibraryEntry(
-                            id = saved.id,
-                            type = saved.type,
-                            name = saved.name,
-                            poster = saved.poster,
-                            posterShape = saved.posterShape,
-                            background = saved.background,
-                            logo = saved.logo,
-                            description = saved.description,
-                            releaseInfo = saved.releaseInfo,
-                            imdbRating = saved.imdbRating,
-                            genres = saved.genres,
-                            addonBaseUrl = saved.addonBaseUrl,
-                            listedAt = saved.addedAt,
+                            id = saved.id, type = saved.type, name = saved.name,
+                            poster = saved.poster, posterShape = saved.posterShape,
+                            background = saved.background, logo = saved.logo,
+                            description = saved.description, releaseInfo = saved.releaseInfo,
+                            imdbRating = saved.imdbRating, genres = saved.genres,
+                            addonBaseUrl = saved.addonBaseUrl, listedAt = saved.addedAt,
                             rawPosterUrl = saved.poster
                         )
                     }
@@ -160,7 +231,11 @@ class LibraryRepositoryImpl @Inject constructor(
                 provider.observeMembership(itemId, itemType)
                     .map { memberships -> memberships.isNotEmpty() }
             } else {
-                libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
+                if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null)
+                    libraryItems.map { items ->
+                        items.any { it.id == itemId && it.type.equals(itemType, ignoreCase = true) }
+                    }
+                else libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
             }
         }.distinctUntilChanged()
     }
@@ -178,7 +253,11 @@ class LibraryRepositoryImpl @Inject constructor(
                     }
                 }
             } else {
-                libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
+                if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null)
+                    libraryItems.map { items ->
+                        items.any { it.id == itemId && it.type.equals(itemType, ignoreCase = true) }
+                    }
+                else libraryPreferences.isInLibrary(itemId = itemId, itemType = itemType)
             }
         }.distinctUntilChanged()
     }
@@ -210,6 +289,10 @@ class LibraryRepositoryImpl @Inject constructor(
         }
 
         val profileId = profileManager.activeProfileId.value
+        if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+            CloudflareTvLibraryStore.toggle(appContext, profileId, item.toSavedLibraryItem())
+            return TrackingMembershipApplyResult()
+        }
         val isInLocal = libraryPreferences.containsItem(
             itemId = item.itemId,
             itemType = item.itemType,
@@ -233,7 +316,10 @@ class LibraryRepositoryImpl @Inject constructor(
 
     override suspend fun getMembershipSnapshot(item: LibraryEntryInput): ListMembershipSnapshot {
         val profileId = profileManager.activeProfileId.value
-        val inLocal = libraryPreferences.containsItem(
+        val inLocal = if (CloudflareTvAccountClient.enabled &&
+            CloudflareTvAccountClient.account != null) {
+            CloudflareTvLibraryStore.contains(profileId, item.itemId, item.itemType)
+        } else libraryPreferences.containsItem(
             itemId = item.itemId,
             itemType = item.itemType,
             profileId = profileId
@@ -279,12 +365,18 @@ class LibraryRepositoryImpl @Inject constructor(
 
         val profileId = profileManager.activeProfileId.value
         val localDesired = desired[LOCAL_LIBRARY_LIST_KEY] == true
-        val currentlyInLocal = libraryPreferences.containsItem(
+        val cloudMode = CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null
+        val currentlyInLocal = if (cloudMode)
+            CloudflareTvLibraryStore.contains(profileId, item.itemId, item.itemType)
+        else libraryPreferences.containsItem(
             itemId = item.itemId,
             itemType = item.itemType,
             profileId = profileId
         )
         if (localDesired != currentlyInLocal) {
+            if (cloudMode) {
+                CloudflareTvLibraryStore.toggle(appContext, profileId, item.toSavedLibraryItem())
+            } else {
             if (localDesired) {
                 libraryPreferences.addItem(
                     item = item.toSavedLibraryItem(),
@@ -298,6 +390,7 @@ class LibraryRepositoryImpl @Inject constructor(
                 )
             }
             triggerRemoteSync(profileId)
+            }
         }
 
         val failures = dispatchTrackingMembershipChanges(
@@ -348,9 +441,12 @@ class LibraryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun refreshNow() {
-        sourceMode.first().providerId
-            ?.let(trackingProviders::provider)
-            ?.refresh(TrackingRefreshIntent.USER_INITIATED)
+        val providerId = sourceMode.first().providerId
+        if (providerId != null) {
+            trackingProviders.provider(providerId)?.refresh(TrackingRefreshIntent.USER_INITIATED)
+        } else if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+            CloudflareTvLibraryStore.refresh(appContext, profileManager.activeProfileId.value)
+        }
     }
 
 

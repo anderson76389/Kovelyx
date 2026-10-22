@@ -20,8 +20,11 @@ export function validSyncInput(body) {
   if (/(?:\"(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|client[_-]?secret|private[_-]?key)\"\s*:)/i.test(serialized)) return false;
   return true;
 }
-export function isAllowedOrigin(origin) {
-  return !origin || origin === "https://anderson76389.github.io";
+export function isAllowedOrigin(origin, workerOrigin = null) {
+  // Les apps natives présentent le Worker lui-même comme origine.
+  // N'accepter aucune origine web étrangère : Better Auth conserve son CSRF.
+  return !origin || origin === "https://anderson76389.github.io" ||
+    (typeof workerOrigin === "string" && workerOrigin !== "" && origin === workerOrigin);
 }
 export function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {

@@ -1,13 +1,18 @@
 package com.nuvio.app.core.cloud
 
 import com.nuvio.app.features.addons.httpRequestRaw
+import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlin.concurrent.Volatile
 
 /**
  * API Cloudflare D1 / Better Auth Kovelyx. Ne pas injecter une URL workers.dev
@@ -20,7 +25,11 @@ import kotlinx.serialization.json.put
 object CloudflareAccountClient {
     data class Session(val userId: String, val email: String, val bearerToken: String)
     private val json = Json { ignoreUnknownKeys = true }
-    private var session: Session? = null
+    @Volatile private var session: Session? = null
+
+    private fun requireUnchangedAccount(active: Session) {
+        check(session === active) { "Compte Kovelyx changé pendant l'opération cloud" }
+    }
 
     val enabled: Boolean get() = CloudflareConfig.URL.startsWith("https://")
     val currentSession: Session? get() = session
@@ -34,7 +43,10 @@ object CloudflareAccountClient {
         val headers = mutableMapOf(
             "Accept" to "application/json",
             "Content-Type" to "application/json",
-            "User-Agent" to "Kovelyx-Client"
+            "User-Agent" to "Kovelyx-Client",
+            // Better Auth refuse les POST natifs sans en-tête Origin valide.
+            // Même origine que le Worker, contrôlée côté serveur.
+            "Origin" to base()
         )
         if (!authorization.isNullOrBlank()) headers["Authorization"] = "Bearer $authorization"
         val response = httpRequestRaw(
@@ -43,7 +55,10 @@ object CloudflareAccountClient {
         )
         if (response.status !in 200..299) {
             val description = runCatching {
-                json.parseToJsonElement(response.body).jsonObject["message"]?.jsonPrimitive?.content
+                json.parseToJsonElement(response.body).jsonObject.let { body ->
+                    body["message"]?.jsonPrimitive?.content
+                        ?: body["error"]?.jsonPrimitive?.content
+                }
             }.getOrNull().orEmpty()
             error("Kovelyx Cloud : HTTP ${response.status}" + if (description.isNotBlank()) " — $description" else "")
         }
@@ -78,16 +93,79 @@ object CloudflareAccountClient {
         check(id.isNotBlank() && realEmail.isNotBlank() && token.length >= 16) {
             "Kovelyx Cloud : session de connexion invalide"
         }
-        return Session(id, realEmail, token).also { session = it }
+        return Session(id, realEmail, token).also { signed ->
+            val sealedPayload = buildJsonObject {
+                put("server", base())
+                put("id", signed.userId)
+                put("email", signed.email)
+                put("token", signed.bearerToken)
+            }.toString()
+            CloudSessionVault.save(sealedPayload)
+            session = signed
+        }
+    }
+
+    /**
+     * Ne jamais restaurer une identité à partir du seul stockage local :
+     * le Worker valide d'abord le jeton auprès de /v1/me.
+     * Réseau indisponible : on garde le coffre mais reste déconnecté.
+     */
+    suspend fun restoreVerified(): Session? {
+        if (!enabled || session != null) return session
+        val sealed = CloudSessionVault.load() ?: return null
+        val candidate = runCatching {
+            val saved = json.parseToJsonElement(sealed).jsonObject
+            check(saved["server"]?.jsonPrimitive?.content == base())
+            val id = saved["id"]?.jsonPrimitive?.content.orEmpty()
+            val email = saved["email"]?.jsonPrimitive?.content.orEmpty()
+            val token = saved["token"]?.jsonPrimitive?.content.orEmpty()
+            check(id.isNotBlank() && email.contains('@') && token.length >= 16)
+            Session(id, email, token)
+        }.getOrElse {
+            if (CloudSessionVault.load() == sealed) CloudSessionVault.clear()
+            return null
+        }
+        return try {
+            val response = httpRequestRaw(
+                method = "GET", url = base() + "/v1/me",
+                headers = mapOf("Authorization" to "Bearer " + candidate.bearerToken,
+                    "Accept" to "application/json"),
+                body = "", followRedirects = false, maxResponseBodyBytes = 131072
+            )
+            if (response.status == 200) {
+                val user = json.parseToJsonElement(response.body).jsonObject
+                if (user["id"]?.jsonPrimitive?.content == candidate.userId &&
+                    user["email"]?.jsonPrimitive?.content.equals(candidate.email, ignoreCase = true)) {
+                    if (session == null && CloudSessionVault.load() == sealed) {
+                        session = candidate
+                    }
+                    session
+                } else {
+                    if (CloudSessionVault.load() == sealed) CloudSessionVault.clear()
+                    null
+                }
+            } else {
+                if (response.status == 401 || response.status == 403) {
+                    if (CloudSessionVault.load() == sealed) CloudSessionVault.clear()
+                }
+                null
+            }
+        } catch (error: Exception) {
+            if (error is kotlinx.coroutines.CancellationException) throw error
+            // Une déconnexion forcée sur simple échec réseau détruirait les sessions.
+            null
+        }
     }
 
     suspend fun signOut() {
         val old = session
+        CloudSessionVault.clear()
         session = null
         if (old != null) request("/api/auth/sign-out", "{}", old.bearerToken)
     }
 
     fun clearLocalSession() {
+        CloudSessionVault.clear()
         session = null
     }
 
@@ -99,7 +177,181 @@ object CloudflareAccountClient {
             body = "", followRedirects = false, maxResponseBodyBytes = 131072
         )
         check(response.status == 200) { "Kovelyx Cloud : profils indisponibles (HTTP ${response.status})" }
-        return json.parseToJsonElement(response.body).jsonObject
+        val result = json.parseToJsonElement(response.body).jsonObject
+        requireUnchangedAccount(active)
+        return result
+    }
+
+
+    private suspend fun profileWrite(path: String, body: String): JsonObject {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val (response, _) = request(path, body, active.bearerToken)
+        val result = json.parseToJsonElement(response).jsonObject
+        requireUnchangedAccount(active)
+        return result
+    }
+
+    suspend fun createAccountProfile(name: String): JsonObject {
+        require(name.isNotBlank() && name.trim().length <= 64) { "Nom de profil invalide" }
+        val body = buildJsonObject { put("displayName", name.trim()) }
+        return checkNotNull(profileWrite("/v1/profiles", body.toString())["profile"]).jsonObject
+    }
+
+    suspend fun renameAccountProfile(profileId: String, name: String) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Profil invalide" }
+        require(name.isNotBlank() && name.trim().length <= 64) { "Nom de profil invalide" }
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("displayName", name.trim())
+        }
+        checkNotNull(profileWrite("/v1/profiles/update", body.toString())["profile"])
+    }
+
+    suspend fun deleteAccountProfile(profileId: String) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Profil invalide" }
+        val body = buildJsonObject { put("profileId", profileId) }
+        check(profileWrite("/v1/profiles/delete", body.toString())["deleted"]?.jsonPrimitive?.booleanOrNull == true) {
+            "Suppression du profil non confirmée"
+        }
+    }
+
+
+    /**
+     * Parcourt entièrement une catégorie D1. Chaque page est bornée (100 lignes)
+     * et l'index évolue par item_key, sans confondre révision individuelle et curseur global.
+     * En cas d'erreur réseau/pagination, on ne renvoie jamais un jeu partiel.
+     */
+    suspend fun syncCategory(profileId: String, category: String): List<JsonObject> {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[0-9a-fA-F-]{36}"))) { "Profil cloud invalide" }
+        require(category in setOf("library", "favorites", "watch_progress",
+            "catalogues", "preferences", "profile_settings", "addons", "plugins"))
+        val items = mutableListOf<JsonObject>()
+        var after: String? = null
+        repeat(100) {
+            val suffix = after?.let { "&after=${it.encodeURLParameter()}" }.orEmpty()
+            val response = httpRequestRaw(
+                method = "GET",
+                url = base() + "/v1/sync?profileId=$profileId&category=$category&limit=100$suffix",
+                headers = mapOf(
+                    "Accept" to "application/json",
+                    "Authorization" to "Bearer ${active.bearerToken}"
+                ),
+                body = "", followRedirects = false, maxResponseBodyBytes = 1048576
+            )
+            check(response.status == 200) { "Kovelyx Cloud : lecture $category HTTP ${response.status}" }
+            requireUnchangedAccount(active)
+            val page = json.parseToJsonElement(response.body).jsonObject
+            val rows = page["items"]?.jsonArray ?: error("Réponse de synchronisation invalide")
+            items += rows.map { it.jsonObject }
+            val next = page["nextCursor"]?.jsonPrimitive?.contentOrNull
+                ?.takeIf { it.isNotBlank() }
+            if (next == null) {
+                check(page["partial"]?.jsonPrimitive?.booleanOrNull != true) {
+                    "Réponse de synchronisation incomplète"
+                }
+                requireUnchangedAccount(active)
+                return items
+            }
+            check(next != after && next.length <= 200) { "Pagination cloud incohérente" }
+            after = next
+        }
+        error("Trop d'éléments pour la synchronisation : données locales préservées")
+    }
+
+    suspend fun writeSync(
+        profileId: String,
+        category: String,
+        itemKey: String,
+        payload: JsonObject,
+        revision: Int,
+        deleted: Boolean
+    ): Int {
+        require(profileId.matches(Regex("[0-9a-fA-F-]{36}"))) { "Profil cloud invalide" }
+        require(category in setOf("library", "favorites", "watch_progress",
+            "catalogues", "preferences", "profile_settings", "addons", "plugins"))
+        require(itemKey.isNotBlank() && itemKey.length <= 200)
+        require(revision >= 0)
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("category", category)
+            put("itemKey", itemKey)
+            put("payload", payload)
+            put("revision", revision)
+            put("deleted", deleted)
+        }
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val (result, _) = request("/v1/sync", body.toString(), active.bearerToken)
+        requireUnchangedAccount(active)
+        return json.parseToJsonElement(result).jsonObject["revision"]
+            ?.jsonPrimitive?.intOrNull ?: error("Révision D1 non confirmée")
+    }
+
+    /**
+     * Historique de visionnage propre au compte. Route dédiée /v1/watched :
+     * elle conserve le statut vu même après suppression d'une reprise.
+     */
+    suspend fun readWatched(profileId: String): List<JsonObject> {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val items = mutableListOf<JsonObject>()
+        var after: String? = null
+        repeat(100) {
+            val suffix = after?.let { "&after=${it.encodeURLParameter()}" }.orEmpty()
+            val response = httpRequestRaw(
+                method = "GET",
+                url = base() + "/v1/watched?profileId=$profileId&limit=100$suffix",
+                headers = mapOf(
+                    "Accept" to "application/json",
+                    "Authorization" to "Bearer ${active.bearerToken}"
+                ),
+                body = "", followRedirects = false, maxResponseBodyBytes = 1048576
+            )
+            check(response.status == 200) {
+                "Kovelyx Cloud : historique indisponible (HTTP ${response.status})"
+            }
+            requireUnchangedAccount(active)
+            val page = json.parseToJsonElement(response.body).jsonObject
+            val rows = page["items"]?.jsonArray ?: error("Historique D1 invalide")
+            check(rows.size <= 100)
+            items += rows.map { it.jsonObject }
+            check(items.size <= 10000)
+            val next = page["nextCursor"]?.jsonPrimitive?.contentOrNull
+                ?.takeIf(String::isNotBlank)
+            if (next == null) {
+                check(page["partial"]?.jsonPrimitive?.booleanOrNull != true) {
+                    "Historique D1 tronqué"
+                }
+                requireUnchangedAccount(active)
+                return items
+            }
+            check(next != after && next.length <= 200)
+            after = next
+        }
+        error("Limite d'historique dépassée : conserver les données locales")
+    }
+
+    suspend fun writeWatched(
+        profileId: String,
+        itemKey: String,
+        payload: JsonObject,
+        revision: Int,
+        deleted: Boolean
+    ): Int {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require(itemKey.length in 1..200 && revision >= 0)
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("itemKey", itemKey)
+            put("payload", payload)
+            put("revision", revision)
+            put("deleted", deleted)
+        }
+        val (response, _) = request("/v1/watched", body.toString(), active.bearerToken)
+        requireUnchangedAccount(active)
+        return json.parseToJsonElement(response).jsonObject["revision"]
+            ?.jsonPrimitive?.intOrNull ?: error("Révision de visionnage non confirmée")
     }
 
     suspend fun synchronizeRaw(profileId: String): JsonObject {
@@ -111,6 +363,8 @@ object CloudflareAccountClient {
             body = "", followRedirects = false, maxResponseBodyBytes = 1048576
         )
         check(response.status == 200) { "Kovelyx Cloud : synchronisation indisponible (HTTP ${response.status})" }
-        return json.parseToJsonElement(response.body).jsonObject
+        val result = json.parseToJsonElement(response.body).jsonObject
+        requireUnchangedAccount(active)
+        return result
     }
 }

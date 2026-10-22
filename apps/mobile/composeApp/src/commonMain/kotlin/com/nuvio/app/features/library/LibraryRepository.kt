@@ -2,6 +2,7 @@ package com.nuvio.app.features.library
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.library.sync.LibrarySyncAdapter
@@ -133,6 +134,12 @@ object LibraryRepository {
         if (profileId == current.token.profileId && current.hasLoaded) return
 
         if (!loadFromDisk(profileId)) return
+        if (CloudflareAccountClient.enabled) {
+            syncScope.launch {
+                runCatching { synchronizeCloudflareLibrary(profileId) }
+                    .onFailure { log.e(it) { "Cloudflare : synchronisation au changement de profil impossible" } }
+            }
+        }
         TrackingProviderRegistry.libraryProviders().forEach(TrackingLibraryProvider::onProfileChanged)
         TrackingProviderRegistry.connectedLibraryProviders().forEach(TrackingLibraryProvider::prepare)
         activeLibraryProvider()?.let(::refreshLibraryProviderAsync)
@@ -216,6 +223,17 @@ object LibraryRepository {
             return
         }
 
+        if (CloudflareAccountClient.enabled) {
+            try {
+                synchronizeCloudflareLibrary(profileId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                log.e(error) { "Bibliothèque Cloudflare : données locales préservées" }
+            }
+            return
+        }
+
         nuvioSyncMutex.withLock {
             val serializedToken = activeOperationToken(profileId) ?: return@withLock
             val pullSnapshot = localState.markPullStarted(serializedToken) ?: return@withLock
@@ -246,6 +264,130 @@ object LibraryRepository {
                 throw error
             } catch (error: Throwable) {
                 log.e(error) { "Failed to pull library from server" }
+            }
+        }
+    }
+
+    /**
+     * Synchronisation de la bibliothèque locale avec D1, séparée des RPC Supabase.
+     * Première liaison : import distant sans écraser ni téléverser les données
+     * préexistantes. Les mutations locales suivantes utilisent un CAS par élément.
+     */
+    internal suspend fun synchronizeCloudflareLibrary(profileId: Int) {
+        if (!CloudflareAccountClient.enabled) return
+        val auth = AuthRepository.state.value as? AuthState.Authenticated ?: return
+        if (auth.isAnonymous || CloudflareAccountClient.currentSession?.userId != auth.userId) return
+        val remoteProfileId = ProfileRepository.state.value.profiles
+            .firstOrNull { it.profileIndex == profileId }?.id
+            ?.takeIf { it.matches(Regex("[0-9a-fA-F-]{36}")) } ?: return
+        nuvioSyncMutex.withLock {
+            val token = activeOperationToken(profileId) ?: return@withLock
+            val rows = CloudflareAccountClient.syncCategory(remoteProfileId, "library")
+            val remote = CloudflareLibraryCodec.decode(rows)
+            val snapshot = localState.snapshot()
+            if (snapshot.token != token || !localState.isCurrent(snapshot)) return@withLock
+            val saved = LibraryStoragePayloadCodec.decode(
+                LibraryStorage.loadPayload(profileId).orEmpty()
+            )
+            val checkpoint = saved.cloudCheckpoint?.takeIf {
+                it.userId == auth.userId && it.profileId == remoteProfileId
+            }
+            val pendingDeletes = snapshot.pendingDeleteKeys.map {
+                libraryItemKey(it.contentId,it.contentType)
+            }.toSet()
+            val remoteAdditions = remote.filter { (key,row) ->
+                !row.deleted && key !in pendingDeletes
+            }.values.mapNotNull(CloudLibraryRow::item)
+            val confirmedRemoteDeletions = remote.filter { (key,row) ->
+                row.deleted && checkpoint?.revisions?.containsKey(key) == true
+            }.keys
+            val merged = localState.applyCloudItems(
+                snapshot, remoteAdditions, confirmedRemoteDeletions
+            ) ?: return@withLock
+            persist(merged)
+            publish()
+
+            val remoteRevisions = remote.mapValues { it.value.revision }
+            if (checkpoint == null) {
+                // Un ancien invité/compte peut posséder des favoris locaux.
+                // Ne pas les attribuer au nouveau compte sans action explicite.
+                val clean = localState.markPushCompleted(merged) ?: return@withLock
+                persist(clean)
+                saveCloudCheckpoint(clean.token, CloudLibraryCheckpoint(
+                    userId = auth.userId, profileId = remoteProfileId,
+                    revisions = remoteRevisions
+                ))
+                return@withLock
+            }
+
+            val localByKey = merged.items.associateBy {
+                libraryItemKey(it.id,it.type)
+            }
+            val progress = checkpoint.revisions.toMutableMap()
+            // D1 et le cache local peuvent changer pendant une requête. Le CAS
+            // refuse de remplacer une modification distante non observée.
+            suspend fun push(key: String, item: LibraryItem?, deleted: Boolean) {
+                val known = progress[key] ?: 0
+                val actual = remote[key]?.revision ?: 0
+                check(known == actual) {
+                    "Conflit cloud sur $key : modification locale préservée (aucun écrasement)"
+                }
+                check(CloudflareAccountClient.currentSession?.userId == auth.userId) {
+                    "Le compte a changé durant la synchronisation"
+                }
+                val newRevision = CloudflareAccountClient.writeSync(
+                    profileId = remoteProfileId,
+                    category = "library",
+                    itemKey = key,
+                    payload = if (deleted) kotlinx.serialization.json.buildJsonObject {}
+                        else CloudflareLibraryCodec.payload(checkNotNull(item)),
+                    revision = actual,
+                    deleted = deleted
+                )
+                progress[key] = newRevision
+                // Sauvegarder chaque accusé de réception : une coupure entre
+                // deux écritures ne doit pas provoquer un faux conflit au retour.
+                saveCloudCheckpoint(token, CloudLibraryCheckpoint(
+                    userId = auth.userId, profileId = remoteProfileId,
+                    revisions = progress.toMap()
+                ))
+            }
+            for (pending in merged.pendingUpsertKeys) {
+                val key = libraryItemKey(pending.contentId,pending.contentType)
+                val item = localByKey[key] ?: continue
+                if (!ServerItemRef.isServerId(item.id))
+                    push(key,item,deleted=false)
+            }
+            for (pending in merged.pendingDeleteKeys) {
+                val key = libraryItemKey(pending.contentId,pending.contentType)
+                if (remote[key]?.deleted == false)
+                    push(key,null,deleted=true)
+            }
+            // Les modifications distantes sans conflit sont maintenant connues.
+            val finalRevisions = remoteRevisions + progress
+            val acknowledged = localState.markPushCompleted(merged)
+            if (acknowledged != null) persist(acknowledged)
+            saveCloudCheckpoint(token, CloudLibraryCheckpoint(
+                userId = auth.userId, profileId = remoteProfileId,
+                revisions = finalRevisions
+            ))
+            publish()
+        }
+    }
+
+    private fun saveCloudCheckpoint(
+        token: LibraryProfileToken,
+        checkpoint: CloudLibraryCheckpoint
+    ) {
+        synchronized(persistenceLock) {
+            val latest = localState.snapshot()
+            if (latest.token != token) return@synchronized
+            localState.runIfCurrent(latest) {
+                LibraryStorage.savePayload(
+                    token.profileId,
+                    LibraryStoragePayloadCodec.encode(latest,checkpoint)
+                )
+                lastPersistedRevisionByProfile[token.profileId] = latest.revision
             }
         }
     }
@@ -546,6 +688,15 @@ object LibraryRepository {
         snapshot: LibraryLocalSnapshot,
         delayMs: Long = pushDebounceMs,
     ) {
+        if (CloudflareAccountClient.enabled) {
+            if (!snapshot.hasPendingPush) return
+            syncScope.launch {
+                delay(delayMs)
+                runCatching { synchronizeCloudflareLibrary(snapshot.token.profileId) }
+                    .onFailure { log.e(it) { "Cloudflare : modification locale conservée, renvoi à réessayer" } }
+            }
+            return
+        }
         if (!snapshot.hasPendingPush) return
         val authState = AuthRepository.state.value
         val profileId = snapshot.token.profileId
@@ -653,12 +804,12 @@ object LibraryRepository {
     }
 
     private fun persist(snapshot: LibraryLocalSnapshot) {
-        val payload = LibraryStoragePayloadCodec.encode(snapshot)
         synchronized(persistenceLock) {
             val profileId = snapshot.token.profileId
             val lastPersistedRevision = lastPersistedRevisionByProfile[profileId] ?: Long.MIN_VALUE
             if (snapshot.revision <= lastPersistedRevision) return@synchronized
             localState.runIfCurrent(snapshot) {
+                val payload = LibraryStoragePayloadCodec.encode(snapshot)
                 LibraryStorage.savePayload(profileId, payload)
                 lastPersistedRevisionByProfile[profileId] = snapshot.revision
             }

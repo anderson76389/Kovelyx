@@ -151,7 +151,17 @@ internal object PlayerPlaybackNetworking {
         context: android.content.Context,
         defaultHeaders: Map<String, String> = emptyMap()
     ): DataSource.Factory {
-        return DefaultDataSource.Factory(context, createHttpDataSourceFactory(defaultHeaders))
+        val http = createHttpDataSourceFactory(defaultHeaders)
+        val normal = DefaultDataSource.Factory(context, http)
+        // Le DefaultDataSource modifié des AAR bascule vers LocalhostZeroCopyDataSource
+        // en mode natif, dont les erreurs HTTP ne sont pas fiables (404 -> 400).
+        // Pour le loopback, imposer le client OkHttp qui préserve les codes HTTP.
+        return DataSource.Factory {
+            SafeLoopbackDataSource(
+                http = http.createDataSource(),
+                normal = normal.createDataSource()
+            )
+        }
     }
 
     fun openConnection(

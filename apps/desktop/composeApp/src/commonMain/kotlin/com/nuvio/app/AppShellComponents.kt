@@ -679,23 +679,24 @@ private fun TabletTopPillItem(
 internal fun AppLoadingContent(
     modifier: Modifier = Modifier,
 ) {
-    val tokens = MaterialTheme.nuvio
+    // Centrer la marque seule : un empilement logo + indicateur décalait
+    // visuellement le logo au-dessus du centre de l'écran.
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AppBrandWordmark(
-                contentDescription = stringResource(Res.string.app_brand_name),
-                modifier = Modifier
-                    .fillMaxWidth(0.48f)
-                    .height(44.dp),
-            )
-            Spacer(modifier = Modifier.height(tokens.spacing.sectionGap))
-            NuvioLoadingIndicator()
-        }
+        AppBrandWordmark(
+            contentDescription = stringResource(Res.string.app_brand_name),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.48f)
+                .height(44.dp),
+        )
+        NuvioLoadingIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 76.dp),
+        )
     }
 }
 

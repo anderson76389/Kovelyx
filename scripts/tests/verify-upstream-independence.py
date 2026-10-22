@@ -46,15 +46,9 @@ UPSTREAM_UPDATE_LITERAL = re.compile(
     r'\b(?:owner|repo)\s*=\s*"(?:NuvioMedia|NuvioMobile|NuvioTV|NuvioDesktop)"'
 )
 
-# Exception convenue : le compte Nuvio historique reste transitoirement disponible.
-# Elle NE constitue PAS une preuve d'indépendance du système de comptes.
-ACCOUNT_ALLOW = {
-    (
-        "apps/mobile/composeApp/src/commonMain/kotlin/"
-        "com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt",
-        "https://nuvio.tv/link",
-    ),
-}
+# AUCUNE exception d'URL Nuvio pour le compte : le mode Cloudflare
+# ne doit jamais retomber silencieusement sur le serveur historique.
+ACCOUNT_ALLOW = set()
 
 # Référence de REJET uniquement : ce serveur historique est explicitement refusé
 # dans isOfficial() ; cette constante ne déclenche aucune requête.

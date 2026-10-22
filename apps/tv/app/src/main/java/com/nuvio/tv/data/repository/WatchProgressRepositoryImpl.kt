@@ -1,6 +1,9 @@
 package com.nuvio.tv.data.repository
 
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
+import com.nuvio.tv.core.sync.CloudflareTvWatchSyncService
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.sync.WatchProgressSyncService
 import com.nuvio.tv.core.sync.WatchStateMutationStore
@@ -45,6 +48,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.SharingStarted
@@ -132,6 +136,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
     private val traktSettingsDataStore: TraktSettingsDataStore,
     private val layoutPreferenceDataStore: com.nuvio.tv.data.local.LayoutPreferenceDataStore,
     private val watchProgressSyncService: WatchProgressSyncService,
+    private val cloudTvWatchSyncService: CloudflareTvWatchSyncService,
     private val watchedItemsPreferences: WatchedItemsPreferences,
     private val watchedItemsSyncService: WatchedItemsSyncService,
     private val authManager: AuthManager,
@@ -187,7 +192,34 @@ class WatchProgressRepositoryImpl @Inject constructor(
     private val inFlightMetadataKeys = mutableSetOf<ProfileContentKey>()
     private val metadataHydrationLimit = 30
 
+    init {
+        if (CloudflareTvAccountClient.enabled) {
+            // Le profil D1 peut être associé après le démarrage. Réconcilier
+            // à chaque association, sans importer les données du mode invité.
+            syncScope.launch {
+                combine(CloudflareTvLibraryStore.state, profileManager.activeProfileId) { view, pid ->
+                    view to pid
+                }.collectLatest { (view, pid) ->
+                    val account = CloudflareTvAccountClient.account
+                    if (view != null && account?.id == view.ownerId && view.localProfileId == pid) {
+                        cloudTvWatchSyncService.sync(pid)
+                    }
+                }
+            }
+        }
+    }
+
     private fun triggerRemoteSync(profileId: Int) {
+        if (CloudflareTvAccountClient.enabled) {
+            synchronized(syncJobsLock) {
+                syncJobs.remove(profileId)?.cancel()
+                syncJobs[profileId] = syncScope.launch {
+                    delay(1500)
+                    cloudTvWatchSyncService.sync(profileId)
+                }
+            }
+            return
+        }
         if (isSyncingFromRemote) return
         if (!hasCompletedInitialPull) return
         if (!authManager.isAuthenticated) return
@@ -211,6 +243,10 @@ class WatchProgressRepositoryImpl @Inject constructor(
     }
 
     private fun triggerWatchedItemsSync(profileId: Int) {
+        if (CloudflareTvAccountClient.enabled) {
+            triggerRemoteSync(profileId)
+            return
+        }
         if (isSyncingFromRemote) return
         if (!hasCompletedInitialWatchedItemsPull) return
         if (!authManager.isAuthenticated) return
@@ -770,7 +806,9 @@ class WatchProgressRepositoryImpl @Inject constructor(
         }
         watchProgressPreferences.saveProgress(progress, profileId = profileId)
 
-        if (shouldPushRemote) {
+        if (CloudflareTvAccountClient.enabled) {
+            if (syncRemote) triggerRemoteSync(profileId)
+        } else if (shouldPushRemote) {
             syncScope.launch(NonCancellable) {
                 watchProgressSyncService.pushSingleToRemote(progressKey, progress, profileId)
                     .onFailure { error ->

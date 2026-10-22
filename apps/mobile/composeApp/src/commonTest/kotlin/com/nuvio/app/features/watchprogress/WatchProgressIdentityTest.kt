@@ -77,7 +77,7 @@ class WatchProgressIdentityTest {
     }
 
     @Test
-    fun `legacy payload derives episode progress key and preserves completed position`() {
+    fun `legacy payload derives key and completes real full-length episode without replacing original position`() {
         val decoded = WatchProgressCodec.decodeEntries(
             """
             {
@@ -89,8 +89,8 @@ class WatchProgressIdentityTest {
                 "title": "Show",
                 "seasonNumber": 1,
                 "episodeNumber": 2,
-                "lastPositionMs": 940,
-                "durationMs": 1000,
+                "lastPositionMs": 188000,
+                "durationMs": 200000,
                 "lastUpdatedEpochMs": 100
               }]
             }
@@ -98,7 +98,7 @@ class WatchProgressIdentityTest {
         )
 
         assertEquals("show_s1e2", decoded.single().progressKey)
-        assertEquals(940L, decoded.single().lastPositionMs)
+        assertEquals(188000L, decoded.single().lastPositionMs)
         assertTrue(decoded.single().isCompleted)
     }
 

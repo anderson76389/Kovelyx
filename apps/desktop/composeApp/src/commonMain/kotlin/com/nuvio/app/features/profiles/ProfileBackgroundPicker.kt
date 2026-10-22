@@ -86,7 +86,10 @@ internal fun ProfileBackgroundPicker(
                 onClick = { onSelectionChange(null, imageUrl) },
             ) {
                 val context = LocalPlatformContext.current
-                AsyncImage(
+                if (isProfileVideo(imageUrl)) {
+                    ProfileVideoBackdrop(url=imageUrl,modifier=Modifier.fillMaxSize())
+                } else {
+                    AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(imageUrl)
                         .memoryCacheKey("custom-profile-background-$imageUrl")
@@ -97,7 +100,8 @@ internal fun ProfileBackgroundPicker(
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                )
+                    )
+                }
             }
         }
         backgrounds.forEach { background ->

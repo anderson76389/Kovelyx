@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.Preferences
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -69,17 +71,25 @@ class WatchProgressPreferences @Inject constructor(
     private val deltaCursorKey = longPreferencesKey("watch_progress_delta_cursor")
     private val deltaInitializedKey = booleanPreferencesKey("watch_progress_delta_initialized")
     private val storageMutex = Mutex()
-    private val initializedProfiles = mutableSetOf<Int>()
+    private val initializedProfiles = mutableSetOf<String>()
+
+    private fun dataScopeKey(profileId: Int): String {
+        val owner = CloudflareTvAccountClient.ownerId.value ?: "invite"
+        val bound = CloudflareTvLibraryStore.state.value?.takeIf {
+            it.ownerId == owner && it.localProfileId == profileId
+        }?.cloudProfileId ?: "non_associe"
+        return "$owner|$bound|$profileId"
+    }
     private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.IO)
 
     @Volatile private var recentMapCache: ProgressMapCache? = null
     @Volatile private var archiveMapCache: ProgressMapCache? = null
 
     private val hotProgressSnapshots =
-        ConcurrentHashMap<Int, kotlinx.coroutines.flow.StateFlow<ProgressSnapshot?>>()
+        ConcurrentHashMap<String, kotlinx.coroutines.flow.StateFlow<ProgressSnapshot?>>()
 
     private fun progressSnapshots(profileId: Int): Flow<ProgressSnapshot> {
-        return hotProgressSnapshots.computeIfAbsent(profileId) {
+        return hotProgressSnapshots.computeIfAbsent(dataScopeKey(profileId)) {
             progressSnapshotsCold(profileId)
                 .stateIn(scope, kotlinx.coroutines.flow.SharingStarted.Eagerly, null)
         }.mapNotNull { it }
@@ -134,7 +144,13 @@ class WatchProgressPreferences @Inject constructor(
     @Volatile private var cachedProgressResult: List<WatchProgress>? = null
     @Volatile private var cachedProfileId: Int = -1
 
-    val allProgress: Flow<List<WatchProgress>> = profileManager.activeProfileId.flatMapLatest { pid ->
+    private val watchedScope = combine(
+        profileManager.activeProfileId,
+        CloudflareTvAccountClient.ownerId,
+        CloudflareTvLibraryStore.state
+    ) { pid, _, _ -> pid }
+
+    val allProgress: Flow<List<WatchProgress>> = watchedScope.flatMapLatest { pid ->
         observeAllProgress(pid)
     }
 
@@ -186,7 +202,7 @@ class WatchProgressPreferences @Inject constructor(
     @Volatile private var cachedRawProgressResult: List<WatchProgress>? = null
     @Volatile private var cachedRawProfileId: Int = -1
 
-    val allRawProgress: Flow<List<WatchProgress>> = profileManager.activeProfileId.flatMapLatest { pid ->
+    val allRawProgress: Flow<List<WatchProgress>> = watchedScope.flatMapLatest { pid ->
         observeAllRawProgress(pid)
     }
 
@@ -658,7 +674,8 @@ class WatchProgressPreferences @Inject constructor(
     }
 
     private suspend fun ensureStorageLocked(profileId: Int) {
-        if (profileId in initializedProfiles) return
+        val scopeKey = dataScopeKey(profileId)
+        if (scopeKey in initializedProfiles) return
         val metadata = metadataStore(profileId).data.first()
         if ((metadata[watchProgressStorageVersionKey] ?: 0) < WATCH_PROGRESS_STORAGE_VERSION) {
             val legacy = parseProgressMap(metadata[watchProgressEntriesKey] ?: "{}")
@@ -676,7 +693,7 @@ class WatchProgressPreferences @Inject constructor(
                 preferences[watchProgressStorageVersionKey] = WATCH_PROGRESS_STORAGE_VERSION
             }
         }
-        initializedProfiles += profileId
+        initializedProfiles += scopeKey
     }
 
     private suspend fun readBucketsLocked(profileId: Int): WatchProgressBuckets {

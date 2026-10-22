@@ -499,7 +499,7 @@ internal fun PlayerRuntimeController.initializePlayer(
             }
             currentParallelChunkOverheadMb = parallelOverheadMb
 
-            val loadControl = if (playerSettings.nuvioPerformanceModeEnabled) {
+            val loadControl = if (NuvioExoPlayerPerformanceHelper.enabled) {
                 effectiveBackBufferDurationMs = NuvioExoPlayerPerformanceHelper.backBufferMs
                 currentBitrateAwareLoadControl = null
                 Log.i(
@@ -543,7 +543,8 @@ internal fun PlayerRuntimeController.initializePlayer(
                     true,
                     C.DEFAULT_BUFFER_SEGMENT_SIZE,
                     64,
-                    playerSettings.nuvioPerformanceModeEnabled
+                    playerSettings.nuvioPerformanceModeEnabled &&
+                        TvMedia3SafetyPolicy.allowNativeAllocation
                 )
                 // Both engines report through the same sampler, so whichever built last owns it.
                 NuvioExoPlayerPerformanceHelper.liveAllocator = allocator
@@ -585,9 +586,9 @@ internal fun PlayerRuntimeController.initializePlayer(
             mediaSourceFactory.vodCacheEnabled = playerSettings.vodCacheEnabled
             mediaSourceFactory.vodCacheSizeMode = playerSettings.vodCacheSizeMode
             mediaSourceFactory.vodCacheSizeMb = playerSettings.vodCacheSizeMb
-            mediaSourceFactory.nativeEngineEnabled = playerSettings.nuvioPerformanceModeEnabled
+            mediaSourceFactory.nativeEngineEnabled = NuvioExoPlayerPerformanceHelper.enabled
 
-            mediaSourceFactory.nuvioPerformanceModeEnabled = playerSettings.nuvioPerformanceModeEnabled
+            mediaSourceFactory.nuvioPerformanceModeEnabled = NuvioExoPlayerPerformanceHelper.enabled
             if (playerSettings.parallelNetworkEnabled && !isTorrentStream) {
                 mediaSourceFactory.useParallelConnections = playerSettings.useParallelConnections
                 mediaSourceFactory.parallelConnectionCount = playerSettings.parallelConnectionCount
