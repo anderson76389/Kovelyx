@@ -193,7 +193,8 @@ fun AccountScreen(
                                 )
                                 else -> uiState.cloudSyncPreview.forEach { preview ->
                                     Text(
-                                        text = "${preview.name} : ${preview.libraryItems} titres · ${preview.progressItems} reprises",
+                                        text = "${preview.name} : ${preview.libraryItems} titres · ${preview.progressItems} reprises · "+
+                                            (preview.watchedItems?.let { "$it vus" } ?: "vus indisponibles"),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = NuvioTheme.colors.TextPrimary
                                     )
