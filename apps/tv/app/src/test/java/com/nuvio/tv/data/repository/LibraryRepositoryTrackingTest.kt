@@ -37,83 +37,83 @@ import org.junit.Test
 class LibraryRepositoryTrackingTest {
     @Test
     fun `screen tabs follow active provider while membership tabs include every connection`() = runTest {
-        val sourceMode = MutableStateFlow(LibrarySourceMode.SIMKL)
+        val sourceMode = MutableStateFlow(LibrarySourceMode.MDBLIST)
         val traktTab = tab("trakt:watchlist", TrackingProviderId.TRAKT)
-        val simklTab = tab("simkl:plantowatch", TrackingProviderId.SIMKL)
+        val mdblistTab = tab("mdblist:plantowatch", TrackingProviderId.MDBLIST)
         val repository = repository(
             sourceMode = sourceMode,
             providers = setOf(
                 FakeLibraryProvider(TrackingProviderId.TRAKT, traktTab),
-                FakeLibraryProvider(TrackingProviderId.SIMKL, simklTab)
+                FakeLibraryProvider(TrackingProviderId.MDBLIST, mdblistTab)
             )
         )
 
-        assertEquals(listOf(simklTab), repository.listTabs.first())
-        assertEquals(listOf(traktTab, simklTab), repository.membershipListTabs.first())
+        assertEquals(listOf(mdblistTab), repository.listTabs.first())
+        assertEquals(listOf(traktTab, mdblistTab), repository.membershipListTabs.first())
 
         sourceMode.value = LibrarySourceMode.TRAKT
 
         assertEquals(listOf(traktTab), repository.listTabs.first())
-        assertEquals(listOf(traktTab, simklTab), repository.membershipListTabs.first())
+        assertEquals(listOf(traktTab, mdblistTab), repository.membershipListTabs.first())
     }
 
     @Test
     fun `manual refresh targets only the active tracking provider`() = runTest {
-        val sourceMode = MutableStateFlow(LibrarySourceMode.SIMKL)
+        val sourceMode = MutableStateFlow(LibrarySourceMode.MDBLIST)
         val trakt = FakeLibraryProvider(
             TrackingProviderId.TRAKT,
             tab("trakt:watchlist", TrackingProviderId.TRAKT)
         )
-        val simkl = FakeLibraryProvider(
-            TrackingProviderId.SIMKL,
-            tab("simkl:plantowatch", TrackingProviderId.SIMKL)
+        val mdblist = FakeLibraryProvider(
+            TrackingProviderId.MDBLIST,
+            tab("mdblist:plantowatch", TrackingProviderId.MDBLIST)
         )
-        val repository = repository(sourceMode, setOf(trakt, simkl))
+        val repository = repository(sourceMode, setOf(trakt, mdblist))
 
         repository.refreshNow()
 
         assertEquals(emptyList<TrackingRefreshIntent>(), trakt.refreshIntents)
-        assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), simkl.refreshIntents)
+        assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), mdblist.refreshIntents)
 
         sourceMode.value = LibrarySourceMode.TRAKT
         repository.refreshNow()
 
         assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), trakt.refreshIntents)
-        assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), simkl.refreshIntents)
+        assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), mdblist.refreshIntents)
     }
 
     @Test
     fun `default toggle waits for destructive removal confirmation`() = runTest {
-        val sourceMode = MutableStateFlow(LibrarySourceMode.SIMKL)
-        val simklTab = tab("simkl:status:plantowatch", TrackingProviderId.SIMKL)
+        val sourceMode = MutableStateFlow(LibrarySourceMode.MDBLIST)
+        val mdblistTab = tab("mdblist:status:plantowatch", TrackingProviderId.MDBLIST)
         val confirmation = TrackingMembershipRemovalConfirmation(
-            providerId = TrackingProviderId.SIMKL,
+            providerId = TrackingProviderId.MDBLIST,
             impacts = setOf(TrackingMembershipRemovalImpact.WATCHED_HISTORY)
         )
-        val simkl = FakeLibraryProvider(
-            providerId = TrackingProviderId.SIMKL,
-            tab = simklTab,
-            membership = mapOf(simklTab.key to true),
+        val mdblist = FakeLibraryProvider(
+            providerId = TrackingProviderId.MDBLIST,
+            tab = mdblistTab,
+            membership = mapOf(mdblistTab.key to true),
             removalConfirmation = confirmation
         )
-        val repository = repository(sourceMode, setOf(simkl))
+        val repository = repository(sourceMode, setOf(mdblist))
         val item = LibraryEntryInput("tt123", "series", "Series")
 
         val preflight = repository.toggleDefault(item)
 
         assertTrue(preflight.requiresRemovalConfirmation)
         assertEquals(listOf(confirmation), preflight.requiredRemovalConfirmations)
-        assertEquals(0, simkl.applyCalls)
+        assertEquals(0, mdblist.applyCalls)
 
         val confirmed = repository.toggleDefault(
             item = item,
-            confirmedRemovalProviders = setOf(TrackingProviderId.SIMKL)
+            confirmedRemovalProviders = setOf(TrackingProviderId.MDBLIST)
         )
 
         assertFalse(confirmed.requiresRemovalConfirmation)
-        assertEquals(1, simkl.applyCalls)
-        assertEquals(mapOf(simklTab.key to false), simkl.lastChanges?.desiredMembership)
-        assertTrue(simkl.lastConfirmed)
+        assertEquals(1, mdblist.applyCalls)
+        assertEquals(mapOf(mdblistTab.key to false), mdblist.lastChanges?.desiredMembership)
+        assertTrue(mdblist.lastConfirmed)
     }
 
     @Test
@@ -182,14 +182,14 @@ class LibraryRepositoryTrackingTest {
 
     @Test
     fun `MDBList participates in membership alongside both existing providers`() = runTest {
-        val tabs = listOf(tab("watchlist", TrackingProviderId.TRAKT), tab("simkl:plantowatch", TrackingProviderId.SIMKL), tab("mdblist:watchlist", TrackingProviderId.MDBLIST))
-        val providers = TrackingProviderId.entries.zip(tabs).map { (id, tab) -> FakeLibraryProvider(id, tab) }
+        val tabs = listOf(tab("watchlist", TrackingProviderId.TRAKT), tab("mdblist:watchlist", TrackingProviderId.MDBLIST))
+        val providers = listOf(TrackingProviderId.TRAKT, TrackingProviderId.MDBLIST).zip(tabs).map { (id, tab) -> FakeLibraryProvider(id, tab) }
         val source = MutableStateFlow(LibrarySourceMode.MDBLIST)
         val repository = repository(source, providers.toSet())
         assertEquals(listOf(tabs.last()), repository.listTabs.first())
         assertEquals(tabs, repository.membershipListTabs.first())
         repository.refreshNow()
-        assertTrue(providers.take(2).all { it.refreshIntents.isEmpty() })
+        assertTrue(providers.take(1).all { it.refreshIntents.isEmpty() })
         assertEquals(listOf(TrackingRefreshIntent.USER_INITIATED), providers.last().refreshIntents)
     }
 

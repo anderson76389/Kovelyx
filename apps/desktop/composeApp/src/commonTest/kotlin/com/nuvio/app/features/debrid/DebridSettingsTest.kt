@@ -29,8 +29,8 @@ class DebridSettingsTest {
 
         val services = DebridProviders.configuredServices(settings)
 
-        assertEquals(listOf(DebridProviders.TORBOX_ID, DebridProviders.PREMIUMIZE_ID), services.map { it.provider.id })
-        assertEquals(listOf("tb_key", "pm_key"), services.map { it.apiKey })
+        assertEquals(listOf(DebridProviders.PREMIUMIZE_ID), services.map { it.provider.id })
+        assertEquals(listOf("pm_key"), services.map { it.apiKey })
         assertTrue(settings.hasAnyApiKey)
         assertFalse(DebridProviders.isVisible(DebridProviders.REAL_DEBRID_ID))
     }
@@ -48,7 +48,7 @@ class DebridSettingsTest {
         val fallback = preferred.copy(preferredResolverProviderId = DebridProviders.REAL_DEBRID_ID)
 
         assertEquals(DebridProviders.PREMIUMIZE_ID, preferred.activeResolverProviderId)
-        assertEquals(DebridProviders.TORBOX_ID, fallback.activeResolverProviderId)
+        assertEquals(DebridProviders.PREMIUMIZE_ID, fallback.activeResolverProviderId)
         assertTrue(preferred.canResolvePlayableLinks)
     }
 
@@ -57,7 +57,7 @@ class DebridSettingsTest {
         val settings = DebridSettings(
             enabled = false,
             cloudLibraryEnabled = true,
-            providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "tb_key"),
+            providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "pm_key"),
         )
 
         assertTrue(settings.canUseCloudLibrary)

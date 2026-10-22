@@ -67,7 +67,9 @@ object DebridProviders {
         capabilities = setOf(DebridProviderCapability.ClientResolve)
     )
 
-    private val registered = listOf(Torbox, Premiumize, RealDebrid)
+    // Ces anciennes implémentations restent seulement pour migrer les données historiques.
+    // Elles ne sont plus enregistrées, sélectionnables ou utilisables dans Kovelyx.
+    private val registered = listOf(Premiumize)
 
     fun all(): List<DebridProvider> = registered
 

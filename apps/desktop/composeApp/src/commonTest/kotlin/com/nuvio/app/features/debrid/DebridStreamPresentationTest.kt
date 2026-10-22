@@ -18,7 +18,7 @@ import kotlin.test.assertFalse
 class DebridStreamPresentationTest {
     @Test
     fun `formats cached addon torrent streams with custom templates`() {
-        val stream = localTorboxStream(
+        val stream = localPremiumizeStream(
             filename = "Lost.S01E01.2160p.WEB-DL.H265.AAC-NAKSU.mkv",
             size = 8_589_934_592,
         )
@@ -27,13 +27,13 @@ class DebridStreamPresentationTest {
             stream = stream,
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
                 streamNameTemplate = "{stream.resolution} {service.shortName} {service.cached::istrue[\"Ready\"||\"Not Ready\"]}",
                 streamDescriptionTemplate = "{stream.quality} {stream.encode}\n{stream.size::bytes}\n{stream.filename}",
             ),
         )
 
-        assertEquals("2160p TB Ready", formatted.name)
+        assertEquals("2160p PM Ready", formatted.name)
         val description = formatted.description.orEmpty()
         assertContains(description, "WEB-DL HEVC")
         assertContains(description, "8 GB")
@@ -42,7 +42,7 @@ class DebridStreamPresentationTest {
 
     @Test
     fun `blank templates preserve original stream name and description`() {
-        val stream = localTorboxStream(
+        val stream = localPremiumizeStream(
             name = "Original torrent",
             filename = "Movie.2026.1080p.WEB-DL.H265-GRP.mkv",
             size = 4_000_000_000,
@@ -52,7 +52,7 @@ class DebridStreamPresentationTest {
             stream = stream,
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
                 streamNameTemplate = "",
                 streamDescriptionTemplate = "",
             ),
@@ -64,7 +64,7 @@ class DebridStreamPresentationTest {
 
     @Test
     fun `formats existing stream badges in template values`() {
-        val stream = localTorboxStream(
+        val stream = localPremiumizeStream(
             filename = "Movie.2024.2160p.BluRay.REMUX.TrueHD.7.1-GRP.mkv",
             size = 40_000_000_000,
         ).copy(
@@ -80,7 +80,7 @@ class DebridStreamPresentationTest {
             stream = stream,
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
                 streamNameTemplate = "{stream.rseMatched::join(' | ')}",
                 streamDescriptionTemplate = "{stream.regexMatched::~TRUEHD[\"has-truehd\"||\"missing-truehd\"]}",
             ),
@@ -124,17 +124,17 @@ class DebridStreamPresentationTest {
 
     @Test
     fun `preserves original addon order by default`() {
-        val low = localTorboxStream(
+        val low = localPremiumizeStream(
             name = "Low",
             filename = "Movie.720p.BluRay.x264-GRP.mkv",
             size = 4_000_000_000,
         )
-        val large = localTorboxStream(
+        val large = localPremiumizeStream(
             name = "Large",
             filename = "Movie.2160p.BluRay.REMUX.HEVC-GRP.mkv",
             size = 40_000_000_000,
         )
-        val mid = localTorboxStream(
+        val mid = localPremiumizeStream(
             name = "Mid",
             filename = "Movie.1080p.WEB-DL.HEVC-GRP.mkv",
             size = 10_000_000_000,
@@ -150,26 +150,26 @@ class DebridStreamPresentationTest {
             ),
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
             ),
         ).single().streams
 
-        assertEquals(listOf("720p TB Instant", "2160p TB Instant", "1080p TB Instant"), presented.map { it.name })
+        assertEquals(listOf("720p PM Instant", "2160p PM Instant", "1080p PM Instant"), presented.map { it.name })
     }
 
     @Test
     fun `sorts by best quality when quality criteria are selected`() {
-        val low = localTorboxStream(
+        val low = localPremiumizeStream(
             name = "Low",
             filename = "Movie.720p.BluRay.x264-GRP.mkv",
             size = 4_000_000_000,
         )
-        val large = localTorboxStream(
+        val large = localPremiumizeStream(
             name = "Large",
             filename = "Movie.2160p.BluRay.REMUX.HEVC-GRP.mkv",
             size = 40_000_000_000,
         )
-        val mid = localTorboxStream(
+        val mid = localPremiumizeStream(
             name = "Mid",
             filename = "Movie.1080p.WEB-DL.HEVC-GRP.mkv",
             size = 10_000_000_000,
@@ -185,29 +185,29 @@ class DebridStreamPresentationTest {
             ),
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
                 streamPreferences = DebridStreamPreferences(
                     sortCriteria = DebridStreamSortCriterion.defaultOrder,
                 ),
             ),
         ).single().streams
 
-        assertEquals(listOf("2160p TB Instant", "1080p TB Instant", "720p TB Instant"), presented.map { it.name })
+        assertEquals(listOf("2160p PM Instant", "1080p PM Instant", "720p PM Instant"), presented.map { it.name })
     }
 
     @Test
     fun `applies debrid sort filters and limits without removing normal urls`() {
-        val low = localTorboxStream(
+        val low = localPremiumizeStream(
             name = "Low",
             filename = "Movie.720p.BluRay.x264-GRP.mkv",
             size = 4_000_000_000,
         )
-        val large = localTorboxStream(
+        val large = localPremiumizeStream(
             name = "Large",
             filename = "Movie.2160p.BluRay.REMUX.HEVC-GRP.mkv",
             size = 40_000_000_000,
         )
-        val mid = localTorboxStream(
+        val mid = localPremiumizeStream(
             name = "Mid",
             filename = "Movie.1080p.WEB-DL.HEVC-GRP.mkv",
             size = 10_000_000_000,
@@ -228,7 +228,7 @@ class DebridStreamPresentationTest {
             groups = listOf(group),
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
                 streamMaxResults = 2,
                 streamSortMode = DebridStreamSortMode.QUALITY_DESC,
                 streamMinimumQuality = DebridStreamMinimumQuality.P1080,
@@ -236,17 +236,17 @@ class DebridStreamPresentationTest {
             ),
         ).single().streams
 
-        assertEquals(listOf("2160p TB Instant", "1080p TB Instant", "Resolved addon URL"), presented.map { it.name })
+        assertEquals(listOf("2160p PM Instant", "1080p PM Instant", "Resolved addon URL"), presented.map { it.name })
     }
 
     @Test
     fun `hides addon torrent streams that are not cached`() {
-        val cached = localTorboxStream(
+        val cached = localPremiumizeStream(
             name = "Cached",
             filename = "Movie.1080p.WEB-DL.HEVC-GRP.mkv",
             size = 10_000_000_000,
         )
-        val uncached = localTorboxStream(
+        val uncached = localPremiumizeStream(
             name = "Uncached",
             filename = "Movie.2160p.WEB-DL.HEVC-GRP.mkv",
             size = 20_000_000_000,
@@ -263,16 +263,16 @@ class DebridStreamPresentationTest {
             ),
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
             ),
         ).single().streams
 
-        assertEquals(listOf("1080p TB Instant"), presented.map { it.name })
+        assertEquals(listOf("1080p PM Instant"), presented.map { it.name })
     }
 
     @Test
     fun `leaves cloud-service results untouched when link resolving is off`() {
-        val uncached = localTorboxStream(
+        val uncached = localPremiumizeStream(
             name = "Uncached",
             filename = "Movie.2160p.WEB-DL.HEVC-GRP.mkv",
             size = 20_000_000_000,
@@ -289,14 +289,14 @@ class DebridStreamPresentationTest {
             ),
             settings = DebridSettings(
                 enabled = false,
-                providerApiKeys = mapOf(DebridProviders.TORBOX_ID to "key"),
+                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "key"),
             ),
         ).single().streams
 
         assertEquals(listOf("Uncached"), presented.map { it.name })
     }
 
-    private fun localTorboxStream(
+    private fun localPremiumizeStream(
         name: String = "Torrent",
         filename: String,
         size: Long,
@@ -312,8 +312,8 @@ class DebridStreamPresentationTest {
                 videoSize = size,
             ),
             debridCacheStatus = StreamDebridCacheStatus(
-                providerId = DebridProviders.TORBOX_ID,
-                providerName = DebridProviders.Torbox.displayName,
+                providerId = DebridProviders.PREMIUMIZE_ID,
+                providerName = DebridProviders.Premiumize.displayName,
                 state = cacheState,
                 cachedName = filename,
                 cachedSize = size,

@@ -220,9 +220,9 @@ class StreamBadgeRulesTest {
                 title = "Movie",
                 season = null,
                 episode = null,
-                service = DebridProviders.TORBOX_ID,
+                service = DebridProviders.PREMIUMIZE_ID,
                 serviceIndex = 0,
-                serviceExtension = "TB",
+                serviceExtension = "PM",
                 isCached = true,
                 stream = StreamClientResolveStream(
                     raw = StreamClientResolveRaw(

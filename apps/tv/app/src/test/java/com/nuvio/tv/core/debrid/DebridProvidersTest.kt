@@ -17,8 +17,9 @@ class DebridProvidersTest {
 
         val services = DebridProviders.configuredServices(settings)
 
-        assertEquals(listOf(DebridProviders.Torbox), services.map { it.provider })
-        assertTrue(DebridProviders.isVisible(DebridProviders.TORBOX_ID))
-        assertFalse(DebridProviders.isVisible(DebridProviders.REAL_DEBRID_ID))
+        assertEquals(emptyList<DebridProvider>(), services.map { it.provider })
+        assertFalse(DebridProviders.isSupported(DebridProviders.TORBOX_ID))
+        assertFalse(DebridProviders.isSupported(DebridProviders.REAL_DEBRID_ID))
+        assertEquals(listOf(DebridProviders.Premiumize), DebridProviders.all())
     }
 }

@@ -46,7 +46,7 @@ class StreamYouTubeTest {
 
     @Test
     fun `a cached debrid stream takes precedence over the ytId`() {
-        val stream = stream(ytId = "dQw4w9WgXcQ", clientResolve = cachedTorboxResolve())
+        val stream = stream(ytId = "dQw4w9WgXcQ", clientResolve = cachedPremiumizeResolve())
 
         assertNull(stream.youTubeIdToResolve())
     }
@@ -80,7 +80,7 @@ class StreamYouTubeTest {
         clientResolve = clientResolve
     )
 
-    private fun cachedTorboxResolve(): StreamClientResolve = StreamClientResolve(
+    private fun cachedPremiumizeResolve(): StreamClientResolve = StreamClientResolve(
         type = "debrid",
         infoHash = "abcdef",
         fileIdx = null,
@@ -94,7 +94,7 @@ class StreamYouTubeTest {
         title = "Title",
         season = null,
         episode = null,
-        service = "torbox",
+        service = "premiumize",
         serviceIndex = 0,
         serviceExtension = null,
         isCached = true

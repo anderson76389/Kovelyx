@@ -18,9 +18,8 @@ import kotlin.concurrent.Volatile
  * API Cloudflare D1 / Better Auth Kovelyx. Ne pas injecter une URL workers.dev
  * dans le client Supabase historique : les protocoles sont incompatibles.
  *
- * Sessions en mémoire pour cette phase de migration : ne pas persister de jetons
- * dans les préférences non chiffrées. L'utilisateur se reconnecte au redémarrage
- * jusqu'à l'intégration d'un stockage sécurisé spécifique aux OS.
+ * Les jetons sont conservés dans le coffre sécurisé CloudSessionVault.
+ * Au redémarrage, la session n'est restaurée qu'après validation /v1/me.
  */
 object CloudflareAccountClient {
     data class Session(val userId: String, val email: String, val bearerToken: String)
@@ -159,9 +158,20 @@ object CloudflareAccountClient {
 
     suspend fun signOut() {
         val old = session
+        // Une déconnexion locale doit fonctionner même sans accès Internet.
+        // Si l'effacement sécurisé échoue, ne pas feindre une déconnexion.
         CloudSessionVault.clear()
         session = null
-        if (old != null) request("/api/auth/sign-out", "{}", old.bearerToken)
+        if (old != null) {
+            try {
+                request("/api/auth/sign-out", "{}", old.bearerToken)
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                // Révocation distante non confirmée : jeton local déjà effacé.
+                // L'expiration serveur reste la frontière de sécurité hors ligne.
+            }
+        }
     }
 
     fun clearLocalSession() {

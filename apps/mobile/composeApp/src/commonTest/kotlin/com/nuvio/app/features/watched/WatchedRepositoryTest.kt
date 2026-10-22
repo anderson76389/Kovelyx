@@ -269,7 +269,7 @@ class WatchedRepositoryTest {
             ),
         )
         assertEquals(
-            listOf(simklItem),
+            listOf(nuvioItem),
             watchedItemsForSource(
                 source = WatchProgressSource.SIMKL,
                 nuvioItems = listOf(nuvioItem),
@@ -352,7 +352,7 @@ class WatchedRepositoryTest {
     @Test
     fun effectiveWatchedSource_selectsConnectedSimkl() {
         assertEquals(
-            WatchProgressSource.SIMKL,
+            WatchProgressSource.NUVIO_SYNC,
             effectiveWatchedSource(
                 requestedSource = WatchProgressSource.SIMKL,
                 connectedProviderIds = setOf(TrackingProviderId.SIMKL),

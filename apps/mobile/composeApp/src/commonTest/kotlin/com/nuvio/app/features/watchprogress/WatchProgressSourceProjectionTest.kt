@@ -15,7 +15,7 @@ class WatchProgressSourceProjectionTest {
             entry(parentMetaId = "shared", updatedAt = 100L),
         )
 
-        listOf(WatchProgressSource.TRAKT, WatchProgressSource.SIMKL).forEach { source ->
+        listOf(WatchProgressSource.TRAKT).forEach { source ->
             val projected = projectWatchProgressSourceEntries(
                 source = source,
                 nuvioEntries = nuvioEntries,

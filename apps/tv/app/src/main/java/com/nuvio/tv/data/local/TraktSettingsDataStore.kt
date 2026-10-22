@@ -30,7 +30,7 @@ enum class WatchProgressSource {
 
     companion object {
         fun fromStorage(value: String?): WatchProgressSource {
-            return entries.firstOrNull { it.name == value } ?: TRAKT
+            return if (value == SIMKL.name) NUVIO_SYNC else entries.firstOrNull { it.name == value } ?: TRAKT
         }
     }
 }
@@ -121,7 +121,7 @@ class TraktSettingsDataStore @Inject constructor(
 
     suspend fun getLibrarySourceMode(profileId: Int): LibrarySourceMode {
         val stored = store(profileId).data.first()[librarySourceModeKey]
-        return LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
+        return if (stored == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL else LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
     }
 
     suspend fun setContinueWatchingDaysCap(days: Int) {
@@ -189,14 +189,15 @@ class TraktSettingsDataStore @Inject constructor(
         profileId: Int = profileManager.activeProfileId.value
     ) {
         store(profileId).edit { prefs ->
-            prefs[watchProgressSourceKey] = source.name
+            prefs[watchProgressSourceKey] = if (source == WatchProgressSource.SIMKL) WatchProgressSource.NUVIO_SYNC.name else source.name
         }
     }
 
     val librarySourceMode: Flow<LibrarySourceMode> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
             val stored = prefs[librarySourceModeKey]
-            LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
+            if (stored == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL
+            else LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
         }
     }
 
@@ -205,21 +206,22 @@ class TraktSettingsDataStore @Inject constructor(
         profileId: Int = profileManager.activeProfileId.value
     ) {
         store(profileId).edit { prefs ->
-            prefs[librarySourceModeKey] = mode.name
+            prefs[librarySourceModeKey] = if (mode == LibrarySourceMode.SIMKL) LibrarySourceMode.LOCAL.name else mode.name
         }
     }
 
     val moreLikeThisSource: Flow<MoreLikeThisSourcePreference> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
             val stored = prefs[moreLikeThisSourceKey]
-            MoreLikeThisSourcePreference.entries.firstOrNull { it.name == stored }
+            if (stored == MoreLikeThisSourcePreference.SIMKL.name) MoreLikeThisSourcePreference.TMDB
+            else MoreLikeThisSourcePreference.entries.firstOrNull { it.name == stored }
                 ?: DEFAULT_MORE_LIKE_THIS_SOURCE
         }
     }
 
     suspend fun setMoreLikeThisSource(source: MoreLikeThisSourcePreference) {
         store().edit { prefs ->
-            prefs[moreLikeThisSourceKey] = source.name
+            prefs[moreLikeThisSourceKey] = if (source == MoreLikeThisSourcePreference.SIMKL) MoreLikeThisSourcePreference.TMDB.name else source.name
         }
     }
 
