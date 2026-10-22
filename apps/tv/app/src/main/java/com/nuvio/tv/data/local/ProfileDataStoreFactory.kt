@@ -2,6 +2,8 @@ package com.nuvio.tv.data.local
 
 import android.content.Context
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import java.security.MessageDigest
 import androidx.datastore.core.DataMigration
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -77,7 +79,25 @@ class ProfileDataStoreFactory @Inject constructor(
     val corruptedFileNames: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     fun get(profileId: Int, featureName: String): DataStore<Preferences> {
-        val fileName = if (profileId == 1) featureName else "${featureName}_p$profileId"
+        val original = if (profileId == 1) featureName else "${featureName}_p$profileId"
+        // Seulement l'historique et la progression : les préférences TV
+        // ordinaires gardent leurs chemins existants. L'ID du compte confirmé
+        // crée des DataStore distincts des invités, sans migrer leur historique.
+        val cloudWatchFeatures = setOf(
+            "watch_progress_preferences",
+            "watch_progress_recent_preferences",
+            "watch_progress_archive_preferences",
+            "watched_items_preferences",
+            "watch_state_pending_mutations"
+        )
+        val owner = CloudflareTvAccountClient.account?.id
+            ?.takeIf { CloudflareTvAccountClient.enabled && featureName in cloudWatchFeatures }
+        val fileName = if (owner == null) original else {
+            val digest = MessageDigest.getInstance("SHA-256")
+                .digest(owner.toByteArray(Charsets.UTF_8))
+                .take(12).joinToString("") { "%02x".format(it) }
+            "cloud_${digest}_${featureName}_p$profileId"
+        }
         synchronized(lock) {
             cache[fileName]?.let { return it.store }
             return createAndCache(fileName).store
