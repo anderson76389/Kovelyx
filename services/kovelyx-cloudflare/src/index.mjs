@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
-import { jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
+import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validSyncInput, isAllowedOrigin } from "./contract.mjs";
 
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
@@ -57,18 +57,26 @@ async function ownedProfile(env, userId, profileId) {
 async function handleSync(request, env, user, url) {
   if (request.method === "GET") {
     const profileId = url.searchParams.get("profileId") || "";
-    if (!/^[a-f0-9-]{36}$/i.test(profileId) || !await ownedProfile(env, user.id, profileId))
+    if (!validProfileId(profileId) || !await ownedProfile(env, user.id, profileId))
       return jsonResponse({error:"Profil introuvable"},404);
+    const requestedOffset = url.searchParams.get("offset") || "0";
+    if (!validSyncOffset(requestedOffset)) return jsonResponse({error:"Curseur invalide"},400);
+    const offset = Number(requestedOffset);
+    // Fetch one extra row, never mistake exactly 500 rows for an additional page.
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
-      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY updated_at, category, item_key LIMIT 500"
-    ).bind(user.id, profileId).all();
+      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY category, item_key LIMIT 501 OFFSET ?"
+    ).bind(user.id, profileId, offset).all();
+    const rows = result.results || [];
+    const partial = rows.length > 500;
     return jsonResponse({
-      items: (result.results || []).map(row => ({
+      items: rows.slice(0,500).map(row => ({
         ...row, payload: JSON.parse(row.payload), deleted: row.deleted === 1
       })),
       limit: 500,
-      partial: (result.results || []).length === 500
+      offset,
+      nextOffset: partial ? offset + 500 : null,
+      partial
     });
   }
   if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
@@ -99,7 +107,7 @@ async function handleSync(request, env, user, url) {
   ).bind(user.id, body.profileId, body.category, body.itemKey).first();
   return jsonResponse({error:"Conflit de synchronisation",current:latest},409);
 }
-async function handleProfiles(request,env,user) {
+async function handleProfiles(request,env,user,url) {
   if (request.method === "GET") {
     const result = await env.DB.prepare(
       "SELECT id,display_name AS displayName,avatar_path AS avatarPath,"+
@@ -107,6 +115,29 @@ async function handleProfiles(request,env,user) {
       "FROM kv_profiles WHERE owner_id=? ORDER BY created_at ASC LIMIT 8"
     ).bind(user.id).all();
     return jsonResponse({profiles:result.results || []});
+  }
+  if (request.method === "PATCH" || request.method === "DELETE") {
+    const profileId = url.searchParams.get("profileId");
+    if (!validProfileId(profileId) || !await ownedProfile(env, user.id, profileId))
+      return jsonResponse({error:"Profil introuvable"},404);
+    if (request.method === "PATCH") {
+      const body = await readJson(request);
+      if (!validProfileName(body?.displayName))
+        return jsonResponse({error:"Nom de profil invalide"},400);
+      const now = Date.now();
+      await env.DB.prepare(
+        "UPDATE kv_profiles SET display_name=?,updated_at=? WHERE id=? AND owner_id=?"
+      ).bind(body.displayName.trim(),now,profileId,user.id).run();
+      return jsonResponse({profile:{id:profileId,displayName:body.displayName.trim(),updatedAt:now}});
+    }
+    // Keep at least one usable profile; a delete cascades the owned sync data.
+    const removed = await env.DB.prepare(
+      "DELETE FROM kv_profiles WHERE owner_id=? AND id=? "+
+      "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
+    ).bind(user.id,profileId,user.id).run();
+    if (removed.meta?.changes !== 1)
+      return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
+    return jsonResponse({deleted:true,id:profileId});
   }
   if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
   const body = await readJson(request);
@@ -156,7 +187,7 @@ export default {
       if (!user) return respond(jsonResponse({error:"Authentification requise"},401));
       if (url.pathname === "/v1/me" && request.method === "GET")
         return respond(jsonResponse({id:user.id,email:user.email,name:user.name}));
-      if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user));
+      if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {
