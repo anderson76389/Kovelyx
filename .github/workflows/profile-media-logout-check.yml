@@ -38,6 +38,7 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :androidApp:assembleFullDebug :composeApp:testAndroidHostTest \
+            -Pnuvio.android.distribution=full \
             --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
       - name: Conserver les rapports JVM
