@@ -172,6 +172,12 @@ object AuthRepository {
         if (CloudflareAccountClient.enabled) {
             val logout = runCatching { CloudflareAccountClient.signOut() }
             AuthStorage.clearAnonymousUserId()
+            // Déconnexion du compte local : vider les caches en mémoire
+            // sans supprimer les profils et bibliothèques sauvegardés.
+            com.nuvio.app.features.library.LibraryRepository.clearLocalState()
+            com.nuvio.app.features.watchprogress.WatchProgressRepository.clearLocalState()
+            com.nuvio.app.features.watched.WatchedRepository.clearLocalState()
+            com.nuvio.app.features.profiles.ProfileRepository.clearInMemory()
             // Ne jamais effacer les profils, la bibliothèque ou la progression
             // avant la migration de stockage/synchronisation vers D1.
             // La fermeture de session ne garantit PAS encore l'isolation locale
