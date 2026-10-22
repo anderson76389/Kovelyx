@@ -34,7 +34,9 @@ object CloudflareAccountClient {
         val headers = mutableMapOf(
             "Accept" to "application/json",
             "Content-Type" to "application/json",
-            "User-Agent" to "Kovelyx-Client"
+            "User-Agent" to "Kovelyx-Client",
+            // Better Auth vérifie les POST par leur origine HTTPS.
+            "Origin" to base()
         )
         if (!authorization.isNullOrBlank()) headers["Authorization"] = "Bearer $authorization"
         val response = httpRequestRaw(
