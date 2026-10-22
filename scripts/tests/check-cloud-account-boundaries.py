@@ -49,6 +49,19 @@ assert "CloudflareTvProfileBinding.resolve" in tv_repo
 assert "pendingDeletes" in cloud_store and "currentRev" in cloud_store
 assert "cloud?.takeIf" in tv_repo and "guestItems" in tv_repo
 assert "CloudflareTvLibraryStore.reset()" in tv_account
+# Le diagnostic de reprises TV doit utiliser uniquement les routes D1
+# du compte actif, sans écrire dans l'historique local de l'invité.
+tv_screen = (tv_root / "ui/screens/account/AccountScreen.kt").read_text(encoding="utf-8")
+assert 'readSyncCategory(profileId: String, category: String)' in tv
+assert 'readSyncCategory(profileId, "watch_progress")' in tv
+assert 'CloudflareTvAccountClient.readProgress(profile.id)' in tv_account
+assert 'CloudflareTvAccountClient.readLibrary(profile.id)' in tv_account
+assert 'CloudflareTvAccountClient.account == owner' in tv_account
+assert 'cloudSyncPreview = emptyList()' in tv_account
+assert 'refreshCloudflareSyncPreview()' in tv_screen
+assert 'Aperçu en lecture seule du compte' in tv_screen
+assert 'if (CloudflareTvAccountClient.enabled)' in tv_screen
+print("TV: aperçu cloud D1 en lecture seule, données invitées préservées")
 assert "locals.size == 1 && remotes.size == 1" in profile_matcher
 for relative in (
     "core/sync/WatchProgressSyncService.kt",
