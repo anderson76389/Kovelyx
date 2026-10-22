@@ -1,5 +1,20 @@
 # Kovelyx Cloudflare — état de la synchronisation
 
+## Intégration directe de la synchronisation sur les trois applications (22 octobre 2026)
+
+**Code présent sur la branche PR nº 40, non fusionnée :**
+
+- Windows et Android : le dépôt des œuvres vues dispose désormais d'une voie D1 bidirectionnelle distincte de la progression, avec chargement des titres/épisodes vus, écriture des marques nouvelles, annulation « non vu », horodatage des suppressions, reprise des écritures en attente, et stockage local propre au compte Better Auth. Aucun élément invité n'est exporté à l'ouverture du compte.
+- Android TV : le lecteur et les actions d'historique appellent `CloudflareTvWatchSyncService`. Cette classe lit/écrit les catégories `watch_progress` et `/v1/watched` en gardant leurs révisions CAS, applique les reprises à `WatchProgressPreferences` et les statuts vus à `WatchedItemsPreferences`. Elle tente de renvoyer les mutations différées après retour du réseau. L'écran compte affiche les trois compteurs.
+- Le démarrage, les lectures, les actualisations et les événements de changement de profil déclenchent le rattrapage D1 sur la TV ; le mode Cloudflare évite les appels de synchronisation Supabase dans ces parcours. La bibliothèque TV est également rafraîchie au démarrage et périodiquement.
+- Les DataStore de progression, d'historique et de mutations TV sont séparés entre invité, compte cloud, et vrai profil UUID associé. Un compte ou une association de profil n'accède pas directement aux fichiers d'un autre.
+- Le filtrage des données évite de transmettre les liens de streaming, jetons, URL signées, images privées et informations de fournisseurs aux données D1.
+
+**Vérifications disponibles :** contrôle d'identité, de création, de lecture, de suppression, de 409 et d'isolation inter-comptes exécuté contre le code du nouveau handler JavaScript avec un double de base en mémoire. Des tests de contrat Node, un scénario Worker+D1 local et des contrôles de frontières statiques sont ajoutés au dépôt, mais **aucune nouvelle compilation Gradle ni CI de ce dernier SHA n'a été confirmée**.
+
+**Points encore ouverts avant toute Release :** déployer et valider la migration D1 0002 sur le vrai compte Cloudflare après sauvegarde ; compiler Windows, Android et Android TV sur le HEAD de la PR ; corriger tout échec de CI, puis tester le scénario lecture/fin d'épisode/ajout-retrait en bibliothèque sur trois appareils réels et après fermeture/réouverture. La PR reste en brouillon et présente un état non fusionnable. La synchronisation ne doit pas être annoncée comme un service de production validé.
+
+
 ## Périmètre confirmé — progression, bibliothèque et historique (22 octobre 2026)
 
 La demande vise tous les films et toutes les séries, **épisode par épisode**, sur tous les appareils. Trois états doivent rester distincts : la bibliothèque, la position de reprise et les titres/épisodes vus (y compris « marquer comme vu » manuellement). Un titre marqué vu ne doit pas disparaître parce que sa position de reprise a été effacée.
