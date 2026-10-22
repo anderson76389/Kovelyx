@@ -91,7 +91,15 @@ class CloudflareTvWatchSyncService @Inject constructor(
         )
     }
 
+    private fun safeTmdbImage(value: String?): String? = value?.takeIf {
+        it.length <= 1024 && it.startsWith("https://image.tmdb.org/t/p/") &&
+            '?' !in it && '#' !in it
+    }
+
     private fun progressPayload(progress: WatchProgress): JSONObject = JSONObject().apply {
+        require(progress.contentId.length in 1..150 &&
+            "://" !in progress.contentId && '?' !in progress.contentId)
+
         put("parentMetaId", progress.contentId)
         put("parentMetaType", progress.contentType)
         put("contentType", progress.contentType)
@@ -102,9 +110,9 @@ class CloudflareTvWatchSyncService @Inject constructor(
         progress.season?.let { put("seasonNumber", it) }
         progress.episode?.let { put("episodeNumber", it) }
         progress.episodeTitle?.let { put("episodeTitle", it) }
-        progress.poster?.let { put("poster", it) }
-        progress.backdrop?.let { put("background", it) }
-        progress.logo?.let { put("logo", it) }
+        safeTmdbImage(progress.poster)?.let { put("poster", it) }
+        safeTmdbImage(progress.backdrop)?.let { put("background", it) }
+        safeTmdbImage(progress.logo)?.let { put("logo", it) }
         put("lastPositionMs", progress.position.coerceAtLeast(0))
         put("durationMs", progress.duration.coerceAtLeast(0))
         put("lastUpdatedEpochMs", progress.lastWatched.coerceAtLeast(1))
