@@ -86,6 +86,22 @@ assert '"/v1/sync"' in backend
 assert '"/v1/profiles"' in backend
 assert "KOVELYX_REGISTRATION_OPEN" in backend
 assert '"watch_progress"' in contract
+
+watched_api = (ROOT / "services/kovelyx-cloudflare/src/watched.mjs").read_text(encoding="utf-8")
+watched_migration = (ROOT / "services/kovelyx-cloudflare/migrations/0002_watched_items.sql").read_text(encoding="utf-8")
+assert 'url.pathname === "/v1/watched"' in backend
+assert "kv_watched_items" in watched_api and "revision=revision+1" in watched_api
+assert "FOREIGN KEY(owner_id, profile_id)" in watched_migration
+assert "kv_sync" not in watched_migration, "La migration des statuts vus ne doit pas rebatir les favoris"
+for app in ("desktop", "mobile"):
+    client = (ROOT / "apps" / app /
+              "composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/CloudflareAccountClient.kt").read_text(encoding="utf-8")
+    assert '"/v1/watched"' in client and "readWatched" in client and "writeWatched" in client
+tv_client = (tv_root / "core/auth/CloudflareTvAccountClient.kt").read_text(encoding="utf-8")
+assert '"/v1/watched"' in tv_client
+assert "readWatched" in tv_client and "writeWatched" in tv_client
+print("Contrats prêts pour l'historique vu : Worker D1, Windows, Android, TV")
+print("NOTE: ces méthodes ne sont pas encore branchées à tous les écrans ni aux mutations locales.")
 assert "# [[r2_buckets]]" in config, "R2 privé doit rester facultatif sans facturation surprise"
 assert "\n[[r2_buckets]]" not in config, "R2 activé sans accord explicite"
 print("Worker: D1/Better Auth présents, inscriptions contrôlées, R2 non activé")
