@@ -111,7 +111,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
     var parallelChunkSizeKb: Int = PlayerSettings.DEFAULT_PARALLEL_CHUNK_SIZE_KB
     // Gated by the parallel network toggle because its only use is the native memory argument to
     // the chunk data source, which nothing else builds.
-    var nuvioPerformanceModeEnabled: Boolean = PlayerSettings.DEFAULT_NUVIO_PERFORMANCE_MODE_ENABLED
+    var nuvioPerformanceModeEnabled: Boolean = PlayerSettings.DEFAULT_NUVIO_PERFORMANCE_MODE_ENABLED &&
+        TvMedia3SafetyPolicy.allowNativeAllocation
 
     // The engine runs off the setting whether or not the parallel gate above passed, so the log
     // reports this rather than the gated flag.
@@ -240,7 +241,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
                 .coerceAtMost(com.nuvio.tv.ui.screens.settings.MemoryBudget.tierMaxChunkMb * 1024)
                 .toLong() * 1024L
             val effectiveNative =
-                nuvioPerformanceModeEnabled || NuvioEngineConfig.get().isNativeAllocationEnabled()
+                TvMedia3SafetyPolicy.allowNativeAllocation &&
+                    (nuvioPerformanceModeEnabled || NuvioEngineConfig.get().isNativeAllocationEnabled())
             ParallelRangeDataSource.Factory(
                 okHttpFactory,
                 sessionConnections,
@@ -577,8 +579,10 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         }
 
         internal fun isLoopbackUrl(url: String): Boolean {
-            val host = url.toHttpUrlOrNull()?.host ?: return false
-            return host == "127.0.0.1" || host == "::1" || host.equals("localhost", ignoreCase = true)
+            val parsed = url.toHttpUrlOrNull() ?: return false
+            // Keep the extended read timeout and SafeLoopbackDataSource routing in
+            // agreement: 127/8 and canonical IPv6 loopback are local too.
+            return TvMedia3SafetyPolicy.useSafeLoopbackHttp(parsed.scheme, parsed.host)
         }
 
         fun parseHeaders(headers: String?): Map<String, String> {

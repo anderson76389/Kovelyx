@@ -11,6 +11,7 @@ import androidx.media3.exoplayer.upstream.DefaultAllocator
 import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.PlayerSettingsDataStore
+import com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy
 import com.nuvio.tv.data.local.TrailerSettingsDataStore
 import com.nuvio.tv.ui.screens.settings.MemoryBudget
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -173,7 +174,7 @@ class TrailerPlayerPool @Inject constructor(
     }
 
     private fun createPlayer(): ExoPlayer {
-        val forceNative = cachedForceNative
+        val forceNative = cachedForceNative && TvMedia3SafetyPolicy.allowNativeAllocation
         val targetBufferMb = trailerTargetBufferMb(cachedPlayerSettings)
         Log.d(
             TAG,

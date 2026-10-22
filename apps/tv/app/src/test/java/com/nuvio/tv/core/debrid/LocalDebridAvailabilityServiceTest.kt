@@ -27,7 +27,7 @@ class LocalDebridAvailabilityServiceTest {
 
         assertNull(streams[0].debridCacheStatus)
         assertEquals(StreamDebridCacheState.CHECKING, streams[1].debridCacheStatus?.state)
-        assertEquals(DebridProviders.TORBOX_ID, streams[1].debridCacheStatus?.providerId)
+        assertEquals(DebridProviders.PREMIUMIZE_ID, streams[1].debridCacheStatus?.providerId)
     }
 
     @Test
@@ -63,7 +63,7 @@ class LocalDebridAvailabilityServiceTest {
         val status = result.single().streams.single().debridCacheStatus
 
         assertEquals(StreamDebridCacheState.UNKNOWN, status?.state)
-        assertEquals(DebridProviders.TORBOX_ID, status?.providerId)
+        assertEquals(DebridProviders.PREMIUMIZE_ID, status?.providerId)
     }
 
     private fun service(
@@ -73,7 +73,7 @@ class LocalDebridAvailabilityServiceTest {
         every { dataStore.settings } returns flowOf(
             DebridSettings(
                 enabled = true,
-                torboxApiKey = "tb_token"
+                premiumizeApiKey = "pm_token"
             )
         )
         return LocalDebridAvailabilityService(dataStore, localDebridService)

@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.sync
 
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.sync.library.LIBRARY_DELTA_PAGE_SIZE
 import com.nuvio.tv.core.sync.library.LIBRARY_SNAPSHOT_PAGE_SIZE
 import com.nuvio.tv.core.sync.library.LibrarySyncLocalStore
@@ -34,6 +35,12 @@ class LibrarySyncService @Inject constructor(
     private val syncMutex = Mutex()
 
     suspend fun pushToRemote(profileId: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        // Ne jamais envoyer une bibliothèque Cloudflare vers l'ancien backend.
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException("Bibliothèque TV Cloudflare D1 non activée")
+            )
+        }
         syncMutex.withLock {
             try {
                 var state = localStore.getSyncState(profileId)
@@ -54,6 +61,11 @@ class LibrarySyncService @Inject constructor(
     suspend fun syncFromRemote(
         profileId: Int
     ): Result<LibraryRemoteSyncResult> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            return@withContext Result.failure(
+                UnsupportedOperationException("Synchronisation TV Cloudflare D1 non activée")
+            )
+        }
         syncMutex.withLock {
             try {
                 var state = localStore.getSyncState(profileId)

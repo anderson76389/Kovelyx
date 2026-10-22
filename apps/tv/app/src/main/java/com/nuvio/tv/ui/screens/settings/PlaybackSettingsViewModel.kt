@@ -323,7 +323,7 @@ class PlaybackSettingsViewModel @Inject constructor(
     @androidx.annotation.OptIn(UnstableApi::class)
     suspend fun setBufferTargetSizeMb(mb: Int) {
         val current = playerSettings.first()
-        if (!current.useParallelConnections || current.nuvioPerformanceModeEnabled || current.allowLargeTargetBuffer) {
+        if (!current.useParallelConnections || (current.nuvioPerformanceModeEnabled && com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy.allowNativeAllocation) || current.allowLargeTargetBuffer) {
             playerSettingsDataStore.setBufferTargetSizeMb(mb)
             return
         }
@@ -355,7 +355,7 @@ class PlaybackSettingsViewModel @Inject constructor(
     suspend fun resetBufferSettingsToDefaults() {
         playerSettingsDataStore.resetBufferSettingsToDefaults()
         val current = playerSettings.first()
-        if (!current.useParallelConnections || current.nuvioPerformanceModeEnabled || current.allowLargeTargetBuffer) return
+        if (!current.useParallelConnections || (current.nuvioPerformanceModeEnabled && com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy.allowNativeAllocation) || current.allowLargeTargetBuffer) return
 
         val currentChunkMb = Math.ceil(current.parallelChunkSizeKb / 1024.0).toInt()
         val (adjBuffer, adjChunkMb) = MemoryBudget.enforce(
@@ -404,7 +404,7 @@ class PlaybackSettingsViewModel @Inject constructor(
             return
         }
         val current = playerSettings.first()
-        if (current.nuvioPerformanceModeEnabled || current.allowLargeTargetBuffer) {
+        if ((current.nuvioPerformanceModeEnabled && com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy.allowNativeAllocation) || current.allowLargeTargetBuffer) {
             playerSettingsDataStore.setUseParallelConnections(true)
             return
         }
@@ -429,7 +429,7 @@ class PlaybackSettingsViewModel @Inject constructor(
     @androidx.annotation.OptIn(UnstableApi::class)
     suspend fun setParallelConnectionCount(count: Int) {
         val current = playerSettings.first()
-        if (current.nuvioPerformanceModeEnabled || current.allowLargeTargetBuffer) {
+        if ((current.nuvioPerformanceModeEnabled && com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy.allowNativeAllocation) || current.allowLargeTargetBuffer) {
             playerSettingsDataStore.setParallelConnectionCount(count)
             return
         }
@@ -454,7 +454,7 @@ class PlaybackSettingsViewModel @Inject constructor(
     @androidx.annotation.OptIn(UnstableApi::class)
     suspend fun setParallelChunkSizeKb(kb: Int) {
         val current = playerSettings.first()
-        if (current.nuvioPerformanceModeEnabled || current.allowLargeTargetBuffer) {
+        if ((current.nuvioPerformanceModeEnabled && com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy.allowNativeAllocation) || current.allowLargeTargetBuffer) {
             playerSettingsDataStore.setParallelChunkSizeKb(kb)
             return
         }

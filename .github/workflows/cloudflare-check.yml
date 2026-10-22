@@ -6,6 +6,18 @@ on:
       - 'services/kovelyx-cloudflare/**'
       - 'scripts/configure-cloud-build.py'
       - '.github/workflows/cloudflare-check.yml'
+  pull_request:
+    paths:
+      - 'services/kovelyx-cloudflare/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/**'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/**'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/SupabaseProvider.kt'
+      - 'apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/SupabaseProvider.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/auth/**'
+      - 'scripts/tests/check-cloud-account-boundaries.py'
+      - '.github/workflows/cloudflare-check.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,6 +39,8 @@ jobs:
           python -m py_compile services/kovelyx-cloudflare/scripts/first-account.py
           python services/kovelyx-cloudflare/tests/test_first_account_request.py
           python services/kovelyx-cloudflare/tests/check-d1-schema.py
+      - name: Vérifier la séparation des comptes et le blocage Nuvio
+        run: python scripts/tests/check-cloud-account-boundaries.py
       - name: Vérifier le script installation Cloudflare
         working-directory: services/kovelyx-cloudflare
         run: node --check scripts/setup.mjs
@@ -36,6 +50,12 @@ jobs:
       - name: Contrôler les appels sécurisés et le contrat
         working-directory: services/kovelyx-cloudflare
         run: npm test
+      - name: Comptes réels sur Worker+D1 locaux (aucune donnée de production)
+        working-directory: services/kovelyx-cloudflare
+        timeout-minutes: 4
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: node tests/local-account-e2e.mjs
       - name: Compiler le Worker (sans déploiement ni identifiants Cloudflare)
         working-directory: services/kovelyx-cloudflare
         run: npx wrangler deploy --dry-run --outdir /tmp/kovelyx-cloudflare-dist

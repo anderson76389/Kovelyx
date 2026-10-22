@@ -1,5 +1,7 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
@@ -153,13 +155,17 @@ class MediaServerSyncService @Inject constructor(
         authManager.authState.value is AuthState.FullAccount &&
             profileManager.activeProfileId.value == profileId
 
-    private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T =
-        try {
+    private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
+        check(!CloudflareTvAccountClient.enabled) {
+            "Fonction de synchronisation historique non migrée vers Kovelyx Cloudflare"
+        }
+        return try {
             block()
         } catch (error: Exception) {
             if (!authManager.refreshSessionIfJwtExpired(error)) throw error
             block()
         }
+    }
 
     private companion object {
         const val TAG = "MediaServerSync"

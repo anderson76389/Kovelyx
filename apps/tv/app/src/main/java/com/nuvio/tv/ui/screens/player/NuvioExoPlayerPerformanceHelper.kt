@@ -34,9 +34,11 @@ object NuvioExoPlayerPerformanceHelper {
     var enabled: Boolean = false
         set(value) {
             val supported = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
-            val newValue = value && supported
+            val newValue = value && supported && TvMedia3SafetyPolicy.allowNativeAllocation
             field = newValue
-            applyEngineConfig(newValue)
+            // Préserver les optimisations réseau, mais exclure l'allocateur natif
+            // jusqu'à reconstruction de l'AAR corrigé (libération tardive après reset).
+            applyEngineConfig(newValue && TvMedia3SafetyPolicy.allowNativeAllocation)
         }
 
     // Rebuilding this on a settings change handed already built data sources a pool that nothing
@@ -132,7 +134,7 @@ object NuvioExoPlayerPerformanceHelper {
         }
 
         val effectiveBufferMb = when {
-            settings.nuvioPerformanceModeEnabled -> {
+            settings.nuvioPerformanceModeEnabled && TvMedia3SafetyPolicy.allowNativeAllocation -> {
                 if (customBuffers && !settings.bufferBudgetManaged) {
                     MemoryBudget.effectiveBufferMb(bufferSettings.targetBufferSizeMb)
                 } else {
@@ -308,7 +310,10 @@ object NuvioExoPlayerPerformanceHelper {
                         "native arena chunk $NATIVE_ARENA_CHUNK_SIZE; native pooling is disabled"
                 )
             }
-            val allocator = DefaultAllocator(true, DEFAULT_NUVIO_ALLOCATOR_SEGMENT_SIZE, 0, enabled)
+            val allocator = DefaultAllocator(
+                true, DEFAULT_NUVIO_ALLOCATOR_SEGMENT_SIZE, 0,
+                enabled && TvMedia3SafetyPolicy.allowNativeAllocation
+            )
             liveAllocator = allocator
             android.util.Log.i(
                 "ExoPerformance",

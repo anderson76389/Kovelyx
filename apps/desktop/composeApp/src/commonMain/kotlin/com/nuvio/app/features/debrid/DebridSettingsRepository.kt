@@ -274,6 +274,12 @@ object DebridSettingsRepository {
 
     private fun loadFromDisk() {
         hasLoaded = true
+        // Purger les anciens jetons ; conserver les réglages et clés des addons.
+        for (removed in listOf(DebridProviders.TORBOX_ID, DebridProviders.REAL_DEBRID_ID)) {
+            if (!DebridSettingsStorage.loadProviderApiKey(removed).isNullOrBlank()) {
+                DebridSettingsStorage.saveProviderApiKey(removed, "")
+            }
+        }
         providerApiKeys = DebridProviders.all()
             .mapNotNull { provider ->
                 DebridSettingsStorage.loadProviderApiKey(provider.id)

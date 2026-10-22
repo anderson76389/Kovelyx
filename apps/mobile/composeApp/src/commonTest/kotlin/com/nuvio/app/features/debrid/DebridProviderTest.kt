@@ -6,6 +6,15 @@ import kotlin.test.assertTrue
 
 class DebridProviderTest {
     @Test
+    fun `removed providers cannot be selected or resolved at runtime`() {
+        assertFalse(DebridProviders.isSupported("torbox"))
+        assertFalse(DebridProviders.isSupported("realdebrid"))
+        assertFalse(DebridProviders.isVisible("torbox"))
+        assertFalse(DebridProviders.isVisible("realdebrid"))
+        assertTrue(DebridProviders.all().map { it.id } == listOf(DebridProviders.PREMIUMIZE_ID))
+    }
+
+    @Test
     fun `torbox exposes local addon capabilities`() {
         assertTrue(DebridProviders.Torbox.authMethod == DebridProviderAuthMethod.DeviceCode)
         assertTrue(DebridProviders.Torbox.supports(DebridProviderCapability.ClientResolve))

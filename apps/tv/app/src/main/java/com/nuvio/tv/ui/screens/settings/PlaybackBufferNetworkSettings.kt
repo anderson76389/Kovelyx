@@ -25,6 +25,7 @@ import com.nuvio.tv.R
 import com.nuvio.tv.data.local.PlayerSettings
 import com.nuvio.tv.data.local.VodCacheSizeMode
 import com.nuvio.tv.ui.screens.player.NuvioExoPlayerPerformanceHelper
+import com.nuvio.tv.ui.screens.player.TvMedia3SafetyPolicy
 import kotlin.math.min
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -39,7 +40,9 @@ internal fun PlaybackBufferNetworkSection(
         onMemorySettingChanged()
     }
     val context = LocalContext.current
-    val isSupported = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
+    // Un mode natif défectueux ne doit pas apparaître comme disponible.
+    val isSupported = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O &&
+        TvMedia3SafetyPolicy.allowNativeAllocation
     var showPerformanceModeWarning by remember { mutableStateOf(false) }
 
     SettingsToggleRow(
@@ -54,7 +57,14 @@ internal fun PlaybackBufferNetworkSection(
             }
         }
     )
-    if (!isSupported && showPerformanceModeWarning) {
+    if (!TvMedia3SafetyPolicy.allowNativeAllocation) {
+        SettingsNote(
+            text = "Mémoire native momentanément indisponible : Kovelyx TV utilise un " +
+                "allocateur standard pour éviter un défaut du moteur vidéo. " +
+                "Cache, réseau parallèle et réglages du lecteur restent disponibles.",
+            tone = SettingsNoteTone.Warning
+        )
+    } else if (!isSupported && showPerformanceModeWarning) {
         SettingsNote(
             text = stringResource(R.string.playback_net_nuvio_performance_mode_not_supported),
             tone = SettingsNoteTone.Danger
@@ -111,7 +121,8 @@ private fun CustomBufferControls(
 ) {
     val context = LocalContext.current
     val buffer = settings.bufferSettings
-    val isNativeMemory = settings.nuvioPerformanceModeEnabled
+    val isNativeMemory = settings.nuvioPerformanceModeEnabled &&
+        TvMedia3SafetyPolicy.allowNativeAllocation
     val maxDuration = if (isNativeMemory) 1200 else 120
     val durationStep = if (isNativeMemory) 10 else 5
 
@@ -193,6 +204,7 @@ private fun CustomBufferControls(
         onToggle = { updateMemory { setBufferBudgetManaged(!settings.bufferBudgetManaged) } }
     )
 
+    val nativeActive = isNativeMemory
     val budgetManaged = settings.bufferBudgetManaged
     val parallelActive = settings.parallelNetworkEnabled && settings.useParallelConnections
     val chunkMb = Math.ceil(settings.parallelChunkSizeKb / 1024.0).toInt().coerceAtMost(MemoryBudget.tierMaxChunkMb)
@@ -201,12 +213,12 @@ private fun CustomBufferControls(
     } else {
         0
     }
-    val safeMaxMb = if (settings.nuvioPerformanceModeEnabled) {
+    val safeMaxMb = if (nativeActive) {
         NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
     } else {
         MemoryBudget.maxBufferMb(parallelOverheadMb)
     }
-    val warningMaxMb = if (settings.nuvioPerformanceModeEnabled) {
+    val warningMaxMb = if (nativeActive) {
         NuvioExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context)
     } else {
         (((MemoryBudget.budgetMb * 1.25f).toInt() - parallelOverheadMb) / MemoryBudget.BUFFER_STEP_MB * MemoryBudget.BUFFER_STEP_MB)
@@ -218,7 +230,7 @@ private fun CustomBufferControls(
         warningMaxMb
     }
     val minBufferSizeMb = MemoryBudget.MIN_TARGET_BUFFER_MB.coerceAtMost(maxBufferSizeMb)
-    val bufferSizeMb = if (settings.nuvioPerformanceModeEnabled && budgetManaged) {
+    val bufferSizeMb = if (nativeActive && budgetManaged) {
         safeMaxMb
     } else {
         MemoryBudget
@@ -230,7 +242,7 @@ private fun CustomBufferControls(
         title = stringResource(R.string.playback_buffer_target),
         subtitle = stringResource(R.string.playback_buffer_target_sub),
         value = bufferSizeMb,
-        valueText = if (settings.nuvioPerformanceModeEnabled && parallelActive && parallelOverheadMb > 0) {
+        valueText = if (nativeActive && parallelActive && parallelOverheadMb > 0) {
             "$effectiveExoMb+$parallelOverheadMb MB"
         } else {
             "$bufferSizeMb MB"
@@ -344,6 +356,8 @@ private fun ParallelNetworkControls(
     settings: PlayerSettings,
     updateMemory: PlaybackSettingsUpdate
 ) {
+    val nativeActive = settings.nuvioPerformanceModeEnabled &&
+        TvMedia3SafetyPolicy.allowNativeAllocation
     SettingsToggleRow(
         title = stringResource(R.string.playback_net_http2),
         subtitle = stringResource(R.string.playback_net_http2_sub),
@@ -364,12 +378,12 @@ private fun ParallelNetworkControls(
             value = settings.parallelConnectionCount,
             valueText = settings.parallelConnectionCount.toString(),
             minValue = MemoryBudget.MIN_CONNECTIONS,
-            maxValue = if (settings.nuvioPerformanceModeEnabled) 16 else MemoryBudget.MAX_CONNECTIONS,
+            maxValue = if (nativeActive) 16 else MemoryBudget.MAX_CONNECTIONS,
             step = 1,
             onValueChange = { count -> updateMemory { setParallelConnectionCount(count) } }
         )
 
-        val maxChunkSizeMb = if (settings.nuvioPerformanceModeEnabled) {
+        val maxChunkSizeMb = if (nativeActive) {
             MemoryBudget.tierMaxChunkMb
         } else {
             MemoryBudget.maxChunkMb(
@@ -404,8 +418,10 @@ private fun ParallelNetworkControls(
 @Composable
 internal fun PlaybackMemoryUsageCard(settings: PlayerSettings) {
     val context = LocalContext.current
+    val nativeActive = settings.nuvioPerformanceModeEnabled &&
+        TvMedia3SafetyPolicy.allowNativeAllocation
     val effectiveBufferMb = when {
-        settings.nuvioPerformanceModeEnabled -> {
+        nativeActive -> {
             if (settings.bufferEngineEnabled && !settings.bufferBudgetManaged) {
                 MemoryBudget.effectiveBufferMb(settings.bufferSettings.targetBufferSizeMb)
             } else {
@@ -425,17 +441,17 @@ internal fun PlaybackMemoryUsageCard(settings: PlayerSettings) {
     } else {
         0
     }
-    val totalUsageMb = if (settings.nuvioPerformanceModeEnabled) {
+    val totalUsageMb = if (nativeActive) {
         effectiveBufferMb
     } else {
         MemoryBudget.totalUsageMb(effectiveBufferMb, settings.parallelConnectionCount, chunkMb, parallelActive)
     }
-    val safeLimitMb = if (settings.nuvioPerformanceModeEnabled) {
+    val safeLimitMb = if (nativeActive) {
         NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
     } else {
         MemoryBudget.budgetMb
     }
-    val warningLimitMb = if (settings.nuvioPerformanceModeEnabled) {
+    val warningLimitMb = if (nativeActive) {
         NuvioExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context)
     } else {
         (MemoryBudget.budgetMb * 1.25f).toInt()
@@ -447,7 +463,7 @@ internal fun PlaybackMemoryUsageCard(settings: PlayerSettings) {
     }
     val effectiveExoMb = (effectiveBufferMb - parallelOverheadMb).coerceAtLeast(MemoryBudget.MIN_BUFFER_MB)
     val baseText = stringResource(R.string.playback_estimated_memory_usage, totalUsageMb, warningLimitMb)
-    val usageText = if (settings.nuvioPerformanceModeEnabled && parallelActive && parallelOverheadMb > 0) {
+    val usageText = if (nativeActive && parallelActive && parallelOverheadMb > 0) {
         baseText
             .replace("$totalUsageMb / $warningLimitMb", "$totalUsageMb($effectiveExoMb+$parallelOverheadMb)/$warningLimitMb")
             .replace("$totalUsageMb /", "$totalUsageMb($effectiveExoMb+$parallelOverheadMb)/")

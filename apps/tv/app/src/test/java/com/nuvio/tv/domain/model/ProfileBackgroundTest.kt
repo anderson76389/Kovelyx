@@ -56,6 +56,27 @@ class ProfileBackgroundTest {
         assertNull(resolveProfileBackgroundSelection(profile, CosmeticEntitlements.None))
     }
 
+    @Test
+    fun ownCloudflareMediaDoesNotNeedAnExternalPremiumMembership() {
+        val url="file:/data/user/0/com.kovelyx.tv/files/kovelyx/profile-media/background-cloud-test.mp4"
+        assertEquals(
+            ProfileBackgroundSelection.Custom(url),
+            resolveProfileBackgroundSelection(
+                profile(id=1,backgroundUrl=url),
+                CosmeticEntitlements.None
+            )
+        )
+    }
+
+    @Test
+    fun unrelatedLocalFilesDoNotBypassTheEntitlement() {
+        val url="file:/storage/emulated/0/Download/random.mp4"
+        assertNull(resolveProfileBackgroundSelection(
+            profile(id=1,backgroundUrl=url),
+            CosmeticEntitlements.None
+        ))
+    }
+
     private fun profile(
         id: Int,
         backgroundId: String? = null,

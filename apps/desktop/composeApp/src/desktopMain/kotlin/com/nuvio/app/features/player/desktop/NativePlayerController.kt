@@ -58,6 +58,8 @@ internal class NativePlayerController(
     private val createWaitTimeoutMs: Long = 5_000L,
     private val releaseTimeoutMs: Long = 10_000L,
     private val onCreateWaitCompleted: () -> Unit = {},
+    // Profile-loop videos are independent from the main playback volume.
+    private val muteEmbeddedProfileMedia: Boolean = false,
 ) : PlayerEngineController {
     private companion object {
         val json = Json { ignoreUnknownKeys = true }
@@ -651,7 +653,8 @@ internal class NativePlayerController(
     private fun applyRememberedVolume() {
         val current = handle
         if (current == 0L) return
-        val level = rememberedVolumeLevel.coerceDesktopPlayerVolumeLevel()
+        val level = if (muteEmbeddedProfileMedia) 0f
+            else rememberedVolumeLevel.coerceDesktopPlayerVolumeLevel()
         currentVolumeLevel = level
         NativePlayerBridge.setVolume(current, level)
         controlsState = controlsState.copy(volumeLevel = level)

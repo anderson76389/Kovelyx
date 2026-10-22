@@ -2,6 +2,7 @@ package com.nuvio.tv.data.repository
 
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
+import com.nuvio.tv.core.sync.CloudflareTvWatchSyncService
 import com.nuvio.tv.core.sync.WatchProgressSyncService
 import com.nuvio.tv.core.sync.WatchStateMutationStore
 import com.nuvio.tv.core.sync.WatchedItemsSyncService
@@ -118,6 +119,7 @@ class WatchProgressRepositoryProfileIsolationTest {
             traktSettingsDataStore = traktSettings,
             layoutPreferenceDataStore = mockk<LayoutPreferenceDataStore>(relaxed = true),
             watchProgressSyncService = mockk<WatchProgressSyncService>(relaxed = true),
+            cloudTvWatchSyncService = mockk<CloudflareTvWatchSyncService>(relaxed = true),
             watchedItemsPreferences = watchedPreferences,
             watchedItemsSyncService = mockk<WatchedItemsSyncService>(relaxed = true),
             authManager = authManager,

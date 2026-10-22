@@ -1,6 +1,7 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.ServerConfiguration
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
@@ -52,7 +53,6 @@ enum class DeviceLinkAuthFailure {
 object DeviceLinkAuthRepository {
     private const val maxConsecutivePollFailures = 3
     private const val maxPollAttempts = 120
-    private const val officialLinkUrl = "https://nuvio.tv/link"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val log = Logger.withTag("DeviceLinkAuthRepository")
     private val json = Json { ignoreUnknownKeys = true }
@@ -62,12 +62,25 @@ object DeviceLinkAuthRepository {
 
     @OptIn(ExperimentalUuidApi::class)
     fun start() {
+        // Le protocole Supabase de connexion par code n'est PAS le protocole
+        // Cloudflare Better Auth. N'envoyer aucune requête vers l'ancien backend.
+        if (CloudflareAccountClient.enabled) {
+            _state.value = DeviceLinkAuthState.Failed(DeviceLinkAuthFailure.Start)
+            return
+        }
         if (_state.value is DeviceLinkAuthState.Starting || _state.value is DeviceLinkAuthState.Waiting) return
 
         activeJob?.cancel()
         activeJob = scope.launch {
             _state.value = DeviceLinkAuthState.Starting
             val configuration = ServerConfigurationRepository.active.value
+            // Un serveur officiel hérité n'est pas un service Kovelyx : ni
+            // ouverture de nuvio.tv, ni démarrage de RPC sans serveur personnel.
+            if (!configuration.isCustom || !configuration.capabilities.tvLogin ||
+                configuration.backendUrl.isBlank() || configuration.publishableKey.isBlank()) {
+                _state.value = DeviceLinkAuthState.Failed(DeviceLinkAuthFailure.Start)
+                return@launch
+            }
             val nonce = Uuid.random().toString()
             try {
                 val session = startSession(
@@ -193,7 +206,7 @@ object DeviceLinkAuthRepository {
     }
 
     private fun ServerConfiguration.deviceLinkUrl(): String =
-        if (isCustom) "${backendUrl.trimEnd('/')}/link" else officialLinkUrl
+        "${backendUrl.trimEnd('/')}/link"
 }
 
 internal fun formatDeviceLinkCode(value: String): String {

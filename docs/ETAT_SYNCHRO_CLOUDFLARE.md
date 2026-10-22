@@ -1,0 +1,149 @@
+# Kovelyx Cloudflare — état de la synchronisation
+
+## Intégration directe de la synchronisation sur les trois applications (22 octobre 2026)
+
+**Code présent sur la branche PR nº 40, non fusionnée :**
+
+- Windows et Android : le dépôt des œuvres vues dispose désormais d'une voie D1 bidirectionnelle distincte de la progression, avec chargement des titres/épisodes vus, écriture des marques nouvelles, annulation « non vu », horodatage des suppressions, reprise des écritures en attente, et stockage local propre au compte Better Auth. Aucun élément invité n'est exporté à l'ouverture du compte.
+- Android TV : le lecteur et les actions d'historique appellent `CloudflareTvWatchSyncService`. Cette classe lit/écrit les catégories `watch_progress` et `/v1/watched` en gardant leurs révisions CAS, applique les reprises à `WatchProgressPreferences` et les statuts vus à `WatchedItemsPreferences`. Elle tente de renvoyer les mutations différées après retour du réseau. L'écran compte affiche les trois compteurs.
+- Le démarrage, les lectures, les actualisations et les événements de changement de profil déclenchent le rattrapage D1 sur la TV ; le mode Cloudflare évite les appels de synchronisation Supabase dans ces parcours. La bibliothèque TV est également rafraîchie au démarrage et périodiquement.
+- Les DataStore de progression, d'historique et de mutations TV sont séparés entre invité, compte cloud, et vrai profil UUID associé. Un compte ou une association de profil n'accède pas directement aux fichiers d'un autre.
+- Le filtrage des données évite de transmettre les liens de streaming, jetons, URL signées, images privées et informations de fournisseurs aux données D1.
+
+**Vérifications disponibles :** contrôle d'identité, de création, de lecture, de suppression, de 409 et d'isolation inter-comptes exécuté contre le code du nouveau handler JavaScript avec un double de base en mémoire. Des tests de contrat Node, un scénario Worker+D1 local et des contrôles de frontières statiques sont ajoutés au dépôt, mais **aucune nouvelle compilation Gradle ni CI de ce dernier SHA n'a été confirmée**.
+
+**Points encore ouverts avant toute Release :** déployer et valider la migration D1 0002 sur le vrai compte Cloudflare après sauvegarde ; compiler Windows, Android et Android TV sur le HEAD de la PR ; corriger tout échec de CI, puis tester le scénario lecture/fin d'épisode/ajout-retrait en bibliothèque sur trois appareils réels et après fermeture/réouverture. La PR reste en brouillon et présente un état non fusionnable. La synchronisation ne doit pas être annoncée comme un service de production validé.
+
+
+## Périmètre confirmé — progression, bibliothèque et historique (22 octobre 2026)
+
+La demande vise tous les films et toutes les séries, **épisode par épisode**, sur tous les appareils. Trois états doivent rester distincts : la bibliothèque, la position de reprise et les titres/épisodes vus (y compris « marquer comme vu » manuellement). Un titre marqué vu ne doit pas disparaître parce que sa position de reprise a été effacée.
+
+**Ajout réellement codé dans la PR nº 40 :** nouvelle migration additive `services/kovelyx-cloudflare/migrations/0002_watched_items.sql` ; route sécurisée `GET/POST /v1/watched` avec profils autorisés, pagination, contrôle de révision, tombstones et validation de métadonnées non sensibles ; méthodes clientes de lecture et d'écriture sur Windows/Android/TV. L'écran de compte TV distingue désormais aussi les titres « vus », quand le Worker possède cette nouvelle route ; sinon les compteurs précédents restent consultables.
+
+**Non réalisé :** les adaptateurs qui alimentent automatiquement cette table depuis chaque lecteur et les actions « vu/non vu », le rapatriement de l'historique dans chaque bibliothèque UI, la mise en file hors ligne et l'isolation complète des anciennes données « vues » locales, ainsi que la synchronisation bidirectionnelle du lecteur TV. Les tests nouvellement écrits sont à exécuter avant toute fusion, puis les essais entre trois appareils physiques.
+
+**Ne rien annoncer de complet ni déployer silencieusement** : aucune migration cloud réelle, aucun Worker de production modifié, et aucune Release n'a été publiée pendant cette étape.
+
+
+## Avancée du 22 octobre 2026 — vérification des reprises sur Android TV
+
+Sur la PR nº 40, un **aperçu cloud TV en lecture seule** a été ajouté dans l'écran Compte : chaque profil D1 accessible au compte connecté affiche séparément le nombre d'éléments en bibliothèque et le nombre de reprises non supprimées. Le bouton *Actualiser les données cloud* relit les catégories `library` et `watch_progress` en pagination avec authentification Better Auth et vérification de la session avant acceptation du résultat. Une erreur réseau affiche un état d'indisponibilité ; aucune donnée invitée TV n'est écrasée.
+
+Cela **ne signifie pas que les positions de lecture se synchronisent dans le lecteur TV**. Il reste à brancher un adaptateur TV de progression véritablement isolé par compte/profil, définir un traitement des suppressions et conflits CAS hors ligne, tester la reprise dans le lecteur et valider le scénario Windows ↔ Android ↔ Android TV sur appareils réels. Les identifiants privés des sources et les mots de passe ne doivent jamais être envoyés dans les charges de synchronisation.
+
+La branche de migration possède déjà le stockage chiffré de session sur Windows (DPAPI) et Android/TV (AndroidKeyStore), avec validation des jetons avant restauration. **La branche `main` et les Releases publiques ne doivent pas être confondues avec cette PR non fusionnée.** Aucun déploiement Worker/D1/R2, aucune migration utilisateur et aucune publication de binaires de production ne sont effectués par cet ajout.
+
+
+_Mise à jour : 19 octobre 2026. Ce document décrit le code de la branche de migration, pas une fonctionnalité déjà déployée dans les Releases._
+
+## Preuves disponibles
+
+- Le premier compte utilisateur, la session et le profil « Principal » ont été créés et relus sur le Worker réel depuis Codespaces (rapport utilisateur).
+- L'inscription publique a été refermée immédiatement après ce test.
+- Les applications Windows, Android et TV contiennent un premier client Better Auth/Cloudflare, distinct du protocole Supabase.
+- Le Worker possède une base D1 pour les profils et les catégories de synchronisation, avec isolation par utilisateur et révisions.
+
+## Ce que cette étape ajoute
+
+- Windows et Android : lecture et import des **noms/identifiants UUID** de profils du même compte, sans remplacer bibliothèques, historique, images et autres préférences locales.
+- Windows et Android : création/renommage de profil côté Cloudflare, et suppression **explicite** d'un profil (qui supprime aussi ses enregistrements kv_sync). Le profil principal et le dernier profil du compte ne peuvent pas être supprimés.
+- Le mode invité reste local et fonctionne sans autorisation du Worker.
+- Les fonctions de synchronisation Supabase incompatibles ne doivent pas s'exécuter pour les comptes Cloudflare dans les chemins de profils/PIN/bibliothèque modifiés.
+- Windows/Android mobile : première implémentation de la **bibliothèque locale** sur D1 (GET paginé par catégorie et écriture avec contrôle de révision). La première connexion importe les éléments du cloud sans exporter automatiquement les anciennes bibliothèques de l'appareil. Après initialisation, les ajouts et suppressions *effectués dans la bibliothèque locale* peuvent être envoyés au serveur avec refus des conflits (409). Les éléments du cloud sont importés de façon additive; les tombstones ne retirent un titre que s'il était déjà connu sur le même profil.
+- Les bibliothèques et caches de profils Windows/Android sont désormais isolés par ID du compte pour éviter de mélanger anciens favoris invités et nouveau compte.
+- Android TV : consultation des noms de profils Cloudflare déjà existante, sans import automatique dans les profils TV. Les actions de liaison par code historiques sont bloquées sur Cloudflare tant qu'il n'existe pas de nouveau protocole. Les entrées de synchronisation bibliothèque historiquement reliées à Supabase refusent toute requête en mode Cloudflare, tandis que la bibliothèque locale reste utilisable.
+
+## Présentation des applications sur cette branche
+
+- Les noms affichés par les variantes de développement mobiles et TV sont désormais « **Kovelyx** » (suppression de « Kovelyx (test) » et « Nuvio Debug »). Le package MSI Windows était déjà « Kovelyx ».
+- Le logo du chargement Compose est ancré au **centre réel** de son écran sur Windows, mobile et TV ; l'indicateur est affiché en dessous sans déplacer le logo.
+- Une vérification statique des labels et positions est ajoutée aux tests de marque, et les APK Android sont contrôlés par `aapt` pour vérifier le **vrai nom installé**.
+- Les identifiants `com.kovelyx.*` restent inchangés : pas de réinitialisation d'application ni de confusion avec les données existantes.
+- Reste à confirmer le rendu optique sur les appareils réels, notamment les premières images du splash natif Android.
+
+## Limites réelles
+
+La synchronisation de **bibliothèque locale Windows ↔ Android** dispose désormais d'un premier code bidirectionnel mais **n'est pas encore validée par un essai complet multi-appareils**. Elle ne couvre pas les listes externes Trakt/MDBList ni une migration automatique de l'ancienne bibliothèque invitée. La synchronisation des **historiques, progression, préférences, extensions, avatars, fonds** et **la bibliothèque Android TV** n'est **pas encore opérationnelle entre les appareils**. Les routes D1 de synchronisation existent, mais il manque les adaptateurs applicatifs, les révisions et les tests multi-appareils. Aucun transfert automatique depuis d'anciens comptes Nuvio/Supabase. Les sessions restent seulement en mémoire : reconnexion nécessaire après fermeture. Pas de connexion par code TV, de réinitialisation de mot de passe ni de suppression définitive du compte.
+
+### Mise en service après validation de la branche
+
+1. Exécuter les checks GitHub de la PR (tests API, schéma D1, compilation du Worker et, lorsque possible, builds des apps).
+2. Déployer la nouvelle version du Worker avec la configuration D1 existante avant de distribuer les nouveaux clients. Ne jamais remplacer l'ID de la base ni les secrets.
+3. Compiler puis publier les nouvelles apps, **sans déclarer une synchronisation complète**.
+4. Tester avec le même compte : créer et renommer un profil sur Windows, fermer/réouvrir Android, vérifier le même UUID et le même nom. Ajouter ensuite un titre sur Windows et vérifier l'apparition sur Android, puis l'inverse. Vérifier les suppressions et les conflits sans perte de données locales. Tester l'échec de suppression du profil principal.
+5. Effectuer une sauvegarde privée de D1 avant tout test de suppression de profil.
+
+La branche ne déploie pas automatiquement le Worker, ne crée pas de compte supplémentaire, ne touche pas au mot de passe ni aux tokens et ne publie aucun exécutable.
+
+## Important : ordre de déploiement
+
+Ce code nécessite que **le nouveau Worker D1 avec pagination de catégorie soit déployé avant les nouveaux APK/EXE**. Les anciens clients ne connaissent pas le nouveau curseur de pagination. Ne jamais lancer les versions de préproduction sur les données définitives sans sauvegarde de D1 et des profils locaux. Aucune Release ne peut être qualifiée de « synchronisation complète » tant que la connexion, la bibliothèque et les redémarrages réels sur deux appareils n'ont pas été testés.
+
+
+## Focus compte et Android TV — avancée du 19 octobre 2026
+
+- **TV, branche uniquement :** un coffre de session AES-GCM AndroidKeyStore a été ajouté dans `TvCloudSessionVault.kt`. Le mot de passe n'est pas stocké ; le jeton n'est accepté au redémarrage qu'après validation HTTPS `/v1/me`.
+- La déconnexion efface la valeur chiffrée enregistrée sur l'appareil. Une panne du Worker empêche la reconnexion automatique sans effacer systématiquement le coffre.
+- **État de preuve :** le code est sur la PR, pas dans les APK publics. Le coffre est chiffré, sa restauration vérifie `/v1/me`, et une protection supplémentaire empêche de ressusciter une session effacée pendant la requête. La compilation, le comportement avec l'AndroidKeyStore sur TV Box réelle, la reconnexion et les transferts effectifs restent à confirmer.
+- **TV et D1 :** un premier adaptateur de bibliothèque bidirectionnel a été ajouté **sur la branche uniquement** : association prudente UUID/identifiant TV, cache séparé par compte, import distant, mutations CAS et reprise des écritures différées. Les données invitées ne sont pas importées automatiquement. **Compilation finale, conflits et parcours réel multi-appareils non encore certifiés.**
+- **Windows et Android :** les premiers adaptateurs de bibliothèque D1 restent expérimentaux ; leur présence dans les sources n'établit pas une synchronisation multi-appareils vérifiée.
+- **À ne pas faire :** fusionner/publier ou déployer un nouveau Worker en considérant la synchronisation terminée. Conserver la sauvegarde D1 et les profils locaux. Le service de comptes hébergé n'a pas été modifié durant cette étape.
+
+### Critères d'acceptation prioritaires
+
+1. Valider sur TV réelle deux redémarrages avec jeton valide, puis les cas jeton révoqué, réseau absent, changement de compte et déconnexion pendant une restauration.
+2. Vérifier l'isolation du cache D1 TV lors d'un changement de compte, les associations 1:1 et par nom unique, et ajouter un choix explicite pour les cas ambigus sans jamais migrer silencieusement le catalogue invité.
+3. Tester le scénario Windows → Android → TV → Windows sur un compte de test, avec les mêmes favoris et progressions, puis un conflit, un mode hors ligne et un second utilisateur distinct.
+4. Résoudre les échecs des tests unitaires TV concernant la source HTTP 404, l'allocateur Media3, l'API soutiens non configurée et la configuration Trakt.
+5. Publier uniquement un build signé et vérifié après un résultat CI vert, puis tester la mise à jour sans effacement des données.
+
+
+### Ajout sur la PR nº 40 — bibliothèque Cloudflare Android TV
+
+- `CloudflareTvProfileBinding` associe les profils uniquement avec une relation non ambiguë : un seul profil de chaque côté, ou correspondance unique des noms lorsque plusieurs profils existent. Les homonymes restent non associés et leurs données ne sont pas mélangées.
+- `CloudflareTvLibraryStore` utilise une sauvegarde locale **par propriétaire et UUID cloud** distincte de la bibliothèque invitée. L'ancien magasin TV n'est pas effacé ni envoyé automatiquement à D1.
+- Le client lit la catégorie D1 `library` par pages avec limites, puis transforme le même format réduit de métadonnées que les applications PC/mobile. Les modifications TV sont sauvegardées localement avant l'envoi et utilisent la révision CAS ; en cas de conflit, elles restent en attente.
+- La bibliothèque locale affichée en mode compte est celle de D1 (cache du compte), tandis que le mode invité conserve son stockage historique. Le déclenchement de la lecture est lié à l'état de connexion et au profil actif, pas seulement à l'ouverture des paramètres du compte.
+- **Limites majeures :** seuls les favoris de la bibliothèque locale sont concernés ; pas encore de sync TV des progressions, épisodes vus, listes externes, paramètres, addons ou secrets. Pas de transfert de médias tant que R2 est désactivé. Aucun appareil physique ni transfert PC–mobile–TV n'a été testé pendant cette étape. Les profils ambigus exigent encore un futur choix explicite.
+- **Production inchangée :** ne pas distribuer cette branche avant une suite CI verte et le déploiement du Worker D1 compatible, après sauvegarde de la base existante.
+
+- **Reconnexion et relance TV :** le dépôt teste la présence des catégories cloud au changement d'utilisateur/profil et périodiquement toutes les cinq minutes tant que l'application TV reste active ; les erreurs réseau sont conservées pour nouvelle tentative. Les annulations de coroutines ne sont pas traitées comme de simples erreurs réseau.
+- **Défauts du moteur TV mis en évidence par tests réels du runner :** le test serveur localhost reçoit un code HTTP 400 lorsqu'il envoie 404 ; le test allocateur conserve 196 608 octets après reset/libération tardive. Ces deux défauts de la bibliothèque Media3 locale restent des échecs à corriger dans le moteur précompilé ; les tests n'ont pas été supprimés ni rendus artificiellement verts.
+
+
+### Sécurisation du lecteur Android TV — moteur Media3 précompilé
+
+Le runner GitHub montre deux défauts **dans les archives AAR vendoriées**, indépendants de Cloudflare : `LocalhostZeroCopyDataSource` interprète une réponse HTTP 404 comme 400, et `DefaultAllocator` conserve 196 608 octets après libération tardive en mode natif.
+
+**Correctif de l'application, distinct d'une recompilation Media3 :** la nouvelle `SafeLoopbackDataSource` route HTTP(S) localhost/127.0.0.1/::1 via OkHttp et préserve les schémas de fichiers standards via `DefaultDataSource`. Les allocations directes natives des chemins de lecture TV, remises en cache et bandes-annonces sont **temporairement désactivées** ; les fonctions réseau et de lecture classiques restent configurables. Le code choisit le mode heap plutôt que le mode natif bogué. Les tests de la nouvelle politique vérifient la sélection et la propagation des erreurs.
+
+**Important :** les deux tests originaux des AAR sont volontairement conservés et peuvent encore échouer, car le contournement ne modifie pas leurs classes internes. Le correctif final des AAR nécessite les sources correspondantes ou une reconstruction traçable de leur fork Media3. Aucune garantie de lecture 100 % sur toutes les box n'est donnée avant tests physiques. Ces mécanismes visent à éviter les deux bogues connus dans les chemins effectivement utilisés par Kovelyx, sans faire croire que les binaires historiques sont réparés.
+
+
+### Fiabilité multi-comptes TV et contrôle dédié du lecteur — 20 octobre 2026
+
+La déconnexion TV efface d'abord le jeton chiffré de l'appareil puis tente la révocation serveur. Une coupure réseau lors de cette dernière étape ne doit plus interrompre l'écran de déconnexion : le cache affiché du compte est vidé immédiatement, sans effacer les bibliothèques invitées ni les modifications D1 en attente. Une révocation serveur indisponible reste une limite explicite : les sessions invalidées localement ne sont pas garanties révoquées côté Workers tant que le réseau est coupé.
+
+Les réponses `/v1/profiles` et les médias privés sont maintenant vérifiés contre le compte exact ayant lancé leur chargement. Si l'utilisateur se déconnecte ou passe sur un second compte au milieu du chargement, l'interface n'applique pas d'anciennes informations de profils ou d'avatar au nouvel utilisateur.
+
+Un job CI TV **ciblé** a été ajouté pour les tests de la route HTTP locale réelle, du mode de mémoire sûr et de l'association des profils D1. Le job complet avec les deux tests de défauts historiques AAR **reste activé et rouge** tant que les archives Media3 ne sont pas réparées : ne pas confondre un test fonctionnel ciblé vert avec une certification globale. Aucun APK public n'a été publié lors de cette étape.
+
+### Fiabilité hors ligne de la TV — corrections du 20 octobre 2026
+
+- La session TV est toujours **vérifiée** par `/v1/me`, sans authentification à partir d'un simple fichier local. Après une panne réseau temporaire lors du démarrage, le gestionnaire de comptes réessaie automatiquement avec un délai exponentiel plafonné à cinq minutes. Une déconnexion explicite ou un jeton définitivement invalidé arrête les tentatives.
+- Une fois le compte validé, l'association **déjà vérifiée** entre le profil local TV et son UUID D1 est conservée séparément pour chaque propriétaire. Si `/v1/profiles` devient indisponible, la bibliothèque cloud peut être restaurée depuis son cache local sans importer celle du mode invité. Si la liste distante est disponible et dément l'association, celle-ci est supprimée.
+- Les clés du cache de bibliothèque D1 précédemment utilisées sont **conservées à l'identique**, pour ne pas effacer les ajouts ou suppressions en attente au moment d'une mise à jour.
+- Lorsqu'une requête D1 a été acceptée mais que la TV n'a pas reçu la réponse, la synchronisation peut reconnaître une mutation distante de contenu identique et acquitter l'opération en attente. Un conflit de contenu divergent reste en attente et **n'est pas écrasé silencieusement**.
+- La panne du job GitHub Actions de démarrage Google TV identifiée sur le run `39340712242` venait du shell `/bin/sh` qui ne prend pas en charge `set -o pipefail` ; le script utilise désormais `set -eu`. Ce défaut CI ne prouvait pas un plantage de Kovelyx.
+- Les vérifications sur une véritable box et la synchronisation des progressions de lecture restent non démontrées. Aucune Release ni migration sur la base D1 de production n'a été faite.
+
+
+## Conclusion de stabilisation — 21 octobre 2026
+
+- Les builds Windows (MSI/EXE/portable), Android mobile et Android TV ont été produits dans GitHub Actions pour le commit `4b7f7162` et la suite Windows, incluant un essai DPAPI réel, était verte.
+- Les contrôles Worker/D1 et de compilation sans domaines Nuvio étaient verts sur ce commit. Le test TV sur émulateur a été lancé, mais il faut utiliser son résultat GitHub final pour certifier ce commit.
+- La suite TV complète conserve **deux échecs reproductibles sur 2 080 tests** : `LocalhostZeroCopyDataSourceTest.testHttpError404` (HTTP 400 à la place de 404) et `DefaultAllocatorTest.testLateReleasedAllocationsMemoryLeak` (mémoire native non rendue). Ces tests interrogent directement des classes des **AAR Media3 binaires historiques**. Les chemins de lecture de l'application ont déjà un contournement testé (OkHttp pour localhost, pas d'allocation native), mais les AAR eux-mêmes ne sont pas réparés.
+- Le correctif `60be75de` propage les annulations de coroutine pendant la restauration de compte TV ; auparavant, une interruption pouvait être masquée en échec réseau. Valider le build TV après ce commit.
+- Les scénarios D1 multi-utilisateurs reproduits localement, y compris `watch_progress`, ne constituent **pas** un essai de synchronisation de progression réalisé entre applications installées sur trois appareils.
+- **Statut pour distribution :** préversions testables uniquement. Pour certifier une version stable : obtenir les sources exactes des classes modifiées dans l'AAR et reconstruire celui-ci, ou remplacer cette dépendance de manière compatible ; compléter les adaptateurs de progression/media, vérifier DPAPI/KeyStore sur vrais appareils et démontrer un transfert réel. Ne pas supprimer/ignorer les tests AAR pour obtenir artificiellement une CI verte. Aucune donnée D1 de production n'a été modifiée ici.
