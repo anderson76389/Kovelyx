@@ -152,7 +152,7 @@ internal fun isTrackingBrandAvailable(
     TrackingBrand.TMDB,
     -> true
     TrackingBrand.TRAKT -> traktConnected
-    TrackingBrand.SIMKL -> simklConnected
+    TrackingBrand.SIMKL -> false
     TrackingBrand.MDBLIST -> mdblistConnected
 }
 

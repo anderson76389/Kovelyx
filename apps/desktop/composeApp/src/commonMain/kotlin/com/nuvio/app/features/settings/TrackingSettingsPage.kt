@@ -569,7 +569,7 @@ private fun trackingUnavailableReason(
 private fun librarySourceModeLabel(source: LibrarySourceMode): String = when (source) {
     LibrarySourceMode.TRAKT -> stringResource(Res.string.trakt_library_source_trakt)
     LibrarySourceMode.LOCAL -> stringResource(Res.string.trakt_library_source_nuvio)
-    LibrarySourceMode.SIMKL -> stringResource(Res.string.tracking_source_simkl)
+    LibrarySourceMode.SIMKL -> stringResource(Res.string.trakt_library_source_nuvio)
     LibrarySourceMode.MDBLIST -> stringResource(Res.string.tracking_source_mdblist)
 }
 
@@ -577,7 +577,7 @@ private fun librarySourceModeLabel(source: LibrarySourceMode): String = when (so
 private fun watchProgressSourceLabel(source: WatchProgressSource): String = when (source) {
     WatchProgressSource.TRAKT -> stringResource(Res.string.trakt_watch_progress_source_trakt)
     WatchProgressSource.NUVIO_SYNC -> stringResource(Res.string.trakt_watch_progress_source_nuvio)
-    WatchProgressSource.SIMKL -> stringResource(Res.string.tracking_source_simkl)
+    WatchProgressSource.SIMKL -> stringResource(Res.string.trakt_watch_progress_source_nuvio)
     WatchProgressSource.MDBLIST -> stringResource(Res.string.tracking_source_mdblist)
 }
 
@@ -585,7 +585,7 @@ private fun watchProgressSourceLabel(source: WatchProgressSource): String = when
 private fun moreLikeThisSourceLabel(source: MoreLikeThisSourcePreference): String = when (source) {
     MoreLikeThisSourcePreference.TRAKT -> stringResource(Res.string.trakt_more_like_this_source_trakt)
     MoreLikeThisSourcePreference.TMDB -> stringResource(Res.string.trakt_more_like_this_source_tmdb)
-    MoreLikeThisSourcePreference.SIMKL -> stringResource(Res.string.trakt_more_like_this_source_simkl)
+    MoreLikeThisSourcePreference.SIMKL -> stringResource(Res.string.trakt_more_like_this_source_tmdb)
 }
 
 @Composable

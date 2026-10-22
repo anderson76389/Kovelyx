@@ -44,7 +44,7 @@ class TrackingSettingsPresentationTest {
         assertFalse(isTrackingBrandAvailable(TrackingBrand.TRAKT, false, true))
         assertTrue(isTrackingBrandAvailable(TrackingBrand.TRAKT, true, false))
         assertFalse(isTrackingBrandAvailable(TrackingBrand.SIMKL, true, false))
-        assertTrue(isTrackingBrandAvailable(TrackingBrand.SIMKL, false, true))
+        assertFalse(isTrackingBrandAvailable(TrackingBrand.SIMKL, false, true))
     }
 
     @Test
