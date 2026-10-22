@@ -1,5 +1,16 @@
 # Kovelyx Cloudflare — état de la synchronisation
 
+## Périmètre confirmé — progression, bibliothèque et historique (22 octobre 2026)
+
+La demande vise tous les films et toutes les séries, **épisode par épisode**, sur tous les appareils. Trois états doivent rester distincts : la bibliothèque, la position de reprise et les titres/épisodes vus (y compris « marquer comme vu » manuellement). Un titre marqué vu ne doit pas disparaître parce que sa position de reprise a été effacée.
+
+**Ajout réellement codé dans la PR nº 40 :** nouvelle migration additive `services/kovelyx-cloudflare/migrations/0002_watched_items.sql` ; route sécurisée `GET/POST /v1/watched` avec profils autorisés, pagination, contrôle de révision, tombstones et validation de métadonnées non sensibles ; méthodes clientes de lecture et d'écriture sur Windows/Android/TV. L'écran de compte TV distingue désormais aussi les titres « vus », quand le Worker possède cette nouvelle route ; sinon les compteurs précédents restent consultables.
+
+**Non réalisé :** les adaptateurs qui alimentent automatiquement cette table depuis chaque lecteur et les actions « vu/non vu », le rapatriement de l'historique dans chaque bibliothèque UI, la mise en file hors ligne et l'isolation complète des anciennes données « vues » locales, ainsi que la synchronisation bidirectionnelle du lecteur TV. Les tests nouvellement écrits sont à exécuter avant toute fusion, puis les essais entre trois appareils physiques.
+
+**Ne rien annoncer de complet ni déployer silencieusement** : aucune migration cloud réelle, aucun Worker de production modifié, et aucune Release n'a été publiée pendant cette étape.
+
+
 ## Avancée du 22 octobre 2026 — vérification des reprises sur Android TV
 
 Sur la PR nº 40, un **aperçu cloud TV en lecture seule** a été ajouté dans l'écran Compte : chaque profil D1 accessible au compte connecté affiche séparément le nombre d'éléments en bibliothèque et le nombre de reprises non supprimées. Le bouton *Actualiser les données cloud* relit les catégories `library` et `watch_progress` en pagination avec authentification Better Auth et vérification de la session avant acceptation du résultat. Une erreur réseau affiche un état d'indisponibilité ; aucune donnée invitée TV n'est écrasée.
