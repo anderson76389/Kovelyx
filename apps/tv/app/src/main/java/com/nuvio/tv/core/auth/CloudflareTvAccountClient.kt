@@ -35,6 +35,8 @@ internal object CloudflareTvAccountClient {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/" + route)
                 .header("Accept", "application/json")
+                // Better Auth exige l'origine HTTPS pour les POST natifs.
+                .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
                 .post(json.toString().toRequestBody("application/json".toMediaType()))
                 .build()
             client.newCall(request).execute().use { response ->
@@ -68,9 +70,14 @@ internal object CloudflareTvAccountClient {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/sign-out")
                 .header("Authorization", "Bearer ${old.bearerToken}")
+                .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
                 .post("{}".toRequestBody("application/json".toMediaType()))
                 .build()
-            client.newCall(request).execute().close()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    android.util.Log.w("KovelyxTvAuth", "Révocation distante HTTP ${response.code} : session locale déjà effacée")
+                }
+            }
         }
     }
 
