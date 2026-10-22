@@ -1,0 +1,101 @@
+name: Valider la réparation Media3 Kovelyx TV
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/media3-tv-fix.yml'
+      - 'scripts/media3/**'
+      - 'apps/tv/app/build.gradle.kts'
+      - 'apps/tv/app/src/test/java/androidx/media3/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/player/StreamAutoPlaySelector.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/data/repository/SupportersRepository.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/SupportersRepositoryTest.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/TraktAuthServiceTest.kt'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/media3-tv-fix.yml'
+      - 'scripts/media3/**'
+      - 'apps/tv/app/build.gradle.kts'
+      - 'apps/tv/app/src/test/java/androidx/media3/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/player/StreamAutoPlaySelector.kt'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/data/repository/SupportersRepository.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/SupportersRepositoryTest.kt'
+      - 'apps/tv/app/src/test/java/com/nuvio/tv/data/repository/TraktAuthServiceTest.kt'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kovelyx-media3-verification
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  media3-tests-and-apk:
+    name: Tester les AAR corrigés et construire la TV
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Vérifier les tests qui échouaient avant le patch
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
+            --tests 'androidx.media3.exoplayer.upstream.DefaultAllocatorTest' \
+            --tests 'androidx.media3.datasource.LocalhostZeroCopyDataSourceTest'
+      - name: Vérifier les AAR réellement reconstruits
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          for spec in \
+            "lib-exoplayer-release.aar|androidx/media3/exoplayer/upstream/DefaultAllocator.class" \
+            "lib-datasource-release.aar|androidx/media3/datasource/KovelyxHttpStatus.class"; do
+            aar="${spec%%|*}"
+            clazz="${spec#*|}"
+            patched="app/build/generated/kovelyx-media3/$aar"
+            original="app/libs/$aar"
+            test -s "$patched"
+            test -s "$original"
+            test "$(sha256sum "$patched" | cut -d ' ' -f1)" != "$(sha256sum "$original" | cut -d ' ' -f1)"
+            unzip -p "$patched" classes.jar > /tmp/kovelyx-media3.jar
+            jar tf /tmp/kovelyx-media3.jar | grep -Fx "$clazz"
+          done
+      - name: Repasser la suite de tests TV complète
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :app:testFullDebugUnitTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      # Build Media3 even when an unrelated full-TV unit test fails. The
+      # workflow remains RED on those failures: no tests are skipped or hidden.
+      - name: Construire l'APK TV à partir des AAR réparés
+        id: build_media3_tv
+        if: ${{ success() || failure() }}
+        working-directory: apps/tv
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Conserver l'APK de validation
+        if: ${{ always() && steps.build_media3_tv.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-media3-fixed-debug-apk
+          path: apps/tv/app/build/outputs/apk/full/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Rapports et preuves des tests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-media3-fixed-unit-tests
+          path: apps/tv/app/build/reports/tests/testFullDebugUnitTest/
+          if-no-files-found: ignore
+          retention-days: 30

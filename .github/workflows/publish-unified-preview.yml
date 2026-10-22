@@ -1,0 +1,73 @@
+name: Regrouper Windows Android et Android TV dans une seule Release
+on:
+  workflow_run:
+    workflows:
+      - "Publier automatiquement les EXE de test Windows"
+      - "Tester Kovelyx TV sur émulateur Android TV"
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      source_type:
+        description: "Sélectionner la preuve Windows ou TV déjà réussie"
+        type: choice
+        options: [windows, tv]
+        default: tv
+        required: true
+      run_id:
+        description: "Identifiant du workflow source réussi"
+        type: string
+        required: true
+  pull_request:
+    paths:
+      - '.github/workflows/publish-unified-preview.yml'
+      - 'scripts/publish-unified-preview.sh'
+      - 'scripts/publish-windows-preview.sh'
+      - '.github/workflows/publish-windows-preview.yml'
+      - '.github/workflows/build.yml'
+      - '.github/workflows/windows.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+# No competing release uploads, never cancel an in-progress safe publication.
+concurrency:
+  group: kovelyx-one-release-per-source
+  cancel-in-progress: false
+
+jobs:
+  lint:
+    name: Contrôler les scripts avant publication
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Valider les scripts Bash
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/publish-unified-preview.sh
+          bash -n scripts/publish-windows-preview.sh
+          shellcheck --severity=warning scripts/publish-unified-preview.sh
+          shellcheck --severity=warning scripts/publish-windows-preview.sh
+          grep -Fq -- '--prerelease' scripts/publish-windows-preview.sh
+          grep -Fq "source_sha == \$sha" scripts/publish-unified-preview.sh
+          grep -Fq 'apk' scripts/publish-unified-preview.sh
+
+  publish:
+    name: Ajouter les deux APK sans modifier les installateurs Windows
+    if: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && (github.event_name != 'workflow_run' || github.event.workflow_run.head_repository.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Vérifier les artefacts et compléter la Release
+        env:
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+          TRIGGER_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.name || (inputs.source_type == 'windows' && 'Publier automatiquement les EXE de test Windows' || 'Tester Kovelyx TV sur émulateur Android TV') }}
+          TRIGGER_RUN_ID: ${{ github.event.workflow_run.id || inputs.run_id }}
+        run: bash scripts/publish-unified-preview.sh
