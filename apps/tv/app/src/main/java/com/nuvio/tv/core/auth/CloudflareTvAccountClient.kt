@@ -4,6 +4,8 @@ import com.nuvio.tv.BuildConfig
 import android.util.Log
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -26,6 +28,8 @@ internal object CloudflareTvAccountClient {
         .followRedirects(false)
         .build()
     private val sessionLock = Any()
+    private val _ownerId = MutableStateFlow<String?>(null)
+    val ownerId: StateFlow<String?> = _ownerId
     @Volatile var account: Account? = null
         private set
 
@@ -65,6 +69,7 @@ internal object CloudflareTvAccountClient {
             synchronized(sessionLock) {
                 TvCloudSessionVault.save(context, it)
                 account = it
+                _ownerId.value = it.id
             }
         }
     }
@@ -76,6 +81,7 @@ internal object CloudflareTvAccountClient {
             // coffre a échoué : sinon l'ancien compte réapparaît au redémarrage.
             TvCloudSessionVault.clear(context)
             account = null
+            _ownerId.value = null
             previous
         }
         if (old == null || !enabled) return
@@ -218,7 +224,7 @@ internal object CloudflareTvAccountClient {
                                 TvCloudSessionVault.clear(context)
                                 null
                             } else {
-                                account ?: saved.also { account = it }
+                                account ?: saved.also { account = it; _ownerId.value = it.id }
                             }
                         }
                     }
@@ -244,6 +250,7 @@ internal object CloudflareTvAccountClient {
             // Le jeton chiffré doit disparaître avant de publier l'état invité.
             TvCloudSessionVault.clear(context)
             account = null
+            _ownerId.value = null
         }
     }
 
