@@ -1,0 +1,44 @@
+name: Afficher la dernière Release Kovelyx dans GitHub
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-sidebar.yml'
+      - 'scripts/showcase-releases.sh'
+      - 'scripts/publish-unified-preview.sh'
+  workflow_run:
+    workflows:
+      - 'Regrouper Windows Android et Android TV dans une seule Release'
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Ne jamais mettre deux Releases concurrentes en avant.
+concurrency:
+  group: kovelyx-release-sidebar
+  cancel-in-progress: false
+
+jobs:
+  latest-complete:
+    name: Mettre en avant la Release complète, explicitement ALPHA
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Valider le script de publication
+        run: |
+          set -euo pipefail
+          bash -n scripts/showcase-releases.sh
+          shellcheck --severity=warning scripts/showcase-releases.sh
+      - name: Afficher la dernière version complète sur la page du dépôt
+        env:
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: bash scripts/showcase-releases.sh
