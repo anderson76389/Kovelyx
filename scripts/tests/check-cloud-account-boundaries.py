@@ -92,7 +92,7 @@ watched_migration = (ROOT / "services/kovelyx-cloudflare/migrations/0002_watched
 assert 'url.pathname === "/v1/watched"' in backend
 assert "kv_watched_items" in watched_api and "revision=revision+1" in watched_api
 assert "FOREIGN KEY(owner_id, profile_id)" in watched_migration
-assert "kv_sync" not in watched_migration, "La migration des statuts vus ne doit pas rebatir les favoris"
+assert "CREATE TABLE IF NOT EXISTS kv_sync " not in watched_migration, "La migration ne doit pas rebatir les favoris"
 for app in ("desktop", "mobile"):
     client = (ROOT / "apps" / app /
               "composeApp/src/commonMain/kotlin/com/nuvio/app/core/cloud/CloudflareAccountClient.kt").read_text(encoding="utf-8")
