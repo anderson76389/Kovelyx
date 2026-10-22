@@ -53,6 +53,7 @@ for attempt in 1 2 3 4 5; do
     confirmed=true
     break
   fi
+  echo "En attente de confirmation GitHub (tentative $attempt/5)"
   sleep 3
 done
 if [[ "$confirmed" != true ]]; then
