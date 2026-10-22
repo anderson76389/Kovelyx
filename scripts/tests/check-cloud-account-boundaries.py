@@ -37,6 +37,32 @@ assert "AndroidKeyStore" in vault and "AES/GCM/NoPadding" in vault
 assert "restoreVerified" in tv and '"/v1/me"' in tv
 assert "if (CloudflareTvAccountClient.enabled)" in library_tv
 assert "Bibliothèque TV Cloudflare D1 non activée" in library_tv
+tv_watch_engine = (tv_root / "core/sync/CloudflareTvWatchSyncService.kt").read_text(encoding="utf-8")
+tv_watch_repository = (tv_root / "data/repository/WatchProgressRepositoryImpl.kt").read_text(encoding="utf-8")
+tv_watch_mutations = (tv_root / "core/sync/WatchStateMutationStore.kt").read_text(encoding="utf-8")
+tv_watch_startup = (tv_root / "core/sync/StartupSyncService.kt").read_text(encoding="utf-8")
+tv_watch_factory = (tv_root / "data/local/ProfileDataStoreFactory.kt").read_text(encoding="utf-8")
+assert "CloudflareTvAccountClient.readProgress" in tv_watch_engine
+assert "CloudflareTvAccountClient.writeProgress" in tv_watch_engine
+assert "CloudflareTvAccountClient.readWatched" in tv_watch_engine
+assert "CloudflareTvAccountClient.writeWatched" in tv_watch_engine
+assert "acknowledgeProgressUpserts" in tv_watch_engine and "acknowledgeWatchedUpserts" in tv_watch_engine
+assert "pendingProgressDeleteTimes" in tv_watch_engine and "pendingWatchedDeleteTimes" in tv_watch_engine
+assert "progress_delete_times_cloud" in tv_watch_mutations
+assert "watched_delete_times_cloud" in tv_watch_mutations
+assert "CloudflareTvWatchSyncService" in tv_watch_repository
+assert "cloudTvWatchSyncService.sync" in tv_watch_repository
+assert "cloudWatchSyncService.sync" in tv_watch_startup
+assert "cloudWatchFeatures" in tv_watch_factory and "cloudProfileId" in tv_watch_factory
+assert "CloudflareTvAccountClient.ownerId" in (
+    tv_root / "data/local/WatchProgressPreferences.kt"
+).read_text(encoding="utf-8")
+assert "CloudflareTvAccountClient.ownerId" in (
+    tv_root / "data/local/WatchedItemsPreferences.kt"
+).read_text(encoding="utf-8")
+print("TV : lectures et écritures D1 reprises/vus reliées au lecteur, stockage isolé par profil.")
+print("Contrôle statique uniquement : la compilation et les appareils doivent encore confirmer.")
+
 cloud_store = (tv_root / "core/sync/CloudflareTvLibraryStore.kt").read_text(encoding="utf-8")
 profile_matcher = (tv_root / "core/sync/CloudflareTvProfileBinding.kt").read_text(encoding="utf-8")
 tv_repo = (tv_root / "data/repository/LibraryRepositoryImpl.kt").read_text(encoding="utf-8")
