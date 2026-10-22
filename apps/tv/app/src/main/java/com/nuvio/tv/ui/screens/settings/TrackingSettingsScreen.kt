@@ -409,10 +409,6 @@ fun TrackingSettingsContent(
                 SettingsPickerOption(
                     MoreLikeThisSourcePreference.TMDB,
                     stringResource(R.string.trakt_more_like_this_source_tmdb)
-                ),
-                SettingsPickerOption(
-                    MoreLikeThisSourcePreference.SIMKL,
-                    stringResource(R.string.trakt_more_like_this_source_simkl)
                 )
             ),
             selectedValue = traktState.moreLikeThisSource,
@@ -535,18 +531,6 @@ internal fun TrackingSettingsOverview(
                                 .testTag(TrackingSettingsTestTags.TRAKT_PROVIDER)
                         )
                         SettingsActionRow(
-                            title = stringResource(R.string.simkl_name),
-                            subtitle = simklPresentation.subtitle,
-                            value = simklPresentation.value,
-                            valueColor = simklPresentation.color,
-                            leadingRawIconRes = R.raw.simkl_tv_glyph,
-                            leadingArtworkSize = 40.dp,
-                            onClick = onSimklClick,
-                            modifier = Modifier
-                                .focusRequester(simklFocusRequester)
-                                .testTag(TrackingSettingsTestTags.SIMKL_PROVIDER)
-                        )
-                        SettingsActionRow(
                             title = stringResource(R.string.mdblist_name),
                             subtitle = mdbListPresentation.subtitle,
                             value = mdbListPresentation.value,
@@ -628,22 +612,6 @@ internal fun TrackingSettingsOverview(
                                     onCommentsChanged(!traktState.showMetaComments)
                                 },
                                 modifier = Modifier.testTag(TrackingSettingsTestTags.COMMENTS)
-                            )
-                        }
-                    }
-                }
-                if (simklState.mode == SimklConnectionMode.CONNECTED) {
-                    item(key = "tracking_simkl_features") {
-                        SettingsGroupCard(
-                            title = stringResource(R.string.tracking_simkl_features_title),
-                            subtitle = stringResource(R.string.tracking_simkl_features_subtitle)
-                        ) {
-                            SettingsActionRow(
-                                title = stringResource(R.string.tracking_simkl_anime_id_title),
-                                subtitle = stringResource(R.string.tracking_simkl_anime_id_subtitle),
-                                value = animeIdPreferenceLabel(trackingState.simklAnimeIdPreference),
-                                onClick = onAnimeIdClick,
-                                modifier = Modifier.testTag("tracking_simkl_anime_id")
                             )
                         }
                     }
