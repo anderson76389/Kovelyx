@@ -304,6 +304,75 @@ internal object CloudflareTvAccountClient {
     suspend fun readProgress(profileId: String): List<JSONObject> =
         readSyncCategory(profileId, "watch_progress")
 
+    /** Historique des oeuvres vues, séparé des positions et de la bibliothèque. */
+    suspend fun readWatched(profileId: String): List<JSONObject> = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val owner = checkNotNull(account) { "Compte TV non connecté" }
+        val rows = mutableListOf<JSONObject>()
+        var cursor: String? = null
+        repeat(100) {
+            check(account == owner) { "Compte changé pendant l'historique" }
+            val suffix = cursor?.let {
+                "&after=" + java.net.URLEncoder.encode(it, "UTF-8")
+            }.orEmpty()
+            val request = Request.Builder()
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
+                    "/v1/watched?profileId=$profileId&limit=100$suffix")
+                .header("Authorization", "Bearer ${owner.bearerToken}")
+                .header("Accept", "application/json")
+                .get().build()
+            val response = client.newCall(request).execute().use { result ->
+                check(result.isSuccessful) { "Historique Cloud TV HTTP ${result.code}" }
+                JSONObject(result.body?.string().orEmpty())
+            }
+            check(account == owner) { "Compte changé pendant l'historique" }
+            val page = response.getJSONArray("items")
+            check(page.length() <= 100)
+            for (i in 0 until page.length()) rows.add(page.getJSONObject(i))
+            check(rows.size <= 10000) { "Historique trop volumineux" }
+            val next = response.optString("nextCursor")
+                .takeUnless { it.isBlank() || it == "null" }
+            if (next == null) {
+                check(!response.optBoolean("partial", false)) { "Historique D1 partiel" }
+                return@withContext rows
+            }
+            check(next != cursor && next.length <= 200) { "Pagination D1 incohérente" }
+            cursor = next
+        }
+        error("Historique cloud tronqué : aucun résultat partiel appliqué")
+    }
+
+    /** Révision CAS : une suppression hors connexion ne peut écraser le voisin. */
+    suspend fun writeWatched(
+        profileId: String, itemKey: String, payload: JSONObject,
+        revision: Int, deleted: Boolean
+    ): Int = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require(itemKey.length in 1..200 && revision >= 0)
+        val owner = checkNotNull(account) { "Compte TV non connecté" }
+        val body = JSONObject()
+            .put("profileId", profileId)
+            .put("itemKey", itemKey)
+            .put("payload", payload)
+            .put("revision", revision)
+            .put("deleted", deleted)
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/watched")
+            .header("Authorization", "Bearer ${owner.bearerToken}")
+            .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            .header("Accept", "application/json")
+            .post(body.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+        val result = client.newCall(request).execute().use { response ->
+            check(response.isSuccessful) {
+                "Historique D1 HTTP ${response.code} (modifications locales préservées)"
+            }
+            JSONObject(response.body?.string().orEmpty())
+        }
+        check(account == owner) { "Compte changé pendant l'écriture" }
+        result.getInt("revision").also { check(it > revision) }
+    }
+
     /** Ecriture optimiste avec contrôle de révision (409 = conserver la mutation locale). */
     suspend fun writeLibrary(
         profileId: String, itemKey: String, item: JSONObject?,
