@@ -125,10 +125,6 @@ if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
 fi
 gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isPrerelease,assets,body \
   > "$proof_dir/release.json"
-jq -e '.isPrerelease == true' "$proof_dir/release.json" >/dev/null || {
-  echo "::error::Refusing to alter an existing stable release"
-  exit 1
-}
 git fetch --quiet origin "refs/tags/$tag:refs/tags/$tag"
 actual_sha="$(git rev-parse "refs/tags/$tag^{commit}")"
 [[ "$actual_sha" == "$source_sha" ]] || { echo "::error::Release is tagged at another commit"; exit 1; }
@@ -149,6 +145,12 @@ if [[ "$existing" == 4 ]]; then
   echo "Already contains both Android APKs: $tag"
   exit 0
 fi
+# A complete showcase Release can be marked Latest (non-prerelease).
+# Do not attempt a second upload, but keep partial stable releases read-only.
+jq -e '.isPrerelease == true' "$proof_dir/release.json" >/dev/null || {
+  echo "::error::Refusing to modify an incomplete non-prerelease release"
+  exit 1
+}
 [[ "$existing" == 0 ]] || { echo "::error::Partial Android assets detected; refusing overwrite"; exit 1; }
 
 mkdir -p "$proof_dir/mobile" "$proof_dir/tv"
