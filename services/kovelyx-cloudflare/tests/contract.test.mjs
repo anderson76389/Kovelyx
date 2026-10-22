@@ -16,5 +16,10 @@ test("profile names and origins",()=>{
   assert.equal(validProfileName(""),false);
   assert.equal(validProfileName("x".repeat(65)),false);
   assert.equal(isAllowedOrigin("https://anderson76389.github.io"),true);
+  assert.equal(isAllowedOrigin(null, "https://kovelyx-cloud.example.workers.dev"),true);
+  assert.equal(isAllowedOrigin("https://kovelyx-cloud.example.workers.dev", "https://kovelyx-cloud.example.workers.dev"),true);
+  assert.equal(isAllowedOrigin("https://evil.example", "https://kovelyx-cloud.example.workers.dev"),false);
+  assert.equal(isAllowedOrigin("https://kovelyx-cloud.example.workers.dev.evil.example", "https://kovelyx-cloud.example.workers.dev"),false);
+  assert.equal(isAllowedOrigin("http://kovelyx-cloud.example.workers.dev", "http://kovelyx-cloud.example.workers.dev"),false);
   assert.equal(isAllowedOrigin("https://evil.example"),false);
 });
