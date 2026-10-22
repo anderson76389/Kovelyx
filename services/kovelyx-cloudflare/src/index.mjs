@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import { CATEGORIES, jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
 import {handleProfileMedia} from "./media.mjs";
+import {handleWatched} from "./watched.mjs";
 
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
@@ -219,6 +220,7 @@ export default {
         return respond(await handleProfiles(request,env,user,url));
       if (url.pathname === "/v1/media") return respond(await handleProfileMedia(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
+      if (url.pathname === "/v1/watched") return respond(await handleWatched(request,env,user,url));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {
       console.error("Kovelyx Cloud request failed", {path:url.pathname,kind:error?.name || "Error"});
