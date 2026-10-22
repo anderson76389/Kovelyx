@@ -121,7 +121,7 @@ class TraktSettingsDataStore @Inject constructor(
 
     suspend fun getLibrarySourceMode(profileId: Int): LibrarySourceMode {
         val stored = store(profileId).data.first()[librarySourceModeKey]
-        return if (stored == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL else if (stored == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL else LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
+        return if (stored == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL else LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
     }
 
     suspend fun setContinueWatchingDaysCap(days: Int) {
@@ -196,7 +196,8 @@ class TraktSettingsDataStore @Inject constructor(
     val librarySourceMode: Flow<LibrarySourceMode> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
             val stored = prefs[librarySourceModeKey]
-            LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
+            if (stored == LibrarySourceMode.SIMKL.name) LibrarySourceMode.LOCAL
+            else LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
         }
     }
 
