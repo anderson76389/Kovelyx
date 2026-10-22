@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {validProfileName, validSyncInput, isAllowedOrigin} from "../src/contract.mjs";
+import {validProfileName, validProfileId, validSyncOffset, validSyncInput, isAllowedOrigin} from "../src/contract.mjs";
 const base = {profileId:"f4b81d5e-982f-4f37-9923-87f47920196c",
   category:"favorites",itemKey:"movie:123",revision:0,deleted:false,payload:{watched:true}};
 test("validates user-owned synchronization shape",()=>{
@@ -11,7 +11,14 @@ test("validates user-owned synchronization shape",()=>{
   assert.equal(validSyncInput({...base,profileId:"../other-user"}),false);
   assert.equal(validSyncInput({...base,payload:{text:"a".repeat(33000)}}),false);
 });
-test("profile names and origins",()=>{
+test("profile names, strict identifiers, cursor pagination and origins",()=>{
+  assert.equal(validProfileId(base.profileId),true);
+  assert.equal(validProfileId("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),false);
+  assert.equal(validSyncOffset("0"),true);
+  assert.equal(validSyncOffset("500"),true);
+  assert.equal(validSyncOffset("-1"),false);
+  assert.equal(validSyncOffset("1000000"),false);
+  assert.equal(validSyncInput({...base,category:"watched_items"}),true);
   assert.equal(validProfileName("Mon profil"),true);
   assert.equal(validProfileName(""),false);
   assert.equal(validProfileName("x".repeat(65)),false);
