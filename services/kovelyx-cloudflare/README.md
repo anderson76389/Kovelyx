@@ -1,5 +1,22 @@
 # Kovelyx Cloud — comptes et synchronisation Cloudflare
 
+## Contrat de synchronisation des trois types de données (22 octobre 2026)
+
+**Périmètre voulu : Windows, Android, Android TV ; chacun des profils distincts.**
+
+| Catégorie | Persistance serveur | Clients dans cette branche |
+|---|---|---|
+| Bibliothèque | `kv_sync`, catégorie `library` | Premiers adaptateurs expérimentaux des 3 versions |
+| Position de reprise film / épisode | `kv_sync`, catégorie `watch_progress` | Windows/Android expérimentaux ; Android TV en lecture diagnostic uniquement |
+| Film / épisode marqué comme vu | Table additive `kv_watched_items` (migration `0002_watched_items.sql`) | Routes de lecture/écriture disponibles dans les 3 clients ; intégration aux écrans et événements du lecteur **non terminée** |
+
+L'historique « vu » reste stocké après suppression d'une position de reprise ou d'un titre de la bibliothèque. Les marques « vu/non vu » sont des données indépendantes, avec `revision` et suppression logique `deleted` contrôlées par comparaison atomique (**409** en cas de conflit). La table reprend les clés `owner_id` + `profile_id`, l'API accepte seulement des métadonnées de titre et d'épisode sans identifiants de fournisseurs.
+
+**Ne pas déployer les applications avant la migration D1.** Le nouveau Worker doit être déployé avec `0002` sur la base D1 existante **après sauvegarde** et validation locale. Cette évolution n'a pas été déployée sur le vrai Worker, n'a pas été fusionnée et n'est pas livrée dans les Releases. Les tests de contrats et le scénario D1 local à deux utilisateurs ont été ajoutés au dépôt, mais leurs nouveaux résultats CI et l'essai matériel des trois clients restent à vérifier.
+
+La prochaine étape côté clients est l'adaptateur d'historique local sécurisé et isolé par compte/profil, la persistance des suppressions hors ligne, puis le raccordement des événements « terminé », « marquer vu » et « retirer vu » à `/v1/watched`. **La présence de méthodes réseau ne rend pas encore la synchronisation automatique.**
+
+
 **Objectif :** ne plus utiliser les serveurs de comptes Nuvio ni un hébergement Supabase. Ce dossier contient un Worker Cloudflare, une base D1, les tables Better Auth et des endpoints de profils et synchronisation.
 
 **État réel au 19 octobre 2026 : Worker Cloudflare et D1 déployés et accessibles ; la création, la connexion, la lecture de l'identité et la création du profil « Principal » ont réussi depuis Codespaces sur le vrai serveur.** La connexion a passé ce test technique, mais les anciennes fonctions de synchronisation des applications ne sont pas encore toutes migrées. [Tests publics automatiques](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-live-check.yml). Les nouvelles applis disposent de premiers adaptateurs pour le formulaire e-mail. Les écrans, caches, profils, lecteurs et anciennes RPC Supabase **ne sont pas encore tous migrés**. Le mode invité reste disponible. Les sessions Cloudflare des premières versions sont en mémoire seulement : il faut se reconnecter après avoir fermé l'application. Les flux QR/code TV et la récupération de mot de passe ne sont pas prêts.
