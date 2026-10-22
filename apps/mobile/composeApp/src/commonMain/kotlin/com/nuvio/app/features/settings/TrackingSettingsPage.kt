@@ -143,7 +143,7 @@ internal fun LazyListScope.trackingSettingsContent(
                 isTablet = isTablet,
                 settingsUiState = settingsUiState,
                 traktConnected = traktUiState.mode == TraktConnectionMode.CONNECTED,
-                simklConnected = simklUiState.mode == SimklConnectionMode.CONNECTED,
+                simklConnected = false,
             )
         }
     }
@@ -165,19 +165,7 @@ internal fun LazyListScope.trackingSettingsContent(
         }
     }
 
-    if (simklUiState.mode == SimklConnectionMode.CONNECTED) {
-        item {
-            SettingsSection(
-                title = stringResource(Res.string.settings_tracking_anime_section),
-                isTablet = isTablet,
-            ) {
-                AnimeIdPreferenceSection(
-                    isTablet = isTablet,
-                    settingsUiState = settingsUiState,
-                )
-            }
-        }
-    }
+
 
     if (mdbListConnected) {
         item {
@@ -273,7 +261,7 @@ private fun TrackingDataSources(
                 },
             )
         }
-        if (traktConnected || simklConnected) {
+        if (traktConnected) {
             val effectiveRecommendationsSource = effectiveTrackingRecommendationsSource(
                 source = settingsUiState.moreLikeThisSource,
                 traktConnected = traktConnected,
@@ -496,13 +484,6 @@ private fun librarySourceOptions(
             unavailableReason = trackingUnavailableReason(TrackingBrand.TRAKT, traktAvailable),
         ),
         TrackingPickerOption(
-            value = LibrarySourceMode.SIMKL,
-            title = stringResource(Res.string.tracking_source_simkl),
-            description = stringResource(Res.string.settings_tracking_simkl_library_description),
-            enabled = simklAvailable,
-            unavailableReason = trackingUnavailableReason(TrackingBrand.SIMKL, simklAvailable),
-        ),
-        TrackingPickerOption(
             value = LibrarySourceMode.MDBLIST,
             title = stringResource(Res.string.tracking_source_mdblist),
             description = stringResource(Res.string.settings_mdblist_library_description),
@@ -534,13 +515,6 @@ private fun watchProgressSourceOptions(
             unavailableReason = trackingUnavailableReason(TrackingBrand.TRAKT, traktAvailable),
         ),
         TrackingPickerOption(
-            value = WatchProgressSource.SIMKL,
-            title = stringResource(Res.string.tracking_source_simkl),
-            description = stringResource(Res.string.settings_tracking_simkl_progress_description),
-            enabled = simklAvailable,
-            unavailableReason = trackingUnavailableReason(TrackingBrand.SIMKL, simklAvailable),
-        ),
-        TrackingPickerOption(
             value = WatchProgressSource.MDBLIST,
             title = stringResource(Res.string.tracking_source_mdblist),
             description = stringResource(Res.string.settings_mdblist_progress_description),
@@ -565,10 +539,6 @@ private fun recommendationsSourceOptions(
     traktConnected: Boolean,
 ): List<TrackingPickerOption<MoreLikeThisSourcePreference>> {
     val traktAvailable = isTrackingBrandAvailable(TrackingBrand.TRAKT, traktConnected, simklConnected = false)
-    val simklConnected = com.nuvio.app.features.simkl.SimklAuthRepository.let {
-        it.ensureLoaded()
-        it.isAuthenticated.value
-    }
     return listOf(
         TrackingPickerOption(
             value = MoreLikeThisSourcePreference.TMDB,
@@ -581,13 +551,6 @@ private fun recommendationsSourceOptions(
             description = stringResource(Res.string.settings_tracking_trakt_recommendations_description),
             enabled = traktAvailable,
             unavailableReason = trackingUnavailableReason(TrackingBrand.TRAKT, traktAvailable),
-        ),
-        TrackingPickerOption(
-            value = MoreLikeThisSourcePreference.SIMKL,
-            title = stringResource(Res.string.trakt_more_like_this_source_simkl),
-            description = stringResource(Res.string.settings_tracking_simkl_recommendations_description),
-            enabled = simklConnected,
-            unavailableReason = if (!simklConnected) stringResource(Res.string.settings_tracking_connect_first, "Simkl") else null,
         ),
     )
 }
@@ -642,12 +605,7 @@ internal fun effectiveTrackingRecommendationsSource(
     if (source == MoreLikeThisSourcePreference.TRAKT && !traktConnected) {
         return MoreLikeThisSourcePreference.TMDB
     }
-    if (source == MoreLikeThisSourcePreference.SIMKL) {
-        com.nuvio.app.features.simkl.SimklAuthRepository.ensureLoaded()
-        if (!com.nuvio.app.features.simkl.SimklAuthRepository.isAuthenticated.value) {
-            return MoreLikeThisSourcePreference.TMDB
-        }
-    }
+    if (source == MoreLikeThisSourcePreference.SIMKL) return MoreLikeThisSourcePreference.TMDB
     return source
 }
 

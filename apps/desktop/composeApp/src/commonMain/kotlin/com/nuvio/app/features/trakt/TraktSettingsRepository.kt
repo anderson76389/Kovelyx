@@ -47,7 +47,7 @@ enum class MoreLikeThisSourcePreference {
 
     companion object {
         fun fromStorage(value: String?): MoreLikeThisSourcePreference =
-            entries.firstOrNull { it.name == value } ?: DEFAULT_MORE_LIKE_THIS_SOURCE
+            entries.firstOrNull { it.name == value && it != SIMKL } ?: MoreLikeThisSourcePreference.TMDB
     }
 }
 
@@ -99,6 +99,7 @@ object TraktSettingsRepository {
         source: WatchProgressSource,
         profileId: Int = ProfileRepository.activeProfileId,
     ) {
+        if (source == WatchProgressSource.SIMKL) return
         ensureLoaded()
         if (_uiState.value.watchProgressSource == source) return
         val nextState = _uiState.value.copy(watchProgressSource = source)
@@ -123,6 +124,7 @@ object TraktSettingsRepository {
     }
 
     fun setLibrarySourceMode(mode: LibrarySourceMode) {
+        if (mode == LibrarySourceMode.SIMKL) return
         ensureLoaded()
         if (_uiState.value.librarySourceMode == mode) return
         _uiState.value = _uiState.value.copy(librarySourceMode = mode)
@@ -130,6 +132,7 @@ object TraktSettingsRepository {
     }
 
     fun setMoreLikeThisSource(source: MoreLikeThisSourcePreference) {
+        if (source == MoreLikeThisSourcePreference.SIMKL) return
         ensureLoaded()
         if (_uiState.value.moreLikeThisSource == source) return
         _uiState.value = _uiState.value.copy(moreLikeThisSource = source)
