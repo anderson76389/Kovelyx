@@ -20,8 +20,15 @@ export function validSyncInput(body) {
   if (/(?:\"(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|client[_-]?secret|private[_-]?key)\"\s*:)/i.test(serialized)) return false;
   return true;
 }
-export function isAllowedOrigin(origin) {
-  return !origin || origin === "https://anderson76389.github.io";
+/**
+ * Native Android/TV clients may send the Worker's own Origin, while the website
+ * uses GitHub Pages. An arbitrary third-party Origin must never be trusted.
+ * A missing Origin is allowed for native HTTP clients (not browser CORS).
+ */
+export function isAllowedOrigin(origin, workerOrigin = "") {
+  return !origin ||
+    origin === "https://anderson76389.github.io" ||
+    (workerOrigin.startsWith("https://") && origin === workerOrigin);
 }
 export function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
