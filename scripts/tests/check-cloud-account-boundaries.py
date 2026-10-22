@@ -107,6 +107,20 @@ for relative in (
         assert begin >= 0, f"{relative}: {name} absent"
         end = source.find("return@withContext Result.failure(", begin)
         assert 0 <= end - begin < 600, f"{relative}: {name} non bloqué en mode Cloudflare"
+# Garde-fou: tous les RPC herites doivent etre fermes pour un compte D1.
+for legacy_service in (
+    "AddonSyncService", "PluginSyncService", "CollectionSyncService",
+    "HomeCatalogSettingsSyncService", "ProfileSettingsSyncService",
+    "ProviderCredentialSyncService", "ProfileSyncService", "MediaServerSyncService",
+):
+    code = (tv_root / f"core/sync/{legacy_service}.kt").read_text(encoding="utf-8")
+    assert "check(!CloudflareTvAccountClient.enabled)" in code, legacy_service
+legacy_module = (tv_root / "core/di/SupabaseModule.kt").read_text(encoding="utf-8")
+assert "supabase-disabled.invalid" in legacy_module
+assert "autoLoadFromStorage = !legacyDisabled" in legacy_module
+assert "autoSaveToStorage = !legacyDisabled" in legacy_module
+assert "alwaysAutoRefresh = !legacyDisabled" in legacy_module
+print("TV : anciens RPC fermes et sessions Supabase non restaurees")
 print("TV: progression et historique Supabase bloqués pour les comptes Cloudflare")
 print("TV: session sécurisée, bibliothèque D1 distincte et association non ambiguë détectées")
 print("NOTE: contrôle statique uniquement; la compilation, l'essai réel et les conflits D1 restent à valider")
