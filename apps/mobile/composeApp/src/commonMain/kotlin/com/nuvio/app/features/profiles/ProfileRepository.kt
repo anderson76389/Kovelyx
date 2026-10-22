@@ -253,6 +253,53 @@ object ProfileRepository {
             applyPayloadsLocally(profiles)
             return
         }
+        if (CloudflareAccountClient.enabled) {
+            // Preserve the cloud UUID of every existing profile; never send a
+            // Better Auth user to the legacy Supabase profile RPC.
+            try {
+                val account = AuthRepository.state.value as? AuthState.Authenticated
+                    ?: error("Compte Kovelyx non connecté")
+                val remote = CloudflareAccountClient.accountProfiles()["profiles"]
+                    ?.jsonArray.orEmpty().map { it.jsonObject }
+                val existingByIndex = _state.value.profiles.associateBy { it.profileIndex }
+                val merged = profiles.sortedBy { it.profileIndex }.map { requested ->
+                    val knownId = existingByIndex[requested.profileIndex]?.id.orEmpty()
+                    val knownRemote = remote.firstOrNull {
+                        it["id"]?.jsonPrimitive?.content == knownId && knownId.isNotBlank()
+                    }
+                    val sameIndex = remote.getOrNull(requested.profileIndex - 1)
+                        ?.takeIf { knownId.isBlank() }
+                    val match = knownRemote ?: sameIndex
+                    val uuid = match?.get("id")?.jsonPrimitive?.content
+                        ?: CloudflareAccountClient.createProfile(requested.name)
+                    val oldName = match?.get("displayName")?.jsonPrimitive?.content
+                    if (oldName != null && oldName != requested.name) {
+                        CloudflareAccountClient.renameProfile(uuid, requested.name)
+                    }
+                    NuvioProfile(
+                        id = uuid, userId = account.userId,
+                        profileIndex = requested.profileIndex, name = requested.name,
+                        avatarColorHex = requested.avatarColorHex,
+                        avatarId = requested.avatarId, avatarUrl = requested.avatarUrl,
+                        profileBackgroundId = requested.profileBackgroundId,
+                        profileBackgroundUrl = requested.profileBackgroundUrl,
+                        usesPrimaryAddons = requested.usesPrimaryAddons,
+                        usesPrimaryPlugins = requested.usesPrimaryPlugins
+                    )
+                }
+                _state.value = _state.value.copy(
+                    profiles = merged, isLoaded = true,
+                    activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex }
+                        ?: merged.firstOrNull()
+                )
+                syncPinCache(merged)
+                persist()
+            } catch (error: Throwable) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                log.e(error) { "Échec de la mise à jour des profils Kovelyx Cloudflare" }
+            }
+            return
+        }
         try {
             val params = buildJsonObject {
                 put("p_client_max_profiles", MAX_PROFILES)
@@ -342,6 +389,34 @@ object ProfileRepository {
     }
 
     suspend fun deleteProfile(profileIndex: Int) {
+        if (CloudflareAccountClient.enabled) {
+            // Delete only the specifically selected remote UUID; preserve all
+            // remaining local profiles and never invoke the old Supabase RPC.
+            try {
+                val selected = _state.value.profiles.firstOrNull {
+                    it.profileIndex == profileIndex
+                } ?: return
+                if (selected.id.isBlank()) {
+                    throw IllegalStateException("Profil Cloudflare sans identifiant distant")
+                }
+                CloudflareAccountClient.deleteProfile(selected.id)
+                val remaining = _state.value.profiles.filterNot {
+                    it.profileIndex == profileIndex
+                }
+                ProfilePinCacheStorage.removePayload(profileIndex)
+                ServerRepository.removeProfile(profileIndex)
+                val active = remaining.firstOrNull {
+                    it.profileIndex == activeProfileIndex
+                } ?: remaining.firstOrNull()
+                if (active != null) activeProfileIndex = active.profileIndex
+                _state.value = _state.value.copy(profiles = remaining, activeProfile = active)
+                persist()
+            } catch (error: Throwable) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                log.e(error) { "Impossible de supprimer le profil Kovelyx Cloudflare" }
+            }
+            return
+        }
         if (AuthRepository.state.value.isAnonymous) {
             val remaining = _state.value.profiles.filter { it.profileIndex != profileIndex }
             ProfilePinCacheStorage.removePayload(profileIndex)
