@@ -391,6 +391,12 @@ class AuthManager @Inject constructor(
         if (CloudflareTvAccountClient.enabled) {
             try {
                 CloudflareTvAccountClient.signOut()
+            } catch (error: kotlinx.coroutines.CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                // La révocation peut échouer hors connexion : la session locale
+                // est déjà effacée. Ne jamais faire planter l'écran de déconnexion.
+                Log.w(TAG, "Révocation Cloudflare indisponible ; déconnexion locale effectuée", error)
             } finally {
                 _authState.value = AuthState.SignedOut
                 // Ne pas supprimer les favoris/profils locaux à la déconnexion :
