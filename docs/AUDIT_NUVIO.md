@@ -9,12 +9,12 @@ Fichiers inspectés : 4524
 
 ### Connexions et services (107 correspondances)
 
-- apps/tv/app/build.gradle.kts:206 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
-- apps/tv/app/build.gradle.kts:207 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
-- apps/tv/app/build.gradle.kts:208 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
-- apps/tv/app/build.gradle.kts:241 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
-- apps/tv/app/build.gradle.kts:242 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
-- apps/tv/app/build.gradle.kts:243 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
+- apps/tv/app/build.gradle.kts:215 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
+- apps/tv/app/build.gradle.kts:216 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
+- apps/tv/app/build.gradle.kts:217 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
+- apps/tv/app/build.gradle.kts:250 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
+- apps/tv/app/build.gradle.kts:251 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
+- apps/tv/app/build.gradle.kts:252 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
 - apps/tv/app/src/main/res/values-ar/strings.xml:2644 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2645 : <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
 - apps/tv/app/src/main/res/values-b+es+419/strings.xml:2204 : <string name="custom_server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
@@ -56,9 +56,9 @@ Fichiers inspectés : 4524
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2133 : <string name="custom_server_error_official_active">api.nuvio.tv 是官方伺服器，且已被選取。</string>
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2134 : <string name="custom_server_error_official_available">api.nuvio.tv 是官方伺服器。關閉此對話框並選擇「使用官方伺服器」以切換回去。</string>
 - apps/tv/local.example.properties:3 : NUVIO_SUPABASE_FALLBACK_URL=
-- apps/mobile/composeApp/build.gradle.kts:342 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-- apps/mobile/composeApp/build.gradle.kts:343 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-- apps/mobile/composeApp/build.gradle.kts:344 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+- apps/mobile/composeApp/build.gradle.kts:348 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
+- apps/mobile/composeApp/build.gradle.kts:349 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
+- apps/mobile/composeApp/build.gradle.kts:350 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401 : <string name="server_error_official_active">api.nuvio.tv অফিসিয়াল সার্ভার এবং ইতিমধ্যেই নির্বাচিত।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402 : <string name="server_error_official_available">api.nuvio.tv হল অফিসিয়াল সার্ভার। এই ডায়ালগটি বন্ধ করুন এবং ফিরে যেতে অফিসিয়াল সার্ভার ব্যবহার করুন নির্বাচন করুন।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1983 : <string name="server_error_official_active">api.nuvio.tv je oficiální server a už je vybraný.</string>
@@ -221,7 +221,7 @@ Fichiers inspectés : 4524
 
 ### Configuration générale (63 correspondances)
 
-- apps/tv/app/build.gradle.kts:529 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
+- apps/tv/app/build.gradle.kts:538 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Color.kt:55 : data class NuvioMediaColors(
@@ -232,7 +232,7 @@ Fichiers inspectés : 4524
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Theme.kt:174 : val media: NuvioMediaTokens
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Theme.kt:175 : get() = NuvioMedia.tokens
 - apps/tv/app/src/main/res/values-nl/strings.xml:1531 : <string name="profile_pin_overlay_forgot_hint">Pincode vergeten
-- apps/mobile/composeApp/build.gradle.kts:277 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
+- apps/mobile/composeApp/build.gradle.kts:283 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
