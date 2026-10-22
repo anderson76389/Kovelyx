@@ -32,6 +32,12 @@ data class SyncOverview(
     val perProfile: List<ProfileSyncStats> = emptyList()
 )
 
+data class CloudProfileSyncPreview(
+    val name: String,
+    val libraryItems: Int,
+    val progressItems: Int
+)
+
 data class AccountUiState(
     val authState: AuthState = AuthState.Loading,
     val isLoading: Boolean = false,
@@ -42,6 +48,10 @@ data class AccountUiState(
     val linkedDevices: List<SupabaseLinkedDevice> = emptyList(),
     // Liste distante uniquement : aucun profil local remplacé automatiquement.
     val cloudProfileNames: List<String> = emptyList(),
+    // Lecture D1 seulement : ne reflète pas encore la progression du lecteur TV.
+    val cloudSyncPreview: List<CloudProfileSyncPreview> = emptyList(),
+    val cloudPreviewLoading: Boolean = false,
+    val cloudPreviewError: Boolean = false,
     val effectiveOwnerId: String? = null,
     val connectedStats: AccountConnectedStats? = null,
     val syncOverview: SyncOverview? = null,
