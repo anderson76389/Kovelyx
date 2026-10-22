@@ -51,6 +51,7 @@ import androidx.tv.material3.Text
 import androidx.compose.ui.res.stringResource
 import com.nuvio.tv.R
 import com.nuvio.tv.domain.model.AuthState
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 
 private const val SHOW_SYNC_CODE_FEATURES = false
 
@@ -164,11 +165,57 @@ fun AccountScreen(
                         value = authState.email
                     )
                 }
-                item {
-                    LinkedDevicesSection(
-                        devices = uiState.linkedDevices,
-                        onUnlink = { viewModel.unlinkDevice(it) }
-                    )
+                if (CloudflareTvAccountClient.enabled) {
+                    item {
+                        Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+                            Text(
+                                text = "Synchronisation Kovelyx Cloud",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = NuvioTheme.colors.TextPrimary
+                            )
+                            Text(
+                                text = "Aperçu en lecture seule du compte. La progression TV reste locale tant que son import sécurisé n'est pas validé.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = NuvioTheme.colors.TextSecondary
+                            )
+                            when {
+                                uiState.cloudPreviewLoading -> Text(
+                                    "Lecture des profils et des reprises cloud…",
+                                    color = NuvioTheme.colors.TextSecondary
+                                )
+                                uiState.cloudPreviewError -> Text(
+                                    "Cloud temporairement indisponible : vos données locales restent intactes.",
+                                    color = NuvioTheme.colors.TextSecondary
+                                )
+                                uiState.cloudSyncPreview.isEmpty() -> Text(
+                                    "Aucune donnée distante à afficher.",
+                                    color = NuvioTheme.colors.TextSecondary
+                                )
+                                else -> uiState.cloudSyncPreview.forEach { preview ->
+                                    Text(
+                                        text = "${preview.name} : ${preview.libraryItems} titres · ${preview.progressItems} reprises",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = NuvioTheme.colors.TextPrimary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    item {
+                        AccountActionCard(
+                            icon = Icons.Default.Sync,
+                            title = "Actualiser les données cloud",
+                            description = "Vérifier les profils et les reprises sans modifier la télévision",
+                            onClick = { viewModel.refreshCloudflareSyncPreview() }
+                        )
+                    }
+                } else {
+                    item {
+                        LinkedDevicesSection(
+                            devices = uiState.linkedDevices,
+                            onUnlink = { viewModel.unlinkDevice(it) }
+                        )
+                    }
                 }
                 if (SHOW_SYNC_CODE_FEATURES) {
                     item {
