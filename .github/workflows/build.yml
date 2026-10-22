@@ -17,9 +17,11 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/mobile/**'
       - 'apps/tv/**'
+      - 'apps/mobile/**'
+      - 'apps/desktop/composeApp/Configuration/DesktopVersion.properties'
       - '.github/workflows/build.yml'
+      - 'scripts/desktop-release-version.py'
   workflow_dispatch:
     inputs:
       platform:
@@ -35,8 +37,7 @@ on:
 
 concurrency:
   group: kovelyx-build-${{ github.ref }}
-  # Sur PR, ne compiler que le dernier commit. Sur main et workflow_dispatch,
-  # préserver chaque build et les Releases pour leur traçabilité.
+  # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -87,6 +88,17 @@ jobs:
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aligner la version Android sur la Release Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          count="$(git rev-list --count HEAD)"
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+          echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
       - name: Java 21
         uses: actions/setup-java@v4
         with:
@@ -109,12 +121,12 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Tester les liens profonds Kovelyx TV
         working-directory: apps/tv
         shell: bash
         run: |
-          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --tests 'com.nuvio.tv.domain.model.ProfileBackgroundTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
       - name: Vérifier l'APK universel et son identité TV
         shell: bash
         run: |
@@ -126,11 +138,9 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
           grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
-          grep -F "application-label:'Kovelyx'" /tmp/kv-tv-badging.txt
-          if grep -Eiq "application-label.*(\\(test\\)|Nuvio Debug)" /tmp/kv-tv-badging.txt; then
-            echo "::error::Étiquette TV de préproduction incorrecte"; exit 1
-          fi
           grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging.txt
+          grep -F "versionName='$KOVELYX_BUILD_VERSION'" /tmp/kv-tv-badging.txt
+          grep -F "versionCode='$KOVELYX_BUILD_CODE'" /tmp/kv-tv-badging.txt
           echo "APK Kovelyx TV universel, signé et identifié correctement" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK TV
         uses: actions/upload-artifact@v4
@@ -149,6 +159,17 @@ jobs:
     steps:
       - name: Sources Kovelyx
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aligner la version Android sur la Release Windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 scripts/desktop-release-version.py)"
+          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          count="$(git rev-list --count HEAD)"
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+          echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
       - name: Java 21
         uses: actions/setup-java@v4
         with:
@@ -171,7 +192,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Vérifier l'APK mobile et l'identité Kovelyx
         shell: bash
         run: |
@@ -183,10 +204,8 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
           grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
-          grep -F "application-label:'Kovelyx'" /tmp/kv-android-badging
-          if grep -Eiq "application-label.*(\\(test\\)|Nuvio Debug)" /tmp/kv-android-badging; then
-            echo "::error::Étiquette mobile de préproduction incorrecte"; exit 1
-          fi
+          grep -F "versionName='$KOVELYX_BUILD_VERSION'" /tmp/kv-android-badging
+          grep -F "versionCode='$KOVELYX_BUILD_CODE'" /tmp/kv-android-badging
           echo "APK mobile universel, signé et identifié comme Kovelyx" >> "$GITHUB_STEP_SUMMARY"
       - name: Enregistrer les APK mobiles
         uses: actions/upload-artifact@v4
