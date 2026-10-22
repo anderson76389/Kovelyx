@@ -247,7 +247,19 @@ class CloudflareTvWatchSyncService @Inject constructor(
                     // Si l'autre appareil a regardé ce titre APRÈS le retrait
                     // local, ne jamais écraser sa nouvelle progression.
                     if (row != null && !row.deleted &&
-                        row.updatedAt > (progressDeleteTimes[k] ?: 0L)) continue
+                        row.updatedAt > (progressDeleteTimes[k] ?: 0L)) {
+                        // Une reprise plus récente sur un autre appareil gagne.
+                        // Le retrait local ancien ne doit pas rester bloqué.
+                        val latest = progressRemote[k]
+                        if (latest != null && current()) {
+                            mutations.acknowledgeProgressDeletes(listOf(k), profileId)
+                            progressPreferences.applyRemoteChanges(
+                                upserts = mapOf(k to latest), deletes = emptyList(),
+                                profileId = profileId
+                            )
+                        }
+                        continue
+                    }
                     try {
                         if (row?.deleted != true) CloudflareTvAccountClient.writeProgress(
                             cloudProfile, k, null, row?.revision ?: 0, true
@@ -275,7 +287,17 @@ class CloudflareTvWatchSyncService @Inject constructor(
                         }
                         continue
                     }
-                    if (row?.deleted == true && row.updatedAt > entry.lastWatched) continue
+                    if (row?.deleted == true && row.updatedAt > entry.lastWatched) {
+                        // Le retrait cloud est postérieur à la lecture enregistrée.
+                        val latest = progressPreferences.getAllRawEntries(profileId)[k]
+                        if (latest == null || latest.lastWatched <= row.updatedAt) {
+                            mutations.acknowledgeProgressUpserts(mapOf(k to entry), profileId)
+                            progressPreferences.applyRemoteChanges(
+                                upserts = emptyMap(), deletes = listOf(k), profileId = profileId
+                            )
+                        }
+                        continue
+                    }
                     try {
                         CloudflareTvAccountClient.writeProgress(
                             cloudProfile, k, progressPayload(entry), row?.revision ?: 0, false
@@ -294,7 +316,17 @@ class CloudflareTvWatchSyncService @Inject constructor(
                         "${key.contentId}_s${key.season}e${key.episode}" else key.contentId
                     val row = watchedRows[k]
                     if (row != null && !row.deleted &&
-                        row.updatedAt > (watchedDeleteTimes[key] ?: 0L)) continue
+                        row.updatedAt > (watchedDeleteTimes[key] ?: 0L)) {
+                        // Une marque « vu » plus récente annule un ancien retrait.
+                        val later = watchedRemote[k]
+                        if (later != null && current()) {
+                            mutations.acknowledgeWatchedDeletes(listOf(key), profileId)
+                            watchedPreferences.applyRemoteChanges(
+                                upserts = listOf(later), deletes = emptyList(), profileId = profileId
+                            )
+                        }
+                        continue
+                    }
                     try {
                         if (row?.deleted != true) CloudflareTvAccountClient.writeWatched(
                             cloudProfile, k, JSONObject(), row?.revision ?: 0, true
@@ -324,7 +356,18 @@ class CloudflareTvWatchSyncService @Inject constructor(
                         }
                         continue
                     }
-                    if (row?.deleted == true && row.updatedAt > item.watchedAt) continue
+                    if (row?.deleted == true && row.updatedAt > item.watchedAt) {
+                        val latest = watchedPreferences.getAllItems(profileId)
+                            .firstOrNull { key(it) == k }
+                        if (latest == null || latest.watchedAt <= row.updatedAt) {
+                            mutations.acknowledgeWatchedUpserts(listOf(item), profileId)
+                            watchedPreferences.applyRemoteChanges(
+                                upserts = emptyList(), deletes = listOf(deletedWatchedKey(k)),
+                                profileId = profileId
+                            )
+                        }
+                        continue
+                    }
                     try {
                         CloudflareTvAccountClient.writeWatched(
                             cloudProfile, k, watchedPayload(item), row?.revision ?: 0, false
