@@ -6,6 +6,12 @@ on:
       - 'services/kovelyx-cloudflare/**'
       - 'scripts/configure-cloud-build.py'
       - '.github/workflows/cloudflare-check.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/kovelyx-cloudflare/**'
+      - 'scripts/configure-cloud-build.py'
+      - '.github/workflows/cloudflare-check.yml'
   workflow_dispatch:
 permissions:
   contents: read
