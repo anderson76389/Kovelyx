@@ -173,26 +173,8 @@ internal fun TrackingProviderCards(
     traktUiState: TraktAuthUiState,
     simklUiState: SimklAuthUiState,
 ) {
-    val syncState by remember {
-        SimklSyncRepository.ensureLoaded()
-        SimklSyncRepository.state
-    }.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
-    var showSyncInfo by rememberSaveable { mutableStateOf(false) }
     var showCredentialEditor by remember { mutableStateOf(false) }
     val credentialsRevision by KovelyxIntegrationCredentials.revision.collectAsStateWithLifecycle()
-
-    val onSimklSyncRequested: () -> Unit = {
-        scope.launch {
-            WatchProgressSourceCoordinator.refreshProviderAndActiveSource(
-                profileId = ProfileRepository.activeProfileId,
-                providerId = TrackingProviderId.SIMKL,
-                refreshProvider = {
-                    SimklSyncRepository.refresh(TrackingRefreshIntent.USER_INITIATED)
-                },
-            )
-        }
-    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -210,20 +192,10 @@ internal fun TrackingProviderCards(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
         )
-        SimklProviderCard(
-            uiState = simklUiState,
-            isSyncing = syncState.isLoading,
-            syncErrorMessage = syncState.errorMessage,
-            onSyncRequested = onSimklSyncRequested,
-            onInfoRequested = { showSyncInfo = true },
-            modifier = Modifier.fillMaxWidth(),
-        )
+        // La connexion SIMKL a été retirée : seuls Trakt et MDBList restent visibles.
         MdbListProviderCard(Modifier.fillMaxWidth())
     }
 
-    if (showSyncInfo) {
-        SimklSyncInfoDialog(onDismiss = { showSyncInfo = false })
-    }
     if (showCredentialEditor && isDesktop) {
         KovelyxOAuthCredentialsDialog(
             onDismiss = { showCredentialEditor = false },

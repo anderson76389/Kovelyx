@@ -24,10 +24,9 @@ internal interface DebridProviderApi {
 }
 
 internal object DebridProviderApis {
+    // Ne jamais router une résolution vers les anciens fournisseurs supprimés.
     private val registered = listOf(
-        TorboxDebridProviderApi(),
         PremiumizeDebridProviderApi(),
-        RealDebridProviderApi(),
     )
 
     fun apiFor(providerId: String?): DebridProviderApi? {
