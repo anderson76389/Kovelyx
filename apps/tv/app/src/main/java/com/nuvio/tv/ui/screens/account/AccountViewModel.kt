@@ -126,7 +126,7 @@ class AccountViewModel @Inject constructor(
                 } else if (CloudflareTvAccountClient.enabled) {
                     CloudflareTvLibraryStore.reset()
                     profileManager.clearCloudMedia()
-                    _uiState.update { it.copy(cloudProfileNames = emptyList()) }
+                    _uiState.update { it.copy(cloudProfileNames = emptyList(), cloudSyncPreview = emptyList(), cloudPreviewLoading = false, cloudPreviewError = false) }
                 }
             }
         }
@@ -171,6 +171,7 @@ class AccountViewModel @Inject constructor(
                     "Le compte Kovelyx a changé pendant le chargement des profils"
                 }
                 _uiState.update { it.copy(cloudProfileNames = remote.map { cloud -> cloud.name }) }
+                refreshCloudflareSyncPreview(remote, owner)
                 val local=profileManager.profiles.value
                 // La bibliothèque D1 est reliée par LibraryRepositoryImpl,
                 // indépendamment de l'ouverture de cet écran de compte.
@@ -204,6 +205,58 @@ class AccountViewModel @Inject constructor(
                 }
             }.onFailure { error ->
                 Log.w(TAG,"Kovelyx Cloud : médias non disponibles, profils TV locaux préservés",error)
+            }
+        }
+    }
+
+    /** L'aperçu vérifie les données du même compte, sans écritures ni import local. */
+    fun refreshCloudflareSyncPreview() {
+        if (CloudflareTvAccountClient.enabled && authManager.isAuthenticated) {
+            loadCloudflareProfilesReadOnly()
+        }
+    }
+
+    private fun refreshCloudflareSyncPreview(
+        profiles: List<CloudflareTvAccountClient.CloudProfile>,
+        owner: CloudflareTvAccountClient.Account
+    ) {
+        _uiState.update {
+            it.copy(cloudPreviewLoading = true, cloudPreviewError = false, cloudSyncPreview = emptyList())
+        }
+        viewModelScope.launch {
+            try {
+                val previews = profiles.map { profile ->
+                    check(CloudflareTvAccountClient.account == owner) {
+                        "Compte changé pendant la lecture des données synchronisées"
+                    }
+                    val library = CloudflareTvAccountClient.readLibrary(profile.id)
+                        .count { !it.getBoolean("deleted") }
+                    val progress = CloudflareTvAccountClient.readProgress(profile.id)
+                        .count { !it.getBoolean("deleted") }
+                    CloudProfileSyncPreview(profile.name, library, progress)
+                }
+                if (CloudflareTvAccountClient.account == owner) {
+                    _uiState.update {
+                        it.copy(
+                            cloudSyncPreview = previews,
+                            cloudPreviewLoading = false,
+                            cloudPreviewError = false
+                        )
+                    }
+                }
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                if (CloudflareTvAccountClient.account == owner) {
+                    Log.w(TAG, "Aperçu D1 TV indisponible, aucun contenu local modifié", error)
+                    _uiState.update {
+                        it.copy(
+                            cloudSyncPreview = emptyList(),
+                            cloudPreviewLoading = false,
+                            cloudPreviewError = true
+                        )
+                    }
+                }
             }
         }
     }
