@@ -35,7 +35,8 @@ data class SyncOverview(
 data class CloudProfileSyncPreview(
     val name: String,
     val libraryItems: Int,
-    val progressItems: Int
+    val progressItems: Int,
+    val watchedItems: Int? = null
 )
 
 data class AccountUiState(
