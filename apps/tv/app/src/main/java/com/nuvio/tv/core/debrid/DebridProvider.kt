@@ -37,6 +37,8 @@ object DebridProviders {
         id = TORBOX_ID,
         displayName = "Torbox",
         shortName = "TB",
+        // Conservé uniquement pour lire les anciennes préférences : aucune nouvelle connexion TV.
+        visibleInUi = false,
         authMethod = DebridProviderAuthMethod.DeviceCode,
         capabilities = setOf(
             DebridProviderCapability.ClientResolve,
