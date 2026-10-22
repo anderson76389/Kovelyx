@@ -10,7 +10,9 @@ actual object AppFeaturePolicy {
     actual val p2pEnabled: Boolean = true
     actual val trailerPlaybackMode: TrailerPlaybackMode = TrailerPlaybackMode.IN_APP
     actual val heroTrailerPlaybackSupported: Boolean = true
-    // APK Full : vérification manuelle disponible ; la recherche automatique\n    // reste désactivée sur les builds debug par AppUpdaterController.\n    actual val inAppUpdaterEnabled: Boolean = true
+    // APK Full : vérification manuelle disponible ; la recherche automatique
+    // reste désactivée sur les builds debug par AppUpdaterController.
+    actual val inAppUpdaterEnabled: Boolean = true
     actual val imdbRatingLogoEnabled: Boolean = true
     actual val mediaPlaybackForegroundServiceEnabled: Boolean = true
     actual val downloadForegroundServiceEnabled: Boolean = true
