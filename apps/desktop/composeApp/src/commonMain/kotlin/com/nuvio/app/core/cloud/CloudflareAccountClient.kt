@@ -3,6 +3,8 @@ package com.nuvio.app.core.cloud
 import com.nuvio.app.features.addons.httpRequestRaw
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
@@ -30,7 +32,7 @@ object CloudflareAccountClient {
         return CloudflareConfig.URL.trimEnd('/')
     }
 
-    private suspend fun request(path: String, body: String, authorization: String? = null): Pair<String, Map<String,String>> {
+    private suspend fun request(path: String, body: String, authorization: String? = null, method: String = "POST"): Pair<String, Map<String,String>> {
         val headers = mutableMapOf(
             "Accept" to "application/json",
             "Content-Type" to "application/json",
@@ -38,7 +40,7 @@ object CloudflareAccountClient {
         )
         if (!authorization.isNullOrBlank()) headers["Authorization"] = "Bearer $authorization"
         val response = httpRequestRaw(
-            method = "POST", url = base() + path, headers = headers, body = body,
+            method = method, url = base() + path, headers = headers, body = body,
             followRedirects = false, maxResponseBodyBytes = 131072
         )
         if (response.status !in 200..299) {
@@ -100,6 +102,75 @@ object CloudflareAccountClient {
         )
         check(response.status == 200) { "Kovelyx Cloud : profils indisponibles (HTTP ${response.status})" }
         return json.parseToJsonElement(response.body).jsonObject
+    }
+
+    /** Retrieve the stable, server-owned UUID for each D1 profile. */
+    suspend fun createProfile(displayName: String): String {
+        require(displayName.isNotBlank() && displayName.length <= 64)
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject { put("displayName", displayName.trim()) }.toString()
+        val (response, _) = request("/v1/profiles", body, active.bearerToken)
+        return json.parseToJsonElement(response).jsonObject["profile"]
+            ?.jsonObject?.get("id")?.jsonPrimitive?.content
+            ?: error("Kovelyx Cloud : identifiant de profil absent")
+    }
+
+    suspend fun renameProfile(profileId: String, displayName: String) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require(displayName.isNotBlank() && displayName.length <= 64)
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject { put("displayName", displayName.trim()) }.toString()
+        request("/v1/profiles?profileId=$profileId", body, active.bearerToken, "PATCH")
+    }
+
+    suspend fun deleteProfile(profileId: String) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        request("/v1/profiles?profileId=$profileId", "{}", active.bearerToken, "DELETE")
+    }
+
+    /** Optimistic, revision-aware write; HTTP 409 is intentionally returned as an error. */
+    suspend fun writeSync(
+        profileId: String, category: String, itemKey: String,
+        payload: JsonObject, revision: Int = 0, deleted: Boolean = false
+    ): JsonObject {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val data = buildJsonObject {
+            put("profileId", profileId)
+            put("category", category)
+            put("itemKey", itemKey)
+            put("revision", revision)
+            put("deleted", deleted)
+            put("payload", payload)
+        }
+        val (response, _) = request("/v1/sync", data.toString(), active.bearerToken)
+        return json.parseToJsonElement(response).jsonObject
+    }
+
+    /** Read all pages, instead of silently truncating the library at 500 entries. */
+    suspend fun synchronizeAll(profileId: String): List<JsonObject> {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val all = mutableListOf<JsonObject>()
+        var offset = 0
+        while (true) {
+            val response = httpRequestRaw(
+                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset",
+                headers = mapOf("Authorization" to "Bearer ${active.bearerToken}"),
+                body = "", followRedirects = false, maxResponseBodyBytes = 1048576
+            )
+            check(response.status == 200) { "Kovelyx Cloud : synchronisation HTTP ${response.status}" }
+            val page = json.parseToJsonElement(response.body).jsonObject
+            val rows = page["items"]?.jsonArray.orEmpty().map { it.jsonObject }
+            all.addAll(rows)
+            val next = page["nextOffset"]?.jsonPrimitive?.intOrNull
+            if (next == null) return all
+            check(next > offset && rows.size == 500 && all.size <= 100000) {
+                "Kovelyx Cloud : pagination invalide"
+            }
+            offset = next
+        }
     }
 
     suspend fun synchronizeRaw(profileId: String): JsonObject {
