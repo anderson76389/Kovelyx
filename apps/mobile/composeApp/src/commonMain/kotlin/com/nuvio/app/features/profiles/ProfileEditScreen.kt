@@ -139,7 +139,7 @@ fun ProfileEditScreen(
                 selectedAvatar = visibleAvatarItem,
                 customAvatarUrl = customAvatarUrl,
                 accentColor = previewAccent,
-                hasAvatarChoices = avatars.isNotEmpty(),
+                hasAvatarChoices = false,
             )
         }
 
@@ -147,7 +147,7 @@ fun ProfileEditScreen(
             NuvioSurfaceCard {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = stringResource(Res.string.profile_custom_avatar_url),
+                        text = "Photo de profil personnalisée",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -158,7 +158,7 @@ fun ProfileEditScreen(
                     )
                     if (ProfileLocalImages.supported) {
                         NuvioPrimaryButton(
-                            text = "Importer une photo, un GIF ou une vidéo",
+                            text = "Choisir une photo de profil (image, GIF ou vidéo)",
                             onClick = {
                                 scope.launch {
                                     runCatching { ProfileLocalImages.chooseImage(background = false) }
@@ -220,7 +220,7 @@ fun ProfileEditScreen(
                         }
                         if (ProfileLocalImages.supported) {
                             NuvioPrimaryButton(
-                                text = "Importer un fond : photo, GIF ou vidéo",
+                                text = "Choisir un fond (image, GIF ou vidéo)",
                                 onClick = {
                                     scope.launch {
                                         runCatching { ProfileLocalImages.chooseImage(background = true) }
@@ -252,36 +252,6 @@ fun ProfileEditScreen(
             }
         }
 
-        item {
-            NuvioSurfaceCard {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(
-                        text = stringResource(Res.string.profile_choose_avatar),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = selectedAvatarItem?.displayName
-                            ?: if (avatars.isEmpty()) {
-                                stringResource(Res.string.profile_loading_avatars)
-                            } else {
-                                stringResource(Res.string.profile_select_avatar)
-                            },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    AvatarPicker(
-                        avatars = avatars,
-                        selectedAvatarId = selectedAvatarId.takeIf { customAvatarUrl == null },
-                        onAvatarSelected = { avatar ->
-                            avatarUrl = ""
-                            selectedAvatarId = avatar.id
-                        },
-                    )
-                }
-            }
-        }
 
         if (!isNew) {
             item {
@@ -338,6 +308,8 @@ fun ProfileEditScreen(
                                 avatarColorHex = avatarColorHex,
                                 avatarId = if (customAvatarUrl == null) selectedAvatarId else null,
                                 avatarUrl = customAvatarUrl,
+                                profileBackgroundId = selectedBackgroundId,
+                                profileBackgroundUrl = selectedBackgroundUrl,
                                 usesPrimaryAddons = usesPrimaryAddons,
                             )
                         } else {
@@ -546,7 +518,7 @@ private fun ProfileIdentityCard(
                                 selectedAvatar.displayName,
                             )
                             hasAvatarChoices -> stringResource(Res.string.profile_choose_avatar_below)
-                            else -> stringResource(Res.string.profile_avatar_options_pending)
+                            else -> "Ajoutez votre photo personnelle (facultatif)"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
