@@ -1,5 +1,12 @@
 # Kovelyx Cloud — comptes et synchronisation Cloudflare
 
+## Mise à jour : raccordement client de l'historique et de la reprise (22 octobre 2026)
+
+Sur la branche non fusionnée, les trois clients disposent des appels `/v1/watched` ; les dépôts « vus » Windows/Android utilisent à présent ces appels dans leurs opérations de lecture et d'écriture cloud. Android TV appelle `CloudflareTvWatchSyncService` lors de la lecture et du démarrage, fusionne les reprises/épisodes vus dans les stockages UI du bon profil, et conserve les mutations en attente. Le cache cloud bibliothèque TV est rechargé au démarrage et périodiquement. Le mode invité reste indépendant.
+
+L'historique « vu » est séparé des positions de reprise. La nouvelle migration `0002_watched_items.sql` doit être appliquée à la base **existante** avant d'activer les nouveaux clients. La migration et les clients ne sont **ni déployés ni publiés** à ce stade. Les anciens tests verts ne prouvent pas le dernier code ; les compilations et tests fonctionnels sur les trois appareils restent requis. Lire également `docs/ETAT_SYNCHRO_CLOUDFLARE.md`.
+
+
 ## Contrat de synchronisation des trois types de données (22 octobre 2026)
 
 **Périmètre voulu : Windows, Android, Android TV ; chacun des profils distincts.**
