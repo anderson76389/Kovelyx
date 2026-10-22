@@ -247,41 +247,62 @@ internal object CloudflareTvAccountClient {
         }
     }
 
-    /** Lecture D1 paginée ; aucun accès à l'ancienne bibliothèque Supabase. */
-    suspend fun readLibrary(profileId: String): List<JSONObject> = withContext(Dispatchers.IO) {
-        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
-        val token = checkNotNull(account).bearerToken
-        val rows = mutableListOf<JSONObject>()
-        var cursor: String? = null
-        repeat(100) {
-            val query = cursor?.let {
-                "&after=" + java.net.URLEncoder.encode(it, "UTF-8")
-            }.orEmpty()
-            val request = Request.Builder()
-                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
-                    "/v1/sync?profileId=$profileId&category=library&limit=100$query")
-                .header("Authorization", "Bearer $token")
-                .header("Accept", "application/json")
-                .get().build()
-            val page = client.newCall(request).execute().use { response ->
-                check(response.code == 200) { "Bibliothèque Cloud TV HTTP ${response.code}" }
-                JSONObject(response.body?.string().orEmpty())
+    /**
+     * Lecture paginée D1 strictement limitée à un compte et un profil vérifiés.
+     * Le même contrat watch_progress est utilisé par Windows et Android.
+     * Aucune donnée de lecture locale TV n'est modifiée par cet appel.
+     */
+    private suspend fun readSyncCategory(profileId: String, category: String): List<JSONObject> =
+        withContext(Dispatchers.IO) {
+            require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+            require(category == "library" || category == "watch_progress")
+            val owner = checkNotNull(account) { "Compte cloud non connecté" }
+            val rows = mutableListOf<JSONObject>()
+            var cursor: String? = null
+            repeat(100) {
+                check(account == owner) { "Compte changé pendant la lecture D1" }
+                val query = cursor?.let {
+                    "&after=" + java.net.URLEncoder.encode(it, "UTF-8")
+                }.orEmpty()
+                val request = Request.Builder()
+                    .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
+                        "/v1/sync?profileId=$profileId&category=$category&limit=100$query")
+                    .header("Authorization", "Bearer ${owner.bearerToken}")
+                    .header("Accept", "application/json")
+                    .get().build()
+                val page = client.newCall(request).execute().use { response ->
+                    check(response.code == 200) { "Lecture D1 $category HTTP ${response.code}" }
+                    JSONObject(response.body?.string().orEmpty())
+                }
+                check(account == owner) { "Compte changé pendant la lecture D1" }
+                val items = page.getJSONArray("items")
+                require(items.length() <= 100)
+                for (index in 0 until items.length()) {
+                    val item = items.getJSONObject(index)
+                    check(item.optString("category") == category) {
+                        "Catégorie inattendue dans la réponse D1"
+                    }
+                    rows.add(item)
+                }
+                require(rows.size <= 10000)
+                val next = page.optString("nextCursor").takeUnless { it.isBlank() || it == "null" }
+                if (next == null) {
+                    check(!page.optBoolean("partial", false)) { "Réponse D1 tronquée" }
+                    return@withContext rows
+                }
+                check(next != cursor && next.length <= 200) { "Pagination D1 incohérente" }
+                cursor = next
             }
-            check(account?.bearerToken == token) { "Compte changé pendant la lecture" }
-            val items = page.getJSONArray("items")
-            require(items.length() <= 100)
-            for (index in 0 until items.length()) rows.add(items.getJSONObject(index))
-            require(rows.size <= 10000)
-            val next = page.optString("nextCursor").takeUnless { it.isBlank() || it == "null" }
-            if (next == null) {
-                check(!page.optBoolean("partial", false)) { "Réponse D1 tronquée" }
-                return@withContext rows
-            }
-            check(next != cursor && next.length <= 200) { "Pagination D1 incohérente" }
-            cursor = next
+            error("Limite D1 de 10 000 éléments atteinte : réponse partielle refusée")
         }
-        error("Limite de 10 000 entrées atteinte, ne pas appliquer une réponse partielle")
-    }
+
+    suspend fun readLibrary(profileId: String): List<JSONObject> =
+        readSyncCategory(profileId, "library")
+
+    /** Progression Windows/Android visible en lecture seule tant que le lecteur TV
+     * n'est pas relié à un cache D1 isolé et testé. Jamais de suppression implicite. */
+    suspend fun readProgress(profileId: String): List<JSONObject> =
+        readSyncCategory(profileId, "watch_progress")
 
     /** Ecriture optimiste avec contrôle de révision (409 = conserver la mutation locale). */
     suspend fun writeLibrary(
