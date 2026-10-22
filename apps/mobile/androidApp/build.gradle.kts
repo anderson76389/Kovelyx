@@ -51,12 +51,19 @@ val sentryOrg = envOrLocalProperty("SENTRY_ORG")
 val sentryProject = envOrLocalProperty("SENTRY_PROJECT")
 val sentryMappingUploadEnabled = sentryAuthToken != null && sentryOrg != null && sentryProject != null
 val appVersionConfigFile = rootProject.file("iosApp/Configuration/Version.xcconfig")
-val releaseAppVersionName = providers.gradleProperty("nuvio.app.versionName").orNull
+// CI prereleases use the SAME SemVer and monotonically increasing Android code
+// as the Windows/TV packages from the exact Git commit. Local builds keep
+// their legacy version metadata unless an explicit override is supplied.
+val releaseAppVersionName = providers.gradleProperty("kovelyx.app.versionName").orNull
+    ?: providers.gradleProperty("nuvio.app.versionName").orNull
     ?: readXcconfigValue(appVersionConfigFile, "MARKETING_VERSION")
     ?: error("MARKETING_VERSION is missing from ${appVersionConfigFile.path}")
-val releaseAppVersionCode = readXcconfigValue(appVersionConfigFile, "CURRENT_PROJECT_VERSION")
+val releaseAppVersionCode = providers.gradleProperty("kovelyx.app.versionCode").orNull?.let { raw ->
+    raw.toIntOrNull()?.takeIf { it > 0 }
+        ?: error("Invalid kovelyx.app.versionCode: requires a positive integer")
+} ?: (readXcconfigValue(appVersionConfigFile, "CURRENT_PROJECT_VERSION")
     ?.toIntOrNull()
-    ?: error("CURRENT_PROJECT_VERSION is missing or invalid in ${appVersionConfigFile.path}")
+    ?: error("CURRENT_PROJECT_VERSION is missing or invalid in ${appVersionConfigFile.path}"))
 val requestedTaskNames = gradle.startParameter.taskNames.map { it.substringAfterLast(':') }
 val buildsReleaseApks = requestedTaskNames.any {
     it.startsWith("assemble", ignoreCase = true) && it.endsWith("Release", ignoreCase = true)

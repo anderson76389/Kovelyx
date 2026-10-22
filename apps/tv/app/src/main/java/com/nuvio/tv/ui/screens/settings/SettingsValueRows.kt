@@ -142,7 +142,9 @@ private fun SliderSettingsItemLayout(
     val shape = settingsTallRowShape()
 
     Card(
-        onClick = { },
+        // Sur la télécommande, OK sur le curseur doit faire une action réelle.
+        // Les flèches et les boutons +/- conservent leur comportement existant.
+        onClick = { if (enabled) onIncrease() },
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { state ->

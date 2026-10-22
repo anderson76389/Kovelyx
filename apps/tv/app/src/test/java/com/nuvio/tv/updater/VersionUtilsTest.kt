@@ -46,4 +46,12 @@ class VersionUtilsTest {
     fun `current beta naming is recognized as prerelease`() {
         assertTrue(VersionUtils.isPrerelease("0.8.12-beta"))
     }
+    @Test
+    fun `shared release version is newer than previously installed TV app`() {
+        assertFalse(VersionUtils.isRemoteNewer("v0.1.549-alpha", "1.1.0-beta.5"))
+        assertTrue(VersionUtils.isRemoteNewer("v1.1.550-alpha", "1.1.0-beta.5"))
+        assertTrue(VersionUtils.isRemoteNewer("v1.1.551-alpha", "1.1.550-alpha"))
+        assertFalse(VersionUtils.isRemoteNewer("v1.1.550-alpha", "1.1.550-alpha"))
+    }
+
 }
