@@ -13,7 +13,7 @@ enum class WatchProgressSource {
     val providerId: TrackingProviderId?
         get() = when (this) {
             TRAKT -> TrackingProviderId.TRAKT
-            SIMKL -> TrackingProviderId.SIMKL
+            SIMKL -> null
             MDBLIST -> TrackingProviderId.MDBLIST
             NUVIO_SYNC -> null
         }
@@ -34,7 +34,7 @@ val LibrarySourceMode.providerId: TrackingProviderId?
     get() = when (this) {
         LibrarySourceMode.LOCAL -> null
         LibrarySourceMode.TRAKT -> TrackingProviderId.TRAKT
-        LibrarySourceMode.SIMKL -> TrackingProviderId.SIMKL
+        LibrarySourceMode.SIMKL -> null
         LibrarySourceMode.MDBLIST -> TrackingProviderId.MDBLIST
     }
 

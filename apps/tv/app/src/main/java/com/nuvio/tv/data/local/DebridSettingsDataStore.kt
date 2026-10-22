@@ -25,6 +25,7 @@ import com.nuvio.tv.domain.model.normalizeDebridStreamMaxResults
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,7 +61,14 @@ class DebridSettingsDataStore @Inject constructor(
     private val streamDescriptionTemplateKey = stringPreferencesKey("debrid_stream_description_template")
 
     val settings: Flow<DebridSettings> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
+        val preferences = factory.get(pid, FEATURE)
+        // Effacer les anciennes clés sans toucher à Premiumize ni aux addons.
+        preferences.data.onStart {
+            preferences.edit { stored ->
+                stored.remove(torboxApiKeyKey)
+                stored.remove(realDebridApiKeyKey)
+            }
+        }.map { prefs ->
             val storedStreamSortMode = enumValueOrDefault(
                 prefs[streamSortModeKey],
                 DebridStreamSortMode.DEFAULT

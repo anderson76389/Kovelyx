@@ -1365,7 +1365,7 @@
     <string name="library_delete_subtitle">Cela supprime la liste et tous ses éléments de Trakt.</string>
     <string name="library_delete_confirm">Supprimer</string>
     <string name="library_source_local">Local</string>
-    <string name="library_source_nuvio">Nuvio</string>
+    <string name="library_source_nuvio">Kovelyx</string>
     <string name="library_source_trakt">Trakt</string>
     <string name="library_watchlist">Liste de suivi</string>
     <string name="library_syncing_library">Synchronisation de la bibliothèque\u2026</string>

@@ -6,7 +6,7 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 val WatchProgressSource.providerId: TrackingProviderId?
     get() = when (this) {
         WatchProgressSource.TRAKT -> TrackingProviderId.TRAKT
-        WatchProgressSource.SIMKL -> TrackingProviderId.SIMKL
+        WatchProgressSource.SIMKL -> null
         WatchProgressSource.MDBLIST -> TrackingProviderId.MDBLIST
         WatchProgressSource.NUVIO_SYNC -> null
     }
@@ -15,7 +15,7 @@ val LibrarySourceMode.providerId: TrackingProviderId?
     get() = when (this) {
         LibrarySourceMode.LOCAL -> null
         LibrarySourceMode.TRAKT -> TrackingProviderId.TRAKT
-        LibrarySourceMode.SIMKL -> TrackingProviderId.SIMKL
+        LibrarySourceMode.SIMKL -> null
         LibrarySourceMode.MDBLIST -> TrackingProviderId.MDBLIST
     }
 
