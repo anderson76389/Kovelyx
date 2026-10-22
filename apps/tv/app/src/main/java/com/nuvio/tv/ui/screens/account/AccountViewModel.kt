@@ -233,7 +233,18 @@ class AccountViewModel @Inject constructor(
                         .count { !it.getBoolean("deleted") }
                     val progress = CloudflareTvAccountClient.readProgress(profile.id)
                         .count { !it.getBoolean("deleted") }
-                    CloudProfileSyncPreview(profile.name, library, progress)
+                    // Nouvelle table additive : si le Worker n'a pas encore
+                    // sa migration 0002, conserver les deux compteurs précédents.
+                    val watched = try {
+                        CloudflareTvAccountClient.readWatched(profile.id)
+                            .count { !it.getBoolean("deleted") }
+                    } catch (cancel: kotlinx.coroutines.CancellationException) {
+                        throw cancel
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Historique D1 non disponible pour ce profil", error)
+                        null
+                    }
+                    CloudProfileSyncPreview(profile.name, library, progress, watched)
                 }
                 if (CloudflareTvAccountClient.account == owner) {
                     _uiState.update {
