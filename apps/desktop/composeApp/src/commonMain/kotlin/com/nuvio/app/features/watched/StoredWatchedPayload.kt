@@ -38,6 +38,10 @@ internal data class StoredProviderWatchedPayload(
     val extraWatchedKeys: Set<String> = emptySet(),
     val extraWatchedKeyGroups: List<StoredWatchedAliasGroup> = emptyList(),
     val dirtyWatchedKeys: Set<String> = emptySet(),
+    /** Suppressions hors ligne (clé D1 -> heure de l'action). */
+    val cloudPendingDeletes: Map<String, Long> = emptyMap(),
+    /** Premier import D1 terminé pour ce compte/profil uniquement. */
+    val cloudInitialized: Boolean = false,
 )
 
 @Serializable
