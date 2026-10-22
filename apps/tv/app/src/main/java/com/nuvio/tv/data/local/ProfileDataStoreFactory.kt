@@ -3,6 +3,7 @@ package com.nuvio.tv.data.local
 import android.content.Context
 import android.util.Log
 import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvLibraryStore
 import java.security.MessageDigest
 import androidx.datastore.core.DataMigration
 import androidx.datastore.core.DataStore
@@ -93,8 +94,13 @@ class ProfileDataStoreFactory @Inject constructor(
         val owner = CloudflareTvAccountClient.account?.id
             ?.takeIf { CloudflareTvAccountClient.enabled && featureName in cloudWatchFeatures }
         val fileName = if (owner == null) original else {
+            val bound = CloudflareTvLibraryStore.state.value
+                ?.takeIf { it.ownerId == owner && it.localProfileId == profileId }
+                ?.cloudProfileId ?: "non_associe"
+            // La même identité cloud ne doit jamais adopter les historiques d'un
+            // autre profil TV local ni d'un profil D1 réassocié plus tard.
             val digest = MessageDigest.getInstance("SHA-256")
-                .digest(owner.toByteArray(Charsets.UTF_8))
+                .digest("$owner|$bound".toByteArray(Charsets.UTF_8))
                 .take(12).joinToString("") { "%02x".format(it) }
             "cloud_${digest}_${featureName}_p$profileId"
         }
