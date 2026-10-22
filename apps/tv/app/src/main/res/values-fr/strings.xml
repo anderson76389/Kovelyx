@@ -875,13 +875,13 @@
     <string name="trakt_watch_progress_dialog_title">Progression</string>
     <string name="trakt_watch_progress_dialog_subtitle">Choisir si la reprise et Continuer à regarder utilisent Trakt ou Nuvio Sync, tout en maintenant le scrobbling Trakt actif.</string>
     <string name="trakt_watch_progress_source_trakt">Trakt</string>
-    <string name="trakt_watch_progress_source_nuvio">Nuvio Sync</string>
+    <string name="trakt_watch_progress_source_nuvio">Progression locale</string>
     <string name="trakt_library_source_title">Source de la bibliothèque</string>
     <string name="trakt_library_source_subtitle">Choisir quelle bibliothèque utiliser pour enregistrer et afficher votre collection</string>
     <string name="trakt_library_source_dialog_title">Source de la bibliothèque</string>
     <string name="trakt_library_source_dialog_subtitle">Choisir où enregistrer et gérer les éléments de votre bibliothèque</string>
     <string name="trakt_library_source_trakt">Trakt</string>
-    <string name="trakt_library_source_nuvio">Bibliothèque Nuvio</string>
+    <string name="trakt_library_source_nuvio">Bibliothèque locale</string>
     <string name="trakt_library_source_trakt_selected">Bibliothèque Trakt sélectionnée</string>
     <string name="trakt_library_source_nuvio_selected">Bibliothèque Nuvio sélectionnée</string>
     <string name="trakt_setting_on">Activé</string>
