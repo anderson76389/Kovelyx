@@ -9,7 +9,9 @@ data class UserProfile(
     val avatarId: String? = null,
     val avatarUrl: String? = null,
     val profileBackgroundId: String? = null,
-    val profileBackgroundUrl: String? = null
+    val profileBackgroundUrl: String? = null,
+    /** Stable Cloudflare UUID, never inferred from the local numeric profile index. */
+    val cloudProfileId: String? = null
 ) {
     val isPrimary: Boolean get() = id == 1
 }

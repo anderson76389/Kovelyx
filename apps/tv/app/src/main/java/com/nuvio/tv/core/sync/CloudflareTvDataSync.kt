@@ -85,19 +85,30 @@ class CloudflareTvDataSync @Inject constructor(
             profileManager.activeProfileId.value != profileId) return@withLock
         // Never equate the numeric local ID with an ordinal in the cloud list:
         // deleted/reordered profiles would silently mix another person's history.
-        val localName = profileManager.profiles.value
-            .firstOrNull { it.id == profileId }?.name.orEmpty()
+        val localProfile = profileManager.profiles.value
+            .firstOrNull { it.id == profileId } ?: return@withLock
         val remoteProfiles = CloudflareTvAccountClient.cloudProfiles()
+        val linkedUuid = localProfile.cloudProfileId
         val matchingProfiles = remoteProfiles.filter {
-            it.second.equals(localName, ignoreCase = true)
+            it.second.equals(localProfile.name, ignoreCase = true)
         }
         val uuid = when {
+            linkedUuid != null && remoteProfiles.any { it.first == linkedUuid } -> linkedUuid
+            linkedUuid != null -> {
+                // An old linked UUID is not part of this account. Never silently
+                // switch the local history into another profile or another owner.
+                Log.w(TAG, "Profil Cloudflare lié inaccessible ; aucune fusion automatique")
+                return@withLock
+            }
             matchingProfiles.size == 1 -> matchingProfiles.single().first
             remoteProfiles.size == 1 && profileId == 1 -> remoteProfiles.single().first
             else -> {
                 Log.w(TAG, "Profil TV ambigu : synchronisation Cloudflare non effectuée")
                 return@withLock
             }
+        }
+        if (localProfile.cloudProfileId != uuid) {
+            profileManager.linkCloudProfile(profileId, uuid)
         }
         val remote = CloudflareTvAccountClient.syncRows(uuid).associateBy {
             it.optString("category") + "|" + it.optString("itemKey")

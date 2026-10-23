@@ -120,6 +120,13 @@ class ProfileManager @Inject constructor(
         return true
     }
 
+    suspend fun linkCloudProfile(localId: Int, cloudUuid: String): Boolean {
+        if (!cloudUuid.matches(Regex("[a-fA-F0-9-]{36}"))) return false
+        val current = profiles.value.firstOrNull { it.id == localId } ?: return false
+        if (current.cloudProfileId == cloudUuid) return true
+        return updateProfile(current.copy(cloudProfileId = cloudUuid))
+    }
+
     suspend fun updateProfile(profile: UserProfile): Boolean {
         if (profiles.value.none { it.id == profile.id }) return false
         profileDataStore.upsertProfile(profile)
