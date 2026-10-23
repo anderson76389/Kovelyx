@@ -62,20 +62,24 @@ async function handleSync(request, env, user, url) {
     const requestedOffset = url.searchParams.get("offset") || "0";
     if (!validSyncOffset(requestedOffset)) return jsonResponse({error:"Curseur invalide"},400);
     const offset = Number(requestedOffset);
-    // Fetch one extra row, never mistake exactly 500 rows for an additional page.
+    const requestedLimit = url.searchParams.get("limit") || "25";
+    if (!/^(?:[1-9]|1[0-9]|2[0-5])$/.test(requestedLimit))
+      return jsonResponse({error:"Limite invalide"},400);
+    const limit = Number(requestedLimit);
+    // 25 x 32 KiB fits under the native clients' 1 MiB response ceiling.
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
-      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY category, item_key LIMIT 501 OFFSET ?"
-    ).bind(user.id, profileId, offset).all();
+      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY category, item_key LIMIT ? OFFSET ?"
+    ).bind(user.id, profileId, limit + 1, offset).all();
     const rows = result.results || [];
-    const partial = rows.length > 500;
+    const partial = rows.length > limit;
     return jsonResponse({
-      items: rows.slice(0,500).map(row => ({
+      items: rows.slice(0,limit).map(row => ({
         ...row, payload: JSON.parse(row.payload), deleted: row.deleted === 1
       })),
-      limit: 500,
+      limit,
       offset,
-      nextOffset: partial ? offset + 500 : null,
+      nextOffset: partial ? offset + limit : null,
       partial
     });
   }
