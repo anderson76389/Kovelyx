@@ -581,9 +581,11 @@ val generateRuntimeConfigs = tasks.register<GenerateRuntimeConfigsTask>("generat
     appVersionCode.set(releaseAppVersionCode)
     desktopAppVersionName.set(desktopReleaseVersionName)
     desktopAppVersionCode.set(desktopReleaseVersionCode)
-    supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-    supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-    supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
+    // Do not embed any historical Nuvio/Supabase credentials in Kovelyx builds.
+    // Better Auth + Cloudflare is configured independently via KOVELYX_CLOUD_URL.
+    supabaseUrl.set("")
+    supabaseAnonKey.set("")
+    supabaseFallbackUrl.set("")
     cloudflareUrl.set(runtimeConfigValue("KOVELYX_CLOUD_URL"))
     sentryDsn.set(runtimeConfigValue("SENTRY_DSN"))
     sentryDesktopDsn.set(runtimeConfigValue("SENTRY_DESKTOP_DSN"))
