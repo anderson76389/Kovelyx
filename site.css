@@ -320,3 +320,158 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var
   .release-card,.hero-download-actions .button{transition:none}
   .release-card:hover,.hero-download-actions .button:hover{transform:none}
 }
+
+
+/* === Interface de téléchargement Kovelyx · édition unifiée 2026 ===
+   Surcouche commune : espacements, boutons, icônes et cartes responsive.
+   La sélection des releases demeure gérée uniquement par site.js. */
+:root{--max:1200px;--line:rgba(184,163,238,.17);--mute:#adaabe;--panel:#151521;--focus:#cfb4ff}
+html{scroll-padding-top:96px}
+body{background:radial-gradient(ellipse 60% 630px at 50% 0,rgba(114,65,204,.10),transparent 80%),#090a10}
+.container{width:100%;max-width:var(--max)}
+.site-header{background:rgba(10,10,18,.85);border-bottom-color:rgba(186,161,255,.12)}
+.nav{min-height:78px;gap:22px}
+.nav-links{gap:clamp(13px,2vw,30px)}
+.nav-links a{padding:9px 0;transition:color .2s}
+.nav-right{gap:18px;flex-shrink:0}
+.nav-github{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.github-icon{width:19px;height:19px;margin:0;vertical-align:middle}
+.action-icon,.rail-icon{width:17px;height:17px;display:inline-block;flex:0 0 auto;vertical-align:middle}
+.action-icon{stroke:none}
+.inline-icon{width:14px;height:14px;margin-left:3px}
+.tiny-icon{width:11px;height:11px;vertical-align:middle}
+.nav-github .tiny-icon{opacity:.65}
+.button{gap:11px;min-height:48px;border-radius:13px;line-height:1.25;box-shadow:none;letter-spacing:0;transition:background .18s,border-color .18s,transform .18s,box-shadow .18s}
+.button.purple{background:linear-gradient(120deg,#c5a6ff,#a87bef);border-color:#bf9bff;box-shadow:0 10px 34px rgba(126,76,235,.12)}
+.button.purple:hover{background:#d2baff;box-shadow:0 14px 32px rgba(142,80,235,.2)}
+.button.outline{background:rgba(27,24,39,.72);border-color:rgba(196,170,255,.21)}
+.button.outline:hover{background:#2c243e}
+.nav-button{min-width:136px}
+.nav-button .action-icon{width:16px;height:16px}
+.hero{padding-top:clamp(70px,9vw,115px)}
+.hero-wordmark{margin-bottom:26px}
+.hero h1{margin-top:22px;margin-bottom:22px;letter-spacing:-.069em}
+.hero-desc{max-width:690px}
+.hero-download-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,760px);gap:12px;margin:35px auto 0}
+.hero-download-actions .button{min-width:0!important;width:100%;min-height:62px;padding:12px 17px;justify-content:space-between;text-align:left;font-size:14px;white-space:normal}
+.hero-download-actions .action-platform-icon{width:23px;height:23px;color:inherit;flex-shrink:0}
+.hero-download-actions .action-text{flex:1;text-align:left;min-width:0}
+.hero-download-actions .action-trailing{height:18px;width:18px;opacity:.86}
+.hero-download-note{max-width:690px;margin:15px auto 0;line-height:1.6;min-height:38px;text-align:center!important}
+.hero-secondary-actions{margin:5px auto 0!important}
+.hero-secondary-actions .button{font-weight:650;background:transparent}
+.hero-note{margin:19px 0 0}
+.showcase{margin-top:54px}
+.platform-rail .container{gap:14px;flex-wrap:wrap}
+.platform-rail span{display:inline-flex;gap:9px;align-items:center;font-size:11px;letter-spacing:.085em}
+.rail-icon{color:#cbb5ff;width:19px;height:19px}
+.rail-star{color:#cbb5ff;font-size:18px}
+.section{padding-top:clamp(86px,9vw,124px)}
+.section-head{gap:30px}
+.section-head h2{flex:1;min-width:0}
+.section-head p{flex:0 1 360px}
+.platform-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-bottom:19px}
+.platform-tabs button{display:flex;flex-direction:row;gap:11px;min-height:68px;min-width:0;justify-content:center;background:linear-gradient(145deg,#171622,#11121b);color:#bbb4ce;border:1px solid #393047;border-radius:16px;padding:14px 12px;font-size:14px}
+.platform-tabs button .platform-icon{width:24px;height:24px}
+.platform-tabs button:hover{background:#242036;border-color:#876cb0;color:#fff}
+.platform-tabs button[aria-selected="true"]{border-color:#bc96ff;background:linear-gradient(115deg,#3b285d,#251c3c);box-shadow:inset 0 0 0 1px rgba(207,180,255,.1),0 12px 35px #070410}
+.platform-panel{grid-template-columns:minmax(0,1fr) minmax(0,1.04fr);min-height:472px;gap:0;background:linear-gradient(135deg,#1c192a,#101119 70%);border:1px solid rgba(176,150,238,.27);border-radius:22px}
+.panel-copy{min-width:0;padding:clamp(27px,3.5vw,48px)}
+.panel-copy h3{font-size:clamp(31px,3.4vw,47px);margin:14px 0 14px}
+.panel-copy p{max-width:540px;line-height:1.68}
+.panel-tags{gap:8px;margin-bottom:23px}
+.panel-tags span{font-size:11px;padding:7px 11px}
+.panel-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;min-width:0}
+.download-action{display:inline-flex;align-items:center;gap:9px;min-height:48px;max-width:100%;white-space:normal;text-align:center;padding:10px 15px;border-radius:12px}
+.download-action .action-icon{width:17px;height:17px}
+.download-action:not(.portable-action){background:linear-gradient(120deg,#c5a6ff,#ad88ff);border-color:#bc99fa}
+.download-action:not(.portable-action):hover{background:#d7c1ff}
+.download-action.portable-action{background:#2b243b;border:1px solid #745891;padding-inline:13px}
+.panel-copy .release-line{margin-top:14px!important;margin-bottom:13px!important}
+.panel-copy .text-link{display:inline-flex;gap:4px;align-items:center;font-size:13px}
+.preview-artifact-link{max-width:540px;margin-top:16px!important}
+.panel-visual{min-height:380px;border-left:1px solid #ffffff0d}
+.panel-visual::before{opacity:.75}
+.device.desktop,.device.tv{width:83%}
+.feature-grid,.open-source-grid{gap:18px}
+.feature-card,.source-card{border-color:rgba(169,147,218,.18)}
+.banner-band .button{flex:0 0 auto}
+.release-items,.release-items:has([data-release-status="android"]){grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.release-card{min-width:0;min-height:340px;padding:24px;box-shadow:none;border:1px solid rgba(165,136,221,.23);border-radius:20px}
+.release-card:hover{border-color:#9f80de}
+.release-topline{gap:12px;margin-bottom:24px}
+.release-topline .platform-icon{height:26px;width:26px}
+.release-card .release-status{line-height:1.6;overflow-wrap:anywhere}
+.release-card .release-filename{line-height:1.6;min-height:53px}
+.release-card .release-link{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;font-weight:760;padding:10px 12px}
+.release-card .release-link .action-platform-icon{color:inherit;height:17px;width:17px}
+.release-card .release-link .action-icon{height:16px;width:16px}
+.release-card .msi-link,.release-card .portable-link{display:inline-flex;align-items:center;gap:6px;padding:8px 0}
+.release-card .msi-link .action-icon,.release-card .portable-link .action-icon{height:14px;width:14px}
+.release-card .release-more{display:inline-flex;align-items:center;gap:4px;margin-top:18px}
+.release-more .inline-icon{margin-left:0}
+.final-cta .hero-actions{margin-top:26px}
+.footer-inner{align-items:flex-start}
+.footer-nav{max-width:600px;justify-content:flex-end;gap:13px 20px}
+@media(max-width:1050px){
+  .nav-links{gap:14px;font-size:12px}
+  .nav{gap:16px}
+  .nav-right{gap:11px}
+  .header-wordmark,.brand img.header-wordmark{width:151px}
+  .release-card{padding:20px}
+  .release-card h3{font-size:23px}
+}
+@media(max-width:850px){
+  .nav-links{display:none}
+  .section-head{align-items:flex-start}
+  .platform-panel{grid-template-columns:1fr 1fr}
+  .panel-copy{padding:28px}
+  .panel-visual{min-height:350px}
+  .release-items,.release-items:has([data-release-status="android"]){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .release-card:last-child{grid-column:1/-1}
+  .footer-inner{flex-wrap:wrap}
+  .footer-nav{max-width:none;justify-content:flex-start}
+}
+@media(max-width:710px){
+  .hero{padding-top:68px}
+  .hero-download-actions{grid-template-columns:1fr;max-width:430px;gap:9px;margin-top:25px}
+  .hero-download-actions .button{min-height:56px;padding:11px 17px}
+  .hero-secondary-actions{margin-top:7px!important}
+  .hero-download-note{max-width:450px}
+  .hero-note{flex-wrap:wrap;line-height:1.5}
+  .showcase{margin-top:35px}
+  .platform-rail .container{justify-content:center;gap:13px 18px}
+  .platform-rail span{font-size:10px}
+  .platform-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .platform-tabs button{flex-direction:column;min-height:76px;gap:6px;padding:11px 5px;font-size:11px;text-align:center}
+  .platform-tabs button .platform-icon{height:23px;width:23px}
+  .platform-panel{grid-template-columns:1fr}
+  .panel-visual{grid-row:1;min-height:275px;border-left:0;border-bottom:1px solid #ffffff0d}
+  .panel-copy{grid-row:2;padding:26px}
+  .release-items,.release-items:has([data-release-status="android"]){grid-template-columns:1fr}
+  .release-card:last-child{grid-column:auto}
+  .release-card{min-height:0;padding:24px}
+  .release-card .release-filename{min-height:0}
+  .footer-inner{display:block}
+  .footer-nav{justify-content:flex-start}
+}
+@media(max-width:430px){
+  .container{padding-inline:18px}
+  .nav{min-height:67px;gap:8px}
+  .brand img.header-wordmark{width:125px}
+  .nav-github{font-size:0;gap:0}
+  .nav-github .tiny-icon{display:none}
+  .nav-github .github-icon{width:23px;height:23px}
+  .nav-button{min-width:0;padding:9px 11px!important;font-size:12px}
+  .nav-button .action-icon{width:14px;height:14px}
+  .hero h1{font-size:clamp(43px,11.7vw,58px)}
+  .hero-eyebrow{max-width:100%;flex-wrap:wrap;justify-content:center;line-height:1.6;letter-spacing:.07em}
+  .panel-copy{padding:24px 19px}
+  .panel-actions .download-action{width:100%;justify-content:center}
+  .platform-tabs button{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  .button,.platform-tabs button,.release-card{transition:none}
+  .button:hover,.release-card:hover{transform:none}
+}
+

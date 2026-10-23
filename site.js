@@ -98,24 +98,35 @@
       (match.release.prerelease ? "Préversion expérimentale" : "Version publiée") +
       " · " + sizeText(match.asset.size);
   }
-  function safeLink(node, match, text, fallbackText) {
+  // Le texte seul ferait disparaître les pictogrammes SVG au rafraîchissement des Releases.
+  // Les libellés proviennent exclusivement de constantes locales ; aucune donnée externe n'est insérée en HTML.
+  function setActionLabel(node, label, platform, isDownload = true) {
+    if (!node) return;
+    const symbols = {desktop: "kv-windows", android: "kv-android", tv: "kv-tv"};
+    const platformIcon = symbols[platform];
+    const icon = name => '<svg class="action-icon" aria-hidden="true" focusable="false"><use href="#' + name + '"></use></svg>';
+    const platformSVG = platformIcon ? '<svg class="platform-icon action-platform-icon" aria-hidden="true" focusable="false"><use href="#' + platformIcon + '"></use></svg>' : "";
+    node.innerHTML = platformSVG + '<span class="action-text">' + label + '</span>' + icon(isDownload ? "kv-download" : "kv-external");
+    node.setAttribute("aria-label", label);
+  }
+  function safeLink(node, match, text, fallbackText, platform) {
     if (!node) return;
     node.href = match ? match.asset.browser_download_url : releasesPage;
-    node.textContent = match ? text : fallbackText;
+    setActionLabel(node, match ? text : fallbackText, platform, !!match);
     node.removeAttribute("download"); // Autoriser les redirections officielles GitHub.
     node.setAttribute("rel", "noopener noreferrer");
   }
   function updateHero() {
     const items = [
-      ["hero-windows-download", "desktop", "↓ Télécharger Windows EXE"],
-      ["hero-android-download", "android", "↓ Télécharger Android APK"],
-      ["hero-tv-download", "tv", "↓ Télécharger Android TV APK"]
+      ["hero-windows-download", "desktop", "Télécharger Windows EXE"],
+      ["hero-android-download", "android", "Télécharger Android APK"],
+      ["hero-tv-download", "tv", "Télécharger Android TV APK"]
     ];
     for (const [id, platform, text] of items) {
       const match = versions[platform];
       const title = match && platform === "desktop" && /\.msi$/i.test(match.asset.name)
-        ? "↓ Télécharger Windows MSI" : text;
-      safeLink($(id), match, title, "Voir les Releases " + (platform === "desktop" ? "Windows" : platform === "android" ? "Android" : "TV") + " ↗");
+        ? "Télécharger Windows MSI" : text;
+      safeLink($(id), match, title, "Voir les Releases " + (platform === "desktop" ? "Windows" : platform === "android" ? "Android" : "TV"), platform);
     }
     const note = $("hero-download-note");
     if (note) {
@@ -158,20 +169,20 @@
     if (portable) {
       const asset = platform === "desktop" ? match?.extras?.portable : null;
       portable.hidden = !asset;
-      if (asset) portable.href = asset.browser_download_url;
+      if (asset) { portable.href = asset.browser_download_url; portable.setAttribute("rel","noopener noreferrer"); }
       else portable.removeAttribute("href");
     }
     if (msi) {
       const asset = platform === "desktop" && /\.exe$/i.test(match?.asset?.name || "") ? match?.extras?.msi : null;
       msi.hidden = !asset;
-      if (asset) msi.href = asset.browser_download_url;
+      if (asset) { msi.href = asset.browser_download_url; msi.setAttribute("rel","noopener noreferrer"); }
       else msi.removeAttribute("href");
     }
     if (match) {
       primary.hidden = false;
       primary.href = match.asset.browser_download_url;
-      primary.textContent = platform === "desktop" && /\.msi$/i.test(match.asset.name)
-        ? "↓ Télécharger Windows MSI" : "↓ " + item.button;
+      setActionLabel(primary, platform === "desktop" && /\.msi$/i.test(match.asset.name)
+        ? "Télécharger Windows MSI" : item.button, platform);
       primary.setAttribute("rel", "noopener noreferrer");
       disabled.hidden = true;
     } else {
@@ -179,7 +190,7 @@
       primary.removeAttribute("href");
       disabled.hidden = false;
       disabled.textContent = availabilityState === "loading"
-        ? "Vérification des fichiers…" : "Consulter les Releases ↗";
+        ? "Vérification des fichiers…" : "Consulter les Releases";
       if (disabled.tagName === "A") disabled.href = releasesPage;
     }
   }
@@ -196,7 +207,7 @@
       const msi = card.querySelector(".msi-link");
       if (status) status.textContent = versionStatus(match);
       if (name) name.textContent = match ? match.asset.name : "Fichier en cours de vérification";
-      safeLink(action, match, "↓ Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : "APK"), "Voir les Releases ↗");
+      safeLink(action, match, "Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : "APK"), "Voir les Releases", platform);
       if (more) more.href = match ? match.release.html_url : releasesPage;
       for (const [node, asset] of [[portable, match?.extras?.portable],
                                   [msi, platform === "desktop" && /\.exe$/i.test(match?.asset.name || "") ? match?.extras?.msi : null]]) {

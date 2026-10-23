@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4524
+Fichiers inspectés : 4536
 
 ## Inventaire des références à traiter
 
@@ -254,7 +254,7 @@ Fichiers inspectés : 4524
 - apps/mobile/scripts/prepare-ios-dependencies.sh:8 : engine_root="${NUVIO_ENGINE_ROOT:-${repository_root}/../nuvio-engine}"
 - apps/mobile/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
 - apps/desktop/composeApp/build.gradle.kts:514 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
-- apps/desktop/composeApp/build.gradle.kts:1210 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
+- apps/desktop/composeApp/build.gradle.kts:1211 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -300,9 +300,9 @@ Fichiers inspectés : 4524
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6738 lignes.
-- apps/mobile : 6950 lignes.
-- apps/desktop : 7864 lignes.
+- apps/tv : 6752 lignes.
+- apps/mobile : 6976 lignes.
+- apps/desktop : 7891 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
