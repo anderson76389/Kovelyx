@@ -1051,12 +1051,15 @@ object WatchedRepository {
     }
 
     /** Honor remote tombstones, but never discard a pending local watched edit. */
-    internal fun applyCloudDeletedWatched(profileId: Int, keys: Set<String>) {
-        if (keys.isEmpty() || profileId != currentProfileId) return
+    internal fun applyCloudDeletedWatched(profileId: Int, deletedAtByKey: Map<String, Long>) {
+        if (deletedAtByKey.isEmpty() || profileId != currentProfileId) return
         ensureLoaded()
-        itemsStore.update { nuvioItems, _, dirtyKeys, _ ->
-            keys.forEach { key ->
-                if (key !in dirtyKeys) nuvioItems.remove(key)
+        itemsStore.update { nuvioItems, _, _, _ ->
+            deletedAtByKey.forEach { (key, deletedAt) ->
+                val local = nuvioItems[key]
+                if (local != null && local.markedAtEpochMs <= deletedAt) {
+                    nuvioItems.remove(key)
+                }
             }
         }
         publish()

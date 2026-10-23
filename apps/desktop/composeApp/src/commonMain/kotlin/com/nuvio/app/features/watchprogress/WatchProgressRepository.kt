@@ -1430,13 +1430,12 @@ object WatchProgressRepository {
         return if (currentProfileId == profileId) localEntriesSnapshot() else emptyList()
     }
 
-    internal fun applyCloudProgressDeletes(profileId: Int, keys: Set<String>) {
-        if (keys.isEmpty() || profileId != currentProfileId) return
+    internal fun applyCloudProgressDeletes(profileId: Int, deletedAtByKey: Map<String, Long>) {
+        if (deletedAtByKey.isEmpty() || profileId != currentProfileId) return
         ensureLoaded()
-        val dirty = dirtyProgressKeysSnapshot()
         val removable = localEntriesSnapshot().filter {
-            it.resolvedProgressKey().take(200) in keys &&
-                it.resolvedProgressKey() !in dirty
+            val deletedAt = deletedAtByKey[it.resolvedProgressKey().take(200)]
+            deletedAt != null && it.lastUpdatedEpochMs <= deletedAt
         }
         removable.forEach { removeLocalEntry(it.resolvedProgressKey()) }
         if (removable.isNotEmpty()) {

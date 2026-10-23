@@ -139,8 +139,9 @@ class CloudflareTvDataSync @Inject constructor(
             val key = librarySyncIdentity(item.id, item.type)
             if (key in pendingDeletes || key.length > 200) continue
             val record = remote["library|$key"]
-            if (record != null && deleted(record)) continue
-            val remoteAdded = payload(record)?.optLong("savedAtEpochMs", Long.MIN_VALUE)
+            val remoteAdded = if (record != null && deleted(record)) {
+                record.optLong("updatedAt", Long.MAX_VALUE)
+            } else payload(record)?.optLong("savedAtEpochMs", Long.MIN_VALUE)
                 ?: Long.MIN_VALUE
             if (record != null && item.addedAt <= remoteAdded) continue
             val itemData = JSONObject()
@@ -180,6 +181,8 @@ class CloudflareTvDataSync @Inject constructor(
             if (item.id.isBlank() || item.type.isBlank()) continue
             val current = local[idKey]
             if (deleted(record) && current == null) continue
+            if (deleted(record) && current != null &&
+                current.addedAt > record.optLong("updatedAt", Long.MAX_VALUE)) continue
             if (!deleted(record) && current != null && current.addedAt >= item.addedAt) continue
             cursor += 1L
             events += LibraryDeltaEvent(cursor, if (deleted(record)) "delete" else "upsert", item)
@@ -191,20 +194,21 @@ class CloudflareTvDataSync @Inject constructor(
         val local = progress.getAllRawEntries(profileId)
         for ((key, record) in remote) {
             if (!key.startsWith("watch_progress|")) continue
+            val localKey = key.removePrefix("watch_progress|")
+            if (deleted(record)) {
+                val existing = local[localKey]
+                if (existing != null &&
+                    record.optLong("updatedAt", Long.MAX_VALUE) >= existing.lastWatched) {
+                    progress.removeProgress(existing.contentId, existing.season, existing.episode, profileId)
+                }
+                continue
+            }
             val data = payload(record) ?: continue
             val contentId = data.optString("parentMetaId")
             if (contentId.isBlank()) continue
             val season = data.optInt("seasonNumber").takeIf { data.has("seasonNumber") }
             val episode = data.optInt("episodeNumber").takeIf { data.has("episodeNumber") }
-            val localKey = key.removePrefix("watch_progress|")
             val lastUpdated = data.optLong("lastUpdatedEpochMs")
-            if (deleted(record)) {
-                val existing = local[localKey]
-                if (existing == null || record.optLong("updatedAt") >= existing.lastWatched) {
-                    progress.removeProgress(contentId, season, episode, profileId)
-                }
-                continue
-            }
             val existing = local[localKey]
             if (existing != null && existing.lastWatched >= lastUpdated) continue
             progress.saveProgress(WatchProgress(
@@ -223,8 +227,9 @@ class CloudflareTvDataSync @Inject constructor(
             val cloudKey = key.take(200)
             if (cloudKey.isBlank()) continue
             val record = remote["watch_progress|$cloudKey"]
-            if (record != null && deleted(record)) continue
-            val cloudDate = payload(record)?.optLong("lastUpdatedEpochMs", Long.MIN_VALUE)
+            val cloudDate = if (record != null && deleted(record)) {
+                record.optLong("updatedAt", Long.MAX_VALUE)
+            } else payload(record)?.optLong("lastUpdatedEpochMs", Long.MIN_VALUE)
                 ?: Long.MIN_VALUE
             if (record != null && item.lastWatched <= cloudDate) continue
             val data = JSONObject()
@@ -253,22 +258,27 @@ class CloudflareTvDataSync @Inject constructor(
         val removals = mutableListOf<Triple<String, Int?, Int?>>()
         for ((key, record) in remote) {
             if (!key.startsWith("watched_items|")) continue
+            val localKey = key.removePrefix("watched_items|")
+            if (deleted(record)) {
+                val existing = localByKey[localKey]
+                if (existing != null && existing.watchedAt <=
+                    record.optLong("updatedAt", Long.MAX_VALUE)) {
+                    removals += Triple(existing.contentId, existing.season, existing.episode)
+                }
+                continue
+            }
             val data = payload(record) ?: continue
             val contentId = data.optString("id")
             if (contentId.isBlank()) continue
             val season = data.optInt("season").takeIf { data.has("season") }
             val episode = data.optInt("episode").takeIf { data.has("episode") }
-            if (deleted(record)) {
-                removals += Triple(contentId, season, episode)
-            } else {
-                val at = data.optLong("markedAtEpochMs")
-                val existing = localByKey[key.removePrefix("watched_items|")]
-                if (existing == null || at > existing.watchedAt) additions += WatchedItem(
-                    contentId = contentId, contentType = data.optString("type"),
-                    title = data.optString("name"),
-                    season = season, episode = episode, watchedAt = at
-                )
-            }
+            val at = data.optLong("markedAtEpochMs")
+            val existing = localByKey[localKey]
+            if (existing == null || at > existing.watchedAt) additions += WatchedItem(
+                contentId = contentId, contentType = data.optString("type"),
+                title = data.optString("name"),
+                season = season, episode = episode, watchedAt = at
+            )
         }
         if (additions.isNotEmpty() || removals.isNotEmpty()) {
             watched.applyRemoteChanges(additions, removals, profileId = profileId)
@@ -277,8 +287,9 @@ class CloudflareTvDataSync @Inject constructor(
             val key = watchedKey(item)
             if (key.length > 200) continue
             val record = remote["watched_items|$key"]
-            if (record != null && deleted(record)) continue
-            val remoteTime = payload(record)?.optLong("markedAtEpochMs", Long.MIN_VALUE)
+            val remoteTime = if (record != null && deleted(record)) {
+                record.optLong("updatedAt", Long.MAX_VALUE)
+            } else payload(record)?.optLong("markedAtEpochMs", Long.MIN_VALUE)
                 ?: Long.MIN_VALUE
             if (record != null && item.watchedAt <= remoteTime) continue
             val data = JSONObject()

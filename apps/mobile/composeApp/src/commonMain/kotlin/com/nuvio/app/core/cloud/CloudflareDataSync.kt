@@ -165,8 +165,10 @@ object CloudflareDataSync {
             val key = libraryItemKey(item.id, item.type)
             if (key in pendingDeletes || key.length > 200) continue
             val row = remote["library|$key"]
-            if (row != null && isDeleted(row)) continue
-            val remoteDate = row?.get("payload")?.jsonObject
+            // A tombstone wins only until a genuinely newer local save.
+            val remoteDate = if (row != null && isDeleted(row)) {
+                row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
+            } else row?.get("payload")?.jsonObject
                 ?.get("savedAtEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
             if (row != null && item.savedAtEpochMs <= remoteDate) continue
             CloudflareAccountClient.writeSync(
@@ -189,6 +191,8 @@ object CloudflareDataSync {
             val current = localByKey[itemKey]
             if (!isDeleted(row) && current != null && current.savedAtEpochMs >= item.savedAtEpochMs) continue
             if (isDeleted(row) && current == null) continue
+            if (isDeleted(row) && current != null &&
+                current.savedAtEpochMs > (row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE)) continue
             eventId += 1L
             events += LibraryDeltaEvent(eventId, if (isDeleted(row)) "delete" else "upsert", item)
         }
@@ -211,11 +215,12 @@ object CloudflareDataSync {
         val local = WatchProgressRepository.cloudLocalEntries(profileId)
         val localByKey = local.associateBy { it.resolvedProgressKey().take(200) }
         val incoming = mutableListOf<WatchProgressEntry>()
-        val remoteDeletes = mutableSetOf<String>()
+        val remoteDeletes = mutableMapOf<String, Long>()
         for ((key, row) in remote) {
             if (!key.startsWith("watch_progress|")) continue
             if (isDeleted(row)) {
-                remoteDeletes += key.removePrefix("watch_progress|")
+                remoteDeletes[key.removePrefix("watch_progress|")] =
+                    row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
                 continue
             }
             val payload = row["payload"]?.jsonObject ?: continue
@@ -232,8 +237,9 @@ object CloudflareDataSync {
             val key = entry.resolvedProgressKey().take(200)
             if (key.isBlank()) continue
             val row = remote["watch_progress|$key"]
-            if (row != null && isDeleted(row)) continue
-            val remoteDate = row?.get("payload")?.jsonObject
+            val remoteDate = if (row != null && isDeleted(row)) {
+                row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
+            } else row?.get("payload")?.jsonObject
                 ?.get("lastUpdatedEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
             if (row != null && entry.lastUpdatedEpochMs <= remoteDate) continue
             CloudflareAccountClient.writeSync(
@@ -262,11 +268,12 @@ object CloudflareDataSync {
         val local = WatchedRepository.cloudLocalItems(profileId)
         val localByKey = local.associateBy { watchedItemKey(it.type, it.id, it.season, it.episode) }
         val incoming = mutableListOf<WatchedItem>()
-        val remoteDeletes = mutableSetOf<String>()
+        val remoteDeletes = mutableMapOf<String, Long>()
         for ((key, row) in remote) {
             if (!key.startsWith("watched_items|")) continue
             if (isDeleted(row)) {
-                remoteDeletes += key.removePrefix("watched_items|")
+                remoteDeletes[key.removePrefix("watched_items|")] =
+                    row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
                 continue
             }
             val item = runCatching {
@@ -281,8 +288,9 @@ object CloudflareDataSync {
             val key = watchedItemKey(item.type, item.id, item.season, item.episode)
             if (key.length > 200) continue
             val row = remote["watched_items|$key"]
-            if (row != null && isDeleted(row)) continue
-            val remoteDate = row?.get("payload")?.jsonObject
+            val remoteDate = if (row != null && isDeleted(row)) {
+                row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
+            } else row?.get("payload")?.jsonObject
                 ?.get("markedAtEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
             if (row != null && item.markedAtEpochMs <= remoteDate) continue
             CloudflareAccountClient.writeSync(
