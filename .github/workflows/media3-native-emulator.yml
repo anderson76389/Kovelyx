@@ -39,15 +39,21 @@ jobs:
           set -euo pipefail
           # Google SDK mirrors occasionally return a truncated emulator ZIP.
           # Fail visibly if three fresh downloads cannot produce an executable.
-          yes | sdkmanager --licenses >/dev/null || true
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER="$(find "${SDK_ROOT}/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null || true)"
+          if [[ ! -x "$SDKMANAGER" ]]; then
+            echo "::error::Outil sdkmanager introuvable dans ${SDK_ROOT}/cmdline-tools"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
           for attempt in 1 2 3; do
             echo "Installation de l'émulateur, essai ${attempt}/3"
-            if sdkmanager --install emulator --channel=0 && \
-               test -x "${ANDROID_HOME}/emulator/emulator"; then
-              "${ANDROID_HOME}/emulator/emulator" -version | head -n 3
+            if "$SDKMANAGER" --install emulator --channel=0 && \
+               test -x "${SDK_ROOT}/emulator/emulator"; then
+              "${SDK_ROOT}/emulator/emulator" -version | head -n 3
               exit 0
             fi
-            rm -rf "${ANDROID_HOME}/emulator"
+            rm -rf "${SDK_ROOT}/emulator"
             sleep 5
           done
           echo "::error::Émulateur Android indisponible après trois téléchargements complets"
