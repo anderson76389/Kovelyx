@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1360** ; références statiques à Nuvio/NuvioMedia : **6786**.
+Fichiers texte examinés : **1363** ; références statiques à Nuvio/NuvioMedia : **6800**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -36,8 +36,8 @@ Fichiers texte examinés : **1360** ; références statiques à Nuvio/NuvioMedia
 | `localhost` | 10 |
 | `image.tmdb.org` | 10 |
 | `mdblist.com` | 9 |
+| `192.168.1.10` | 9 |
 | `postersplus.example.com` | 9 |
-| `subs.example.com` | 8 |
 
 ### Références à vérifier en priorité
 
@@ -121,11 +121,11 @@ Fichiers texte examinés : **1360** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:27`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:28`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:29`
-- …et 6706 autres correspondances (plafond d'affichage).
+- …et 6720 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1409** ; références statiques à Nuvio/NuvioMedia : **109**.
+Fichiers texte examinés : **1413** ; références statiques à Nuvio/NuvioMedia : **109**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -246,7 +246,7 @@ Fichiers texte examinés : **1409** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1786** ; références statiques à Nuvio/NuvioMedia : **119**.
+Fichiers texte examinés : **1791** ; références statiques à Nuvio/NuvioMedia : **119**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
