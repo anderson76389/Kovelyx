@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {handleSync} from "../src/index.mjs";
 const PROFILE="f4b81d5e-982f-4f37-9923-87f47920196c";
-const records=Array.from({length:56},(_,n)=>({
+const records=Array.from({length:551},(_,n)=>({
  category:"library", itemKey:"movie:"+String(n).padStart(3,"0"),
  payload:JSON.stringify({item:{id:String(n)}}),revision:1,deleted:n===8?1:0,updatedAt:n
 }));
@@ -31,15 +31,23 @@ async function load(query,owner="alice") {
  return {status:result.status,body:await result.json()};
 }
 test("legacy client pagination reads over 500 items without hard cap",async()=>{
- const first=await load("&limit=25");
- const second=await load("&limit=25&offset=25");
- const third=await load("&limit=25&offset=50");
- assert.equal(first.status,200);
- assert.equal(first.body.nextOffset,25);
- assert.equal(second.body.nextOffset,50);
- assert.equal(third.body.nextOffset,null);
- assert.equal([...first.body.items,...second.body.items,...third.body.items].length,56);
- assert.equal(first.body.items[8].deleted,true);
+ let offset=0, all=[], pages=0;
+ while (true) {
+  const page=await load("&limit=25&offset="+offset);
+  assert.equal(page.status,200);
+  all.push(...page.body.items);
+  pages++;
+  if (page.body.nextOffset===null) {
+   assert.equal(page.body.partial,false);
+   break;
+  }
+  assert.equal(page.body.nextOffset,offset+25);
+  offset=page.body.nextOffset;
+  assert.ok(pages<30,"pagination must terminate");
+ }
+ assert.equal(all.length,551);
+ assert.equal(all[8].deleted,true);
+ assert.ok(pages>20,"more than 500 sync rows must be retrievable");
 });
 test("legacy cursors reject bad input and foreign profiles",async()=>{
  assert.equal((await load("&offset=-1")).status,400);
