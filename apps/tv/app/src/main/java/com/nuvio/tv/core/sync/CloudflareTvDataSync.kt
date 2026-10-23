@@ -20,6 +20,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
@@ -39,6 +43,26 @@ class CloudflareTvDataSync @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
     private val inFlight = ConcurrentHashMap.newKeySet<Int>()
+
+    init {
+        // Observe actual local TV changes (player position, library, watched flags).
+        // Only different snapshots trigger an upload; echo updates don't loop.
+        scope.launch {
+            profileManager.activeProfileId.collectLatest { profileId ->
+                combine(
+                    library.libraryItems,
+                    progress.observeAllRawProgress(profileId),
+                    watched.observeAllItems(profileId)
+                ) { libraryItems, positions, history ->
+                    Triple(libraryItems, positions, history).hashCode()
+                }.distinctUntilChanged()
+                    .debounce(2500L)
+                    .collect {
+                        if (CloudflareTvAccountClient.account != null) request(profileId)
+                    }
+            }
+        }
+    }
 
     fun request(profileId: Int) {
         if (!CloudflareTvAccountClient.enabled || !inFlight.add(profileId)) return
