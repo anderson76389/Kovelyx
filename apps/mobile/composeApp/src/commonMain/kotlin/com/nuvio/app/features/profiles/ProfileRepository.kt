@@ -152,8 +152,30 @@ object ProfileRepository {
                     )
                 }
             if (_state.value.profiles.isNotEmpty()) {
-                // Conserver les noms, préférences et historiques de cet appareil.
-                _state.value = _state.value.copy(isLoaded = true)
+                // Attach cloud UUIDs and remote names without replacing the local
+                // avatar, background, library, watch history or user preferences.
+                val original = _state.value.profiles.toMutableList()
+                remote.forEach { incoming ->
+                    val matchIndex = original.indexOfFirst { it.id == incoming.id }
+                        .takeIf { it >= 0 }
+                        ?: original.indexOfFirst {
+                            it.profileIndex == incoming.profileIndex && it.id.isBlank()
+                        }
+                    if (matchIndex >= 0) {
+                        original[matchIndex] = original[matchIndex].copy(
+                            id = incoming.id, userId = account.userId, name = incoming.name
+                        )
+                    } else if (original.none { it.profileIndex == incoming.profileIndex }) {
+                        original += incoming
+                    }
+                }
+                val merged = original.sortedBy { it.profileIndex }
+                val active = merged.firstOrNull { it.profileIndex == activeProfileIndex }
+                    ?: merged.firstOrNull()
+                _state.value = _state.value.copy(
+                    profiles = merged, isLoaded = true, activeProfile = active
+                )
+                persist()
                 return
             }
             _state.value = _state.value.copy(
