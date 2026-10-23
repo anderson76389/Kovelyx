@@ -46,15 +46,8 @@ UPSTREAM_UPDATE_LITERAL = re.compile(
     r'\b(?:owner|repo)\s*=\s*"(?:NuvioMedia|NuvioMobile|NuvioTV|NuvioDesktop)"'
 )
 
-# Exception convenue : le compte Nuvio historique reste transitoirement disponible.
-# Elle NE constitue PAS une preuve d'indépendance du système de comptes.
-ACCOUNT_ALLOW = {
-    (
-        "apps/mobile/composeApp/src/commonMain/kotlin/"
-        "com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt",
-        "https://nuvio.tv/link",
-    ),
-}
+# Aucun serveur de comptes officiel Nuvio n'est permis dans les clients actifs.
+ACCOUNT_ALLOW: set[tuple[str, str]] = set()
 
 # Référence de REJET uniquement : ce serveur historique est explicitement refusé
 # dans isOfficial() ; cette constante ne déclenche aucune requête.
@@ -103,8 +96,16 @@ for file in sorted(set(candidate_files)):
                     rejection_only_exceptions.append(f"{relative}:{line_no}")
                 else:
                     violations.append(f"{relative}:{line_no} : URL interdite {url}")
+        if "NUVIO_SUPABASE_" in line:
+            violations.append(f"{relative}:{line_no} : configuration du compte amont interdite")
         if UPSTREAM_UPDATE_LITERAL.search(line):
             violations.append(f"{relative}:{line_no} : ancienne source de mise à jour")
+
+# Les anciens flux IPA Nuvio ne sont pas des Releases Kovelyx :
+# leur présence dans les sous-projets est une régression.
+for upstream_feed in ("apps/mobile/store.json", "apps/desktop/store.json"):
+    if (ROOT / upstream_feed).is_file():
+        violations.append(f"Flux IPA Nuvio hérités toujours publiés : {upstream_feed}")
 
 print(f"Sources de production et build inspectés : {checked_files}")
 print(f"Exceptions temporaires pour le compte historique : {len(account_exceptions)}")
