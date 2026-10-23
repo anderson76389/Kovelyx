@@ -185,16 +185,24 @@ object CloudflareDataSync {
             if (itemKey in pendingDeletes || snapshot.pendingUpsertKeys.any {
                 libraryItemKey(it.contentId, it.contentType) == itemKey
             }) continue
+            val current = localByKey[itemKey]
+            if (isDeleted(row)) {
+                // Deletions carry a small tombstone (often only id/type), not a
+                // complete LibraryItem. Decode the local item instead of
+                // silently skipping the deletion on Windows and Android.
+                if (current == null) continue
+                val deletedAt = row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
+                if (current.savedAtEpochMs > deletedAt) continue
+                eventId += 1L
+                events += LibraryDeltaEvent(eventId, "delete", current)
+                continue
+            }
             val payload = row["payload"]?.jsonObject ?: continue
             val item = runCatching { json.decodeFromJsonElement(LibraryItem.serializer(), payload) }
                 .getOrNull() ?: continue
-            val current = localByKey[itemKey]
-            if (!isDeleted(row) && current != null && current.savedAtEpochMs >= item.savedAtEpochMs) continue
-            if (isDeleted(row) && current == null) continue
-            if (isDeleted(row) && current != null &&
-                current.savedAtEpochMs > (row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE)) continue
+            if (current != null && current.savedAtEpochMs >= item.savedAtEpochMs) continue
             eventId += 1L
-            events += LibraryDeltaEvent(eventId, if (isDeleted(row)) "delete" else "upsert", item)
+            events += LibraryDeltaEvent(eventId, "upsert", item)
         }
         LibraryRepository.applyCloudChanges(profileId, events)
     }
