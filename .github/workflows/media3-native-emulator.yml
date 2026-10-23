@@ -19,7 +19,7 @@ concurrency:
 jobs:
   native-media3:
     name: Exercices Media3 JNI et allocateur sur Google TV
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +33,25 @@ jobs:
         run: |
           set -euo pipefail
           if [[ -e /dev/kvm ]]; then sudo chmod 666 /dev/kvm; fi
+      - name: Préinstaller l'émulateur avec reprises en cas d'archive SDK corrompue
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Google SDK mirrors occasionally return a truncated emulator ZIP.
+          # Fail visibly if three fresh downloads cannot produce an executable.
+          yes | sdkmanager --licenses >/dev/null || true
+          for attempt in 1 2 3; do
+            echo "Installation de l'émulateur, essai ${attempt}/3"
+            if sdkmanager --install emulator --channel=0 && \
+               test -x "${ANDROID_HOME}/emulator/emulator"; then
+              "${ANDROID_HOME}/emulator/emulator" -version | head -n 3
+              exit 0
+            fi
+            rm -rf "${ANDROID_HOME}/emulator"
+            sleep 5
+          done
+          echo "::error::Émulateur Android indisponible après trois téléchargements complets"
+          exit 1
       - name: Tester le décodage vidéo H264 et la mémoire Media3 sur Google TV 34
         uses: reactivecircus/android-emulator-runner@v2
         with:
