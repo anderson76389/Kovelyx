@@ -1,6 +1,7 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.ServerConfiguration
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
@@ -67,7 +68,8 @@ object DeviceLinkAuthRepository {
         activeJob = scope.launch {
             _state.value = DeviceLinkAuthState.Starting
             val configuration = ServerConfigurationRepository.active.value
-            if (!configuration.isCustom || !configuration.capabilities.tvLogin ||
+            if (CloudflareAccountClient.enabled || !configuration.isCustom ||
+                !configuration.capabilities.tvLogin ||
                 configuration.backendUrl.isBlank() || configuration.publishableKey.isBlank()) {
                 _state.value = DeviceLinkAuthState.Failed(DeviceLinkAuthFailure.Start)
                 return@launch
