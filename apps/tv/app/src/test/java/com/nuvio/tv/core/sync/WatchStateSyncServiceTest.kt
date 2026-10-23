@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.tracking.TrackingProgressProviderRegistry
@@ -11,6 +12,8 @@ import com.nuvio.tv.domain.model.WatchedItem
 import com.nuvio.tv.domain.model.mutationKey
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.result.PostgrestResult
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -24,9 +27,25 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.After
 import org.junit.Test
 
 class WatchStateSyncServiceTest {
+    /** Ces tests vérifient uniquement le protocole Supabase historique.
+     * En distribution Kovelyx Cloudflare, les RPC Supabase restent bloqués.
+     * Le protocole Cloudflare est testé séparément via Worker/D1 et ses clients. */
+    @Before
+    fun legacyProtocolOnly() {
+        mockkObject(CloudflareTvAccountClient)
+        every { CloudflareTvAccountClient.enabled } returns false
+    }
+
+    @After
+    fun closeLegacyProtocol() {
+        unmockkObject(CloudflareTvAccountClient)
+    }
+
     @Test
     fun `progress push sends only pending mutations to the requested profile`() = runTest {
         val postgrest = mockk<Postgrest>()
