@@ -86,6 +86,55 @@ object CloudflareDataSync {
         synchronizeWatched(profileId, cloudId, remote)
     }
 
+    fun deleteProgress(profileId: Int, entries: Collection<WatchProgressEntry>) {
+        enqueueDeletes(
+            profileId, "watch_progress",
+            entries.map { it.resolvedProgressKey().take(200) }
+        )
+    }
+
+    fun deleteWatched(profileId: Int, items: Collection<WatchedItem>) {
+        enqueueDeletes(
+            profileId, "watched_items",
+            items.map { watchedItemKey(it.type, it.id, it.season, it.episode) }
+        )
+    }
+
+    private fun enqueueDeletes(profileId: Int, category: String, keys: Collection<String>) {
+        if (!CloudflareAccountClient.enabled || keys.isEmpty()) return
+        scope.launch {
+            try {
+                mutex.withLock {
+                    val account = AuthRepository.state.value as? AuthState.Authenticated
+                        ?: return@withLock
+                    if (account.isAnonymous ||
+                        CloudflareAccountClient.currentSession?.userId != account.userId) return@withLock
+                    val profileIdCloud = ProfileRepository.state.value.profiles
+                        .firstOrNull { it.profileIndex == profileId }?.id.orEmpty()
+                    if (!profileIdCloud.matches(Regex("[a-fA-F0-9-]{36}"))) return@withLock
+                    val remote = CloudflareAccountClient.synchronizeAll(profileIdCloud).associateBy {
+                        it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +
+                            it["itemKey"]?.jsonPrimitive?.content.orEmpty()
+                    }
+                    for (key in keys) {
+                        if (key.isBlank() || key.length > 200) continue
+                        val row = remote["$category|$key"]
+                        if (row != null && isDeleted(row)) continue
+                        CloudflareAccountClient.writeSync(
+                            profileIdCloud, category, key,
+                            buildJsonObject { put("removed", true) },
+                            revision(row), deleted = true
+                        )
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                log.e(error) { "Suppression Cloudflare non confirmée ; données locales préservées" }
+            }
+        }
+    }
+
     private fun isDeleted(row: JsonObject): Boolean =
         row["deleted"]?.jsonPrimitive?.booleanOrNull == true
 
@@ -162,8 +211,13 @@ object CloudflareDataSync {
         val local = WatchProgressRepository.cloudLocalEntries(profileId)
         val localByKey = local.associateBy { it.resolvedProgressKey().take(200) }
         val incoming = mutableListOf<WatchProgressEntry>()
+        val remoteDeletes = mutableSetOf<String>()
         for ((key, row) in remote) {
-            if (!key.startsWith("watch_progress|") || isDeleted(row)) continue
+            if (!key.startsWith("watch_progress|")) continue
+            if (isDeleted(row)) {
+                remoteDeletes += key.removePrefix("watch_progress|")
+                continue
+            }
             val payload = row["payload"]?.jsonObject ?: continue
             val entry = runCatching { json.decodeFromJsonElement(WatchProgressEntry.serializer(), payload) }
                 .getOrNull() ?: continue
@@ -172,6 +226,7 @@ object CloudflareDataSync {
                 incoming += entry
             }
         }
+        if (remoteDeletes.isNotEmpty()) WatchProgressRepository.applyCloudProgressDeletes(profileId, remoteDeletes)
         if (incoming.isNotEmpty()) WatchProgressRepository.applyExternalProgress(incoming)
         for (entry in local) {
             val key = entry.resolvedProgressKey().take(200)
@@ -207,14 +262,20 @@ object CloudflareDataSync {
         val local = WatchedRepository.cloudLocalItems(profileId)
         val localByKey = local.associateBy { watchedItemKey(it.type, it.id, it.season, it.episode) }
         val incoming = mutableListOf<WatchedItem>()
+        val remoteDeletes = mutableSetOf<String>()
         for ((key, row) in remote) {
-            if (!key.startsWith("watched_items|") || isDeleted(row)) continue
+            if (!key.startsWith("watched_items|")) continue
+            if (isDeleted(row)) {
+                remoteDeletes += key.removePrefix("watched_items|")
+                continue
+            }
             val item = runCatching {
                 json.decodeFromJsonElement(WatchedItem.serializer(), row["payload"]!!.jsonObject)
             }.getOrNull() ?: continue
             val current = localByKey[key.removePrefix("watched_items|")]
             if (current == null || item.markedAtEpochMs > current.markedAtEpochMs) incoming += item
         }
+        if (remoteDeletes.isNotEmpty()) WatchedRepository.applyCloudDeletedWatched(profileId, remoteDeletes)
         if (incoming.isNotEmpty()) WatchedRepository.applyCloudWatched(incoming)
         for (item in local) {
             val key = watchedItemKey(item.type, item.id, item.season, item.episode)
