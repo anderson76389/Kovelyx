@@ -2,6 +2,8 @@ package com.nuvio.app.features.watched
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareDataSync
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.details.MetaDetails
@@ -1041,12 +1043,41 @@ object WatchedRepository {
      */
     fun baseFullyWatchedSeriesKeys(): Set<String> = fullyWatchedSeriesKeysForSource(activeSource)
 
+    /** LOCAL watched history, not imported Trakt/MDBList data. */
+    internal fun cloudLocalItems(profileId: Int): List<WatchedItem> {
+        ensureLoaded()
+        if (currentProfileId != profileId) return emptyList()
+        return itemsStore.read { nuvioItems, _, _, _ -> nuvioItems.values.toList() }
+    }
+
+    /** Apply only fresher records, retaining local pending changes and watched timestamps. */
+    internal fun applyCloudWatched(incoming: Collection<WatchedItem>) {
+        if (incoming.isEmpty()) return
+        ensureLoaded()
+        itemsStore.update { nuvioItems, _, dirtyKeys, _ ->
+            incoming.forEach { item ->
+                val key = watchedItemKey(item.type, item.id, item.season, item.episode)
+                if (key in dirtyKeys) return@forEach
+                val current = nuvioItems[key]
+                if (current == null || item.markedAtEpochMs > current.markedAtEpochMs) {
+                    nuvioItems[key] = item
+                }
+            }
+        }
+        publish()
+        persist()
+    }
+
     private fun pushMarksToServer(
         items: Collection<WatchedItem>,
         trackerHistorySync: WatchedTrackerHistorySync,
         source: WatchProgressSource,
     ) {
         val profileId = currentProfileId
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
         val operationGeneration = profileGeneration
         if (trackerHistorySync == WatchedTrackerHistorySync.Mirror) ServerWatched.mirror(items, played = true)
         accountScopeSnapshot().launch {
@@ -1076,6 +1107,10 @@ object WatchedRepository {
         source: WatchProgressSource,
     ) {
         val profileId = currentProfileId
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.deleteWatched(profileId, items)
+            return
+        }
         ServerWatched.mirror(items, played = false)
         accountScopeSnapshot().launch {
             runCatching {
