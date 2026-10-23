@@ -156,7 +156,7 @@ object CloudflareAccountClient {
         var offset = 0
         while (true) {
             val response = httpRequestRaw(
-                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset",
+                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25",
                 headers = mapOf("Authorization" to "Bearer ${active.bearerToken}"),
                 body = "", followRedirects = false, maxResponseBodyBytes = 1048576
             )
@@ -166,7 +166,7 @@ object CloudflareAccountClient {
             all.addAll(rows)
             val next = page["nextOffset"]?.jsonPrimitive?.intOrNull
             if (next == null) return all
-            check(next > offset && rows.size == 500 && all.size <= 100000) {
+            check(next > offset && rows.size == 25 && all.size <= 100000) {
                 "Kovelyx Cloud : pagination invalide"
             }
             offset = next
