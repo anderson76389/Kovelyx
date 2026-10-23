@@ -102,7 +102,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx wrangler d1 migrations apply DB --remote --yes
+          npx wrangler d1 migrations apply DB --remote
 
       - name: Déployer le Worker sur le même compte Cloudflare
         if: steps.credentials.outputs.ready == 'true'
