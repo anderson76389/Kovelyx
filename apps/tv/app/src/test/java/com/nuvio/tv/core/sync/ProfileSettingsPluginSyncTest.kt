@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -14,6 +15,8 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.result.PostgrestResult
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import io.ktor.http.Headers
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -50,6 +53,8 @@ class ProfileSettingsPluginSyncTest {
 
     @Before
     fun setUp() {
+        mockkObject(CloudflareTvAccountClient)
+        every { CloudflareTvAccountClient.enabled } returns false
         mockkStatic(Dispatchers::class)
         every { Dispatchers.IO } returns dispatcher
     }
@@ -62,6 +67,7 @@ class ProfileSettingsPluginSyncTest {
             scope.cancel()
         }
         unmockkStatic(Dispatchers::class)
+        unmockkObject(CloudflareTvAccountClient)
     }
 
     @Test
