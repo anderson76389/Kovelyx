@@ -36,6 +36,9 @@ object CloudflareAccountClient {
         val headers = mutableMapOf(
             "Accept" to "application/json",
             "Content-Type" to "application/json",
+            // Better Auth rejects native sign-in/sign-out without a trusted Origin.
+            // Use only our configured HTTPS Worker origin, never a Nuvio domain.
+            "Origin" to base(),
             "User-Agent" to "Kovelyx-Client"
         )
         if (!authorization.isNullOrBlank()) headers["Authorization"] = "Bearer $authorization"

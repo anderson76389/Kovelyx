@@ -58,7 +58,7 @@ try {
     const headers={Accept:"application/json"};
     if(body!==null) {
       headers["Content-Type"]="application/json";
-      // Native clients omit Origin; browsers are separately restricted by CORS.
+      headers.Origin=base; // Native clients send their Worker's own trusted Origin.
     }
     if(token) headers.Authorization="Bearer "+token;
     const response=await fetch(base+path,{

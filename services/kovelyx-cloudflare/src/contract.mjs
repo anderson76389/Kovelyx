@@ -36,7 +36,9 @@ export function validSyncInput(body) {
 export function isAllowedOrigin(origin, workerOrigin = "") {
   return !origin ||
     origin === "https://anderson76389.github.io" ||
-    (workerOrigin.startsWith("https://") && origin === workerOrigin);
+    ((workerOrigin.startsWith("https://") ||
+      /^http:\/\/(?:127\.0\.0\.1|localhost)(?::[0-9]{2,5})?$/.test(workerOrigin)) &&
+      origin === workerOrigin);
 }
 export function jsonResponse(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {

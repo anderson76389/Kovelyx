@@ -29,4 +29,8 @@ test("profile names, strict identifiers, cursor pagination and origins",()=>{
   assert.equal(isAllowedOrigin("https://kovelyx-cloud.example.workers.dev.evil.example", "https://kovelyx-cloud.example.workers.dev"),false);
   assert.equal(isAllowedOrigin("http://kovelyx-cloud.example.workers.dev", "http://kovelyx-cloud.example.workers.dev"),false);
   assert.equal(isAllowedOrigin("https://evil.example"),false);
+  assert.equal(isAllowedOrigin("http://127.0.0.1:8765","http://127.0.0.1:8765"),true);
+  assert.equal(isAllowedOrigin("http://localhost:8787","http://localhost:8787"),true);
+  assert.equal(isAllowedOrigin("http://evil.example","http://evil.example"),false);
+  assert.equal(isAllowedOrigin("http://127.0.0.1:8765","http://localhost:8787"),false);
 });
