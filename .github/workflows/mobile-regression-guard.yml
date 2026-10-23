@@ -1,0 +1,53 @@
+name: Vérifier les régressions Android après synchronisation cloud
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/watchprogress/**'
+      - '.github/workflows/mobile-regression-guard.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-regression-guard.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-mobile-unit-regression-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  host-tests:
+    name: Tous les tests Android Host (sans exclusions)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Vérifier progression, notes d'épisodes et mises à jour
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x apps/mobile/gradlew
+          ./apps/mobile/gradlew -p apps/mobile :composeApp:testAndroidHostTest \
+            --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Conserver le rapport, même quand un test échoue
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-mobile-unit-regression-results
+          path: |
+            apps/mobile/composeApp/build/reports/tests/testAndroidHostTest/**
+            apps/mobile/composeApp/build/test-results/testAndroidHostTest/**
+          if-no-files-found: warn
+          retention-days: 30
