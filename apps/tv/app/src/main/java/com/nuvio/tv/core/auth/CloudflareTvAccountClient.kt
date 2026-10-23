@@ -151,6 +151,79 @@ internal object CloudflareTvAccountClient {
         }
     }
 
+    /** Stable D1 profile IDs must be used instead of the TV's local numeric index. */
+    suspend fun cloudProfiles(): List<Pair<String, String>> = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles")
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .get().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Cloudflare profils HTTP ${response.code}" }
+            val entries = JSONObject(response.body?.string().orEmpty())
+                .optJSONArray("profiles") ?: return@use emptyList()
+            (0 until entries.length()).mapNotNull { i ->
+                entries.optJSONObject(i)?.let { data ->
+                    val id = data.optString("id")
+                    if (id.length == 36) id to data.optString("displayName") else null
+                }
+            }
+        }
+    }
+
+    suspend fun syncRows(profileId: String): List<JSONObject> = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val rows = mutableListOf<JSONObject>()
+        var offset = 0
+        do {
+            val request = Request.Builder()
+                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
+                    "/v1/sync?profileId=$profileId&offset=$offset&limit=25")
+                .header("Authorization", "Bearer ${active.bearerToken}")
+                .get().build()
+            val next = client.newCall(request).execute().use { response ->
+                check(response.isSuccessful) { "Cloudflare sync HTTP ${response.code}" }
+                val page = JSONObject(response.body?.string().orEmpty())
+                val values = page.optJSONArray("items") ?: org.json.JSONArray()
+                for (i in 0 until values.length()) {
+                    values.optJSONObject(i)?.let(rows::add)
+                }
+                if (page.isNull("nextOffset")) -1 else page.optInt("nextOffset", -1)
+            }
+            if (next == -1) break
+            check(next == offset + 25 && rows.size <= 100000) {
+                "Pagination Cloudflare invalide"
+            }
+            offset = next
+        } while (true)
+        rows
+    }
+
+    suspend fun writeSync(
+        profileId: String,
+        category: String,
+        itemKey: String,
+        payload: JSONObject,
+        revision: Int = 0,
+        deleted: Boolean = false
+    ) = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val body = JSONObject()
+            .put("profileId", profileId).put("category", category)
+            .put("itemKey", itemKey).put("payload", payload)
+            .put("revision", revision).put("deleted", deleted)
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/sync")
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .post(body.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Cloudflare sync HTTP ${response.code}" }
+        }
+    }
+
     fun clearLocalSession() {
         account = null
         sessionStore?.clear()
