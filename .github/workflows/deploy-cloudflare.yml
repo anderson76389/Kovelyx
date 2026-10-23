@@ -63,7 +63,7 @@ jobs:
           set -euo pipefail
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" || -z "${KOVELYX_D1_DATABASE_ID:-}" ]]; then
             echo 'ready=false' >> "$GITHUB_OUTPUT"
-            echo '⚠️ Déploiement non effectué : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID ainsi que la variable KOVELYX_D1_DATABASE_ID dans GitHub Actions. Aucun identifiant n’est imprimé.' >> "$GITHUB_STEP_SUMMARY"
+            echo '⚠️ Déploiement non effectué : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID ainsi que la variable KOVELYX_D1_DATABASE_ID dans GitHub Actions. Aucun identifiant sensible n est imprime.' >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           if [[ ! "$KOVELYX_D1_DATABASE_ID" =~ ^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$ ]]; then
