@@ -3,6 +3,7 @@ package com.nuvio.tv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.plugin.PluginManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.StartupSyncPreferences
@@ -67,7 +68,8 @@ class StartupSyncService @Inject constructor(
     private val watchProgressPreferences: WatchProgressPreferences,
     private val profileManager: ProfileManager,
     private val startupSyncPreferences: StartupSyncPreferences,
-    private val cwEnrichmentCache: com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache
+    private val cwEnrichmentCache: com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache,
+    private val cloudflareSync: CloudflareTvDataSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var startupPullJob: Job? = null
@@ -91,6 +93,10 @@ class StartupSyncService @Inject constructor(
             authManager.authState.collect { state ->
                 when (state) {
                     is AuthState.FullAccount -> {
+                        if (CloudflareTvAccountClient.enabled) {
+                            cloudflareSync.request(profileManager.activeProfileId.value)
+                            return@collect
+                        }
                         val force = forceSyncRequested
                         val includeProfileSettings = if (force) forceSyncIncludesProfileSettings else true
                         val started = scheduleStartupPull(
@@ -138,6 +144,10 @@ class StartupSyncService @Inject constructor(
     }
 
     fun requestSyncNow(includeProfileSettings: Boolean = true) {
+        if (CloudflareTvAccountClient.enabled) {
+            cloudflareSync.request(profileManager.activeProfileId.value)
+            return
+        }
         forceSyncRequested = true
         forceSyncIncludesProfileSettings = forceSyncIncludesProfileSettings || includeProfileSettings
         when (val state = authManager.authState.value) {
@@ -154,6 +164,10 @@ class StartupSyncService @Inject constructor(
     }
 
     fun requestForegroundSync() {
+        if (CloudflareTvAccountClient.enabled) {
+            cloudflareSync.request(profileManager.activeProfileId.value)
+            return
+        }
         scheduleActivityPull(
             reason = "foreground",
             delayMs = FOREGROUND_ACTIVITY_PULL_DELAY_MS,
@@ -195,6 +209,10 @@ class StartupSyncService @Inject constructor(
 
     fun requestRealtimeSurfacePull(profileId: Int, surface: String) {
         if (!authManager.isAuthenticated) return
+        if (CloudflareTvAccountClient.enabled) {
+            cloudflareSync.request(profileId)
+            return
+        }
         if (surface != "profiles" && profileManager.activeProfileId.value != profileId) {
             Log.d(TAG, "Ignoring realtime surface=$surface for inactive profile $profileId")
             return
@@ -275,6 +293,10 @@ class StartupSyncService @Inject constructor(
         delayMs: Long = 0L,
         minIntervalMs: Long = 0L
     ): Boolean {
+        if (CloudflareTvAccountClient.enabled) {
+            cloudflareSync.request(profileManager.activeProfileId.value)
+            return true
+        }
         val state = authManager.authState.value as? AuthState.FullAccount ?: return false
         val key = pullKey(state.userId)
         val now = SystemClock.elapsedRealtime()

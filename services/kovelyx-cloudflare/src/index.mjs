@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
-import { jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
+import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validSyncInput, isAllowedOrigin } from "./contract.mjs";
 
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
@@ -24,7 +24,7 @@ function makeAuth(request, env) {
     database: env.DB,
     baseURL: new URL(request.url).origin,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: ["https://anderson76389.github.io"],
+    trustedOrigins: ["https://anderson76389.github.io", new URL(request.url).origin],
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
@@ -57,18 +57,30 @@ async function ownedProfile(env, userId, profileId) {
 async function handleSync(request, env, user, url) {
   if (request.method === "GET") {
     const profileId = url.searchParams.get("profileId") || "";
-    if (!/^[a-f0-9-]{36}$/i.test(profileId) || !await ownedProfile(env, user.id, profileId))
+    if (!validProfileId(profileId) || !await ownedProfile(env, user.id, profileId))
       return jsonResponse({error:"Profil introuvable"},404);
+    const requestedOffset = url.searchParams.get("offset") || "0";
+    if (!validSyncOffset(requestedOffset)) return jsonResponse({error:"Curseur invalide"},400);
+    const offset = Number(requestedOffset);
+    const requestedLimit = url.searchParams.get("limit") || "25";
+    if (!/^(?:[1-9]|1[0-9]|2[0-5])$/.test(requestedLimit))
+      return jsonResponse({error:"Limite invalide"},400);
+    const limit = Number(requestedLimit);
+    // 25 x 32 KiB fits under the native clients' 1 MiB response ceiling.
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
-      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY updated_at, category, item_key LIMIT 500"
-    ).bind(user.id, profileId).all();
+      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY category, item_key LIMIT ? OFFSET ?"
+    ).bind(user.id, profileId, limit + 1, offset).all();
+    const rows = result.results || [];
+    const partial = rows.length > limit;
     return jsonResponse({
-      items: (result.results || []).map(row => ({
+      items: rows.slice(0,limit).map(row => ({
         ...row, payload: JSON.parse(row.payload), deleted: row.deleted === 1
       })),
-      limit: 500,
-      partial: (result.results || []).length === 500
+      limit,
+      offset,
+      nextOffset: partial ? offset + limit : null,
+      partial
     });
   }
   if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
@@ -99,7 +111,7 @@ async function handleSync(request, env, user, url) {
   ).bind(user.id, body.profileId, body.category, body.itemKey).first();
   return jsonResponse({error:"Conflit de synchronisation",current:latest},409);
 }
-async function handleProfiles(request,env,user) {
+async function handleProfiles(request,env,user,url) {
   if (request.method === "GET") {
     const result = await env.DB.prepare(
       "SELECT id,display_name AS displayName,avatar_path AS avatarPath,"+
@@ -107,6 +119,29 @@ async function handleProfiles(request,env,user) {
       "FROM kv_profiles WHERE owner_id=? ORDER BY created_at ASC LIMIT 8"
     ).bind(user.id).all();
     return jsonResponse({profiles:result.results || []});
+  }
+  if (request.method === "PATCH" || request.method === "DELETE") {
+    const profileId = url.searchParams.get("profileId");
+    if (!validProfileId(profileId) || !await ownedProfile(env, user.id, profileId))
+      return jsonResponse({error:"Profil introuvable"},404);
+    if (request.method === "PATCH") {
+      const body = await readJson(request);
+      if (!validProfileName(body?.displayName))
+        return jsonResponse({error:"Nom de profil invalide"},400);
+      const now = Date.now();
+      await env.DB.prepare(
+        "UPDATE kv_profiles SET display_name=?,updated_at=? WHERE id=? AND owner_id=?"
+      ).bind(body.displayName.trim(),now,profileId,user.id).run();
+      return jsonResponse({profile:{id:profileId,displayName:body.displayName.trim(),updatedAt:now}});
+    }
+    // Keep at least one usable profile; a delete cascades the owned sync data.
+    const removed = await env.DB.prepare(
+      "DELETE FROM kv_profiles WHERE owner_id=? AND id=? "+
+      "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
+    ).bind(user.id,profileId,user.id).run();
+    if (removed.meta?.changes !== 1)
+      return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
+    return jsonResponse({deleted:true,id:profileId});
   }
   if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
   const body = await readJson(request);
@@ -125,7 +160,8 @@ async function handleProfiles(request,env,user) {
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("origin");
-    if (!isAllowedOrigin(origin)) return jsonResponse({error:"Origine interdite"},403);
+    const workerOrigin = new URL(request.url).origin;
+    if (!isAllowedOrigin(origin, workerOrigin)) return jsonResponse({error:"Origine interdite"},403);
     const headers = corsHeaders(origin);
     if (request.method === "OPTIONS")
       return new Response(null,{status:204,headers});
@@ -155,7 +191,7 @@ export default {
       if (!user) return respond(jsonResponse({error:"Authentification requise"},401));
       if (url.pathname === "/v1/me" && request.method === "GET")
         return respond(jsonResponse({id:user.id,email:user.email,name:user.name}));
-      if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user));
+      if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {

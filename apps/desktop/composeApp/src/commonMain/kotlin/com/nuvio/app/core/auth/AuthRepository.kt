@@ -56,7 +56,20 @@ object AuthRepository {
         // Tant que le jeton n'est pas stocke de façon chiffrée, les utilisateurs
         // du Worker se reconnectent après chaque redémarrage de l'application.
         if (CloudflareAccountClient.enabled) {
-            if (savedAnonId == null) _state.value = AuthState.Unauthenticated
+            if (savedAnonId == null) {
+                _state.value = AuthState.Loading
+                scope.launch {
+                    val restored = CloudflareAccountClient.restoreSession()
+                    // A user may sign in manually while the remote validation runs.
+                    if (_state.value == AuthState.Loading) {
+                        _state.value = if (restored != null) {
+                            AuthState.Authenticated(
+                                userId = restored.userId, email = restored.email, isAnonymous = false
+                            )
+                        } else AuthState.Unauthenticated
+                    }
+                }
+            }
             return
         }
 
@@ -171,13 +184,20 @@ object AuthRepository {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
             val logout = runCatching { CloudflareAccountClient.signOut() }
+            // Credentials and in-memory identity are cleared before network revocation.
+            // Offline revocation must not leave the account visibly connected.
+            val cancellation = logout.exceptionOrNull() as? CancellationException
+            if (cancellation != null) throw cancellation
+            logout.exceptionOrNull()?.let { error ->
+                log.w(error) { "Cloudflare logout completed locally; remote revocation unavailable" }
+            }
             AuthStorage.clearAnonymousUserId()
             // Ne jamais effacer les profils, la bibliothèque ou la progression
             // avant la migration de stockage/synchronisation vers D1.
             // La fermeture de session ne garantit PAS encore l'isolation locale
             // entre plusieurs utilisateurs sur le même appareil.
             _state.value = AuthState.Unauthenticated
-            return logout
+            return Result.success(Unit)
         }
         val anonymousRead = runCatching { AuthStorage.loadAnonymousUserId() }
         val wasAnonymous = anonymousRead.getOrNull() != null

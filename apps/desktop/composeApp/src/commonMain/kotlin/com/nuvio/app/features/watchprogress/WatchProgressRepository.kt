@@ -2,6 +2,8 @@ package com.nuvio.app.features.watchprogress
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareDataSync
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.addons.AddonManifest
@@ -1403,6 +1405,10 @@ object WatchProgressRepository {
 
     private fun pushScrobbleToServer(entry: WatchProgressEntry, profileId: Int) {
         if (ServerItemRef.isServerId(entry.parentMetaId)) return
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
         val operationGeneration = profileGeneration.takeIf { profileId == currentProfileId }
         accountScopeSnapshot().launch {
             runCatching {
@@ -1418,8 +1424,32 @@ object WatchProgressRepository {
         }
     }
 
+    /** Raw LOCAL playback positions, independent of any external tracker. */
+    internal fun cloudLocalEntries(profileId: Int): List<WatchProgressEntry> {
+        ensureLoaded()
+        return if (currentProfileId == profileId) localEntriesSnapshot() else emptyList()
+    }
+
+    internal fun applyCloudProgressDeletes(profileId: Int, deletedAtByKey: Map<String, Long>) {
+        if (deletedAtByKey.isEmpty() || profileId != currentProfileId) return
+        ensureLoaded()
+        val removable = localEntriesSnapshot().filter {
+            val deletedAt = deletedAtByKey[it.resolvedProgressKey().take(200)]
+            deletedAt != null && it.lastUpdatedEpochMs <= deletedAt
+        }
+        removable.forEach { removeLocalEntry(it.resolvedProgressKey()) }
+        if (removable.isNotEmpty()) {
+            publish()
+            persist()
+        }
+    }
+
     private fun pushDeleteToServer(entries: Collection<WatchProgressEntry>) {
         if (activeSource.providerId != null) return
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.deleteProgress(currentProfileId, entries)
+            return
+        }
         val entries = entries.filterNot { ServerItemRef.isServerId(it.parentMetaId) }
         val profileId = currentProfileId
         accountScopeSnapshot().launch {
