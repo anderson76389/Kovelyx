@@ -1,6 +1,7 @@
 package com.nuvio.app.core.auth
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.ServerConfiguration
 import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.SupabaseProvider
@@ -52,7 +53,6 @@ enum class DeviceLinkAuthFailure {
 object DeviceLinkAuthRepository {
     private const val maxConsecutivePollFailures = 3
     private const val maxPollAttempts = 120
-    private const val officialLinkUrl = "https://nuvio.tv/link"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val log = Logger.withTag("DeviceLinkAuthRepository")
     private val json = Json { ignoreUnknownKeys = true }
@@ -68,6 +68,14 @@ object DeviceLinkAuthRepository {
         activeJob = scope.launch {
             _state.value = DeviceLinkAuthState.Starting
             val configuration = ServerConfigurationRepository.active.value
+            // Better Auth / Cloudflare does not support the legacy Supabase TV-link RPC.
+            // Never redirect Kovelyx users to Nuvio or start Supabase in Cloudflare mode.
+            if (CloudflareAccountClient.enabled || !configuration.isCustom ||
+                !configuration.capabilities.tvLogin ||
+                configuration.backendUrl.isBlank() || configuration.publishableKey.isBlank()) {
+                _state.value = DeviceLinkAuthState.Failed(DeviceLinkAuthFailure.Start)
+                return@launch
+            }
             val nonce = Uuid.random().toString()
             try {
                 val session = startSession(
@@ -193,7 +201,7 @@ object DeviceLinkAuthRepository {
     }
 
     private fun ServerConfiguration.deviceLinkUrl(): String =
-        if (isCustom) "${backendUrl.trimEnd('/')}/link" else officialLinkUrl
+        "${backendUrl.trimEnd('/')}/link"
 }
 
 internal fun formatDeviceLinkCode(value: String): String {
