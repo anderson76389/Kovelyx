@@ -3,6 +3,7 @@ package com.nuvio.app.core.sync
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareDataSync
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.build.AppFeaturePolicy
 import com.nuvio.app.core.time.EpisodeReleaseDatePlatform
@@ -342,7 +343,10 @@ object SyncManager {
     fun requestForegroundPull(profileId: Int, force: Boolean = false) {
         // Les RPC historiques Supabase ne sont pas compatibles avec Cloudflare D1.
         // Ne jamais les lancer avant qu'un adaptateur natif D1 ait été testé.
-        if (CloudflareAccountClient.enabled) return
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
         val authState = AuthRepository.state.value
         if (authState !is AuthState.Authenticated || authState.isAnonymous) return
 
@@ -520,7 +524,20 @@ object SyncManager {
 
     fun startPeriodicNuvioSyncPull(profileId: Int) {
         if (CloudflareAccountClient.enabled) {
+            if (periodicNuvioSyncPullJob?.isActive == true &&
+                periodicNuvioSyncProfileId == profileId) return
             stopPeriodicNuvioSyncPull()
+            periodicNuvioSyncProfileId = profileId
+            periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
+                while (isActive) {
+                    delay(PERIODIC_NUVIO_SYNC_PULL_INTERVAL_MS)
+                    val state = AuthRepository.state.value as? AuthState.Authenticated
+                    if (state != null && !state.isAnonymous &&
+                        ProfileRepository.activeProfileId == profileId) {
+                        CloudflareDataSync.request(profileId)
+                    }
+                }
+            }
             return
         }
         val authState = AuthRepository.state.value
