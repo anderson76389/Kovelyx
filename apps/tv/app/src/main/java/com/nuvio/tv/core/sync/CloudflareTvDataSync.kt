@@ -83,8 +83,22 @@ class CloudflareTvDataSync @Inject constructor(
     suspend fun synchronize(profileId: Int) = mutex.withLock {
         if (CloudflareTvAccountClient.account == null ||
             profileManager.activeProfileId.value != profileId) return@withLock
-        val uuid = CloudflareTvAccountClient.cloudProfiles()
-            .getOrNull(profileId - 1)?.first ?: return@withLock
+        // Never equate the numeric local ID with an ordinal in the cloud list:
+        // deleted/reordered profiles would silently mix another person's history.
+        val localName = profileManager.profiles.value
+            .firstOrNull { it.id == profileId }?.name.orEmpty()
+        val remoteProfiles = CloudflareTvAccountClient.cloudProfiles()
+        val matchingProfiles = remoteProfiles.filter {
+            it.second.equals(localName, ignoreCase = true)
+        }
+        val uuid = when {
+            matchingProfiles.size == 1 -> matchingProfiles.single().first
+            remoteProfiles.size == 1 && profileId == 1 -> remoteProfiles.single().first
+            else -> {
+                Log.w(TAG, "Profil TV ambigu : synchronisation Cloudflare non effectuée")
+                return@withLock
+            }
+        }
         val remote = CloudflareTvAccountClient.syncRows(uuid).associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }
