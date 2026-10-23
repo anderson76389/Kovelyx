@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
-import { CATEGORIES, jsonResponse, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
+import { CATEGORIES, jsonResponse, validProfileId, validSyncOffset, validProfileName, validSyncInput, isAllowedOrigin } from "./contract.mjs";
 import {handleProfileMedia} from "./media.mjs";
 import {handleWatched} from "./watched.mjs";
 
@@ -59,7 +59,7 @@ async function ownedProfile(env, userId, profileId) {
 export async function handleSync(request, env, user, url) {
   if (request.method === "GET") {
     const profileId = url.searchParams.get("profileId") || "";
-    if (!/^[a-f0-9-]{36}$/i.test(profileId) || !await ownedProfile(env, user.id, profileId))
+    if (!validProfileId(profileId) || !await ownedProfile(env, user.id, profileId))
       return jsonResponse({error:"Profil introuvable"},404);
     const requestedCategory = url.searchParams.get("category");
     if (requestedCategory !== null) {
@@ -85,17 +85,23 @@ export async function handleSync(request, env, user, url) {
         nextCursor:rows.length>requestedLimit ? page[page.length-1].itemKey : null
       });
     }
-    // Legacy endpoint remains usable for older diagnostic clients only.
+    // Older released clients use offset pagination; preserve their complete library.
+    const offsetValue = url.searchParams.get("offset") ?? "0";
+    const limitValue = url.searchParams.get("limit") ?? "25";
+    if (!validSyncOffset(offsetValue) || !/^(?:[1-9]|1[0-9]|2[0-5])$/.test(limitValue))
+      return jsonResponse({error:"Pagination invalide"},400);
+    const offset = Number(offsetValue), limit = Number(limitValue);
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
-      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY updated_at, category, item_key LIMIT 500"
-    ).bind(user.id, profileId).all();
+      "FROM kv_sync WHERE owner_id=? AND profile_id=? "+
+      "ORDER BY category, item_key LIMIT ? OFFSET ?" 
+    ).bind(user.id, profileId, limit+1, offset).all();
+    const rows = result.results || [], partial = rows.length > limit;
     return jsonResponse({
-      items: (result.results || []).map(row => ({
+      items: rows.slice(0,limit).map(row => ({
         ...row, payload: JSON.parse(row.payload), deleted: row.deleted === 1
       })),
-      limit: 500,
-      partial: (result.results || []).length === 500
+      limit, offset, nextOffset: partial ? offset+limit : null, partial
     });
   }
   if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
@@ -128,34 +134,34 @@ export async function handleSync(request, env, user, url) {
 }
 export async function handleProfiles(request,env,user,url) {
   const route = url.pathname;
-  // Toute mutation reste limitée au compte authentifié.
-  if (route === "/v1/profiles/update" || route === "/v1/profiles/delete") {
-    if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
-    const body = await readJson(request);
-    if (!body || typeof body.profileId !== "string" ||
-        !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(body.profileId))
-      return jsonResponse({error:"Identifiant de profil invalide"},400);
-    if (route === "/v1/profiles/update") {
-      if (!validProfileName(body.displayName))
-        return jsonResponse({error:"Nom de profil invalide"},400);
-      const name = body.displayName.trim();
-      const now = Date.now();
+  // Preserve both the legacy POST and current PATCH/DELETE profile APIs.
+  const legacyUpdate = route === "/v1/profiles/update";
+  const legacyDelete = route === "/v1/profiles/delete";
+  const mutationUpdate = legacyUpdate || (route === "/v1/profiles" && request.method === "PATCH");
+  const mutationDelete = legacyDelete || (route === "/v1/profiles" && request.method === "DELETE");
+  if (mutationUpdate || mutationDelete) {
+    if ((legacyUpdate || legacyDelete) && request.method !== "POST")
+      return jsonResponse({error:"Méthode interdite"},405);
+    const body = mutationUpdate || legacyDelete ? await readJson(request) : null;
+    const profileId = legacyUpdate || legacyDelete ? body?.profileId : url.searchParams.get("profileId");
+    if (!validProfileId(profileId)) return jsonResponse({error:"Identifiant de profil invalide"},400);
+    if (mutationUpdate) {
+      if (!validProfileName(body?.displayName)) return jsonResponse({error:"Nom de profil invalide"},400);
+      const name = body.displayName.trim(), now = Date.now();
       const updated = await env.DB.prepare(
         "UPDATE kv_profiles SET display_name=?,updated_at=? WHERE id=? AND owner_id=?"
-      ).bind(name,now,body.profileId,user.id).run();
+      ).bind(name,now,profileId,user.id).run();
       if (updated.meta?.changes !== 1) return jsonResponse({error:"Profil introuvable"},404);
-      return jsonResponse({profile:{id:body.profileId,displayName:name,updatedAt:now}});
+      return jsonResponse({profile:{id:profileId,displayName:name,updatedAt:now}});
     }
-    // Suppression explicite seulement : les lignes kv_sync du profil sont effacées
-    // par la contrainte ON DELETE CASCADE. Le dernier profil est préservé.
+    // No cross-account or principal-profile deletion; preserve the last profile.
     const deleted = await env.DB.prepare(
       "DELETE FROM kv_profiles WHERE id=? AND owner_id=? " +
       "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1 " +
       "AND id!=(SELECT id FROM kv_profiles WHERE owner_id=? ORDER BY created_at,id LIMIT 1)"
-    ).bind(body.profileId,user.id,user.id,user.id).run();
-    if (deleted.meta?.changes === 1) return jsonResponse({deleted:true});
-    if (!await ownedProfile(env,user.id,body.profileId))
-      return jsonResponse({error:"Profil introuvable"},404);
+    ).bind(profileId,user.id,user.id,user.id).run();
+    if (deleted.meta?.changes === 1) return jsonResponse({deleted:true,id:profileId});
+    if (!await ownedProfile(env,user.id,profileId)) return jsonResponse({error:"Profil introuvable"},404);
     return jsonResponse({error:"Le profil principal ou dernier profil ne peut pas être supprimé"},409);
   }
   if (route !== "/v1/profiles") return jsonResponse({error:"Route inconnue"},404);
