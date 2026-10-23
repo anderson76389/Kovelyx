@@ -13,6 +13,8 @@ data class AppUpdateAssetSelector(
     val contentTypes: List<String> = emptyList(),
     val preferredNameFragments: List<String> = emptyList(),
     val fallbackNameFragments: List<String> = emptyList(),
+    // Avoid cross-platform APKs and unrelated binaries in shared GitHub Releases.
+    val requiredNamePrefixes: List<String> = emptyList(),
 )
 
 expect object AppUpdaterPlatform {

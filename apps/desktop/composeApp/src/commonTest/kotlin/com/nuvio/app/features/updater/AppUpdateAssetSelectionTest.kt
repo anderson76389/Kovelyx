@@ -87,6 +87,34 @@ class AppUpdateAssetSelectionTest {
         assertNull(selected)
     }
 
+    @Test
+    fun androidUpdateNeverSelectsTvUniversalApk() {
+        val selected = selectBestUpdateAsset(
+            assets = listOf(
+                asset("Kovelyx-TV-v1.1.565-alpha-universal.apk"),
+                asset("Kovelyx-Android-v1.1.565-alpha.apk"),
+            ),
+            selector = AppUpdateAssetSelector(
+                fileExtensions = listOf(".apk"),
+                fallbackNameFragments = listOf("universal", "all"),
+                requiredNamePrefixes = listOf("Kovelyx-Android-", "Kovelyx-Mobile-"),
+            ),
+        )
+        assertEquals("Kovelyx-Android-v1.1.565-alpha.apk", selected?.name)
+    }
+
+    @Test
+    fun rejectsTvOnlyReleaseForMobile() {
+        val selected = selectBestUpdateAsset(
+            assets = listOf(asset("Kovelyx-TV-v1.1.565-alpha-universal.apk")),
+            selector = AppUpdateAssetSelector(
+                fileExtensions = listOf(".apk"),
+                requiredNamePrefixes = listOf("Kovelyx-Android-", "Kovelyx-Mobile-"),
+            ),
+        )
+        assertNull(selected)
+    }
+
     private fun asset(
         name: String,
         contentType: String? = null,

@@ -21,6 +21,7 @@ actual object AppUpdaterPlatform {
             contentTypes = listOf("application/vnd.android.package-archive"),
             preferredNameFragments = AndroidAppUpdaterPlatform.getSupportedAbis(),
             fallbackNameFragments = listOf("universal", "all"),
+            requiredNamePrefixes = listOf("Kovelyx-Android-", "Kovelyx-Mobile-"),
         )
 
     actual val currentVersionName: String = AppVersionConfig.VERSION_NAME

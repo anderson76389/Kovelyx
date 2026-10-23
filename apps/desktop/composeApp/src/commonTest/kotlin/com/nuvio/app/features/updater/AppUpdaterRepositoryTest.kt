@@ -7,28 +7,28 @@ import kotlin.test.assertNull
 class AppUpdaterRepositoryTest {
     @Test
     fun channelsUseTheSameReleaseEndpointsAsTv() {
-        assertEquals("releases/latest", AppUpdaterRepository.releasePath(UpdateChannel.STABLE))
+        assertEquals("releases?per_page=100", AppUpdaterRepository.releasePath(UpdateChannel.STABLE))
         assertEquals("releases?per_page=100", AppUpdaterRepository.releasePath(UpdateChannel.BETA))
-        assertEquals("releases?per_page=20", AppUpdaterRepository.releasePath(UpdateChannel.ALL_RELEASES))
+        assertEquals("releases?per_page=100", AppUpdaterRepository.releasePath(UpdateChannel.ALL_RELEASES))
     }
 
     @Test
     fun stableAcceptsReleasesFromAnyBranch() {
         listOf("main", "master", "cmp-rewrite", "1234567").forEach { branch ->
-            val response = """{
+            val response = """[{
                 "tag_name": "v1.1.0", "target_commitish": "$branch",
                 "assets": [{"name": "app.apk", "browser_download_url": "https://example.com/app.apk"}]
-            }"""
+            }]"""
             assertEquals("v1.1.0", select(response, UpdateChannel.STABLE)?.tag)
         }
     }
 
     @Test
     fun stableRejectsLegacyBetaNamesEvenIfGithubMarksThemStable() {
-        val response = """{
+        val response = """[{
             "tag_name": "1.1.0", "name": "Beta 1.1.0 Hotfix",
             "assets": [{"name": "app.apk", "browser_download_url": "https://example.com/app.apk"}]
-        }"""
+        }]"""
         assertNull(select(response, UpdateChannel.STABLE))
     }
 
@@ -57,34 +57,57 @@ class AppUpdaterRepositoryTest {
     }
 
     @Test
-    fun desktopSelectsFirstPublishedReleaseInGithubOrderWithoutChannelOrSemverFiltering() {
+    fun desktopChoosesHighestSemanticReleaseNotGithubPublicationOrder() {
         val response = """[
-            {"tag_name": "desktop-preview", "name": "Desktop Preview", "prerelease": true, "assets": [
-                {"name": "Nuvio.dmg", "browser_download_url": "https://example.com/preview.dmg"}]},
-            {"tag_name": "2.0.0", "assets": [
-                {"name": "Nuvio.dmg", "browser_download_url": "https://example.com/stable.dmg"}]}
+            {"tag_name": "desktop-preview-deadbeef", "prerelease": true, "assets": [
+                {"name": "Kovelyx-Windows-Setup-preview.exe", "browser_download_url": "https://example.com/preview.exe"}]},
+            {"tag_name": "v1.1.565-alpha", "prerelease": false, "assets": [
+                {"name": "Kovelyx-Windows-v1.1.565-alpha.msi", "browser_download_url": "https://example.com/old.msi"}]},
+            {"tag_name": "v1.1.568-alpha", "prerelease": true, "assets": [
+                {"name": "Kovelyx-Windows-v1.1.568-alpha.msi", "browser_download_url": "https://example.com/new.msi"}]}
         ]"""
-
         val update = AppUpdaterRepository.selectUpdate(
             responseBody = response,
             channel = UpdateChannel.ALL_RELEASES,
             supportedAbis = emptyList(),
-            selector = AppUpdateAssetSelector(fileExtensions = listOf(".dmg")),
+            selector = AppUpdateAssetSelector(
+                fileExtensions = listOf(".msi"),
+                requiredNamePrefixes = listOf("Kovelyx-Windows-"),
+            ),
         )
+        assertEquals("v1.1.568-alpha", update?.tag)
+        assertEquals("Kovelyx-Windows-v1.1.568-alpha.msi", update?.assetName)
+    }
 
-        assertEquals("desktop-preview", update?.tag)
-        assertEquals("https://example.com/preview.dmg", update?.assetUrl)
+    @Test
+    fun stableSearchSkipsNewerAndroidAndTvOnlyReleases() {
+        val response = """[
+            {"tag_name": "v2.0.0", "assets": [
+                {"name": "Kovelyx-TV-v2.0.0.apk", "browser_download_url": "https://example.com/tv.apk"}]},
+            {"tag_name": "v1.1.9", "assets": [
+                {"name": "Kovelyx-Android-v1.1.9.apk", "browser_download_url": "https://example.com/mobile.apk"}]},
+            {"tag_name": "v1.1.8", "assets": [
+                {"name": "Kovelyx-Windows-v1.1.8.msi", "browser_download_url": "https://example.com/windows.msi"}]}
+        ]"""
+        val update = AppUpdaterRepository.selectUpdate(
+            response, UpdateChannel.STABLE, emptyList(),
+            AppUpdateAssetSelector(
+                fileExtensions = listOf(".msi"),
+                requiredNamePrefixes = listOf("Kovelyx-Windows-"),
+            ),
+        )
+        assertEquals("v1.1.8", update?.tag)
     }
 
     @Test
     fun apkSelectionPreservesDeviceAbiPreference() {
-        val response = """{
+        val response = """[{
             "tag_name": "1.1.0", "assets": [
                 {"name": "app-universal.apk", "browser_download_url": "https://example.com/universal.apk"},
                 {"name": "app-arm64-v8a.apk", "browser_download_url": "https://example.com/arm64.apk"},
                 {"name": "app-x86_64.apk", "browser_download_url": "https://example.com/x86.apk"}
             ]
-        }"""
+        }]"""
         assertEquals("app-arm64-v8a.apk", select(response, UpdateChannel.STABLE)?.assetName)
         assertEquals(
             "app-universal.apk",

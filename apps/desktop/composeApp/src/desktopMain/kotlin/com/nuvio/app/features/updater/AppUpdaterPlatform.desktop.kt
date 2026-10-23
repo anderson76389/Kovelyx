@@ -76,6 +76,7 @@ actual object AppUpdaterPlatform {
             AppUpdateAssetSelector(
                 fileExtensions = listOf(".zip"),
                 preferredNameFragments = listOf("Kovelyx-Windows-Portable-"),
+                requiredNamePrefixes = listOf("Kovelyx-Windows-Portable-"),
             )
         } else {
             currentOs.assetSelector(linuxInstallMethod)
@@ -324,6 +325,7 @@ private enum class DesktopUpdaterOs {
                 fileExtensions = listOf(".exe", ".msi"),
                 preferredNameFragments = listOf("Kovelyx-Windows-v") + archFragments + listOf("Kovelyx-Windows-Setup-", "windows"),
                 fallbackNameFragments = listOf("universal", "all"),
+                requiredNamePrefixes = listOf("Kovelyx-Windows-"),
             )
             MACOS -> AppUpdateAssetSelector(
                 fileExtensions = listOf(".dmg", ".pkg"),
