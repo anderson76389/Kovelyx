@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.mediaserver.FakeServerProvider
@@ -15,6 +16,8 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.result.PostgrestResult
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import io.ktor.http.Headers
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -37,9 +40,25 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.After
 import org.junit.Test
 
 class MediaServerSyncServiceTest {
+    /** Ces tests vérifient uniquement le protocole Supabase historique.
+     * En distribution Kovelyx Cloudflare, les RPC Supabase restent bloqués.
+     * Le protocole Cloudflare est testé séparément via Worker/D1 et ses clients. */
+    @Before
+    fun legacyProtocolOnly() {
+        mockkObject(CloudflareTvAccountClient)
+        every { CloudflareTvAccountClient.enabled } returns false
+    }
+
+    @After
+    fun closeLegacyProtocol() {
+        unmockkObject(CloudflareTvAccountClient)
+    }
+
     private var remote: List<SyncedServer>? = null
     private val calls = mutableListOf<String>()
     private val authState = MutableStateFlow<AuthState>(AuthState.FullAccount("user", "user@example.com"))
