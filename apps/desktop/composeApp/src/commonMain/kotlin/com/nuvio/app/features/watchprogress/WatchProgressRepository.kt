@@ -1430,6 +1430,21 @@ object WatchProgressRepository {
         return if (currentProfileId == profileId) localEntriesSnapshot() else emptyList()
     }
 
+    internal fun applyCloudProgressDeletes(profileId: Int, keys: Set<String>) {
+        if (keys.isEmpty() || profileId != currentProfileId) return
+        ensureLoaded()
+        val dirty = dirtyProgressKeysSnapshot()
+        val removable = localEntriesSnapshot().filter {
+            it.resolvedProgressKey().take(200) in keys &&
+                it.resolvedProgressKey() !in dirty
+        }
+        removable.forEach { removeLocalEntry(it.resolvedProgressKey()) }
+        if (removable.isNotEmpty()) {
+            publish()
+            persist()
+        }
+    }
+
     private fun pushDeleteToServer(entries: Collection<WatchProgressEntry>) {
         if (activeSource.providerId != null) return
         if (CloudflareAccountClient.enabled) {
