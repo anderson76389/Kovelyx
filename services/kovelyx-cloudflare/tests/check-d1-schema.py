@@ -5,6 +5,7 @@ import sqlite3
 import unittest
 
 migration = Path(__file__).parents[1] / "migrations/0001_accounts_and_sync.sql"
+history_migration = Path(__file__).parents[1] / "migrations/0002_watched_history.sql"
 watched_migration = Path(__file__).parents[1] / "migrations/0002_watched_items.sql"
 
 
@@ -13,6 +14,7 @@ class CloudflareDatabase(unittest.TestCase):
         self.db = sqlite3.connect(":memory:")
         self.db.execute("PRAGMA foreign_keys=ON")
         self.db.executescript(migration.read_text(encoding="utf-8"))
+        self.db.executescript(history_migration.read_text(encoding="utf-8"))
         self.db.executescript(watched_migration.read_text(encoding="utf-8"))
         for user in ("alice", "bob"):
             self.db.execute(
@@ -93,6 +95,17 @@ class CloudflareDatabase(unittest.TestCase):
                 "SELECT count(*) FROM kv_watched_items WHERE owner_id=? AND deleted=1",
                 ("alice",)
             ).fetchone()[0],1
+        )
+
+    def test_legacy_watched_items_category_survives_migrations(self):
+        self.db.execute(
+            "INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,revision,updated_at) "
+            "VALUES (?,?,?,?,?,?,?)",
+            ("alice","alice-profile","watched_items","movie:42","{}",1,1)
+        )
+        self.assertEqual(
+            self.db.execute("SELECT revision FROM kv_sync WHERE category=?",
+                            ("watched_items",)).fetchone(), (1,)
         )
 
     def test_no_credentials_category(self):
