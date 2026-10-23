@@ -1,5 +1,6 @@
 package com.nuvio.tv.core.sync
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.sync.library.LibrarySyncLocalStore
 import com.nuvio.tv.core.sync.library.LibrarySyncRemoteDataSource
 import com.nuvio.tv.domain.model.LibraryDeltaApplyResult
@@ -13,9 +14,28 @@ import com.nuvio.tv.domain.model.SavedLibraryItem
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.every
+import org.junit.Before
+import org.junit.After
 import org.junit.Test
 
 class LibrarySyncServiceTest {
+    /** Ces tests vérifient uniquement le protocole Supabase historique.
+     * En distribution Kovelyx Cloudflare, les RPC Supabase restent bloqués.
+     * Le protocole Cloudflare est testé séparément via Worker/D1 et ses clients. */
+    @Before
+    fun legacyProtocolOnly() {
+        mockkObject(CloudflareTvAccountClient)
+        every { CloudflareTvAccountClient.enabled } returns false
+    }
+
+    @After
+    fun closeLegacyProtocol() {
+        unmockkObject(CloudflareTvAccountClient)
+    }
+
     @Test
     fun bootstrapUsesSnapshotThenConsumesDelta() = runBlocking {
         val local = InMemoryLibrarySyncStore()
