@@ -98,3 +98,22 @@ test("profile routes reject invalid bodies and unsupported methods",async()=>{
   const [getReq,getUrl]=request("/v1/profiles/delete",null,"GET");
   assert.equal((await handleProfiles(getReq,{DB:db},{id:"alice"},getUrl)).status,405);
 });
+
+
+test("PATCH and DELETE remain compatible with already published clients",async()=>{
+  const db=fakeDatabase();
+  const [update,url]=request("/v1/profiles?profileId="+SECOND,{displayName:"Télévision"},"PATCH");
+  const good=await handleProfiles(update,{DB:db},{id:"alice"},url);
+  assert.equal(good.status,200);
+  assert.equal(db.profiles.find(p=>p.id===SECOND).display_name,"Télévision");
+
+  const [bad,other]=request("/v1/profiles?profileId="+OTHER,{displayName:"Pirate"},"PATCH");
+  assert.equal((await handleProfiles(bad,{DB:db},{id:"alice"},other)).status,404);
+  const [forbidden,principal]=request("/v1/profiles?profileId="+MAIN,null,"DELETE");
+  assert.equal((await handleProfiles(forbidden,{DB:db},{id:"alice"},principal)).status,409);
+  const [deletion,location]=request("/v1/profiles?profileId="+SECOND,null,"DELETE");
+  const ok=await handleProfiles(deletion,{DB:db},{id:"alice"},location);
+  assert.equal(ok.status,200);
+  assert.equal((await ok.json()).id,SECOND);
+  assert.equal(db.profiles.filter(p=>p.owner_id==="alice").length,1);
+});
