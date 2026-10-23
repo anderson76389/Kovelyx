@@ -1050,6 +1050,19 @@ object WatchedRepository {
         return itemsStore.read { nuvioItems, _, _, _ -> nuvioItems.values.toList() }
     }
 
+    /** Honor remote tombstones, but never discard a pending local watched edit. */
+    internal fun applyCloudDeletedWatched(profileId: Int, keys: Set<String>) {
+        if (keys.isEmpty() || profileId != currentProfileId) return
+        ensureLoaded()
+        itemsStore.update { nuvioItems, _, dirtyKeys, _ ->
+            keys.forEach { key ->
+                if (key !in dirtyKeys) nuvioItems.remove(key)
+            }
+        }
+        publish()
+        persist()
+    }
+
     /** Apply only fresher records, retaining local pending changes and watched timestamps. */
     internal fun applyCloudWatched(incoming: Collection<WatchedItem>) {
         if (incoming.isEmpty()) return
