@@ -2,6 +2,8 @@ package com.nuvio.app.features.library
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareDataSync
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.library.sync.LibrarySyncAdapter
@@ -542,11 +544,39 @@ object LibraryRepository {
         )
     }
 
+    /** Snapshot of LOCAL items, not an external tracking provider's imported list. */
+    internal fun cloudSnapshotForSync(profileId: Int): LibraryLocalSnapshot? {
+        ensureLoaded()
+        val snapshot = localState.snapshot()
+        return snapshot.takeIf { it.token.profileId == profileId && it.hasLoaded }
+    }
+
+    internal fun acknowledgeCloudSnapshot(snapshot: LibraryLocalSnapshot) {
+        localState.markPushCompleted(snapshot)?.let(::persist)
+    }
+
+    internal fun applyCloudChanges(
+        profileId: Int,
+        events: List<com.nuvio.app.features.library.sync.LibraryDeltaEvent>,
+    ) {
+        if (events.isEmpty()) return
+        val snapshot = localState.snapshot()
+        if (snapshot.token.profileId != profileId) return
+        localState.applyDeltaEvents(snapshot.token, events)?.let {
+            persist(it)
+            publish()
+        }
+    }
+
     private fun pushToServer(
         snapshot: LibraryLocalSnapshot,
         delayMs: Long = pushDebounceMs,
     ) {
         if (!snapshot.hasPendingPush) return
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(snapshot.token.profileId)
+            return
+        }
         val authState = AuthRepository.state.value
         val profileId = snapshot.token.profileId
         if (authState !is AuthState.Authenticated) {
