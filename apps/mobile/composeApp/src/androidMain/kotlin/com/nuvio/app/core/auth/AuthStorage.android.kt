@@ -11,6 +11,7 @@ actual object AuthStorage {
 
     fun initialize(context: Context) {
         preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        CloudflareCredentialStore.initialize(context)
     }
 
     actual fun loadAnonymousUserId(): String? =

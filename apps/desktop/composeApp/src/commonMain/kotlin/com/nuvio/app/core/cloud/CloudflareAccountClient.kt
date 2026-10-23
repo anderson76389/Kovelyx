@@ -1,6 +1,7 @@
 package com.nuvio.app.core.cloud
 
 import com.nuvio.app.features.addons.httpRequestRaw
+import com.nuvio.app.core.auth.CloudflareCredentialStore
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
@@ -15,9 +16,8 @@ import kotlinx.serialization.json.put
  * API Cloudflare D1 / Better Auth Kovelyx. Ne pas injecter une URL workers.dev
  * dans le client Supabase historique : les protocoles sont incompatibles.
  *
- * Sessions en mémoire pour cette phase de migration : ne pas persister de jetons
- * dans les préférences non chiffrées. L'utilisateur se reconnecte au redémarrage
- * jusqu'à l'intégration d'un stockage sécurisé spécifique aux OS.
+ * Sessions sauvegardées uniquement avec les mécanismes sécurisés de l'OS
+ * (Android Keystore / Windows DPAPI), vérifiées auprès du Worker à chaque lancement.
  */
 object CloudflareAccountClient {
     data class Session(val userId: String, val email: String, val bearerToken: String)
@@ -52,6 +52,60 @@ object CloudflareAccountClient {
         return response.body to response.headers
     }
 
+    /** Restore encrypted credentials, never treating local storage as proof of identity. */
+    suspend fun restoreSession(): Session? {
+        if (!enabled) return null
+        val raw = runCatching { CloudflareCredentialStore.load() }.getOrNull() ?: return null
+        val saved = runCatching {
+            val data = json.parseToJsonElement(raw).jsonObject
+            Session(
+                userId = data["id"]?.jsonPrimitive?.content.orEmpty(),
+                email = data["email"]?.jsonPrimitive?.content.orEmpty(),
+                bearerToken = data["bearer"]?.jsonPrimitive?.content.orEmpty()
+            )
+        }.getOrNull()
+        if (saved == null || saved.userId.isBlank() || saved.email.isBlank() ||
+            saved.bearerToken.length < 16) {
+            CloudflareCredentialStore.clear()
+            return null
+        }
+        return try {
+            val response = httpRequestRaw(
+                method = "GET", url = base() + "/v1/me",
+                headers = mapOf("Authorization" to "Bearer ${saved.bearerToken}"),
+                body = "", followRedirects = false, maxResponseBodyBytes = 131072
+            )
+            if (response.status == 401 || response.status == 403) {
+                CloudflareCredentialStore.clear()
+                return null
+            }
+            if (response.status != 200) return null
+            val me = json.parseToJsonElement(response.body).jsonObject
+            val id = me["id"]?.jsonPrimitive?.content
+            val email = me["email"]?.jsonPrimitive?.content
+            if (id != saved.userId || email != saved.email) {
+                CloudflareCredentialStore.clear()
+                return null
+            }
+            if (session == null) session = saved
+            session
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // Preserve encrypted credentials on transient connection failures.
+            null
+        }
+    }
+
+    private fun persistSession(account: Session) {
+        val serialized = buildJsonObject {
+            put("id", account.userId)
+            put("email", account.email)
+            put("bearer", account.bearerToken)
+        }.toString()
+        runCatching { CloudflareCredentialStore.save(serialized) }
+    }
+
     suspend fun signUp(email: String, password: String) {
         val name = email.substringBefore('@').take(48).ifBlank { "Kovelyx" }
         val body = buildJsonObject {
@@ -80,17 +134,22 @@ object CloudflareAccountClient {
         check(id.isNotBlank() && realEmail.isNotBlank() && token.length >= 16) {
             "Kovelyx Cloud : session de connexion invalide"
         }
-        return Session(id, realEmail, token).also { session = it }
+        return Session(id, realEmail, token).also {
+            session = it
+            persistSession(it)
+        }
     }
 
     suspend fun signOut() {
         val old = session
         session = null
+        CloudflareCredentialStore.clear()
         if (old != null) request("/api/auth/sign-out", "{}", old.bearerToken)
     }
 
     fun clearLocalSession() {
         session = null
+        CloudflareCredentialStore.clear()
     }
 
     suspend fun accountProfiles(): JsonObject {
