@@ -153,6 +153,33 @@ internal object CloudflareTvAccountClient {
         }
     }
 
+    /**
+     * Creates the first cloud profile only for a genuinely empty account.
+     * TV keeps the returned D1 UUID; numeric local profile IDs are not cloud IDs.
+     */
+    suspend fun createCloudProfile(displayName: String): String = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        check(enabled) { "Kovelyx Cloudflare non configuré" }
+        require(displayName.isNotBlank() && displayName.length <= 64)
+        val root = BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/')
+        val data = JSONObject().put("displayName", displayName.trim())
+        val request = Request.Builder()
+            .url("$root/v1/profiles")
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .header("Origin", root)
+            .post(data.toString().toRequestBody("application/json".toMediaType()))
+            .build()
+        client.newCall(request).execute().use { response ->
+            check(response.code == 201) { "Création du profil Cloudflare HTTP ${response.code}" }
+            val id = JSONObject(response.body?.string().orEmpty())
+                .optJSONObject("profile")?.optString("id").orEmpty()
+            check(id.matches(Regex("[a-fA-F0-9-]{36}"))) {
+                "Le serveur a renvoyé un profil Cloudflare invalide."
+            }
+            id
+        }
+    }
+
     /** Stable D1 profile IDs must be used instead of the TV's local numeric index. */
     suspend fun cloudProfiles(): List<Pair<String, String>> = withContext(Dispatchers.IO) {
         val active = checkNotNull(account) { "Compte Kovelyx non connecté" }

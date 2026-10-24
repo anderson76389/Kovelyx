@@ -102,6 +102,12 @@ class CloudflareTvDataSync @Inject constructor(
             }
             matchingProfiles.size == 1 -> matchingProfiles.single().first
             remoteProfiles.size == 1 && profileId == 1 -> remoteProfiles.single().first
+            remoteProfiles.isEmpty() && profileId == 1 -> {
+                // A TV-first account has no D1 profiles yet. Previously every
+                // sync was silently skipped forever until another device
+                // created a profile. Create the default only on empty accounts.
+                CloudflareTvAccountClient.createCloudProfile(localProfile.name)
+            }
             else -> {
                 Log.w(TAG, "Profil TV ambigu : synchronisation Cloudflare non effectuée")
                 return@withLock
