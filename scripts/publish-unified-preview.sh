@@ -210,7 +210,7 @@ notes_file="$proof_dir/notes.md"
 jq -r '.body // ""' "$proof_dir/release.json" > "$notes_file"
 cat >> "$notes_file" <<EOF
 
-## Android mobile et Android TV (préversions de test)
+## Android et Android TV — préversions de test
 
 - **Android** : \`$mobile_name\` (APK Debug).
 - **Android TV / TV Box** : \`$tv_name\` (APK Debug universelle).
@@ -222,6 +222,6 @@ cat >> "$notes_file" <<EOF
 - La Release demeure expérimentale ; cette publication ne certifie ni streaming, ni synchro multi-appareils.
 EOF
 gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
-  --title "Kovelyx $tag — Windows · Android · Android TV" \
+  --title "Kovelyx $tag — PRÉVERSION EXPÉRIMENTALE · Windows · Android · Android TV" \
   --notes-file "$notes_file"
 echo "✅ Release commune complète : https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag" >> "$GITHUB_STEP_SUMMARY"

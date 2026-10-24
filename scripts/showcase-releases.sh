@@ -11,6 +11,41 @@ trap 'rm -f "$releases_file"' EXIT
 
 gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$releases_file"
 
+# Franciser les seules descriptions Windows historiques en anglais.
+# Aucun changement de tag, binaire, empreinte ou texte Android/TV déjà français.
+mapfile -t anciennes_notes_anglaises < <(jq -r '
+  .[]
+  | select(.draft == false and .published_at != null)
+  | select(
+      (.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+-(alpha|beta|rc)$"))
+      or (.tag_name | test("^(android|tv)-preview-[0-9a-f]{12}$"))
+    )
+  | select(
+      ((.body // "") | startswith("## Kovelyx Windows — preview "))
+      or ((.name // "") | endswith(" — test"))
+      or ((.name // "") | startswith("Kovelyx Android experimental - "))
+      or ((.body // "") | contains("\nBuild : "))
+      or ((.body // "") | contains("\nBuild TV : "))
+    )
+  | .tag_name
+' "$releases_file")
+
+for ancienne_version in "${anciennes_notes_anglaises[@]}"; do
+  meta="$(mktemp)"
+  notes="$(mktemp)"
+  titre="$(mktemp)"
+  jq -c --arg tag "$ancienne_version" '.[] | select(.tag_name == $tag) | {tag_name,name,body}' "$releases_file" > "$meta"
+  python3 scripts/localize_release_metadata.py "$meta" "$notes" "$titre"
+  [[ -s "$notes" && -s "$titre" ]] || {
+    echo "::error::La francisation de $ancienne_version a produit un fichier vide."
+    rm -f "$meta" "$notes" "$titre"
+    exit 1
+  }
+  gh release edit "$ancienne_version" --repo "$GITHUB_REPOSITORY" --title "$(cat "$titre")" --notes-file "$notes"
+  echo "Notes GitHub francisées : $ancienne_version"
+  rm -f "$meta" "$notes" "$titre"
+done
+
 # Select only published, complete, three-platform, versioned previews.
 # Separate TV-only previews and half-finished Windows uploads are never promoted.
 selected_tag="$(jq -r '

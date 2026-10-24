@@ -292,16 +292,17 @@ class AppUpdaterController internal constructor(
             updateChannel = preferences.channel.value,
             update = AppUpdate(
                 tag = "9.9.9",
-                title = "Nuvio 9.9.9",
+                title = "Kovelyx 9.9.9 — aperçu de mise à jour",
                 notes = """
-                    A local preview of the new update experience.
+                    Aperçu local du système de mise à jour Kovelyx.
 
-                    - The banner pushes the app content down.
-                    - Download progress fills the banner with the primary accent.
-                    - Release notes live behind the info button.
+                    - La bannière déplace le contenu de l'application vers le bas.
+                    - La progression du téléchargement apparaît dans la bannière.
+                    - Les notes de version sont accessibles depuis le bouton d'information.
+                    - Il s'agit d'un test simulé, sans téléchargement ni installation réelle.
                 """.trimIndent(),
                 releaseUrl = null,
-        assetName = "Nuvio-debug-preview.apk",
+        assetName = "Kovelyx-debug-preview.apk",
                 assetUrl = "debug://update-preview",
                 assetSizeBytes = 185L * 1024L * 1024L,
             ),

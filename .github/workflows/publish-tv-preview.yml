@@ -118,10 +118,10 @@ jobs:
           - Installation, lancement et actions de télécommande testés sur émulateur Android TV.
           - Aucun test de lecture complet, de compte ou de streaming réel garanti.
           - Signature de test non pérenne : sauvegarder avant remplacement.
-          - Les comptes Kovelyx synchronisés seront intégrés plus tard.
+          - Les comptes et la synchronisation entre appareils ne sont pas encore validés.
 
           Sources : $SOURCE_SHA
-          Build TV : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
+          Compilation TV : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
           Test émulateur : https://github.com/$GITHUB_REPOSITORY/actions/runs/$SMOKE_ID
           Licence : https://github.com/$GITHUB_REPOSITORY/blob/main/docs/PROVENANCE.md
           EOF

@@ -92,19 +92,19 @@ cp -- "${portables[0]}" "dist/Kovelyx-Windows-Portable-$tag.zip"
 (cd dist && for file in ./*.exe ./*.msi ./*.zip; do sha256sum -- "$file" > "$file.sha256"; done)
 
 cat > release-notes.md <<EOF
-## Kovelyx Windows — preview $tag
+## Kovelyx Windows — préversion expérimentale $tag
 
-**Recommended download:** Kovelyx-Windows-Setup-$tag.exe (one file to INSTALL).
-The MSI is an alternative installer. The portable ZIP must retain the complete app and Java runtime folders.
+**Téléchargement conseillé :** Kovelyx-Windows-Setup-$tag.exe (installateur Windows en un seul fichier).
+Le fichier MSI est un autre format d'installation. La version portable ZIP doit conserver tous les fichiers de l'application et le moteur Java fourni.
 
-- Source Windows CI: https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id
-- Source commit: $source_sha
-- SHA-256 checksums are provided for every file.
-- This build is **experimental, unsigned and not certified on real hardware**.
-- Playback, extensions, tracking sign-in, and updates still need real-PC verification.
-- License and dependency notices: https://github.com/$GITHUB_REPOSITORY/blob/main/docs/PROVENANCE.md
+- Compilation Windows : https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id
+- Commit source : $source_sha
+- Une empreinte SHA-256 accompagne chaque fichier téléchargé.
+- Cette version est **expérimentale, non signée et non certifiée sur un ordinateur réel**.
+- La lecture, les extensions, les connexions aux services de suivi et les mises à jour doivent encore être vérifiées sur un vrai PC.
+- Licences et dépendances : https://github.com/$GITHUB_REPOSITORY/blob/main/docs/PROVENANCE.md
 
-This is NOT a stable release. Do not ignore Windows security warnings.
+**Ce n'est PAS une version stable. Respectez les avertissements de sécurité de Windows.**
 EOF
 
 if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -116,7 +116,7 @@ if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
     dist/*.exe dist/*.exe.sha256 dist/*.msi dist/*.msi.sha256 dist/*.zip dist/*.zip.sha256
 else
   gh release create "$tag" --repo "$GITHUB_REPOSITORY" \
-    --target "$source_sha" --title "Kovelyx Windows $tag — test" \
+    --target "$source_sha" --title "Kovelyx Windows $tag — préversion expérimentale" \
     --prerelease --notes-file release-notes.md \
     dist/*.exe dist/*.exe.sha256 dist/*.msi dist/*.msi.sha256 dist/*.zip dist/*.zip.sha256
 fi
@@ -127,9 +127,9 @@ jq -n --arg tag "$tag" --arg source_sha "$source_sha" --argjson build_run_id "$r
   '{tag:$tag,source_sha:$source_sha,build_run_id:$build_run_id}' \
   > dist/kovelyx-windows-release-proof.json
 
-echo "Published Windows preview: $tag"
+echo "Préversion Windows publiée : $tag"
 {
-  echo "### Windows preview $tag"
-  echo "Compiled by https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
-  echo "Release: https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag"
+  echo "### Préversion Windows $tag"
+  echo "Compilation : https://github.com/$GITHUB_REPOSITORY/actions/runs/$run_id"
+  echo "Préversion : https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag"
 } >> "$GITHUB_STEP_SUMMARY"
