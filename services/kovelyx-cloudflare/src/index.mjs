@@ -157,6 +157,36 @@ async function handleProfiles(request,env,user,url) {
   return jsonResponse({profile:{id,displayName:body.displayName.trim(),createdAt:now}},201);
 }
 
+/** Etat technique du Worker, sans lire de donnees personnelles.
+ * /health indique uniquement que le script HTTP repond ; /ready prouve en plus
+ * que D1, le secret d'authentification et la migration des oeuvres vues existent.
+ * Il ne remplace PAS un test authentifie entre appareils reels.
+ */
+async function productionReadiness(env) {
+  const unavailable = () => jsonResponse({service:"Kovelyx Cloud",status:"not_ready"},503);
+  if (!env.DB || !env.BETTER_AUTH_SECRET || env.BETTER_AUTH_SECRET.length < 32)
+    return unavailable();
+  try {
+    const tables = await env.DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('user','session','account','kv_profiles')"
+    ).all();
+    const found = new Set((tables.results || []).map(row => row.name));
+    if (!["user","session","account","kv_profiles"].every(name => found.has(name)))
+      return unavailable();
+    const sync = await env.DB.prepare(
+      "SELECT sql FROM sqlite_master WHERE type='table' AND name='kv_sync'"
+    ).first();
+    if (typeof sync?.sql !== "string" || !sync.sql.includes("'watched_items'"))
+      return unavailable();
+    return jsonResponse({
+      service:"Kovelyx Cloud",provider:"Cloudflare D1",
+      status:"ok",schema:"0002_watched_history"
+    });
+  } catch {
+    return unavailable();
+  }
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("origin");
@@ -175,6 +205,8 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === "/health")
       return respond(jsonResponse({service:"Kovelyx Cloud",provider:"Cloudflare D1",status:"ok",version:"0.1.0"}));
+    if (url.pathname === "/ready" && request.method === "GET")
+      return respond(await productionReadiness(env));
     if (!env.DB) return respond(jsonResponse({error:"D1 non configuré"},503));
     if (!env.BETTER_AUTH_SECRET || env.BETTER_AUTH_SECRET.length < 32)
       return respond(jsonResponse({error:"Secret serveur non configuré"},503));
