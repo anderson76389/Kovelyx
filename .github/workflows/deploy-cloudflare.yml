@@ -1,0 +1,142 @@
+name: Déployer Kovelyx Cloudflare Worker et migrations D1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/kovelyx-cloudflare/src/**'
+      - 'services/kovelyx-cloudflare/migrations/**'
+      - 'services/kovelyx-cloudflare/package.json'
+      - '.github/workflows/deploy-cloudflare.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-cloudflare.yml'
+      - 'services/kovelyx-cloudflare/**'
+  workflow_dispatch:
+    inputs:
+      deploy_now:
+        description: "Déployer le Worker et appliquer les migrations D1 (production)"
+        type: boolean
+        required: true
+        default: false
+      backup_confirmed:
+        description: "Je confirme avoir une sauvegarde D1 vérifiée, récupérable hors de GitHub Actions"
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Contrat et migration D1 hors production
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Vérifier les tests Worker et migration SQL
+        working-directory: services/kovelyx-cloudflare
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm test
+          python3 tests/check-d1-schema.py
+          npx wrangler deploy --dry-run --outdir /tmp/kovelyx-cloudflare-check
+
+  production:
+    name: Migration D1 et Worker (validation humaine et sauvegarde obligatoires)
+    needs: verify
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_now == true && inputs.backup_confirmed == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID }}
+      KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+    steps:
+      - name: Vérifier que l'accès Cloudflare appartient au propriétaire
+        id: credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" || -z "${KOVELYX_D1_DATABASE_ID:-}" ]]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo '⚠️ Déploiement non effectué : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID ainsi que la variable KOVELYX_D1_DATABASE_ID dans GitHub Actions. Aucun identifiant sensible n est imprime.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [[ ! "$KOVELYX_D1_DATABASE_ID" =~ ^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$ ]]; then
+            echo '::error::La variable publique KOVELYX_D1_DATABASE_ID doit contenir un UUID D1 valide.'
+            exit 1
+          fi
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.credentials.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.credentials.outputs.ready == 'true'
+        with:
+          node-version: '22'
+      - name: Installer les dépendances et configurer uniquement le runner
+        if: steps.credentials.outputs.ready == 'true'
+        working-directory: services/kovelyx-cloudflare
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          config = Path('wrangler.toml')
+          original = config.read_text(encoding='utf-8')
+          marker = 'REPLACE_WITH_YOUR_D1_DATABASE_ID'
+          if marker not in original:
+              raise SystemExit('Erreur : le marqueur D1 attendu est absent ; aucune modification faite.')
+          config.write_text(original.replace(marker, os.environ['KOVELYX_D1_DATABASE_ID']), encoding='utf-8')
+          PY
+
+      - name: Appliquer la migration D1 existante sans effacer les comptes
+        if: steps.credentials.outputs.ready == 'true'
+        working-directory: services/kovelyx-cloudflare
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler d1 migrations apply DB --remote
+
+      - name: Déployer le Worker sur le même compte Cloudflare
+        if: steps.credentials.outputs.ready == 'true'
+        working-directory: services/kovelyx-cloudflare
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler deploy
+
+      - name: Vérifier que le Worker répond en production
+        if: steps.credentials.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 25 \
+            -H 'Accept: application/json' "${KOVELYX_CLOUDFLARE_URL%/}/health" -o /tmp/kovelyx-cloud-health.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/kovelyx-cloud-health.json', encoding='utf-8') as f:
+              result = json.load(f)
+          assert result.get('service') == 'Kovelyx Cloud', result
+          assert result.get('status') == 'ok', result
+          assert result.get('provider') == 'Cloudflare D1', result
+          print('Worker Cloudflare accessible. Le test multi-appareils reste distinct.')
+          PY
+          echo '✅ Migration D1 appliquée, Worker déployé et health check réussi.' >> "$GITHUB_STEP_SUMMARY"
