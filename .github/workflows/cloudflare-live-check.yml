@@ -37,8 +37,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          code="$(curl --silent --show-error --location --max-time 25 --connect-timeout 10 \\
-            -H 'Accept: application/json' \\
+          code="$(curl --silent --show-error --location --max-time 25 --connect-timeout 10 \
+            -H 'Accept: application/json' \
             -o /tmp/kv-ready.json -w '%{http_code}' "${KOVELYX_CLOUDFLARE_URL%/}/ready")"
           if [[ "$code" != "200" ]]; then
             echo "::error::Worker accessible, mais D1/Better Auth ne sont pas prêts en PRODUCTION (HTTP $code). /health seul ne prouve pas la synchronisation."
