@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       build_run_id:
-        description: 'Optional successful Windows build run ID, blank selects the newest'
+        description: 'Identifiant de compilation Windows réussie (vide : dernière compilation)'
         required: false
         type: string
 
