@@ -74,8 +74,9 @@ jobs:
           set -euo pipefail
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" || -z "${KOVELYX_D1_DATABASE_ID:-}" ]]; then
             echo 'ready=false' >> "$GITHUB_OUTPUT"
-            echo '⚠️ Déploiement non effectué : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID ainsi que la variable KOVELYX_D1_DATABASE_ID dans GitHub Actions. Aucun identifiant sensible n est imprime.' >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            echo '❌ Déploiement refusé : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID et la variable KOVELYX_D1_DATABASE_ID. Aucune migration exécutée.' >> "$GITHUB_STEP_SUMMARY"
+            echo '::error::Accès Cloudflare D1 non configuré ; ne jamais afficher un déploiement réussi si aucun Worker n a été publié.'
+            exit 1
           fi
           if [[ ! "$KOVELYX_D1_DATABASE_ID" =~ ^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$ ]]; then
             echo '::error::La variable publique KOVELYX_D1_DATABASE_ID doit contenir un UUID D1 valide.'
@@ -139,4 +140,25 @@ jobs:
           assert result.get('provider') == 'Cloudflare D1', result
           print('Worker Cloudflare accessible. Le test multi-appareils reste distinct.')
           PY
-          echo '✅ Migration D1 appliquée, Worker déployé et health check réussi.' >> "$GITHUB_STEP_SUMMARY"
+          echo '✅ Worker joignable. Contrôle D1 en cours…' >> "$GITHUB_STEP_SUMMARY"
+      - name: Certifier la migration D1 0002 sur le vrai Worker
+        if: steps.credentials.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 30 --connect-timeout 10 --retry 3 --retry-delay 2 \
+            -H 'Accept: application/json' -o /tmp/kv-ready.json -w '%{http_code}' \
+            "${KOVELYX_CLOUDFLARE_URL%/}/ready")"
+          [[ "$code" == "200" ]] || {
+            echo "::error::Production non prête après migration (HTTP $code), vérifier l'URL, Better Auth et D1."
+            exit 1
+          }
+          python3 - <<'PY'
+          import json
+          with open('/tmp/kv-ready.json', encoding='utf-8') as file:
+              data=json.load(file)
+          assert data.get('status') == 'ok', 'Worker non prêt'
+          assert data.get('schema') == '0002_watched_history', 'D1 0002 absent'
+          print('Vrai serveur Kovelyx Cloudflare prêt : schéma D1 0002 vérifié.')
+          PY
+          echo '✅ Worker réellement déployé : comptes Better Auth et schéma D1 0002 vérifiés. Synchronisation multi-appareils à tester séparément.' >> "$GITHUB_STEP_SUMMARY"
