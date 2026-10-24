@@ -349,12 +349,7 @@ internal fun AppGate(
         val hasCachedProfileAccess =
             cachedProfiles.isNotEmpty() &&
                 authState !is AuthState.Authenticated
-        val allowCachedProfileAccess =
-            hasCachedProfileAccess &&
-                (
-                    networkStatusUiState.condition != NetworkCondition.Online ||
-                        gateScreen != AppGateScreen.Auth.name
-                )
+
 
         when (authState) {
             is AuthState.Loading -> {
@@ -365,14 +360,13 @@ internal fun AppGate(
                 }
             }
             is AuthState.Unauthenticated -> {
-                if (allowCachedProfileAccess) {
-                    enterProfileGate(cachedProfiles, syncOnEnter = false)
-                } else {
-                    ProfileRepository.clearInMemory()
-                    profileSelectionLoading = false
-                    profileSelectionTransitionActive = false
-                    gateScreen = AppGateScreen.Auth.name
-                }
+                // A deliberate sign-out MUST NOT reopen cached user profiles.
+                // Cached access is allowed while validation is Loading, never
+                // after the repository declares the user unauthenticated.
+                ProfileRepository.clearInMemory()
+                profileSelectionLoading = false
+                profileSelectionTransitionActive = false
+                gateScreen = AppGateScreen.Auth.name
             }
             is AuthState.Authenticated -> {
                 val authenticatedState = authState as AuthState.Authenticated
