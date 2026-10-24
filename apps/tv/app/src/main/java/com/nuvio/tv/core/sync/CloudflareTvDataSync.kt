@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
@@ -76,15 +77,26 @@ class CloudflareTvDataSync @Inject constructor(
         }
         scope.launch {
             try {
+                var retryDelayMs = 2_000L
                 do {
                     rerunRequested.remove(profileId)
-                    synchronize(profileId)
-                    // Include edits received after the snapshot was read.
+                    try {
+                        synchronize(profileId)
+                        retryDelayMs = 2_000L
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Synchronisation D1 TV différée : reprise automatique, données locales préservées", error)
+                        if (CloudflareTvAccountClient.account == null ||
+                            profileManager.activeProfileId.value != profileId) break
+                        delay(retryDelayMs)
+                        retryDelayMs = (retryDelayMs * 2).coerceAtMost(60_000L)
+                        rerunRequested.add(profileId)
+                    }
+                    // Les modifications reçues pendant la requête sont reprises.
                 } while (rerunRequested.remove(profileId))
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (error: Exception) {
-                Log.w(TAG, "D1 sync failed; local playback/library kept", error)
             } finally {
                 inFlight.remove(profileId)
                 // Close the race between the last loop condition and removing
