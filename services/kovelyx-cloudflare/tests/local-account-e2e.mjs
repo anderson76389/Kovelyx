@@ -70,6 +70,13 @@ try {
     try{data=JSON.parse(text)}catch{data=null}
     return {status:response.status,data,headers:response.headers};
   }
+  // Un /health vert ne prouve pas que D1 et la migration watched_items existent.
+  // Ce test utilise UNIQUEMENT la base locale jetable du processus Wrangler.
+  const ready=await req("/ready");
+  assert.equal(ready.status,200,"La base locale et Better Auth doivent etre prets");
+  assert.equal(ready.data?.status,"ok");
+  assert.equal(ready.data?.schema,"0002_watched_history");
+
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
   const runId=randomUUID();

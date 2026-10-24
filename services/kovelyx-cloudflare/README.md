@@ -2,6 +2,8 @@
 
 **Objectif :** ne plus utiliser les serveurs de comptes Nuvio ni un hébergement Supabase. Ce dossier contient un Worker Cloudflare, une base D1, les tables Better Auth et des endpoints de profils et synchronisation.
 
+**Vérification du serveur réellement déployé :** `/health` indique seulement que le Worker répond ; `/ready` (après publication de la nouvelle version) contrôle sans écrire de données la présence de D1, du secret Better Auth et du schéma `0002_watched_history`. Le workflow manuel [Diagnostic Cloudflare en production](../../.github/workflows/cloudflare-readiness.yml) effectue ce contrôle en lecture seule. Un résultat positif ne remplace pas un test de connexion et de synchronisation sur les trois appareils. Pour appliquer la migration sur la base réelle, utiliser uniquement le déploiement protégé avec sauvegarde D1 préalable. Aucun secret ni compte ne doit être envoyé à GitHub pour ce diagnostic.
+
 **État réel au 19 octobre 2026 : Worker Cloudflare et D1 déployés et accessibles ; la création, la connexion, la lecture de l'identité et la création du profil « Principal » ont réussi depuis Codespaces sur le vrai serveur.** La connexion a passé ce test technique, mais les anciennes fonctions de synchronisation des applications ne sont pas encore toutes migrées. [Tests publics automatiques](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-live-check.yml). Les nouvelles applis disposent de premiers adaptateurs pour le formulaire e-mail. Les écrans, caches, profils, lecteurs et anciennes RPC Supabase **ne sont pas encore tous migrés**. Le mode invité reste disponible. Les sessions Cloudflare des premières versions sont en mémoire seulement : il faut se reconnecter après avoir fermé l'application. Les flux QR/code TV et la récupération de mot de passe ne sont pas prêts.
 
 ## Un hébergement gratuit sans pause 7 jours ?
@@ -155,6 +157,7 @@ Les données **restent chez Cloudflare, pas sur GitHub Pages**. Exportez réguli
 | Route | Méthode | Protection | État |
 |---|---|---|---|
 | `/health` | GET | Publique | Implémentée |
+| `/ready` | GET | Publique, lecture seule | Contrôle D1, tables Better Auth et migration `0002` ; HTTP 503 si non prêt |
 | `/api/auth/sign-up/email` | POST | Inscriptions fermées par défaut | Implémentée via Better Auth |
 | `/api/auth/sign-in/email` | POST | Rate limiting Better Auth / D1 | Implémentée |
 | `/api/auth/get-session` | GET | Session Better Auth | Implémentée |
