@@ -2,8 +2,9 @@
 // Installe une instance Kovelyx Cloudflare personnelle. Aucun token n'est stocké dans Git.
 import { execFileSync, spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { chmodSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("../", import.meta.url)));
@@ -40,6 +41,7 @@ console.log("Aucune clé privée ne sera affichée ni enregistrée dans Git.\n")
 call(["wrangler", "whoami"]);
 
 let database = getDatabase();
+const databaseAlreadyExists = Boolean(database);
 if (!database) {
   console.log("\nCréation d'une nouvelle base D1 limitée à l'Union européenne.");
   call(["wrangler", "d1", "create", name, "--jurisdiction=eu"]);
@@ -64,6 +66,26 @@ if (updated !== config) {
   console.log("✅ Base D1 déjà liée : aucune modification.");
 }
 
+// Toute mise à niveau D1 réelle doit commencer par un export indépendant
+// du dépôt Git et conservé sur le Codespace/PC de l'administrateur.
+if (databaseAlreadyExists) {
+  const safeDir = join(homedir(), "Kovelyx-sauvegardes-D1");
+  mkdirSync(safeDir, { recursive: true, mode: 0o700 });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const backup = join(safeDir, `kovelyx-D1-${stamp}-${randomBytes(4).toString("hex")}.sql`);
+  console.log("\nSauvegarde obligatoire de la base D1 existante avant migration.");
+  call(["wrangler", "d1", "export", "DB", "--remote", "--skip-confirmation", "--output", backup]);
+  const exported = statSync(backup);
+  if (!exported.isFile() || exported.size < 80)
+    throw Error("La sauvegarde D1 est vide ou illisible. Migration interrompue.");
+  chmodSync(backup, 0o600);
+  const preview = readFileSync(backup, "utf8");
+  if (!/(CREATE TABLE|PRAGMA|INSERT INTO)/i.test(preview))
+    throw Error("Format de sauvegarde D1 inattendu. Migration interrompue.");
+  console.log("✅ Sauvegarde créée hors dépôt : " + backup);
+  console.log("⚠️ Ce fichier contient vos comptes privés. Conservez-en une copie chiffrée hors Codespaces ; ne le publiez jamais sur GitHub.");
+}
+
 console.log("\nApplication du schéma de comptes.");
 call(["wrangler", "d1", "migrations", "apply", "DB", "--remote"]);
 
@@ -84,7 +106,21 @@ if (existing.some(row => row.name === "BETTER_AUTH_SECRET")) {
   call(["wrangler", "secret", "put", "BETTER_AUTH_SECRET"], secret + "\n");
   console.log("✅ Nouveau secret d'authentification généré, jamais affiché.");
 }
-console.log("\n✅ Serveur installé. Les inscriptions restent fermées par défaut.");
+// L'endpoint /health ne teste pas la migration. Vérifier /ready également.
+const expectedUrl = process.env.KOVELYX_CLOUDFLARE_URL?.trim().replace(/\\/$/, "")
+  || "https://kovelyx-cloud.mailpromahe.workers.dev";
+try {
+  const ready = await fetch(expectedUrl + "/ready", { headers: { accept: "application/json" }, signal: AbortSignal.timeout(20000) });
+  const body = await ready.json().catch(() => ({}));
+  if (!ready.ok || body.status !== "ok" || body.schema !== "0002_watched_history")
+    throw new Error("HTTP " + ready.status + ", schema=" + String(body.schema || "absent"));
+  console.log("✅ Production prête : /ready indique comptes Better Auth et D1 0002.");
+} catch (error) {
+  console.error("❌ La production n'est pas encore vérifiée : " + error.message);
+  console.error("Contrôlez l'URL KOVELYX_CLOUDFLARE_URL et le Worker après déploiement.");
+  process.exitCode = 1;
+}
+console.log("\n✅ Installation du Worker exécutée. Les inscriptions restent fermées par défaut.");
 console.log("Copie uniquement l'URL publique *.workers.dev affichée par Wrangler.");
 console.log("Vérifie cette URL en ajoutant /health, puis configure GitHub Actions :");
 console.log("Settings → Secrets and variables → Actions → Variables");
