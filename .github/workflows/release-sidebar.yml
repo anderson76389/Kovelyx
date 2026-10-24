@@ -1,4 +1,4 @@
-name: Afficher la dernière Release Kovelyx dans GitHub
+name: Vérifier le classement des Releases Kovelyx alpha
 
 on:
   push:
@@ -19,12 +19,12 @@ permissions:
 
 # Ne jamais mettre deux Releases concurrentes en avant.
 concurrency:
-  group: kovelyx-release-sidebar
+  group: kovelyx-release-classification
   cancel-in-progress: false
 
 jobs:
   latest-complete:
-    name: Mettre en avant la Release complète, explicitement ALPHA
+    name: Classer les versions expérimentales en préversions
     if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
           bash -n scripts/showcase-releases.sh
           shellcheck --severity=warning scripts/showcase-releases.sh
-      - name: Afficher la dernière version complète sur la page du dépôt
+      - name: Conserver le statut Pre-release et annoncer la version complète
         env:
           GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}

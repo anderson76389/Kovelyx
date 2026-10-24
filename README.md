@@ -10,6 +10,8 @@
 
 [![Site officiel](https://img.shields.io/badge/SITE_OFFICIEL-DÉCOUVRIR-8656F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://anderson76389.github.io/Kovelyx/)
 [![Téléchargements](https://img.shields.io/badge/RELEASES-TÉLÉCHARGER-B784FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases)
+
+**[📦 Télécharger la dernière préversion complète (Windows · Android · TV)](https://github.com/anderson76389/Kovelyx/releases)**
 [![Licence](https://img.shields.io/badge/LICENCE-GPLv3-33304A?style=for-the-badge)](./docs/PROVENANCE.md)
 
 <sub>Projet open source • Versions actuellement en préversion • Sources et builds hébergés dans ce dépôt</sub>

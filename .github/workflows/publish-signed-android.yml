@@ -1,7 +1,11 @@
-name: Publier APK Android signes par la cle Kovelyx (opt-in)
-# Publication des versions release, jamais depuis une cle Debug ephemeral.
-# Lancer manuellement APRES ajout des secrets prives. Ne remplace pas les APK existants.
+name: Publier APK Android signes avec la cle Kovelyx permanente
+# Automated for successful main APK builds only when the private signer secret exists.
+# Never alter an existing Debug APK, or use an ephemeral Debug key for a Release.
 on:
+  workflow_run:
+    workflows: ["Compiler Kovelyx (APK et diagnostic Windows)"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       platform:
@@ -16,12 +20,33 @@ concurrency:
   group: kovelyx-signed-android-releases
   cancel-in-progress: false
 jobs:
+  signer-ready:
+    name: Vérifier la présence du signataire permanent
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.signer.outputs.enabled }}
+    steps:
+      - id: signer
+        shell: bash
+        env:
+          SIGNING_BUNDLE: ${{ secrets.KOVELYX_ANDROID_SIGNING_BUNDLE }}
+        run: |
+          if [[ -n "$SIGNING_BUNDLE" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Aucune clé permanente configurée : pas de publication APK release. Ajouter le secret KOVELYX_ANDROID_SIGNING_BUNDLE."
+          fi
+
   build-and-publish:
     name: APK release signe - ${{ matrix.platform }}
+    needs: signer-ready
+    if: ${{ needs.signer-ready.outputs.enabled == 'true' }}
     strategy:
       fail-fast: false
       matrix:
-        platform: ${{ fromJSON(inputs.platform == 'all' && '["mobile","tv"]' || format('["{0}"]', inputs.platform)) }}
+        platform: ${{ fromJSON((github.event_name == 'workflow_run' || inputs.platform == 'all') && '["mobile","tv"]' || format('["{0}"]', inputs.platform)) }}
     runs-on: ubuntu-latest
     timeout-minutes: 150
     env:
@@ -31,6 +56,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # workflow_run itself runs on the latest main; pin builds to the
+          # exact already-successful source commit instead.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

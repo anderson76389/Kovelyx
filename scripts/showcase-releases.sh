@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Keep a fully packaged Kovelyx preview visible in the GitHub repository sidebar.
-# Release metadata only: never touch tags, binaries or users' data.
+# Keep alpha/beta/rc releases correctly classified; expose the latest complete preview in the job summary.
+# Metadata only: never touch tags, binaries or users' data.
 set -euo pipefail
 
 : "${GH_TOKEN:?The workflow needs its GitHub token}"
@@ -34,37 +34,29 @@ if [[ -z "$selected_tag" ]]; then
   exit 0
 fi
 
-previous_latest="$(gh api "repos/$GITHUB_REPOSITORY/releases/latest" --jq '.tag_name' 2>/dev/null || true)"
-if [[ "$previous_latest" == "$selected_tag" ]]; then
-  echo "La Release $selected_tag est déjà Latest."
-  exit 0
-fi
-
-# The sidebar only presents a Latest release when it is non-prerelease.
-# Make the experimental status explicit even though GitHub labels it Latest.
-gh release edit "$selected_tag" --repo "$GITHUB_REPOSITORY" \
-  --prerelease=false --latest \
-  --title "Kovelyx $selected_tag — ALPHA / EXPÉRIMENTAL · Windows · Android · Android TV"
-
-confirmed=false
-for attempt in 1 2 3 4 5; do
-  if gh api "repos/$GITHUB_REPOSITORY/releases/latest" \
-    --jq '.tag_name' 2>/dev/null | grep -Fxq -- "$selected_tag"; then
-    confirmed=true
-    break
-  fi
-  echo "En attente de confirmation GitHub (tentative $attempt/5)"
-  sleep 3
+# Experimental releases must remain GitHub PRE-RELEASES. Never promote an
+# alpha to stable solely to obtain GitHub's "Latest" sidebar badge.
+# Repair older misclassified alpha/beta/rc releases without touching binaries,
+# tags, descriptions or publication dates.
+mapfile -t misclassified_tags < <(jq -r '
+  .[] | select(.draft == false and .published_at != null and .prerelease == false)
+  | select(.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+-(alpha|beta|rc)([.]|$)"))
+  | .tag_name
+' "$releases_file")
+for preview_tag in "${misclassified_tags[@]}"; do
+  echo "Correction du statut de préversion : $preview_tag"
+  gh release edit "$preview_tag" --repo "$GITHUB_REPOSITORY" --prerelease
+  gh release view "$preview_tag" --repo "$GITHUB_REPOSITORY" \
+    --json isPrerelease --jq '.isPrerelease' | grep -qx true || {
+      echo "::error::Préversion GitHub non confirmée pour $preview_tag"
+      exit 1
+    }
 done
-if [[ "$confirmed" != true ]]; then
-  echo "::error::La Release a été éditée mais /releases/latest ne la confirme pas."
-  exit 1
-fi
 
 link="https://github.com/$GITHUB_REPOSITORY/releases/tag/$selected_tag"
-echo "Dernière Release complète et expérimentale affichée dans la colonne GitHub : $link"
+echo "Dernière préversion complète (Windows, Android, TV) : $link"
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
-  printf '### Release Kovelyx visible dans la colonne GitHub\n\n' >> "$GITHUB_STEP_SUMMARY"
+  printf '### Préversion Kovelyx complète\n\n' >> "$GITHUB_STEP_SUMMARY"
   printf -- '- [Kovelyx %s — ALPHA / EXPÉRIMENTAL](%s)\n' "$selected_tag" "$link" >> "$GITHUB_STEP_SUMMARY"
-  printf -- '- Windows EXE/MSI/ZIP et APK Android/TV présents. **Latest ne certifie pas la stabilité.**\n' >> "$GITHUB_STEP_SUMMARY"
+  printf -- '- Chaque version alpha/beta/rc conserve le statut **Pre-release**. Utiliser le lien Releases du README au lieu du badge Latest réservé aux versions stables.\n' >> "$GITHUB_STEP_SUMMARY"
 fi
