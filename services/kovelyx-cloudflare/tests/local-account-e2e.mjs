@@ -180,7 +180,7 @@ try {
       lastPositionMs:85000,lastUpdatedEpochMs:1720010700000}
   },tvToken);
   assert.equal(tvProgress.status,200,"Mise à jour progression depuis un autre appareil");
-  const pcProgress=await req("/v1/sync?profileId="+profileId+"&limit=25","GET",null,alice.token);
+  const pcProgress=await req("/v1/sync?profileId="+profileId+"&limit=25&offset=25","GET",null,alice.token);
   assert.ok(pcProgress.data?.items?.some(item=>item.category==="watch_progress" &&
     item.itemKey==="movie:tt1" && item.payload?.lastPositionMs===85000),
     "La progression publiée depuis la TV doit être lisible depuis le PC");
