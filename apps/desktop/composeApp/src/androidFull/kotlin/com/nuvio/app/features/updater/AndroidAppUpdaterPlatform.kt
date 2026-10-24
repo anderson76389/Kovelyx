@@ -76,45 +76,76 @@ object AndroidAppUpdaterPlatform {
         runCatching {
             val context = requireContext()
             val safeName = assetName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
-            val destination = File(File(context.cacheDir, "updates"), safeName)
-            destination.parentFile?.mkdirs()
-            if (destination.exists()) {
-                destination.delete()
-            }
-
-            val request = Request.Builder()
-                .url(assetUrl)
-                .build()
-
-            httpClient.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    error(runBlocking { getString(Res.string.updates_download_failed_http, response.code) })
-                }
-
-                val body = response.body ?: error(runBlocking { getString(Res.string.updates_empty_download_body) })
-                val totalBytes = body.contentLength().takeIf { it > 0L }
-                body.byteStream().use { input ->
-                    FileOutputStream(destination).use { output ->
-                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                        var downloadedBytes = 0L
-                        while (true) {
-                            currentCoroutineContext().ensureActive()
-                            val read = input.read(buffer)
-                            currentCoroutineContext().ensureActive()
-                            if (read <= 0) break
-                            output.write(buffer, 0, read)
-                            downloadedBytes += read
-                            onProgress(downloadedBytes, totalBytes)
+            val expectedSha256 = fetchReleaseChecksum(assetUrl, safeName)
+            val dir = File(context.cacheDir, "updates").apply { mkdirs() }
+            val destination = File(dir, safeName)
+            val temporary = File(dir, "$safeName.part")
+            temporary.delete()
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            try {
+                val request = Request.Builder().url(assetUrl).get().build()
+                httpClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        error(runBlocking { getString(Res.string.updates_download_failed_http, response.code) })
+                    }
+                    val body = response.body ?: error(runBlocking { getString(Res.string.updates_empty_download_body) })
+                    val total = body.contentLength().takeIf { it > 0L }
+                    var downloaded = 0L
+                    body.byteStream().use { input ->
+                        FileOutputStream(temporary).use { output ->
+                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                            while (true) {
+                                currentCoroutineContext().ensureActive()
+                                val read = input.read(buffer)
+                                currentCoroutineContext().ensureActive()
+                                if (read < 0) break
+                                if (read == 0) continue
+                                output.write(buffer, 0, read)
+                                digest.update(buffer, 0, read)
+                                downloaded += read.toLong()
+                                onProgress(downloaded, total)
+                            }
+                            output.flush()
                         }
-                        output.flush()
+                    }
+                    check(downloaded > 0 && (total == null || downloaded == total)) {
+                        "Téléchargement incomplet : l’installation ne sera pas lancée."
                     }
                 }
+                val sha256 = digest.digest().joinToString("") { "%02x".format(it) }
+                check(sha256.equals(expectedSha256, ignoreCase = true)) {
+                    "Empreinte SHA-256 différente de la Release officielle Kovelyx."
+                }
+                if (destination.exists()) destination.delete()
+                if (!temporary.renameTo(destination)) {
+                    temporary.copyTo(destination, overwrite = true)
+                    temporary.delete()
+                }
+                destination.absolutePath
+            } finally {
+                temporary.delete()
             }
-
-            destination.absolutePath
         }
     }
 
+    private fun fetchReleaseChecksum(assetUrl: String, safeName: String): String {
+        val uri = java.net.URI(assetUrl)
+        require(uri.scheme == "https" && uri.host == "github.com" &&
+            uri.path.startsWith("/anderson76389/Kovelyx/releases/download/")) {
+            "Fichier non officiel : cette mise à jour ne vient pas des Releases Kovelyx."
+        }
+        val request = Request.Builder().url(assetUrl + ".sha256").get().build()
+        val line = httpClient.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Empreinte SHA-256 indisponible (HTTP ${response.code})." }
+            response.body?.string()?.trim()?.lineSequence()?.firstOrNull().orEmpty()
+        }
+        val match = Regex("^([a-fA-F0-9]{64})\\s+\\*?(.+)$").matchEntire(line)
+            ?: error("Empreinte SHA-256 invalide.")
+        check(match.groupValues[2].removePrefix("./") == safeName) {
+            "La vérification SHA-256 ne correspond pas à l’APK sélectionné."
+        }
+        return match.groupValues[1]
+    }
     fun canRequestPackageInstalls(): Boolean {
         val context = appContext ?: return false
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

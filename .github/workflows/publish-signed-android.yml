@@ -128,11 +128,23 @@ jobs:
           apk="${apks[0]}"
           unzip -tq "$apk"
           tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          # Un build Gradle peut accidentellement conserver une signature de test.
+          # Resigner explicitement avec la cle permanente du secret GitHub.
+          # Le certificat FINAL doit etre identique a celui de cette cle.
+          signed="$RUNNER_TEMP/kovelyx-${{ matrix.platform }}-permanent.apk"
+          "$tools/apksigner" sign \
+            --ks "$KOVELYX_RELEASE_STORE_FILE" \
+            --ks-key-alias "$KOVELYX_RELEASE_KEY_ALIAS" \
+            --ks-pass env:KOVELYX_RELEASE_STORE_PASSWORD \
+            --key-pass env:KOVELYX_RELEASE_KEY_PASSWORD \
+            --out "$signed" "$apk"
+          apk="$signed"
           "$tools/apksigner" verify --verbose "$apk" >/dev/null
           "$tools/apksigner" verify --print-certs "$apk" > /tmp/kv-signer.txt
           actual="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' /tmp/kv-signer.txt | head -n1 | tr '[:upper:]' '[:lower:]')"
           expected="$(echo "$KOVELYX_ANDROID_CERT_SHA256" | tr -d ':' | tr '[:upper:]' '[:lower:]')"
-          [[ -n "$actual" && "$actual" == "$expected" ]] || { echo "::error::Le certificat APK ne correspond pas au certificat Kovelyx epingle"; exit 1; }
+          [[ -n "$actual" && "$actual" == "$expected" ]] || { echo "::error::Certificat APK different de la cle permanente ; publication interdite"; exit 1; }
+          echo "Certificat permanent verifie sur le fichier APK final."
           "$tools/aapt" dump badging "$apk" > /tmp/kv-badging.txt
           grep -F "package: name='$application_id'" /tmp/kv-badging.txt
           version_name="$(sed -n "s/.*versionName='\([^']*\)'.*/\1/p" /tmp/kv-badging.txt | head -n1)"
@@ -176,7 +188,7 @@ jobs:
             gh release upload "$tag" "dist/$file" "dist/$file.sha256" --repo "$GITHUB_REPOSITORY"
           else
             gh release create "$tag" "dist/$file" "dist/$file.sha256" --repo "$GITHUB_REPOSITORY" \
-              --target "$GITHUB_SHA" --title "Kovelyx Android signe - $tag" --prerelease \
+              --target "$(git rev-parse HEAD)" --title "Kovelyx Android signe - $tag" --prerelease \
               --notes "APK Release signe avec le certificat Kovelyx permanent. VersionCode : $KOVELYX_RELEASE_VERSION_CODE. Preversion : tests reels et sauvegarde recommandes. Versions Debug anterieures non compatibles avec une mise a jour directe."
           fi
           echo "Release signee disponible : https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag" >> "$GITHUB_STEP_SUMMARY"
