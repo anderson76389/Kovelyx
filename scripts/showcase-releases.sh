@@ -16,10 +16,16 @@ gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > "$releases_file"
 mapfile -t anciennes_notes_anglaises < <(jq -r '
   .[]
   | select(.draft == false and .published_at != null)
-  | select(.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+-(alpha|beta|rc)$"))
+  | select(
+      (.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+-(alpha|beta|rc)$"))
+      or (.tag_name | test("^(android|tv)-preview-[0-9a-f]{12}$"))
+    )
   | select(
       ((.body // "") | startswith("## Kovelyx Windows — preview "))
       or ((.name // "") | endswith(" — test"))
+      or ((.name // "") | startswith("Kovelyx Android experimental - "))
+      or ((.body // "") | contains("\nBuild : "))
+      or ((.body // "") | contains("\nBuild TV : "))
     )
   | .tag_name
 ' "$releases_file")
