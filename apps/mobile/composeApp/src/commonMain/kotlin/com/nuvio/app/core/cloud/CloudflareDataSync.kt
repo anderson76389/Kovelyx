@@ -17,8 +17,8 @@ import com.nuvio.app.features.watchprogress.resolvedProgressKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -44,21 +44,32 @@ object CloudflareDataSync {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mutex = Mutex()
     private val json = Json { ignoreUnknownKeys = true }
-    private var pending: Job? = null
+    // One worker for all devices' local profile mutations. A new player-position
+    // update must NEVER cancel an in-flight D1 request: cancellation could drop
+    // a successful upload or leave a 409 reconciliation without another retry.
+    // Conflation queues the latest profile once, even during continuous playback.
+    private val requests = Channel<Int>(Channel.CONFLATED)
+
+    init {
+        scope.launch {
+            for (profileId in requests) {
+                delay(900L)
+                try {
+                    synchronize(profileId)
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    // The pending channel request (if any) remains available.
+                    // Local data is never removed on a transport or CAS failure.
+                    log.e(error) { "Synchronisation D1 interrompue, données locales préservées" }
+                }
+            }
+        }
+    }
 
     fun request(profileId: Int) {
         if (!CloudflareAccountClient.enabled) return
-        pending?.cancel()
-        pending = scope.launch {
-            delay(900L)
-            try {
-                synchronize(profileId)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (error: Exception) {
-                log.e(error) { "Synchronisation D1 interrompue, données locales préservées" }
-            }
-        }
+        requests.trySend(profileId)
     }
 
     suspend fun synchronize(profileId: Int) = mutex.withLock {
