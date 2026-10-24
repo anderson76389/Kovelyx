@@ -116,7 +116,8 @@ if (existing.some(row => row.name === "BETTER_AUTH_SECRET")) {
   console.log("✅ Nouveau secret d'authentification généré, jamais affiché.");
 }
 // L'endpoint /health ne teste pas la migration. Vérifier /ready également.
-const expectedUrl = process.env.KOVELYX_CLOUDFLARE_URL?.trim().replace(/\\/$/, "")
+const rawCloudUrl = process.env.KOVELYX_CLOUDFLARE_URL?.trim() || "https://kovelyx-cloud.mailpromahe.workers.dev";
+const expectedUrl = rawCloudUrl.endsWith("/") ? rawCloudUrl.slice(0, -1) : rawCloudUrl;
   || "https://kovelyx-cloud.mailpromahe.workers.dev";
 try {
   const ready = await fetch(expectedUrl + "/ready", { headers: { accept: "application/json" }, signal: AbortSignal.timeout(20000) });
