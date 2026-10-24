@@ -77,7 +77,7 @@ Fichiers texte examinés : **1363** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdatePreferences.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdatePreferences.kt:11`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:9`
+- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:11`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:4`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1`
