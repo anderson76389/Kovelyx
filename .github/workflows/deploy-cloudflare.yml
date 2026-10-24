@@ -14,6 +14,17 @@ on:
       - '.github/workflows/deploy-cloudflare.yml'
       - 'services/kovelyx-cloudflare/**'
   workflow_dispatch:
+    inputs:
+      deploy_now:
+        description: "Déployer le Worker et appliquer les migrations D1 (production)"
+        type: boolean
+        required: true
+        default: false
+      backup_confirmed:
+        description: "Je confirme avoir une sauvegarde D1 vérifiée, récupérable hors de GitHub Actions"
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
@@ -45,9 +56,9 @@ jobs:
           npx wrangler deploy --dry-run --outdir /tmp/kovelyx-cloudflare-check
 
   production:
-    name: Migration D1 puis publication du Worker
+    name: Migration D1 et Worker (validation humaine et sauvegarde obligatoires)
     needs: verify
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_now == true && inputs.backup_confirmed == true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 18
     env:
