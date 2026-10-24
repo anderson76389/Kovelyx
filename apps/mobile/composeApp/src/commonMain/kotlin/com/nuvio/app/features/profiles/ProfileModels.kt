@@ -103,7 +103,11 @@ fun String.isValidAvatarUrl(): Boolean {
     val value = trim()
     return value.length <= 2048 &&
         !value.any { it.isWhitespace() } &&
-        (value.startsWith("https://") || value.startsWith("http://"))
+        (
+            value.startsWith("https://") ||
+            value.startsWith("http://") ||
+            (value.startsWith("file:///") && "/kovelyx-profile-media/" in value)
+        )
 }
 
 fun profileAvatarImageUrl(profile: NuvioProfile, avatar: AvatarCatalogItem?): String? =

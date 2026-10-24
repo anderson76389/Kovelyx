@@ -54,17 +54,26 @@ internal actual object ProfileLocalImages {
             require(Files.isRegularFile(original) && Files.size(original) in 1..12_000_000L) {
                 "L'image doit être un fichier de 12 Mo maximum."
             }
-            val resized = readAndResize(original, background)
+            // Conserver les GIF animés tels quels : l'ancien redimensionnement
+            // ImageIO ne gardait que la première image de l'animation.
+            val keepGif = original.fileName.toString().lowercase(Locale.ROOT).endsWith(".gif")
+            if (keepGif) validateImageDimensions(original)
+            val resized = if (keepGif) null else readAndResize(original, background)
+            val outputExtension = if (keepGif) ".gif" else if (background) ".jpg" else ".png"
             val target = imageDir.resolve(
                 (if (background) "background-" else "avatar-") +
-                    UUID.randomUUID().toString() + if (background) ".jpg" else ".png"
+                    UUID.randomUUID().toString() + outputExtension
             )
             Files.createDirectories(imageDir)
             val pending = Files.createTempFile(imageDir, "kovelyx-import-", ".tmp")
             try {
-                Files.newOutputStream(pending).use { output ->
-                    check(ImageIO.write(resized, if (background) "jpg" else "png", output)) {
-                        "L'encodeur de l'image n'est pas disponible."
+                if (keepGif) {
+                    Files.copy(original, pending, StandardCopyOption.REPLACE_EXISTING)
+                } else {
+                    Files.newOutputStream(pending).use { output ->
+                        check(ImageIO.write(requireNotNull(resized), if (background) "jpg" else "png", output)) {
+                            "L'encodeur de l'image n'est pas disponible."
+                        }
                     }
                 }
                 Files.move(pending, target, StandardCopyOption.REPLACE_EXISTING)
@@ -72,6 +81,25 @@ internal actual object ProfileLocalImages {
                 Files.deleteIfExists(pending)
             }
             target.toUri().toString()
+        }
+    }
+
+    private fun validateImageDimensions(path: Path) {
+        ImageIO.createImageInputStream(path.toFile()).use { stream ->
+            requireNotNull(stream) { "Impossible de lire l'image." }
+            val readers = ImageIO.getImageReaders(stream)
+            require(readers.hasNext()) { "Format d'image non reconnu." }
+            val reader = readers.next()
+            try {
+                reader.input = stream
+                val width = reader.getWidth(0)
+                val height = reader.getHeight(0)
+                require(width > 0 && height > 0 && width.toLong() * height <= 32_000_000L) {
+                    "Dimensions d'image non prises en charge (32 mégapixels maximum)."
+                }
+            } finally {
+                reader.dispose()
+            }
         }
     }
 
@@ -123,7 +151,8 @@ internal actual object ProfileLocalImages {
             val path = Path.of(URI(url)).toAbsolutePath().normalize()
             path.startsWith(imageDir) && Files.isRegularFile(path) &&
                 (path.fileName.toString().lowercase(Locale.ROOT).endsWith(".png") ||
-                    path.fileName.toString().lowercase(Locale.ROOT).endsWith(".jpg"))
+                    path.fileName.toString().lowercase(Locale.ROOT).endsWith(".jpg") ||
+                    path.fileName.toString().lowercase(Locale.ROOT).endsWith(".gif"))
         }.getOrDefault(false)
     }
 

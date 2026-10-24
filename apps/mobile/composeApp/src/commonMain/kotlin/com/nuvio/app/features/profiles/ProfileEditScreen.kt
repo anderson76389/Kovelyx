@@ -79,6 +79,7 @@ fun ProfileEditScreen(
     var selectedBackgroundUrl by rememberSaveable { mutableStateOf(currentProfile?.profileBackgroundUrl) }
     var usesPrimaryAddons by rememberSaveable { mutableStateOf(currentProfile?.usesPrimaryAddons ?: false) }
     var isSaving by remember { mutableStateOf(false) }
+    var localImageError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showPinSetup by remember { mutableStateOf(false) }
     var showPinClear by remember { mutableStateOf(false) }
@@ -87,8 +88,22 @@ fun ProfileEditScreen(
         MemberAccessRepository.access
     }.collectAsStateWithLifecycle()
     val backgroundCatalog by ProfileBackgroundRepository.catalog.collectAsStateWithLifecycle()
-    val canChooseBackground = !isNew && memberAccess.entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)
+    val hasMemberBackgrounds = !isNew && memberAccess.entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)
+    val canChooseBackground = !isNew && (nativeProfileImagePickerAvailable || hasMemberBackgrounds)
 
+    val openImagePicker = rememberNativeProfileImagePicker(
+        onSelected = { background, savedUrl ->
+            if (background) {
+                selectedBackgroundId = null
+                selectedBackgroundUrl = savedUrl
+            } else {
+                avatarUrl = savedUrl
+                selectedAvatarId = null
+            }
+            localImageError = null
+        },
+        onError = { localImageError = it },
+    )
     val avatars by AvatarRepository.avatars.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         AvatarRepository.refreshAvatars()
@@ -152,6 +167,26 @@ fun ProfileEditScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    if (nativeProfileImagePickerAvailable) {
+                        Button(
+                            onClick = { openImagePicker(false) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Text("Choisir une photo depuis ma galerie")
+                        }
+                        Text(
+                            text = "Photo privée sur cet appareil. La synchronisation des images entre appareils nécessite encore Cloudflare R2.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    localImageError?.let { message ->
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                     NuvioInputField(
                         value = avatarUrl,
                         onValueChange = { value ->
@@ -182,16 +217,26 @@ fun ProfileEditScreen(
                             style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
+                        if (nativeProfileImagePickerAvailable) {
+                            Button(
+                                onClick = { openImagePicker(true) },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text("Choisir un fond depuis ma galerie")
+                            }
+                        }
+                        if (hasMemberBackgrounds) {
                         Text(
                             text = stringResource(Res.string.profile_background_member_note),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        }
                         ProfileBackgroundPicker(
                             backgrounds = backgroundCatalog,
                             selectedBackgroundId = selectedBackgroundId,
                             selectedBackgroundUrl = selectedBackgroundUrl,
-                            customBackgroundUrl = currentProfile?.profileBackgroundUrl,
+                            customBackgroundUrl = selectedBackgroundUrl ?: currentProfile?.profileBackgroundUrl,
                             standardBackgroundColor = previewAccent,
                             onSelectionChange = { id, url ->
                                 selectedBackgroundId = id
