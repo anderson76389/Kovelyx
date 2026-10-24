@@ -24,6 +24,27 @@ build_id=""
 smoke_id=""
 tag=""
 
+# A workflow_run can be reported as successful when its publish/smoke job
+# was skipped (e.g. an APK build was cancelled). Never attempt to download a
+# non-existent proof or turn this normal skip into a red publishing workflow.
+proof_name=""
+case "$TRIGGER_NAME" in
+  "Publier automatiquement les EXE de test Windows")
+    proof_name="kovelyx-windows-release-proof" ;;
+  "Tester Kovelyx TV sur émulateur Android TV")
+    proof_name="kovelyx-tv-build-proof" ;;
+  *)
+    echo "::error::Unexpected workflow '$TRIGGER_NAME'"; exit 1 ;;
+esac
+gh api "repos/$GITHUB_REPOSITORY/actions/runs/$TRIGGER_RUN_ID/artifacts?per_page=100" \
+  > "$proof_dir/artifacts.json"
+if ! jq -e --arg proof "$proof_name" '
+    [.artifacts[]? | select(.name == $proof and .expired == false)] | length == 1
+' "$proof_dir/artifacts.json" >/dev/null; then
+  echo "::notice::Le workflow source ne contient aucune preuve $proof_name (job ignoré ou annulé). Aucune Release modifiée."
+  exit 0
+fi
+
 if [[ "$TRIGGER_NAME" == "Publier automatiquement les EXE de test Windows" ]]; then
   gh run download "$TRIGGER_RUN_ID" --repo "$GITHUB_REPOSITORY" \
     --name kovelyx-windows-release-proof --dir "$proof_dir/windows"

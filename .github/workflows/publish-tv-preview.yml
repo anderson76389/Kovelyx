@@ -43,6 +43,14 @@ jobs:
             .conclusion == "success" and
             .status == "completed"
           ' /tmp/smoke.json >/dev/null || { echo "::error::Le test TV n'est pas réussi"; exit 1; }
+          # A successful workflow can contain only skipped jobs. In that case
+          # there is no emulator proof: skip publication without a false red CI.
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$SMOKE_ID/artifacts?per_page=100" > /tmp/tv-artifacts.json
+          if ! jq -e '[.artifacts[]? | select(.name == "kovelyx-tv-build-proof" and .expired == false)] | length == 1' /tmp/tv-artifacts.json >/dev/null; then
+            echo "SKIP_TV_RELEASE=true" >> "$GITHUB_ENV"
+            echo "::notice::Test TV terminé sans preuve (build annulé ou test ignoré) ; aucune Release modifiée."
+            exit 0
+          fi
           mkdir -p /tmp/kv-proof /tmp/kv-apk dist
           gh run download "$SMOKE_ID" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-build-proof --dir /tmp/kv-proof
           test -s /tmp/kv-proof/kovelyx-tv-build-proof.json
@@ -73,6 +81,7 @@ jobs:
             echo "APK_NAME=$APK_NAME"
           } >> "$GITHUB_ENV"
       - name: Vérifier le paquet Android TV et sa signature
+        if: ${{ env.SKIP_TV_RELEASE != 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -87,6 +96,7 @@ jobs:
           (cd dist && sha256sum "$APK_NAME" > "$APK_NAME.sha256")
           echo "✅ APK Android TV universel, signé et testé au démarrage sur émulateur" >> "$GITHUB_STEP_SUMMARY"
       - name: Publier la préversion dans GitHub Releases
+        if: ${{ env.SKIP_TV_RELEASE != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
         shell: bash
