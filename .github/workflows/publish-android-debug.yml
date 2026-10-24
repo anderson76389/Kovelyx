@@ -120,12 +120,12 @@ jobs:
           ATTENTION : non testé sur un téléphone réel. La lecture, les extensions, les services tiers et la stabilité ne sont pas garantis. Ce fichier est signé avec une clé de test et ne constitue pas une APK de production. Sauvegarder les données avant installation. Le compte unique Kovelyx n'est pas encore déployé.
 
           Sources : $SOURCE_SHA
-          Build : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
+          Compilation : https://github.com/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID
           Licence et crédits : https://github.com/$GITHUB_REPOSITORY
           EOF
           if gh release create "$TAG" "dist/$APK_NAME" "dist/$APK_NAME.sha256" \
             --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" \
-            --title "Kovelyx Android experimental - $TAG" \
+            --title "Kovelyx Android — préversion expérimentale · $TAG" \
             --prerelease --notes-file /tmp/kv-notes.md; then
             echo "RELEASE_PUBLISHED=true" >> "$GITHUB_ENV"
             echo "APK mobile publié dans les Releases Kovelyx." >> "$GITHUB_STEP_SUMMARY"
