@@ -67,6 +67,8 @@ private fun AccountSettingsBody(
     val authState by AuthRepository.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var showSignOutConfirm by remember { mutableStateOf(false) }
+    var signingOut by remember { mutableStateOf(false) }
+    var signOutError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var isDeletingAccount by remember { mutableStateOf(false) }
     var deleteErrorMessage by remember { mutableStateOf<String?>(null) }
@@ -112,10 +114,26 @@ private fun AccountSettingsBody(
             }
         }
 
-        NuvioPrimaryButton(
-            text = stringResource(Res.string.settings_account_sign_out),
-            onClick = { showSignOutConfirm = true },
-        )
+        // Ne jamais proposer une déconnexion lorsque l'écran indique
+        // « Non connecté ». Le mode invité a aussi un état Authenticated.
+        if (authState is AuthState.Authenticated) {
+            NuvioPrimaryButton(
+                text = stringResource(Res.string.settings_account_sign_out),
+                onClick = {
+                    if (!signingOut) {
+                        signOutError = null
+                        showSignOutConfirm = true
+                    }
+                },
+            )
+        }
+        signOutError?.let { message ->
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
 
         if (canDeleteAccount) {
             DeleteAccountCard(
@@ -131,14 +149,25 @@ private fun AccountSettingsBody(
     NuvioStatusModal(
         title = stringResource(Res.string.settings_account_sign_out_confirm_title),
         message = stringResource(Res.string.settings_account_sign_out_confirm_message),
-        isVisible = showSignOutConfirm,
+        isVisible = showSignOutConfirm && authState is AuthState.Authenticated,
+        isBusy = signingOut,
         confirmText = stringResource(Res.string.settings_account_sign_out),
         dismissText = stringResource(Res.string.action_cancel),
         onConfirm = {
-            showSignOutConfirm = false
-            scope.launch { AuthRepository.signOut() }
+            if (!signingOut) {
+                signingOut = true
+                scope.launch {
+                    val result = AuthRepository.signOut()
+                    signingOut = false
+                    showSignOutConfirm = false
+                    signOutError = result.exceptionOrNull()?.message
+                        ?: if (result.isFailure) "Déconnexion impossible. Réessayez." else null
+                }
+            }
         },
-        onDismiss = { showSignOutConfirm = false },
+        onDismiss = {
+            if (!signingOut) showSignOutConfirm = false
+        },
     )
 
     NuvioStatusModal(

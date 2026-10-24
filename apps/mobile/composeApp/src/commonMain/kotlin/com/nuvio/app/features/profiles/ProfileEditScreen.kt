@@ -135,7 +135,7 @@ fun ProfileEditScreen(
                 selectedAvatar = visibleAvatarItem,
                 customAvatarUrl = customAvatarUrl,
                 accentColor = previewAccent,
-                hasAvatarChoices = avatars.isNotEmpty(),
+                hasAvatarChoices = false,
             )
         }
 
@@ -203,36 +203,8 @@ fun ProfileEditScreen(
             }
         }
 
-        item {
-            NuvioSurfaceCard {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(
-                        text = stringResource(Res.string.profile_choose_avatar),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = selectedAvatarItem?.displayName
-                            ?: if (avatars.isEmpty()) {
-                                stringResource(Res.string.profile_loading_avatars)
-                            } else {
-                                stringResource(Res.string.profile_select_avatar)
-                            },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-
-                    AvatarPicker(
-                        avatars = avatars,
-                        selectedAvatarId = selectedAvatarId.takeIf { customAvatarUrl == null },
-                        onAvatarSelected = { avatar ->
-                            avatarUrl = ""
-                            selectedAvatarId = avatar.id
-                        },
-                    )
-                }
-            }
-        }
+        // Le catalogue d'avatars Supabase n'appartient pas à Kovelyx.
+        // Les profils utilisent désormais une photo personnelle ou une URL.
 
         if (!isNew) {
             item {

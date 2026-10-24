@@ -1,6 +1,7 @@
 package com.nuvio.app.features.profiles
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.features.membership.CosmeticEntitlement
 import com.nuvio.app.features.membership.MemberAccessRepository
@@ -76,6 +77,12 @@ object AvatarRepository {
     private var lastMemberRefresh: TimeMark? = null
 
     suspend fun fetchAvatars() {
+        // Le catalogue historique est une RPC Supabase, indisponible avec D1.
+        // Ne jamais charger ou réafficher ces avatars quand Cloudflare est actif.
+        if (CloudflareAccountClient.enabled) {
+            _avatars.value = emptyList()
+            return
+        }
         hydrateFromCacheIfNeeded()
         ensureMemberAccessObserver()
         if (standardLoaded && standardCatalog.isNotEmpty()) {
@@ -86,6 +93,10 @@ object AvatarRepository {
     }
 
     suspend fun refreshAvatars(force: Boolean = false) {
+        if (CloudflareAccountClient.enabled) {
+            _avatars.value = emptyList()
+            return
+        }
         hydrateFromCacheIfNeeded()
         ensureMemberAccessObserver()
         if (force || isRefreshDue(lastStandardRefresh)) {

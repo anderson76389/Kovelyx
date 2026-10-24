@@ -155,6 +155,11 @@ object CloudflareAccountClient {
         CloudflareCredentialStore.clear()
     }
 
+    /** Révoquer uniquement l'ancienne session sans toucher à une nouvelle connexion. */
+    suspend fun revokePreviousSession(bearerToken: String) {
+        request("/api/auth/sign-out", "{}", bearerToken)
+    }
+
     suspend fun accountProfiles(): JsonObject {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         val response = httpRequestRaw(
