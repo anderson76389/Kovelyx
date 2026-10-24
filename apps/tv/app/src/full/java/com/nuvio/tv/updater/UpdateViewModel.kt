@@ -290,7 +290,16 @@ class UpdateViewModel @Inject constructor(
         }
 
         _uiState.update { it.copy(showUnknownSourcesDialog = false) }
-        ApkInstaller.launchInstall(context, apkFile)
+        runCatching { ApkInstaller.launchInstall(context, apkFile) }
+            .onFailure { error ->
+                _uiState.update {
+                    it.copy(
+                        errorMessage = error.message ?: "Impossible de lancer l'installation de Kovelyx.",
+                        showBanner = true,
+                        showUnknownSourcesDialog = false
+                    )
+                }
+            }
     }
 
     fun openUnknownSourcesSettings() {
