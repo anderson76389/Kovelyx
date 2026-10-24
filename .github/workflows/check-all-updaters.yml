@@ -1,0 +1,39 @@
+name: Vérifier les vraies mises à jour Windows Android et TV
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/tests/test_updater_release_contract.py'
+      - '.github/workflows/check-all-updaters.yml'
+      - '.github/workflows/publish-signed-android.yml'
+      - 'apps/desktop/composeApp/src/**/updater/**'
+      - 'apps/mobile/composeApp/src/**/updater/**'
+      - 'apps/tv/app/src/**/updater/**'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/tests/test_updater_release_contract.py'
+      - '.github/workflows/check-all-updaters.yml'
+      - '.github/workflows/publish-signed-android.yml'
+      - 'apps/desktop/composeApp/src/**/updater/**'
+      - 'apps/mobile/composeApp/src/**/updater/**'
+      - 'apps/tv/app/src/**/updater/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  release-contract:
+    name: Releases officielles et SHA-256 de chaque plateforme
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Vérifier la syntaxe du vérificateur
+        run: python -m py_compile scripts/tests/test_updater_release_contract.py
+      - name: Tester les fichiers publiés réellement sur GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/tests/test_updater_release_contract.py
