@@ -44,6 +44,9 @@ class CloudflareTvDataSync @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
     private val inFlight = ConcurrentHashMap.newKeySet<Int>()
+    // A local edit made during a network sync must be retried once the current
+    // snapshot finishes, not silently discarded by the inFlight gate.
+    private val rerunRequested = ConcurrentHashMap.newKeySet<Int>()
 
     init {
         // Observe actual local TV changes (player position, library, watched flags).
@@ -66,16 +69,27 @@ class CloudflareTvDataSync @Inject constructor(
     }
 
     fun request(profileId: Int) {
-        if (!CloudflareTvAccountClient.enabled || !inFlight.add(profileId)) return
+        if (!CloudflareTvAccountClient.enabled) return
+        if (!inFlight.add(profileId)) {
+            rerunRequested.add(profileId)
+            return
+        }
         scope.launch {
             try {
-                synchronize(profileId)
+                do {
+                    rerunRequested.remove(profileId)
+                    synchronize(profileId)
+                    // Include edits received after the snapshot was read.
+                } while (rerunRequested.remove(profileId))
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
                 Log.w(TAG, "D1 sync failed; local playback/library kept", error)
             } finally {
                 inFlight.remove(profileId)
+                // Close the race between the last loop condition and removing
+                // the in-flight marker. A pending edit always gets a new run.
+                if (rerunRequested.remove(profileId)) request(profileId)
             }
         }
     }
