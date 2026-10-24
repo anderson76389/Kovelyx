@@ -9,6 +9,14 @@ import javax.inject.Singleton
 internal class NoEligibleUpdateException(channel: UpdateChannel) :
     IllegalStateException("No compatible APK release found for ${channel.storedValue} channel")
 
+/** A permanently signed TV APK cannot replace the separately packaged .debug app. */
+internal fun tvReleaseMatchesInstalledVariant(tag: String?, isDebugBuild: Boolean): Boolean =
+    if (isDebugBuild) {
+        tag?.startsWith("v", ignoreCase = true) == true
+    } else {
+        tag?.startsWith("tv-v", ignoreCase = true) == true
+    }
+
 @Singleton
 class UpdateRepository @Inject constructor(
     private val gitHubReleaseApi: GitHubReleaseApi
@@ -39,6 +47,7 @@ class UpdateRepository @Inject constructor(
             }
             val releaseWithAsset = ReleaseSelector
                 .eligibleReleases(releases, channel)
+                .filter { tvReleaseMatchesInstalledVariant(it.tagName, BuildConfig.IS_DEBUG_BUILD) }
                 .firstNotNullOfOrNull { release ->
                     // Une Release Kovelyx peut contenir l'APK mobile ET TV.
                     // N'installer JAMAIS par erreur le fichier Android mobile sur une TV.

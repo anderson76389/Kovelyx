@@ -100,6 +100,41 @@ class AppUpdaterRepositoryTest {
         assertEquals("android-v1.0.0", select(response, UpdateChannel.STABLE)?.tag)
     }
 
+    @Test
+    fun signedBuildSkipsNewerDebugApkAndSelectsReleaseSignedWithPermanentKey() {
+        val response = """[
+            {"tag_name":"v1.1.999-alpha","prerelease":true,
+             "assets":[{"name":"Kovelyx-Android-v1.1.999-alpha.apk",
+                        "browser_download_url":"https://example.com/debug.apk"}]},
+            {"tag_name":"android-v1.1.700-alpha","prerelease":true,
+             "assets":[{"name":"Kovelyx-Android-android-v1.1.700-alpha-universal.apk",
+                        "browser_download_url":"https://example.com/signed.apk"}]}
+        ]"""
+        val selected = AppUpdaterRepository.selectUpdate(
+            response, UpdateChannel.BETA, listOf("arm64-v8a"),
+            family = AndroidApkReleaseFamily.SIGNED,
+        )
+        assertEquals("android-v1.1.700-alpha", selected?.tag)
+        assertEquals("https://example.com/signed.apk", selected?.assetUrl)
+    }
+
+    @Test
+    fun debugBuildNeverOffersSignedReleaseForDifferentPackageId() {
+        val response = """[
+            {"tag_name":"android-v1.1.900-alpha","prerelease":true,
+             "assets":[{"name":"Kovelyx-Android-android-v1.1.900-alpha-universal.apk",
+                        "browser_download_url":"https://example.com/signed.apk"}]},
+            {"tag_name":"v1.1.800-alpha","prerelease":true,
+             "assets":[{"name":"Kovelyx-Android-v1.1.800-alpha.apk",
+                        "browser_download_url":"https://example.com/debug.apk"}]}
+        ]"""
+        val selected = AppUpdaterRepository.selectUpdate(
+            response, UpdateChannel.BETA, listOf("arm64-v8a"),
+            family = AndroidApkReleaseFamily.DEBUG,
+        )
+        assertEquals("v1.1.800-alpha", selected?.tag)
+    }
+
     private fun select(response: String, channel: UpdateChannel): AppUpdate? =
         AppUpdaterRepository.selectUpdate(response, channel, listOf("arm64-v8a"))
 }

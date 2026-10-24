@@ -74,6 +74,16 @@ class ReleaseSelectorTest {
         )
     }
 
+    @Test
+    fun tvDebugAndSignedReleasesNeverCrossInstall() {
+        assertEquals(true, tvReleaseMatchesInstalledVariant("v1.1.573-alpha", true))
+        assertEquals(false, tvReleaseMatchesInstalledVariant("tv-v1.1.573-alpha", true))
+        assertEquals(false, tvReleaseMatchesInstalledVariant("v1.1.573-alpha", false))
+        assertEquals(true, tvReleaseMatchesInstalledVariant("tv-v1.1.573-alpha", false))
+        assertEquals(false, tvReleaseMatchesInstalledVariant("android-v1.1.573-alpha", false))
+        assertEquals(false, tvReleaseMatchesInstalledVariant(null, false))
+    }
+
     private fun release(
         tag: String,
         name: String = tag,

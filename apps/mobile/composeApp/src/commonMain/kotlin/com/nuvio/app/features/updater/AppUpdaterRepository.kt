@@ -31,6 +31,14 @@ internal data class GitHubAssetDto(
 
 internal class NoChannelReleaseException : IllegalStateException()
 
+/**
+ * Debug APKs use com.kovelyx.mobile.debug and an ephemeral CI key;
+ * signed releases use com.kovelyx.mobile and a permanent key.
+ * Never select a package from the other release family.
+ */
+internal enum class AndroidApkReleaseFamily { ANY, DEBUG, SIGNED }
+
+
 internal object AppUpdaterRepository {
     private val json = Json {
         ignoreUnknownKeys = true
@@ -52,7 +60,16 @@ internal object AppUpdaterRepository {
         if (response.status !in 200..299) {
             error(getString(Res.string.updates_github_api_error, response.status))
         }
-        selectUpdate(response.body, channel, AppUpdaterPlatform.getSupportedAbis())
+        selectUpdate(
+            response.body,
+            channel,
+            AppUpdaterPlatform.getSupportedAbis(),
+            family = if (AppUpdaterPlatform.isDebugBuild) {
+                AndroidApkReleaseFamily.DEBUG
+            } else {
+                AndroidApkReleaseFamily.SIGNED
+            },
+        )
             ?: throw NoChannelReleaseException()
     }
 
@@ -65,10 +82,28 @@ internal object AppUpdaterRepository {
         responseBody: String,
         channel: UpdateChannel,
         supportedAbis: List<String>,
+        family: AndroidApkReleaseFamily = AndroidApkReleaseFamily.ANY,
     ): AppUpdate? {
         val releases = json.decodeFromString<List<GitHubReleaseDto>>(responseBody)
-        return ReleaseSelector.eligibleReleases(releases, channel).firstNotNullOfOrNull { release ->
-            val asset = chooseBestApkAsset(release.assets, supportedAbis) ?: return@firstNotNullOfOrNull null
+        return ReleaseSelector.eligibleReleases(releases, channel)
+            .filter { release ->
+                val tag = release.tagName.orEmpty()
+                when (family) {
+                    AndroidApkReleaseFamily.ANY -> true
+                    AndroidApkReleaseFamily.DEBUG -> tag.startsWith("v", ignoreCase = true)
+                    AndroidApkReleaseFamily.SIGNED -> tag.startsWith("android-v", ignoreCase = true)
+                }
+            }.firstNotNullOfOrNull { release ->
+            val candidates = when (family) {
+                AndroidApkReleaseFamily.SIGNED -> release.assets.filter {
+                    it.name.startsWith("Kovelyx-Android-android-v", ignoreCase = true)
+                }
+                AndroidApkReleaseFamily.DEBUG -> release.assets.filter {
+                    it.name.startsWith("Kovelyx-Android-v", ignoreCase = true)
+                }
+                AndroidApkReleaseFamily.ANY -> release.assets
+            }
+            val asset = chooseBestApkAsset(candidates, supportedAbis) ?: return@firstNotNullOfOrNull null
             val tag = release.tagName?.takeIf { VersionUtils.parse(it) != null }
                 ?: release.name.orEmpty()
             AppUpdate(
