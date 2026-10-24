@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 VERSION = re.compile(r"^v\d+\.\d+\.\d+-(?:alpha|beta|rc)$")
+DEBUG_PREVIEW = re.compile(r"^(?:android|tv)-preview-[0-9a-f]{12}$")
 OLD_WINDOWS_PREFIX = "## Kovelyx Windows — preview "
 REPLACEMENTS = (
     ("**Recommended download:**", "**Téléchargement conseillé :**"),
@@ -44,6 +45,19 @@ def localize_release(release: dict) -> tuple[str, str]:
     tag = str(release.get("tag_name") or "")
     title = str(release.get("name") or "")
     body = str(release.get("body") or "")
+    # Les préversions Android et TV avaient également des libellés anglais.
+    # N'agir que sur nos anciens modèles connus, jamais sur un texte arbitraire.
+    if DEBUG_PREVIEW.fullmatch(tag) and tag.startswith("android-preview-"):
+        if body.startswith("## Kovelyx Android - préversion expérimentale"):
+            if title == f"Kovelyx Android experimental - {tag}":
+                title = f"Kovelyx Android — préversion expérimentale · {tag}"
+            body = body.replace("\nBuild : ", "\nCompilation : ", 1)
+        return title, body
+    if DEBUG_PREVIEW.fullmatch(tag) and tag.startswith("tv-preview-"):
+        if body.startswith("# Kovelyx TV - APK universel expérimental"):
+            body = body.replace("\nBuild TV : ", "\nCompilation TV : ", 1)
+        return title, body
+
     if not VERSION.fullmatch(tag):
         return title, body
 
