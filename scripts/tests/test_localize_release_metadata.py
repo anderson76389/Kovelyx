@@ -49,5 +49,30 @@ class ReleaseMetadataFrenchTests(unittest.TestCase):
         self.assertEqual(localize_release(source), ("Kovelyx FR", source["body"]))
 
 
+    def test_android_preview_title_and_build_label_in_french(self):
+        data = {
+            "tag_name": "android-preview-012345abcdef",
+            "name": "Kovelyx Android experimental - android-preview-012345abcdef",
+            "body": "## Kovelyx Android - préversion expérimentale\\n\\nBuild : https://example.com/42",
+        }
+        # Use real newline delimiters as in the published GitHub notes.
+        data["body"] = data["body"].replace("\\n", "\n")
+        title, body = localize_release(data)
+        self.assertEqual(title, "Kovelyx Android — préversion expérimentale · android-preview-012345abcdef")
+        self.assertIn("Compilation : https://example.com/42", body)
+        self.assertEqual(localize_release({"tag_name": data["tag_name"], "name": title, "body": body}), (title, body))
+
+    def test_tv_preview_preserves_existing_french(self):
+        data = {
+            "tag_name": "tv-preview-012345abcdef",
+            "name": "Kovelyx TV — préversion tv-preview-012345abcdef",
+            "body": "# Kovelyx TV - APK universel expérimental\n\nBuild TV : https://example.com/tv",
+        }
+        title, body = localize_release(data)
+        self.assertEqual(title, data["name"])
+        self.assertIn("Compilation TV : https://example.com/tv", body)
+        self.assertNotIn("Build TV :", body)
+
+
 if __name__ == "__main__":
     unittest.main()
