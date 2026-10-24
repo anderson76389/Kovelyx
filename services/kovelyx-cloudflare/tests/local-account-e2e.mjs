@@ -88,7 +88,7 @@ try {
     const me=await req("/v1/me","GET",null,token);
     assert.equal(me.status,200,"Bearer authorization must work");
     assert.equal(me.data.email,email);
-    return {token,userId:me.data.id};
+    return {token,userId:me.data.id,email};
   }
   const alice=await signupAndLogin("alice");
   const bob=await signupAndLogin("bob");
@@ -97,6 +97,21 @@ try {
   assert.equal(created.status,201,"Create principal profile");
   const profileId=created.data?.profile?.id;
   assert.match(profileId||"",/^[a-f0-9-]{36}$/i);
+  // Un autre appareil se connecte au MEME compte, avec sa propre session.
+  // La présence d'un Worker répondant /health ne suffit pas : il faut
+  // pouvoir relire et modifier les données écrites par cette autre session.
+  const tvLogin=await req("/api/auth/sign-in/email","POST",{
+    email:alice.email,password:accountPassword
+  });
+  assert.equal(tvLogin.status,200,"Deuxième session du même compte");
+  const tvToken=tvLogin.headers.get("set-auth-token")||tvLogin.data?.token;
+  assert.ok(tvToken?.length>=16,"Session distincte pour le second appareil");
+  assert.notEqual(tvToken,alice.token,"Les appareils doivent avoir des sessions indépendantes");
+  const tvMe=await req("/v1/me","GET",null,tvToken);
+  assert.equal(tvMe.data?.id,alice.userId,"Deuxième appareil lié au même utilisateur");
+  const tvProfiles=await req("/v1/profiles","GET",null,tvToken);
+  assert.equal(tvProfiles.data?.profiles?.[0]?.id,profileId,"Profil commun visible sur TV");
+
   const otherUser=await req("/v1/sync?profileId="+profileId,"GET",null,bob.token);
   assert.equal(otherUser.status,404,"Foreign account must not read D1 profile");
   assert.equal((await req("/v1/profiles","GET",null,bob.token)).data.profiles.length,0);
@@ -106,6 +121,7 @@ try {
     revision:0,deleted:false,
     payload:{id:"tt"+n,type:"movie",name:"Film "+n,savedAtEpochMs:1720010000000+n}
   });
+  // Écriture depuis PC / lecture depuis TV à l'aide d'un autre Bearer.
   const first=await req("/v1/sync","POST",entry(1),alice.token);
   assert.equal(first.status,201,"Insert first library item");
   assert.equal(first.data.revision,1);
@@ -116,6 +132,11 @@ try {
     const result=await req("/v1/sync","POST",entry(n),alice.token);
     assert.equal(result.status,201,"Library insert "+n);
   }
+  const tvLibrary=await req("/v1/sync?profileId="+profileId+"&limit=25","GET",null,tvToken);
+  assert.equal(tvLibrary.status,200,"La TV doit relire les éléments publiés par Windows");
+  assert.ok(tvLibrary.data?.items?.some(item=>item.category==="library" &&
+    item.payload?.id==="tt1"),"Une œuvre de la bibliothèque doit être visible sur la TV");
+
   const pageOne=await req("/v1/sync?profileId="+profileId+"&limit=25","GET",null,alice.token);
   assert.equal(pageOne.status,200);
   assert.equal(pageOne.data.items.length,25);
@@ -152,12 +173,29 @@ try {
   assert.equal((await req("/v1/sync","POST",progress,alice.token)).status,409,
     "Stale playback position conflict");
 
+  // Android TV reprend la progression puis le PC récupère la position mise
+  // à jour : vérification de la synchronisation croisée des sessions.
+  const tvProgress=await req("/v1/sync","POST",{
+    ...progress,revision:2,payload:{...progress.payload,
+      lastPositionMs:85000,lastUpdatedEpochMs:1720010700000}
+  },tvToken);
+  assert.equal(tvProgress.status,200,"Mise à jour progression depuis un autre appareil");
+  const pcProgress=await req("/v1/sync?profileId="+profileId+"&limit=25","GET",null,alice.token);
+  assert.ok(pcProgress.data?.items?.some(item=>item.category==="watch_progress" &&
+    item.itemKey==="movie:tt1" && item.payload?.lastPositionMs===85000),
+    "La progression publiée depuis la TV doit être lisible depuis le PC");
+
   const watched={
     profileId,category:"watched_items",itemKey:"movie:tt1:-1:-1",revision:0,
     deleted:false,payload:{id:"tt1",type:"movie",name:"Film 1",markedAtEpochMs:1720010600000}
   };
   assert.equal((await req("/v1/sync","POST",watched,alice.token)).status,201,
     "Watched history category requires migration 0002");
+  // Même historique sur deux appareils, sans partager de jeton de session.
+  const tvWatched=await req("/v1/sync?profileId="+profileId+"&limit=25&offset=25","GET",null,tvToken);
+  assert.equal(tvWatched.status,200);
+  assert.ok(tvWatched.data.items.some(item=>item.category==="watched_items" &&
+    item.itemKey==="movie:tt1:-1:-1"),"Historique vu synchronisé sur la TV");
   const all=await req("/v1/sync?profileId="+profileId+"&limit=25&offset=25","GET",null,alice.token);
   assert.ok(all.data.items.some(x=>x.category==="watched_items" || x.category==="watch_progress"));
   assert.equal((await req("/v1/sync","POST",watched,bob.token)).status,404,
@@ -178,7 +216,13 @@ try {
   assert.ok(signedOut.status>=200&&signedOut.status<300);
   assert.equal((await req("/v1/me","GET",null,alice.token)).status,401,
     "Sign-out revokes the bearer token");
-  console.log("PASS: two local Better Auth accounts, D1 0002 watched state, library 31 items, offset pagination, progress, tombstones, CAS 409, profile rename, isolation, sign-out");
+  assert.equal((await req("/v1/me","GET",null,tvToken)).status,200,
+    "La déconnexion Windows ne doit pas invalider la session Android TV");
+  const tvSignedOut=await req("/api/auth/sign-out","POST",{},tvToken);
+  assert.ok(tvSignedOut.status>=200&&tvSignedOut.status<300);
+  assert.equal((await req("/v1/me","GET",null,tvToken)).status,401,
+    "La TV doit pouvoir déconnecter sa propre session");
+  console.log("PASS: deux appareils et sessions indépendantes sur un même compte, Worker+D1 locaux, bibliothèque, lecture reprise, œuvres vues, déconnexion isolée, CAS, migrations et séparation des comptes");
 } finally {
   if (worker?.pid) {
     // Sous Linux, -pid désigne notre groupe dédié, jamais celui du runner.
