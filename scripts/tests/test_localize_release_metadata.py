@@ -34,7 +34,7 @@ class ReleaseMetadataFrenchTests(unittest.TestCase):
         self.assertNotIn("Recommended download", body)
         self.assertIn("Kovelyx-Windows-Setup-v1.1.575-alpha.exe", body)
         self.assertIn("https://github.com/example/actions/runs/42", body)
-        self.assertIn("Source", body)
+        self.assertIn("Commit source : abcdef123456", body)
         self.assertIn("## Android mobile et Android TV (préversions de test)", body)
         self.assertIn("- Test TV : https://example.com/123", body)
         self.assertEqual(localize_release({"tag_name": release["tag_name"], "name": title, "body": body}), (title, body))
