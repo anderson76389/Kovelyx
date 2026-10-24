@@ -76,10 +76,19 @@ if (databaseAlreadyExists) {
   console.log("\nSauvegarde obligatoire de la base D1 existante avant migration.");
   call(["wrangler", "d1", "export", "DB", "--remote", "--skip-confirmation", "--output", backup]);
   const exported = statSync(backup);
-  if (!exported.isFile() || exported.size < 80)
+  if (!exported.isFile() || exported.size < 12)
     throw Error("La sauvegarde D1 est vide ou illisible. Migration interrompue.");
   chmodSync(backup, 0o600);
-  const preview = readFileSync(backup, "utf8");
+  // Les exports D1 peuvent être volumineux : ne vérifier que le début du fichier.
+  const fd = await import("node:fs/promises").then(fs => fs.open(backup, "r"));
+  const header = Buffer.alloc(128 * 1024);
+  let bytesRead;
+  try {
+    ({ bytesRead } = await fd.read(header, 0, header.length, 0));
+  } finally {
+    await fd.close();
+  }
+  const preview = header.subarray(0, bytesRead).toString("utf8");
   if (!/(CREATE TABLE|PRAGMA|INSERT INTO)/i.test(preview))
     throw Error("Format de sauvegarde D1 inattendu. Migration interrompue.");
   console.log("✅ Sauvegarde créée hors dépôt : " + backup);
