@@ -6,7 +6,17 @@ on:
     paths:
       - '.github/workflows/release-sidebar.yml'
       - 'scripts/showcase-releases.sh'
+      - 'scripts/localize_release_metadata.py'
+      - 'scripts/tests/test_localize_release_metadata.py'
       - 'scripts/publish-unified-preview.sh'
+  pull_request:
+    paths:
+      - 'scripts/showcase-releases.sh'
+      - 'scripts/localize_release_metadata.py'
+      - 'scripts/tests/test_localize_release_metadata.py'
+      - 'scripts/publish-windows-preview.sh'
+      - 'scripts/publish-unified-preview.sh'
+      - '.github/workflows/release-sidebar.yml'
   workflow_run:
     workflows:
       - 'Regrouper Windows Android et Android TV dans une seule Release'
@@ -23,9 +33,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  tester-fr:
+    name: Vérifier les notes françaises sans publier
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier les traductions et les données préservées
+        run: python3 -m unittest discover -s scripts/tests -p 'test_localize_release_metadata.py'
+      - name: Vérifier les scripts de publication
+        run: |
+          set -euo pipefail
+          bash -n scripts/showcase-releases.sh
+          bash -n scripts/publish-windows-preview.sh
+          bash -n scripts/publish-unified-preview.sh
+
   latest-complete:
     name: Classer les versions expérimentales en préversions
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository) }}
+    needs: tester-fr
+    if: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository)) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
