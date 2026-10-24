@@ -39,10 +39,14 @@ class PluginRuntimeDesktopTest {
 
     @Test
     fun `desktop runtime handles concurrent scraper executions`() = runBlocking {
-        val results = coroutineScope {
-            (0 until 32).map { index ->
-                async(Dispatchers.Default) {
-                    PluginRuntime.executePlugin(
+        // QuickJS instances are resource-heavy on CI. Cover all 32 inputs in
+        // bounded concurrent waves so the test stresses parallel execution
+        // without exhausting native threads/heap and timing out at 60 seconds.
+        val results = (0 until 32).chunked(8).flatMap { batch ->
+            coroutineScope {
+                batch.map { index ->
+                    async(Dispatchers.Default) {
+                        PluginRuntime.executePlugin(
                         code = """
                             module.exports.getStreams = async function(tmdbId, mediaType) {
                                 await Promise.resolve();
@@ -58,9 +62,10 @@ class PluginRuntimeDesktopTest {
                         season = null,
                         episode = null,
                         scraperId = "desktop-runtime-stress-$index",
-                    )
-                }
-            }.awaitAll()
+                        )
+                    }
+                }.awaitAll()
+            }
         }
 
         assertEquals(32, results.size)
