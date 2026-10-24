@@ -3,6 +3,7 @@ package com.nuvio.tv.data.remote.supabase
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.data.local.MemberCatalogStorage
 import com.nuvio.tv.domain.model.ServerConfiguration
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -85,6 +86,10 @@ class AvatarRepository @Inject constructor(
     private var lastMemberRefreshAtMs = 0L
 
     suspend fun getAvatarCatalog(hasMemberAccess: Boolean = false): List<AvatarCatalogItem> {
+        // L'ancien catalogue Nuvio est une RPC Supabase absente du Worker D1.
+        // Sur Kovelyx Cloudflare, ne pas attendre cette requête indéfiniment,
+        // ni afficher des avatars d'un backend sans lien avec les comptes Kovelyx.
+        if (CloudflareTvAccountClient.enabled) return emptyList()
         val hadStandardCache = cachedStandardCatalog != null
         val standardCatalog = getStandardAvatarCatalog()
         if (hadStandardCache) refreshStandardCatalogInBackground()
