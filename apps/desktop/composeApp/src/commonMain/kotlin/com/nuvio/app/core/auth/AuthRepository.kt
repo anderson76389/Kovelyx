@@ -183,20 +183,23 @@ object AuthRepository {
     suspend fun signOut(): Result<Unit> {
         _error.value = null
         if (CloudflareAccountClient.enabled) {
-            val logout = runCatching { CloudflareAccountClient.signOut() }
-            // Credentials and in-memory identity are cleared before network revocation.
-            // Offline revocation must not leave the account visibly connected.
-            val cancellation = logout.exceptionOrNull() as? CancellationException
-            if (cancellation != null) throw cancellation
-            logout.exceptionOrNull()?.let { error ->
-                log.w(error) { "Cloudflare logout completed locally; remote revocation unavailable" }
-            }
+            // La session locale doit disparaître IMMÉDIATEMENT, même sans réseau :
+            // attendre la requête de révocation laissait l'utilisateur bloqué.
+            val oldToken = CloudflareAccountClient.currentSession?.bearerToken
+            CloudflareAccountClient.clearLocalSession()
             AuthStorage.clearAnonymousUserId()
-            // Ne jamais effacer les profils, la bibliothèque ou la progression
-            // avant la migration de stockage/synchronisation vers D1.
-            // La fermeture de session ne garantit PAS encore l'isolation locale
-            // entre plusieurs utilisateurs sur le même appareil.
             _state.value = AuthState.Unauthenticated
+            if (!oldToken.isNullOrBlank()) {
+                scope.launch {
+                    try {
+                        CloudflareAccountClient.revokePreviousSession(oldToken)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        log.w(error) { "Ancienne session Cloudflare non révoquée : déconnexion locale effective" }
+                    }
+                }
+            }
             return Result.success(Unit)
         }
         val anonymousRead = runCatching { AuthStorage.loadAnonymousUserId() }
