@@ -54,14 +54,26 @@ object CloudflareDataSync {
         scope.launch {
             for (profileId in requests) {
                 delay(900L)
-                try {
-                    synchronize(profileId)
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (error: Exception) {
-                    // The pending channel request (if any) remains available.
-                    // Local data is never removed on a transport or CAS failure.
-                    log.e(error) { "Synchronisation D1 interrompue, données locales préservées" }
+                var retryDelayMs = 2_000L
+                // A transient outage or HTTP 409 must not silently discard the
+                // only queued upload. Each attempt pulls fresh D1 revisions.
+                while (true) {
+                    val user = AuthRepository.state.value as? AuthState.Authenticated
+                    if (user == null || user.isAnonymous ||
+                        ProfileRepository.activeProfileId != profileId ||
+                        CloudflareAccountClient.currentSession?.userId != user.userId) break
+                    try {
+                        synchronize(profileId)
+                        break
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        // No local deletion. Retry while this same user/profile
+                        // remains active, with a bounded exponential delay.
+                        log.w(error) { "Cloudflare D1 indisponible : nouvelle tentative automatique, données conservées" }
+                        delay(retryDelayMs)
+                        retryDelayMs = (retryDelayMs * 2).coerceAtMost(60_000L)
+                    }
                 }
             }
         }
@@ -84,8 +96,8 @@ object CloudflareDataSync {
                 .firstOrNull { it.profileIndex == profileId }?.id.orEmpty()
         }
         if (!cloudId.matches(Regex("[a-fA-F0-9-]{36}"))) {
-            log.w { "Aucun UUID Cloudflare pour le profil local $profileId" }
-            return@withLock
+            // Offline/new profile: try again after D1 profile creation.
+            throw IllegalStateException("Profil Cloudflare non encore lié : reprise de synchronisation nécessaire")
         }
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
         val remote = records.associateBy {
