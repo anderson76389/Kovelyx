@@ -73,7 +73,7 @@ data class WatchProgressEntry(
     val isEffectivelyCompleted: Boolean
         get() = isCompleted ||
             (normalizedProgressPercent?.let { it >= WatchProgressCompletionPercentThreshold } == true) ||
-            (durationMs > 0L && lastPositionMs.toDouble() / durationMs.toDouble() >= WatchProgressCompletionPercentThreshold / 100.0)
+            (durationMs > 0L && isWatchProgressComplete(lastPositionMs, durationMs, false))
 
     val progressFraction: Float
         get() {
