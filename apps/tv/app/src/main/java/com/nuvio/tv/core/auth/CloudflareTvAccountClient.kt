@@ -29,10 +29,15 @@ internal object CloudflareTvAccountClient {
     @Volatile
     var account: Account? = null
         private set
+    private val sessionLock = Any()
+    private var sessionRevision = 0L
     private var sessionStore: CloudflareTvSessionStore? = null
 
     /** Called from AuthManager at process startup; never assumes a valid remote session. */
     suspend fun restoreSession(context: Context): Account? = withContext(Dispatchers.IO) {
+        // Sign-out may happen while /v1/me is still in flight: a stale
+        // verification must never resurrect a deleted local session.
+        val startingRevision = synchronized(sessionLock) { sessionRevision }
         sessionStore = CloudflareTvSessionStore(context)
         val saved = sessionStore?.load(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
             ?: return@withContext null
@@ -58,8 +63,13 @@ internal object CloudflareTvAccountClient {
                     sessionStore?.clear()
                     return@withContext null
                 }
-                if (account == null) account = saved
-                account
+                synchronized(sessionLock) {
+                    if (sessionRevision != startingRevision) null
+                    else {
+                        if (account == null) account = saved
+                        account
+                    }
+                }
             }
         } catch (cancelled: CancellationException) {
             throw cancelled
@@ -105,11 +115,14 @@ internal object CloudflareTvAccountClient {
             "Kovelyx Cloud : jeton invalide"
         }
         return Account(id, address, token).also { signedIn ->
-            account = signedIn
-            runCatching {
-                sessionStore?.save(signedIn, BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
-            }.onFailure { error ->
-                Log.w("KovelyxTvAuth", "Session connectée mais stockage chiffré indisponible", error)
+            synchronized(sessionLock) {
+                sessionRevision += 1L
+                account = signedIn
+                runCatching {
+                    sessionStore?.save(signedIn, BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+                }.onFailure { error ->
+                    Log.w("KovelyxTvAuth", "Session connectée mais stockage chiffré indisponible", error)
+                }
             }
         }
     }
@@ -259,7 +272,10 @@ internal object CloudflareTvAccountClient {
     }
 
     fun clearLocalSession() {
-        account = null
-        sessionStore?.clear()
+        synchronized(sessionLock) {
+            sessionRevision += 1L
+            account = null
+            sessionStore?.clear()
+        }
     }
 }
