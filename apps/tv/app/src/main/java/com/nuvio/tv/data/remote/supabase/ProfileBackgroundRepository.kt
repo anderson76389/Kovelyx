@@ -2,6 +2,7 @@ package com.nuvio.tv.data.remote.supabase
 
 import android.content.Context
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.data.local.MemberCatalogStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.jan.supabase.postgrest.Postgrest
@@ -60,6 +61,8 @@ class ProfileBackgroundRepository @Inject constructor(
     private var remoteLoaded = false
 
     fun ensureLoaded() {
+        // Never contact legacy Supabase for Nuvio member assets in Cloudflare mode.
+        if (CloudflareTvAccountClient.enabled) return
         hydrateFromCacheIfNeeded()
         if (remoteLoaded || catalogLoadJob?.isActive == true) return
         catalogLoadJob = scope.launch {
@@ -79,6 +82,7 @@ class ProfileBackgroundRepository @Inject constructor(
     }
 
     fun loadSelectedAndPreload(id: String) {
+        if (CloudflareTvAccountClient.enabled) return
         ensureLoaded()
         remoteCatalog.firstOrNull { it.id == id }?.let(::loadCachedAndPublish)
             ?: loadUnindexedCachedSelection(id)
@@ -99,6 +103,7 @@ class ProfileBackgroundRepository @Inject constructor(
     }
 
     fun preloadImages() {
+        if (CloudflareTvAccountClient.enabled) return
         ensureLoaded()
         assetLoadJob?.cancel()
         assetLoadJob = scope.launch {
