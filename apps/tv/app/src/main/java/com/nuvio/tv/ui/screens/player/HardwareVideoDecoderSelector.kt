@@ -19,8 +19,14 @@ private val HARDWARE_FIRST_VIDEO_TYPES = setOf(
 private val SOFTWARE_DECODER_PREFIXES = listOf("omx.google.", "c2.android.", "c2.google.", "omx.ffmpeg.")
 
 /**
- * Android's software decoders are left out only when a hardware decoder supports this exact format
- * (profile, level, size), so a stream beyond the hardware still plays in software.
+ * Prefer hardware for supported formats without losing Media3's decoder fallback.
+ *
+ * A codec can advertise support for a profile/size yet fail during initialization or
+ * when the TV changes output modes. ExoPlayer's enableDecoderFallback(true) only
+ * works when the remaining software decoders are present in this list.
+ *
+ * Keep the platform order unchanged if no hardware decoder confirms support;
+ * otherwise try hardware first and leave software last as an emergency fallback.
  */
 internal fun <T> hardwareFirstVideoDecoders(
     mimeType: String?,
@@ -30,7 +36,9 @@ internal fun <T> hardwareFirstVideoDecoders(
 ): List<T> {
     if (mimeType !in HARDWARE_FIRST_VIDEO_TYPES) return decoders
     val hardware = decoders.filterNot(isSoftware)
-    return if (hardware.any(supportsFormat)) hardware else decoders
+    if (!hardware.any(supportsFormat)) return decoders
+    val software = decoders.filter(isSoftware)
+    return hardware + software
 }
 
 internal fun hardwareFirstVideoDecoders(format: Format, decoders: List<MediaCodecInfo>): List<MediaCodecInfo> =
