@@ -108,6 +108,33 @@ jobs:
             ./gradlew :app:assembleFullRelease --no-daemon --max-workers=1 \
               -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
           fi
+      - name: Conserver l'APK universel compile pour diagnostic avant publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.platform }}" == mobile ]]; then
+            output=apps/mobile/androidApp/build/outputs/apk/full/release
+          else
+            output=apps/tv/app/build/outputs/apk/full/release
+          fi
+          echo "Fichiers APK produits pour ${{ matrix.platform }} :"
+          find "$output" -maxdepth 1 -type f -name '*.apk' -printf '%f (%s octets)\\n' | sort
+          mkdir -p diagnostic-apk
+          while IFS= read -r -d '' apk; do
+            cp "$apk" "diagnostic-apk/"
+          done < <(find "$output" -maxdepth 1 -type f -iname '*universal*.apk' -print0)
+          if ! compgen -G 'diagnostic-apk/*.apk' > /dev/null; then
+            echo "::error::Aucun APK universel produit : verifier les splits ABI et les noms de fichiers ci-dessus."
+            exit 1
+          fi
+      - name: Sauvegarder l'APK universel compile, meme si les controles suivants echouent
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-${{ matrix.platform }}-apk-non-verifie-diagnostic
+          path: diagnostic-apk/*.apk
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Valider package, signatures, empreinte de certificat et identite
         shell: bash
         run: |
@@ -122,9 +149,9 @@ jobs:
             application_id=com.kovelyx.tv
             prefix=Kovelyx-TV
           fi
-          mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -name '*universal*release*.apk' -print0)
+          mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -iname '*universal*.apk' -print0)
           [[ "${{ matrix.platform }}" == mobile || "${{ matrix.platform }}" == tv ]] || exit 1
-          [[ "${#apks[@]}" == 1 ]] || { echo "::error::APK universel manquant ou ambigu"; exit 1; }
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::Il faut un seul APK universel dans $output : ${#apks[@]} trouves"; ls -lh "$output"; exit 1; }
           apk="${apks[0]}"
           unzip -tq "$apk"
           tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
