@@ -402,19 +402,28 @@ class AuthManager @Inject constructor(
 
     suspend fun signOut(explicit: Boolean = true) {
         if (CloudflareTvAccountClient.enabled) {
+            // Local logout must never wait for an HTTP timeout or a dead Worker.
+            // Capture the old token BEFORE clearing; asynchronous revocation must
+            // not affect the next account if the user signs in again quickly.
+            val previousToken = CloudflareTvAccountClient.account?.bearerToken
             try {
-                CloudflareTvAccountClient.signOut()
-            } catch (error: kotlinx.coroutines.CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                // La révocation peut échouer hors connexion : la session locale
-                // est déjà effacée. Ne jamais faire planter l'écran de déconnexion.
-                Log.w(TAG, "Révocation Cloudflare indisponible ; déconnexion locale effectuée", error)
+                CloudflareTvAccountClient.clearLocalSession()
             } finally {
+                cachedEffectiveUserId = null
+                cachedEffectiveUserSourceUserId = null
                 _authState.value = AuthState.SignedOut
-                // Ne pas supprimer les favoris/profils locaux à la déconnexion :
-                // la sauvegarde Cloudflare D1 n'est pas encore migrée et testée.
-                // Les caches locaux restent à isoler avant multi-utilisateur partagé.
+                // Keep locally stored library/progress and cloud D1 data intact.
+            }
+            if (!previousToken.isNullOrBlank()) {
+                scope.launch {
+                    try {
+                        CloudflareTvAccountClient.revokePreviousSession(previousToken)
+                    } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Log.w(TAG, "Ancienne session Cloudflare non révoquée ; déconnexion locale effective", error)
+                    }
+                }
             }
             return
         }
