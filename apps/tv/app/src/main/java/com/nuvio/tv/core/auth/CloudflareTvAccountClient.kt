@@ -51,7 +51,7 @@ internal object CloudflareTvAccountClient {
                 .build()
             client.newCall(request).execute().use { response ->
                 if (response.code == 401 || response.code == 403) {
-                    sessionStore?.clear()
+                    invalidateRestoredSessionIfCurrent(startingRevision)
                     return@withContext null
                 }
                 if (!response.isSuccessful) {
@@ -60,7 +60,7 @@ internal object CloudflareTvAccountClient {
                 }
                 val me = JSONObject(response.body?.string().orEmpty())
                 if (me.optString("id") != saved.id) {
-                    sessionStore?.clear()
+                    invalidateRestoredSessionIfCurrent(startingRevision)
                     return@withContext null
                 }
                 synchronized(sessionLock) {
@@ -77,6 +77,18 @@ internal object CloudflareTvAccountClient {
             // Network failure: keep encrypted credentials for the next launch.
             Log.w("KovelyxTvAuth", "Impossible de vérifier la session sauvegardée", error)
             null
+        }
+    }
+
+    private fun invalidateRestoredSessionIfCurrent(expectedRevision: Long) {
+        synchronized(sessionLock) {
+            // A stale /v1/me 401 from the previous account must never erase
+            // the encrypted token saved by a newer successful sign-in.
+            if (sessionRevision == expectedRevision) {
+                sessionRevision += 1L
+                account = null
+                sessionStore?.clear()
+            }
         }
     }
 
