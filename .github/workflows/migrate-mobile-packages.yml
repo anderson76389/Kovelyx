@@ -1,0 +1,62 @@
+name: Migration réelle des packages Android mobile
+
+on:
+  push:
+    branches:
+      - audit/mobile-kovelyx-nuvio-build-identity-20261027
+    paths:
+      - scripts/migrate-android-mobile-packages.py
+      - .github/workflows/migrate-mobile-packages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kovelyx-migrate-mobile-packages
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Migrer et compiler avant commit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Appliquer la migration Kotlin, manifestes et scripts d'audit
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate-android-mobile-packages.py
+          python3 scripts/migrate-android-mobile-packages.py --check
+          python3 scripts/audit-kovelyx-android.py
+          python3 scripts/audit-mobile-independence.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compiler l'APK Android téléphone et tablette
+        working-directory: apps/mobile
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
+            -Pkotlin.compiler.execution.strategy=in-process
+      - name: Enregistrer uniquement une migration compilée
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A apps/mobile scripts .github/workflows
+          if git diff --cached --quiet; then
+            echo "Migration déjà réalisée, aucun changement."
+          else
+            git commit -m "refactor(android): migration com.nuvio.app vers com.kovelyx.app"
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi
+          echo "Les APK ne sont pas déclarés validés sur appareil physique par ce workflow." >> "$GITHUB_STEP_SUMMARY"
