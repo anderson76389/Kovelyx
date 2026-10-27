@@ -1,0 +1,82 @@
+package com.kovelyx.tv.core.deeplink
+
+import com.kovelyx.tv.domain.deeplink.AppDeepLink
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
+
+class DeepLinkParserTest {
+    @Test
+    fun parsesKovelyxMetaLink() {
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tt0944947"),
+            DeepLinkParser.parse("kovelyx://meta?type=series&id=tt0944947")
+        )
+    }
+
+    @Test
+    fun parsesKovelyxAddonLink() {
+        assertEquals(
+            AppDeepLink.AddonInstall("https://example.com/manifest.json"),
+            DeepLinkParser.parse("kovelyx://example.com/manifest.json")
+        )
+    }
+
+    @Test
+    fun parsesMetaQueryDeepLink() {
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tt0944947"),
+            DeepLinkParser.parse("nuvio://meta?type=series&id=tt0944947")
+        )
+    }
+
+    @Test
+    fun parsesAddonInstallDeepLink() {
+        assertEquals(
+            AppDeepLink.AddonInstall("https://free.nebulapro.xyz/sports/i/free/manifest.json"),
+            DeepLinkParser.parse("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json")
+        )
+    }
+
+    @Test
+    fun parsesStremioAddonInstallDeepLink() {
+        assertEquals(
+            AppDeepLink.AddonInstall("https://free.nebulapro.xyz/sports/i/free/manifest.json"),
+            DeepLinkParser.parse("stremio://free.nebulapro.xyz/sports/i/free/manifest.json")
+        )
+    }
+
+    @Test
+    fun parsesDirectImdbDetailDeepLink() {
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tt0944947"),
+            DeepLinkParser.parse("nuvio://series/tt0944947")
+        )
+    }
+
+    @Test
+    fun parsesProviderImdbDetailDeepLink() {
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tt0944947"),
+            DeepLinkParser.parse("nuvio://imdb/series/tt0944947")
+        )
+    }
+
+    @Test
+    fun parsesProviderTmdbDetailDeepLink() {
+        assertEquals(
+            AppDeepLink.Meta(type = "series", id = "tmdb:1399"),
+            DeepLinkParser.parse("nuvio://tmdb/tv/1399")
+        )
+    }
+
+    @Test
+    fun doesNotTreatAuthLinkAsAddonInstall() {
+        assertNull(DeepLinkParser.parse("nuvio://auth/trakt?code=abc"))
+    }
+
+    @Test
+    fun doesNotTreatNonHostStremioLinkAsAddonInstall() {
+        assertNull(DeepLinkParser.parse("stremio://detail/series/tt0944947"))
+    }
+}
