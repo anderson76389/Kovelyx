@@ -143,7 +143,7 @@ internal fun LazyListScope.trackingSettingsContent(
                 isTablet = isTablet,
                 settingsUiState = settingsUiState,
                 traktConnected = traktUiState.mode == TraktConnectionMode.CONNECTED,
-                simklConnected = simklUiState.mode == SimklConnectionMode.CONNECTED,
+                simklConnected = false, // Retiré de Kovelyx : ne plus proposer cette source.
             )
         }
     }
@@ -160,20 +160,6 @@ internal fun LazyListScope.trackingSettingsContent(
                     traktConnected = true,
                     commentsEnabled = commentsEnabled,
                     onCommentsEnabledChange = onCommentsEnabledChange,
-                )
-            }
-        }
-    }
-
-    if (simklUiState.mode == SimklConnectionMode.CONNECTED) {
-        item {
-            SettingsSection(
-                title = stringResource(Res.string.settings_tracking_anime_section),
-                isTablet = isTablet,
-            ) {
-                AnimeIdPreferenceSection(
-                    isTablet = isTablet,
-                    settingsUiState = settingsUiState,
                 )
             }
         }
