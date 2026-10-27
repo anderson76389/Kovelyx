@@ -10,14 +10,15 @@ class MdbListAuthRepository(
     private val http: MdbListHttpClient,
     private val configuration: MdbListConfiguration,
     private val store: MdbListAuthStore,
-    private val nowEpochMs: () -> Long = System::currentTimeMillis
+    private val nowEpochMs: () -> Long = System::currentTimeMillis,
+    private val oauthClientId: () -> String = { configuration.clientId }
 ) {
     private val deviceMutex = Mutex()
     private val refreshMutex = Mutex()
     private val json = Json { ignoreUnknownKeys = true }
     val state = store.state
 
-    fun hasRequiredCredentials(): Boolean = configuration.clientId.isNotBlank()
+    fun hasRequiredCredentials(): Boolean = oauthClientId().isNotBlank()
 
     suspend fun startDeviceAuthorization(scope: MdbListAuthScope = store.scope()): MdbListDeviceSession = deviceMutex.withLock {
         store.checkScope(scope)
@@ -134,7 +135,7 @@ class MdbListAuthRepository(
                     method = MdbListHttpMethod.POST,
                     path = "/oauth/revoke_token/",
                     form = mapOf(
-                        "client_id" to configuration.clientId,
+                        "client_id" to oauthClientId(),
                         "token" to current.tokens.refreshToken,
                         "token_type_hint" to "refresh_token"
                     )
@@ -153,7 +154,7 @@ class MdbListAuthRepository(
             MdbListHttpRequest(
                 method = MdbListHttpMethod.POST,
                 path = path,
-                form = fields + ("client_id" to configuration.clientId),
+                form = fields + ("client_id" to oauthClientId()),
                 limitKey = "oauth:${scope.profileId}"
             ),
             checkScope = { store.checkScope(scope) }
