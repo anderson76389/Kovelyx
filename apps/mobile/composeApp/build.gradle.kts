@@ -256,7 +256,6 @@ val appVersionConfigFile = rootProject.file("iosApp/Configuration/Version.xcconf
 // This also feeds generated AppVersionConfig used by the in-app updater;
 // matching AndroidManifest alone would leave update detection permanently stale.
 val releaseAppVersionName = providers.gradleProperty("kovelyx.app.versionName").orNull
-    ?: providers.gradleProperty("nuvio.app.versionName").orNull
     ?: readXcconfigValue(appVersionConfigFile, "MARKETING_VERSION")
     ?: error("MARKETING_VERSION is missing from ${appVersionConfigFile.path}")
 val releaseAppVersionCode = providers.gradleProperty("kovelyx.app.versionCode").orNull?.let { raw ->
