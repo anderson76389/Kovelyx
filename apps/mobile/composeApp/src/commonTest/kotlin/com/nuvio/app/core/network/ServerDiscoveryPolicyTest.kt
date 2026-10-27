@@ -16,6 +16,8 @@ class ServerDiscoveryPolicyTest {
             "https://api-two.nuvioapp.space",
             "https://nuvioapp.space",
             "https://api.nuvio.tv.",
+            "https://A.B.API.NUVIO.TV:8443/link",
+            "http://nuvioapp.space",
         )
         addresses.forEach { assertTrue(ServerDiscoveryPolicy.isOfficial(it), it) }
     }
@@ -26,6 +28,7 @@ class ServerDiscoveryPolicyTest {
             "https://cloud.example.net",
             "https://nuvio.tv.example.net",
             "https://anothernuvio.tv",
+            "https://nuvioapp.space.example.net",
             "https://api.kovelyx.example.org",
         )
         addresses.forEach { assertFalse(ServerDiscoveryPolicy.isOfficial(it), it) }
