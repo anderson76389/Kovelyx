@@ -25,6 +25,7 @@ import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.nuvio.tv.core.trakt.KovelyxTvTraktCredentials
+import com.nuvio.tv.core.trakt.KovelyxTvMdbListCredentials
 import com.nuvio.tv.ui.components.NuvioDialog
 import com.nuvio.tv.ui.theme.NuvioTheme
 
@@ -52,7 +53,7 @@ internal fun TvTraktCredentialsDialog(
                 onValueChange = { clientId = it; error = null },
             )
             TvCredentialInput(
-                title = "Client Secret (si fourni par Trakt)",
+                title = "Client Secret (nécessaire au flux actuel)",
                 value = clientSecret,
                 onValueChange = { clientSecret = it; error = null },
                 secret = true,
@@ -112,6 +113,51 @@ private fun TvCredentialInput(
                     .focusRequester(focusRequester)
                     .background(NuvioTheme.colors.BackgroundElevated)
                     .padding(14.dp),
+            )
+        }
+    }
+}
+
+/** Le Client ID OAuth MDBList est distinct de la clé API des notes et classements. */
+@Composable
+internal fun TvMdbListCredentialsDialog(
+    onDismiss: () -> Unit,
+    onSaved: () -> Unit,
+) {
+    val context = LocalContext.current
+    var clientId by remember(context) {
+        mutableStateOf(KovelyxTvMdbListCredentials.savedClientId(context))
+    }
+    var error by remember { mutableStateOf<String?>(null) }
+    NuvioDialog(
+        onDismiss = onDismiss,
+        title = "Client ID OAuth MDBList",
+        subtitle = "Identifiant de votre application MDBList, différent de la clé API des notes.",
+        width = 700.dp,
+    ) {
+        TvCredentialInput(
+            title = "Client ID MDBList",
+            value = clientId,
+            onValueChange = { clientId = it; error = null },
+        )
+        Text(
+            "Pour la clé API des notes, utilisez plutôt Paramètres > Intégrations > MDBList.",
+            style = MaterialTheme.typography.bodySmall,
+            color = NuvioTheme.colors.TextTertiary,
+        )
+        error?.let {
+            Text(it, color = NuvioTheme.colors.Error)
+        }
+        SettingsDialogActionRow {
+            SettingsDialogActionButton(text = "Annuler", onClick = onDismiss)
+            SettingsDialogActionButton(
+                text = "Enregistrer",
+                primary = true,
+                onClick = {
+                    runCatching { KovelyxTvMdbListCredentials.save(context, clientId) }
+                        .onSuccess { onSaved() }
+                        .onFailure { error = it.message ?: "Enregistrement impossible." }
+                },
             )
         }
     }
