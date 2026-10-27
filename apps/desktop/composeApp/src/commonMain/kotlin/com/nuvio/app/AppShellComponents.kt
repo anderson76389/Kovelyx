@@ -18,14 +18,13 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -37,7 +36,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.Row
@@ -66,7 +64,6 @@ import com.nuvio.app.core.ui.LocalNuvioNavBarScrollState
 import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.core.ui.NuvioNavBarScrollState
 import com.nuvio.app.core.ui.NuvioTokens
-import com.nuvio.app.core.ui.nuvio
 import com.nuvio.app.features.cloud.CloudLibraryContentType
 import com.nuvio.app.features.cloud.CloudLibraryFile
 import com.nuvio.app.features.cloud.CloudLibraryItem
@@ -679,23 +676,24 @@ private fun TabletTopPillItem(
 internal fun AppLoadingContent(
     modifier: Modifier = Modifier,
 ) {
-    val tokens = MaterialTheme.nuvio
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            AppBrandWordmark(
-                contentDescription = stringResource(Res.string.app_brand_name),
-                modifier = Modifier
-                    .fillMaxWidth(0.48f)
-                    .height(44.dp),
-            )
-            Spacer(modifier = Modifier.height(tokens.spacing.sectionGap))
-            NuvioLoadingIndicator()
-        }
+        // Centre le logo dans l'écran, indépendamment de l'indicateur de chargement.
+        // Centrer leur Column commune déplaçait auparavant le logo vers le haut.
+        AppBrandWordmark(
+            contentDescription = stringResource(Res.string.app_brand_name),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.48f)
+                .height(44.dp),
+        )
+        NuvioLoadingIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 72.dp),
+        )
     }
 }
 
