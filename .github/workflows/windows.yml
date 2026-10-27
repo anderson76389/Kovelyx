@@ -296,11 +296,13 @@ jobs:
           path: apps/desktop/composeApp/build/reports/tests/desktopTest/
           if-no-files-found: ignore
           retention-days: 14
-      - name: Enregistrer le MSI
-        if: steps.native.outputs.available == 'true'
+      - name: Sauvegarder les installateurs Windows generes (meme si un test echoue)
+        if: ${{ always() && steps.native.outputs.available == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: Kovelyx-Windows-installers-experimental
           path: dist/
-          if-no-files-found: error
+          # Le build peut echouer avant d'avoir produit les fichiers :
+          # conserver le vrai echec initial au lieu d'en creer un deuxieme.
+          if-no-files-found: warn
           retention-days: 30
