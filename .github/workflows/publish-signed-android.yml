@@ -166,18 +166,28 @@ jobs:
             --key-pass env:KOVELYX_RELEASE_KEY_PASSWORD \
             --out "$signed" "$apk"
           apk="$signed"
-          "$tools/apksigner" verify --verbose "$apk" >/dev/null
-          "$tools/apksigner" verify --print-certs "$apk" > /tmp/kv-signer.txt
-          # AOSP apksigner can vary spaces and output formatting across
-          # build-tools versions. Normalize ONLY the public certificate digest;
-          # never weaken the equality check against the private keystore.
-          actual="$(sed -nE 's/.*[Ss]igner #[0-9]+ certificate SHA-256 digest:[[:space:]]*([[:xdigit:]:]+).*/\1/p' /tmp/kv-signer.txt | head -n1 | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+          # Ne jamais publier sans une signature APK réellement validée.
+          # Certaines versions Android SDK écrivent les certificats sur stderr.
+          "$tools/apksigner" verify --verbose --print-certs "$apk" > /tmp/kv-signer.txt 2>&1
+          # Normaliser seulement l'empreinte publique (pas la clé privée).
+          # Le contrôle strict avec l'empreinte JKS reste obligatoire.
+          actual="$(python3 - <<'PY'
+import re
+from pathlib import Path
+report = Path('/tmp/kv-signer.txt').read_text(encoding='utf-8', errors='replace')
+match = re.search(
+    r'(?im)signer\\s*#?\\s*\\d+\\s+certificate\\s+SHA[- ]?256\\s+digest\\s*:\\s*([a-f0-9: ]+)',
+    report,
+)
+print(re.sub(r'[^0-9a-f]', '', match.group(1).lower()) if match else '')
+PY
+          )"
           expected="$(printf '%s' "$KOVELYX_ANDROID_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
           if [[ ! "$actual" =~ ^[0-9a-f]{64}$ ]]; then
-            echo "::error::Empreinte SHA-256 du signataire APK introuvable ou mal formee."
-            # Certificate subject/digest are public metadata; never dump the
-            # keystore, credentials or signing command environment.
-            grep -E 'Signer #[0-9]+ certificate (DN|SHA-256 digest):' /tmp/kv-signer.txt || true
+            echo "::error::Empreinte SHA-256 APK introuvable dans la sortie d'apksigner."
+            # Le certificat est public ; afficher un diagnostic lisible sans
+            # jamais afficher les mots de passe ni le contenu de la clé JKS.
+            grep -Ei 'signer|certificate|digest|verified' /tmp/kv-signer.txt | head -n 20 || true
             exit 1
           fi
           if [[ ! "$expected" =~ ^[0-9a-f]{64}$ || "$actual" != "$expected" ]]; then
