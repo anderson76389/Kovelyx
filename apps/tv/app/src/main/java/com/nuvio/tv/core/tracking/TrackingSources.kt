@@ -24,6 +24,7 @@ fun effectiveWatchProgressSource(
     isProviderAuthenticated: (TrackingProviderId) -> Boolean
 ): WatchProgressSource {
     val providerId = requestedSource.providerId ?: return WatchProgressSource.NUVIO_SYNC
+    if (providerId == TrackingProviderId.SIMKL) return WatchProgressSource.NUVIO_SYNC
     return requestedSource.takeIf { isProviderAuthenticated(providerId) } ?: WatchProgressSource.NUVIO_SYNC
 }
 
@@ -32,6 +33,7 @@ fun effectiveLibrarySourceMode(
     isProviderAuthenticated: (TrackingProviderId) -> Boolean
 ): LibrarySourceMode {
     val providerId = requestedSource.providerId ?: return LibrarySourceMode.LOCAL
+    if (providerId == TrackingProviderId.SIMKL) return LibrarySourceMode.LOCAL
     return requestedSource.takeIf { isProviderAuthenticated(providerId) } ?: LibrarySourceMode.LOCAL
 }
 
