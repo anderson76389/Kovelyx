@@ -58,7 +58,6 @@ class TrackingSettingsViewModel @Inject constructor(
             val connected = combine(traktAuthDataStore.state, simklAuthRepository.state, mdbListAuth.state, profiles.activeProfileId) { trakt, simkl, mdblist, profileId ->
                 if (mdblist.scope.profileId != profileId) null else buildSet<TrackingProviderId> {
                     if (trakt.isAuthenticated) add(TrackingProviderId.TRAKT)
-                    if (simkl.isAuthenticated) add(TrackingProviderId.SIMKL)
                     if (mdblist.isAuthenticated) add(TrackingProviderId.MDBLIST)
                 }
             }
