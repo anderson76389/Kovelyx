@@ -4,8 +4,6 @@ import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.features.library.LibrarySourceMode
 import com.nuvio.app.features.profiles.ProfileRepository
-import com.nuvio.app.features.simkl.DEFAULT_SIMKL_ANIME_ID_PREFERENCE
-import com.nuvio.app.features.simkl.SimklAnimeIdPreference
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +45,7 @@ enum class MoreLikeThisSourcePreference {
 
     companion object {
         fun fromStorage(value: String?): MoreLikeThisSourcePreference =
-            entries.firstOrNull { it.name == value } ?: DEFAULT_MORE_LIKE_THIS_SOURCE
+            entries.firstOrNull { it.name == value && it != SIMKL } ?: MoreLikeThisSourcePreference.TMDB
     }
 }
 
@@ -58,7 +56,6 @@ data class TraktSettingsUiState(
     val continueWatchingDaysCap: Int = TRAKT_DEFAULT_CONTINUE_WATCHING_DAYS_CAP,
     val librarySourceMode: LibrarySourceMode = DEFAULT_LIBRARY_SOURCE_MODE,
     val moreLikeThisSource: MoreLikeThisSourcePreference = DEFAULT_MORE_LIKE_THIS_SOURCE,
-    val simklAnimeIdPreference: SimklAnimeIdPreference = DEFAULT_SIMKL_ANIME_ID_PREFERENCE,
 )
 
 @Serializable
@@ -67,7 +64,6 @@ private data class StoredTraktSettings(
     val continueWatchingDaysCap: Int = TRAKT_DEFAULT_CONTINUE_WATCHING_DAYS_CAP,
     val librarySourceMode: String? = null,
     val moreLikeThisSource: String? = null,
-    val simklAnimeIdPreference: String? = null,
 )
 
 object TraktSettingsRepository {
@@ -136,14 +132,6 @@ object TraktSettingsRepository {
         persist()
     }
 
-    fun setSimklAnimeIdPreference(preference: SimklAnimeIdPreference) {
-        ensureLoaded()
-        if (_uiState.value.simklAnimeIdPreference == preference) return
-        _uiState.value = _uiState.value.copy(simklAnimeIdPreference = preference)
-        persist()
-        com.nuvio.app.features.simkl.SimklSyncRepository.invalidateProjections()
-    }
-
     private fun loadFromDisk() {
         hasLoaded = true
 
@@ -163,7 +151,6 @@ object TraktSettingsRepository {
                 continueWatchingDaysCap = normalizeTraktContinueWatchingDaysCap(stored.continueWatchingDaysCap),
                 librarySourceMode = librarySourceModeFromStorage(stored.librarySourceMode),
                 moreLikeThisSource = MoreLikeThisSourcePreference.fromStorage(stored.moreLikeThisSource),
-                simklAnimeIdPreference = SimklAnimeIdPreference.fromStorage(stored.simklAnimeIdPreference),
             )
         } else {
             TraktSettingsUiState()
@@ -178,7 +165,6 @@ object TraktSettingsRepository {
                     continueWatchingDaysCap = state.continueWatchingDaysCap,
                     librarySourceMode = state.librarySourceMode.name,
                     moreLikeThisSource = state.moreLikeThisSource.name,
-                    simklAnimeIdPreference = state.simklAnimeIdPreference.name,
                 ),
             ),
         )

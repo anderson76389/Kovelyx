@@ -2,8 +2,6 @@ package com.nuvio.app.features.watched
 
 import co.touchlab.kermit.Logger
 import com.nuvio.app.features.details.MetaDetailsRepository
-import com.nuvio.app.features.simkl.SimklSyncRepository
-import com.nuvio.app.features.simkl.toSimklShowIdSiblings
 import com.nuvio.app.features.tracking.TrackingProviderId
 import com.nuvio.app.features.tracking.TrackingSettingsRepository
 import com.nuvio.app.features.tracking.effectiveWatchProgressSource
@@ -60,7 +58,7 @@ suspend fun resolveWatchedBadgesBulk(
     if (touchedSeriesIds.isEmpty()) return@withContext true
 
     // Use the full watchedKeys from UI state which includes extra keys from
-    // provider alternate IDs (e.g. Simkl anime alternate MAL/Kitsu keys).
+    // provider alternate IDs (including alternate anime MAL/Kitsu keys).
     val watchedKeys = WatchedRepository.uiState.value.watchedKeys
 
     log.i { "Bulk badge resolution starting: ${touchedSeriesIds.size} series candidates" }
@@ -86,12 +84,8 @@ suspend fun resolveWatchedBadgesBulk(
                             if (keys.any(watchedKeys::contains)) {
                                 true
                             } else {
-                                val episodeNumber = episode.episode
-                                if (episodeNumber != null) {
-                                    com.nuvio.app.features.simkl.SimklAnimeWatchedFallback.isWatched(episode.id, episodeNumber)
-                                } else {
-                                    false
-                                }
+                                watchedItemKeys(meta.type, episode.id, episode.season, episode.episode)
+                                .any(watchedKeys::contains)
                             }
                         },
                         isEpisodeCompleted = { episode ->

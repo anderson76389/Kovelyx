@@ -38,16 +38,8 @@ object WatchingState {
             episode = episode.episode,
         )
         if (keys.any(watchedKeys::contains)) return true
-
-        // Fallback for franchise-parent anime: meta.id (e.g. "mal:49233") may differ
-        // from the actual entry ID in Simkl. Check via video ID resolution in snapshot.
-        // Only for anime-style video IDs (mal:, kitsu:, etc.) — not IMDB/TVDB content.
-        val videoId = episode.id
-        val episodeNumber = episode.episode
-        if (episodeNumber != null) {
-            return com.nuvio.app.features.simkl.SimklAnimeWatchedFallback.isWatched(videoId, episodeNumber)
-        }
-        return false
+        return watchedItemKeys(metaType, episode.id, episode.season, episode.episode)
+            .any(watchedKeys::contains)
     }
 
     fun areEpisodesWatched(
