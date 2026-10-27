@@ -60,6 +60,14 @@ fun ProfileAvatarCircle(
             ),
         contentAlignment = Alignment.Center
     ) {
+        // Always show an initial immediately while Coil fetches a personal photo.
+        // If the URL fails or never responds, the avatar is never a blank spinner.
+        Text(
+            text = initial,
+            color = Color.White,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold
+        )
         if (imageRequest != null) {
             AsyncImage(
                 model = imageRequest,
@@ -68,13 +76,6 @@ fun ProfileAvatarCircle(
                     .size(size)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
-            )
-        } else {
-            Text(
-                text = initial,
-                color = Color.White,
-                fontSize = fontSize,
-                fontWeight = FontWeight.Bold
             )
         }
     }

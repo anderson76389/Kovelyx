@@ -402,14 +402,9 @@ private fun ProfileAvatarCard(
                     ),
                 contentAlignment = Alignment.Center,
             ) {
-                if (avatarImageUrl != null) {
-                    AsyncImage(
-                        model = avatarImageUrl,
-                        contentDescription = avatarItem?.displayName ?: profile.name,
-                        modifier = Modifier.size(100.dp).clip(CircleShape),
-                        contentScale = ContentScale.Crop,
-                    )
-                } else if (profile.name.isNotBlank()) {
+                // Display the profile initial immediately. Coil replaces it only
+                // after loading succeeds; a broken URL never leaves a blank avatar.
+                if (profile.name.isNotBlank()) {
                     Text(
                         text = profile.name.take(1).uppercase(),
                         style = MaterialTheme.typography.headlineLarge.copy(fontSize = 38.sp),
@@ -422,6 +417,14 @@ private fun ProfileAvatarCard(
                         contentDescription = null,
                         tint = avatarColor,
                         modifier = Modifier.size(46.dp),
+                    )
+                }
+                if (avatarImageUrl != null) {
+                    AsyncImage(
+                        model = avatarImageUrl,
+                        contentDescription = avatarItem?.displayName ?: profile.name,
+                        modifier = Modifier.size(100.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop,
                     )
                 }
             }

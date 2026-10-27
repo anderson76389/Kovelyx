@@ -155,6 +155,9 @@ class AvatarRepository @Inject constructor(
     }
 
     fun getAvatarImageUrl(avatarId: String, catalog: List<AvatarCatalogItem>): String? {
+        // The legacy Nuvio catalog is not served by Kovelyx Cloudflare.
+        // Do not resurrect stale on-disk member assets while browsing profiles.
+        if (CloudflareTvAccountClient.enabled) return null
         return catalog.find { it.id == avatarId }?.imageUrl
             ?: latestCachedMemberAvatar(avatarId)?.toURI()?.toString()
     }

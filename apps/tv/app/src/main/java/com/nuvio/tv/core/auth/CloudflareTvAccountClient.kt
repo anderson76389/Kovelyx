@@ -29,10 +29,15 @@ internal object CloudflareTvAccountClient {
     @Volatile
     var account: Account? = null
         private set
+    private val sessionLock = Any()
+    private var sessionRevision = 0L
     private var sessionStore: CloudflareTvSessionStore? = null
 
     /** Called from AuthManager at process startup; never assumes a valid remote session. */
     suspend fun restoreSession(context: Context): Account? = withContext(Dispatchers.IO) {
+        // Sign-out may happen while /v1/me is still in flight: a stale
+        // verification must never resurrect a deleted local session.
+        val startingRevision = synchronized(sessionLock) { sessionRevision }
         sessionStore = CloudflareTvSessionStore(context)
         val saved = sessionStore?.load(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
             ?: return@withContext null
@@ -46,7 +51,7 @@ internal object CloudflareTvAccountClient {
                 .build()
             client.newCall(request).execute().use { response ->
                 if (response.code == 401 || response.code == 403) {
-                    sessionStore?.clear()
+                    invalidateRestoredSessionIfCurrent(startingRevision)
                     return@withContext null
                 }
                 if (!response.isSuccessful) {
@@ -55,11 +60,16 @@ internal object CloudflareTvAccountClient {
                 }
                 val me = JSONObject(response.body?.string().orEmpty())
                 if (me.optString("id") != saved.id) {
-                    sessionStore?.clear()
+                    invalidateRestoredSessionIfCurrent(startingRevision)
                     return@withContext null
                 }
-                if (account == null) account = saved
-                account
+                synchronized(sessionLock) {
+                    if (sessionRevision != startingRevision) null
+                    else {
+                        if (account == null) account = saved
+                        account
+                    }
+                }
             }
         } catch (cancelled: CancellationException) {
             throw cancelled
@@ -67,6 +77,18 @@ internal object CloudflareTvAccountClient {
             // Network failure: keep encrypted credentials for the next launch.
             Log.w("KovelyxTvAuth", "Impossible de vérifier la session sauvegardée", error)
             null
+        }
+    }
+
+    private fun invalidateRestoredSessionIfCurrent(expectedRevision: Long) {
+        synchronized(sessionLock) {
+            // A stale /v1/me 401 from the previous account must never erase
+            // the encrypted token saved by a newer successful sign-in.
+            if (sessionRevision == expectedRevision) {
+                sessionRevision += 1L
+                account = null
+                sessionStore?.clear()
+            }
         }
     }
 
@@ -105,30 +127,38 @@ internal object CloudflareTvAccountClient {
             "Kovelyx Cloud : jeton invalide"
         }
         return Account(id, address, token).also { signedIn ->
-            account = signedIn
-            runCatching {
-                sessionStore?.save(signedIn, BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
-            }.onFailure { error ->
-                Log.w("KovelyxTvAuth", "Session connectée mais stockage chiffré indisponible", error)
+            synchronized(sessionLock) {
+                sessionRevision += 1L
+                account = signedIn
+                runCatching {
+                    sessionStore?.save(signedIn, BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+                }.onFailure { error ->
+                    Log.w("KovelyxTvAuth", "Session connectée mais stockage chiffré indisponible", error)
+                }
             }
         }
     }
 
+    /** Always clear the device first; network revocation must never block local logout. */
     suspend fun signOut() {
-        val old = account
-        account = null
-        sessionStore?.clear()
-        if (old == null || !enabled) return
+        val token = account?.bearerToken
+        clearLocalSession()
+        if (!token.isNullOrBlank()) revokePreviousSession(token)
+    }
+
+    /** Revokes only the captured old token, never a later account's new session. */
+    suspend fun revokePreviousSession(previousBearerToken: String) {
+        if (!enabled || previousBearerToken.isBlank()) return
         withContext(Dispatchers.IO) {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/api/auth/sign-out")
-                .header("Authorization", "Bearer ${old.bearerToken}")
+                .header("Authorization", "Bearer $previousBearerToken")
                 .header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
                 .post("{}".toRequestBody("application/json".toMediaType()))
                 .build()
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    android.util.Log.w("KovelyxTvAuth", "Révocation distante HTTP ${response.code} : session locale déjà effacée")
+                    Log.w("KovelyxTvAuth", "Ancienne session non révoquée HTTP ${response.code}; déconnexion locale déjà effective")
                 }
             }
         }
@@ -254,7 +284,10 @@ internal object CloudflareTvAccountClient {
     }
 
     fun clearLocalSession() {
-        account = null
-        sessionStore?.clear()
+        synchronized(sessionLock) {
+            sessionRevision += 1L
+            account = null
+            sessionStore?.clear()
+        }
     }
 }

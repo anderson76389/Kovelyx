@@ -463,6 +463,23 @@ private fun ProfileIdentityCard(
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
+                    // Keep an instant readable fallback while the custom
+                    // photo is decoding or a remote URL cannot be reached.
+                    if (name.isNotBlank()) {
+                        Text(
+                            text = name.take(1).uppercase(),
+                            style = MaterialTheme.typography.displayLarge,
+                            color = accentColor,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.Person,
+                            contentDescription = null,
+                            tint = accentColor,
+                            modifier = Modifier.size(40.dp),
+                        )
+                    }
                     if (customAvatarUrl != null) {
                         AsyncImage(
                             model = customAvatarUrl,
@@ -476,20 +493,6 @@ private fun ProfileIdentityCard(
                             contentDescription = selectedAvatar.displayName,
                             modifier = Modifier.size(88.dp).clip(CircleShape),
                             contentScale = ContentScale.Crop,
-                        )
-                    } else if (name.isNotBlank()) {
-                        Text(
-                            text = name.take(1).uppercase(),
-                            style = MaterialTheme.typography.displayLarge,
-                            color = accentColor,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Rounded.Person,
-                            contentDescription = null,
-                            tint = accentColor,
-                            modifier = Modifier.size(40.dp),
                         )
                     }
                 }
