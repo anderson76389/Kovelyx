@@ -59,7 +59,6 @@ fun availableWatchProgressSources(
 ): List<WatchProgressSource> = buildList {
     add(WatchProgressSource.NUVIO_SYNC)
     if (TrackingProviderId.TRAKT in connectedProviderIds) add(WatchProgressSource.TRAKT)
-    if (TrackingProviderId.SIMKL in connectedProviderIds) add(WatchProgressSource.SIMKL)
     if (TrackingProviderId.MDBLIST in connectedProviderIds) add(WatchProgressSource.MDBLIST)
 }
 
@@ -68,6 +67,5 @@ fun availableLibrarySourceModes(
 ): List<LibrarySourceMode> = buildList {
     add(LibrarySourceMode.LOCAL)
     if (TrackingProviderId.TRAKT in connectedProviderIds) add(LibrarySourceMode.TRAKT)
-    if (TrackingProviderId.SIMKL in connectedProviderIds) add(LibrarySourceMode.SIMKL)
     if (TrackingProviderId.MDBLIST in connectedProviderIds) add(LibrarySourceMode.MDBLIST)
 }
