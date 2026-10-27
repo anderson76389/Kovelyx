@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Nuvio" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <style name="Theme.Kovelyx" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/nuvio_background</item>
     </style>
 
-    <style name="Theme.Nuvio.Splash" parent="@style/Theme.Nuvio" />
-    <style name="Theme.Nuvio.Splash.ArcticBlue" parent="@style/Theme.Nuvio.Splash" />
-    <style name="Theme.Nuvio.Splash.Emerald" parent="@style/Theme.Nuvio.Splash" />
-    <style name="Theme.Nuvio.Splash.RoseGold" parent="@style/Theme.Nuvio.Splash" />
-    <style name="Theme.Nuvio.Splash.Copper" parent="@style/Theme.Nuvio.Splash" />
-    <style name="Theme.Nuvio.Splash.Graphite" parent="@style/Theme.Nuvio.Splash" />
+    <style name="Theme.Kovelyx.Splash" parent="@style/Theme.Kovelyx" />
+    <style name="Theme.Kovelyx.Splash.ArcticBlue" parent="@style/Theme.Kovelyx.Splash" />
+    <style name="Theme.Kovelyx.Splash.Emerald" parent="@style/Theme.Kovelyx.Splash" />
+    <style name="Theme.Kovelyx.Splash.RoseGold" parent="@style/Theme.Kovelyx.Splash" />
+    <style name="Theme.Kovelyx.Splash.Copper" parent="@style/Theme.Kovelyx.Splash" />
+    <style name="Theme.Kovelyx.Splash.Graphite" parent="@style/Theme.Kovelyx.Splash" />
 </resources>
