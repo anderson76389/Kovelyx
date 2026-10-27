@@ -62,15 +62,31 @@ def run() -> None:
         if not release.get("draft") and (match := SEMVER.fullmatch(release.get("tag_name", "")))
     ]
     assert candidates, "Aucune Release numérotée publiée"
-    _, release = max(candidates, key=lambda row: row[0])
-    tag = release["tag_name"]
-    assets = {a["name"]: a for a in release.get("assets", [])}
-    print(f"Release commune vérifiée : {tag}")
+    # Un build Windows peut être prêt avant Android/TV, et inversement.
+    # L'updater choisit la Release compatible la plus récente par appareil ;
+    # le contrôle CI doit reproduire cette règle, sans exiger une Release
+    # multiplateforme simultanée ni accepter un checksum manquant.
+    ordered = [release for _, release in sorted(candidates, reverse=True, key=lambda row: row[0])]
+    latest_tag = ordered[0]["tag_name"]
+    print(f"Dernière Release numérotée : {latest_tag}")
     for label, file_for_tag in TRACKS.items():
+        compatible = next(
+            (
+                (release, {asset["name"]: asset for asset in release.get("assets", [])})
+                for release in ordered
+                if file_for_tag(release["tag_name"]) in {
+                    asset["name"] for asset in release.get("assets", [])
+                }
+            ),
+            None,
+        )
+        assert compatible is not None, (label, "Aucune Release compatible publiée")
+        release, assets = compatible
+        tag = release["tag_name"]
         name = file_for_tag(tag)
-        assert name in assets and name + ".sha256" in assets, (tag, label, name)
+        assert name + ".sha256" in assets, (tag, label, name, "SHA256 absent")
         check_checksum(assets[name], assets[name + ".sha256"], tag)
-        print(f"OK : {label}, URL GitHub et fichier SHA-256")
+        print(f"OK : {label} ({tag}), URL GitHub et fichier SHA-256")
 
     # Les APK signés utilisent des tags séparés et la même clé permanente.
     # Ils sont facultatifs tant que le pipeline de signature n'a pas passé la CI.
