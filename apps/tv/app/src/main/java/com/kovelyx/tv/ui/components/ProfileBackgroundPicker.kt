@@ -224,7 +224,15 @@ fun CustomProfileBackgroundImage(
     val context = LocalContext.current
     AsyncImage(
         model = ImageRequest.Builder(context)
-            .data(imageUrl)
+            // Coil doit recevoir un File pour les fonds locaux importés en file://.
+            // Les URLs HTTPS et content:// restent prises en charge.
+            .data(
+                if (imageUrl.startsWith("file:", ignoreCase = true)) {
+                    runCatching { java.io.File(java.net.URI(imageUrl)) }.getOrElse { imageUrl }
+                } else {
+                    imageUrl
+                }
+            )
             .memoryCacheKey("custom-profile-background-$imageUrl")
             .diskCacheKey("custom-profile-background-$imageUrl")
             .diskCachePolicy(CachePolicy.ENABLED)
