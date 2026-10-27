@@ -16,10 +16,12 @@ fun resolveProfileBackground(
     profile.profileBackgroundUrl?.trim()?.takeIf(ProfileLocalImages::isManagedUri)?.let {
         return ProfileBackgroundSelection.Custom(it)
     }
-    if (!entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)) return null
+    // Les fonds personnels (locaux ou URL du compte Kovelyx) n'exigent
+    // jamais d'abonnement à l'ancien catalogue de fonds Nuvio.
     profile.profileBackgroundUrl?.trim()?.takeIf { it.isNotBlank() }?.let {
         return ProfileBackgroundSelection.Custom(it)
     }
+    if (!entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)) return null
     profile.profileBackgroundId?.trim()?.takeIf { it.isNotBlank() }?.let {
         return ProfileBackgroundSelection.Catalog(it)
     }
