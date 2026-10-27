@@ -52,11 +52,17 @@ def verify() -> None:
     manifest = MANIFEST.read_text("utf-8")
     ET.fromstring(manifest)
     assert 'android:scheme="kovelyx"' in manifest
+    assert 'android:name="com.nuvio.app.KovelyxApplication"' in manifest
+    assert 'android:name="com.nuvio.app.NuvioApplication"' not in manifest
     assert 'android:scheme="nuvio"' not in manifest
     for variant in ("", "_arctic_blue", "_emerald", "_rose_gold", "_copper", "_graphite"):
         name = "ic_kovelyx" + variant
         assert f'android:icon="@drawable/{name}"' in manifest, f"Icône non utilisée : {name}"
         ET.parse(ANDROID / "drawable" / (name + ".xml"))
+
+    app_src = (ROOT / "apps/mobile/composeApp/src/androidMain/kotlin/com/nuvio/app/KovelyxApplication.kt").read_text("utf-8")
+    assert "class KovelyxApplication : Application()" in app_src
+    assert not (ROOT / "apps/mobile/composeApp/src/androidMain/kotlin/com/nuvio/app/NuvioApplication.kt").exists()
 
     for locale in ("values", "values-fr"):
         resource = ROOT / f"apps/mobile/composeApp/src/commonMain/composeResources/{locale}/strings.xml"
