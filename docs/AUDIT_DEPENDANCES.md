@@ -218,7 +218,7 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1781** ; références statiques à Nuvio/NuvioMedia : **59**.
+Fichiers texte examinés : **1781** ; références statiques à Nuvio/NuvioMedia : **57**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -257,8 +257,6 @@ Fichiers texte examinés : **1781** ; références statiques à Nuvio/NuvioMedia
 
 - `apps/desktop/scripts/prepare-ios-dependencies.sh:25`
 - `apps/desktop/MPVKit/Package.swift:304`
-- `apps/desktop/composeApp/build.gradle.kts:144`
-- `apps/desktop/composeApp/build.gradle.kts:158`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 - `apps/desktop/scripts/linux/test-linux-deb-tools.sh:30`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`

@@ -98,7 +98,7 @@ Fichiers inspectés : 4518
 - apps/desktop/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.4/Libmpv.xcframework.zip",
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (32 correspondances)
+### Liens annexes (30 correspondances)
 
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
@@ -114,8 +114,6 @@ Fichiers inspectés : 4518
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
-- apps/desktop/composeApp/build.gradle.kts:144 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
-- apps/desktop/composeApp/build.gradle.kts:158 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49 : parseAppDeepLink("nuvio://series/tt0944947"),
@@ -232,8 +230,8 @@ Fichiers inspectés : 4518
 ## Références de packages Kotlin historiques
 
 - apps/tv : 6754 lignes.
-- apps/mobile : 6980 lignes.
-- apps/desktop : 7887 lignes.
+- apps/mobile : 6982 lignes.
+- apps/desktop : 7889 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
