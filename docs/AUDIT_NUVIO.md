@@ -229,7 +229,7 @@ Fichiers inspectés : 4523
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6765 lignes.
+- apps/tv : 6767 lignes.
 - apps/mobile : 6974 lignes.
 - apps/desktop : 7881 lignes.
 
