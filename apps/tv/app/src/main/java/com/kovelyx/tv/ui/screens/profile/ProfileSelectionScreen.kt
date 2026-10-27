@@ -10,6 +10,13 @@ import com.kovelyx.tv.ui.theme.brandWordmarkResource
 import com.kovelyx.tv.ui.theme.createFocusRingStyle
 
 import android.graphics.Rect
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.rememberCoroutineScope
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -1752,6 +1759,27 @@ private fun EditProfileOverlay(
         mutableStateOf(profile.profileBackgroundUrl?.takeIf { it.isNotBlank() })
     }
     var selectedEditorTab by remember(profile.id) { mutableStateOf(ProfileEditorTab.Avatar) }
+    val context = LocalContext.current
+    val importScope = rememberCoroutineScope()
+    var backgroundImportError by remember(profile.id) { mutableStateOf<String?>(null) }
+    val personalBackgroundPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { selectedUri ->
+        if (selectedUri != null) {
+            importScope.launch {
+                try {
+                    val importedUrl = withContext(Dispatchers.IO) {
+                        importPrivateProfileBackground(context, selectedUri)
+                    }
+                    selectedBackgroundId = null
+                    selectedBackgroundUrl = importedUrl
+                    backgroundImportError = null
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    backgroundImportError = error.message ?: "Impossible d'importer ce fond."
+                }
+            }
+        }
+    }
     var focusedAvatarName by remember { mutableStateOf<String?>(null) }
     val selectedAvatar = remember(avatarCatalog, selectedAvatarId) {
         avatarCatalog.find { it.id == selectedAvatarId }
@@ -1770,13 +1798,8 @@ private fun EditProfileOverlay(
         runCatching { nameFocusRequester.requestFocus() }
     }
 
-    // La personnalisation locale doit rester visible en mode Cloudflare,
-    // même si l'ancien catalogue de fonds réservés n'est pas disponible.
-    val canShowBackgroundTab = hasProfileBackgroundAccess ||
-        !profile.profileBackgroundUrl.isNullOrBlank()
-    LaunchedEffect(canShowBackgroundTab) {
-        if (!canShowBackgroundTab) selectedEditorTab = ProfileEditorTab.Avatar
-    }
+    // Un fond personnel doit pouvoir être choisi sur toute TV, y compris
+    // en mode Cloudflare. Seul le catalogue historique reste réservé.
 
     Box(
         modifier = Modifier
@@ -1919,7 +1942,7 @@ private fun EditProfileOverlay(
                 ) {
                     ProfileEditorTabs(
                         selectedTab = selectedEditorTab,
-                        showBackgroundTab = canShowBackgroundTab,
+                        showBackgroundTab = true,
                         onTabSelected = { selectedEditorTab = it },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
@@ -2004,19 +2027,36 @@ private fun EditProfileOverlay(
                                 textAlign = TextAlign.Center
                             )
 
-                            Text(
-                                text = stringResource(R.string.profile_background_member_note),
+                            if (hasProfileBackgroundAccess) {
+                                Text(
+                                    text = stringResource(R.string.profile_background_member_note),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = NuvioTheme.colors.TextTertiary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                            OverlayButton(
+                                text = "Importer un fond personnalisé",
                                 modifier = Modifier.fillMaxWidth(),
-                                color = NuvioTheme.colors.TextTertiary,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center
+                                onClick = { personalBackgroundPicker.launch("image/*") }
                             )
+                            backgroundImportError?.let { message ->
+                                Text(
+                                    text = message,
+                                    color = Color(0xFFFFA7A7),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
 
                             ProfileBackgroundPicker(
-                                backgrounds = profileBackgroundCatalog,
+                                backgrounds = if (hasProfileBackgroundAccess) profileBackgroundCatalog else emptyList(),
                                 selectedBackgroundId = selectedBackgroundId,
-                                customBackgroundUrl = profile.profileBackgroundUrl,
+                                customBackgroundUrl = selectedBackgroundUrl?.takeIf { it.isNotBlank() }
+                                    ?: profile.profileBackgroundUrl,
                                 selectedBackgroundUrl = selectedBackgroundUrl,
                                 standardBackgroundColor = parseProfileColor(selectedColorHex),
                                 onStandardBackgroundSelected = {
@@ -2035,8 +2075,8 @@ private fun EditProfileOverlay(
                                     selectedBackgroundUrl = null
                                 },
                                 onCustomBackgroundSelected = {
-                                    val customUrl = profile.profileBackgroundUrl
-                                        ?.takeIf { it.isNotBlank() }
+                                    val customUrl = selectedBackgroundUrl?.takeIf { it.isNotBlank() }
+                                        ?: profile.profileBackgroundUrl?.takeIf { it.isNotBlank() }
                                     if (
                                         selectedBackgroundId == null &&
                                         selectedBackgroundUrl == customUrl
