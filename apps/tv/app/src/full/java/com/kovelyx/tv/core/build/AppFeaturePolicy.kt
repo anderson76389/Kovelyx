@@ -1,4 +1,4 @@
-package com.nuvio.tv.core.build
+package com.kovelyx.tv.core.build
 
 object AppFeaturePolicy {
     val pluginsEnabled: Boolean = true
