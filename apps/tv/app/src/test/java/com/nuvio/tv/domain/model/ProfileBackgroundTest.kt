@@ -50,6 +50,20 @@ class ProfileBackgroundTest {
     }
 
     @Test
+    fun personalCustomBackgroundDisplaysWithoutLegacyCatalogEntitlement() {
+        val profile = profile(
+            id = 3,
+            backgroundUrl = "file:///data/user/0/com.kovelyx.tv/files/profile/background.jpg"
+        )
+        assertEquals(
+            ProfileBackgroundSelection.Custom(
+                "file:///data/user/0/com.kovelyx.tv/files/profile/background.jpg"
+            ),
+            resolveProfileBackgroundSelection(profile, CosmeticEntitlements.None)
+        )
+    }
+
+    @Test
     fun unavailableEntitlementHidesSavedSelection() {
         val profile = profile(id = 1, backgroundId = "jade")
 
