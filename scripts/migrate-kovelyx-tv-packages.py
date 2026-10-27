@@ -85,7 +85,7 @@ def migrate() -> tuple[int, int]:
             rewritten += 1
     # Adapter les chemins source TV codés dans les tests/outils sans altérer
     # le code mobile/Windows, les crédits, les préférences historiques ou les licences.
-    for directory in (ROOT / "scripts", ROOT / ".github/workflows"):
+    for directory in (ROOT / "scripts",):
         if not directory.exists():
             continue
         for file in sorted(directory.rglob("*")):
