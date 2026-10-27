@@ -129,7 +129,7 @@ Fichiers texte examinés : **1406** ; références statiques à Nuvio/NuvioMedia
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 182 |
+| `example.com` | 184 |
 | `github.com` | 121 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 68 |
