@@ -13,11 +13,11 @@ class TrackingSourcesTest {
         assertEquals(WatchProgressSource.MDBLIST, WatchProgressSource.fromStorage("MDBLIST"))
         assertEquals(TrackingProviderId.MDBLIST, WatchProgressSource.MDBLIST.providerId)
         assertEquals(
-            listOf(WatchProgressSource.NUVIO_SYNC, WatchProgressSource.TRAKT, WatchProgressSource.SIMKL, WatchProgressSource.MDBLIST),
+            listOf(WatchProgressSource.NUVIO_SYNC, WatchProgressSource.TRAKT, WatchProgressSource.MDBLIST),
             availableWatchProgressSources(connected)
         )
         assertEquals(
-            listOf(LibrarySourceMode.LOCAL, LibrarySourceMode.TRAKT, LibrarySourceMode.SIMKL, LibrarySourceMode.MDBLIST),
+            listOf(LibrarySourceMode.LOCAL, LibrarySourceMode.TRAKT, LibrarySourceMode.MDBLIST),
             availableLibrarySourceModes(connected)
         )
         val selection = TrackingSourceSelection(WatchProgressSource.MDBLIST, LibrarySourceMode.TRAKT)
@@ -42,7 +42,7 @@ class TrackingSourcesTest {
             effectiveWatchProgressSource(WatchProgressSource.SIMKL) { false }
         )
         assertEquals(
-            WatchProgressSource.SIMKL,
+            WatchProgressSource.NUVIO_SYNC,
             effectiveWatchProgressSource(WatchProgressSource.SIMKL) { it == TrackingProviderId.SIMKL }
         )
     }
@@ -54,7 +54,7 @@ class TrackingSourcesTest {
             effectiveLibrarySourceMode(LibrarySourceMode.SIMKL) { false }
         )
         assertEquals(
-            LibrarySourceMode.SIMKL,
+            LibrarySourceMode.LOCAL,
             effectiveLibrarySourceMode(LibrarySourceMode.SIMKL) { it == TrackingProviderId.SIMKL }
         )
     }
@@ -88,13 +88,13 @@ class TrackingSourcesTest {
         )
         assertEquals(
             TrackingSourceSelection(
-                WatchProgressSource.SIMKL,
+                WatchProgressSource.NUVIO_SYNC,
                 LibrarySourceMode.LOCAL
             ),
             effectiveTrackingSourceSelection(requested, setOf(TrackingProviderId.SIMKL))
         )
         assertEquals(
-            requested,
+            TrackingSourceSelection(WatchProgressSource.NUVIO_SYNC, LibrarySourceMode.TRAKT),
             effectiveTrackingSourceSelection(
                 requested,
                 setOf(TrackingProviderId.TRAKT, TrackingProviderId.SIMKL)
@@ -138,22 +138,20 @@ class TrackingSourcesTest {
     }
 
     @Test
-    fun `both connected pickers expose Nuvio Trakt and Simkl in stable order`() {
+    fun `connected pickers exclude removed SIMKL provider`() {
         val connected = setOf(TrackingProviderId.TRAKT, TrackingProviderId.SIMKL)
 
         assertEquals(
             listOf(
                 WatchProgressSource.NUVIO_SYNC,
-                WatchProgressSource.TRAKT,
-                WatchProgressSource.SIMKL
+                WatchProgressSource.TRAKT
             ),
             availableWatchProgressSources(connected)
         )
         assertEquals(
             listOf(
                 LibrarySourceMode.LOCAL,
-                LibrarySourceMode.TRAKT,
-                LibrarySourceMode.SIMKL
+                LibrarySourceMode.TRAKT
             ),
             availableLibrarySourceModes(connected)
         )
@@ -170,7 +168,7 @@ class TrackingSourcesTest {
             availableLibrarySourceModes(emptySet())
         )
         assertEquals(
-            listOf(WatchProgressSource.NUVIO_SYNC, WatchProgressSource.SIMKL),
+            listOf(WatchProgressSource.NUVIO_SYNC),
             availableWatchProgressSources(setOf(TrackingProviderId.SIMKL))
         )
         assertEquals(
