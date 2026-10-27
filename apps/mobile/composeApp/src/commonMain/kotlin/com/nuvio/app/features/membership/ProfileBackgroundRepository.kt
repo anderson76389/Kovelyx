@@ -1,6 +1,7 @@
 package com.nuvio.app.features.membership
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.network.SupabaseProvider
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.storage.storage
@@ -45,6 +46,12 @@ object ProfileBackgroundRepository {
     private var remoteLoaded = false
 
     fun ensureLoaded() {
+        // Le catalogue de fonds Supabase de l'ancien projet n'appartient pas
+        // a Cloudflare. Ne pas contacter ce serveur ni afficher ses caches.
+        if (CloudflareAccountClient.enabled) {
+            invalidate()
+            return
+        }
         hydrateFromCacheIfNeeded()
         if (remoteLoaded || loadJob?.isActive == true) return
         loadJob = scope.launch {
@@ -65,6 +72,7 @@ object ProfileBackgroundRepository {
     }
 
     fun loadSelectedAndPreload(id: String, portrait: Boolean) {
+        if (CloudflareAccountClient.enabled) return
         ensureLoaded()
         remoteCatalog.firstOrNull { it.id == id }?.let { item ->
             loadCachedAndPublish(item, portrait)
@@ -88,6 +96,7 @@ object ProfileBackgroundRepository {
     }
 
     fun preloadLandscapeImages() {
+        if (CloudflareAccountClient.enabled) return
         ensureLoaded()
         assetLoadJob?.cancel()
         assetLoadJob = scope.launch {
