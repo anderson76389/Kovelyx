@@ -74,7 +74,17 @@ def verify() -> None:
             str([value[:70] for value in visible if "Nuvio" in value or "nuvio.tv" in value][:5])
         )
 
+    # Build identity: independent release version/signing configuration without
+    # silently reusing historical Nuvio secrets or Gradle properties.
+    settings_gradle = (ROOT / "apps/mobile/settings.gradle.kts").read_text("utf-8")
+    assert 'rootProject.name = "Kovelyx"' in settings_gradle
+    android_gradle = (ROOT / "apps/mobile/androidApp/build.gradle.kts").read_text("utf-8")
+    assert 'applicationId = "com.kovelyx.mobile"' in android_gradle
+    assert 'NUVIO_RELEASE_' not in android_gradle
+    assert 'nuvio.app.versionName' not in android_gradle
+
     gradle = (ROOT / "apps/mobile/composeApp/build.gradle.kts").read_text("utf-8")
+    assert 'nuvio.app.versionName' not in gradle
     assert '"kovelyx://auth/trakt"' in gradle
     assert '"kovelyx://auth/simkl"' in gradle
 
