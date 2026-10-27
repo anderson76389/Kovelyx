@@ -24,6 +24,8 @@ PATH_IN_PROJECT = re.compile(
 def rewrite(value: str) -> str:
     value = LEGACY_PACKAGE.sub(lambda m: "com.kovelyx." + m.group(1), value)
     value = LEGACY_PATH.sub(lambda m: "com/kovelyx/" + m.group(1), value)
+    # Le changement du nom Gradle change aussi le package des ressources Compose.
+    value = value.replace("nuvio.composeapp.generated.resources", "kovelyx.composeapp.generated.resources")
     value = value.replace("Theme.Nuvio", "Theme.Kovelyx")
     value = value.replace("Theme_Nuvio", "Theme_Kovelyx")
     return value
