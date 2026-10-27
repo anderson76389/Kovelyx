@@ -29,6 +29,7 @@
 4. Une ancienne adresse Nuvio enregistrée en tant que serveur personnalisé **n'est plus activée** au démarrage ; elle n'est pas supprimée du stockage utilisateur.
 5. Tests de non-régression Kotlin : hôtes Nuvio bloqués, faux positifs de domaine évités, auto-hébergement restant compatible.
 6. Audits Python : suppression de l'exception d'URL de connexion Nuvio et garde-fou pour le manifeste et la nouvelle classe Application.
+7. L'ancienne URL d'aide Debrid `nuvioapp.space/faq` encore active dans les réglages a été remplacée par `docs/AIDE_DEBRID_ANDROID.md`, hébergée dans Kovelyx. L'audit renforcé a détecté cette référence et bloqué la PR avant correction.
 
 ## Héritages encore présents, intentionnellement
 
