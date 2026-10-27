@@ -6,7 +6,6 @@ import javax.inject.Singleton
 
 enum class TrackingProviderId(val storageId: String) {
     TRAKT("trakt"),
-    SIMKL("simkl"),
     MDBLIST("mdblist");
 
     companion object {
@@ -53,11 +52,10 @@ class TrackingProviderRegistry private constructor(providers: Collection<Trackin
 
     internal constructor(providers: List<TrackingProvider>) : this(providers as Collection<TrackingProvider>)
 
-    private val activeProviders = providers.filterNot { it.descriptor.id == TrackingProviderId.SIMKL }
-    private val providersById = activeProviders.associateBy { it.descriptor.id }
+    private val providersById = providers.associateBy { it.descriptor.id }
 
     init {
-        require(providersById.size == activeProviders.size)
+        require(providersById.size == providers.size)
     }
 
     fun providers(): List<TrackingProvider> = providersById.values.sortedBy { it.descriptor.id.ordinal }
