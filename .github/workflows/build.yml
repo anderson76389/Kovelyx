@@ -138,6 +138,11 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
           grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
+          # The launcher label is intentionally clean even for debug builds.
+          grep -Fx "application-label:'Kovelyx'" /tmp/kv-tv-badging.txt || {
+            echo "::error::Android TV doit afficher uniquement Kovelyx, sans suffixe Test/Debug"
+            exit 1
+          }
           grep -E "leanback|android.software.leanback" /tmp/kv-tv-badging.txt
           grep -F "versionName='$KOVELYX_BUILD_VERSION'" /tmp/kv-tv-badging.txt
           grep -F "versionCode='$KOVELYX_BUILD_CODE'" /tmp/kv-tv-badging.txt
@@ -204,6 +209,10 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
           grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
+          grep -Fx "application-label:'Kovelyx'" /tmp/kv-android-badging || {
+            echo "::error::Android mobile doit afficher uniquement Kovelyx, sans suffixe Test/Debug"
+            exit 1
+          }
           grep -F "versionName='$KOVELYX_BUILD_VERSION'" /tmp/kv-android-badging
           grep -F "versionCode='$KOVELYX_BUILD_CODE'" /tmp/kv-android-badging
           echo "APK mobile universel, signé et identifié comme Kovelyx" >> "$GITHUB_STEP_SUMMARY"
