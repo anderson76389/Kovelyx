@@ -15,13 +15,11 @@ ROOT = Path(__file__).resolve().parents[1]
 MOBILE = ROOT / "apps/mobile"
 SOURCES = MOBILE / "composeApp/src"
 REPO_URL = "https://api.github.com/repos/anderson76389/Kovelyx"
-ACCOUNT_PATH = "core/auth/DeviceLinkAuthRepository.kt"
 LEGAL_PATH = "features/settings/LicensesAttributionsPage.kt"
-SERVICE_URL = re.compile(r"https?://(?:[a-z0-9-]+\.)*nuvio\.tv(?:/[^\s\"'<>)]*)?", re.I)
+SERVICE_URL = re.compile(r"https?://(?:[a-z0-9-]+\\.)*(?:nuvio\\.tv|nuvioapp\\.space)(?:/[^\\s\\\"'<>)]*)?", re.I)
 UPSTREAM_URL = re.compile(r"https?://github\.com/NuvioMedia(?:/[^\s\"'<>)]*)?", re.I)
 SOURCE_FOLDERS = {"androidMain", "androidFull", "androidPlaystore", "commonMain"}
 violations: list[str] = []
-accepted_accounts: list[str] = []
 accepted_licences: list[str] = []
 files_scanned = 0
 
@@ -34,9 +32,7 @@ for file in sorted(SOURCES.rglob("*.kt")):
     for pattern in (SERVICE_URL, UPSTREAM_URL):
         for match in pattern.finditer(data):
             url = match.group(0)
-            if ACCOUNT_PATH in relative and url == "https://nuvio.tv/link":
-                accepted_accounts.append(relative + " : " + url)
-            elif LEGAL_PATH in relative and url == "https://github.com/NuvioMedia/NuvioMobile":
+            if LEGAL_PATH in relative and url == "https://github.com/NuvioMedia/NuvioMobile":
                 accepted_licences.append(relative + " : " + url)
             else:
                 violations.append(relative + " : " + url)
@@ -55,9 +51,6 @@ if not updater.is_file() or REPO_URL not in updater.read_text(encoding="utf-8"):
     violations.append("Les mises à jour Android ne pointent pas vers les Releases Kovelyx.")
 
 print(f"Sources Kotlin Android examinées : {files_scanned}")
-print(f"Endpoint comptes conservé : {len(accepted_accounts)}")
-for item in accepted_accounts:
-    print("  COMPTE : " + item)
 print(f"Attributions obligatoires conservées : {len(accepted_licences)}")
 print(f"Références réseau Nuvio non autorisées : {len(violations)}")
 for item in violations:
