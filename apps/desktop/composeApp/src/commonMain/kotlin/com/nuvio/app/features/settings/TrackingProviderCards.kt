@@ -238,6 +238,7 @@ private fun KovelyxOAuthCredentialsDialog(
     var traktSecret by remember { mutableStateOf(KovelyxIntegrationCredentials.desktopTraktClientSecret) }
     var mdbId by remember { mutableStateOf(KovelyxIntegrationCredentials.desktopMdbListClientId) }
     var error by remember { mutableStateOf<String?>(null) }
+    val uriHandler = LocalUriHandler.current
 
     DialogSurface(
         title = "Connecter Trakt et MDBList à Kovelyx",
@@ -266,12 +267,18 @@ private fun KovelyxOAuthCredentialsDialog(
         OutlinedTextField(
             value = mdbId,
             onValueChange = { mdbId = it; error = null },
-            label = { Text("MDBList — Client ID") },
+            label = { Text("MDBList — Client ID OAuth (pas la clé API)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
+        TextButton(onClick = {
+            runCatching { uriHandler.openUri("https://trakt.tv/oauth/applications") }
+        }) { Text("Créer / gérer mon application Trakt") }
+        TextButton(onClick = {
+            runCatching { uriHandler.openUri("https://mdblist.com/preferences/") }
+        }) { Text("Obtenir ma clé API MDBList (rubrique MDBList)") }
         Text(
-            "Obtenez vos identifiants sur Trakt et MDBList. " +
+            "La clé API MDBList s'enregistre dans Paramètres > MDBList, pas dans le Client ID OAuth. " +
                 "Stockage local de Kovelyx non chiffré : n'utilisez pas de clés partagées.",
             style = MaterialTheme.typography.bodySmall,
         )
