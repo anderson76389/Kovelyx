@@ -95,6 +95,7 @@ fun TrackingSettingsContent(
     var showAnimeIdDialog by remember { mutableStateOf(false) }
     var showMdbListLibraryListsDialog by remember { mutableStateOf(false) }
     var showTvTraktCredentials by remember { mutableStateOf(false) }
+    var showTvMdbListCredentials by remember { mutableStateOf(false) }
 
     val hasOverlay = activeProvider != null ||
         disconnectProvider != null ||
@@ -104,7 +105,8 @@ fun TrackingSettingsContent(
         showMoreLikeThisSourceDialog ||
         showAnimeIdDialog ||
         showMdbListLibraryListsDialog ||
-        showTvTraktCredentials
+        showTvTraktCredentials ||
+        showTvMdbListCredentials
 
     LaunchedEffect(
         activeProvider,
@@ -198,6 +200,7 @@ fun TrackingSettingsContent(
         moreLikeThisFocusRequester = moreLikeThisFocusRequester,
         onTraktClick = { openProvider(TrackingProviderId.TRAKT) },
         onTraktCredentialsClick = { showTvTraktCredentials = true },
+        onMdbListCredentialsClick = { showTvMdbListCredentials = true },
         onSimklClick = { openProvider(TrackingProviderId.SIMKL) },
         onMdbListClick = { openProvider(TrackingProviderId.MDBLIST) },
         onLibrarySourceClick = {
@@ -226,6 +229,16 @@ fun TrackingSettingsContent(
             showMdbListLibraryListsDialog = true
         }
     )
+
+    if (showTvMdbListCredentials) {
+        TvMdbListCredentialsDialog(
+            onDismiss = { showTvMdbListCredentials = false },
+            onSaved = {
+                mdbListViewModel.onCredentialsSaved()
+                showTvMdbListCredentials = false
+            },
+        )
+    }
 
     if (showTvTraktCredentials) {
         TvTraktCredentialsDialog(
@@ -506,6 +519,7 @@ internal fun TrackingSettingsOverview(
     mdbListLibraryLists: MdbListLibraryListsUiState = MdbListLibraryListsUiState(),
     onMdbListLibraryListsClick: () -> Unit = {},
     onTraktCredentialsClick: () -> Unit = {},
+    onMdbListCredentialsClick: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val traktPresentation = traktConnectionPresentation(traktState)
@@ -564,6 +578,11 @@ internal fun TrackingSettingsOverview(
                             modifier = Modifier
                                 .focusRequester(mdbListFocusRequester)
                                 .testTag(TrackingSettingsTestTags.MDBLIST_PROVIDER)
+                        )
+                        SettingsActionRow(
+                            title = "Configurer mon Client ID MDBList",
+                            subtitle = "Compte OAuth MDBList ; la clé API des notes est dans Intégrations.",
+                            onClick = onMdbListCredentialsClick,
                         )
                     }
                 }
