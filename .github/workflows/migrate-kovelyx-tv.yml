@@ -47,6 +47,7 @@ jobs:
             echo "Migration déjà enregistrée."
           else
             git commit -m "refactor(tv): migrer com.nuvio.tv vers com.kovelyx.tv avec pont JNI"
+            git pull --rebase origin "$GITHUB_REF_NAME"
             git push origin HEAD:"$GITHUB_REF_NAME"
           fi
           echo "La migration est enregistrée sur une branche séparée : validation APK et tests nécessaire avant fusion." >> "$GITHUB_STEP_SUMMARY"
