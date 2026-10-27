@@ -161,7 +161,7 @@ fun TrackingSettingsContent(
                 }
             }
             TrackingProviderId.SIMKL -> {
-                if (simklState.mode == SimklConnectionMode.CONNECTED) {
+                if (false) { // SIMKL désactivé dans Kovelyx TV
                     dismissOnConnected = null
                 } else {
                     dismissOnConnected = provider
@@ -535,18 +535,6 @@ internal fun TrackingSettingsOverview(
                                 .testTag(TrackingSettingsTestTags.TRAKT_PROVIDER)
                         )
                         SettingsActionRow(
-                            title = stringResource(R.string.simkl_name),
-                            subtitle = simklPresentation.subtitle,
-                            value = simklPresentation.value,
-                            valueColor = simklPresentation.color,
-                            leadingRawIconRes = R.raw.simkl_tv_glyph,
-                            leadingArtworkSize = 40.dp,
-                            onClick = onSimklClick,
-                            modifier = Modifier
-                                .focusRequester(simklFocusRequester)
-                                .testTag(TrackingSettingsTestTags.SIMKL_PROVIDER)
-                        )
-                        SettingsActionRow(
                             title = stringResource(R.string.mdblist_name),
                             subtitle = mdbListPresentation.subtitle,
                             value = mdbListPresentation.value,
@@ -585,7 +573,7 @@ internal fun TrackingSettingsOverview(
                                 .focusRequester(watchProgressFocusRequester)
                                 .testTag(TrackingSettingsTestTags.WATCH_PROGRESS_SOURCE)
                         )
-                        if (traktConnected || simklState.mode == SimklConnectionMode.CONNECTED) {
+                        if (traktConnected) {
                             SettingsActionRow(
                                 title = stringResource(R.string.trakt_more_like_this_source_title),
                                 subtitle = stringResource(R.string.trakt_more_like_this_source_subtitle),
