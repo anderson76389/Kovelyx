@@ -106,7 +106,7 @@ val kovelyxSharedVersionCode = providers.gradleProperty("kovelyx.app.versionCode
 } ?: 1068
 
 android {
-    namespace = "com.nuvio.tv"
+    namespace = "com.kovelyx.tv"
     compileSdk = 36
     ndkVersion = "29.0.14206865"
 
@@ -415,7 +415,7 @@ baselineProfile {
     mergeIntoMain = true
     baselineProfileOutputDir = "generated/baselineProfiles"
     filter {
-        include("com.nuvio.tv.**")
+        include("com.kovelyx.tv.**")
     }
 }
 
@@ -447,7 +447,7 @@ dependencies {
 
     // Source-retention nullness annotations (MonotonicNonNull / RequiresNonNull /
     // EnsuresNonNull) used by the vendored Matroska extractor in
-    // com.nuvio.tv.core.player.dvmkv. Media3 keeps these compileOnly in its own
+    // com.kovelyx.tv.core.player.dvmkv. Media3 keeps these compileOnly in its own
     // build, so they aren't on our classpath via the prebuilt AARs.
     compileOnly("org.checkerframework:checker-qual:3.43.0")
 
