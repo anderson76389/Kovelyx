@@ -3,18 +3,12 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4536
+Fichiers inspectés : 4518
 
 ## Inventaire des références à traiter
 
-### Connexions et services (107 correspondances)
+### Connexions et services (91 correspondances)
 
-- apps/tv/app/build.gradle.kts:215 : buildConfigField("String", "SUPABASE_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_URL")))
-- apps/tv/app/build.gradle.kts:216 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_ANON_KEY")))
-- apps/tv/app/build.gradle.kts:217 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(resolveProperty(devProperties, localProperties, "NUVIO_SUPABASE_FALLBACK_URL")))
-- apps/tv/app/build.gradle.kts:250 : buildConfigField("String", "SUPABASE_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_URL", "")))
-- apps/tv/app/build.gradle.kts:251 : buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_ANON_KEY", "")))
-- apps/tv/app/build.gradle.kts:252 : buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(localProperties.getProperty("NUVIO_SUPABASE_FALLBACK_URL", "")))
 - apps/tv/app/src/main/res/values-ar/strings.xml:2644 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2645 : <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
 - apps/tv/app/src/main/res/values-b+es+419/strings.xml:2204 : <string name="custom_server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
@@ -55,10 +49,6 @@ Fichiers inspectés : 4536
 - apps/tv/app/src/main/res/values-zh-rCN/strings.xml:2134 : <string name="custom_server_error_official_available">api.nuvio.tv 是官方服务器。关闭此对话框并选择「使用官方服务器」以切换回去。</string>
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2133 : <string name="custom_server_error_official_active">api.nuvio.tv 是官方伺服器，且已被選取。</string>
 - apps/tv/app/src/main/res/values-zh-rTW/strings.xml:2134 : <string name="custom_server_error_official_available">api.nuvio.tv 是官方伺服器。關閉此對話框並選擇「使用官方伺服器」以切換回去。</string>
-- apps/tv/local.example.properties:3 : NUVIO_SUPABASE_FALLBACK_URL=
-- apps/mobile/composeApp/build.gradle.kts:348 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-- apps/mobile/composeApp/build.gradle.kts:349 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-- apps/mobile/composeApp/build.gradle.kts:350 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401 : <string name="server_error_official_active">api.nuvio.tv অফিসিয়াল সার্ভার এবং ইতিমধ্যেই নির্বাচিত।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402 : <string name="server_error_official_available">api.nuvio.tv হল অফিসিয়াল সার্ভার। এই ডায়ালগটি বন্ধ করুন এবং ফিরে যেতে অফিসিয়াল সার্ভার ব্যবহার করুন নির্বাচন করুন।</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1983 : <string name="server_error_official_active">api.nuvio.tv je oficiální server a už je vybraný.</string>
@@ -83,24 +73,32 @@ Fichiers inspectés : 4536
 - apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv Official server ہے۔ یہ dialog بند کریں اور واپس جانے کے لیے Official server استعمال کریں منتخب کریں۔</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
-- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/auth/DeviceLinkAuthRepository.kt:55 : private const val officialLinkUrl = "https://nuvio.tv/link"
-- apps/desktop/composeApp/build.gradle.kts:584 : supabaseUrl.set(runtimeConfigValue("NUVIO_SUPABASE_URL"))
-- apps/desktop/composeApp/build.gradle.kts:585 : supabaseAnonKey.set(runtimeConfigValue("NUVIO_SUPABASE_ANON_KEY"))
-- apps/desktop/composeApp/build.gradle.kts:586 : supabaseFallbackUrl.set(runtimeConfigValue("NUVIO_SUPABASE_FALLBACK_URL"))
-- apps/desktop/composeApp/src/commonMain/composeResources/values/strings.xml:407 : <string name="server_error_official_active">api.nuvio.tv is the official server and is already selected.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values/strings.xml:408 : <string name="server_error_official_available">api.nuvio.tv is the official server. Close this dialog and choose Use official server to switch back.</string>
-- Autres correspondances non détaillées : 27
+- apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401 : <string name="server_error_official_active">api.nuvio.tv অফিসিয়াল সার্ভার এবং ইতিমধ্যেই নির্বাচিত।</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402 : <string name="server_error_official_available">api.nuvio.tv হল অফিসিয়াল সার্ভার। এই ডায়ালগটি বন্ধ করুন এবং ফিরে যেতে অফিসিয়াল সার্ভার ব্যবহার করুন নির্বাচন করুন।</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984 : <string name="server_error_official_active">api.nuvio.tv je oficiální server a už je vybraný.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1985 : <string name="server_error_official_available">api.nuvio.tv je oficiální server. Zavřete toto okno a volbou Použít oficiální server se přepněte zpět.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:183 : <string name="server_error_official_active">Το api.nuvio.tv είναι ο επίσημος διακομιστής και είναι ήδη επιλεγμένο.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:184 : <string name="server_error_official_available">Το api.nuvio.tv είναι ο επίσημος διακομιστής. Κλείστε αυτό το παράθυρο διαλόγου και επιλέξτε «Χρήση επίσημου διακομιστή» για να 
+- apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:398 : <string name="server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:399 : <string name="server_error_official_available">api.nuvio.tv es el servidor oficial. Cierra este diálogo y elige Usar servidor oficial para volver a él.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv je službeni poslužitelj i već je odabran.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv je službeni poslužitelj. Zatvorite ovaj prozor i odaberite „Koristi službeni poslužitelj” za povratak.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273 : <string name="server_error_official_active">api.nuvio.tv er den offisielle serveren og er allerede valgt.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274 : <string name="server_error_official_available">api.nuvio.tv er den offisielle serveren. Lukk denne dialogen og velg Bruk offisiell server for å bytte tilbake.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395 : <string name="server_error_official_active">api.nuvio.tv is de officiële server en is al geselecteerd.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396 : <string name="server_error_official_available">api.nuvio.tv is de officiële server. Sluit dit venster en kies Officiële server gebruiken om terug te schakelen.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2077 : <string name="server_error_official_active">api.nuvio.tv to oficjalny serwer i jest już wybrany.</string>
+- apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2078 : <string name="server_error_official_available">api.nuvio.tv to oficjalny serwer. Zamknij to okno i wybierz „Użyj oficjalnego serwera", aby przełączyć.</string>
+- Autres correspondances non détaillées : 11
 
-### Mises à jour et releases (6 correspondances)
+### Mises à jour et releases (4 correspondances)
 
 - apps/mobile/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.5/Libmpv.xcframework.zip",
 - apps/mobile/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 - apps/desktop/MPVKit/Package.swift:304 : url: "https://github.com/NuvioMedia/MPVKit/releases/download/0.41.0-n8.1.2-nuvio.4/Libmpv.xcframework.zip",
-- apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/updater/AppUpdaterPlatform.ios.kt:15 : owner = "NuvioMedia",
-- apps/desktop/scripts/linux/com.nuvio.media.desktop.metainfo.xml:17 : <url type="homepage">https://github.com/NuvioMedia/NuvioDesktop</url>
 - apps/desktop/scripts/prepare-ios-dependencies.sh:25 : "https://github.com/NuvioMedia/nuvio-engine/releases/download/v${engine_version}/nuvio-engine-apple-${engine_version}.zip"
 
-### Liens annexes (32 correspondances)
+### Liens annexes (30 correspondances)
 
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
@@ -116,8 +114,6 @@ Fichiers inspectés : 4536
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
-- apps/desktop/composeApp/build.gradle.kts:144 : / const val REDIRECT_URI = "${props.getProperty("TRAKT_REDIRECT_URI", "nuvio://auth/trakt")}"
-- apps/desktop/composeApp/build.gradle.kts:158 : / const val REDIRECT_URI = "${props.getProperty("SIMKL_REDIRECT_URI", "nuvio://auth/simkl")}"
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25 : parseAppDeepLink("nuvio://meta
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33 : parseAppDeepLink("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json"),
 - apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49 : parseAppDeepLink("nuvio://series/tt0944947"),
@@ -135,7 +131,7 @@ Fichiers inspectés : 4536
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
-### Archives et tests (129 correspondances)
+### Archives et tests (14 correspondances)
 
 - apps/tv/app/src/test/java/com/nuvio/tv/core/deeplink/DeepLinkParserTest.kt:29 : DeepLinkParser.parse("nuvio://meta
 - apps/tv/app/src/test/java/com/nuvio/tv/core/deeplink/DeepLinkParserTest.kt:37 : DeepLinkParser.parse("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json")
@@ -150,78 +146,11 @@ Fichiers inspectés : 4536
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:108 : "https://api.nuvio.tv"
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:113 : "https://api.nuvio.tv.example.com/.well-known/nuvio",
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:114 : "https://api.nuvio.tv"
-- apps/mobile/.github/ISSUE_TEMPLATE/config.yml:4 : url: https://github.com/NuvioMedia/NuvioMobile/releases
-- apps/mobile/.github/ISSUE_TEMPLATE/config.yml:7 : url: https://github.com/NuvioMedia/NuvioMobile/blob/main/README.md
-- apps/mobile/store.json:5 : "website": "https://nuvio.tv",
-- apps/mobile/store.json:6 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
-- apps/mobile/store.json:15 : "developerName": "NuvioMedia",
-- apps/mobile/store.json:18 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
-- apps/mobile/store.json:26 : "localizedDescription": "- 1bb2b10e feat(servers): sync libraries that mix movies and shows @tapframe \r\n- 6f98691d fix(servers): mark playback info requests as playback @tap
-- apps/mobile/store.json:27 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.9-beta/nuvio-0.5.9-full-release.ipa",
-- apps/mobile/store.json:36 : "localizedDescription": "- [i18n: Add Croatian (hr) translation (#2169)](https://github.com/NuvioMedia/NuvioMobile/pull/2169) @Anarchydr \r\n- [feat(mdblist): sort library lis
-- apps/mobile/store.json:37 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.8-beta/nuvio-0.5.8-full-release.ipa",
-- apps/mobile/store.json:46 : "localizedDescription": "- c2127769 fix(p2p): correct torrent cache path and usage @tapframe \r\n- [feat(player): add ExoPlayer native memory, VOD cache, and buffer setting (#
-- apps/mobile/store.json:47 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.7-beta/nuvio-0.5.7-full-release.ipa",
-- apps/mobile/store.json:56 : "localizedDescription": "- 312f7399 feat(details): use desktop hero layout on tablets @tapframe \n- b3d7c5b6 feat(settings): show restart prompt when layout direction changes 
-- apps/mobile/store.json:57 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.6-beta/nuvio-0.5.6-full-release.ipa",
-- apps/mobile/store.json:66 : "localizedDescription": "- [feat(i18n): add Bengali (বাংলা) language support and UI localization (#2113)](https://github.com/NuvioMedia/NuvioMobile/pull/2113) @TanvirSdq \n- [
-- apps/mobile/store.json:67 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.5-beta/nuvio-0.5.5-full-release.ipa",
-- apps/mobile/store.json:76 : "localizedDescription": "- 80860602 fix(player): ignore short clips for tracking @tapframe \n- cd4572e2 fix(ios): update quickjs to 1.0.15 @tapframe \n- 9980d643 fix(player): 
-- apps/mobile/store.json:77 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.4-beta/nuvio-0.5.4-full-release.ipa",
-- apps/mobile/store.json:86 : "localizedDescription": "- 0b7ab892 feat(poster): support addon landscape posters @tapframe \r\n- 60a0f4b3 feat(library): move downloads to library\r\n- 5ebb8ee5 feat(spinner)
-- apps/mobile/store.json:87 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.3-beta/nuvio-0.5.3-full-release.ipa",
-- apps/mobile/store.json:96 : "localizedDescription": "\r\n- 353b8cd9 fix(exo): update buffer defaults @tapframe \r\n- f50bd149 update engine libs @tapframe \r\n- 23e4d3f7 fix(ios): hide home indicator dur
-- apps/mobile/store.json:97 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.2-beta/nuvio-0.5.2-full-release.ipa",
-- apps/mobile/store.json:106 : "localizedDescription": "- 0b427905 fix(mdblist): correct library sorting @tapframe \n- 647e4c09 fix(mdblist): batch and reuse rating requests @tapframe \n- [i18n(vi): update 
-- apps/mobile/store.json:107 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.1-beta/nuvio-0.5.1-full-release.ipa",
-- apps/mobile/store.json:116 : "localizedDescription": "- 4c82f9ac feat(settings): collapse tracker cards by default @tapframe \r\n- c9d6f5f6 fix(player): restore subtitles for each episode @tapframe \r\n- 
-- apps/mobile/store.json:117 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.5.0-beta/nuvio-0.5.0-full-release.ipa",
-- apps/mobile/store.json:126 : "localizedDescription": "- 458f810b fix(streams): share addon filtering across pickers @tapframe \n- [i18n(nb): complete missing Norwegian Bokmål strings (#2005)](https://gith
-- apps/mobile/store.json:127 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.26-beta/nuvio-0.4.26-full-release.ipa",
-- apps/mobile/store.json:136 : "localizedDescription": "- b5163558 fix(home): prevent hero flash when cycling @tapframe \r\n- 656f368c fix(pr): update workflow @tapframe \r\n- [i18n(el): sync Greek translat
-- apps/mobile/store.json:137 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.25-beta/nuvio-0.4.25-full-release.ipa",
-- apps/mobile/store.json:147 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.24-beta/nuvio-0.4.24-full-release.ipa",
-- apps/mobile/store.json:156 : "localizedDescription": "- 542aa570 fix(simkl): retain posters when marking items watched @tapframe \n- 08bdd629 fix(home): restore wide continue watching sizing @tapframe \n-
-- apps/mobile/store.json:157 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.23-beta/nuvio-0.4.23-full-release.ipa",
-- apps/mobile/store.json:166 : "localizedDescription": "- 12111fd8 feat(updater): add stable and beta update channels @tapframe \n- df589078 feat(tmdb): add personal API key override with credential sync @t
-- apps/mobile/store.json:167 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.22-beta/nuvio-0.4.22-full-release.ipa",
-- apps/mobile/store.json:176 : "localizedDescription": "- 24c08216 fix(home): match continue watching badge colors to tv @tapframe \n- 73005d99 perf(navigation): reduce root tab switch stalls @tapframe \n- 
-- apps/mobile/store.json:177 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.21/nuvio-0.4.21-full-release.ipa",
-- apps/mobile/store.json:187 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.20/nuvio-0.4.20-full-release.ipa",
-- apps/mobile/store.json:197 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.19/nuvio-0.4.19-full-release.ipa",
-- apps/mobile/store.json:206 : "localizedDescription": "- b04a1607 fix(profiles): stabilize popup size transitions @tapframe \r\n- fbf59953 fix(details): apply poster radius to episode list cards @tapframe 
-- apps/mobile/store.json:207 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.18/nuvio-0.4.18-full-release.ipa",
-- apps/mobile/store.json:216 : "localizedDescription": "- 2d03b258 fix(plugins): restore iOS runtime compilation @tapframe \n- d23b3c04 fix(player): disable binge group reuse by default @tapframe \n- [perf(
-- apps/mobile/store.json:217 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.17/nuvio-0.4.17-full-release.ipa",
-- apps/mobile/store.json:226 : "localizedDescription": "- 8f0bfc8e fix(home): settle hero carousel when returning @tapframe \r\n- db3da891 fix(settings): require Trakt progress for continue watching window 
-- apps/mobile/store.json:227 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.16/nuvio-0.4.16-full-release.ipa",
-- apps/mobile/store.json:236 : "localizedDescription": "- cf6cf2d6 fix(auth): synchronize shared client initialization @tapframe \r\n- 28df1e7d fix(home): restore hero position when switching profiles @tapf
-- apps/mobile/store.json:237 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.15/nuvio-0.4.15-full-release.ipa",
-- apps/mobile/store.json:246 : "localizedDescription": "- 4f79bfe0 fix(player): original audio language preference @tapframe \r\n- 9b09045f fix(player): allow minimum device brightness @tapframe \r\n- [use 
-- apps/mobile/store.json:247 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.14/nuvio-0.4.14-full-release.ipa",
-- apps/mobile/store.json:256 : "localizedDescription": "- 0504af98 feat(details): parse addon certifications @tapframe \r\n- f5726012 fix(details): parse addon season posters @tapframe \r\n- 085e8dc6 fix(ui
-- apps/mobile/store.json:257 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.13/nuvio-0.4.13-full-release.ipa",
-- apps/mobile/store.json:266 : "localizedDescription": "- 501c61d9 fix(tmdb): use multiplatform map insertion @tapframe \r\n- 793c665c feat(store): automate sideload source updates @tapframe \r\n- [i18n(el)
-- apps/mobile/store.json:267 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.12/nuvio-0.4.12-full-release.ipa",
-- apps/mobile/store.json:276 : "localizedDescription": "## What's Changed\r\n\r\n- 04ca1226 feat(details): add tappable expandable descriptions @tapframe\r\n- [fix: Simkl anime type classification and lands
-- apps/mobile/store.json:277 : "downloadURL": "https://github.com/NuvioMedia/NuvioMobile/releases/download/0.4.11/nuvio-0.4.11-full-release.ipa",
-- apps/desktop/.github/ISSUE_TEMPLATE/config.yml:4 : url: https://github.com/NuvioMedia/NuvioDesktop/releases
-- apps/desktop/.github/ISSUE_TEMPLATE/config.yml:7 : url: https://github.com/NuvioMedia/NuvioDesktop/blob/main/README.md
-- apps/desktop/.github/workflows/desktop-release.yml:223 : NUVIO_SUPABASE_URL
-- apps/desktop/.github/workflows/desktop-release.yml:224 : NUVIO_SUPABASE_ANON_KEY
-- apps/desktop/.github/workflows/desktop-release.yml:433 : NUVIO_SUPABASE_URL
-- apps/desktop/.github/workflows/desktop-release.yml:434 : NUVIO_SUPABASE_ANON_KEY
-- apps/desktop/.github/workflows/desktop-release.yml:941 : export APPIMAGE_WEBSITE_URL="https://github.com/NuvioMedia/NuvioDesktop"
 - apps/desktop/scripts/linux/test-linux-deb-tools.sh:30 : Maintainer: Nuvio Media <contact@nuvio.tv>
-- apps/desktop/store.json:5 : "website": "https://nuvio.tv",
-- apps/desktop/store.json:6 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
-- apps/desktop/store.json:15 : "developerName": "NuvioMedia",
-- apps/desktop/store.json:18 : "iconURL": "https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/0.4.11/iosApp/iosApp/Assets.xcassets/AppIcon.appiconset/app-icon-1024.png",
-- Autres correspondances non détaillées : 49
 
 ### Configuration générale (63 correspondances)
 
-- apps/tv/app/build.gradle.kts:538 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
+- apps/tv/app/build.gradle.kts:539 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Color.kt:55 : data class NuvioMediaColors(
@@ -254,7 +183,7 @@ Fichiers inspectés : 4536
 - apps/mobile/scripts/prepare-ios-dependencies.sh:8 : engine_root="${NUVIO_ENGINE_ROOT:-${repository_root}/../nuvio-engine}"
 - apps/mobile/scripts/prepare-ios-dependencies.sh:22 : archive="${temporary_directory}/nuvio-engine-apple-${engine_version}.zip"
 - apps/desktop/composeApp/build.gradle.kts:514 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
-- apps/desktop/composeApp/build.gradle.kts:1211 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
+- apps/desktop/composeApp/build.gradle.kts:1213 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -300,26 +229,19 @@ Fichiers inspectés : 4536
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6752 lignes.
-- apps/mobile : 6976 lignes.
-- apps/desktop : 7891 lignes.
+- apps/tv : 6754 lignes.
+- apps/mobile : 6982 lignes.
+- apps/desktop : 7889 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
 - NUVIO_SYNC : 126
-- NUVIO_RELEASE_STORE_FILE : 12
 - NUVIO_IOS_DISTRIBUTION : 12
 - NUVIO_JS : 10
-- NUVIO_RELEASE_KEY_ALIAS : 8
-- NUVIO_RELEASE_KEY_PASSWORD : 8
-- NUVIO_RELEASE_STORE_PASSWORD : 8
-- NUVIO_GRADLE_JVMARGS : 8
-- NUVIO_KOTLIN_NATIVE_JVMARGS : 8
-- NUVIO_SUPABASE_URL : 7
-- NUVIO_SUPABASE_ANON_KEY : 7
-- NUVIO_MACOS_NOTARY_KEYCHAIN_PROFILE : 6
-- NUVIO_MACOS_SIGNING_IDENTITY : 6
-- NUVIO_SUPABASE_FALLBACK_URL : 5
+- NUVIO_RELEASE_KEY_ALIAS : 6
+- NUVIO_RELEASE_KEY_PASSWORD : 6
+- NUVIO_RELEASE_STORE_PASSWORD : 6
+- NUVIO_RELEASE_STORE_FILE : 5
 - NUVIO_LINUX_SHORTCUT_RELATIVE_PATH : 5
 - NUVIO_ENGINE_EVENT_DISK_CACHE_RECLAIMED : 4
 - NUVIO_ENGINE_EVENT_STREAM_PREPARED : 4
@@ -333,10 +255,10 @@ Fichiers inspectés : 4536
 - NUVIO_ENGINE_TORRENT_PROFILE_SOFT : 4
 - NUVIO_ENGINE_UPLOAD_DISABLED : 4
 - NUVIO_ENGINE_UPLOAD_UNLIMITED : 4
+- NUVIO_GRADLE_JVMARGS : 4
+- NUVIO_KOTLIN_NATIVE_JVMARGS : 4
 - NUVIO_LINUX_RPM_RUNTIME_DEPENDENCIES : 4
 - NUVIO_LINUX_SHORTCUT_STARTUP_WM_CLASS : 4
-- NUVIO_RELEASE_ : 3
-- NUVIO_MACOS_ : 3
 - NUVIO_LINUX_DEB_RUNTIME_DEPENDENCIES : 3
 - NUVIO_LINUX_SHORTCUT_MIME_TYPES : 3
 - NUVIO_SHARED_POOL_MAX_IDLE : 2
@@ -344,8 +266,15 @@ Fichiers inspectés : 4536
 - NUVIO_ANDROID_DISTRIBUTION : 2
 - NUVIO_LOG_PACKAGE : 2
 - NUVIO_ENGINE_ROOT : 2
-- NUVIO_MACOS_NOTARY_KEYCHAIN_PATH : 2
 - NUVIO_MACOS_NOTARY_PASSWORD : 2
+- NUVIO_MACOS_NOTARY_KEYCHAIN_PROFILE : 2
+- NUVIO_MACOS_SIGNING_IDENTITY : 2
+- NUVIO_DESKTOP_VERSION_NAME : 2
+- NUVIO_DESKTOP_VERSION_CODE : 2
+- NUVIO_DESKTOP_SMOKE_PLAYER_URL : 2
+- NUVIO_LINUX_SHORTCUT_NAME : 2
+- NUVIO_LINUX_SHORTCUT_COMMENT : 2
+- NUVIO_LINUX_SHORTCUT_CATEGORIES : 2
 
 ## Limites et vérifications indispensables
 
