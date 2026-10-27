@@ -19,7 +19,7 @@ import com.nuvio.app.core.poster.CustomPosterFallbackInterceptor
  * image request. Without this, Coil's auto-init ContentProvider creates the singleton
  * before MainActivity.onCreate, and interceptors registered later are ignored.
  */
-class NuvioApplication : Application(), SingletonImageLoader.Factory {
+class KovelyxApplication : Application(), SingletonImageLoader.Factory {
 
     override fun newImageLoader(context: android.content.Context): ImageLoader {
         return ImageLoader.Builder(context)

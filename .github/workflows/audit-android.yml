@@ -15,6 +15,13 @@ on:
       - 'scripts/audit-kovelyx-android.py'
       - 'scripts/audit-mobile-independence.py'
       - '.github/workflows/audit-android.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - 'scripts/audit-kovelyx-android.py'
+      - 'scripts/audit-mobile-independence.py'
+      - '.github/workflows/audit-android.yml'
   workflow_dispatch:
 
 permissions:

@@ -78,6 +78,11 @@ internal object ServerDiscoveryPolicy {
             throw ServerDiscoveryException(ServerDiscoveryFailure.NotSelfHosted)
         }
         val backendUrl = normalizeBackendUrl(payload.backendUrl)
+        // A custom discovery document cannot silently reconnect Kovelyx to
+        // the old Nuvio account infrastructure.
+        if (isOfficial(backendUrl)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OfficialServer)
+        }
         val key = payload.publishableKey.trim()
         if (key.isBlank()) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.MissingConfiguration)
@@ -97,9 +102,18 @@ internal object ServerDiscoveryPolicy {
         )
     }
 
-    fun isOfficial(candidateUrl: String): Boolean =
-        matchesBackend(candidateUrl, SupabaseConfig.URL) ||
+    fun isOfficial(candidateUrl: String): Boolean {
+        val host = runCatching { Url(candidateUrl).host.trimEnd('.').lowercase() }.getOrNull()
+            ?: return false
+        // Match DNS label boundaries, not substrings: a custom host such as
+        // nuvio.tv.example.net is allowed, but api-two.nuvioapp.space is not.
+        val formerService = listOf("nuvio.tv", "nuvioapp.space").any {
+            host == it || host.endsWith(".$it")
+        }
+        return formerService ||
+            matchesBackend(candidateUrl, SupabaseConfig.URL) ||
             matchesBackend(candidateUrl, canonicalOfficialBackend)
+    }
 
     private fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {
         val candidate = runCatching { Url(candidateUrl) }.getOrNull() ?: return false
@@ -161,6 +175,9 @@ object ServerDiscoveryService {
                         "User-Agent" to "Kovelyx-Mobile/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
                     ),
                     body = "",
+                    // Never follow a custom server's 3xx redirect to an
+                    // upstream Nuvio domain before the response URL is checked.
+                    followRedirects = false,
                     maxResponseBodyBytes = maxDocumentBytes + 1,
                 )
             }
@@ -180,6 +197,11 @@ object ServerDiscoveryService {
             !response.url.startsWith("https://", ignoreCase = true)
         ) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.ConnectionFailed)
+        }
+        // An apparently harmless custom host must not HTTP-redirect into a
+        // former Nuvio account service after the initial allow check.
+        if (ServerDiscoveryPolicy.isOfficial(response.url)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OfficialServer)
         }
         if (response.body.encodeToByteArray().size > maxDocumentBytes) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.ResponseTooLarge)
