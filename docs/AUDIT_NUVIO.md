@@ -235,7 +235,7 @@ Fichiers inspectés : 4522
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
-- NUVIO_SYNC : 126
+- NUVIO_SYNC : 127
 - NUVIO_IOS_DISTRIBUTION : 12
 - NUVIO_JS : 10
 - NUVIO_RELEASE_KEY_ALIAS : 6
