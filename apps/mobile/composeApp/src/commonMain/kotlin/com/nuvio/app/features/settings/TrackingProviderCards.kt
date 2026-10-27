@@ -72,13 +72,6 @@ import com.nuvio.app.core.ui.NuvioLoadingIndicator
 import com.nuvio.app.core.ui.NuvioTokens
 import com.nuvio.app.core.ui.nuvio
 import com.nuvio.app.features.profiles.ProfileRepository
-import com.nuvio.app.features.simkl.SimklAuthError
-import com.nuvio.app.features.simkl.SimklAuthRepository
-import com.nuvio.app.features.simkl.SimklAuthUiState
-import com.nuvio.app.features.simkl.SimklBrandAsset
-import com.nuvio.app.features.simkl.SimklConnectionMode
-import com.nuvio.app.features.simkl.SimklSyncRepository
-import com.nuvio.app.features.simkl.simklBrandPainter
 import com.nuvio.app.features.tracking.TrackingProviderId
 import com.nuvio.app.features.tracking.TrackingRefreshIntent
 import com.nuvio.app.features.trakt.TraktAuthRepository
@@ -93,23 +86,6 @@ import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.action_cancel
 import nuvio.composeapp.generated.resources.action_collapse
 import nuvio.composeapp.generated.resources.action_expand
-import nuvio.composeapp.generated.resources.settings_simkl_authorization_expired
-import nuvio.composeapp.generated.resources.settings_simkl_authorization_revoked
-import nuvio.composeapp.generated.resources.settings_simkl_connect
-import nuvio.composeapp.generated.resources.settings_simkl_connected_as
-import nuvio.composeapp.generated.resources.settings_simkl_connected_description
-import nuvio.composeapp.generated.resources.settings_simkl_default_user
-import nuvio.composeapp.generated.resources.settings_simkl_disconnect
-import nuvio.composeapp.generated.resources.settings_simkl_disconnect_description
-import nuvio.composeapp.generated.resources.settings_simkl_finish_sign_in
-import nuvio.composeapp.generated.resources.settings_simkl_invalid_callback
-import nuvio.composeapp.generated.resources.settings_simkl_missing_credentials
-import nuvio.composeapp.generated.resources.settings_simkl_open_login
-import nuvio.composeapp.generated.resources.settings_simkl_sign_in_description
-import nuvio.composeapp.generated.resources.settings_simkl_sign_in_failed
-import nuvio.composeapp.generated.resources.settings_simkl_sync_info_action
-import nuvio.composeapp.generated.resources.settings_simkl_sync_now
-import nuvio.composeapp.generated.resources.settings_simkl_visit
 import nuvio.composeapp.generated.resources.settings_tracking_approval_redirect
 import nuvio.composeapp.generated.resources.settings_tracking_disconnect_description
 import nuvio.composeapp.generated.resources.settings_tracking_disconnect_title
@@ -131,7 +107,6 @@ import org.jetbrains.compose.resources.stringResource
 internal enum class TrackingBrand(val displayName: String) {
     NUVIO("Nuvio"),
     TRAKT("Trakt"),
-    SIMKL("Simkl"),
     MDBLIST("MDBList"),
     TMDB("TMDB"),
 }
@@ -145,14 +120,12 @@ internal enum class TrackingConnectionCardMode {
 internal fun isTrackingBrandAvailable(
     brand: TrackingBrand,
     traktConnected: Boolean,
-    simklConnected: Boolean,
     mdblistConnected: Boolean = false,
 ): Boolean = when (brand) {
     TrackingBrand.NUVIO,
     TrackingBrand.TMDB,
     -> true
     TrackingBrand.TRAKT -> traktConnected
-    TrackingBrand.SIMKL -> simklConnected
     TrackingBrand.MDBLIST -> mdblistConnected
 }
 
@@ -162,19 +135,11 @@ internal fun TraktConnectionMode.toTrackingConnectionCardMode(): TrackingConnect
     TraktConnectionMode.CONNECTED -> TrackingConnectionCardMode.CONNECTED
 }
 
-internal fun SimklConnectionMode.toTrackingConnectionCardMode(): TrackingConnectionCardMode = when (this) {
-    SimklConnectionMode.DISCONNECTED -> TrackingConnectionCardMode.DISCONNECTED
-    SimklConnectionMode.AWAITING_APPROVAL -> TrackingConnectionCardMode.AWAITING_APPROVAL
-    SimklConnectionMode.CONNECTED -> TrackingConnectionCardMode.CONNECTED
-}
-
 @Composable
 internal fun TrackingProviderCards(
     isTablet: Boolean,
     traktUiState: TraktAuthUiState,
-    simklUiState: SimklAuthUiState,
 ) {
-    // Aucun chargement/synchronisation SIMKL lors de l'ouverture des réglages.
     var showCredentialEditor by remember { mutableStateOf(false) }
 
     Column(
@@ -193,7 +158,6 @@ internal fun TrackingProviderCards(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
         )
-        // SIMKL retiré de la liste des fournisseurs Kovelyx.
         MdbListProviderCard(Modifier.fillMaxWidth())
     }
 
@@ -315,51 +279,6 @@ private fun TraktProviderCard(
         },
         onCancelAuthorization = TraktAuthRepository::onCancelAuthorization,
         onDisconnect = TraktAuthRepository::onDisconnectRequested,
-        modifier = modifier,
-    )
-}
-
-@Composable
-private fun SimklProviderCard(
-    uiState: SimklAuthUiState,
-    isSyncing: Boolean,
-    syncErrorMessage: String?,
-    onSyncRequested: () -> Unit,
-    onInfoRequested: () -> Unit,
-    modifier: Modifier,
-) {
-    TrackingProviderCard(
-        brand = TrackingBrand.SIMKL,
-        mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
-        isLoading = uiState.isLoading,
-        connectedLabel = stringResource(
-            Res.string.settings_simkl_connected_as,
-            uiState.username ?: stringResource(Res.string.settings_simkl_default_user),
-        ),
-        connectedDescription = stringResource(Res.string.settings_simkl_connected_description),
-        signInDescription = stringResource(Res.string.settings_simkl_sign_in_description),
-        finishSignInLabel = stringResource(Res.string.settings_simkl_finish_sign_in),
-        approvalDescription = stringResource(Res.string.settings_tracking_approval_redirect),
-        connectLabel = stringResource(Res.string.settings_simkl_connect),
-        openLoginLabel = stringResource(Res.string.settings_simkl_open_login),
-        disconnectLabel = stringResource(Res.string.settings_simkl_disconnect),
-        syncLabel = stringResource(Res.string.settings_simkl_sync_now),
-        infoLabel = stringResource(Res.string.settings_simkl_sync_info_action),
-        isSyncing = isSyncing,
-        missingCredentialsMessage = stringResource(Res.string.settings_simkl_missing_credentials),
-        errorMessage = simklErrorMessage(uiState.error) ?: syncErrorMessage,
-        websiteLabel = stringResource(Res.string.settings_simkl_visit),
-        websiteUrl = SIMKL_WEBSITE_URL,
-        onConnectRequested = SimklAuthRepository::onConnectRequested,
-        onResumeAuthorization = {
-            SimklAuthRepository.pendingAuthorizationUrl()
-                ?: SimklAuthRepository.onConnectRequested()
-        },
-        onCancelAuthorization = SimklAuthRepository::onCancelAuthorization,
-        onSyncRequested = onSyncRequested,
-        onInfoRequested = onInfoRequested,
-        onDisconnect = SimklAuthRepository::onDisconnectRequested,
         modifier = modifier,
     )
 }
@@ -745,8 +664,6 @@ private fun TrackingDisconnectDialog(
             text = when (brand) {
                 TrackingBrand.TRAKT ->
                     stringResource(Res.string.settings_trakt_disconnect_description)
-                TrackingBrand.SIMKL ->
-                    stringResource(Res.string.settings_simkl_disconnect_description)
                 TrackingBrand.MDBLIST -> stringResource(Res.string.settings_mdblist_disconnect_description)
                 TrackingBrand.NUVIO,
                 TrackingBrand.TMDB,
@@ -785,12 +702,6 @@ internal fun TrackingBrandGlyph(
             modifier = modifier,
             contentScale = ContentScale.Fit,
         )
-        TrackingBrand.SIMKL -> Image(
-            painter = simklBrandPainter(SimklBrandAsset.Glyph),
-            contentDescription = contentDescription,
-            modifier = modifier,
-            contentScale = ContentScale.Fit,
-        )
         TrackingBrand.MDBLIST -> Image(
             painter = integrationLogoPainter(IntegrationLogo.MdbList),
             contentDescription = contentDescription,
@@ -819,7 +730,6 @@ private fun TrackingBrandWordmark(
 ) {
     val painter: Painter = when (brand) {
         TrackingBrand.TRAKT -> traktBrandPainter(TraktBrandAsset.Wordmark)
-        TrackingBrand.SIMKL -> simklBrandPainter(SimklBrandAsset.Wordmark)
         TrackingBrand.MDBLIST -> integrationLogoPainter(IntegrationLogo.MdbList)
         TrackingBrand.NUVIO,
         TrackingBrand.TMDB,
@@ -839,9 +749,6 @@ private fun TrackingBrandWordmark(
             TrackingBrand.TRAKT -> Modifier
                 .width(86.dp)
                 .height(38.dp)
-            TrackingBrand.SIMKL -> Modifier
-                .width(124.dp)
-                .height(30.dp)
             TrackingBrand.MDBLIST -> Modifier.width(130.dp).height(32.dp)
             TrackingBrand.NUVIO,
             TrackingBrand.TMDB,
@@ -859,28 +766,9 @@ private fun TrackingBrand.cardBrush(): Brush = when (this) {
     TrackingBrand.MDBLIST -> Brush.linearGradient(
         colors = listOf(Color(0xFF173D69), Color(0xFF225C97), Color(0xFF16385D)),
     )
-    TrackingBrand.SIMKL -> Brush.linearGradient(
-        colors = listOf(Color(0xFF050505), Color(0xFF292929), Color(0xFF111111)),
-    )
     TrackingBrand.NUVIO,
     TrackingBrand.TMDB,
     -> Brush.linearGradient(colors = listOf(Color(0xFF242424), Color(0xFF111111)))
 }
 
-@Composable
-private fun simklErrorMessage(error: SimklAuthError?): String? = when (error) {
-    null, SimklAuthError.MISSING_CLIENT_ID -> null
-    SimklAuthError.INVALID_CALLBACK,
-    SimklAuthError.INVALID_CALLBACK_STATE,
-    -> stringResource(Res.string.settings_simkl_invalid_callback)
-    SimklAuthError.AUTHORIZATION_EXPIRED ->
-        stringResource(Res.string.settings_simkl_authorization_expired)
-    SimklAuthError.TOKEN_EXCHANGE_FAILED,
-    SimklAuthError.INVALID_TOKEN_RESPONSE,
-    -> stringResource(Res.string.settings_simkl_sign_in_failed)
-    SimklAuthError.AUTHORIZATION_REVOKED ->
-        stringResource(Res.string.settings_simkl_authorization_revoked)
-}
-
 private val TrackingErrorColor = Color(0xFFFFDAD6)
-private const val SIMKL_WEBSITE_URL = "https://simkl.com"
