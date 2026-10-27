@@ -11,7 +11,6 @@
 [![Site officiel](https://img.shields.io/badge/SITE_OFFICIEL-DÉCOUVRIR-8656F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://anderson76389.github.io/Kovelyx/)
 [![Téléchargements](https://img.shields.io/badge/RELEASES-TÉLÉCHARGER-B784FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases)
 
-**[📦 Télécharger la dernière préversion complète (Windows · Android · TV)](https://github.com/anderson76389/Kovelyx/releases)**
 [![Licence](https://img.shields.io/badge/LICENCE-GPLv3-33304A?style=for-the-badge)](./docs/PROVENANCE.md)
 
 <sub>Projet open source • Versions actuellement en préversion • Sources et builds hébergés dans ce dépôt</sub>
@@ -24,12 +23,14 @@
 
 <div align="center">
 
-<img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration des trois applications Kovelyx" width="900">
-
-<sub>Illustration conceptuelle, et non capture d'écran d'une application installée.</sub>
-
 <table align="center" width="100%">
   <thead>
+    <tr>
+      <th align="center" colspan="3">
+        <img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration centrée des applications Windows, Android et Android TV" width="100%">
+        <p><sub>Illustration conceptuelle, non issue d'une application installée.</sub></p>
+      </th>
+    </tr>
     <tr>
       <th align="center" width="33%">🖥️ Windows</th>
       <th align="center" width="34%">📱 Android mobile</th>
