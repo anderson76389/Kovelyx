@@ -293,12 +293,17 @@ class ParallelRangeChunkLeaseTest {
 
     @Test
     fun `pooled memory is not reachable through the chunk that gave it back`() {
+        // An idle buffer is pooled only while a DataSource is still alive.
+        // A completed download after final close must be freed instead,
+        // which is checked separately in the late-completion regression test.
+        val activeSource = source()
         val buffer = pooledBuffer(memory.allocate(CHUNK.toInt()))
         releaseSessionBuffer(buffer, 4)
         assertEquals(1, pooled())
         assertFalse(call(buffer, "lease") as Boolean)
         drainPool()
         assertEquals(1, memory.freed.get())
+        activeSource.close()
     }
 
     @Test
