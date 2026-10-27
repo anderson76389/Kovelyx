@@ -172,15 +172,15 @@ jobs:
           # Normaliser seulement l'empreinte publique (pas la clé privée).
           # Le contrôle strict avec l'empreinte JKS reste obligatoire.
           actual="$(python3 - <<'PY'
-import re
-from pathlib import Path
-report = Path('/tmp/kv-signer.txt').read_text(encoding='utf-8', errors='replace')
-match = re.search(
-    r'(?im)signer\\s*#?\\s*\\d+\\s+certificate\\s+SHA[- ]?256\\s+digest\\s*:\\s*([a-f0-9: ]+)',
-    report,
-)
-print(re.sub(r'[^0-9a-f]', '', match.group(1).lower()) if match else '')
-PY
+          import re
+          from pathlib import Path
+          report = Path('/tmp/kv-signer.txt').read_text(encoding='utf-8', errors='replace')
+          match = re.search(
+              r'(?im)signer\\s*#?\\s*\\d+\\s+certificate\\s+SHA[- ]?256\\s+digest\\s*:\\s*([a-f0-9: ]+)',
+              report,
+          )
+          print(re.sub(r'[^0-9a-f]', '', match.group(1).lower()) if match else '')
+          PY
           )"
           expected="$(printf '%s' "$KOVELYX_ANDROID_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
           if [[ ! "$actual" =~ ^[0-9a-f]{64}$ ]]; then
