@@ -125,12 +125,12 @@ Fichiers texte examinés : **1363** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia : **53**.
+Fichiers texte examinés : **1406** ; références statiques à Nuvio/NuvioMedia : **62**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `example.com` | 182 |
-| `github.com` | 120 |
+| `github.com` | 121 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 68 |
 | `schemas.android.com` | 47 |
@@ -171,6 +171,13 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:18`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:19`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:29`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:30`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
@@ -178,6 +185,8 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:109`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`

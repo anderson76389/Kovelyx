@@ -3,11 +3,11 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4518
+Fichiers inspectés : 4519
 
 ## Inventaire des références à traiter
 
-### Connexions et services (91 correspondances)
+### Connexions et services (100 correspondances)
 
 - apps/tv/app/src/main/res/values-ar/strings.xml:2644 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2645 : <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
@@ -73,6 +73,15 @@ Fichiers inspectés : 4518
 - apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv Official server ہے۔ یہ dialog بند کریں اور واپس جانے کے لیے Official server استعمال کریں منتخب کریں۔</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv là máy chủ chính thức và đã được chọn.</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv là máy chủ chính thức. Vui lòng đóng hộp thoại này và chọn “Sử dụng máy chủ chính thức” để chuyển trở lại.</string>
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:109 : // nuvio.tv.example.net is allowed, but api-two.nuvioapp.space is not.
+- apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110 : val formerService = listOf("nuvio.tv", "nuvioapp.space").any {
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13 : "https://nuvio.tv",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14 : "https://api.nuvio.tv",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15 : "https://nuvio.tv:443/.well-known/nuvio",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:18 : "https://api.nuvio.tv.",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:19 : "https://A.B.API.NUVIO.TV:8443/link",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:29 : "https://nuvio.tv.example.net",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:30 : "https://anothernuvio.tv",
 - apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401 : <string name="server_error_official_active">api.nuvio.tv অফিসিয়াল সার্ভার এবং ইতিমধ্যেই নির্বাচিত।</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402 : <string name="server_error_official_available">api.nuvio.tv হল অফিসিয়াল সার্ভার। এই ডায়ালগটি বন্ধ করুন এবং ফিরে যেতে অফিসিয়াল সার্ভার ব্যবহার করুন নির্বাচন করুন।</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984 : <string name="server_error_official_active">api.nuvio.tv je oficiální server a už je vybraný.</string>
@@ -80,16 +89,7 @@ Fichiers inspectés : 4518
 - apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:183 : <string name="server_error_official_active">Το api.nuvio.tv είναι ο επίσημος διακομιστής και είναι ήδη επιλεγμένο.</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:184 : <string name="server_error_official_available">Το api.nuvio.tv είναι ο επίσημος διακομιστής. Κλείστε αυτό το παράθυρο διαλόγου και επιλέξτε «Χρήση επίσημου διακομιστή» για να 
 - apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:398 : <string name="server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:399 : <string name="server_error_official_available">api.nuvio.tv es el servidor oficial. Cierra este diálogo y elige Usar servidor oficial para volver a él.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400 : <string name="server_error_official_active">api.nuvio.tv je službeni poslužitelj i već je odabran.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401 : <string name="server_error_official_available">api.nuvio.tv je službeni poslužitelj. Zatvorite ovaj prozor i odaberite „Koristi službeni poslužitelj” za povratak.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273 : <string name="server_error_official_active">api.nuvio.tv er den offisielle serveren og er allerede valgt.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274 : <string name="server_error_official_available">api.nuvio.tv er den offisielle serveren. Lukk denne dialogen og velg Bruk offisiell server for å bytte tilbake.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395 : <string name="server_error_official_active">api.nuvio.tv is de officiële server en is al geselecteerd.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396 : <string name="server_error_official_available">api.nuvio.tv is de officiële server. Sluit dit venster en kies Officiële server gebruiken om terug te schakelen.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2077 : <string name="server_error_official_active">api.nuvio.tv to oficjalny serwer i jest już wybrany.</string>
-- apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2078 : <string name="server_error_official_available">api.nuvio.tv to oficjalny serwer. Zamknij to okno i wybierz „Użyj oficjalnego serwera", aby przełączyć.</string>
-- Autres correspondances non détaillées : 11
+- Autres correspondances non détaillées : 20
 
 ### Mises à jour et releases (4 correspondances)
 
@@ -230,7 +230,7 @@ Fichiers inspectés : 4518
 ## Références de packages Kotlin historiques
 
 - apps/tv : 6754 lignes.
-- apps/mobile : 6982 lignes.
+- apps/mobile : 6983 lignes.
 - apps/desktop : 7889 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
