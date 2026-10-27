@@ -61,11 +61,15 @@ class AppUpdaterController internal constructor(
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             preferences.channel.collect { channel ->
                 if (channel != _uiState.value.updateChannel) {
+                    val wasSimulatedPreview = _uiState.value.isDebugTest
                     updateCheckJob?.cancel()
                     downloadJob?.cancel()
                     _uiState.value.downloadedApkPath?.let(AppUpdaterPlatform::deleteDownloadedApk)
                     _uiState.value = AppUpdaterUiState(updateChannel = channel)
-                    if (!AppUpdaterPlatform.isDebugBuild) {
+                    // Les APK de préversion sont identifiés comme Debug,
+                    // mais doivent eux aussi rechercher leurs vraies Releases.
+                    // Conserver le mode simulation isolé des requêtes réelles.
+                    if (!wasSimulatedPreview) {
                         checkForUpdates(force = true, showNoUpdateFeedback = false)
                     }
                 }
@@ -75,7 +79,7 @@ class AppUpdaterController internal constructor(
 
     fun ensureAutoCheckStarted() {
         if (autoCheckStarted || !AppFeaturePolicy.inAppUpdaterEnabled ||
-            !AppUpdaterPlatform.isSupported || AppUpdaterPlatform.isDebugBuild
+            !AppUpdaterPlatform.isSupported
         ) {
             return
         }
