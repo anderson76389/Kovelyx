@@ -14,6 +14,27 @@ class ProfileBackgroundTest {
     }
 
     @Test
+    fun importedBackgroundWorksWithoutMembership() {
+        val uri = "file:///data/user/0/com.kovelyx/files/kovelyx-profile-media/fond-local.png"
+        val profile = NuvioProfile(profileBackgroundId = "aurora", profileBackgroundUrl = uri)
+
+        assertEquals(
+            ProfileBackgroundSelection.Custom(uri),
+            resolveProfileBackground(profile, CosmeticEntitlements.None),
+        )
+    }
+
+    @Test
+    fun webCustomBackgroundWorksWithoutMembership() {
+        val profile = NuvioProfile(profileBackgroundUrl = "https://example.com/mon-fond.gif")
+
+        assertEquals(
+            ProfileBackgroundSelection.Custom("https://example.com/mon-fond.gif"),
+            resolveProfileBackground(profile, CosmeticEntitlements.None),
+        )
+    }
+
+    @Test
     fun customBackgroundTakesPriorityWhenEntitled() {
         val profile = NuvioProfile(
             profileBackgroundId = "aurora",
