@@ -11,15 +11,23 @@ ROOT = Path(__file__).resolve().parents[2]
 PLATFORMS = ("desktop", "mobile")
 
 
+def kotlin_package_path(platform: str) -> str:
+    return "com/kovelyx/app" if platform == "mobile" else "com/nuvio/app"
+
+
+def kotlin_package_name(platform: str) -> str:
+    return "com.kovelyx.app" if platform == "mobile" else "com.nuvio.app"
+
+
 class CloudflareLegacyBoundaryTests(unittest.TestCase):
     def test_member_background_catalog_is_never_started_in_cloudflare_mode(self):
         for platform in PLATFORMS:
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
-                    "com/nuvio/app/features/membership/ProfileBackgroundRepository.kt"
+                    f"{kotlin_package_path(platform)}/features/membership/ProfileBackgroundRepository.kt"
                 ).read_text(encoding="utf-8")
-                self.assertIn("import com.nuvio.app.core.cloud.CloudflareAccountClient", source)
+                self.assertIn(f"import {kotlin_package_name(platform)}.core.cloud.CloudflareAccountClient", source)
                 self.assertRegex(
                     source,
                     r"fun ensureLoaded\(\)\s*\{[\s\S]{0,280}"
@@ -38,7 +46,7 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
-                    "com/nuvio/app/features/membership/MemberAccessRepository.kt"
+                    f"{kotlin_package_path(platform)}/features/membership/MemberAccessRepository.kt"
                 ).read_text(encoding="utf-8")
                 self.assertIn("import com.nuvio.app.core.cloud.CloudflareAccountClient", source)
                 for function in ("ensureStarted", "loadAccess", "hydrateCachedAccess"):
@@ -64,7 +72,7 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
-                    "com/nuvio/app/core/network/ServerDiscovery.kt"
+                    f"{kotlin_package_path(platform)}/core/network/ServerDiscovery.kt"
                 ).read_text(encoding="utf-8")
                 self.assertRegex(source, r'"User-Agent"\s+to\s+"Kovelyx')
 
