@@ -52,17 +52,17 @@ def verify() -> None:
     manifest = MANIFEST.read_text("utf-8")
     ET.fromstring(manifest)
     assert 'android:scheme="kovelyx"' in manifest
-    assert 'android:name="com.nuvio.app.KovelyxApplication"' in manifest
-    assert 'android:name="com.nuvio.app.NuvioApplication"' not in manifest
+    assert 'android:name="com.kovelyx.app.KovelyxApplication"' in manifest
+    assert 'android:name="com.kovelyx.app.NuvioApplication"' not in manifest
     assert 'android:scheme="nuvio"' not in manifest
     for variant in ("", "_arctic_blue", "_emerald", "_rose_gold", "_copper", "_graphite"):
         name = "ic_kovelyx" + variant
         assert f'android:icon="@drawable/{name}"' in manifest, f"Icône non utilisée : {name}"
         ET.parse(ANDROID / "drawable" / (name + ".xml"))
 
-    app_src = (ROOT / "apps/mobile/composeApp/src/androidMain/kotlin/com/nuvio/app/KovelyxApplication.kt").read_text("utf-8")
+    app_src = (ROOT / "apps/mobile/composeApp/src/androidMain/kotlin/com/kovelyx/app/KovelyxApplication.kt").read_text("utf-8")
     assert "class KovelyxApplication : Application()" in app_src
-    assert not (ROOT / "apps/mobile/composeApp/src/androidMain/kotlin/com/nuvio/app/NuvioApplication.kt").exists()
+    assert not (ROOT / "apps/mobile/composeApp/src/androidMain/kotlin/com/kovelyx/app/NuvioApplication.kt").exists()
 
     for locale in ("values", "values-fr"):
         resource = ROOT / f"apps/mobile/composeApp/src/commonMain/composeResources/{locale}/strings.xml"
@@ -74,11 +74,21 @@ def verify() -> None:
             str([value[:70] for value in visible if "Nuvio" in value or "nuvio.tv" in value][:5])
         )
 
+    # Build identity: independent release version/signing configuration without
+    # silently reusing historical Nuvio secrets or Gradle properties.
+    settings_gradle = (ROOT / "apps/mobile/settings.gradle.kts").read_text("utf-8")
+    assert 'rootProject.name = "Kovelyx"' in settings_gradle
+    android_gradle = (ROOT / "apps/mobile/androidApp/build.gradle.kts").read_text("utf-8")
+    assert 'applicationId = "com.kovelyx.mobile"' in android_gradle
+    assert 'NUVIO_RELEASE_' not in android_gradle
+    assert 'nuvio.app.versionName' not in android_gradle
+
     gradle = (ROOT / "apps/mobile/composeApp/build.gradle.kts").read_text("utf-8")
+    assert 'nuvio.app.versionName' not in gradle
     assert '"kovelyx://auth/trakt"' in gradle
     assert '"kovelyx://auth/simkl"' in gradle
 
-    updater = (ROOT / "apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/updater/AppUpdaterRepository.kt").read_text("utf-8")
+    updater = (ROOT / "apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/features/updater/AppUpdaterRepository.kt").read_text("utf-8")
     assert "anderson76389/Kovelyx" in updater and "NuvioMedia" not in updater
     print(f"OK : {len(ARTWORK)} logos et icônes, {len(SPLASHES)} splash, 6 raccourcis, FR/EN et URLs Kovelyx.")
 

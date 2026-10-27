@@ -24,17 +24,16 @@ val localProps = Properties().apply {
     val propsFile = rootProject.file("local.properties")
     if (propsFile.exists()) propsFile.inputStream().use { load(it) }
 }
-// Kovelyx release signing is opt-in and read from CI secrets; legacy local
-// property names remain supported for development without changing old builds.
-fun releaseSigningValue(name: String, previousName: String): String? =
+// Les signatures sont propres à Kovelyx. Ne pas récupérer silencieusement
+// d'anciennes clés Nuvio, même lors d'une compilation locale.
+fun releaseSigningValue(name: String): String? =
     providers.environmentVariable(name).orNull?.takeIf { it.isNotBlank() }
         ?: localProps.getProperty(name)?.takeIf { it.isNotBlank() }
-        ?: localProps.getProperty(previousName)?.takeIf { it.isNotBlank() }
 
-val releaseStoreFile = releaseSigningValue("KOVELYX_RELEASE_STORE_FILE", "NUVIO_RELEASE_STORE_FILE")
-val releaseStorePassword = releaseSigningValue("KOVELYX_RELEASE_STORE_PASSWORD", "NUVIO_RELEASE_STORE_PASSWORD")
-val releaseKeyAlias = releaseSigningValue("KOVELYX_RELEASE_KEY_ALIAS", "NUVIO_RELEASE_KEY_ALIAS")
-val releaseKeyPassword = releaseSigningValue("KOVELYX_RELEASE_KEY_PASSWORD", "NUVIO_RELEASE_KEY_PASSWORD")
+val releaseStoreFile = releaseSigningValue("KOVELYX_RELEASE_STORE_FILE")
+val releaseStorePassword = releaseSigningValue("KOVELYX_RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = releaseSigningValue("KOVELYX_RELEASE_KEY_ALIAS")
+val releaseKeyPassword = releaseSigningValue("KOVELYX_RELEASE_KEY_PASSWORD")
 val releaseKeystore = releaseStoreFile?.let(rootProject::file)
 if (providers.environmentVariable("CI_SIGNED_ANDROID").orNull == "true") {
     require(releaseKeystore?.isFile == true && releaseStorePassword != null &&
@@ -55,7 +54,6 @@ val appVersionConfigFile = rootProject.file("iosApp/Configuration/Version.xcconf
 // as the Windows/TV packages from the exact Git commit. Local builds keep
 // their legacy version metadata unless an explicit override is supplied.
 val releaseAppVersionName = providers.gradleProperty("kovelyx.app.versionName").orNull
-    ?: providers.gradleProperty("nuvio.app.versionName").orNull
     ?: readXcconfigValue(appVersionConfigFile, "MARKETING_VERSION")
     ?: error("MARKETING_VERSION is missing from ${appVersionConfigFile.path}")
 val releaseAppVersionCode = providers.gradleProperty("kovelyx.app.versionCode").orNull?.let { raw ->
@@ -70,7 +68,7 @@ val buildsReleaseApks = requestedTaskNames.any {
 }
 
 android {
-    namespace = "com.nuvio.android"
+    namespace = "com.kovelyx.android"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     compileSdkMinor = libs.versions.android.compileSdkMinor.get().toInt()
 
