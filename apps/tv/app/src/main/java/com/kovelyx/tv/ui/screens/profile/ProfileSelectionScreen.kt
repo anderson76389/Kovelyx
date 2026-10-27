@@ -1770,8 +1770,12 @@ private fun EditProfileOverlay(
         runCatching { nameFocusRequester.requestFocus() }
     }
 
-    LaunchedEffect(hasProfileBackgroundAccess) {
-        if (!hasProfileBackgroundAccess) selectedEditorTab = ProfileEditorTab.Avatar
+    // La personnalisation locale doit rester visible en mode Cloudflare,
+    // même si l'ancien catalogue de fonds réservés n'est pas disponible.
+    val canShowBackgroundTab = hasProfileBackgroundAccess ||
+        !profile.profileBackgroundUrl.isNullOrBlank()
+    LaunchedEffect(canShowBackgroundTab) {
+        if (!canShowBackgroundTab) selectedEditorTab = ProfileEditorTab.Avatar
     }
 
     Box(
@@ -1915,7 +1919,7 @@ private fun EditProfileOverlay(
                 ) {
                     ProfileEditorTabs(
                         selectedTab = selectedEditorTab,
-                        showBackgroundTab = hasProfileBackgroundAccess,
+                        showBackgroundTab = canShowBackgroundTab,
                         onTabSelected = { selectedEditorTab = it },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
