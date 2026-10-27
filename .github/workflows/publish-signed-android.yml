@@ -108,6 +108,33 @@ jobs:
             ./gradlew :app:assembleFullRelease --no-daemon --max-workers=1 \
               -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
           fi
+      - name: Conserver l'APK universel compile pour diagnostic avant publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.platform }}" == mobile ]]; then
+            output=apps/mobile/androidApp/build/outputs/apk/full/release
+          else
+            output=apps/tv/app/build/outputs/apk/full/release
+          fi
+          echo "Fichiers APK produits pour ${{ matrix.platform }} :"
+          find "$output" -maxdepth 1 -type f -name '*.apk' -printf '%f (%s octets)\\n' | sort
+          mkdir -p diagnostic-apk
+          while IFS= read -r -d '' apk; do
+            cp "$apk" "diagnostic-apk/"
+          done < <(find "$output" -maxdepth 1 -type f -iname '*universal*.apk' -print0)
+          if ! compgen -G 'diagnostic-apk/*.apk' > /dev/null; then
+            echo "::error::Aucun APK universel produit : verifier les splits ABI et les noms de fichiers ci-dessus."
+            exit 1
+          fi
+      - name: Sauvegarder l'APK universel compile, meme si les controles suivants echouent
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-${{ matrix.platform }}-apk-non-verifie-diagnostic
+          path: diagnostic-apk/*.apk
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Valider package, signatures, empreinte de certificat et identite
         shell: bash
         run: |
@@ -122,9 +149,9 @@ jobs:
             application_id=com.kovelyx.tv
             prefix=Kovelyx-TV
           fi
-          mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -name '*universal*release*.apk' -print0)
+          mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -iname '*universal*.apk' -print0)
           [[ "${{ matrix.platform }}" == mobile || "${{ matrix.platform }}" == tv ]] || exit 1
-          [[ "${#apks[@]}" == 1 ]] || { echo "::error::APK universel manquant ou ambigu"; exit 1; }
+          [[ "${#apks[@]}" == 1 ]] || { echo "::error::Il faut un seul APK universel dans $output : ${#apks[@]} trouves"; ls -lh "$output"; exit 1; }
           apk="${apks[0]}"
           unzip -tq "$apk"
           tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
@@ -141,9 +168,23 @@ jobs:
           apk="$signed"
           "$tools/apksigner" verify --verbose "$apk" >/dev/null
           "$tools/apksigner" verify --print-certs "$apk" > /tmp/kv-signer.txt
-          actual="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' /tmp/kv-signer.txt | head -n1 | tr '[:upper:]' '[:lower:]')"
-          expected="$(echo "$KOVELYX_ANDROID_CERT_SHA256" | tr -d ':' | tr '[:upper:]' '[:lower:]')"
-          [[ -n "$actual" && "$actual" == "$expected" ]] || { echo "::error::Certificat APK different de la cle permanente ; publication interdite"; exit 1; }
+          # AOSP apksigner can vary spaces and output formatting across
+          # build-tools versions. Normalize ONLY the public certificate digest;
+          # never weaken the equality check against the private keystore.
+          actual="$(sed -nE 's/.*[Ss]igner #[0-9]+ certificate SHA-256 digest:[[:space:]]*([[:xdigit:]:]+).*/\1/p' /tmp/kv-signer.txt | head -n1 | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+          expected="$(printf '%s' "$KOVELYX_ANDROID_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+          if [[ ! "$actual" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::Empreinte SHA-256 du signataire APK introuvable ou mal formee."
+            # Certificate subject/digest are public metadata; never dump the
+            # keystore, credentials or signing command environment.
+            grep -E 'Signer #[0-9]+ certificate (DN|SHA-256 digest):' /tmp/kv-signer.txt || true
+            exit 1
+          fi
+          if [[ ! "$expected" =~ ^[0-9a-f]{64}$ || "$actual" != "$expected" ]]; then
+            echo "::error::Certificat final APK different de la cle permanente ; publication interdite."
+            echo "Certificat APK (debut): ${actual:0:16} ; certificat JKS (debut): ${expected:0:16}"
+            exit 1
+          fi
           echo "Certificat permanent verifie sur le fichier APK final."
           "$tools/aapt" dump badging "$apk" > /tmp/kv-badging.txt
           grep -F "package: name='$application_id'" /tmp/kv-badging.txt

@@ -45,17 +45,17 @@ class HardwareVideoDecoderSelectorTest {
             FakeDecoder("c2.android.vp9.decoder", software = true, vp9Profiles = setOf(0, 2)),
         )
         assertEquals(listOf("c2.vendor.vp9.decoder", "c2.android.vp9.decoder"), vp9("vp09.02.40.10", box))
-        assertEquals(listOf("c2.vendor.vp9.decoder"), vp9("vp09.00.40.08", box))
+        assertEquals(listOf("c2.vendor.vp9.decoder", "c2.android.vp9.decoder"), vp9("vp09.00.40.08", box))
     }
 
     @Test
-    fun `software is dropped as soon as one hardware decoder supports the format`() {
+    fun `software is still available if a supported hardware decoder fails at runtime`() {
         val box = listOf(
             FakeDecoder("OMX.vendor.vp9.decoder", software = false, vp9Profiles = setOf(0)),
             FakeDecoder("c2.vendor.vp9.decoder", software = false, vp9Profiles = setOf(0, 2)),
             FakeDecoder("c2.android.vp9.decoder", software = true, vp9Profiles = setOf(0, 2)),
         )
-        assertEquals(listOf("OMX.vendor.vp9.decoder", "c2.vendor.vp9.decoder"), vp9("vp09.02.40.10", box))
+        assertEquals(listOf("OMX.vendor.vp9.decoder", "c2.vendor.vp9.decoder", "c2.android.vp9.decoder"), vp9("vp09.02.40.10", box))
     }
 
     @Test
@@ -70,7 +70,7 @@ class HardwareVideoDecoderSelectorTest {
     }
 
     @Test
-    fun `software HEVC and H264 are dropped when the hardware supports the format`() {
+    fun `software HEVC and H264 remain as fallbacks after hardware`() {
         val decoders = arrayOf(
             decoder("c2.amlogic.hevc.decoder", MimeTypes.VIDEO_H265, softwareOnly = false),
             decoder("c2.android.hevc.decoder", MimeTypes.VIDEO_H265, softwareOnly = true),
@@ -78,8 +78,8 @@ class HardwareVideoDecoderSelectorTest {
             decoder("OMX.google.h264.decoder", MimeTypes.VIDEO_H264, softwareOnly = true),
             decoder("c2.android.avc.decoder", MimeTypes.VIDEO_H264, softwareOnly = true),
         )
-        assertEquals(listOf("c2.amlogic.hevc.decoder"), names(format(MimeTypes.VIDEO_H265), *decoders))
-        assertEquals(listOf("OMX.amlogic.avc.decoder.awesome2"), names(format(MimeTypes.VIDEO_H264), *decoders))
+        assertEquals(listOf("c2.amlogic.hevc.decoder", "c2.android.hevc.decoder"), names(format(MimeTypes.VIDEO_H265), *decoders))
+        assertEquals(listOf("OMX.amlogic.avc.decoder.awesome2", "OMX.google.h264.decoder", "c2.android.avc.decoder"), names(format(MimeTypes.VIDEO_H264), *decoders))
     }
 
     @Test
@@ -97,8 +97,8 @@ class HardwareVideoDecoderSelectorTest {
         val decoders = listOf("c2.amlogic.av1.decoder" to false, "c2.android.av1.decoder" to true)
         val kept = hardwareFirstVideoDecoders(MimeTypes.VIDEO_AV1, decoders, { it.second }) { it.second }
         assertEquals(decoders, kept)
-        val dropped = hardwareFirstVideoDecoders(MimeTypes.VIDEO_AV1, decoders, { it.second }) { true }
-        assertEquals(listOf(decoders[0]), dropped)
+        val fallbackReady = hardwareFirstVideoDecoders(MimeTypes.VIDEO_AV1, decoders, { it.second }) { true }
+        assertEquals(decoders, fallbackReady)
     }
 
     @Test
@@ -107,7 +107,7 @@ class HardwareVideoDecoderSelectorTest {
             decoder("c2.mtk.hevc.decoder", MimeTypes.VIDEO_H265, softwareOnly = false),
             decoder("c2.android.hevc.decoder", MimeTypes.VIDEO_H265, softwareOnly = false),
         )
-        assertEquals(listOf("c2.mtk.hevc.decoder"), names(format(MimeTypes.VIDEO_H265), *decoders))
+        assertEquals(listOf("c2.mtk.hevc.decoder", "c2.android.hevc.decoder"), names(format(MimeTypes.VIDEO_H265), *decoders))
     }
 
     @Test
@@ -118,7 +118,7 @@ class HardwareVideoDecoderSelectorTest {
             decoder("c2.amlogic.dolby-vision.dvav.decoder", MimeTypes.VIDEO_DOLBY_VISION, softwareOnly = false),
         )
         assertEquals(
-            listOf("c2.amlogic.dolby-vision.dvhe.decoder", "c2.amlogic.dolby-vision.dvav.decoder"),
+            listOf("c2.amlogic.dolby-vision.dvhe.decoder", "c2.amlogic.dolby-vision.dvav.decoder", "c2.android.dv.decoder"),
             names(format(MimeTypes.VIDEO_DOLBY_VISION), *decoders),
         )
     }
@@ -135,6 +135,30 @@ class HardwareVideoDecoderSelectorTest {
         assertEquals(
             listOf("c2.amlogic.mpeg2.decoder", "c2.android.mpeg2.decoder"),
             names(format(MimeTypes.VIDEO_MPEG2), *decoders),
+        )
+    }
+
+    @Test
+    fun `software listed first is moved behind capable hardware but never discarded`() {
+        val decoders = listOf(
+            FakeDecoder("c2.android.vp9.decoder", software = true, vp9Profiles = setOf(2)),
+            FakeDecoder("c2.vendor.vp9.decoder", software = false, vp9Profiles = setOf(2)),
+        )
+        assertEquals(
+            listOf("c2.vendor.vp9.decoder", "c2.android.vp9.decoder"),
+            vp9("vp09.02.40.10", decoders),
+        )
+    }
+
+    @Test
+    fun `capability failure preserves original ordering including software-first`() {
+        val decoders = listOf(
+            FakeDecoder("c2.android.vp9.decoder", software = true, vp9Profiles = setOf(2)),
+            FakeDecoder("c2.vendor.vp9.decoder", software = false, vp9Profiles = setOf(0)),
+        )
+        assertEquals(
+            listOf("c2.android.vp9.decoder", "c2.vendor.vp9.decoder"),
+            vp9("vp09.02.40.10", decoders),
         )
     }
 

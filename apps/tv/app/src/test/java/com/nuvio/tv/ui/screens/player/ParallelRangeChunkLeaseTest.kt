@@ -228,6 +228,40 @@ class ParallelRangeChunkLeaseTest {
         assertEquals("every chunk freed exactly once", memory.allocated.get(), memory.freed.get())
     }
 
+    private fun activeSourceCount(): Int =
+        (ParallelRangeDataSource::class.java.getDeclaredField("activeInstances")
+            .apply { isAccessible = true }.get(null) as AtomicInteger).get()
+
+    @Test
+    fun `closing and reopening a source does not undercount active TV readers`() {
+        serve()
+        val first = source()
+        val second = source()
+        val initial = activeSourceCount()
+        first.open(spec(0))
+        first.close()
+        assertEquals(initial - 1, activeSourceCount())
+        first.open(spec(0))
+        assertEquals("reopening must restore the global pool reference", initial, activeSourceCount())
+        first.close()
+        assertEquals(initial - 1, activeSourceCount())
+        second.close()
+        assertEquals(initial - 2, activeSourceCount())
+        assertAllMemoryReturned()
+    }
+
+    @Test
+    fun `late completed downloads cannot repool memory after final close`() {
+        val source = source()
+        val allocation = memory.allocate(CHUNK.toInt())
+        val buffer = pooledBuffer(allocation)
+        source.close()
+        releaseSessionBuffer(buffer, poolCap = 4)
+        assertEquals("native allocation must be freed, never left in detached pool", 0, pooled())
+        assertEquals(1, memory.freed.get())
+        assertEquals(0, memory.badFrees.get())
+    }
+
     @Test
     fun `releasing a buffer nobody reads frees it once and refuses later leases`() {
         val buffer = pooledBuffer(memory.allocate(CHUNK.toInt()))
@@ -259,12 +293,17 @@ class ParallelRangeChunkLeaseTest {
 
     @Test
     fun `pooled memory is not reachable through the chunk that gave it back`() {
+        // An idle buffer is pooled only while a DataSource is still alive.
+        // A completed download after final close must be freed instead,
+        // which is checked separately in the late-completion regression test.
+        val activeSource = source()
         val buffer = pooledBuffer(memory.allocate(CHUNK.toInt()))
         releaseSessionBuffer(buffer, 4)
         assertEquals(1, pooled())
         assertFalse(call(buffer, "lease") as Boolean)
         drainPool()
         assertEquals(1, memory.freed.get())
+        activeSource.close()
     }
 
     @Test

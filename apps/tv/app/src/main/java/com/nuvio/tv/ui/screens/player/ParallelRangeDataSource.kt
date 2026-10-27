@@ -93,6 +93,9 @@ internal class ParallelRangeDataSource(
         }
 
         private val activeInstances = java.util.concurrent.atomic.AtomicInteger(0)
+        // Pool eviction and chunk recycle must be atomic: a late downloader may
+        // otherwise enqueue its native allocation into a detached, cleared pool.
+        private val bufferPoolLock = Any()
         private val globalBufferPool = ConcurrentHashMap<Long, ConcurrentLinkedDeque<PooledBuffer>>()
 
         private fun freeDirectBuffer(buffer: ByteBuffer) {
@@ -270,13 +273,17 @@ internal class ParallelRangeDataSource(
         }
 
         private fun recycleBuffer(buffer: PooledBuffer, chunkSz: Long, poolCap: Int) {
-            if (poolCap > 0) {
-                val pool = globalBufferPool.computeIfAbsent(chunkSz) { ConcurrentLinkedDeque() }
-                if (pool.size < poolCap) {
-                    pool.offerLast(buffer)
-                    return
+            synchronized(bufferPoolLock) {
+                if (poolCap > 0 && activeInstances.get() > 0) {
+                    val pool = globalBufferPool.computeIfAbsent(chunkSz) { ConcurrentLinkedDeque() }
+                    if (pool.size < poolCap) {
+                        pool.offerLast(buffer)
+                        return
+                    }
                 }
             }
+            // Do not pool after the last DataSource has closed; otherwise a
+            // finishing worker can leak native memory after clearGlobalPool().
             freeBuffer(buffer)
         }
 
@@ -437,9 +444,11 @@ internal class ParallelRangeDataSource(
         }
 
         internal fun drainIdleBuffers(chunkSize: Long) {
-            val pool = globalBufferPool[chunkSize] ?: return
-            while (true) {
-                freeBuffer(pool.pollLast() ?: break)
+            synchronized(bufferPoolLock) {
+                val pool = globalBufferPool[chunkSize] ?: return
+                while (true) {
+                    freeBuffer(pool.pollLast() ?: break)
+                }
             }
         }
 
@@ -470,12 +479,18 @@ internal class ParallelRangeDataSource(
         }
 
         private fun clearGlobalPool() {
-            globalBufferPool.values.forEach { pool ->
-                while (true) {
-                    freeBuffer(pool.pollFirst() ?: break)
+            synchronized(bufferPoolLock) {
+                // A new DataSource may have opened since close() decremented
+                // the active count. In that case let the new playback reuse
+                // the existing pool rather than discarding it.
+                if (activeInstances.get() > 0) return
+                globalBufferPool.values.forEach { pool ->
+                    while (true) {
+                        freeBuffer(pool.pollFirst() ?: break)
+                    }
                 }
+                globalBufferPool.clear()
             }
-            globalBufferPool.clear()
             Log.d(TAG, "Cleared global buffer pool as all ParallelRangeDataSource instances are closed")
         }
     }
@@ -574,9 +589,14 @@ internal class ParallelRangeDataSource(
         if (com.nuvio.tv.ui.screens.settings.MemoryBudget.isLowRamTier) 2 else 4
 
     override fun open(dataSpec: DataSpec): Long {
+        // A DataSource may be closed and reopened on the same instance after
+        // an interrupted range read. Restore its live-instance reference
+        // exactly once; otherwise repeated close() drives the global count
+        // negative and purges buffers belonging to other active players.
+        val wasClosed = closed.getAndSet(false)
+        if (wasClosed) activeInstances.incrementAndGet()
         val isSubtitle = dataSpec.uri.getQueryParameter("nuvio_type") == "subtitle"
         if (isSubtitle) {
-            closed.set(false)
             resetLocalReadState()
 
             val cleanedUri = dataSpec.uri.buildUpon().clearQuery().let { builder ->
@@ -604,15 +624,12 @@ internal class ParallelRangeDataSource(
             return openLength
         }
 
-        val wasClosed = closed.get()
         val isReopen = !wasClosed &&
                        fallbackSource == null &&
                        originalDataSpec != null &&
                        originalDataSpec?.uri == dataSpec.uri &&
                        position == dataSpec.position &&
                        totalFileLength != C.LENGTH_UNSET.toLong()
-
-        closed.set(false)
 
         if (isReopen) {
             position = dataSpec.position
@@ -1510,8 +1527,9 @@ internal class ParallelRangeDataSource(
     }
 
     private fun acquireBuffer(): PooledBuffer {
-        val pool = globalBufferPool.computeIfAbsent(chunkSize) { ConcurrentLinkedDeque() }
-        val idle = pool.pollLast()
+        // Use the same lock as clearGlobalPool: never borrow an allocation
+        // from a queue that is concurrently being destroyed.
+        val idle = synchronized(bufferPoolLock) { globalBufferPool[chunkSize]?.pollLast() }
         if (idle != null) {
             idle.byteBuffer.clear()
             return PooledBuffer(idle.allocation, idle.byteBuffer)
