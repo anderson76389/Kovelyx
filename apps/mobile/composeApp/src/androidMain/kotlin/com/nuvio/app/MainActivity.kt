@@ -58,8 +58,6 @@ import com.nuvio.app.features.trakt.TraktSettingsStorage
 import com.nuvio.app.features.mdblist.PlatformMdbListAuthPersistence
 import com.nuvio.app.features.mdblist.PlatformMdbListSyncStorage
 import com.nuvio.app.features.servers.ServerStorage
-import com.nuvio.app.features.simkl.SimklAuthStorage
-import com.nuvio.app.features.simkl.SimklSyncStorage
 import com.nuvio.app.features.tmdb.TmdbSettingsStorage
 import com.nuvio.app.features.updater.AndroidAppUpdaterPlatform
 import com.nuvio.app.core.ui.CardDepthStyleStorage
@@ -147,8 +145,6 @@ open class MainActivity : AppCompatActivity() {
         PlatformMdbListAuthPersistence.initialize(applicationContext)
         ServerStorage.initialize(applicationContext)
         PlatformMdbListSyncStorage.initialize(applicationContext)
-        SimklAuthStorage.initialize(applicationContext)
-        SimklSyncStorage.initialize(applicationContext)
         LibraryDisplaySettingsStorage.initialize(applicationContext)
         ContinueWatchingPreferencesStorage.initialize(applicationContext)
         ResumePromptStorage.initialize(applicationContext)
