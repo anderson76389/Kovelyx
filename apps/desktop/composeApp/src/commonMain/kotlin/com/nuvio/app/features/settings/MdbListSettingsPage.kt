@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -149,6 +151,7 @@ private fun MdbListApiKeyRow(
     val verticalPadding = if (isTablet) 16.dp else 14.dp
     var draft by rememberSaveable(value) { mutableStateOf(value) }
     val normalizedDraft = draft.trim()
+    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = Modifier
@@ -196,6 +199,11 @@ private fun MdbListApiKeyRow(
                 enabled = normalizedDraft != value,
             ) {
                 Text(stringResource(Res.string.action_save))
+            }
+            TextButton(onClick = {
+                runCatching { uriHandler.openUri("https://mdblist.com/preferences/") }
+            }) {
+                Text("Obtenir ma clé API MDBList")
             }
         }
     }
