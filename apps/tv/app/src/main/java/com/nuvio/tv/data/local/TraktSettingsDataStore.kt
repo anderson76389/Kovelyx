@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.nuvio.tv.core.profile.ProfileManager
-import com.nuvio.tv.data.simkl.SimklAnimeIdPreference
 import com.nuvio.tv.domain.model.LibrarySourceMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,21 +23,19 @@ import javax.inject.Singleton
 
 enum class WatchProgressSource {
     TRAKT,
-    SIMKL,
     MDBLIST,
     NUVIO_SYNC;
 
     companion object {
         fun fromStorage(value: String?): WatchProgressSource {
-            return entries.firstOrNull { it.name == value } ?: TRAKT
+            return if (value == null) TRAKT else entries.firstOrNull { it.name == value } ?: NUVIO_SYNC
         }
     }
 }
 
 enum class MoreLikeThisSourcePreference {
     TRAKT,
-    TMDB,
-    SIMKL
+    TMDB
 }
 
 @Singleton
@@ -73,7 +70,6 @@ class TraktSettingsDataStore @Inject constructor(
     private val watchProgressSourceKey = stringPreferencesKey("watch_progress_source")
     private val librarySourceModeKey = stringPreferencesKey("library_source_mode")
     private val moreLikeThisSourceKey = stringPreferencesKey("more_like_this_source")
-    private val simklAnimeIdPreferenceKey = stringPreferencesKey("simkl_anime_id_preference")
 
     val continueWatchingDaysCap: Flow<Int> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
@@ -223,15 +219,4 @@ class TraktSettingsDataStore @Inject constructor(
         }
     }
 
-    val simklAnimeIdPreference: Flow<SimklAnimeIdPreference> = profileManager.activeProfileId.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { prefs ->
-            SimklAnimeIdPreference.fromStorage(prefs[simklAnimeIdPreferenceKey])
-        }
-    }
-
-    suspend fun setSimklAnimeIdPreference(preference: SimklAnimeIdPreference) {
-        store().edit { prefs ->
-            prefs[simklAnimeIdPreferenceKey] = preference.name
-        }
-    }
 }

@@ -76,7 +76,7 @@ def verify() -> None:
 
     gradle = (ROOT / "apps/mobile/composeApp/build.gradle.kts").read_text("utf-8")
     assert '"kovelyx://auth/trakt"' in gradle
-    assert '"kovelyx://auth/simkl"' in gradle
+    assert '"kovelyx://auth/simkl"' not in gradle, "Le retour OAuth SIMKL a été réintroduit"
 
     updater = (ROOT / "apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/features/updater/AppUpdaterRepository.kt").read_text("utf-8")
     assert "anderson76389/Kovelyx" in updater and "NuvioMedia" not in updater

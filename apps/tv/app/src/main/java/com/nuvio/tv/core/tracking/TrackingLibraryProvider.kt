@@ -38,11 +38,10 @@ interface TrackingLibraryProvider {
 class TrackingLibraryProviderRegistry @Inject constructor(
     providers: Set<@JvmSuppressWildcards TrackingLibraryProvider>
 ) {
-    private val activeProviders = providers.filterNot { it.providerId == TrackingProviderId.SIMKL }
-    private val providersById = activeProviders.associateBy(TrackingLibraryProvider::providerId)
+    private val providersById = providers.associateBy(TrackingLibraryProvider::providerId)
 
     init {
-        require(providersById.size == activeProviders.size)
+        require(providersById.size == providers.size)
     }
 
     fun providers(): List<TrackingLibraryProvider> =

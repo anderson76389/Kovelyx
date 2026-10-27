@@ -6,7 +6,6 @@ import com.nuvio.tv.domain.model.LibrarySourceMode
 val WatchProgressSource.providerId: TrackingProviderId?
     get() = when (this) {
         WatchProgressSource.TRAKT -> TrackingProviderId.TRAKT
-        WatchProgressSource.SIMKL -> TrackingProviderId.SIMKL
         WatchProgressSource.MDBLIST -> TrackingProviderId.MDBLIST
         WatchProgressSource.NUVIO_SYNC -> null
     }
@@ -15,7 +14,6 @@ val LibrarySourceMode.providerId: TrackingProviderId?
     get() = when (this) {
         LibrarySourceMode.LOCAL -> null
         LibrarySourceMode.TRAKT -> TrackingProviderId.TRAKT
-        LibrarySourceMode.SIMKL -> TrackingProviderId.SIMKL
         LibrarySourceMode.MDBLIST -> TrackingProviderId.MDBLIST
     }
 
@@ -24,7 +22,6 @@ fun effectiveWatchProgressSource(
     isProviderAuthenticated: (TrackingProviderId) -> Boolean
 ): WatchProgressSource {
     val providerId = requestedSource.providerId ?: return WatchProgressSource.NUVIO_SYNC
-    if (providerId == TrackingProviderId.SIMKL) return WatchProgressSource.NUVIO_SYNC
     return requestedSource.takeIf { isProviderAuthenticated(providerId) } ?: WatchProgressSource.NUVIO_SYNC
 }
 
@@ -33,7 +30,6 @@ fun effectiveLibrarySourceMode(
     isProviderAuthenticated: (TrackingProviderId) -> Boolean
 ): LibrarySourceMode {
     val providerId = requestedSource.providerId ?: return LibrarySourceMode.LOCAL
-    if (providerId == TrackingProviderId.SIMKL) return LibrarySourceMode.LOCAL
     return requestedSource.takeIf { isProviderAuthenticated(providerId) } ?: LibrarySourceMode.LOCAL
 }
 

@@ -856,13 +856,7 @@ internal fun HomeViewModel.loadContinueWatchingPipeline() {
                                     val item = buildNextUpItem(
                                         progress = seed,
                                         showUnairedNextUp = showUnairedNextUp
-                                    ).also { resolved ->
-                                        logSimklAsyncNextUpResolution(
-                                            seed = seed,
-                                            resolved = resolved,
-                                            watchedItems = allWatchedItems
-                                        )
-                                    }
+                                    )
                                     if (item != null) {
                                         conclusivelyProcessedOlderContentIds += seed.contentId
                                         if (
@@ -1112,19 +1106,6 @@ internal fun HomeViewModel.loadContinueWatchingPipeline() {
                         state.copy(continueWatchingItems = normalMain, upcomingItems = normalUpcoming)
                     }
                 }
-                SimklContinueWatchingDisplayLogger.log(
-                    buildSimklCwDisplayDiagnosticReport(
-                        displayedItems = _uiState.value.continueWatchingItems + _uiState.value.upcomingItems,
-                        liveProgress = items,
-                        nextUpSeeds = nextUpSeeds,
-                        watchedItems = allWatchedItems,
-                        freshNextUpItems = nextUpItems,
-                        olderResolvedNextUpItems = persistedOlderItems,
-                        cachedNextUpItems = cachedNextUpItems,
-                        preferFurthestEpisode = nextUpFromFurthestEpisode,
-                        hasLoadedRemoteProgress = snapshot.hasLoadedRemoteProgress
-                    )
-                )
                 debug.recordLightweightRendered(
                     count = normalItems.size,
                     elapsedMs = SystemClock.elapsedRealtime() - cycleStartMs

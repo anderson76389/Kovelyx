@@ -956,7 +956,8 @@ object WatchedRepository {
             } else {
                 val episodeNumber = episode.episode
                 if (episodeNumber != null) {
-                    com.nuvio.app.features.simkl.SimklAnimeWatchedFallback.isWatched(episode.id, episodeNumber)
+                    watchedItemKeys(meta.type, episode.id, episode.season, episodeNumber)
+                        .any(_uiState.value.watchedKeys::contains)
                 } else {
                     false
                 }
@@ -1159,7 +1160,7 @@ object WatchedRepository {
         val watchedKeys = items.mapTo(linkedSetOf()) {
             watchedItemKey(it.type, it.id, it.season, it.episode)
         }
-        // Merge extra watched keys from providers (e.g. Simkl anime alternate IDs)
+        // Merge extra watched keys from providers (e.g. alternate anime IDs)
         activeSource.providerId?.let { providerId ->
             providerExtraWatchedKeys[providerId]?.let { extraKeys -> watchedKeys += extraKeys }
         }
@@ -1191,7 +1192,7 @@ object WatchedRepository {
         }
 
     /**
-     * Observes provider extra watched keys (e.g. Simkl anime alternate IDs).
+     * Observes provider extra watched keys (e.g. alternate anime IDs).
      * When the provider's snapshot changes (after mutations, syncs), recomputes
      * extra keys, re-pulls watched items, and re-publishes so watchedKeys and
      * items stay reactive and current.

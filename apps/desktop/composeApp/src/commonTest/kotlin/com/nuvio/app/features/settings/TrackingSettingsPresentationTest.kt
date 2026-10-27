@@ -1,6 +1,5 @@
 package com.nuvio.app.features.settings
 
-import com.nuvio.app.features.simkl.SimklConnectionMode
 import com.nuvio.app.features.trakt.MoreLikeThisSourcePreference
 import com.nuvio.app.features.trakt.TraktConnectionMode
 import kotlin.test.Test
@@ -23,18 +22,6 @@ class TrackingSettingsPresentationTest {
             TrackingConnectionCardMode.CONNECTED,
             TraktConnectionMode.CONNECTED.toTrackingConnectionCardMode(),
         )
-        assertEquals(
-            TrackingConnectionCardMode.DISCONNECTED,
-            SimklConnectionMode.DISCONNECTED.toTrackingConnectionCardMode(),
-        )
-        assertEquals(
-            TrackingConnectionCardMode.AWAITING_APPROVAL,
-            SimklConnectionMode.AWAITING_APPROVAL.toTrackingConnectionCardMode(),
-        )
-        assertEquals(
-            TrackingConnectionCardMode.CONNECTED,
-            SimklConnectionMode.CONNECTED.toTrackingConnectionCardMode(),
-        )
     }
 
     @Test
@@ -43,8 +30,8 @@ class TrackingSettingsPresentationTest {
         assertTrue(isTrackingBrandAvailable(TrackingBrand.TMDB, false, false))
         assertFalse(isTrackingBrandAvailable(TrackingBrand.TRAKT, false, true))
         assertTrue(isTrackingBrandAvailable(TrackingBrand.TRAKT, true, false))
-        assertFalse(isTrackingBrandAvailable(TrackingBrand.SIMKL, true, false))
-        assertTrue(isTrackingBrandAvailable(TrackingBrand.SIMKL, false, true))
+        assertFalse(isTrackingBrandAvailable(TrackingBrand.MDBLIST, true, false))
+        assertTrue(isTrackingBrandAvailable(TrackingBrand.MDBLIST, false, true))
     }
 
     @Test
