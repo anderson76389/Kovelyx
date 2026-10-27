@@ -89,7 +89,7 @@ fun ProfileEditScreen(
     }.collectAsStateWithLifecycle()
     val backgroundCatalog by ProfileBackgroundRepository.catalog.collectAsStateWithLifecycle()
     val hasMemberBackgrounds = !isNew && memberAccess.entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS)
-    val canChooseBackground = !isNew && (nativeProfileImagePickerAvailable || hasMemberBackgrounds)
+    val canChooseBackground = nativeProfileImagePickerAvailable || hasMemberBackgrounds
 
     val openImagePicker = rememberNativeProfileImagePicker(
         onSelected = { background, savedUrl ->
@@ -108,8 +108,8 @@ fun ProfileEditScreen(
     LaunchedEffect(Unit) {
         AvatarRepository.refreshAvatars()
     }
-    LaunchedEffect(canChooseBackground) {
-        if (canChooseBackground) ProfileBackgroundRepository.preloadLandscapeImages()
+    LaunchedEffect(hasMemberBackgrounds) {
+        if (hasMemberBackgrounds) ProfileBackgroundRepository.preloadLandscapeImages()
     }
     LaunchedEffect(isNew, avatars, selectedAvatarId, avatarUrl) {
         if (isNew && avatarUrl.isBlank() && selectedAvatarId == null && avatars.isNotEmpty()) {
@@ -233,7 +233,7 @@ fun ProfileEditScreen(
                         )
                         }
                         ProfileBackgroundPicker(
-                            backgrounds = backgroundCatalog,
+                            backgrounds = if (hasMemberBackgrounds) backgroundCatalog else emptyList(),
                             selectedBackgroundId = selectedBackgroundId,
                             selectedBackgroundUrl = selectedBackgroundUrl,
                             customBackgroundUrl = selectedBackgroundUrl ?: currentProfile?.profileBackgroundUrl,
@@ -307,6 +307,8 @@ fun ProfileEditScreen(
                                 avatarId = if (customAvatarUrl == null) selectedAvatarId else null,
                                 avatarUrl = customAvatarUrl,
                                 usesPrimaryAddons = usesPrimaryAddons,
+                                profileBackgroundId = selectedBackgroundId,
+                                profileBackgroundUrl = selectedBackgroundUrl,
                             )
                         } else {
                             ProfileRepository.updateProfile(
