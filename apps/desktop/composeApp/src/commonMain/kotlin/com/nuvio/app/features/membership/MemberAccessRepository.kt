@@ -3,6 +3,7 @@ package com.nuvio.app.features.membership
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.time.EpisodeReleaseDatePlatform
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -33,6 +34,12 @@ object MemberAccessRepository {
     private var verifiedAtMs = 0L
 
     fun ensureStarted() {
+        if (CloudflareAccountClient.enabled) {
+            // Kovelyx D1 does not offer the old Supabase supporter RPC.
+            // Do not hydrate or display the legacy Nuvio member cache.
+            _access.value = MemberAccess.None
+            return
+        }
         if (started) return
         started = true
         hydrateCachedAccess()
@@ -54,6 +61,7 @@ object MemberAccessRepository {
     }
 
     fun refreshIfStale() {
+        if (CloudflareAccountClient.enabled) return
         ensureStarted()
         val auth = AuthRepository.state.value as? AuthState.Authenticated ?: return
         if (auth.isAnonymous) return
@@ -70,6 +78,10 @@ object MemberAccessRepository {
     }
 
     private suspend fun loadAccess(auth: AuthState) {
+        if (CloudflareAccountClient.enabled) {
+            _access.value = MemberAccess.None
+            return
+        }
         when (auth) {
             AuthState.Loading -> return
             AuthState.Unauthenticated -> {
@@ -119,6 +131,7 @@ object MemberAccessRepository {
     }
 
     private fun hydrateCachedAccess() {
+        if (CloudflareAccountClient.enabled) return
         val cached = loadStoredAccess()?.toMemberAccess() ?: return
         _access.value = cached
         warmMemberAssets(cached)
