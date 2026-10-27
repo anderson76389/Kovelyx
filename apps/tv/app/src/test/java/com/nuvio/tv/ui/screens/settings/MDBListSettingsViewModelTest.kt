@@ -36,7 +36,7 @@ class MDBListSettingsViewModelTest {
             }
         }
         val api = mockk<MDBListApi> {
-            coEvery { getUser("separate-key") } returns Response.success(Unit)
+            // L'enregistrement local reste possible même sans vérification réseau préalable.
         }
         val viewModel = MDBListSettingsViewModel(store, api, harness.store)
         runCurrent()
@@ -53,14 +53,14 @@ class MDBListSettingsViewModelTest {
         assertEquals(1, saves)
         assertEquals("separate-key", viewModel.uiState.value.apiKey)
         assertTrue(viewModel.uiState.value.isConnected)
-        coVerify(exactly = 1) { api.getUser("separate-key") }
+        coVerify(exactly = 0) { api.getUser(any()) }
 
         viewModel.validateAndSaveApiKey("") { saves++ }
         runCurrent()
         assertEquals(2, saves)
         assertEquals("", viewModel.uiState.value.apiKey)
         assertTrue(viewModel.uiState.value.isConnected)
-        coVerify(exactly = 1) { api.getUser(any()) }
+        coVerify(exactly = 0) { api.getUser(any()) }
 
         harness.store.clearAuth()
         runCurrent()
