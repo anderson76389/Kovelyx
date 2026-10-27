@@ -14,6 +14,15 @@ class ProfileBackgroundTest {
     }
 
     @Test
+    fun customBackgroundWorksWithoutLegacyCatalogEntitlement() {
+        val profile = NuvioProfile(profileBackgroundUrl = "file:///data/user/0/com.kovelyx.mobile/files/fond.png")
+        assertEquals(
+            ProfileBackgroundSelection.Custom("file:///data/user/0/com.kovelyx.mobile/files/fond.png"),
+            resolveProfileBackground(profile, CosmeticEntitlements.None),
+        )
+    }
+
+    @Test
     fun customBackgroundTakesPriorityWhenEntitled() {
         val profile = NuvioProfile(
             profileBackgroundId = "aurora",
