@@ -51,10 +51,11 @@ interface TrackingProgressProvider {
 class TrackingProgressProviderRegistry @Inject constructor(
     providers: Set<@JvmSuppressWildcards TrackingProgressProvider>
 ) {
-    private val providersById = providers.associateBy(TrackingProgressProvider::providerId)
+    private val activeProviders = providers.filterNot { it.providerId == TrackingProviderId.SIMKL }
+    private val providersById = activeProviders.associateBy(TrackingProgressProvider::providerId)
 
     init {
-        require(providersById.size == providers.size)
+        require(providersById.size == activeProviders.size)
     }
 
     fun providers(): List<TrackingProgressProvider> =
@@ -67,10 +68,11 @@ class TrackingProgressProviderRegistry @Inject constructor(
 class TrackingHistoryWriterRegistry @Inject constructor(
     writers: Set<@JvmSuppressWildcards TrackingHistoryWriter>
 ) {
-    private val writersById = writers.associateBy(TrackingHistoryWriter::providerId)
+    private val activeWriters = writers.filterNot { it.providerId == TrackingProviderId.SIMKL }
+    private val writersById = activeWriters.associateBy(TrackingHistoryWriter::providerId)
 
     init {
-        require(writersById.size == writers.size)
+        require(writersById.size == activeWriters.size)
     }
 
     fun writers(): List<TrackingHistoryWriter> =
