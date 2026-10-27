@@ -3,6 +3,7 @@ package com.nuvio.tv.core.di
 import android.content.Context
 import android.util.Log
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.trakt.KovelyxTvTraktCredentials
 import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.data.remote.api.AddonApi
 import com.nuvio.tv.data.remote.api.AniSkipApi
@@ -243,7 +244,8 @@ object NetworkModule {
     @Singleton
     @Named("trakt")
     fun provideTraktOkHttpClient(
-        okHttpClient: OkHttpClient
+        okHttpClient: OkHttpClient,
+        @ApplicationContext context: Context
     ): OkHttpClient = okHttpClient.newBuilder()
         .addInterceptor { chain ->
             val request = chain.request()
@@ -251,7 +253,7 @@ object NetworkModule {
             val newRequest = request.newBuilder()
                 .header("Content-Type", "application/json")
                 .header("User-Agent", "Kovelyx/$version")
-                .header("trakt-api-key", BuildConfig.TRAKT_CLIENT_ID)
+                .header("trakt-api-key", KovelyxTvTraktCredentials.clientId(context))
                 .header("trakt-api-version", "2")
                 .build()
 
