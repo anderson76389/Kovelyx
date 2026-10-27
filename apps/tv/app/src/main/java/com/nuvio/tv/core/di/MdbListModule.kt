@@ -1,6 +1,9 @@
 package com.nuvio.tv.core.di
 
 import com.nuvio.tv.BuildConfig
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.nuvio.tv.core.trakt.KovelyxTvMdbListCredentials
 import com.nuvio.tv.core.network.NoDelaySocketFactory
 import com.nuvio.tv.core.profile.ProfileScopedCredentialStore
 import com.nuvio.tv.core.profile.ProfileManager
@@ -78,8 +81,15 @@ object MdbListModule {
 
     @Provides
     @Singleton
-    fun auth(http: MdbListHttpClient, configuration: MdbListConfiguration, store: MdbListAuthStore) =
-        MdbListAuthRepository(http, configuration, store)
+    fun auth(
+        http: MdbListHttpClient,
+        configuration: MdbListConfiguration,
+        store: MdbListAuthStore,
+        @ApplicationContext context: Context
+    ) = MdbListAuthRepository(
+        http, configuration, store,
+        oauthClientId = { KovelyxTvMdbListCredentials.clientId(context) }
+    )
 
     @Provides
     @Singleton
