@@ -48,7 +48,7 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
                     f"{kotlin_package_path(platform)}/features/membership/MemberAccessRepository.kt"
                 ).read_text(encoding="utf-8")
-                self.assertIn("import com.nuvio.app.core.cloud.CloudflareAccountClient", source)
+                self.assertIn(f"import {kotlin_package_name(platform)}.core.cloud.CloudflareAccountClient", source)
                 for function in ("ensureStarted", "loadAccess", "hydrateCachedAccess"):
                     match = re.search(
                         rf"fun {function}\([^)]*\)\s*\{{([\s\S]{{0,320}})",
