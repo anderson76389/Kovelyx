@@ -3,6 +3,7 @@ package com.nuvio.tv.data.repository
 import android.content.Context
 import android.util.Log
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.core.trakt.KovelyxTvTraktCredentials
 import com.nuvio.tv.R
 import com.nuvio.tv.data.local.AuthSessionNoticeDataStore
 import com.nuvio.tv.data.local.TraktAuthDataStore
@@ -118,7 +119,7 @@ class TraktAuthService @Inject constructor(
     }
 
     fun hasRequiredCredentials(): Boolean {
-        return BuildConfig.TRAKT_CLIENT_ID.isNotBlank() && BuildConfig.TRAKT_CLIENT_SECRET.isNotBlank()
+        return KovelyxTvTraktCredentials.clientId(context).isNotBlank() && KovelyxTvTraktCredentials.clientSecret(context).isNotBlank()
     }
 
     suspend fun getCurrentAuthState(): TraktAuthState = traktAuthDataStore.getCurrentState()
@@ -157,7 +158,7 @@ class TraktAuthService @Inject constructor(
         // Retry-After header when the server supplies a short back-off.
         suspend fun requestOnce(): Response<TraktDeviceCodeResponseDto> =
             traktApi.requestDeviceCode(
-                TraktDeviceCodeRequestDto(clientId = BuildConfig.TRAKT_CLIENT_ID)
+                TraktDeviceCodeRequestDto(clientId = KovelyxTvTraktCredentials.clientId(context))
             )
 
         var response = try {
@@ -212,8 +213,8 @@ class TraktAuthService @Inject constructor(
             traktApi.requestDeviceToken(
                 TraktDeviceTokenRequestDto(
                     code = deviceCode,
-                    clientId = BuildConfig.TRAKT_CLIENT_ID,
-                    clientSecret = BuildConfig.TRAKT_CLIENT_SECRET
+                    clientId = KovelyxTvTraktCredentials.clientId(context),
+                    clientSecret = KovelyxTvTraktCredentials.clientSecret(context)
                 )
             )
         } catch (e: IOException) {
@@ -275,8 +276,8 @@ class TraktAuthService @Inject constructor(
                 traktApi.refreshToken(
                     TraktRefreshTokenRequestDto(
                         refreshToken = refreshToken,
-                        clientId = BuildConfig.TRAKT_CLIENT_ID,
-                        clientSecret = BuildConfig.TRAKT_CLIENT_SECRET,
+                        clientId = KovelyxTvTraktCredentials.clientId(context),
+                        clientSecret = KovelyxTvTraktCredentials.clientSecret(context),
                         redirectUri = traktRedirectUri()
                     )
                 )
@@ -310,8 +311,8 @@ class TraktAuthService @Inject constructor(
                     traktApi.revokeToken(
                         TraktRevokeRequestDto(
                             token = accessToken,
-                            clientId = BuildConfig.TRAKT_CLIENT_ID,
-                            clientSecret = BuildConfig.TRAKT_CLIENT_SECRET
+                            clientId = KovelyxTvTraktCredentials.clientId(context),
+                            clientSecret = KovelyxTvTraktCredentials.clientSecret(context)
                         )
                     )
                 }
