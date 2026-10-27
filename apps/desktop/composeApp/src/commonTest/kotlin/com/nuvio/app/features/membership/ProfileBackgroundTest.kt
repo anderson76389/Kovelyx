@@ -14,6 +14,16 @@ class ProfileBackgroundTest {
     }
 
     @Test
+    fun savedCustomBackgroundWorksWithoutLegacyEntitlement() {
+        val profile = NuvioProfile(profileBackgroundUrl = "https://example.com/fond-personnel.png")
+
+        assertEquals(
+            ProfileBackgroundSelection.Custom("https://example.com/fond-personnel.png"),
+            resolveProfileBackground(profile, CosmeticEntitlements.None),
+        )
+    }
+
+    @Test
     fun customBackgroundTakesPriorityWhenEntitled() {
         val profile = NuvioProfile(
             profileBackgroundId = "aurora",
