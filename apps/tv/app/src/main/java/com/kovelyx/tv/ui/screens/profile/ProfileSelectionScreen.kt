@@ -2039,6 +2039,7 @@ private fun EditProfileOverlay(
                             }
                             OverlayButton(
                                 text = "Importer un fond personnalisé",
+                                isPrimary = false,
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = { personalBackgroundPicker.launch("image/*") }
                             )
