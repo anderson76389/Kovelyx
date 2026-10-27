@@ -22,15 +22,40 @@
 
 ## ✦ Trois expériences. Un seul univers.
 
-<img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration conceptuelle des applications Kovelyx pour Windows, Android et Android TV" width="100%">
+<div align="center">
 
-<sub>Illustration de présentation : ce visuel n'est pas une capture d'écran d'une version installée.</sub>
+<img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration des trois applications Kovelyx" width="900">
 
-| 🖥️ Windows | 📱 Android mobile | 📺 Android TV |
-|:---|:---|:---|
-| Windows 10 et 11, x64 | Téléphones et tablettes Android 7+ | Télévisions et TV Box Android 7+ |
-| Installateur EXE, MSI, ZIP portable | APK Android universel | APK TV universel avec navigation télécommande |
-| [**Télécharger pour Windows ↗**](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes) | [**Télécharger pour Android ↗**](https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes) | [**Télécharger pour Android TV ↗**](https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes) |
+<sub>Illustration conceptuelle, et non capture d'écran d'une application installée.</sub>
+
+<table align="center" width="100%">
+  <thead>
+    <tr>
+      <th align="center" width="33%">🖥️ Windows</th>
+      <th align="center" width="34%">📱 Android mobile</th>
+      <th align="center" width="33%">📺 Android TV</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center">Windows 10 et 11 · x64</td>
+      <td align="center">Téléphones et tablettes · Android 7+</td>
+      <td align="center">Télévisions et TV Box · Android 7+</td>
+    </tr>
+    <tr>
+      <td align="center">EXE · MSI · ZIP portable</td>
+      <td align="center">APK Android universel</td>
+      <td align="center">APK TV universel · télécommande</td>
+    </tr>
+    <tr>
+      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes"><strong>Télécharger Windows</strong></a></td>
+      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes"><strong>Télécharger Android</strong></a></td>
+      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes"><strong>Télécharger Android TV</strong></a></td>
+    </tr>
+  </tbody>
+</table>
+
+</div>
 
 <div align="center">
 
@@ -72,34 +97,6 @@ Un backend distinct de Nuvio est en place autour de **Cloudflare Workers, D1 et 
 La synchronisation universelle **n'est pas encore annoncée comme fonctionnelle**. Les développements en cours sont dans la [PR nº 40](https://github.com/anderson76389/Kovelyx/pull/40), qui n'est pas fusionnée aux Releases publiques.
 
 **[Documentation du serveur Cloudflare](./services/kovelyx-cloudflare/README.md) · [État précis de la synchronisation](https://github.com/anderson76389/Kovelyx/blob/feature/cloudflare-profile-sync-safe-20261019/docs/ETAT_SYNCHRO_CLOUDFLARE.md)**
-
----
-
-## 📥 Télécharger et installer
-
-### Windows
-
-Choisissez le **Setup.exe** pour une installation classique, le **MSI** pour une autre méthode d'installation ou le **ZIP portable** pour une version à extraire intégralement. La version portable a besoin de tous les fichiers de son archive, pas uniquement de son exécutable.
-
-**[Accéder aux téléchargements Windows](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes)**
-
-### Android mobile
-
-Téléchargez l'APK Android sur le site, puis installez-le via le gestionnaire de fichiers du téléphone. La version mobile ne doit pas être confondue avec celle conçue pour la télévision.
-
-**[Accéder aux téléchargements Android](https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes)**
-
-### Android TV / TV Box
-
-Utilisez l'APK **Kovelyx-TV** : son interface est prévue pour la télécommande. La compatibilité dépend aussi de la box, des codecs et de sa version d'Android.
-
-**[Accéder aux téléchargements TV](https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes)**
-
-### Mises à jour
-
-Les différentes versions consultent les **Releases du dépôt Kovelyx**. L'intégration d'une bannière et d'un téléchargement de mise à jour est disponible dans le code, mais son comportement doit être vérifié selon la version installée et la signature de l'APK. Ce n'est pas un téléchargement différentiel.
-
-Les archives et leurs empreintes **SHA-256**, lorsqu'elles sont publiées, sont disponibles depuis [GitHub Releases](https://github.com/anderson76389/Kovelyx/releases).
 
 ---
 
