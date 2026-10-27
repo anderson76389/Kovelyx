@@ -175,6 +175,9 @@ object ServerDiscoveryService {
                         "User-Agent" to "Kovelyx-Mobile/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
                     ),
                     body = "",
+                    // Never follow a custom server's 3xx redirect to an
+                    // upstream Nuvio domain before the response URL is checked.
+                    followRedirects = false,
                     maxResponseBodyBytes = maxDocumentBytes + 1,
                 )
             }
