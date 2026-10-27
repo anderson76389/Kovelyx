@@ -96,8 +96,6 @@ class MetaDetailsViewModel @Inject constructor(
     private val traktCommentsService: TraktCommentsService,
     private val traktRelatedService: TraktRelatedService,
     private val traktSettingsDataStore: TraktSettingsDataStore,
-    private val simklRelatedService: com.nuvio.tv.data.simkl.SimklRelatedService,
-    private val simklAuthRepository: com.nuvio.tv.data.simkl.SimklAuthRepository,
     private val layoutPreferenceDataStore: LayoutPreferenceDataStore,
     private val episodeShuffleStore: com.nuvio.tv.data.local.EpisodeShuffleStore,
     private val episodeShuffle: com.nuvio.tv.domain.model.EpisodeShuffle,
@@ -1017,7 +1015,6 @@ class MetaDetailsViewModel @Inject constructor(
 
         val contentId = _effectiveContentId.value
 
-        // Wait for remote progress provider (Simkl/Trakt) to finish initial load.
         watchProgressRepository.observeRemoteProgressLoaded().first { it }
 
         // After remote is loaded, getAllEpisodeProgress may start with an onStart{emptyMap()}
@@ -1264,7 +1261,6 @@ class MetaDetailsViewModel @Inject constructor(
         moreLikeThisJob?.cancel()
         moreLikeThisJob = viewModelScope.launch {
             val source = when {
-                shouldLoadSimklMoreLikeThis() -> MoreLikeThisSource.SIMKL
                 shouldLoadTraktMoreLikeThis(meta) -> MoreLikeThisSource.TRAKT
                 else -> {
                     val settings = tmdbSettingsDataStore.settings.first()
@@ -1286,19 +1282,6 @@ class MetaDetailsViewModel @Inject constructor(
                         )
                     }.getOrElse {
                         Log.w(TAG, "Failed to load Trakt related titles for ${meta.id}: ${it.message}")
-                        emptyList()
-                    }
-                }
-
-                MoreLikeThisSource.SIMKL -> {
-                    runCatching {
-                        simklRelatedService.getRelated(
-                            meta = meta,
-                            fallbackItemId = itemId,
-                            fallbackItemType = itemType
-                        )
-                    }.getOrElse {
-                        Log.w(TAG, "Failed to load Simkl related titles for ${meta.id}: ${it.message}")
                         emptyList()
                     }
                 }
@@ -1325,6 +1308,7 @@ class MetaDetailsViewModel @Inject constructor(
                         emptyList()
                     }
                 }
+                else -> emptyList()
             }
 
             val pattern = layoutPreferenceDataStore.customPosterUrlPattern.first()
@@ -1363,11 +1347,6 @@ class MetaDetailsViewModel @Inject constructor(
             ContentType.SERIES, ContentType.TV -> true
             else -> meta.apiType in listOf("movie", "series", "tv", "show")
         }
-    }
-
-    private fun shouldLoadSimklMoreLikeThis(): Boolean {
-        if (moreLikeThisSourcePreference != com.nuvio.tv.data.local.MoreLikeThisSourcePreference.SIMKL) return false
-        return simklAuthRepository.state.value.isAuthenticated
     }
 
     private fun loadCollectionAsync(collectionId: Int, collectionName: String?, settings: TmdbSettings) {
