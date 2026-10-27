@@ -77,10 +77,11 @@ class MdbListTrackerViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private val action = MutableStateFlow(MdbListTrackerAction())
+    private val credentialRevision = MutableStateFlow(0)
     private var connectionJob: Job? = null
     private var disconnectJob: Job? = null
     private val listsAction = MutableStateFlow(MdbListLibraryListsAction())
-    val uiState = combine(authStore.state, sync.state, action, profiles.activeProfileId) { authorization, syncState, action, profileId ->
+    val uiState = combine(authStore.state, sync.state, action, profiles.activeProfileId, credentialRevision) { authorization, syncState, action, profileId, _ ->
         val current = authorization.scope.profileId == profileId
         val transient = action.takeIf { it.scope == authorization.scope && current } ?: MdbListTrackerAction()
         val currentSync = syncState.takeIf { it.scope == authorization.scope && current }
@@ -123,6 +124,10 @@ class MdbListTrackerViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun onCredentialsSaved() {
+        credentialRevision.value += 1
     }
 
     fun onConnect() {
