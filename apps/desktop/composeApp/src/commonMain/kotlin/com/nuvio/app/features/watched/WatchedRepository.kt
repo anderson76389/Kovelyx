@@ -957,7 +957,7 @@ object WatchedRepository {
                 val episodeNumber = episode.episode
                 if (episodeNumber != null) {
                     watchedItemKeys(meta.type, episode.id, episode.season, episodeNumber)
-                        .any(watchedKeys::contains)
+                        .any(_uiState.value.watchedKeys::contains)
                 } else {
                     false
                 }
