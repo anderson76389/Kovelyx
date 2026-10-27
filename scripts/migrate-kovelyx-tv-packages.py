@@ -34,7 +34,11 @@ def production_files():
         if not file.is_file() or file.suffix not in TEXT_EXTENSIONS:
             continue
         relative = file.relative_to(TV)
-        if any(p in SKIPPED_DIRECTORIES for p in relative.parts):
+        # Ne pas exclure les packages Kotlin core/build : seul le dossier
+        # de sorties Gradle du module est généré.
+        if relative.parts[0] in SKIPPED_DIRECTORIES:
+            continue
+        if len(relative.parts) > 1 and relative.parts[0] in {"app", "baselineprofile", "ffmpeg-decoder-downmix"} and relative.parts[1] in SKIPPED_DIRECTORIES:
             continue
         yield file
 
