@@ -94,6 +94,7 @@ fun TrackingSettingsContent(
     var showMoreLikeThisSourceDialog by remember { mutableStateOf(false) }
     var showAnimeIdDialog by remember { mutableStateOf(false) }
     var showMdbListLibraryListsDialog by remember { mutableStateOf(false) }
+    var showTvTraktCredentials by remember { mutableStateOf(false) }
 
     val hasOverlay = activeProvider != null ||
         disconnectProvider != null ||
@@ -102,7 +103,8 @@ fun TrackingSettingsContent(
         showDaysCapDialog ||
         showMoreLikeThisSourceDialog ||
         showAnimeIdDialog ||
-        showMdbListLibraryListsDialog
+        showMdbListLibraryListsDialog ||
+        showTvTraktCredentials
 
     LaunchedEffect(
         activeProvider,
@@ -195,6 +197,7 @@ fun TrackingSettingsContent(
         continueWatchingFocusRequester = continueWatchingFocusRequester,
         moreLikeThisFocusRequester = moreLikeThisFocusRequester,
         onTraktClick = { openProvider(TrackingProviderId.TRAKT) },
+        onTraktCredentialsClick = { showTvTraktCredentials = true },
         onSimklClick = { openProvider(TrackingProviderId.SIMKL) },
         onMdbListClick = { openProvider(TrackingProviderId.MDBLIST) },
         onLibrarySourceClick = {
@@ -223,6 +226,16 @@ fun TrackingSettingsContent(
             showMdbListLibraryListsDialog = true
         }
     )
+
+    if (showTvTraktCredentials) {
+        TvTraktCredentialsDialog(
+            onDismiss = { showTvTraktCredentials = false },
+            onSaved = {
+                traktViewModel.onCredentialsSaved()
+                showTvTraktCredentials = false
+            },
+        )
+    }
 
     when (activeProvider) {
         TrackingProviderId.TRAKT -> {
@@ -482,6 +495,7 @@ internal fun TrackingSettingsOverview(
     continueWatchingFocusRequester: FocusRequester,
     moreLikeThisFocusRequester: FocusRequester,
     onTraktClick: () -> Unit,
+    onTraktCredentialsClick: () -> Unit,
     onSimklClick: () -> Unit,
     onMdbListClick: () -> Unit,
     onLibrarySourceClick: () -> Unit,
@@ -533,6 +547,11 @@ internal fun TrackingSettingsOverview(
                             modifier = Modifier
                                 .focusRequester(traktFocusRequester)
                                 .testTag(TrackingSettingsTestTags.TRAKT_PROVIDER)
+                        )
+                        SettingsActionRow(
+                            title = "Configurer mes clés Trakt",
+                            subtitle = "Renseigner le Client ID et le Client Secret de mon application Trakt.",
+                            onClick = onTraktCredentialsClick,
                         )
                         SettingsActionRow(
                             title = stringResource(R.string.mdblist_name),
