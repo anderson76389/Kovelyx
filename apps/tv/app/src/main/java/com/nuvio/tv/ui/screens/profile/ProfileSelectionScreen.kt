@@ -2041,7 +2041,13 @@ private fun EditProfileOverlay(
                                 text = "Importer un fond personnalisé",
                                 isPrimary = false,
                                 modifier = Modifier.fillMaxWidth(),
-                                onClick = { personalBackgroundPicker.launch("image/*") }
+                                onClick = {
+                                    runCatching { personalBackgroundPicker.launch("image/*") }
+                                        .onFailure {
+                                            backgroundImportError =
+                                                "Aucun sélecteur de fichiers compatible n'est disponible sur cette TV."
+                                        }
+                                }
                             )
                             backgroundImportError?.let { message ->
                                 Text(
