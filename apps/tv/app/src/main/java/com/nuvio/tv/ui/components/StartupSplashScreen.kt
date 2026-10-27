@@ -1,11 +1,9 @@
 package com.nuvio.tv.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -95,18 +93,18 @@ fun StartupSplashScreen(
             )
         }
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            BrandWordmark(
-                modifier = Modifier.height(48.dp),
-                contentDescription = stringResource(R.string.cd_nuvio_logo),
-                drawableOverride = brandWordmarkRes
-            )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxl))
-            LoadingIndicator(modifier = Modifier.size(NuvioTheme.spacing.xxxl))
-        }
+        // Le logo est centré sur l'écran lui-même. L'ancien Column centrait
+        // logo + espacement + indicateur, déplaçant visuellement le logo vers le haut.
+        BrandWordmark(
+            modifier = Modifier.align(Alignment.Center).height(48.dp),
+            contentDescription = stringResource(R.string.cd_nuvio_logo),
+            drawableOverride = brandWordmarkRes
+        )
+        LoadingIndicator(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(y = 76.dp)
+                .size(NuvioTheme.spacing.xxxl)
+        )
     }
 }
