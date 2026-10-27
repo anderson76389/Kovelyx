@@ -624,7 +624,7 @@ internal class PostPlayRecommendationController(
         val candidates = withTimeoutOrNull(10_000L) {
             val sourcePreference = traktSettingsDataStore.moreLikeThisSource.first()
             val traktAuthenticated = traktAuthDataStore.isAuthenticated.first()
-            if (sourcePreference == MoreLikeThisSourcePreference.TRAKT &&            } else if (sourcePreference == MoreLikeThisSourcePreference.TRAKT && traktAuthenticated) {
+            if (sourcePreference == MoreLikeThisSourcePreference.TRAKT && traktAuthenticated) {
                 runCatching {
                     traktRelatedService.getRelated(
                         meta = meta,
