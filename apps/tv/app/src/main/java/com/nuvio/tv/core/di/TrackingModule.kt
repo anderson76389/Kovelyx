@@ -1,11 +1,5 @@
 package com.nuvio.tv.core.di
 
-import com.nuvio.tv.data.simkl.AndroidSimklAuthStorage
-import com.nuvio.tv.data.simkl.AndroidSimklSyncStorage
-import com.nuvio.tv.data.simkl.SimklAuthStorage
-import com.nuvio.tv.data.simkl.SimklApiSyncRemote
-import com.nuvio.tv.data.simkl.SimklSyncRemote
-import com.nuvio.tv.data.simkl.SimklSyncStorage
 import com.nuvio.tv.core.tracking.TrackingLibraryProvider
 import com.nuvio.tv.core.tracking.TrackingProvider
 import com.nuvio.tv.data.repository.TraktTrackingLibraryProvider
@@ -43,24 +37,6 @@ abstract class TrackingModule {
     @Binds
     @IntoSet
     abstract fun bindMdbListHistory(writer: MdbListTrackingHistoryWriter): TrackingHistoryWriter
-
-    @Binds
-    @Singleton
-    abstract fun bindSimklAuthStorage(storage: AndroidSimklAuthStorage): SimklAuthStorage
-
-    @Binds
-    @IntoSet
-    abstract fun bindSimklProfileScopedCredentialStore(
-        storage: AndroidSimklAuthStorage
-    ): ProfileScopedCredentialStore
-
-    @Binds
-    @Singleton
-    abstract fun bindSimklSyncStorage(storage: AndroidSimklSyncStorage): SimklSyncStorage
-
-    @Binds
-    @Singleton
-    abstract fun bindSimklSyncRemote(remote: SimklApiSyncRemote): SimklSyncRemote
 
     @Binds
     @IntoSet
