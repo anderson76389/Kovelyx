@@ -211,14 +211,7 @@ internal fun TrackingProviderCards(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
         )
-        SimklProviderCard(
-            uiState = simklUiState,
-            isSyncing = syncState.isLoading,
-            syncErrorMessage = syncState.errorMessage,
-            onSyncRequested = onSimklSyncRequested,
-            onInfoRequested = { showSyncInfo = true },
-            modifier = Modifier.fillMaxWidth(),
-        )
+        // SIMKL retiré de la liste des fournisseurs Kovelyx.
         MdbListProviderCard(Modifier.fillMaxWidth())
     }
 
