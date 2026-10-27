@@ -30,7 +30,6 @@ import com.nuvio.tv.data.local.ImagePerformancePreferences
 import com.nuvio.tv.data.local.SentrySettingsDataStore
 import com.nuvio.tv.data.mediaserver.ServerMatcher
 import com.nuvio.tv.data.mediaserver.ServerUserStateProjection
-import com.nuvio.tv.data.simkl.SimklAnimeIdPreferenceHolder
 import dagger.hilt.android.HiltAndroidApp
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -47,7 +46,6 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
     @Inject lateinit var androidTvChannelSyncService: AndroidTvChannelSyncService
     @Inject lateinit var sentrySettingsDataStore: SentrySettingsDataStore
     @Inject lateinit var imagePerformancePreferences: ImagePerformancePreferences
-    @Inject lateinit var simklAnimeIdPreferenceHolder: SimklAnimeIdPreferenceHolder
     @Inject lateinit var serverUserStateProjection: ServerUserStateProjection
     @Inject lateinit var serverMatcher: ServerMatcher
 
