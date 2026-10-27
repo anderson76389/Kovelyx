@@ -620,22 +620,6 @@ internal fun TrackingSettingsOverview(
                         }
                     }
                 }
-                if (simklState.mode == SimklConnectionMode.CONNECTED) {
-                    item(key = "tracking_simkl_features") {
-                        SettingsGroupCard(
-                            title = stringResource(R.string.tracking_simkl_features_title),
-                            subtitle = stringResource(R.string.tracking_simkl_features_subtitle)
-                        ) {
-                            SettingsActionRow(
-                                title = stringResource(R.string.tracking_simkl_anime_id_title),
-                                subtitle = stringResource(R.string.tracking_simkl_anime_id_subtitle),
-                                value = animeIdPreferenceLabel(trackingState.simklAnimeIdPreference),
-                                onClick = onAnimeIdClick,
-                                modifier = Modifier.testTag("tracking_simkl_anime_id")
-                            )
-                        }
-                    }
-                }
                 if (mdbListState.isConnected) {
                     item(key = "tracking_mdblist_features") {
                         SettingsGroupCard(
