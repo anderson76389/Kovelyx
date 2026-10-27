@@ -174,26 +174,8 @@ internal fun TrackingProviderCards(
     traktUiState: TraktAuthUiState,
     simklUiState: SimklAuthUiState,
 ) {
-    val syncState by remember {
-        SimklSyncRepository.ensureLoaded()
-        SimklSyncRepository.state
-    }.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
-    var showSyncInfo by rememberSaveable { mutableStateOf(false) }
+    // Aucun chargement/synchronisation SIMKL lors de l'ouverture des réglages.
     var showCredentialEditor by remember { mutableStateOf(false) }
-    // Refresh the content when credentials are updated by the user.
-    val credentialsRevision by KovelyxIntegrationCredentials.revision.collectAsStateWithLifecycle()
-    val onSimklSyncRequested: () -> Unit = {
-        scope.launch {
-            WatchProgressSourceCoordinator.refreshProviderAndActiveSource(
-                profileId = ProfileRepository.activeProfileId,
-                providerId = TrackingProviderId.SIMKL,
-                refreshProvider = {
-                    SimklSyncRepository.refresh(TrackingRefreshIntent.USER_INITIATED)
-                },
-            )
-        }
-    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -215,9 +197,6 @@ internal fun TrackingProviderCards(
         MdbListProviderCard(Modifier.fillMaxWidth())
     }
 
-    if (showSyncInfo) {
-        SimklSyncInfoDialog(onDismiss = { showSyncInfo = false })
-    }
     if (showCredentialEditor && !isIos && KovelyxIntegrationCredentials.mobileConfigured) {
         KovelyxOAuthCredentialsDialog(
             onDismiss = { showCredentialEditor = false },
