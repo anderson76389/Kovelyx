@@ -63,22 +63,23 @@ class MDBListSettingsViewModel @Inject constructor(
 
     fun validateAndSaveApiKey(value: String, onSuccess: () -> Unit) {
         val trimmed = value.trim()
-        if (trimmed.isBlank()) {
-            viewModelScope.launch { dataStore.setApiKey("") }
-            onSuccess()
+        // Enregistrer réellement la clé dans DataStore avant de fermer le dialogue.
+        // Un contrôle HTTP préalable peut échouer hors ligne, en cas de quota
+        // MDBList (429) ou d'indisponibilité momentanée, même avec une clé valide.
+        // La connexion effective reste vérifiée lors des vraies requêtes.
+        if (trimmed.length > 512) {
+            _validationError.tryEmit(Unit)
             return
         }
         viewModelScope.launch {
             _validating.value = true
-            val valid = try {
-                mdbListApi.getUser(trimmed).isSuccessful
-            } catch (e: Exception) { false }
-            _validating.value = false
-            if (valid) {
+            try {
                 dataStore.setApiKey(trimmed)
                 onSuccess()
-            } else {
+            } catch (_: Exception) {
                 _validationError.tryEmit(Unit)
+            } finally {
+                _validating.value = false
             }
         }
     }
