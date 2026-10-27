@@ -88,8 +88,6 @@ import com.nuvio.app.features.player.PlayerSettingsRepository
 import com.nuvio.app.features.player.AndroidLibmpvVideoOutput
 import com.nuvio.app.features.player.AndroidPlaybackEngine
 import com.nuvio.app.features.profiles.ProfileRepository
-import com.nuvio.app.features.simkl.SimklAuthRepository
-import com.nuvio.app.features.simkl.SimklAuthUiState
 import com.nuvio.app.features.trakt.TraktAuthUiState
 import com.nuvio.app.features.trakt.TraktAuthRepository
 import com.nuvio.app.features.trakt.TraktCommentsSettings
@@ -197,10 +195,6 @@ fun SettingsScreen(
         val traktAuthUiState by remember {
             TraktAuthRepository.ensureLoaded()
             TraktAuthRepository.uiState
-        }.collectAsStateWithLifecycle()
-        val simklAuthUiState by remember {
-            SimklAuthRepository.ensureLoaded()
-            SimklAuthRepository.uiState
         }.collectAsStateWithLifecycle()
         val traktCommentsEnabled by remember {
             TraktCommentsSettings.ensureLoaded()
@@ -396,7 +390,6 @@ fun SettingsScreen(
                 mdbListSettings = mdbListSettings,
                 debridSettings = debridSettings,
                 traktAuthUiState = traktAuthUiState,
-                simklAuthUiState = simklAuthUiState,
                 traktCommentsEnabled = traktCommentsEnabled,
                 mdbListConnected = mdbListConnected,
                 trackingSettingsUiState = trackingSettingsUiState,
@@ -464,7 +457,6 @@ fun SettingsScreen(
                 mdbListSettings = mdbListSettings,
                 debridSettings = debridSettings,
                 traktAuthUiState = traktAuthUiState,
-                simklAuthUiState = simklAuthUiState,
                 traktCommentsEnabled = traktCommentsEnabled,
                 mdbListConnected = mdbListConnected,
                 trackingSettingsUiState = trackingSettingsUiState,
@@ -544,7 +536,6 @@ private fun MobileSettingsScreen(
     mdbListSettings: MdbListSettings,
     debridSettings: DebridSettings,
     traktAuthUiState: TraktAuthUiState,
-    simklAuthUiState: SimklAuthUiState,
     traktCommentsEnabled: Boolean,
     mdbListConnected: Boolean,
     trackingSettingsUiState: TrackingSettingsUiState,
@@ -841,7 +832,6 @@ private fun MobileSettingsScreen(
                 SettingsPage.TraktAuthentication -> trackingSettingsContent(
                     isTablet = false,
                     traktUiState = traktAuthUiState,
-                    simklUiState = simklAuthUiState,
                     settingsUiState = trackingSettingsUiState,
                     commentsEnabled = traktCommentsEnabled,
                     mdbListConnected = mdbListConnected,
@@ -941,7 +931,6 @@ private fun TabletSettingsScreen(
     mdbListSettings: MdbListSettings,
     debridSettings: DebridSettings,
     traktAuthUiState: TraktAuthUiState,
-    simklAuthUiState: SimklAuthUiState,
     traktCommentsEnabled: Boolean,
     mdbListConnected: Boolean,
     trackingSettingsUiState: TrackingSettingsUiState,
@@ -1313,7 +1302,6 @@ private fun TabletSettingsScreen(
                             SettingsPage.TraktAuthentication -> trackingSettingsContent(
                                 isTablet = true,
                                 traktUiState = traktAuthUiState,
-                                simklUiState = simklAuthUiState,
                                 settingsUiState = trackingSettingsUiState,
                                 commentsEnabled = traktCommentsEnabled,
                                 mdbListConnected = mdbListConnected,
