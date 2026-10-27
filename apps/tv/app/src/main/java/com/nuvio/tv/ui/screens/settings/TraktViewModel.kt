@@ -109,6 +109,16 @@ class TraktViewModel @Inject constructor(
         }
     }
 
+    fun onCredentialsSaved() {
+        _uiState.update { current ->
+            current.copy(
+                credentialsConfigured = traktAuthService.hasRequiredCredentials(),
+                errorMessage = null,
+                statusMessage = null,
+            )
+        }
+    }
+
     fun onConnectClick() {
         if (!traktAuthService.hasRequiredCredentials()) {
             _uiState.update {
