@@ -35,7 +35,10 @@ def migrate_sources() -> tuple[int, int]:
     files = sorted(
         p for p in MOBILE.rglob("*")
         if p.is_file() and p.suffix in SOURCE_EXTENSIONS
-        and not any(part in {"build", ".gradle"} for part in p.parts)
+        # Ne pas ignorer core/build : c'est un paquet Kotlin actif,
+        # distinct des répertoires Gradle générés.
+        and not p.relative_to(MOBILE).parts[0] in {".gradle", "build"}
+        and not (len(p.relative_to(MOBILE).parts) > 1 and p.relative_to(MOBILE).parts[1] == "build")
     )
     for old in files:
         old_data = old.read_text(encoding="utf-8")
