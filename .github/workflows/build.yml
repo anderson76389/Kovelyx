@@ -69,8 +69,8 @@ jobs:
               - 'vendor/engine/**'
               - 'scripts/media3/**'
               - 'scripts/desktop-release-version.py'
-      - 'scripts/sign-ci-debug-apk.sh'
-      - '.github/workflows/publish-signed-android.yml'
+              - 'scripts/sign-ci-debug-apk.sh'
+              - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
               - '.github/workflows/publish-unified-preview.yml'
               - '.github/workflows/build.yml'
@@ -81,8 +81,8 @@ jobs:
               - 'vendor/engine/**'
               - 'scripts/media3/**'
               - 'scripts/desktop-release-version.py'
-      - 'scripts/sign-ci-debug-apk.sh'
-      - '.github/workflows/publish-signed-android.yml'
+              - 'scripts/sign-ci-debug-apk.sh'
+              - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
               - '.github/workflows/publish-unified-preview.yml'
               - '.github/workflows/build.yml'
@@ -163,10 +163,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/restore-android-signing.py
-      - name: Signer l'APK ${platform} avec le certificat Kovelyx stable
+      - name: Signer l'APK TV avec le certificat Kovelyx stable
         if: ${{ github.event_name != 'pull_request' }}
         shell: bash
-        run: bash scripts/sign-ci-debug-apk.sh ${platform}
+        run: bash scripts/sign-ci-debug-apk.sh tv
       - name: Effacer la clé privée après signature
         if: ${{ always() }}
         shell: bash
@@ -248,10 +248,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 scripts/restore-android-signing.py
-      - name: Signer l'APK ${platform} avec le certificat Kovelyx stable
+      - name: Signer l'APK mobile avec le certificat Kovelyx stable
         if: ${{ github.event_name != 'pull_request' }}
         shell: bash
-        run: bash scripts/sign-ci-debug-apk.sh ${platform}
+        run: bash scripts/sign-ci-debug-apk.sh mobile
       - name: Effacer la clé privée après signature
         if: ${{ always() }}
         shell: bash
