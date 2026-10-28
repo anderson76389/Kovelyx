@@ -3,7 +3,7 @@ package com.nuvio.tv.core.di
 import com.nuvio.tv.core.sync.library.LibrarySyncLocalStore
 import com.nuvio.tv.core.sync.library.LibrarySyncRemoteDataSource
 import com.nuvio.tv.data.local.LibraryPreferences
-import com.nuvio.tv.data.remote.supabase.SupabaseLibrarySyncRemoteDataSource
+import com.nuvio.tv.core.sync.library.RetiredLibrarySyncRemoteDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,6 +22,6 @@ abstract class LibrarySyncModule {
     @Binds
     @Singleton
     abstract fun bindLibrarySyncRemoteDataSource(
-        implementation: SupabaseLibrarySyncRemoteDataSource
+        implementation: RetiredLibrarySyncRemoteDataSource
     ): LibrarySyncRemoteDataSource
 }
