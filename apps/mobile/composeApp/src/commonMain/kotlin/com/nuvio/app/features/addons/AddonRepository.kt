@@ -1,12 +1,8 @@
 package com.nuvio.app.features.addons
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.core.network.SupabaseProvider
-import com.nuvio.app.core.sync.putSyncOriginClientId
+import com.nuvio.app.core.cloud.CloudflareProfileRecords
 import com.nuvio.app.features.profiles.ProfileRepository
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Order
-import io.github.jan.supabase.postgrest.rpc
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +23,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.getString
 
@@ -47,6 +45,14 @@ private data class AddonPushItem(
 )
 
 private const val ADDON_PUSH_DEBOUNCE_MS = 500L
+
+// Configuration URLs can contain bearer tokens. Sync only public-looking
+// manifests; secret-bearing addon URLs remain on the user's device.
+private fun isShareableManifestUrl(url: String): Boolean =
+    url.startsWith("https://", ignoreCase = true) &&
+        !Regex("(?i)(api[_-]?key|access[_-]?token|password|secret|bearer|[?&]key=|[?&]token=)")
+            .containsMatchIn(url)
+
 
 object AddonRepository {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -113,13 +119,18 @@ object AddonRepository {
         currentProfileId = resolveEffectiveProfileId(profileId)
         log.i { "pullFromServer() — profileId=$profileId, initialized=$initialized" }
         runCatching {
-            val rows = SupabaseProvider.client.postgrest
-                .from("addons")
-                .select {
-                    filter { eq("profile_id", currentProfileId) }
-                    order("sort_order", Order.ASCENDING)
-                }
-                .decodeList<AddonRow>()
+            val record = CloudflareProfileRecords.lookup(
+                CloudflareProfileRecords.records(currentProfileId), "addons", "ordered"
+            ) ?: run {
+                // No remote snapshot means the user has not synced addons yet.
+                // Never wipe locally configured addons in this case.
+                initialized = true
+                return@runCatching
+            }
+            val data = record["payload"]?.jsonObject?.get("addons")
+                ?: error("Catalogue d'extensions Cloudflare mal formé")
+            val rows = json.decodeFromJsonElement<List<AddonRow>>(data)
+
 
             val rowsByUrl = linkedMapOf<String, AddonRow>()
             rows.forEach { row ->
@@ -142,6 +153,9 @@ object AddonRepository {
                         userSetName = row?.name?.takeIf { it.isNotBlank() },
                         enabled = row?.enabled,
                     )
+                } + _uiState.value.addons.filter { existing ->
+                    !isShareableManifestUrl(existing.manifestUrl) &&
+                        existing.manifestUrl !in rowsByUrl
                 },
             )
             persist()
@@ -357,12 +371,12 @@ object AddonRepository {
             try {
                 delay(ADDON_PUSH_DEBOUNCE_MS)
                 log.d { "pushToServer() — profileId=$profileId, pushing ${addons.size} addons" }
-                val params = buildJsonObject {
-                    put("p_profile_id", profileId)
-                    put("p_addons", json.encodeToJsonElement(addons))
-                    putSyncOriginClientId()
+                val shareable = addons.filter { isShareableManifestUrl(it.url) }
+                if (shareable.size < addons.size) {
+                    log.w { "Extensions avec URLs ou secrets privés conservées localement uniquement" }
                 }
-                SupabaseProvider.client.postgrest.rpc("sync_push_addons", params)
+                CloudflareProfileRecords.write(profileId, "addons", "ordered",
+                    buildJsonObject { put("addons", json.encodeToJsonElement(shareable)) })
                 log.d { "pushToServer() — success" }
             } catch (error: CancellationException) {
                 throw error
