@@ -25,7 +25,7 @@ internal fun buildDeviceRegistrationParams(
     metadata: DeviceClientMetadata,
 ): JsonObject = buildJsonObject {
     put("p_installation_id", installationId)
-    put("p_client_name", CLIENT_NAME)
+    put("p_client_name", metadata.clientName)
     put("p_client_version", clientVersion)
     put("p_platform", metadata.platform)
     put("p_device_name", metadata.deviceName)

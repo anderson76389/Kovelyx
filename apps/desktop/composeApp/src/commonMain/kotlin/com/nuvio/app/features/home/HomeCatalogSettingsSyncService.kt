@@ -3,12 +3,9 @@ package com.nuvio.app.features.home
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
-import com.nuvio.app.core.network.SupabaseProvider
+import com.nuvio.app.core.cloud.CloudflareProfileRecords
 import com.nuvio.app.core.sync.HOME_CATALOG_SHARED_SYNC_PLATFORM
-import com.nuvio.app.core.sync.putSyncOriginClientId
 import com.nuvio.app.features.profiles.ProfileRepository
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.rpc
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +42,7 @@ data class SyncHomeCatalogPayload(
 )
 
 @Serializable
-private data class SupabaseHomeCatalogSettingsBlob(
+private data class CloudflareHomeCatalogSettingsBlob(
     @SerialName("profile_id") val profileId: Int = 1,
     @SerialName("settings_json") val settingsJson: JsonObject = buildJsonObject { },
 )
@@ -151,13 +148,10 @@ object HomeCatalogSettingsSyncService {
             val payload = HomeCatalogSettingsRepository.exportToSyncPayload()
             val jsonElement = mergedSharedPayloadJson(token, payload)
 
-            val params = buildJsonObject {
-                put("p_profile_id", token.profileId)
-                put("p_platform", HOME_CATALOG_SHARED_SYNC_PLATFORM)
-                put("p_settings_json", jsonElement)
-                putSyncOriginClientId()
-            }
-            SupabaseProvider.client.postgrest.rpc("sync_push_home_catalog_settings", params)
+            CloudflareProfileRecords.write(
+                token.profileId, "preferences", "home-catalog",
+                buildJsonObject { put("settings", jsonElement) },
+            )
             cachedSharedSettings = CachedSharedSettings(token = token, settingsJson = jsonElement)
             log.d { "pushToRemote — success" }
         }.onFailure { e ->
@@ -192,15 +186,13 @@ object HomeCatalogSettingsSyncService {
         }
     }
 
-    private suspend fun fetchRemoteBlob(
-        profileId: Int,
-    ): SupabaseHomeCatalogSettingsBlob? {
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-            put("p_platform", HOME_CATALOG_SHARED_SYNC_PLATFORM)
-        }
-        val result = SupabaseProvider.client.postgrest.rpc("sync_pull_home_catalog_settings", params)
-        return result.decodeList<SupabaseHomeCatalogSettingsBlob>().firstOrNull()
+    private suspend fun fetchRemoteBlob(profileId: Int): CloudflareHomeCatalogSettingsBlob? {
+        val row = CloudflareProfileRecords.lookup(
+            CloudflareProfileRecords.records(profileId), "preferences", "home-catalog",
+        ) ?: return null
+        val settings = row["payload"]?.jsonObject?.get("settings")?.jsonObject
+            ?: error("Paramètres du catalogue Cloudflare illisibles")
+        return CloudflareHomeCatalogSettingsBlob(profileId = profileId, settingsJson = settings)
     }
 
     private fun decodePayloadPreservingLocalDefaults(
