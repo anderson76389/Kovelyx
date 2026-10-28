@@ -14,6 +14,25 @@ export function validProfileName(value) {
   return typeof value === "string" && value.trim().length >= 1 &&
     value.trim().length <= 64;
 }
+// Check nested object keys AND JSON-serialized strings (older profile settings
+// can contain a stringified Trakt/debrid config). Fail closed for excessive nesting.
+const sensitiveField = /(apikey|accesstoken|refreshtoken|password|secret|authorization|privatekey|bearertoken|sessiontoken)/i;
+function hasUnencryptedCredential(value, depth = 0) {
+  if (depth > 12) return true;
+  if (Array.isArray(value)) return value.some(item => hasUnencryptedCredential(item, depth + 1));
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try { return hasUnencryptedCredential(JSON.parse(trimmed), depth + 1); }
+      catch { return false; }
+    }
+    return false;
+  }
+  if (!value || typeof value !== "object") return false;
+  return Object.entries(value).some(([key, data]) =>
+    sensitiveField.test(key.replace(/[^a-z0-9]/gi, "")) ||
+      hasUnencryptedCredential(data, depth + 1));
+}
 export function validSyncInput(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return false;
   if (!validProfileId(body.profileId)) return false;
@@ -23,9 +42,8 @@ export function validSyncInput(body) {
   if (typeof body.deleted !== "boolean") return false;
   if (!body.payload || typeof body.payload !== "object" || Array.isArray(body.payload)) return false;
   if (JSON.stringify(body.payload).length > 32000) return false;
-  // External provider credentials are not synchronized without explicit encryption and consent.
-  const serialized = JSON.stringify(body.payload);
-  if (/(?:\"(?:api[_-]?key|access[_-]?token|refresh[_-]?token|password|client[_-]?secret|private[_-]?key)\"\s*:)/i.test(serialized)) return false;
+  // Private provider credentials must never enter D1 without E2E encryption.
+  if (hasUnencryptedCredential(body.payload)) return false;
   return true;
 }
 /**
