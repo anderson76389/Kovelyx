@@ -650,6 +650,7 @@ internal fun MainAppContent(
             AppForegroundMonitor.events().collect { visibility ->
                 when (visibility) {
                     AppVisibility.Foreground -> {
+                        appUpdaterController.requestForegroundCheck()
                         NetworkStatusRepository.requestForegroundRefresh()
                         DeviceSessionRegistration.registerIfAuthenticated()
                         MemberAccessRepository.refreshIfStale()

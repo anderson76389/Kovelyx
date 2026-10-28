@@ -1,4 +1,4 @@
-name: Vérifier les traductions françaises Windows et Android
+name: Vérifier le français et les logos Windows Android et TV
 
 on:
   pull_request:
@@ -7,16 +7,32 @@ on:
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values-fr/**'
+      - 'apps/tv/app/src/main/res/values/**'
+      - 'apps/tv/app/src/main/res/values-fr/**'
       - 'scripts/tests/check-french-resources.py'
+      - 'scripts/tests/check-tv-french-resources.py'
+      - 'scripts/tests/test_centered_brand.py'
+      - 'scripts/generate-compose-brand.py'
+      - 'apps/tv/app/src/main/res/drawable/app_logo_wordmark*.png'
+      - 'apps/mobile/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark*.png'
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark*.png'
       - '.github/workflows/validate-french.yml'
   push:
-    branches: [main]
+    branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values-fr/**'
+      - 'apps/tv/app/src/main/res/values/**'
+      - 'apps/tv/app/src/main/res/values-fr/**'
       - 'scripts/tests/check-french-resources.py'
+      - 'scripts/tests/check-tv-french-resources.py'
+      - 'scripts/tests/test_centered_brand.py'
+      - 'scripts/generate-compose-brand.py'
+      - 'apps/tv/app/src/main/res/drawable/app_logo_wordmark*.png'
+      - 'apps/mobile/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark*.png'
+      - 'apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark*.png'
       - '.github/workflows/validate-french.yml'
   workflow_dispatch:
 
@@ -25,14 +41,19 @@ permissions:
 
 jobs:
   check:
-    name: Couverture française PC et Android à 100 %
+    name: Français et centrage des logos sur les trois plateformes
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Préparer le contrôle des images du logo
+        run: python3 -m pip install 'Pillow>=10,<13'
+      - name: Vérifier le centrage des logos
+        run: python3 scripts/tests/test_centered_brand.py
       - name: Vérifier XML, clés et paramètres des chaînes
         shell: bash
         run: |
           set -euo pipefail
           python3 scripts/tests/check-french-resources.py
           python3 scripts/tests/check-french-resources.py --mobile
+          python3 scripts/tests/check-tv-french-resources.py

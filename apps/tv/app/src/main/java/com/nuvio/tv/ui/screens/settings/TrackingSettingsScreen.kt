@@ -535,7 +535,7 @@ internal fun TrackingSettingsOverview(
                         )
                         SettingsActionRow(
                             title = "Configurer mes clés Trakt",
-                            subtitle = "Renseigner le Client ID et le Client Secret de mon application Trakt.",
+                            subtitle = "Renseigner le identifiant client et le secret client de mon application Trakt.",
                             onClick = onTraktCredentialsClick,
                         )
                         SettingsActionRow(
@@ -551,7 +551,7 @@ internal fun TrackingSettingsOverview(
                                 .testTag(TrackingSettingsTestTags.MDBLIST_PROVIDER)
                         )
                         SettingsActionRow(
-                            title = "Configurer mon Client ID MDBList",
+                            title = "Configurer mon identifiant client MDBList",
                             subtitle = "Compte OAuth MDBList ; la clé API des notes est dans Intégrations.",
                             onClick = onMdbListCredentialsClick,
                         )

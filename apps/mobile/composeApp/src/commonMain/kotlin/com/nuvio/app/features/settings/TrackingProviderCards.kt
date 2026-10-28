@@ -232,14 +232,14 @@ private fun KovelyxOAuthCredentialsDialog(
         OutlinedTextField(
             value = traktId,
             onValueChange = { traktId = it; error = null },
-            label = { Text("Trakt — Client ID") },
+            label = { Text("Trakt — identifiant client") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
         OutlinedTextField(
             value = traktSecret,
             onValueChange = { traktSecret = it; error = null },
-            label = { Text("Trakt — Client Secret") },
+            label = { Text("Trakt — secret client") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -247,7 +247,7 @@ private fun KovelyxOAuthCredentialsDialog(
         OutlinedTextField(
             value = mdbId,
             onValueChange = { mdbId = it; error = null },
-            label = { Text("MDBList — Client ID OAuth (pas la clé API)") },
+            label = { Text("MDBList — identifiant client OAuth (pas la clé API)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
@@ -258,7 +258,7 @@ private fun KovelyxOAuthCredentialsDialog(
             runCatching { uriHandler.openUri("https://mdblist.com/preferences/") }
         }) { Text("Obtenir ma clé API MDBList (rubrique MDBList)") }
         Text(
-            "La clé API MDBList s'enregistre dans Paramètres > MDBList, pas dans le Client ID OAuth. " +
+            "La clé API MDBList s'enregistre dans Paramètres > MDBList, pas dans le identifiant client OAuth. " +
                 "Stockage privé local de Kovelyx, non chiffré : n'utilisez pas de clés partagées.",
             style = MaterialTheme.typography.bodySmall,
         )

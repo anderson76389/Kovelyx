@@ -271,7 +271,7 @@ actual object AppUpdaterPlatform {
                 appImagePath = System.getenv(appImageEnvName),
                 currentPid = ProcessHandle.current().pid(),
             )
-            DesktopUpdaterOs.UNKNOWN -> error("Desktop updates are not supported on this operating system.")
+            DesktopUpdaterOs.UNKNOWN -> error("Les mises à jour de Kovelyx ne sont pas disponibles sur ce système.")
         }
         ProcessBuilder(command).start()
     }

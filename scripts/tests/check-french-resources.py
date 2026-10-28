@@ -28,7 +28,7 @@ SOURCE_MODULES = (
     "strings_mdblist.xml",
     "strings_servers.xml",
 )
-FORMAT_ARGUMENT = re.compile(r"%(?:[1-9]\d*\$)?[sd]")
+FORMAT_ARGUMENT = re.compile(r"%(?:[1-9]\d*\$)?[-+#0,(]*\d*(?:\.\d+)?[sdfoxXeEgGaAcCbBhHn]")
 
 
 def read_strings(path: Path) -> dict[str, str]:

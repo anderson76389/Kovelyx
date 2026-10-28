@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal class NoEligibleUpdateException(channel: UpdateChannel) :
-    IllegalStateException("No compatible APK release found for ${channel.storedValue} channel")
+    IllegalStateException("Aucune version APK compatible pour le canal ${channel.storedValue}")
 
 /** A permanently signed TV APK cannot replace the separately packaged .debug app. */
 internal fun tvReleaseMatchesInstalledVariant(tag: String?, isDebugBuild: Boolean): Boolean =
@@ -33,16 +33,16 @@ class UpdateRepository @Inject constructor(
                     // La sélection doit examiner les assets de chaque plateforme.
                     val response = gitHubReleaseApi.getReleases(owner = owner, repo = repo)
                     if (!response.isSuccessful) {
-                        error("GitHub API error: ${response.code()}")
+                        error("Erreur de l’API GitHub : ${response.code()}")
                     }
-                    response.body() ?: error("Empty GitHub release response")
+                    response.body() ?: error("Réponse des versions GitHub vide")
                 }
                 UpdateChannel.BETA -> {
                     val response = gitHubReleaseApi.getReleases(owner = owner, repo = repo)
                     if (!response.isSuccessful) {
-                        error("GitHub API error: ${response.code()}")
+                        error("Erreur de l’API GitHub : ${response.code()}")
                     }
-                    response.body() ?: error("Empty GitHub release response")
+                    response.body() ?: error("Réponse des versions GitHub vide")
                 }
             }
             val releaseWithAsset = ReleaseSelector
@@ -64,7 +64,7 @@ class UpdateRepository @Inject constructor(
 
             val tag = dto.tagName?.takeIf { it.isNotBlank() }
                 ?: dto.name?.takeIf { it.isNotBlank() }
-                ?: error("Release has no tag/name")
+                ?: error("Cette version ne possède ni identifiant ni nom")
 
             AppUpdate(
                 tag = tag,

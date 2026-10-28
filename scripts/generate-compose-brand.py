@@ -61,6 +61,12 @@ def wordmark(palette, *, gold=False):
     font=load_font(132)
     ink=(244,226,179,255) if gold else (251,249,255,255)
     draw.text((247,123),'KOVELYX',font=font,fill=ink,anchor='lm',stroke_width=0)
+    # Center the visible ink, not the asymmetric transparent source canvas.
+    bounds = image.getchannel('A').getbbox()
+    if bounds:
+        ink = image.crop(bounds)
+        image = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        image.alpha_composite(ink, ((image.width-ink.width)//2, (image.height-ink.height)//2))
     return image
 
 def main():

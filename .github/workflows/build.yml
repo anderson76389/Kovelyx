@@ -60,7 +60,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Vérifier la syntaxe du script de signature avant compilation
         shell: bash
-        run: bash -n scripts/sign-ci-debug-apk.sh
+        run: |
+          bash -n scripts/sign-ci-debug-apk.sh
+          python3 scripts/tests/test_verified_preview.py
       - uses: dorny/paths-filter@v3
         id: paths
         with:
@@ -137,7 +139,7 @@ jobs:
         working-directory: apps/tv
         shell: bash
         run: |
-          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Vérifier l'APK universel et son identité TV
         shell: bash
         run: |
@@ -369,3 +371,21 @@ jobs:
           path: apps/desktop/composeApp/build/compose/binaries/**/*.msi
           if-no-files-found: error
           retention-days: 7
+
+  publish-verified-preview:
+    name: Publier les trois paquets vérifiés pour la bannière de mise à jour
+    needs: [tv, mobile]
+    if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Vérifier les preuves et publier une préversion complète
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish-verified-preview.py
