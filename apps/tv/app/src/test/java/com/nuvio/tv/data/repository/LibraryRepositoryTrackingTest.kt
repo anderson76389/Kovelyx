@@ -96,7 +96,7 @@ class LibraryRepositoryTrackingTest {
             membership = mapOf(mdblistTab.key to true),
             removalConfirmation = confirmation
         )
-        val repository = repository(sourceMode, setOf(simkl))
+        val repository = repository(sourceMode, setOf(mdblist))
         val item = LibraryEntryInput("tt123", "series", "Series")
 
         val preflight = repository.toggleDefault(item)
