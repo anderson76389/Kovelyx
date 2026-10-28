@@ -65,7 +65,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.nuvio.tv.R
-import com.nuvio.tv.data.remote.supabase.AvatarCatalogItem
+import com.nuvio.tv.data.remote.cloudflare.AvatarCatalogItem
 
 private val PinnedAvatarCategories = listOf("anime", "animation", "tv", "movie", "gaming")
 

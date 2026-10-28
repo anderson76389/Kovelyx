@@ -235,8 +235,12 @@ fun ContentCard(
     ) {
         val context = LocalContext.current
         val density = LocalDensity.current
-        // Keep decode size stable during width animation to avoid recreating requests/painters every frame.
-        val maxRequestCardWidth = if (effectiveExpandEnabled) {
+        // Decode ordinary catalog posters at their visible size. Only the expanded
+        // card needs a wide bitmap; decoding every offscreen poster at expanded width
+        // is especially expensive on 2 GB Android TV devices.
+        // isBackdropExpanded flips once, before the width animation, keeping decode size
+        // stable throughout the animation itself.
+        val maxRequestCardWidth = if (effectiveExpandEnabled && isBackdropExpanded) {
             maxOf(baseCardWidth, expandedCardWidth)
         } else {
             baseCardWidth
@@ -268,7 +272,8 @@ fun ContentCard(
         val imageModel = remember(imageUrl, requestWidthPx, requestHeightPx, revalidationKey) {
             val builder = ImageRequest.Builder(context)
                 .data(imageUrl)
-                .crossfade(true)
+                // Avoid dozens of animated layers during fast D-pad scrolling.
+                .crossfade(false)
                 .memoryCacheKey("${imageUrl}_${requestWidthPx}x${requestHeightPx}_v$revalidationKey")
                 .size(width = requestWidthPx, height = requestHeightPx)
             if (revalidationKey > 0) {

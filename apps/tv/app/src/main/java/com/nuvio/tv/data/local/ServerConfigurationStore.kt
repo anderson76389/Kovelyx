@@ -58,20 +58,20 @@ class ServerConfigurationStore @Inject constructor(
             .commit()
 
     private fun officialConfiguration() = ServerConfiguration(
-        backendUrl = BuildConfig.SUPABASE_URL.trimEnd('/'),
-        publishableKey = BuildConfig.SUPABASE_ANON_KEY,
+        // Le serveur officiel Kovelyx est uniquement le Worker Cloudflare.
+        // Une clé Supabase n'est ni nécessaire ni compatible avec Better Auth.
+        backendUrl = BuildConfig.KOVELYX_CLOUD_URL.trim().trimEnd('/'),
+        publishableKey = "",
         capabilities = ServerCapabilities(
-            // Cloudflare D1 dispose du formulaire email/mot de passe.
-            // L'ancien QR/RPC Supabase n'existe pas sur le Worker.
-            emailPasswordAuth = BuildConfig.KOVELYX_CLOUD_URL.isNotBlank(),
-            tvLogin = BuildConfig.KOVELYX_CLOUD_URL.isBlank() &&
-                BuildConfig.SUPABASE_URL.isNotBlank()
+            emailPasswordAuth = BuildConfig.KOVELYX_CLOUD_URL.startsWith("https://"),
+            // La liaison QR historique via RPC n'existe pas sur ce Worker.
+            tvLogin = false
         ),
         isCustom = false,
-        fallbackBackendUrl = BuildConfig.SUPABASE_FALLBACK_URL.trim().trimEnd('/').takeIf { it.isNotBlank() },
-        tvLoginWebBaseUrl = BuildConfig.TV_LOGIN_WEB_BASE_URL,
-        deviceLoginWebBaseUrl = BuildConfig.DEVICE_LOGIN_WEB_BASE_URL,
-        avatarPublicBaseUrl = BuildConfig.AVATAR_PUBLIC_BASE_URL.trimEnd('/').takeIf { it.isNotBlank() }
+        fallbackBackendUrl = null,
+        tvLoginWebBaseUrl = null,
+        deviceLoginWebBaseUrl = null,
+        avatarPublicBaseUrl = null
     )
 
     private companion object {

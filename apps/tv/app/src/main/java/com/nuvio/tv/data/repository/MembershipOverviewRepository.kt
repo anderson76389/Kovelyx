@@ -2,7 +2,7 @@ package com.nuvio.tv.data.repository
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
-import com.nuvio.tv.data.remote.supabase.MembershipOverviewRemoteDataSource
+import com.nuvio.tv.data.remote.cloudflare.MembershipOverviewRemoteDataSource
 import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.domain.model.MembershipOverview
 import com.nuvio.tv.domain.model.MembershipOverviewState
