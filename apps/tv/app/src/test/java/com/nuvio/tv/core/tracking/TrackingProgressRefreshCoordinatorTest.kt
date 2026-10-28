@@ -44,7 +44,7 @@ class TrackingProgressRefreshCoordinatorTest {
     @Test
     fun `skips disconnected providers`() = runTest {
         val trakt = FakeProgressProvider(TrackingProviderId.TRAKT, authenticated = false)
-        val simkl = FakeProgressProvider(TrackingProviderId.MDBLIST, authenticated = true)
+        val mdblist = FakeProgressProvider(TrackingProviderId.MDBLIST, authenticated = true)
         val coordinator = TrackingProgressRefreshCoordinator(
             TrackingProgressProviderRegistry(setOf(trakt, mdblist))
         )
