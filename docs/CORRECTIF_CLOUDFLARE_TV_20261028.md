@@ -31,7 +31,7 @@ Après envoi de la branche, contrôler d'abord le job APK TV et les tests TV, pu
 - Syntaxe YAML et déclenchement de la branche : vérifiés pour les trois workflows modifiés.
 - Worker public `/ready` : HTTP 200 avec le schéma `0002_watched_history`, avec les User-Agent `okhttp/4.12.0` et `Kovelyx-Client`.
 
-Tests Kotlin ajoutés pour migrer les anciennes préférences SIMKL et préserver les choix Trakt/MDBList. Ils attendent une exécution Gradle ; ne pas les annoncer comme réussis avant le résultat CI.
+Les tests Kotlin de migration SIMKL et les suites TV/mobile ont maintenant passé en CI. Les résultats détaillés sont ci-dessous.
 
 ## Vérifications sur appareils encore nécessaires
 
@@ -42,3 +42,24 @@ Tests Kotlin ajoutés pour migrer les anciennes préférences SIMKL et préserve
 5. Trakt et MDBList : vérifier les identifiants Kovelyx configurés et effectuer une véritable autorisation sur leurs services. Le correctif ne crée pas d'application OAuth ni de faux état connecté.
 
 L'indépendance des binaires natifs et le trafic réseau réel ne sont pas certifiés par les audits statiques. Aucun compte de production n'a été créé ou modifié pour ces vérifications.
+
+
+## Résultats CI après correction des échecs de publication
+
+- Tests TV et mobile : [workflow 40638832785](https://github.com/anderson76389/Kovelyx/actions/runs/40638832785), réussi sur `e525ecd814be70bd107d960ad3e9901e6fe005b3`.
+- Windows : [workflow 40638832809](https://github.com/anderson76389/Kovelyx/actions/runs/40638832809), réussi, MSI/EXE/portable enregistrés dans `Kovelyx-Windows-installers-experimental` (artefact `12795415211`). Version `1.1.741-alpha`.
+- Android mobile et TV : [workflow 40640085191](https://github.com/anderson76389/Kovelyx/actions/runs/40640085191), deux builds réussis sur `5de2fa9bbc8fa3ff3a31bd6193ebe84a9a1dcd89`. Version `1.1.742-alpha`.
+- TV : les cinq APK, dont l'universel, sont signés et vérifiés ; artefact `kovelyx-tv-debug` (`12795332441`). Choisir le fichier dont le nom contient `universal` pour une installation TV générale.
+- Mobile : artefact signé `kovelyx-mobile-debug` (`12795272135`).
+- Tests du parcours de signature avec SDK et clé simulés : [workflow 40640085269](https://github.com/anderson76389/Kovelyx/actions/runs/40640085269), réussi (syntaxe, APK unique mobile, cinq APK TV, absence d'APK).
+
+Les fichiers sont des préversions de cette branche. Le code Windows est identique entre les deux commits de build ; le dernier commit ne change que le script de signature Android et son contrôle automatique.
+
+Causes des premiers workflows rouges :
+
+1. Une apostrophe dans une expansion de paramètre Bash empêchait le script de signature de démarrer.
+2. Le même script exigeait un seul APK, alors que la TV en produit cinq. Tous les fichiers sont maintenant signés et vérifiés avant leur enregistrement.
+3. Un test mobile attendait encore l'absence de nouvelle recherche lors du changement de canal. Il vérifie désormais que l'ancienne proposition disparaît pendant la recherche et que la nouvelle réponse correspond au nouveau canal.
+4. Le test Windows déclenchait un avertissement de cache de configuration incompatible avec le pont natif ; la commande de test désactive ce cache. Le délai dépassé du test QuickJS ne s'est pas reproduit lors du passage suivant. Aucune correction du moteur QuickJS n'est revendiquée.
+
+Les signatures utilisent la clé permanente déjà présente dans les secrets GitHub. Aucun déploiement Cloudflare ni changement de données de compte n'a été effectué. La synchronisation entre appareils physiques et les véritables autorisations Trakt/MDBList restent à vérifier.
