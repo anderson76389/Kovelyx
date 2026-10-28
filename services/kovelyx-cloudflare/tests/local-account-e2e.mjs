@@ -211,6 +211,35 @@ try {
     ...watched,itemKey:"movie:private",payload:{access_token:"private"}
   },alice.token)).status,400,"Credential fields must not sync");
 
+  // The same native contract also synchronizes safe UI settings across devices.
+  // No credential or password is permitted, including inside nested objects.
+  const settings={
+    profileId,category:"profile_settings",itemKey:"mobile",revision:0,deleted:false,
+    payload:{settings:{features:{theme_settings:{amoled:true},
+      debrid_settings:{},trakt_settings_payload:""}}}
+  };
+  const initialSettings=await req("/v1/sync","POST",settings,alice.token);
+  assert.equal(initialSettings.status,201,"Cloudflare must store credential-free profile settings");
+  const tvSettings=await req("/v1/sync?profileId="+profileId+"&limit=25&offset=25",
+    "GET",null,tvToken);
+  assert.equal(tvSettings.status,200);
+  assert.ok(tvSettings.data.items.some(item=>
+    item.category==="profile_settings"&&item.itemKey==="mobile"&&
+    item.payload?.settings?.features?.theme_settings?.amoled===true),
+    "Safe profile settings must be visible to another active session");
+  assert.equal((await req("/v1/sync","POST",{
+    ...settings,revision:1,payload:{settings:{features:{
+      debrid_settings:{debrid_alldebrid_api_key:"SECRET"}
+    }}}
+  },alice.token)).status,400,"No AllDebrid key may be stored in D1");
+  assert.equal((await req("/v1/sync","POST",{
+    ...settings,revision:1,payload:{settings:{features:{
+      trakt_settings_payload:{access_token:"SECRET"}
+    }}}
+  },alice.token)).status,400,"No Trakt token may be stored in D1");
+  assert.equal((await req("/v1/sync","POST",settings,bob.token)).status,404,
+    "Another account cannot overwrite synced profile settings");
+
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);
   assert.equal(renamed.status,200,"Rename profile from second device");

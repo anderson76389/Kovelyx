@@ -1,6 +1,7 @@
 package com.nuvio.app.core.network
 
 import com.nuvio.app.core.build.AppVersionConfig
+import com.nuvio.app.core.cloud.CloudflareConfig
 import com.nuvio.app.features.addons.httpRequestRaw
 import io.ktor.http.Url
 import kotlinx.coroutines.CancellationException
@@ -98,7 +99,7 @@ internal object ServerDiscoveryPolicy {
     }
 
     fun isOfficial(candidateUrl: String): Boolean =
-        matchesBackend(candidateUrl, SupabaseConfig.URL) ||
+        matchesBackend(candidateUrl, CloudflareConfig.URL) ||
             matchesBackend(candidateUrl, canonicalOfficialBackend)
 
     private fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {

@@ -11,6 +11,21 @@ test("validates user-owned synchronization shape",()=>{
   assert.equal(validSyncInput({...base,profileId:"../other-user"}),false);
   assert.equal(validSyncInput({...base,payload:{text:"a".repeat(33000)}}),false);
 });
+test("rejects secret fields inside nested profile settings and encoded JSON",()=>{
+  const settings={...base,category:"profile_settings",itemKey:"mobile",
+    payload:{settings:{features:{theme_settings:{amoled:true}}}}};
+  assert.equal(validSyncInput(settings),true);
+  assert.equal(validSyncInput({...settings,payload:{settings:{features:{
+    debrid_settings:{debrid_alldebrid_api_key:"very-secret"}
+  }}}}),false);
+  assert.equal(validSyncInput({...settings,payload:{settings:{
+    trakt_settings_payload:JSON.stringify({access_token:"secret"})
+  }}}),false);
+  assert.equal(validSyncInput({...settings,payload:{settings:{features:{
+    nested:{apiKey:"secret"}
+  }}}}),false);
+});
+
 test("profile names, strict identifiers, cursor pagination and origins",()=>{
   assert.equal(validProfileId(base.profileId),true);
   assert.equal(validProfileId("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),false);

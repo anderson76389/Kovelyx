@@ -143,13 +143,9 @@ object NetworkStatusRepository {
             return NetworkCondition.Online
         }
 
-        val supabaseReachable = SupabaseEndpointConfig.restEndpointUrls().any { url ->
-            probeReachable(
-                url = url,
-                headers = mapOf("apikey" to configuration.publishableKey),
-            )
-        }
-        if (!supabaseReachable) {
+        // A guest device can use Kovelyx without a configured account server.
+        val cloudUrl = com.nuvio.app.core.cloud.CloudflareConfig.URL.trimEnd('/')
+        if (cloudUrl.isNotBlank() && !probeReachable("${cloudUrl}/health")) {
             return NetworkCondition.ServersUnreachable
         }
 

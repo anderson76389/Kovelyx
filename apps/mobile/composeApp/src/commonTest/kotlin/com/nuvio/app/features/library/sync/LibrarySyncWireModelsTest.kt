@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 
-class SupabaseLibrarySyncAdapterTest {
+class LibrarySyncWireModelsTest {
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true

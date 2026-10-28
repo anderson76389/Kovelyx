@@ -17,7 +17,7 @@ import com.nuvio.app.features.tracking.WatchProgressSource
 import com.nuvio.app.features.tracking.effectiveWatchProgressSource
 import com.nuvio.app.features.tracking.providerId
 import com.nuvio.app.features.watching.domain.isSeriesLikeWatchingContentType
-import com.nuvio.app.features.watching.sync.SupabaseWatchedSyncAdapter
+import com.nuvio.app.features.watching.sync.RemoteWatchedSyncUnavailable
 import com.nuvio.app.features.watching.sync.WatchedDeltaEvent
 import com.nuvio.app.features.watching.sync.WatchedSyncAdapter
 import kotlinx.atomicfu.locks.SynchronizedObject
@@ -156,7 +156,7 @@ object WatchedRepository {
     private var lastSuccessfulPushEpochMs: Long = 0L
     private var deltaCursorEventId: Long = 0L
     private var deltaInitialized: Boolean = false
-    internal var syncAdapter: WatchedSyncAdapter = SupabaseWatchedSyncAdapter
+    internal var syncAdapter: WatchedSyncAdapter = RemoteWatchedSyncUnavailable
     private var extraKeysObserverJob: Job? = null
 
     fun ensureLoaded() {

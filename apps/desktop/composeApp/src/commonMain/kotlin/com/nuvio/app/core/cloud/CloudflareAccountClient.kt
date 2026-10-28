@@ -2,6 +2,8 @@ package com.nuvio.app.core.cloud
 
 import com.nuvio.app.features.addons.httpRequestRaw
 import com.nuvio.app.core.auth.CloudflareCredentialStore
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
@@ -22,10 +24,23 @@ import kotlinx.serialization.json.put
 object CloudflareAccountClient {
     data class Session(val userId: String, val email: String, val bearerToken: String)
     private val json = Json { ignoreUnknownKeys = true }
+    private val sessionLock = SynchronizedObject()
+    private var sessionRevision = 0L
     private var session: Session? = null
 
     val enabled: Boolean get() = CloudflareConfig.URL.startsWith("https://")
-    val currentSession: Session? get() = session
+    val currentSession: Session? get() = synchronized(sessionLock) { session }
+
+    // A slow restore must never revive a token after logout or replace a new login.
+    private fun clearSavedSessionIfCurrent(startRevision: Long) {
+        synchronized(sessionLock) {
+            if (sessionRevision == startRevision) {
+                sessionRevision++
+                session = null
+                CloudflareCredentialStore.clear()
+            }
+        }
+    }
 
     private fun base(): String {
         check(enabled) { "Kovelyx Cloudflare non configuré" }
@@ -58,6 +73,7 @@ object CloudflareAccountClient {
     /** Restore encrypted credentials, never treating local storage as proof of identity. */
     suspend fun restoreSession(): Session? {
         if (!enabled) return null
+        val startingRevision = synchronized(sessionLock) { sessionRevision }
         val raw = runCatching { CloudflareCredentialStore.load() }.getOrNull() ?: return null
         val saved = runCatching {
             val data = json.parseToJsonElement(raw).jsonObject
@@ -69,7 +85,7 @@ object CloudflareAccountClient {
         }.getOrNull()
         if (saved == null || saved.userId.isBlank() || saved.email.isBlank() ||
             saved.bearerToken.length < 16) {
-            CloudflareCredentialStore.clear()
+            clearSavedSessionIfCurrent(startingRevision)
             return null
         }
         return try {
@@ -79,7 +95,7 @@ object CloudflareAccountClient {
                 body = "", followRedirects = false, maxResponseBodyBytes = 131072
             )
             if (response.status == 401 || response.status == 403) {
-                CloudflareCredentialStore.clear()
+                clearSavedSessionIfCurrent(startingRevision)
                 return null
             }
             if (response.status != 200) return null
@@ -87,11 +103,16 @@ object CloudflareAccountClient {
             val id = me["id"]?.jsonPrimitive?.content
             val email = me["email"]?.jsonPrimitive?.content
             if (id != saved.userId || email != saved.email) {
-                CloudflareCredentialStore.clear()
+                clearSavedSessionIfCurrent(startingRevision)
                 return null
             }
-            if (session == null) session = saved
-            session
+            synchronized(sessionLock) {
+                if (sessionRevision != startingRevision) null
+                else {
+                    if (session == null) session = saved
+                    session
+                }
+            }
         } catch (cancelled: kotlinx.coroutines.CancellationException) {
             throw cancelled
         } catch (_: Exception) {
@@ -106,7 +127,11 @@ object CloudflareAccountClient {
             put("email", account.email)
             put("bearer", account.bearerToken)
         }.toString()
-        runCatching { CloudflareCredentialStore.save(serialized) }
+        synchronized(sessionLock) {
+            sessionRevision++
+            session = account
+            runCatching { CloudflareCredentialStore.save(serialized) }
+        }
     }
 
     suspend fun signUp(email: String, password: String) {
@@ -137,22 +162,26 @@ object CloudflareAccountClient {
         check(id.isNotBlank() && realEmail.isNotBlank() && token.length >= 16) {
             "Kovelyx Cloud : session de connexion invalide"
         }
-        return Session(id, realEmail, token).also {
-            session = it
-            persistSession(it)
-        }
+        return Session(id, realEmail, token).also { persistSession(it) }
     }
 
     suspend fun signOut() {
-        val old = session
-        session = null
-        CloudflareCredentialStore.clear()
+        val old = synchronized(sessionLock) {
+            sessionRevision++
+            val previous = session
+            session = null
+            CloudflareCredentialStore.clear()
+            previous
+        }
         if (old != null) request("/api/auth/sign-out", "{}", old.bearerToken)
     }
 
     fun clearLocalSession() {
-        session = null
-        CloudflareCredentialStore.clear()
+        synchronized(sessionLock) {
+            sessionRevision++
+            session = null
+            CloudflareCredentialStore.clear()
+        }
     }
 
     /** Révoquer uniquement l'ancienne session sans toucher à une nouvelle connexion. */
@@ -161,7 +190,7 @@ object CloudflareAccountClient {
     }
 
     suspend fun accountProfiles(): JsonObject {
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         val response = httpRequestRaw(
             method = "GET", url = base() + "/v1/profiles",
             headers = mapOf("Authorization" to "Bearer ${active.bearerToken}"),
@@ -174,7 +203,7 @@ object CloudflareAccountClient {
     /** Retrieve the stable, server-owned UUID for each D1 profile. */
     suspend fun createProfile(displayName: String): String {
         require(displayName.isNotBlank() && displayName.length <= 64)
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         val body = buildJsonObject { put("displayName", displayName.trim()) }.toString()
         val (response, _) = request("/v1/profiles", body, active.bearerToken)
         return json.parseToJsonElement(response).jsonObject["profile"]
@@ -185,14 +214,14 @@ object CloudflareAccountClient {
     suspend fun renameProfile(profileId: String, displayName: String) {
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
         require(displayName.isNotBlank() && displayName.length <= 64)
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         val body = buildJsonObject { put("displayName", displayName.trim()) }.toString()
         request("/v1/profiles?profileId=$profileId", body, active.bearerToken, "PATCH")
     }
 
     suspend fun deleteProfile(profileId: String) {
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         request("/v1/profiles?profileId=$profileId", "{}", active.bearerToken, "DELETE")
     }
 
@@ -202,7 +231,7 @@ object CloudflareAccountClient {
         payload: JsonObject, revision: Int = 0, deleted: Boolean = false
     ): JsonObject {
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         val data = buildJsonObject {
             put("profileId", profileId)
             put("category", category)
@@ -217,7 +246,7 @@ object CloudflareAccountClient {
 
     /** Read all pages, instead of silently truncating the library at 500 entries. */
     suspend fun synchronizeAll(profileId: String): List<JsonObject> {
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
         val all = mutableListOf<JsonObject>()
         var offset = 0
@@ -241,7 +270,7 @@ object CloudflareAccountClient {
     }
 
     suspend fun synchronizeRaw(profileId: String): JsonObject {
-        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val active = checkNotNull(currentSession) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}"))) { "Identifiant de profil invalide" }
         val response = httpRequestRaw(
             method = "GET", url = base() + "/v1/sync?profileId=$profileId",

@@ -1,13 +1,16 @@
-name: Vérifier la base de comptes Kovelyx
+name: Vérifier le schéma Cloudflare D1 des comptes Kovelyx
 
 on:
   push:
     branches: [main]
     paths:
+      - 'services/kovelyx-cloudflare/migrations/**'
       - 'services/kovelyx-cloud/**'
       - '.github/workflows/cloud-schema-check.yml'
   pull_request:
+    branches: [main]
     paths:
+      - 'services/kovelyx-cloudflare/migrations/**'
       - 'services/kovelyx-cloud/**'
       - '.github/workflows/cloud-schema-check.yml'
   workflow_dispatch:
@@ -17,14 +20,18 @@ permissions:
 
 jobs:
   contract:
-    name: Garde-fous SQL et script de sauvegarde
+    name: Vérifier le schéma D1 et l'abandon du serveur SQL historique
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Vérifier les politiques RLS et le modèle de données
-        run: python3 services/kovelyx-cloud/tests/check_contract.py
-      - name: Vérifier la syntaxe du script de sauvegarde
-        run: bash -n services/kovelyx-cloud/scripts/backup-database.sh
-      - name: Signaler les tests restants avant la mise en service
-        run: echo 'Contrôles statiques réussis. Aucun serveur déployé et aucun test runtime RLS effectué.'
+      - name: Contrôler les migrations Cloudflare D1 des comptes et de l'historique
+        run: python3 services/kovelyx-cloudflare/tests/check-d1-schema.py
+      - name: Refuser le retour des anciennes migrations PostgreSQL
+        run: |
+          if [[ -e services/kovelyx-cloud/supabase ]]; then
+            echo "::error::Des migrations de l'ancien serveur sont encore présentes."
+            exit 1
+          fi
+      - name: Rappeler la limite de la vérification
+        run: echo 'Schéma D1 validé statiquement ; les tests Worker locaux et réels se font dans les workflows Cloudflare dédiés.'

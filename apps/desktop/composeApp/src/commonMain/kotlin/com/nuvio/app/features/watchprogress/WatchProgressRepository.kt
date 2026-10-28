@@ -27,7 +27,7 @@ import com.nuvio.app.features.watching.application.WatchingActions
 import com.nuvio.app.features.watching.sync.ProgressDeltaEvent
 import com.nuvio.app.features.watching.sync.ProgressSyncRecord
 import com.nuvio.app.features.watching.sync.ProgressSyncAdapter
-import com.nuvio.app.features.watching.sync.SupabaseProgressSyncAdapter
+import com.nuvio.app.features.watching.sync.RemoteProgressSyncUnavailable
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.CoroutineScope
@@ -259,7 +259,7 @@ object WatchProgressRepository {
     private var deltaCursorEventId = 0L
     private var deltaInitialized = false
     private val remoteWriteDeduplicator = RemoteProgressWriteDeduplicator()
-    internal var syncAdapter: ProgressSyncAdapter = SupabaseProgressSyncAdapter
+    internal var syncAdapter: ProgressSyncAdapter = RemoteProgressSyncUnavailable
 
     init {
         ensureTrackingProvidersRegistered()
