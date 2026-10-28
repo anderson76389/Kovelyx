@@ -42,6 +42,14 @@ def unique_file(root, pattern):
     return files[0]
 
 
+def windows_package_names(sha, tag):
+    """CI artifacts use the source SHA; public updater assets use the version tag."""
+    for stem, extension in (("Kovelyx-Windows", "msi"),
+                            ("Kovelyx-Windows-Setup", "exe"),
+                            ("Kovelyx-Windows-Portable", "zip")):
+        yield f"{stem}-{sha}.{extension}", f"{stem}-{tag}.{extension}"
+
+
 def ensure_tag(tag, sha):
     # A draft release does not guarantee that the corresponding Git ref exists.
     existing = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/git/ref/tags/{tag}"],
@@ -116,9 +124,8 @@ def main():
             shutil.copyfile(apk, output / name)
         if not certificates[0] or certificates[0] != certificates[1]:
             raise RuntimeError("Les deux APK ne portent pas le même certificat Kovelyx")
-        for name in (f"Kovelyx-Windows-{tag}.msi", f"Kovelyx-Windows-Setup-{tag}.exe",
-                     f"Kovelyx-Windows-Portable-{tag}.zip"):
-            shutil.copyfile(unique_file(root / "windows", name), output / name)
+        for source_name, public_name in windows_package_names(sha, tag):
+            shutil.copyfile(unique_file(root / "windows", source_name), output / public_name)
         for path in list(output.iterdir()):
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
         notes = root / "notes.md"

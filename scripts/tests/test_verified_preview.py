@@ -40,6 +40,14 @@ class VerifiedPreviewTests(unittest.TestCase):
                 PREVIEW.ensure_tag("v1.1.744-alpha", "a" * 40)
             command.assert_not_called()
 
+    def test_windows_artifacts_are_mapped_from_commit_to_public_version(self):
+        sha = "a" * 40
+        self.assertEqual(list(PREVIEW.windows_package_names(sha, "v1.1.748-alpha")), [
+            (f"Kovelyx-Windows-{sha}.msi", "Kovelyx-Windows-v1.1.748-alpha.msi"),
+            (f"Kovelyx-Windows-Setup-{sha}.exe", "Kovelyx-Windows-Setup-v1.1.748-alpha.exe"),
+            (f"Kovelyx-Windows-Portable-{sha}.zip", "Kovelyx-Windows-Portable-v1.1.748-alpha.zip"),
+        ])
+
     def test_ambiguous_or_incomplete_packages_block_publication(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
