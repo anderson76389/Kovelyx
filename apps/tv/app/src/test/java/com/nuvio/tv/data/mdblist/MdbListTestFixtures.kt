@@ -34,7 +34,7 @@ internal class MdbListTestHarness {
     val engine = MdbListTestEngine()
     val configuration = MdbListConfiguration("public-client", "test")
     val http = MdbListHttpClient(engine, { now }, { sleeps += it; now += it })
-    val auth = MdbListAuthRepository(http, configuration, store) { now }
+    val auth = MdbListAuthRepository(http, configuration, store, nowEpochMs = { now })
     val api = MdbListApiClient(http, auth, store)
 
     fun reply(status: Int = 200, body: String = "{}", headers: Map<String, String> = emptyMap()) {
