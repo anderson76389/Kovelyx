@@ -124,7 +124,10 @@ class AuthManager @Inject constructor(
                 }
             }
         } else {
-            observeSessionStatus()
+            // Cloudflare is the only supported Kovelyx account backend.
+            // Never silently connect to the retired Supabase/Nuvio account service.
+            Log.e(TAG, "Serveur Kovelyx Cloudflare absent : authentification désactivée")
+            _authState.value = AuthState.SignedOut
         }
     }
 
@@ -337,6 +340,9 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
+        if (!CloudflareTvAccountClient.enabled) {
+            return Result.failure(IllegalStateException("Serveur de comptes Kovelyx Cloudflare non configuré"))
+        }
         if (CloudflareTvAccountClient.enabled) return runCatching {
             CloudflareTvAccountClient.signUp(email, password)
         }
@@ -371,6 +377,9 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
+        if (!CloudflareTvAccountClient.enabled) {
+            return Result.failure(IllegalStateException("Serveur de comptes Kovelyx Cloudflare non configuré"))
+        }
         if (CloudflareTvAccountClient.enabled) return runCatching {
             val account = CloudflareTvAccountClient.signIn(email, password)
             _authState.value = AuthState.FullAccount(userId = account.id, email = account.email)
