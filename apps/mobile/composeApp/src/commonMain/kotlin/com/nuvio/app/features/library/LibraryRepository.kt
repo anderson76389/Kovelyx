@@ -7,7 +7,7 @@ import com.nuvio.app.core.cloud.CloudflareDataSync
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.core.tracking.ensureTrackingProvidersRegistered
 import com.nuvio.app.features.library.sync.LibrarySyncAdapter
-import com.nuvio.app.features.library.sync.SupabaseLibrarySyncAdapter
+import com.nuvio.app.features.library.sync.RemoteLibrarySyncUnavailable
 import com.nuvio.app.features.library.sync.consumeCursorPages
 import com.nuvio.app.features.library.sync.libraryDeltaPageSize
 import com.nuvio.app.features.library.sync.librarySnapshotPageSize
@@ -66,7 +66,7 @@ object LibraryRepository {
     private val nuvioSyncMutex = Mutex()
     private val persistenceLock = SynchronizedObject()
     private val lastPersistedRevisionByProfile = mutableMapOf<Int, Long>()
-    internal var syncAdapter: LibrarySyncAdapter = SupabaseLibrarySyncAdapter
+    internal var syncAdapter: LibrarySyncAdapter = RemoteLibrarySyncUnavailable
 
     init {
         ensureTrackingProvidersRegistered()
