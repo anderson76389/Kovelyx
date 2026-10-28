@@ -2,6 +2,8 @@ package com.nuvio.app.core.network
 
 import androidx.compose.runtime.Composable
 import com.nuvio.app.features.addons.httpRequestRaw
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -131,6 +133,19 @@ object NetworkStatusRepository {
     }
 
     private suspend fun probeCondition(): NetworkCondition {
+        // Check the backend actually used by this build before unrelated public probes.
+        // A working Worker also proves connectivity when Google is blocked by the network.
+        if (CloudflareAccountClient.enabled) {
+            if (probeReachable(
+                    CloudflareConfig.URL.trimEnd('/') + "/ready",
+                    headers = mapOf("Accept" to "application/json", "User-Agent" to "Kovelyx-Client"),
+                    requireSuccess = true,
+                )) {
+                return NetworkCondition.Online
+            }
+            return if (probePublicInternet()) NetworkCondition.ServersUnreachable else NetworkCondition.NoInternet
+        }
+
         val internetReachable = probePublicInternet()
         if (!internetReachable) {
             return NetworkCondition.NoInternet
@@ -143,7 +158,10 @@ object NetworkStatusRepository {
             return NetworkCondition.Online
         }
 
-        val supabaseReachable = SupabaseEndpointConfig.restEndpointUrls().any { url ->
+        val endpoints = SupabaseEndpointConfig.restEndpointUrls()
+        // Guest builds have no account backend to contact.
+        if (endpoints.isEmpty()) return NetworkCondition.Online
+        val supabaseReachable = endpoints.any { url ->
             probeReachable(
                 url = url,
                 headers = mapOf("apikey" to configuration.publishableKey),
@@ -162,6 +180,7 @@ object NetworkStatusRepository {
     private suspend fun probeReachable(
         url: String,
         headers: Map<String, String> = emptyMap(),
+        requireSuccess: Boolean = false,
     ): Boolean {
         val response = withTimeoutOrNull(REQUEST_TIMEOUT_MS) {
             runCatching {
@@ -174,7 +193,7 @@ object NetworkStatusRepository {
             }.getOrNull()
         } ?: return false
 
-        return response.status in 100..599
+        return if (requireSuccess) response.status in 200..299 else response.status in 100..599
     }
 
     private fun NetworkCondition.isOfflineLike(): Boolean =

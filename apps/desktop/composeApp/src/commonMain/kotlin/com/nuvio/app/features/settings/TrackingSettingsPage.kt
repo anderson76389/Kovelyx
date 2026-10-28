@@ -467,7 +467,6 @@ private fun librarySourceOptions(
     mdblistConnected: Boolean,
 ): List<TrackingPickerOption<LibrarySourceMode>> {
     val traktAvailable = isTrackingBrandAvailable(TrackingBrand.TRAKT, traktConnected, simklConnected)
-    val simklAvailable = isTrackingBrandAvailable(TrackingBrand.SIMKL, traktConnected, simklConnected)
     return listOf(
         TrackingPickerOption(
             value = LibrarySourceMode.LOCAL,
@@ -480,13 +479,6 @@ private fun librarySourceOptions(
             description = stringResource(Res.string.settings_tracking_trakt_library_description),
             enabled = traktAvailable,
             unavailableReason = trackingUnavailableReason(TrackingBrand.TRAKT, traktAvailable),
-        ),
-        TrackingPickerOption(
-            value = LibrarySourceMode.SIMKL,
-            title = stringResource(Res.string.tracking_source_simkl),
-            description = stringResource(Res.string.settings_tracking_simkl_library_description),
-            enabled = simklAvailable,
-            unavailableReason = trackingUnavailableReason(TrackingBrand.SIMKL, simklAvailable),
         ),
         TrackingPickerOption(
             value = LibrarySourceMode.MDBLIST,
@@ -505,7 +497,6 @@ private fun watchProgressSourceOptions(
     mdblistConnected: Boolean,
 ): List<TrackingPickerOption<WatchProgressSource>> {
     val traktAvailable = isTrackingBrandAvailable(TrackingBrand.TRAKT, traktConnected, simklConnected)
-    val simklAvailable = isTrackingBrandAvailable(TrackingBrand.SIMKL, traktConnected, simklConnected)
     return listOf(
         TrackingPickerOption(
             value = WatchProgressSource.NUVIO_SYNC,
@@ -518,13 +509,6 @@ private fun watchProgressSourceOptions(
             description = stringResource(Res.string.settings_tracking_trakt_progress_description),
             enabled = traktAvailable,
             unavailableReason = trackingUnavailableReason(TrackingBrand.TRAKT, traktAvailable),
-        ),
-        TrackingPickerOption(
-            value = WatchProgressSource.SIMKL,
-            title = stringResource(Res.string.tracking_source_simkl),
-            description = stringResource(Res.string.settings_tracking_simkl_progress_description),
-            enabled = simklAvailable,
-            unavailableReason = trackingUnavailableReason(TrackingBrand.SIMKL, simklAvailable),
         ),
         TrackingPickerOption(
             value = WatchProgressSource.MDBLIST,
@@ -551,10 +535,6 @@ private fun recommendationsSourceOptions(
     traktConnected: Boolean,
 ): List<TrackingPickerOption<MoreLikeThisSourcePreference>> {
     val traktAvailable = isTrackingBrandAvailable(TrackingBrand.TRAKT, traktConnected, simklConnected = false)
-    val simklConnected = com.nuvio.app.features.simkl.SimklAuthRepository.let {
-        it.ensureLoaded()
-        it.isAuthenticated.value
-    }
     return listOf(
         TrackingPickerOption(
             value = MoreLikeThisSourcePreference.TMDB,
@@ -567,13 +547,6 @@ private fun recommendationsSourceOptions(
             description = stringResource(Res.string.settings_tracking_trakt_recommendations_description),
             enabled = traktAvailable,
             unavailableReason = trackingUnavailableReason(TrackingBrand.TRAKT, traktAvailable),
-        ),
-        TrackingPickerOption(
-            value = MoreLikeThisSourcePreference.SIMKL,
-            title = stringResource(Res.string.trakt_more_like_this_source_simkl),
-            description = stringResource(Res.string.settings_tracking_simkl_recommendations_description),
-            enabled = simklConnected,
-            unavailableReason = if (!simklConnected) stringResource(Res.string.settings_tracking_connect_first, "Simkl") else null,
         ),
     )
 }
@@ -629,10 +602,7 @@ internal fun effectiveTrackingRecommendationsSource(
         return MoreLikeThisSourcePreference.TMDB
     }
     if (source == MoreLikeThisSourcePreference.SIMKL) {
-        com.nuvio.app.features.simkl.SimklAuthRepository.ensureLoaded()
-        if (!com.nuvio.app.features.simkl.SimklAuthRepository.isAuthenticated.value) {
-            return MoreLikeThisSourcePreference.TMDB
-        }
+        return MoreLikeThisSourcePreference.TMDB
     }
     return source
 }

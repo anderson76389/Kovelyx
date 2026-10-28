@@ -22,6 +22,16 @@ internal object CloudflareTvAccountClient {
     data class Account(val id: String, val email: String, val bearerToken: String)
     val enabled: Boolean get() = BuildConfig.KOVELYX_CLOUD_URL.startsWith("https://")
     private val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val builder = request.newBuilder()
+                .header("Accept", "application/json")
+                .header("User-Agent", "Kovelyx-Client")
+            if (request.method != "GET" && request.method != "HEAD") {
+                builder.header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            }
+            chain.proceed(builder.build())
+        }
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .followRedirects(false)

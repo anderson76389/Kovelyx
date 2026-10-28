@@ -30,7 +30,7 @@ enum class WatchProgressSource {
 
     companion object {
         fun fromStorage(value: String?): WatchProgressSource {
-            return entries.firstOrNull { it.name == value } ?: TRAKT
+            return if (value == "SIMKL") NUVIO_SYNC else entries.firstOrNull { it.name == value } ?: TRAKT
         }
     }
 }
@@ -40,6 +40,15 @@ enum class MoreLikeThisSourcePreference {
     TMDB,
     SIMKL
 }
+
+// Keep old preference names readable without reactivating the retired provider.
+internal fun librarySourceModeFromStorage(value: String?): LibrarySourceMode =
+    if (value == "SIMKL") LibrarySourceMode.LOCAL
+    else LibrarySourceMode.entries.firstOrNull { it.name == value } ?: LibrarySourceMode.TRAKT
+
+internal fun recommendationsSourceFromStorage(value: String?): MoreLikeThisSourcePreference =
+    if (value == "SIMKL") MoreLikeThisSourcePreference.TMDB
+    else MoreLikeThisSourcePreference.entries.firstOrNull { it.name == value } ?: MoreLikeThisSourcePreference.TRAKT
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -121,7 +130,7 @@ class TraktSettingsDataStore @Inject constructor(
 
     suspend fun getLibrarySourceMode(profileId: Int): LibrarySourceMode {
         val stored = store(profileId).data.first()[librarySourceModeKey]
-        return LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
+        return librarySourceModeFromStorage(stored)
     }
 
     suspend fun setContinueWatchingDaysCap(days: Int) {
@@ -196,7 +205,7 @@ class TraktSettingsDataStore @Inject constructor(
     val librarySourceMode: Flow<LibrarySourceMode> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
             val stored = prefs[librarySourceModeKey]
-            LibrarySourceMode.entries.firstOrNull { it.name == stored } ?: DEFAULT_LIBRARY_SOURCE_MODE
+            librarySourceModeFromStorage(stored)
         }
     }
 
@@ -212,8 +221,7 @@ class TraktSettingsDataStore @Inject constructor(
     val moreLikeThisSource: Flow<MoreLikeThisSourcePreference> = profileManager.activeProfileId.flatMapLatest { pid ->
         factory.get(pid, FEATURE).data.map { prefs ->
             val stored = prefs[moreLikeThisSourceKey]
-            MoreLikeThisSourcePreference.entries.firstOrNull { it.name == stored }
-                ?: DEFAULT_MORE_LIKE_THIS_SOURCE
+            recommendationsSourceFromStorage(stored)
         }
     }
 

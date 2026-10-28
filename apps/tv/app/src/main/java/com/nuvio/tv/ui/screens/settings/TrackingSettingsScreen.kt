@@ -65,13 +65,12 @@ fun TrackingSettingsScreen(
 @Composable
 fun TrackingSettingsContent(
     traktViewModel: TraktViewModel = hiltViewModel(),
-    simklViewModel: SimklSettingsViewModel = hiltViewModel(),
     mdbListViewModel: MdbListTrackerViewModel = hiltViewModel(),
     trackingViewModel: TrackingSettingsViewModel = hiltViewModel(),
     initialFocusRequester: FocusRequester? = null
 ) {
     val traktState by traktViewModel.uiState.collectAsStateWithLifecycle()
-    val simklState by simklViewModel.uiState.collectAsStateWithLifecycle()
+    val simklState = remember { SimklSettingsUiState(credentialsConfigured = false) }
     val mdbListState by mdbListViewModel.uiState.collectAsStateWithLifecycle()
     val mdbListLibraryLists by mdbListViewModel.libraryLists.collectAsStateWithLifecycle()
     val trackingState by trackingViewModel.uiState.collectAsStateWithLifecycle()
@@ -165,14 +164,9 @@ fun TrackingSettingsContent(
                 }
             }
             TrackingProviderId.SIMKL -> {
-                if (false) { // SIMKL désactivé dans Kovelyx TV
-                    dismissOnConnected = null
-                } else {
-                    dismissOnConnected = provider
-                    if (simklState.mode == SimklConnectionMode.DISCONNECTED && !simklState.isLoading) {
-                        simklViewModel.onConnect()
-                    }
-                }
+                activeProvider = null
+                dismissOnConnected = null
+                restoreFocusTarget = null
             }
             TrackingProviderId.MDBLIST -> {
                 if (mdbListState.isConnected) {
@@ -201,7 +195,7 @@ fun TrackingSettingsContent(
         onTraktClick = { openProvider(TrackingProviderId.TRAKT) },
         onTraktCredentialsClick = { showTvTraktCredentials = true },
         onMdbListCredentialsClick = { showTvMdbListCredentials = true },
-        onSimklClick = { openProvider(TrackingProviderId.SIMKL) },
+        onSimklClick = {},
         onMdbListClick = { openProvider(TrackingProviderId.MDBLIST) },
         onLibrarySourceClick = {
             restoreFocusTarget = TrackingFocusTarget.LIBRARY
@@ -270,26 +264,7 @@ fun TrackingSettingsContent(
                 }
             )
         }
-        TrackingProviderId.SIMKL -> {
-            SimklAccountDialog(
-                state = simklState,
-                onStartConnection = simklViewModel::onConnect,
-                onRetryPolling = simklViewModel::onRetryPolling,
-                onSync = simklViewModel::onSyncNow,
-                onDisconnect = {
-                    activeProvider = null
-                    dismissOnConnected = null
-                    disconnectProvider = TrackingProviderId.SIMKL
-                },
-                onDismiss = {
-                    if (simklState.mode != SimklConnectionMode.CONNECTED) {
-                        simklViewModel.onCancel()
-                    }
-                    activeProvider = null
-                    dismissOnConnected = null
-                }
-            )
-        }
+        TrackingProviderId.SIMKL -> Unit
         TrackingProviderId.MDBLIST -> {
             MdbListAccountDialog(
                 state = mdbListState,
@@ -348,7 +323,7 @@ fun TrackingSettingsContent(
                         disconnectProvider = null
                         when (provider) {
                             TrackingProviderId.TRAKT -> traktViewModel.onDisconnectClick()
-                            TrackingProviderId.SIMKL -> simklViewModel.onDisconnect()
+                            TrackingProviderId.SIMKL -> Unit
                             TrackingProviderId.MDBLIST -> mdbListViewModel.onDisconnect()
                         }
                     },
@@ -435,10 +410,6 @@ fun TrackingSettingsContent(
                 SettingsPickerOption(
                     MoreLikeThisSourcePreference.TMDB,
                     stringResource(R.string.trakt_more_like_this_source_tmdb)
-                ),
-                SettingsPickerOption(
-                    MoreLikeThisSourcePreference.SIMKL,
-                    stringResource(R.string.trakt_more_like_this_source_simkl)
                 )
             ),
             selectedValue = traktState.moreLikeThisSource,

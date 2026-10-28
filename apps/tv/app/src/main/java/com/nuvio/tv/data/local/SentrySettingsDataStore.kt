@@ -27,9 +27,7 @@ class SentrySettingsDataStore @Inject constructor(
     private val dataStore = context.sentrySettingsDataStore
     private val enabledKey = booleanPreferencesKey("enabled")
 
-    val enabled: Flow<Boolean> = dataStore.data.map { prefs ->
-        prefs[enabledKey] ?: true
-    }
+    val enabled: Flow<Boolean> = dataStore.data.map { false }
 
     suspend fun isEnabled(): Boolean {
         return enabled.first()
@@ -37,7 +35,7 @@ class SentrySettingsDataStore @Inject constructor(
 
     suspend fun setEnabled(value: Boolean) {
         dataStore.edit { prefs ->
-            prefs[enabledKey] = value
+            prefs[enabledKey] = false
         }
     }
 }

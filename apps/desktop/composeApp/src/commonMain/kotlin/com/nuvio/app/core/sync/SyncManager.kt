@@ -402,7 +402,10 @@ object SyncManager {
         profileId: Int,
         reason: String,
     ) {
-        if (CloudflareAccountClient.enabled) return
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
         val authState = AuthRepository.state.value
         if (authState !is AuthState.Authenticated || authState.isAnonymous) return
         if (ProfileRepository.activeProfileId != profileId) return

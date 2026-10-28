@@ -2,7 +2,7 @@ name: Tester les fonctions Kotlin Android TV et Android mobile
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - '.github/workflows/functional-verification.yml'
       - 'apps/mobile/composeApp/src/**'

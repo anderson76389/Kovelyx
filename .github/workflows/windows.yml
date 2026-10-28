@@ -2,7 +2,7 @@ name: Kovelyx Windows - MSI et tests de packaging
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - 'apps/desktop/**'
       - '!apps/desktop/**/*.md'
