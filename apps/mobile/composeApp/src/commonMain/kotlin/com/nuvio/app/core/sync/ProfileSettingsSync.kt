@@ -3,7 +3,7 @@ package com.nuvio.app.core.sync
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
-import com.nuvio.app.core.network.SupabaseProvider
+import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.features.collection.CollectionMobileSettingsRepository
 import com.nuvio.app.features.collection.CollectionMobileSettingsStorage
 import com.nuvio.app.features.debrid.DebridSettingsRepository
@@ -35,8 +35,6 @@ import com.nuvio.app.features.trakt.TraktSettingsStorage
 import com.nuvio.app.features.tracking.TrackingSettingsRepository
 import com.nuvio.app.features.watchprogress.ContinueWatchingPreferencesStorage
 import com.nuvio.app.features.watchprogress.ContinueWatchingPreferencesRepository
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.rpc
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +58,9 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.intOrNull
 
 private const val PUSH_DEBOUNCE_MS = 1500L
 
@@ -118,14 +119,13 @@ object ProfileSettingsSync {
                 if (ProfileRepository.activeProfileId != profileId) return@withLock false
                 val localSignature = buildSignature(localBlob)
 
-                val params = buildJsonObject {
-                    put("p_profile_id", profileId)
-                    put("p_platform", MOBILE_SYNC_PLATFORM)
+                val cloudId = cloudProfileId(profileId)
+                val record = CloudflareAccountClient.synchronizeAll(cloudId).firstOrNull { row ->
+                    row["category"]?.jsonPrimitive?.content == "profile_settings" &&
+                        row["itemKey"]?.jsonPrimitive?.content == MOBILE_SYNC_PLATFORM
                 }
-                val result = SupabaseProvider.client.postgrest.rpc("sync_pull_profile_settings_blob", params)
                 if (ProfileRepository.activeProfileId != profileId) return@withLock false
-                val response = result.decodeList<SettingsBlobResponse>().firstOrNull()
-                val remoteJson = response?.settingsJson
+                val remoteJson = record?.get("payload")?.jsonObject?.get("settings")?.jsonObject
 
                 if (remoteJson == null) {
                     log.i { "pull(profileId=$profileId) — no remote settings blob found" }
@@ -224,15 +224,42 @@ object ProfileSettingsSync {
         }
     }
 
-    private suspend fun pushToRemoteLocked(profileId: Int, blob: MobileProfileSettingsBlob) {
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-            put("p_platform", MOBILE_SYNC_PLATFORM)
-            put("p_settings_json", json.encodeToJsonElement(MobileProfileSettingsBlob.serializer(), blob))
-            putSyncOriginClientId()
+    private fun cloudProfileId(profileId: Int): String {
+        val account = AuthRepository.state.value as? AuthState.Authenticated
+            ?: error("Compte Kovelyx non connecté")
+        check(!account.isAnonymous && CloudflareAccountClient.currentSession?.userId == account.userId) {
+            "Compte Cloudflare non authentifié"
         }
-        SupabaseProvider.client.postgrest.rpc("sync_push_profile_settings_blob", params)
-        log.d { "pushToRemoteLocked(profileId=$profileId) — success" }
+        val id = ProfileRepository.state.value.profiles
+            .firstOrNull { it.profileIndex == profileId }?.id.orEmpty()
+        check(id.matches(Regex("[a-fA-F0-9-]{36}"))) {
+            "Profil Cloudflare sans identifiant distant : synchronisation reportée"
+        }
+        return id
+    }
+
+    private suspend fun pushToRemoteLocked(profileId: Int, blob: MobileProfileSettingsBlob) {
+        val cloudId = cloudProfileId(profileId)
+        val platform = MOBILE_SYNC_PLATFORM
+        // Credentials and access tokens must never be stored in unencrypted D1.
+        // AllDebrid and other provider keys are deliberately local-only.
+        val safeBlob = blob.copy(features = blob.features.copy(
+            debridSettings = JsonObject(emptyMap()),
+            traktSettingsPayload = "",
+        ))
+        val safePayload = buildJsonObject {
+            put("settings", json.encodeToJsonElement(MobileProfileSettingsBlob.serializer(), safeBlob))
+        }
+        val existing = CloudflareAccountClient.synchronizeAll(cloudId).firstOrNull { row ->
+            row["category"]?.jsonPrimitive?.content == "profile_settings" &&
+                row["itemKey"]?.jsonPrimitive?.content == platform
+        }
+        val revision = existing?.get("revision")?.jsonPrimitive?.intOrNull ?: 0
+        CloudflareAccountClient.writeSync(
+            profileId = cloudId, category = "profile_settings", itemKey = platform,
+            payload = safePayload, revision = revision,
+        )
+        log.d { "Paramètres du profil $profileId synchronisés avec Cloudflare D1" }
     }
 
     private fun exportSettingsBlob(): MobileProfileSettingsBlob {
@@ -308,7 +335,7 @@ object ProfileSettingsSync {
         StreamBadgeSettingsStorage.replaceFromSyncPayload(blob.features.streamBadgeSettings)
         StreamBadgeSettingsRepository.onProfileChanged()
 
-        DebridSettingsStorage.replaceFromSyncPayload(
+        if (blob.features.debridSettings.isNotEmpty()) DebridSettingsStorage.replaceFromSyncPayload(
             preservingLocalProfileCredentials(
                 PROFILE_DEBRID_SETTINGS_FEATURE,
                 blob.features.debridSettings,
@@ -345,8 +372,10 @@ object ProfileSettingsSync {
         ContinueWatchingPreferencesStorage.savePayload(blob.features.continueWatchingSettingsPayload)
         ContinueWatchingPreferencesRepository.onProfileChanged()
 
-        TraktSettingsStorage.savePayload(blob.features.traktSettingsPayload)
-        TrackingSettingsRepository.onProfileChanged()
+        if (blob.features.traktSettingsPayload.isNotBlank()) {
+            TraktSettingsStorage.savePayload(blob.features.traktSettingsPayload)
+            TrackingSettingsRepository.onProfileChanged()
+        }
 
         TraktCommentsStorage.replaceFromSyncPayload(blob.features.traktCommentsSettings)
         TraktCommentsSettings.onProfileChanged()
@@ -408,11 +437,4 @@ private data class MobileProfileSettingsFeatures(
 @Serializable
 private data class NotificationsSettingsPayload(
     @SerialName("episode_release_alerts_enabled") val episodeReleaseAlertsEnabled: Boolean = false,
-)
-
-@Serializable
-private data class SettingsBlobResponse(
-    @SerialName("profile_id") val profileId: Int = 0,
-    @SerialName("settings_json") val settingsJson: JsonObject? = null,
-    @SerialName("updated_at") val updatedAt: String? = null,
 )
