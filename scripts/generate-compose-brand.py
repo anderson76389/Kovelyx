@@ -69,11 +69,35 @@ def wordmark(palette, *, gold=False):
         image.alpha_composite(ink, ((image.width-ink.width)//2, (image.height-ink.height)//2))
     return image
 
+def splash_icon(palette):
+    """Place the visible K inside Android's centered, circular splash safe area."""
+    icon = make_icon(palette, transparent=True)
+    ink = icon.crop(icon.getchannel('A').getbbox())
+    diameter = 512 * 2 / 3
+    scale = diameter / (ink.width ** 2 + ink.height ** 2) ** .5
+    ink = ink.resize((round(ink.width * scale), round(ink.height * scale)), Image.Resampling.LANCZOS)
+    image = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
+    image.alpha_composite(ink, ((512 - ink.width) // 2, (512 - ink.height) // 2))
+    return image
+
+
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--project',default='apps/desktop')
     args=ap.parse_args()
     project=Path(args.project).resolve()
+    tv_drawable = project / 'app/src/main/res/drawable'
+    if tv_drawable.is_dir():
+        for key in ('original', 'arctic_blue', 'emerald', 'rose_gold', 'graphite', 'gold'):
+            suffix = {'original': '', 'emerald': '_jade'}.get(key, '_' + key)
+            wordmark(PALETTES[key], gold=key == 'gold').save(tv_drawable / ('app_logo_wordmark' + suffix + '.png'))
+        splash_icon(PALETTES['original']).save(tv_drawable / 'app_logo_mark.png')
+        return
+    native_splash = project / 'composeApp/src/androidMain/res/drawable-nodpi'
+    if (native_splash / 'ic_splash_logo.png').exists():
+        for key in ('original', 'arctic_blue', 'emerald', 'rose_gold', 'copper', 'graphite'):
+            suffix = '' if key == 'original' else '_' + key
+            splash_icon(PALETTES[key]).save(native_splash / ('ic_splash_logo' + suffix + '.png'))
     common=project/'composeApp/src/commonMain/composeResources/drawable'
     desktop=project/'composeApp/src/desktopMain/resources/icons'
     common.mkdir(parents=True,exist_ok=True)
