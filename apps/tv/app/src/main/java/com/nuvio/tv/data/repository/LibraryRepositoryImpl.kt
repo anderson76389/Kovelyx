@@ -74,6 +74,9 @@ class LibraryRepositoryImpl @Inject constructor(
     var hasCompletedInitialPull = false
 
     private fun triggerRemoteSync(profileId: Int) {
+        // CloudflareTvDataSync observes local library mutations directly and
+        // handles uploads. Never call the retired Supabase RPC adapter.
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) return
         if (!hasCompletedInitialPull) return
         if (!authManager.isAuthenticated) return
         syncJob?.cancel()
