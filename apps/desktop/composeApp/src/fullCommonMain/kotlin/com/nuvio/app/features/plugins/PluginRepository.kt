@@ -55,6 +55,11 @@ private data class PluginPushItem(
     @SerialName("sort_order") val sortOrder: Int = 0,
 )
 
+private fun isShareablePluginUrl(url: String): Boolean =
+    url.startsWith("https://", ignoreCase = true) &&
+        !Regex("(?i)(api[_-]?key|access[_-]?token|password|secret|bearer|[?&]key=|[?&]token=)")
+            .containsMatchIn(url)
+
 private data class PluginPersistenceSnapshot(
     val profileId: Int,
     val generation: Long,
@@ -128,7 +133,10 @@ actual object PluginRepository {
             val rows = json.decodeFromJsonElement<List<PluginRow>>(payload)
 
 
-            val urls = dedupeManifestUrls(rows.map { it.url })
+            val keptPrivateUrls = _uiState.value.repositories
+                .map { it.manifestUrl }
+                .filterNot(::isShareablePluginUrl)
+            val urls = dedupeManifestUrls(rows.map { it.url } + keptPrivateUrls)
             val existingState = _uiState.value
             val existingReposByUrl = existingState.repositories.associateBy { it.manifestUrl }
             val nowEpochMs = currentEpochMillis()
@@ -515,11 +523,7 @@ actual object PluginRepository {
                 }
 
                 // Never sync repository URLs containing private credentials.
-                val shareable = repos.filter { repo ->
-                    repo.url.startsWith("https://", ignoreCase = true) &&
-                        !Regex("(?i)(api[_-]?key|access[_-]?token|password|secret|bearer|[?&]key=|[?&]token=)")
-                            .containsMatchIn(repo.url)
-                }
+                val shareable = repos.filter { isShareablePluginUrl(it.url) }
                 CloudflareProfileRecords.write(currentProfileId, "plugins", "ordered",
                     buildJsonObject { put("plugins", json.encodeToJsonElement(shareable)) })
             }.onFailure { error ->
