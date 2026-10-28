@@ -51,16 +51,16 @@ internal data class SurfacePullFreshness(
 @Singleton
 class StartupSyncService @Inject constructor(
     private val authManager: AuthManager,
-    private val pluginSyncService: PluginSyncService,
-    private val addonSyncService: AddonSyncService,
-    private val collectionSyncService: CollectionSyncService,
-    private val homeCatalogSettingsSyncService: HomeCatalogSettingsSyncService,
-    private val watchProgressSyncService: WatchProgressSyncService,
-    private val librarySyncService: LibrarySyncService,
-    private val watchedItemsSyncService: WatchedItemsSyncService,
-    private val profileSettingsSyncService: ProfileSettingsSyncService,
-    private val providerCredentialSyncService: ProviderCredentialSyncService,
-    private val profileSyncService: ProfileSyncService,
+    private val legacyPluginSyncServiceProvider: dagger.Lazy<PluginSyncService>,
+    private val legacyAddonSyncServiceProvider: dagger.Lazy<AddonSyncService>,
+    private val legacyCollectionSyncServiceProvider: dagger.Lazy<CollectionSyncService>,
+    private val legacyHomeCatalogSettingsSyncServiceProvider: dagger.Lazy<HomeCatalogSettingsSyncService>,
+    private val legacyWatchProgressSyncServiceProvider: dagger.Lazy<WatchProgressSyncService>,
+    private val legacyLibrarySyncServiceProvider: dagger.Lazy<LibrarySyncService>,
+    private val legacyWatchedItemsSyncServiceProvider: dagger.Lazy<WatchedItemsSyncService>,
+    private val legacyProfileSettingsSyncServiceProvider: dagger.Lazy<ProfileSettingsSyncService>,
+    private val legacyProviderCredentialSyncServiceProvider: dagger.Lazy<ProviderCredentialSyncService>,
+    private val legacyProfileSyncServiceProvider: dagger.Lazy<ProfileSyncService>,
     private val pluginManager: PluginManager,
     private val addonRepository: AddonRepositoryImpl,
     private val watchProgressRepository: WatchProgressRepositoryImpl,
@@ -71,6 +71,20 @@ class StartupSyncService @Inject constructor(
     private val cwEnrichmentCache: com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache,
     private val cloudflareSync: CloudflareTvDataSync
 ) {
+    // The Cloudflare account path needs CloudflareTvDataSync, not the retired RPC services.
+    // Construct legacy services only on an explicit legacy operation, avoiding Supabase
+    // client initialization and related memory work during normal TV startup.
+    private val pluginSyncService: PluginSyncService get() = legacyPluginSyncServiceProvider.get()
+    private val addonSyncService: AddonSyncService get() = legacyAddonSyncServiceProvider.get()
+    private val collectionSyncService: CollectionSyncService get() = legacyCollectionSyncServiceProvider.get()
+    private val homeCatalogSettingsSyncService: HomeCatalogSettingsSyncService get() = legacyHomeCatalogSettingsSyncServiceProvider.get()
+    private val watchProgressSyncService: WatchProgressSyncService get() = legacyWatchProgressSyncServiceProvider.get()
+    private val librarySyncService: LibrarySyncService get() = legacyLibrarySyncServiceProvider.get()
+    private val watchedItemsSyncService: WatchedItemsSyncService get() = legacyWatchedItemsSyncServiceProvider.get()
+    private val profileSettingsSyncService: ProfileSettingsSyncService get() = legacyProfileSettingsSyncServiceProvider.get()
+    private val providerCredentialSyncService: ProviderCredentialSyncService get() = legacyProviderCredentialSyncServiceProvider.get()
+    private val profileSyncService: ProfileSyncService get() = legacyProfileSyncServiceProvider.get()
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var startupPullJob: Job? = null
     private var activityPullJob: Job? = null

@@ -255,7 +255,8 @@ object NuvioExoPlayerPerformanceHelper {
             totalMem <= 0L -> 200 // Safe default
             totalMem < 1.15 * gb -> 100
             totalMem < 1.45 * gb -> 200
-            totalMem < 2.3 * gb -> 200
+            // Leave more headroom for the UI/graphics process on 2 GB TV boxes.
+            totalMem < 2.3 * gb -> 144
             totalMem < 3.2 * gb -> 500
             totalMem < 4.8 * gb -> 1000
             totalMem < 6.8 * gb -> 1600
@@ -273,7 +274,7 @@ object NuvioExoPlayerPerformanceHelper {
             totalMem <= 0L -> 260
             totalMem < 1.15 * gb -> 130
             totalMem < 1.45 * gb -> 260
-            totalMem < 2.3 * gb -> 260
+            totalMem < 2.3 * gb -> 208
             totalMem < 3.2 * gb -> 650
             totalMem < 4.8 * gb -> 1200
             totalMem < 6.8 * gb -> 2000

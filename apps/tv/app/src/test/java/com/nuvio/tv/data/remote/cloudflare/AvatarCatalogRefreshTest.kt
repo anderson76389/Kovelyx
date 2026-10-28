@@ -1,4 +1,4 @@
-package com.nuvio.tv.data.remote.supabase
+package com.nuvio.tv.data.remote.cloudflare
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

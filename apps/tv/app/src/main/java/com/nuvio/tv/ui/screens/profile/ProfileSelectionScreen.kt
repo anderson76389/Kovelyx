@@ -113,8 +113,8 @@ import androidx.tv.material3.Text
 import androidx.compose.ui.res.stringResource
 import com.nuvio.tv.R
 import com.nuvio.tv.core.sync.SetProfilePinResult
-import com.nuvio.tv.data.remote.supabase.AvatarCatalogItem
-import com.nuvio.tv.data.remote.supabase.ProfileBackgroundCatalogItem
+import com.nuvio.tv.data.remote.cloudflare.AvatarCatalogItem
+import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundCatalogItem
 import com.nuvio.tv.domain.model.UserProfile
 import com.nuvio.tv.ui.components.AvatarPickerGrid
 import com.nuvio.tv.ui.components.CustomProfileBackgroundImage

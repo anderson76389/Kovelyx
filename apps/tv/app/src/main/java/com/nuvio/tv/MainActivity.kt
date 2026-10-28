@@ -158,7 +158,7 @@ import com.nuvio.tv.data.local.LayoutPreferenceDataStore
 import com.nuvio.tv.data.local.StartupAuthNotice
 import com.nuvio.tv.data.local.ThemeDataStore
 import com.nuvio.tv.data.repository.MemberAccessRepository
-import com.nuvio.tv.data.remote.supabase.AvatarRepository
+import com.nuvio.tv.data.remote.cloudflare.AvatarRepository
 import com.nuvio.tv.domain.model.AppFont
 import com.nuvio.tv.domain.model.AppTheme
 import com.nuvio.tv.domain.model.CustomThemeColors
@@ -311,7 +311,7 @@ open class MainActivity : ComponentActivity() {
     lateinit var avatarRepository: AvatarRepository
 
     @Inject
-    lateinit var profileBackgroundRepository: com.nuvio.tv.data.remote.supabase.ProfileBackgroundRepository
+    lateinit var profileBackgroundRepository: com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundRepository
 
     @Inject
     lateinit var trailerPlayerPool: com.nuvio.tv.core.player.TrailerPlayerPool
@@ -472,7 +472,7 @@ open class MainActivity : ComponentActivity() {
                 }
             }
 
-            var avatarCatalog by remember { mutableStateOf(emptyList<com.nuvio.tv.data.remote.supabase.AvatarCatalogItem>()) }
+            var avatarCatalog by remember { mutableStateOf(emptyList<com.nuvio.tv.data.remote.cloudflare.AvatarCatalogItem>()) }
             val avatarMemberAccess by memberAccessRepository.access.collectAsState()
             val hasProfileAvatarAccess = avatarMemberAccess.entitlements
                 .includes(CosmeticEntitlement.PROFILE_AVATARS)

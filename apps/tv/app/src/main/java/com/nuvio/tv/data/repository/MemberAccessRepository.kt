@@ -6,7 +6,7 @@ import com.nuvio.tv.BuildConfig
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.data.local.DebugSettingsDataStore
 import com.nuvio.tv.data.local.MemberAccessDataStore
-import com.nuvio.tv.data.remote.supabase.MemberAccessRemoteDataSource
+import com.nuvio.tv.data.remote.cloudflare.MemberAccessRemoteDataSource
 import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.domain.model.MemberAccess
 import com.nuvio.tv.domain.model.MemberTier

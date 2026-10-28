@@ -80,8 +80,10 @@ private data class SessionRefreshOutcome(
 
 @Singleton
 class AuthManager @Inject constructor(
-    private val auth: Auth,
-    private val postgrest: Postgrest,
+    // Do not create legacy Supabase/Ktor clients just to open a Cloudflare account.
+    // Dagger resolves these only if a legacy action is explicitly called.
+    private val legacyAuthProvider: dagger.Lazy<Auth>,
+    private val legacyPostgrestProvider: dagger.Lazy<Postgrest>,
     private val httpClient: OkHttpClient,
     @param:Named("customServerAuth") private val customServerHttpClient: OkHttpClient,
     private val authSessionNoticeDataStore: AuthSessionNoticeDataStore,
@@ -93,7 +95,9 @@ class AuthManager @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val json = Json { ignoreUnknownKeys = true }
     private val refreshMutex = Mutex()
-    private val sessionValidator = AuthSessionValidator(auth)
+    private val auth: Auth get() = legacyAuthProvider.get()
+    private val postgrest: Postgrest get() = legacyPostgrestProvider.get()
+    private val sessionValidator by lazy { AuthSessionValidator(auth) }
     private val startupAuthLock = Any()
     private val authHttpClient = if (serverConfiguration.isCustom) customServerHttpClient else httpClient
 
@@ -120,7 +124,10 @@ class AuthManager @Inject constructor(
                 }
             }
         } else {
-            observeSessionStatus()
+            // Cloudflare is the only supported Kovelyx account backend.
+            // Never silently connect to the retired Supabase/Nuvio account service.
+            Log.e(TAG, "Serveur Kovelyx Cloudflare absent : authentification désactivée")
+            _authState.value = AuthState.SignedOut
         }
     }
 
@@ -333,6 +340,9 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signUpWithEmail(email: String, password: String): Result<Unit> {
+        if (!CloudflareTvAccountClient.enabled) {
+            return Result.failure(IllegalStateException("Serveur de comptes Kovelyx Cloudflare non configuré"))
+        }
         if (CloudflareTvAccountClient.enabled) return runCatching {
             CloudflareTvAccountClient.signUp(email, password)
         }
@@ -367,6 +377,9 @@ class AuthManager @Inject constructor(
     }
 
     suspend fun signInWithEmail(email: String, password: String): Result<Unit> {
+        if (!CloudflareTvAccountClient.enabled) {
+            return Result.failure(IllegalStateException("Serveur de comptes Kovelyx Cloudflare non configuré"))
+        }
         if (CloudflareTvAccountClient.enabled) return runCatching {
             val account = CloudflareTvAccountClient.signIn(email, password)
             _authState.value = AuthState.FullAccount(userId = account.id, email = account.email)

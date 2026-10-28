@@ -23,20 +23,20 @@ class TrackingProgressRefreshCoordinatorTest {
             authenticated = true,
             refreshFailure = traktFailure
         )
-        val simkl = FakeProgressProvider(
-            id = TrackingProviderId.SIMKL,
+        val mdblist = FakeProgressProvider(
+            id = TrackingProviderId.MDBLIST,
             authenticated = true
         )
         val coordinator = TrackingProgressRefreshCoordinator(
-            TrackingProgressProviderRegistry(setOf(simkl, trakt))
+            TrackingProgressProviderRegistry(setOf(mdblist, trakt))
         )
 
         val failures = coordinator.refreshConnected(TrackingRefreshIntent.INVALIDATED)
 
         assertEquals(1, trakt.refreshCount)
-        assertEquals(1, simkl.refreshCount)
+        assertEquals(1, mdblist.refreshCount)
         assertEquals(TrackingRefreshIntent.INVALIDATED, trakt.lastIntent)
-        assertEquals(TrackingRefreshIntent.INVALIDATED, simkl.lastIntent)
+        assertEquals(TrackingRefreshIntent.INVALIDATED, mdblist.lastIntent)
         assertEquals(listOf(TrackingProviderId.TRAKT), failures.map { it.providerId })
         assertTrue(failures.single().cause === traktFailure)
     }
@@ -44,22 +44,22 @@ class TrackingProgressRefreshCoordinatorTest {
     @Test
     fun `skips disconnected providers`() = runTest {
         val trakt = FakeProgressProvider(TrackingProviderId.TRAKT, authenticated = false)
-        val simkl = FakeProgressProvider(TrackingProviderId.SIMKL, authenticated = true)
+        val mdblist = FakeProgressProvider(TrackingProviderId.MDBLIST, authenticated = true)
         val coordinator = TrackingProgressRefreshCoordinator(
-            TrackingProgressProviderRegistry(setOf(trakt, simkl))
+            TrackingProgressProviderRegistry(setOf(trakt, mdblist))
         )
 
         val failures = coordinator.refreshConnected(TrackingRefreshIntent.AUTOMATIC)
 
         assertEquals(0, trakt.refreshCount)
-        assertEquals(1, simkl.refreshCount)
+        assertEquals(1, mdblist.refreshCount)
         assertTrue(failures.isEmpty())
     }
 
     @Test
     fun `rethrows cancellation`() = runTest {
         val provider = FakeProgressProvider(
-            id = TrackingProviderId.SIMKL,
+            id = TrackingProviderId.MDBLIST,
             authenticated = true,
             refreshFailure = CancellationException("cancel")
         )
@@ -77,7 +77,7 @@ class TrackingProgressRefreshCoordinatorTest {
 
     @Test
     fun `default provider policy is neutral`() = runTest {
-        val provider = FakeProgressProvider(TrackingProviderId.SIMKL, authenticated = true)
+        val provider = FakeProgressProvider(TrackingProviderId.MDBLIST, authenticated = true)
         val completed = progress(position = 90L, duration = 100L)
         val incomplete = progress(position = 50L, duration = 100L)
 

@@ -8,10 +8,10 @@ import com.nuvio.tv.core.sync.ProfileSettingsSyncService
 import com.nuvio.tv.core.sync.ProfileSyncService
 import com.nuvio.tv.core.sync.SetProfilePinResult
 import com.nuvio.tv.data.local.ProfileLockStateDataStore
-import com.nuvio.tv.data.remote.supabase.AvatarCatalogItem
-import com.nuvio.tv.data.remote.supabase.AvatarRepository
-import com.nuvio.tv.data.remote.supabase.ProfileBackgroundCatalogItem
-import com.nuvio.tv.data.remote.supabase.ProfileBackgroundRepository
+import com.nuvio.tv.data.remote.cloudflare.AvatarCatalogItem
+import com.nuvio.tv.data.remote.cloudflare.AvatarRepository
+import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundCatalogItem
+import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundRepository
 import com.nuvio.tv.data.remote.supabase.SupabaseProfilePinVerifyResult
 import com.nuvio.tv.data.repository.MemberAccessRepository
 import com.nuvio.tv.domain.model.CosmeticEntitlement

@@ -96,10 +96,17 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
     }
 
     override fun newImageLoader(context: android.content.Context): ImageLoader {
+        // The Freebox Pop and similar Android TV players have 2 GB of physical RAM.
+        // Avoid saturating their limited CPU, decoder threads and memory with offscreen posters.
+        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val memoryInfo = ActivityManager.MemoryInfo().apply { activityManager.getMemoryInfo(this) }
+        val totalRamMb = memoryInfo.totalMem / (1024L * 1024L)
+        val constrainedTv = activityManager.isLowRamDevice || totalRamMb in 1L..2300L
+
         val imageOkHttpClient by lazy {
             val imageDispatcher = okhttp3.Dispatcher().apply {
-                maxRequests = 32
-                maxRequestsPerHost = 16
+                maxRequests = if (constrainedTv) 12 else 32
+                maxRequestsPerHost = if (constrainedTv) 6 else 16
             }
             OkHttpClient.Builder()
                 .dispatcher(imageDispatcher)
@@ -146,17 +153,10 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
                 )
             }
             .memoryCache {
-                val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                val memoryInfo = ActivityManager.MemoryInfo()
-                activityManager.getMemoryInfo(memoryInfo)
-                val totalRamMb = memoryInfo.totalMem / (1024 * 1024)
-                // Low-RAM devices (≤2GB): use 0.15 — larger cache reduces GC pressure
-                // from rapid bitmap eviction during scrolling.
-                // Mid-range devices (≤3GB): use 0.20 for decent image caching.
-                // Normal devices (>3GB): use 0.25 for snappy image loading.
-                // - allowHardware(false) keeps bitmaps on heap instead of GPU memory
+                // MemoryCache.maxSizePercent is a fraction of this app's memory class,
+                // not a fraction of device RAM. Preserve space for catalog state and playback.
                 val cachePercent = when {
-                    totalRamMb <= 2048 -> 0.15
+                    constrainedTv -> 0.10
                     totalRamMb <= 3072 -> 0.20
                     else -> 0.25
                 }
@@ -174,7 +174,7 @@ class NuvioApplication : Application(), SingletonImageLoader.Factory {
             .precision(coil3.size.Precision.INEXACT)
             .allowHardware(false)
             .allowRgb565(imagePerformancePreferences.rgb565Enabled)
-            .bitmapFactoryMaxParallelism(4)
+            .bitmapFactoryMaxParallelism(if (constrainedTv) 2 else 4)
             .build()
     }
 }
