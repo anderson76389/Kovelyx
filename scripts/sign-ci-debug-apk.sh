@@ -21,7 +21,7 @@ esac
 
 : "${KOVELYX_RELEASE_STORE_FILE:?Clé permanente non restaurée}"
 : "${KOVELYX_RELEASE_STORE_PASSWORD:?Mot de passe de la clé manquant}"
-: "${KOVELYX_RELEASE_KEY_PASSWORD:?Mot de passe de l'alias manquant}"
+: "${KOVELYX_RELEASE_KEY_PASSWORD:?Mot de passe pour alias manquant}"
 : "${KOVELYX_RELEASE_KEY_ALIAS:?Alias de signature manquant}"
 
 mapfile -d '' apks < <(find "$output" -maxdepth 1 -type f -name '*.apk' -print0)

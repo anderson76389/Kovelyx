@@ -58,6 +58,9 @@ jobs:
       mobile: ${{ steps.paths.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
+      - name: Vérifier la syntaxe du script de signature avant compilation
+        shell: bash
+        run: bash -n scripts/sign-ci-debug-apk.sh
       - uses: dorny/paths-filter@v3
         id: paths
         with:

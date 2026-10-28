@@ -281,7 +281,7 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          & .\gradlew.bat :composeApp:desktopTest --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
+          & .\gradlew.bat :composeApp:desktopTest --no-configuration-cache --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
           if ($LASTEXITCODE -ne 0) {
             '### Tests Desktop en échec — distribution bloquée' >> $env:GITHUB_STEP_SUMMARY
             exit $LASTEXITCODE
