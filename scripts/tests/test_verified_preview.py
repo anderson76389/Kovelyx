@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
 
 SPEC = importlib.util.spec_from_file_location(
     "preview", Path(__file__).resolve().parents[1] / "publish-verified-preview.py")
@@ -20,6 +22,23 @@ class VerifiedPreviewTests(unittest.TestCase):
                     dict(correct, head_repository={"full_name": "someone/else"}, run_number=12)]
         self.assertEqual(correct, PREVIEW.matching_run(rejected + [correct], PREVIEW.WINDOWS, "a" * 40))
         self.assertIsNone(PREVIEW.matching_run(rejected, PREVIEW.WINDOWS, "a" * 40))
+
+    def test_a_missing_tag_is_created_and_verified_before_a_draft_release(self):
+        sha = "a" * 40
+        with patch.object(PREVIEW.subprocess, "run", return_value=SimpleNamespace(returncode=1)), \
+             patch.object(PREVIEW, "gh") as command, \
+             patch.object(PREVIEW, "api", return_value={"object": {"type": "commit", "sha": sha}}):
+            PREVIEW.ensure_tag("v1.1.744-alpha", sha)
+            self.assertIn("POST", command.call_args.args)
+            self.assertIn("sha=" + sha, command.call_args.args)
+
+    def test_an_existing_tag_cannot_be_repointed_to_different_code(self):
+        with patch.object(PREVIEW.subprocess, "run", return_value=SimpleNamespace(returncode=0)), \
+             patch.object(PREVIEW, "gh") as command, \
+             patch.object(PREVIEW, "api", return_value={"object": {"type": "commit", "sha": "b" * 40}}):
+            with self.assertRaises(RuntimeError):
+                PREVIEW.ensure_tag("v1.1.744-alpha", "a" * 40)
+            command.assert_not_called()
 
     def test_ambiguous_or_incomplete_packages_block_publication(self):
         with tempfile.TemporaryDirectory() as directory:

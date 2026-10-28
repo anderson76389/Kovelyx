@@ -20,6 +20,11 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'apps/**'
+      - 'scripts/**'
+      - '.github/workflows/build.yml'
+      - '.github/workflows/windows.yml'
+      - '.github/workflows/functional-verification.yml'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values/**'

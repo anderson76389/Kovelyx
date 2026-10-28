@@ -16,6 +16,8 @@ on:
       - 'scripts/generate-windows-icon.py'
       - 'scripts/generate-compose-brand.py'
       - 'scripts/desktop-release-version.py'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/windows.yml'
   pull_request:
     branches: [main]

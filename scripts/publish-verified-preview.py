@@ -42,6 +42,20 @@ def unique_file(root, pattern):
     return files[0]
 
 
+def ensure_tag(tag, sha):
+    # A draft release does not guarantee that the corresponding Git ref exists.
+    existing = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/git/ref/tags/{tag}"],
+                              text=True, capture_output=True)
+    if existing.returncode != 0:
+        gh("api", "--method", "POST", f"repos/{REPOSITORY}/git/refs",
+           "-f", f"ref=refs/tags/{tag}", "-f", f"sha={sha}")
+    ref = api(f"git/ref/tags/{tag}")["object"]
+    if ref["type"] == "tag":
+        ref = api(f"git/tags/{ref['sha']}")["object"]
+    if ref["sha"] != sha:
+        raise RuntimeError("Le tag existant désigne un autre commit")
+
+
 def main():
     if os.environ.get("GITHUB_REPOSITORY") != REPOSITORY:
         raise RuntimeError("Dépôt de publication inattendu")
@@ -115,6 +129,7 @@ def main():
             "- Corrections des textes français.\n\n"
             f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
+        ensure_tag(tag, sha)
         existing = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/releases/tags/{tag}"],
                                   text=True, capture_output=True)
         if existing.returncode != 0:
