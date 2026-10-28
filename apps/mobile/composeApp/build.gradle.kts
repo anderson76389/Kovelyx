@@ -442,6 +442,8 @@ kotlin {
                 implementation(libs.compose.uiToolingPreview)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activity.compose)
+                // ProcessLifecycleOwner is used for foreground sync events.
+                implementation("androidx.lifecycle:lifecycle-process:2.9.2")
                 implementation(libs.androidx.core.splashscreen)
                 implementation(libs.androidx.work.runtime)
                 implementation(libs.coil.gif)

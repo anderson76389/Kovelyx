@@ -13,6 +13,7 @@ internal actual fun currentDeviceClientMetadata(): DeviceClientMetadata {
         .ifBlank { Build.VERSION.SDK_INT.toString() }
 
     return DeviceClientMetadata(
+        clientName = "Kovelyx Android",
         deviceName = deviceName,
         platform = "Android $osVersion",
     )
