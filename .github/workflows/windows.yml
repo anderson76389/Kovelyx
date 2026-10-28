@@ -34,10 +34,12 @@ permissions:
 concurrency:
   group: kovelyx-windows-${{ github.ref }}
   # The packaging job can take >30 min; preserve it for a useful diagnostic.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
 
 jobs:
   desktop:
+    # The push run validates this same owned branch and produces the installers.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository || github.head_ref != 'fix/cloudflare-network-status-and-settings' }}
     name: Compiler Kovelyx Windows
     runs-on: windows-latest
     timeout-minutes: 90

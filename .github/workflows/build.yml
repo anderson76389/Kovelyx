@@ -46,7 +46,7 @@ on:
 concurrency:
   group: kovelyx-build-${{ github.ref }}
   # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
 
 permissions:
   contents: read
@@ -55,6 +55,8 @@ permissions:
 
 jobs:
   changes:
+    # This owned branch already builds on push; avoid duplicating APKs for its PR.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository || github.head_ref != 'fix/cloudflare-network-status-and-settings' }}
     name: Détecter les plateformes modifiées
     runs-on: ubuntu-latest
     outputs:
