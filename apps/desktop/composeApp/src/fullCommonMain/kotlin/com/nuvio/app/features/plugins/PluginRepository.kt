@@ -1,15 +1,12 @@
 package com.nuvio.app.features.plugins
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.core.network.SupabaseProvider
+import com.nuvio.app.core.cloud.CloudflareProfileRecords
 import com.nuvio.app.features.addons.encodeUnsafeHttpUrlCharacters
 import com.nuvio.app.features.addons.httpGetText
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.tmdb.TmdbService
 import com.nuvio.app.features.plugins.runtime.PluginRuntime
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Order
-import io.github.jan.supabase.postgrest.rpc
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -31,6 +28,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.plugins_error_enter_repo_url
 import nuvio.composeapp.generated.resources.plugins_error_enter_valid_url
@@ -121,13 +120,13 @@ actual object PluginRepository {
         val effectiveProfileId = resolveEffectiveProfileId(profileId)
         ensureStateLoadedForProfile(effectiveProfileId)
         runCatching {
-            val rows = SupabaseProvider.client.postgrest
-                .from("plugins")
-                .select {
-                    filter { eq("profile_id", currentProfileId) }
-                    order("sort_order", Order.ASCENDING)
-                }
-                .decodeList<PluginRow>()
+            val record = CloudflareProfileRecords.lookup(
+                CloudflareProfileRecords.records(effectiveProfileId), "plugins", "ordered"
+            ) ?: return@runCatching
+            val payload = record["payload"]?.jsonObject?.get("plugins")
+                ?: error("Liste d'extensions Cloudflare manquante")
+            val rows = json.decodeFromJsonElement<List<PluginRow>>(payload)
+
 
             val urls = dedupeManifestUrls(rows.map { it.url })
             val existingState = _uiState.value
@@ -515,11 +514,14 @@ actual object PluginRepository {
                     )
                 }
 
-                val params = buildJsonObject {
-                    put("p_profile_id", currentProfileId)
-                    put("p_plugins", json.encodeToJsonElement(repos))
+                // Never sync repository URLs containing private credentials.
+                val shareable = repos.filter { repo ->
+                    repo.url.startsWith("https://", ignoreCase = true) &&
+                        !Regex("(?i)(api[_-]?key|access[_-]?token|password|secret|bearer|[?&]key=|[?&]token=)")
+                            .containsMatchIn(repo.url)
                 }
-                SupabaseProvider.client.postgrest.rpc("sync_push_plugins", params)
+                CloudflareProfileRecords.write(currentProfileId, "plugins", "ordered",
+                    buildJsonObject { put("plugins", json.encodeToJsonElement(shareable)) })
             }.onFailure { error ->
                 log.e(error) { "pushToServer failed" }
             }
