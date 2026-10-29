@@ -71,7 +71,8 @@ def find_release(tag):
 
 def recoverable_source(current_sha):
     allowed = {"scripts/publish-verified-preview.py", "scripts/tests/test_verified_preview.py",
-               ".github/workflows/recover-verified-preview.yml"}
+               ".github/workflows/recover-verified-preview.yml", "scripts/prune-releases.py",
+               "scripts/tests/test_release_retention.py"}
     for run in api("actions/runs?per_page=100")["workflow_runs"]:
         if (run.get("name") != "Compiler Kovelyx (APK et diagnostic Windows)"
                 or run.get("event") != "push"
@@ -196,7 +197,8 @@ def main():
             else:
                 gh("release", "upload", tag, str(path), "--repo", REPOSITORY)
         gh("release", "edit", tag, "--repo", REPOSITORY, "--draft=false", "--prerelease", "--latest=false")
-        print(f"Préversion complète publiée : {tag}")
+        print(f"Préversion complète publiée : {tag}", flush=True)
+        subprocess.run(["python3", "scripts/prune-releases.py"], check=True)
 
 
 if __name__ == "__main__":

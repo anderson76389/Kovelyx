@@ -7,6 +7,8 @@ on:
       - 'scripts/publish-verified-preview.py'
       - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/recover-verified-preview.yml'
+      - 'scripts/prune-releases.py'
+      - 'scripts/tests/test_release_retention.py'
   workflow_dispatch:
 
 permissions:
@@ -29,7 +31,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Tester la reprise et les contrôles de provenance
-        run: python3 scripts/tests/test_verified_preview.py
+        run: |
+          python3 scripts/tests/test_verified_preview.py
+          python3 scripts/tests/test_release_retention.py
       - name: Reprendre uniquement les paquets identiques déjà vérifiés
         env:
           GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
