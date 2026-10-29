@@ -92,6 +92,10 @@ def main():
             suffix = {'original': '', 'emerald': '_jade'}.get(key, '_' + key)
             wordmark(PALETTES[key], gold=key == 'gold').save(tv_drawable / ('app_logo_wordmark' + suffix + '.png'))
         splash_icon(PALETTES['original']).save(tv_drawable / 'app_logo_mark.png')
+        # Keep the repository presentation aligned with the installed TV branding.
+        brand = project / 'assets/brand'
+        if brand.is_dir():
+            wordmark(PALETTES['original']).save(brand / 'app_logo_wordmark.png')
         return
     native_splash = project / 'composeApp/src/androidMain/res/drawable-nodpi'
     if (native_splash / 'ic_splash_logo.png').exists():
@@ -117,8 +121,6 @@ def main():
             wordmark(palette).save(common/'app_logo_wordmark.png')
             opaque.save(desktop/'kovelyx.png')
             opaque.save(desktop/'kovelyx.ico',format='ICO',sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
-            transparent.save(desktop/'nuvio-app-icon-transparent.png')  # compatibility path; artwork is Kovelyx
-            transparent.save(desktop/'nuvio-app-icon-transparent.ico',format='ICO',sizes=[(16,16),(32,32),(48,48),(128,128),(256,256)])
     print('Generated six authentic Kovelyx icons, transparent variants and seven wordmarks.')
 
 if __name__ == '__main__': main()

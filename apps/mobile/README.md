@@ -17,7 +17,7 @@ Sur un système disposant de Java 21 et du SDK Android, à la racine de `apps/mo
 
 L'APK est produit dans `androidApp/build/outputs/apk/full/debug/`.
 
-**Attention :** l'APK de débogage est expérimental et signé avec une clé de test. Il ne garantit ni la stabilité de l'application ni une migration des données vers une future APK de production. Le système de compte universel Kovelyx n'est pas encore disponible. Un serveur de compte Nuvio n'est pas requis pour compiler l'APK.
+Les APK publiés par le pipeline Kovelyx utilisent un certificat permanent. Une compilation locale Debug sans cette configuration peut utiliser une autre clé. Le compte et la synchronisation utilisent le Worker Cloudflare configuré à la compilation ; aucun compte Nuvio n’est requis. L’installation et la synchronisation entre appareils physiques restent à valider.
 
 Les noms de packages historiques du code et les crédits de licences peuvent encore citer Nuvio, dont les attributions légales doivent être conservées.
 
@@ -32,7 +32,7 @@ et/ou démarre sur émulateur ; elle ne valide pas toutes les fonctions réseau.
 Avant une annonce de version stable : vérifier la recherche et l'affichage de
 films/séries, le lecteur et les sous-titres, les extensions, les préférences,
 l'import des catalogues, les profils, les connexions et la récupération des
-mises à jour. **Les comptes Kovelyx seront traités en dernier.**
+mises à jour. Le serveur Cloudflare et les identifiants des fournisseurs doivent être correctement configurés.
 
 Les nouvelles builds Android sont générées par le
 [workflow Android](https://github.com/anderson76389/Kovelyx/actions/workflows/build.yml)

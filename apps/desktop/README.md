@@ -1,6 +1,6 @@
 # Kovelyx pour Windows 10 et 11
 
-**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 est la seule version PC activement maintenue. Linux est abandonné ; Android et Android TV seront traités ensuite.
+**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 est la seule version PC activement maintenue. Les versions Android mobile et Android TV sont maintenues dans ce même dépôt.
 
 ## Télécharger et tester
 
@@ -17,11 +17,11 @@ Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-
 
 ### Comptes et synchronisation
 
-**Paramètres → Suivi** contient les cartes **Trakt, Simkl et MDBList**. Les cartes de connexion utilisent les flux d’autorisation des fournisseurs : code d’appareil, navigateur, synchronisation et déconnexion. Sous Windows, le navigateur par défaut est ouvert lorsque le fournisseur a réellement transmis son URL d'autorisation. Une carte dont l'identifiant OAuth est manquant est volontairement désactivée : afficher un formulaire fictif ne connecterait aucun compte.
+**Paramètres → Suivi** contient les cartes **Trakt et MDBList**. Les cartes de connexion utilisent les flux d’autorisation des fournisseurs : code d’appareil, navigateur, synchronisation et déconnexion. Sous Windows, le navigateur par défaut est ouvert lorsque le fournisseur a réellement transmis son URL d'autorisation. Une carte dont l'identifiant OAuth est manquant est volontairement désactivée : afficher un formulaire fictif ne connecterait aucun compte.
 
-Pour les distributions personnalisées, la configuration peut utiliser `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET`, `SIMKL_CLIENT_ID` et `MDBLIST_CLIENT_ID` dans `apps/desktop/local.properties` avant compilation (ne jamais publier ce fichier dans Git). Les valeurs sont indispensables aux API des fournisseurs et ne peuvent pas être fabriquées par Kovelyx.
+Pour les distributions personnalisées, la configuration peut utiliser `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` et `MDBLIST_CLIENT_ID` dans `apps/desktop/local.properties` avant compilation (ne jamais publier ce fichier dans Git). Les valeurs sont indispensables aux API des fournisseurs et ne peuvent pas être fabriquées par Kovelyx.
 
-**Compte Kovelyx :** la création d'un seul compte synchronisé entre Windows, Android et TV nécessite un serveur de comptes Kovelyx opérationnel. Aucun serveur par défaut n'est déployé dans les versions publiques actuelles. Le mode invité conserve les données locales ; il ne synchronise pas les profils entre appareils.
+**Compte Kovelyx :** la création d'un seul compte synchronisé entre Windows, Android et TV nécessite un serveur de comptes Kovelyx opérationnel. Le backend utilisé dépend du Worker Cloudflare configuré à la compilation. Le mode invité conserve les données locales ; il ne synchronise pas les profils entre appareils.
 
 Le **Setup.exe est autonome pour l'installation** : ce n'est pas un exécutable portable à lancer sans installation. Aucun fichier n'est annoncé disponible avant la réussite des vérifications et son enregistrement dans les artefacts.
 
