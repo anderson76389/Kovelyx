@@ -151,10 +151,11 @@ class CloudflareTvDataSync @Inject constructor(
         try { profileMedia.synchronize() }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (error: Exception) { Log.w(TAG, "Images Cloudflare différées", error) }
-        try { addons.synchronizeCloudAddons() }
+        val rows = CloudflareTvAccountClient.syncRows(uuid)
+        try { addons.synchronizeCloudAddons(uuid, rows) }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (error: Exception) { Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
-        val remote = CloudflareTvAccountClient.syncRows(uuid).associateBy {
+        val remote = rows.associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }
         val deletedKeys = flushCloudflareWatchDeletes(

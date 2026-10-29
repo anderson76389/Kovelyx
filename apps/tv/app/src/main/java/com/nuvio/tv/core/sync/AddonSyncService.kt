@@ -45,12 +45,13 @@ class AddonSyncService @Inject constructor(
     private val cloudEngine = CloudAddonEngine({ key -> cloudStore.getString(key, null) },
         { key, value -> cloudStore.edit().putString(key, value).apply() })
 
-    suspend fun synchronizeCloudAddons() = cloudMutex.withLock {
+    suspend fun synchronizeCloudAddons(knownProfileId: String? = null, knownRows: List<JSONObject>? = null) = cloudMutex.withLock {
         val account = CloudflareTvAccountClient.account ?: return@withLock
         val activeId = profileManager.activeProfileId.value
         val effectiveId = if (profileManager.activeProfile?.usesPrimaryAddons == true) 1 else activeId
         val profile = profileManager.profiles.value.firstOrNull { it.id == effectiveId } ?: return@withLock
-        val profiles = CloudflareTvAccountClient.cloudProfiles()
+        val profiles = if (profile.cloudProfileId == knownProfileId && knownProfileId != null)
+            listOf(knownProfileId to profile.name) else CloudflareTvAccountClient.cloudProfiles()
         val matching = profiles.filter { it.second.equals(profile.name, true) }
         val uuid = if (profile.cloudProfileId != null) {
             profiles.firstOrNull { it.first == profile.cloudProfileId }?.first ?: return@withLock
@@ -64,7 +65,7 @@ class AddonSyncService @Inject constructor(
         check(valid())
         if (profile.cloudProfileId != uuid) profileManager.linkCloudProfile(effectiveId, uuid)
         val captured = addonPreferences.cloudSnapshot(effectiveId)
-        val row = CloudflareTvAccountClient.syncRows(uuid).firstOrNull {
+        val row = (if (uuid == knownProfileId && knownRows != null) knownRows else CloudflareTvAccountClient.syncRows(uuid)).firstOrNull {
             it.optString("category") == "addons" && it.optString("itemKey") == "installed"
         }
         val remote = row?.let {

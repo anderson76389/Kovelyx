@@ -52,6 +52,28 @@ jobs:
           print('Accès de déploiement : ' + ('configuré' if not missing else 'non configuré ; champs manquants : ' + ', '.join(missing)))
           print('Ce contrôle ne déploie rien et ne lit aucun compte utilisateur.')
           PYDEPLOY
+      - name: Observer le schéma réellement déployé (lecture seule)
+        if: github.event_name == 'push'
+        env:
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+        run: |
+          python3 - <<'PYLIVE'
+          import json, os, urllib.request
+          base = os.environ['KOVELYX_CLOUDFLARE_URL'].rstrip('/')
+          try:
+              request = urllib.request.Request(base + '/ready', headers={'Accept':'application/json', 'User-Agent':'Kovelyx-readonly-diagnostic'})
+              with urllib.request.urlopen(request, timeout=15) as response:
+                  body = json.load(response)
+                  schema = str(body.get('schema', 'absent'))[:80]
+                  print('Serveur réel : HTTP', response.status, '; schéma :', schema)
+                  if body.get('status') == 'ok' and schema == '0003_profile_media':
+                      print('Routes images du nouveau schéma disponibles ; échange authentifié sur appareils à vérifier séparément.')
+                  else:
+                      print('Images privées : mise à jour du Worker et migration 0003 encore nécessaires.')
+          except Exception as error:
+              print('Diagnostic distant indisponible :', type(error).__name__)
+              print('Aucune validation du serveur réel ne peut être déduite des tests locaux.')
+          PYLIVE
       - name: Vérifier la syntaxe Python et le schéma SQLite D1
         run: |
           python -m py_compile scripts/configure-cloud-build.py

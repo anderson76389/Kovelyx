@@ -74,8 +74,10 @@ class CloudflareTvProfileMediaSync @Inject constructor(
                     row.optString("backgroundPath").takeIf { it != "null" && it.isNotBlank() })
                 check(CloudflareTvAccountClient.account?.id == account.id) { "Compte modifié" }
                 val current = profiles.profiles.value.firstOrNull { it.id == local.id } ?: continue
-                if (current.avatarUrl != avatar || current.profileBackgroundUrl != background || current.cloudProfileId != uuid)
-                    profiles.updateProfile(current.copy(avatarUrl = avatar, profileBackgroundUrl = background, cloudProfileId = uuid))
+                val nextAvatar = if (current.avatarUrl == local.avatarUrl) avatar else current.avatarUrl
+                val nextBackground = if (current.profileBackgroundUrl == local.profileBackgroundUrl) background else current.profileBackgroundUrl
+                if (current.avatarUrl != nextAvatar || current.profileBackgroundUrl != nextBackground || current.cloudProfileId != uuid)
+                    profiles.updateProfile(current.copy(avatarUrl = nextAvatar, profileBackgroundUrl = nextBackground, cloudProfileId = uuid))
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (error: Exception) {
                 Log.w("KovelyxTvMedia", "Images en attente, fichiers locaux conservés", error)

@@ -123,7 +123,7 @@ try {
   const body = await ready.json().catch(() => ({}));
   if (!ready.ok || body.status !== "ok" || body.schema !== "0003_profile_media")
     throw new Error("HTTP " + ready.status + ", schema=" + String(body.schema || "absent"));
-  console.log("✅ Production prête : /ready indique comptes Better Auth et D1 0002.");
+  console.log("✅ Production prête : /ready indique comptes Better Auth et D1 0003 (images privées).");
 } catch (error) {
   console.error("❌ La production n'est pas encore vérifiée : " + error.message);
   console.error("Contrôlez l'URL KOVELYX_CLOUDFLARE_URL et le Worker après déploiement.");

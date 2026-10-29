@@ -400,7 +400,7 @@ object AddonRepository {
     }
 
     /** Shares exact manifest URLs (including personal configuration), order and enabled flags. */
-    suspend fun synchronizeCloudAddons() = cloudMutex.withLock {
+    suspend fun synchronizeCloudAddons(knownProfileId: String? = null, knownRows: List<kotlinx.serialization.json.JsonObject>? = null) = cloudMutex.withLock {
         val account = CloudflareAccountClient.currentSession ?: return@withLock
         initialize()
         val activeId = ProfileRepository.activeProfileId
@@ -414,7 +414,7 @@ object AddonRepository {
         val captured = snapshot()
         fun valid() = CloudflareAccountClient.currentSession?.userId == account.userId &&
             ProfileRepository.activeProfileId == activeId && currentProfileId == effectiveId
-        val row = CloudflareAccountClient.synchronizeAll(uuid).firstOrNull {
+        val row = (if (knownProfileId == uuid && knownRows != null) knownRows else CloudflareAccountClient.synchronizeAll(uuid)).firstOrNull {
             it["category"]?.jsonPrimitive?.content == "addons" && it["itemKey"]?.jsonPrimitive?.content == "installed"
         }
         val remote = row?.let {

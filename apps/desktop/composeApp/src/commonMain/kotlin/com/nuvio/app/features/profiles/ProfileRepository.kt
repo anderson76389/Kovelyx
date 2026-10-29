@@ -206,15 +206,22 @@ object ProfileRepository {
         if (!CloudflareAccountClient.enabled) return
         val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId ?: return
         try {
-            val images = CloudflareProfileMediaSync.synchronize(_state.value.profiles, reportFailure)
+            val captured = _state.value.profiles
+            val images = CloudflareProfileMediaSync.synchronize(captured, reportFailure)
+            val beforeById = captured.associateBy { it.id }
             if ((AuthRepository.state.value as? AuthState.Authenticated)?.userId != owner) return
             val byId = images.associateBy { it.id }
             val merged = _state.value.profiles.map { current ->
                 val image = byId[current.id]
-                if (image == null) current else current.copy(avatarUrl = image.avatarUrl, profileBackgroundUrl = image.profileBackgroundUrl)
+                val before = beforeById[current.id]
+                if (image == null || before == null) current else current.copy(
+                    avatarUrl = if (current.avatarUrl == before.avatarUrl) image.avatarUrl else current.avatarUrl,
+                    profileBackgroundUrl = if (current.profileBackgroundUrl == before.profileBackgroundUrl) image.profileBackgroundUrl else current.profileBackgroundUrl)
             }
-            _state.value = _state.value.copy(profiles = merged, activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex })
-            persist()
+            if (merged != _state.value.profiles) {
+                _state.value = _state.value.copy(profiles = merged, activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex })
+                persist()
+            }
         } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
         catch (error: Exception) {
             log.w(error) { "Images Cloudflare différées ; profils locaux conservés" }
