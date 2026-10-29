@@ -172,7 +172,7 @@ Les données **restent chez Cloudflare, pas sur GitHub Pages**. Exportez réguli
 | Route | Méthode | Protection | État |
 |---|---|---|---|
 | `/health` | GET | Publique | Implémentée |
-| `/ready` | GET | Publique, lecture seule | Contrôle D1, tables Better Auth et migration `0002` ; HTTP 503 si non prêt |
+| `/ready` | GET | Publique, lecture seule | Contrôle D1, tables Better Auth et migration `0003` (images privées) ; HTTP 503 si non prêt |
 | `/api/auth/sign-up/email` | POST | Inscriptions fermées par défaut | Implémentée via Better Auth |
 | `/api/auth/sign-in/email` | POST | Rate limiting Better Auth / D1 | Implémentée |
 | `/api/auth/get-session` | GET | Session Better Auth | Implémentée |

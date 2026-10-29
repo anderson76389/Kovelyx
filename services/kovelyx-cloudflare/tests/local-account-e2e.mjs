@@ -242,6 +242,19 @@ try {
   const chunked=await putPicture(alice.token,imageVersion,largePicture);
   assert.equal(chunked.status,201,"Photos are chunked below D1's cell limit");
   const chunkVersion=(await chunked.json()).version;
+  // Background and avatar have independent files and profile-version columns.
+  const backgroundUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=background";
+  const backgroundPicture=new Uint8Array([...picture,0]);
+  const backgroundPut=await fetch(backgroundUrl,{method:"PUT",headers:{Authorization:"Bearer "+tvToken,
+    Origin:base,"Content-Type":"image/png","If-Match":"none"},body:backgroundPicture});
+  assert.equal(backgroundPut.status,201);
+  const backgroundVersion=(await backgroundPut.json()).version;
+  const imageProfiles=await req("/v1/profiles","GET",null,alice.token);
+  assert.equal(imageProfiles.data.profiles[0].avatarPath,chunkVersion);
+  assert.equal(imageProfiles.data.profiles[0].backgroundPath,backgroundVersion);
+  const backgroundGet=await fetch(backgroundUrl,{headers:{Authorization:"Bearer "+alice.token}});
+  assert.equal(backgroundGet.status,200);
+  assert.deepEqual(new Uint8Array(await backgroundGet.arrayBuffer()),backgroundPicture);
   const roundTrip=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}});
   assert.deepEqual(new Uint8Array(await roundTrip.arrayBuffer()),largePicture);
   assert.equal((await putPicture(alice.token,chunkVersion,new Uint8Array(2_097_153))).status,413);
@@ -253,6 +266,9 @@ try {
   assert.equal((await fetch(mediaUrl,{method:"DELETE",headers:{Authorization:"Bearer "+alice.token,Origin:base,"If-Match":chunkVersion}})).status,409);
   assert.equal((await fetch(mediaUrl,{method:"DELETE",headers:{Authorization:"Bearer "+alice.token,Origin:base,"If-Match":winnerVersion}})).status,200);
   assert.equal((await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}})).status,404);
+
+  assert.equal((await fetch(backgroundUrl,{headers:{Authorization:"Bearer "+tvToken}})).status,200,
+    "Deleting the avatar must not remove the background");
 
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);
