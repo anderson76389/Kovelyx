@@ -533,7 +533,7 @@ object SyncManager {
             periodicNuvioSyncProfileId = profileId
             periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
                 while (isActive) {
-                    delay(PERIODIC_NUVIO_SYNC_PULL_INTERVAL_MS)
+                    delay(60_000L)
                     val state = AuthRepository.state.value as? AuthState.Authenticated
                     if (state != null && !state.isAnonymous &&
                         ProfileRepository.activeProfileId == profileId) {

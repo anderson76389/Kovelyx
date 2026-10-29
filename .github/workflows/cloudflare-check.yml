@@ -1,15 +1,21 @@
 name: Vérifier Kovelyx Cloudflare (Workers et D1)
 on:
   push:
-    branches: [main]
+    branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - 'services/kovelyx-cloudflare/**'
+      - 'apps/**/core/cloud/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/sync/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/data/repository/WatchProgressRepositoryImpl.kt'
       - 'scripts/configure-cloud-build.py'
       - '.github/workflows/cloudflare-check.yml'
   pull_request:
     branches: [main]
     paths:
       - 'services/kovelyx-cloudflare/**'
+      - 'apps/**/core/cloud/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/core/sync/**'
+      - 'apps/tv/app/src/main/java/com/nuvio/tv/data/repository/WatchProgressRepositoryImpl.kt'
       - 'scripts/configure-cloud-build.py'
       - '.github/workflows/cloudflare-check.yml'
   workflow_dispatch:

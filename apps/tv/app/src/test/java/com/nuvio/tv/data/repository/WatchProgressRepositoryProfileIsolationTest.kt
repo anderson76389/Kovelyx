@@ -1,5 +1,7 @@
 package com.nuvio.tv.data.repository
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvDataSync
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.sync.WatchProgressSyncService
@@ -18,6 +20,9 @@ import com.nuvio.tv.domain.repository.MetaRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -99,7 +104,34 @@ class WatchProgressRepositoryProfileIsolationTest {
         }
     }
 
-    private fun harness(activeProfileId: Int): Harness {
+    @Test
+    fun `cloudflare playback does not invoke legacy RPCs on every position tick`() = runTest {
+        mockkObject(CloudflareTvAccountClient)
+        try {
+            every { CloudflareTvAccountClient.enabled } returns true
+            val h = harness(1, authenticated = true)
+            h.repository.saveProgress(progress("movie", 2_000L, 10_000L), profileId = 1, syncRemote = true)
+            coVerify(exactly = 0) { h.legacyProgress.pushSingleToRemote(any(), any(), any()) }
+            coVerify(exactly = 0) { h.legacyProgress.pushToRemote(any()) }
+            // The durable preference observer groups these ticks into one sampled snapshot.
+            verify(exactly = 0) { h.cloud.request(any()) }
+        } finally { unmockkObject(CloudflareTvAccountClient) }
+    }
+
+    @Test
+    fun `cloudflare removal queues its own sync without calling legacy deletes`() = runTest {
+        mockkObject(CloudflareTvAccountClient)
+        try {
+            every { CloudflareTvAccountClient.enabled } returns true
+            val h = harness(1, authenticated = true)
+            h.repository.removeProgress("movie", null, null)
+            coVerify(exactly = 0) { h.legacyProgress.deleteFromRemote(any(), any()) }
+            coVerify { h.mutationStore.queueProgressDeletes(any(), 1) }
+            verify { h.cloud.request(1) }
+        } finally { unmockkObject(CloudflareTvAccountClient) }
+    }
+
+    private fun harness(activeProfileId: Int, authenticated: Boolean = false): Harness {
         val activeProfile = MutableStateFlow(activeProfileId)
         val profileManager = mockk<ProfileManager>()
         every { profileManager.activeProfileId } returns activeProfile
@@ -109,15 +141,17 @@ class WatchProgressRepositoryProfileIsolationTest {
         val watchedPreferences = mockk<WatchedItemsPreferences>(relaxed = true)
         val mutationStore = mockk<WatchStateMutationStore>(relaxed = true)
         val authManager = mockk<AuthManager>(relaxed = true)
-        every { authManager.isAuthenticated } returns false
+        every { authManager.isAuthenticated } returns authenticated
         val traktSettings = mockk<TraktSettingsDataStore>(relaxed = true)
         every { traktSettings.watchProgressSource } returns MutableStateFlow(WatchProgressSource.NUVIO_SYNC)
 
+        val cloud = mockk<CloudflareTvDataSync>(relaxed = true)
+        val legacyProgress = mockk<WatchProgressSyncService>(relaxed = true)
         val repository = WatchProgressRepositoryImpl(
             watchProgressPreferences = progressPreferences,
             traktSettingsDataStore = traktSettings,
             layoutPreferenceDataStore = mockk<LayoutPreferenceDataStore>(relaxed = true),
-            watchProgressSyncService = mockk<WatchProgressSyncService>(relaxed = true),
+            watchProgressSyncService = legacyProgress,
             watchedItemsPreferences = watchedPreferences,
             watchedItemsSyncService = mockk<WatchedItemsSyncService>(relaxed = true),
             authManager = authManager,
@@ -127,6 +161,7 @@ class WatchProgressRepositoryProfileIsolationTest {
             trackingProgressProviders = TrackingProgressProviderRegistry(emptySet()),
             trackingHistoryWriters = TrackingHistoryWriterRegistry(emptySet()),
             mutationStore = mutationStore,
+            cloudflareSync = cloud,
             serverWatched = mockk(relaxed = true)
         )
         return Harness(
@@ -134,7 +169,9 @@ class WatchProgressRepositoryProfileIsolationTest {
             activeProfile = activeProfile,
             progressPreferences = progressPreferences,
             watchedPreferences = watchedPreferences,
-            mutationStore = mutationStore
+            mutationStore = mutationStore,
+            legacyProgress = legacyProgress,
+            cloud = cloud
         )
     }
 
@@ -159,6 +196,8 @@ class WatchProgressRepositoryProfileIsolationTest {
         val activeProfile: MutableStateFlow<Int>,
         val progressPreferences: WatchProgressPreferences,
         val watchedPreferences: WatchedItemsPreferences,
-        val mutationStore: WatchStateMutationStore
+        val mutationStore: WatchStateMutationStore,
+        val legacyProgress: WatchProgressSyncService,
+        val cloud: CloudflareTvDataSync
     )
 }

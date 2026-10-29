@@ -11,4 +11,7 @@ internal actual object SyncClientIdentityStorage {
     actual fun saveClientId(clientId: String) {
         store.putString("client_instance_id", clientId)
     }
+
+    actual fun loadCloudflareDeletes(): String? = store.getString("cloudflare_deletes")
+    actual fun saveCloudflareDeletes(payload: String) { store.putString("cloudflare_deletes", payload) }
 }
