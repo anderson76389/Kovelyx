@@ -47,6 +47,8 @@ internal fun JsonObjectBuilder.putSyncOriginClientId() {
 internal expect object SyncClientIdentityStorage {
     fun loadClientId(): String?
     fun saveClientId(clientId: String)
+    fun loadCloudflareAddons(key: String): String?
+    fun saveCloudflareAddons(key: String, payload: String)
     fun loadCloudflareDeletes(): String?
     fun saveCloudflareDeletes(payload: String)
 }

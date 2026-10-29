@@ -1,5 +1,17 @@
 package com.nuvio.tv.core.sync
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import com.kovelyx.cloud.addons.CloudAddon
+import com.kovelyx.cloud.addons.CloudAddonEngine
+import com.kovelyx.cloud.addons.CloudAddonRow
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
+import org.json.JSONObject
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
@@ -24,8 +36,51 @@ class AddonSyncService @Inject constructor(
     private val authManager: AuthManager,
     private val addonPreferences: AddonPreferences,
     private val profileManager: ProfileManager,
+    @ApplicationContext context: Context,
     private val syncClientIdentity: SyncClientIdentity
 ) {
+    private val cloudMutex = Mutex()
+    private val cloudJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val cloudStore = context.getSharedPreferences("kovelyx_cloud_addons", Context.MODE_PRIVATE)
+    private val cloudEngine = CloudAddonEngine({ key -> cloudStore.getString(key, null) },
+        { key, value -> cloudStore.edit().putString(key, value).apply() })
+
+    suspend fun synchronizeCloudAddons() = cloudMutex.withLock {
+        val account = CloudflareTvAccountClient.account ?: return@withLock
+        val activeId = profileManager.activeProfileId.value
+        val effectiveId = if (profileManager.activeProfile?.usesPrimaryAddons == true) 1 else activeId
+        val profile = profileManager.profiles.value.firstOrNull { it.id == effectiveId } ?: return@withLock
+        val profiles = CloudflareTvAccountClient.cloudProfiles()
+        val matching = profiles.filter { it.second.equals(profile.name, true) }
+        val uuid = if (profile.cloudProfileId != null) {
+            profiles.firstOrNull { it.first == profile.cloudProfileId }?.first ?: return@withLock
+        } else when {
+            matching.size == 1 -> matching.single().first
+            profiles.size == 1 && effectiveId == 1 -> profiles.single().first
+            matching.isEmpty() && profiles.size < 8 -> CloudflareTvAccountClient.createCloudProfile(profile.name)
+            else -> return@withLock
+        }
+        fun valid() = CloudflareTvAccountClient.account?.id == account.id && profileManager.activeProfileId.value == activeId
+        check(valid())
+        if (profile.cloudProfileId != uuid) profileManager.linkCloudProfile(effectiveId, uuid)
+        val captured = addonPreferences.cloudSnapshot(effectiveId)
+        val row = CloudflareTvAccountClient.syncRows(uuid).firstOrNull {
+            it.optString("category") == "addons" && it.optString("itemKey") == "installed"
+        }
+        val remote = row?.let {
+            val items = if (it.optBoolean("deleted")) emptyList() else
+                cloudJson.decodeFromString<List<CloudAddon>>(it.getJSONObject("payload").getJSONArray("items").toString())
+            CloudAddonRow(it.optInt("revision"), items)
+        }
+        check(valid())
+        cloudEngine.synchronize("${account.id}.$uuid", captured, remote, write = { items, revision ->
+            check(valid())
+            val payload = buildJsonObject { put("items", cloudJson.encodeToJsonElement(items)) }.toString()
+            require(payload.length <= 32000) { "Configuration des extensions trop volumineuse" }
+            CloudflareTvAccountClient.writeSync(uuid, "addons", "installed", JSONObject(payload), revision)
+        }, apply = { items -> valid() && addonPreferences.applyCloudSnapshot(effectiveId, captured, items) })
+    }
+
     private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
         return try {
             block()
@@ -40,6 +95,7 @@ class AddonSyncService @Inject constructor(
      * Uses a SECURITY DEFINER function to handle RLS for linked devices.
      */
     suspend fun pushToRemote(): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext runCatching { synchronizeCloudAddons() }
         try {
             val activeProfile = profileManager.activeProfile
             val profileId = profileManager.activeProfileId.value
@@ -87,6 +143,10 @@ class AddonSyncService @Inject constructor(
     }
 
     suspend fun getRemoteAddonUrls(): Result<List<String>> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext runCatching {
+            synchronizeCloudAddons()
+            addonPreferences.installedAddonUrls.first()
+        }
         try {
             val effectiveUserId = authManager.getEffectiveUserId(fallbackToOwnIdOnFailure = false)
                 ?: return@withContext Result.failure(

@@ -18,12 +18,16 @@ class AndroidProfileMediaFiles(context: Context) : ProfileMediaFiles {
     private val state = this.context.getSharedPreferences("kovelyx_cloud_profile_media", Context.MODE_PRIVATE)
     private val folder = File(this.context.filesDir, "kovelyx-cloud-profile-media")
     private val json = Json { ignoreUnknownKeys = true }
+    private val stateLock = Any()
     private fun stateKey(key: String) = sha256(key.toByteArray())
-    override fun loadState(key: String): ProfileMediaState? = state.getString(stateKey(key), null)?.let {
-        json.decodeFromString<ProfileMediaState>(it)
+    override fun loadState(key: String): ProfileMediaState? = synchronized(stateLock) {
+        state.getString(stateKey(key), null)?.let { json.decodeFromString<ProfileMediaState>(it) }
     }
-    override fun saveState(key: String, state: ProfileMediaState) {
+    override fun saveState(key: String, state: ProfileMediaState) = synchronized(stateLock) {
         this.state.edit().putString(stateKey(key), json.encodeToString(state)).apply()
+    }
+    override fun compareAndSaveState(key: String, expected: ProfileMediaState?, next: ProfileMediaState): Boolean = synchronized(stateLock) {
+        if (loadState(key) != expected) false else { saveState(key, next); true }
     }
     private fun privateFile(uri: String): File {
         require(uri.startsWith("file:")) { "Le fichier de profil doit être une copie locale privée." }

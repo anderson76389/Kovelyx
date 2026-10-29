@@ -7,6 +7,8 @@ player correctness or external OAuth/API availability.
 """
 from pathlib import Path
 import re
+import importlib.util
+from PIL import Image, ImageChops
 import sys
 import xml.etree.ElementTree as ET
 
@@ -44,9 +46,15 @@ SPLASHES = {
 def verify() -> None:
     for name in ARTWORK:
         assert (MOBILE / name).read_bytes() == (DESKTOP / name).read_bytes(), f"Art différent : {name}"
+    spec = importlib.util.spec_from_file_location("brand", ROOT / "scripts/generate-compose-brand.py")
+    brand = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(brand)
     for output, source in SPLASHES.items():
         path = ANDROID / "drawable-nodpi" / output
-        assert path.read_bytes() == (DESKTOP / source).read_bytes(), f"Splash différent : {output}"
+        palette = source.removeprefix("app_icon_").removesuffix(".png")
+        with Image.open(path) as actual:
+            expected = brand.splash_icon(brand.PALETTES[palette])
+            assert actual.size == expected.size and ImageChops.difference(actual.convert("RGBA"), expected).getbbox(alpha_only=False) is None, f"Splash différent : {output}"
         assert not path.with_suffix(".webp").exists(), f"Ancien splash présent : {output}"
 
     manifest = MANIFEST.read_text("utf-8")

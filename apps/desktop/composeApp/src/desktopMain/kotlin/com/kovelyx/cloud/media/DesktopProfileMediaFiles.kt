@@ -19,11 +19,15 @@ internal class DesktopProfileMediaFiles : ProfileMediaFiles {
     private val settings = DesktopStorage.store("kovelyx_cloud_profile_media")
     private val folder get() = DesktopStorage.rootDir.resolve("cloud-profile-media")
     private val json = Json { ignoreUnknownKeys = true }
-    override fun loadState(key: String): ProfileMediaState? = settings.getString(sha256(key.toByteArray()))?.let {
-        json.decodeFromString<ProfileMediaState>(it)
+    private val stateLock = Any()
+    override fun loadState(key: String): ProfileMediaState? = synchronized(stateLock) {
+        settings.getString(sha256(key.toByteArray()))?.let { json.decodeFromString<ProfileMediaState>(it) }
     }
-    override fun saveState(key: String, state: ProfileMediaState) {
+    override fun saveState(key: String, state: ProfileMediaState) = synchronized(stateLock) {
         settings.putString(sha256(key.toByteArray()), json.encodeToString(state))
+    }
+    override fun compareAndSaveState(key: String, expected: ProfileMediaState?, next: ProfileMediaState): Boolean = synchronized(stateLock) {
+        if (loadState(key) != expected) false else { saveState(key, next); true }
     }
     private fun privateFile(uri: String): Path {
         require(uri.startsWith("file:"))

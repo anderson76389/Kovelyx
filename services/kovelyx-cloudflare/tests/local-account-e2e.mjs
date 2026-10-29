@@ -211,6 +211,16 @@ try {
     ...watched,itemKey:"movie:private",payload:{access_token:"private"}
   },alice.token)).status,400,"Credential fields must not sync");
 
+  // Exact configured addon URL, ordered list and removal cross two independent sessions.
+  const addons={profileId,category:"addons",itemKey:"installed",revision:0,deleted:false,
+    payload:{items:[{url:"https://addon.example/config%2FA/manifest.json?lang=fr",name:"Personnel",enabled:false}]}};
+  assert.equal((await req("/v1/sync","POST",addons,alice.token)).status,201);
+  const tvAddons=await req("/v1/sync?profileId="+profileId+"&limit=25&offset=25","GET",null,tvToken);
+  assert.deepEqual(tvAddons.data.items.find(x=>x.category==="addons").payload,addons.payload);
+  assert.equal((await req("/v1/sync","POST",{...addons,revision:1,payload:{items:[]}},tvToken)).status,200);
+  assert.equal((await req("/v1/sync","POST",addons,alice.token)).status,409,"Old device cannot resurrect removed addons with a stale revision");
+  assert.equal((await req("/v1/sync","POST",addons,bob.token)).status,404);
+
   // Private user pictures are real bytes, isolated by owner and protected by revisions.
   const mediaUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=avatar";
   const picture=Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aM5sAAAAASUVORK5CYII=","base64"));

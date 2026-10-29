@@ -40,6 +40,7 @@ class CloudflareTvDataSync @Inject constructor(
     private val progress: WatchProgressPreferences,
     private val watched: WatchedItemsPreferences,
     private val mutations: WatchStateMutationStore,
+    private val addons: AddonSyncService,
     private val profileMedia: CloudflareTvProfileMediaSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -150,6 +151,9 @@ class CloudflareTvDataSync @Inject constructor(
         try { profileMedia.synchronize() }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (error: Exception) { Log.w(TAG, "Images Cloudflare différées", error) }
+        try { addons.synchronizeCloudAddons() }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
         val remote = CloudflareTvAccountClient.syncRows(uuid).associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }

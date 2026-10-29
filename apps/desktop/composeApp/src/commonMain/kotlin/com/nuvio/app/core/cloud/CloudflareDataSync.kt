@@ -107,6 +107,9 @@ object CloudflareDataSync {
             throw IllegalStateException("Profil Cloudflare non encore lié : reprise de synchronisation nécessaire")
         }
         ProfileRepository.syncCloudflareProfileImages()
+        try { com.nuvio.app.features.addons.AddonRepository.synchronizeCloudAddons() }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { log.w(error) { "Extensions Cloudflare différées, configuration locale conservée" } }
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
         val remote = records.associateBy {
             it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +

@@ -5,12 +5,17 @@ import kotlinx.serialization.Serializable
 const val MAX_PROFILE_MEDIA_BYTES = 2 * 1024 * 1024
 
 @Serializable
-data class ProfileMediaState(val uri: String? = null, val version: String? = null, val pending: Boolean = false)
+data class ProfileMediaState(val uri: String? = null, val version: String? = null, val pending: Boolean = false, val automatic: Boolean = false)
 data class ProfileImageBytes(val mime: String, val bytes: ByteArray)
 
 interface ProfileMediaFiles {
     fun loadState(key: String): ProfileMediaState?
     fun saveState(key: String, state: ProfileMediaState)
+    fun compareAndSaveState(key: String, expected: ProfileMediaState?, next: ProfileMediaState): Boolean {
+        if (loadState(key) != expected) return false
+        saveState(key, next)
+        return true
+    }
     fun exists(uri: String): Boolean
     fun sha256(bytes: ByteArray): String
     suspend fun encodeLocal(uri: String, background: Boolean): ProfileImageBytes
@@ -40,8 +45,13 @@ class ProfileMediaEngine(private val files: ProfileMediaFiles, private val remot
         // One-time migration of an existing personal file only when the cloud has no image.
         // An unmarked old local cache must never overwrite another device's newer photo.
         if (state == null && version == null && local?.startsWith("file:") == true) {
-            state = ProfileMediaState(local, pending = true)
-            files.saveState(key, state)
+            files.compareAndSaveState(key, null, ProfileMediaState(local, pending = true, automatic = true))
+            state = files.loadState(key)
+        }
+        // If another device won a first-import race, its already established photo wins.
+        if (state?.pending == true && state.automatic && version != null) {
+            files.compareAndSaveState(key, state, ProfileMediaState(state.uri))
+            state = files.loadState(key)
         }
         if (state?.pending == true) {
             val next = if (state.uri == null) {
@@ -53,13 +63,13 @@ class ProfileMediaEngine(private val files: ProfileMediaFiles, private val remot
                 remote.upload(profile, kind, version, image)
             }
             // Saving another photo during the request preserves that later pending edit.
-            if (files.loadState(key) == state) files.saveState(key, ProfileMediaState(state.uri, next))
+            files.compareAndSaveState(key, state, ProfileMediaState(state.uri, next))
             return (files.loadState(key) ?: state).uri
         }
         if (version == null) {
             if (state?.version != null) {
-                files.saveState(key, ProfileMediaState())
-                return null
+                files.compareAndSaveState(key, state, ProfileMediaState())
+                return files.loadState(key)?.uri
             }
             return local
         }
@@ -71,8 +81,8 @@ class ProfileMediaEngine(private val files: ProfileMediaFiles, private val remot
             "Image distante incomplète ou empreinte différente"
         }
         val uri = files.saveDownloaded(key, version, image)
-        if (files.loadState(key) != captured) return files.loadState(key)?.uri ?: local
-        files.saveState(key, ProfileMediaState(uri, version))
+        if (!files.compareAndSaveState(key, captured, ProfileMediaState(uri, version)))
+            return files.loadState(key)?.uri
         return uri
     }
 }

@@ -17,4 +17,6 @@ actual object SyncClientIdentityStorage {
     actual fun saveCloudflareDeletes(payload: String) {
         NSUserDefaults.standardUserDefaults.setObject(payload, forKey = "cloudflare_deletes")
     }
+    actual fun loadCloudflareAddons(key: String): String? = NSUserDefaults.standardUserDefaults.stringForKey("addons.$key")
+    actual fun saveCloudflareAddons(key: String, payload: String) { NSUserDefaults.standardUserDefaults.setObject(payload, forKey = "addons.$key") }
 }

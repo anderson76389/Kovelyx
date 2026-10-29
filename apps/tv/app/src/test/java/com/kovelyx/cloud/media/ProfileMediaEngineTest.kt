@@ -77,6 +77,18 @@ class ProfileMediaEngineTest {
         assertEquals("file:newer", engine.synchronize("alice", "profile", "background", "file:first", v1))
         assertEquals(true, files.loadState("alice.profile.background")?.pending)
     }
+    @Test fun `an automatic first import does not overwrite a cloud photo established by another device`() = runTest {
+        val files = Files(); val remote = Remote(); val engine = ProfileMediaEngine(files, remote)
+        remote.offline = true
+        assertTrue(runCatching { engine.synchronize("alice", "profile", "avatar", "file:old-local", null) }.isFailure)
+        assertEquals(true, files.loadState("alice.profile.avatar")?.automatic)
+        remote.offline = false
+        val result = engine.synchronize("alice", "profile", "avatar", "file:old-local", v1)
+        assertTrue(result?.startsWith("file:cache-") == true)
+        assertEquals(1, remote.uploads)
+        assertEquals(1, remote.downloads)
+    }
+
     @Test fun `explicit clearing removes the remote picture with its expected version`() = runTest {
         val files = Files(); val remote = Remote(); val engine = ProfileMediaEngine(files, remote)
         engine.edited("alice", "profile", "avatar", null)
