@@ -231,7 +231,7 @@ class AddonManifestPlaceholderTest {
     fun `TV limits concurrent manifest requests while loading many addons`() = runTest {
         val inFlight = AtomicInteger()
         val peak = AtomicInteger()
-        val harness = newRepository(reachable = true, onRequest = {
+        val harness = newRepository(reachable = true, installedUrls = emptyList(), onRequest = {
             val active = inFlight.incrementAndGet()
             peak.updateAndGet { maxOf(it, active) }
             try { delay(100L) } finally { inFlight.decrementAndGet() }
@@ -256,7 +256,8 @@ class AddonManifestPlaceholderTest {
         reachable: Boolean = false,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         clock: () -> Long = System::currentTimeMillis,
-        onRequest: suspend () -> Unit = {}
+        onRequest: suspend () -> Unit = {},
+        installedUrls: List<String> = listOf(addonUrl)
     ): Harness {
         val manifestCalls = AtomicInteger()
         val isReachable = AtomicBoolean(reachable)
@@ -271,7 +272,7 @@ class AddonManifestPlaceholderTest {
         }
 
         val preferences = mockk<AddonPreferences>()
-        every { preferences.installedAddonUrls } returns flowOf(listOf(addonUrl))
+        every { preferences.installedAddonUrls } returns flowOf(installedUrls)
         every { preferences.userSetNames } returns userSetNames
         every { preferences.addonEnabledStates } returns flowOf(emptyMap())
         coEvery { preferences.removeAddon(any()) } returns true

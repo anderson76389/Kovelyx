@@ -186,7 +186,8 @@ def main():
             "- Synchronisation privée des photos et fonds de profil, avec cache local.\n"
             "  Cette fonction nécessite le Worker Cloudflare et la migration D1 0003_profile_media ; "
             "installer l’application seule ne met pas le serveur à jour.\n"
-            "- Regroupement des envois TV, reprise des suppressions et réduction des appels hérités.\n\n"
+            "- Synchronisation des addons : URL configurée, ordre, nom et activation ; suppressions et reprise hors ligne.\n"
+            "- Regroupement des envois TV, quatre requêtes de manifeste au maximum et reprise des suppressions.\n\n"
             f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
         ensure_tag(tag, sha)
