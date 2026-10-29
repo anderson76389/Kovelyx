@@ -8,7 +8,7 @@
 - Trois anciennes images TV sans consommateur : deux logos hérités et une icône de présentation inutilisée.
 - Deux copies PNG/ICO historiques de l’icône Windows, sans consommateur. Le générateur ne les recrée plus. Windows utilise les icônes `kovelyx` ; l’icône ICNS encore référencée par le packaging Apple est conservée.
 
-Le logo encore utilisé par le README TV est remplacé par le wordmark Kovelyx centré. Les README des trois clients sont actualisés : lien TV vers les Releases conservées, configuration Cloudflare, certificat des APK publiés, cartes Trakt/MDBList. Les cinq textes français TV affichant encore Nuvio dans le suivi ou le compte sont corrigés, sans renommer leurs clés de ressources.
+Le logo encore utilisé par le README TV est remplacé par le wordmark Kovelyx centré. Les README des trois clients sont actualisés : lien TV vers les Releases conservées, configuration Cloudflare, certificat des APK publiés, cartes Trakt/MDBList. Les cinq textes français TV affichant encore Nuvio dans le suivi ou le compte sont corrigés, sans renommer leurs clés de ressources. Les titres de secours de bibliothèque, le libellé de la carte locale, les noms d’appareil envoyés lors de l’inscription des sessions et les messages d’échec de fermeture du lecteur Windows utilisent également Kovelyx. Les assertions concernées sont adaptées ; les identifiants de sessions et de stockage restent inchangés.
 
 ## Vérifications
 
