@@ -65,7 +65,7 @@ export async function handleProfileMedia(request,env,user,url) {
       env.DB.prepare(`UPDATE kv_profiles SET ${column}=NULL,updated_at=? WHERE owner_id=? AND id=? AND ${column}=?`)
         .bind(now,user.id,profileId,row?.version||'')
     ]);
-    if(row && result[0].meta?.changes!==1)return jsonResponse({error:"Image modifiée par un autre appareil"},409);
+    if(row && Number(result[0].meta?.changes || 0) < 1)return jsonResponse({error:"Image modifiée par un autre appareil"},409);
     return jsonResponse({version:null});
   }
   const bytes=await limitedBytes(request);

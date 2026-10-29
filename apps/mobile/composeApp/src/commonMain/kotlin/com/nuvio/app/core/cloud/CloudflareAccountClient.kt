@@ -263,7 +263,7 @@ object CloudflareAccountClient {
             "Authorization" to "Bearer ${active.bearerToken}", "Origin" to base(),
             "Content-Type" to image.mime, "If-Match" to (expected ?: "none"), "User-Agent" to "Kovelyx-Client"
         ), "", followRedirects = false, maxResponseBodyBytes = 4096, bodyBytes = image.bytes)
-        check(response.status in 200..299) { "Synchronisation des images : HTTP ${response.status}. Le Worker doit inclure la migration des images privées." }
+        check(response.status in 200..299) { "Le service d’images est indisponible ou doit être mis à jour (HTTP ${response.status})." }
         check(session?.userId == active.userId) { "Compte modifié" }
         return json.parseToJsonElement(response.body).jsonObject["version"]!!.jsonPrimitive.content
     }

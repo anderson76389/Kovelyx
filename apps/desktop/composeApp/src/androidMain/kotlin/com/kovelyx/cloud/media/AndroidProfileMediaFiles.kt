@@ -52,18 +52,39 @@ class AndroidProfileMediaFiles(context: Context) : ProfileMediaFiles {
         var sample = 1
         while (maxOf(bounds.outWidth, bounds.outHeight) / sample > target * 2) sample *= 2
         val decoded = requireNotNull(BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inSampleSize = sample }))
-        var bitmap = decoded
+        val oriented = orient(decoded, file)
+        var bitmap = oriented
         try {
-            val ratio = minOf(1.0, target.toDouble() / maxOf(decoded.width, decoded.height))
-            if (ratio < 1.0) bitmap = Bitmap.createScaledBitmap(decoded,
-                (decoded.width * ratio).toInt().coerceAtLeast(1), (decoded.height * ratio).toInt().coerceAtLeast(1), true)
+            val ratio = minOf(1.0, target.toDouble() / maxOf(oriented.width, oriented.height))
+            if (ratio < 1.0) bitmap = Bitmap.createScaledBitmap(oriented,
+                (oriented.width * ratio).toInt().coerceAtLeast(1), (oriented.height * ratio).toInt().coerceAtLeast(1), true)
             val output = ByteArrayOutputStream()
             val png = !background && bitmap.hasAlpha()
             check(bitmap.compress(if (png) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG, 88, output))
             val bytes = output.toByteArray()
             require(bytes.size <= MAX_PROFILE_MEDIA_BYTES) { "Image trop volumineuse après optimisation." }
             ProfileImageBytes(if (png) "image/png" else "image/jpeg", bytes)
-        } finally { if (bitmap !== decoded) bitmap.recycle(); decoded.recycle() }
+        } finally {
+            if (bitmap !== oriented) bitmap.recycle()
+            if (oriented !== decoded) oriented.recycle()
+            decoded.recycle()
+        }
+    }
+    private fun orient(source: Bitmap, file: File): Bitmap {
+        val orientation = runCatching {
+            android.media.ExifInterface(file.path).getAttributeInt(android.media.ExifInterface.TAG_ORIENTATION, 1)
+        }.getOrDefault(1)
+        val matrix = android.graphics.Matrix()
+        when (orientation) {
+            2 -> matrix.setScale(-1f, 1f)
+            3 -> matrix.setRotate(180f)
+            4 -> { matrix.setRotate(180f); matrix.postScale(-1f, 1f) }
+            5 -> { matrix.setRotate(90f); matrix.postScale(-1f, 1f) }
+            6 -> matrix.setRotate(90f)
+            7 -> { matrix.setRotate(-90f); matrix.postScale(-1f, 1f) }
+            8 -> matrix.setRotate(-90f)
+        }
+        return if (matrix.isIdentity) source else Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
     }
     override suspend fun saveDownloaded(key: String, version: String, image: ProfileImageBytes): String = withContext(Dispatchers.IO) {
         require(version.matches(Regex("[a-f0-9]{64}")))

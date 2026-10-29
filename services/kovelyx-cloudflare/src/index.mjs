@@ -140,7 +140,7 @@ async function handleProfiles(request,env,user,url) {
       "DELETE FROM kv_profiles WHERE owner_id=? AND id=? "+
       "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
     ).bind(user.id,profileId,user.id).run();
-    if (removed.meta?.changes !== 1)
+    if (Number(removed.meta?.changes || 0) < 1)
       return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
     return jsonResponse({deleted:true,id:profileId});
   }

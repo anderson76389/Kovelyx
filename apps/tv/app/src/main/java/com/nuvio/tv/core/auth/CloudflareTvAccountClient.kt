@@ -328,7 +328,7 @@ internal object CloudflareTvAccountClient {
             .header("Authorization", "Bearer ${active.bearerToken}").header("If-Match", expected ?: "none")
             .put(image.bytes.toRequestBody(image.mime.toMediaType())).build()
         client.newCall(request).execute().use { response ->
-            check(response.isSuccessful && account?.id == active.id) { "Images privées : HTTP ${response.code}. Mise à jour du Worker nécessaire." }
+            check(response.isSuccessful && account?.id == active.id) { "Le service d’images est indisponible ou doit être mis à jour (HTTP ${response.code})." }
             JSONObject(response.body?.string().orEmpty()).getString("version")
         }
     }

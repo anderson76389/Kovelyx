@@ -143,6 +143,7 @@ object ProfileRepository {
         }
         try {
             val data = CloudflareAccountClient.accountProfiles()
+            check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
             val remote = data["profiles"]?.jsonArray.orEmpty()
                 .take(MAX_PROFILES)
                 .mapIndexedNotNull { index, item ->
@@ -175,6 +176,7 @@ object ProfileRepository {
                     }
                 }
                 val merged = CloudflareProfileMediaSync.synchronize(original.sortedBy { it.profileIndex })
+                check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
                 val active = merged.firstOrNull { it.profileIndex == activeProfileIndex }
                     ?: merged.firstOrNull()
                 _state.value = _state.value.copy(
@@ -184,6 +186,7 @@ object ProfileRepository {
                 return
             }
             val withMedia = CloudflareProfileMediaSync.synchronize(remote)
+            check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
             _state.value = _state.value.copy(
                 profiles = withMedia,
                 isLoaded = true,
@@ -351,6 +354,7 @@ object ProfileRepository {
                     ?: error("Compte Kovelyx non connecté")
                 val remote = CloudflareAccountClient.accountProfiles()["profiles"]
                     ?.jsonArray.orEmpty().map { it.jsonObject }
+                check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
                 val existingByIndex = _state.value.profiles.associateBy { it.profileIndex }
                 val merged = profiles.sortedBy { it.profileIndex }.map { requested ->
                     val knownId = existingByIndex[requested.profileIndex]?.id.orEmpty()
@@ -362,6 +366,7 @@ object ProfileRepository {
                     val match = knownRemote ?: sameIndex
                     val uuid = match?.get("id")?.jsonPrimitive?.content
                         ?: CloudflareAccountClient.createProfile(requested.name)
+                    check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
                     val oldName = match?.get("displayName")?.jsonPrimitive?.content
                     if (oldName != null && oldName != requested.name) {
                         CloudflareAccountClient.renameProfile(uuid, requested.name)
@@ -380,6 +385,7 @@ object ProfileRepository {
                         usesPrimaryPlugins = requested.usesPrimaryPlugins
                     )
                 }
+                check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
                 _state.value = _state.value.copy(
                     profiles = merged, isLoaded = true,
                     activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex }

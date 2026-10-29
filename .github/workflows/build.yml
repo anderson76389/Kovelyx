@@ -113,6 +113,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Compiler sans accès aux anciens domaines Nuvio
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
       - name: Aligner la version Android sur la Release Windows
         shell: bash
         run: |
@@ -205,6 +215,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Compiler sans accès aux anciens domaines Nuvio
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
       - name: Aligner la version Android sur la Release Windows
         shell: bash
         run: |

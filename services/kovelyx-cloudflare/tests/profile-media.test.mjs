@@ -10,3 +10,17 @@ test('only supported raster signatures are accepted, not SVG or HTML',()=>{
   assert.equal(profileImageMime(new Uint8Array()),null);
   assert.equal(MAX_PROFILE_MEDIA_BYTES,2097152);
 });
+
+import {handleProfileMedia} from '../src/profile-media.mjs';
+test('cascade child deletions count as a successful media deletion, stale writes do not',async()=>{
+  const profile='12345678-1234-4234-8234-123456789012';
+  const version='a'.repeat(64);
+  const url=new URL(`https://worker.example/v1/profile-media?profileId=${profile}&kind=avatar`);
+  const request=new Request(url,{method:'DELETE',headers:{'If-Match':version}});
+  const environment=(changes)=>({DB:{
+    prepare(sql){return {bind(){return {first:async()=>sql.startsWith('SELECT id')?{id:profile}:{version,mime:'image/png',size:1}}}}},
+    batch:async()=>[{meta:{changes}},{meta:{changes:1}}]
+  }});
+  assert.equal((await handleProfileMedia(request,environment(5),{id:'owner'},url)).status,200);
+  assert.equal((await handleProfileMedia(request,environment(0),{id:'owner'},url)).status,409);
+});

@@ -280,6 +280,8 @@ class ProfileSelectionViewModel @Inject constructor(
     }
 
     fun refreshProfilePinStates() {
+        // Cloudflare has no legacy PIN RPC; retain the locally stored lock state.
+        if (CloudflareTvAccountClient.enabled) return
         viewModelScope.launch {
             var attempt = 0
             while (attempt < 4) {
