@@ -64,12 +64,49 @@ def ensure_tag(tag, sha):
         raise RuntimeError("Le tag existant désigne un autre commit")
 
 
+def find_release(tag):
+    # The tag endpoint returns 404 for drafts; the authenticated collection includes them.
+    return next((r for r in api("releases?per_page=100") if r["tag_name"] == tag), None)
+
+
+def recoverable_source(current_sha):
+    allowed = {"scripts/publish-verified-preview.py", "scripts/tests/test_verified_preview.py",
+               ".github/workflows/recover-verified-preview.yml"}
+    for run in api("actions/runs?per_page=100")["workflow_runs"]:
+        if (run.get("name") != "Compiler Kovelyx (APK et diagnostic Windows)"
+                or run.get("event") != "push"
+                or run.get("head_branch") != "fix/cloudflare-network-status-and-settings"
+                or run.get("head_repository", {}).get("full_name") != REPOSITORY):
+            continue
+        source_sha = run["head_sha"]
+        ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", source_sha, current_sha])
+        if ancestor.returncode != 0:
+            continue
+        changed = set(subprocess.check_output(
+            ["git", "diff", "--name-only", source_sha, current_sha], text=True).splitlines())
+        if not changed or not changed.issubset(allowed):
+            continue
+        jobs = api(f"actions/runs/{run["id"]}/jobs?per_page=100")["jobs"]
+        if all(any(j["name"] == name and j["conclusion"] == "success" for j in jobs)
+               for name in ("Android TV - APK Full Debug", "Android mobile - APK Full Debug")):
+            return run
+    return None
+
+
 def main():
     if os.environ.get("GITHUB_REPOSITORY") != REPOSITORY:
         raise RuntimeError("Dépôt de publication inattendu")
     sha = os.environ["GITHUB_SHA"]
-    build_id = int(os.environ["GITHUB_RUN_ID"])
-    source = api(f"actions/runs/{build_id}")
+    if os.environ.get("KOVELYX_RECOVER_PREVIEW") == "1":
+        source = recoverable_source(sha)
+        if source is None:
+            print("Aucun ancien build identique à reprendre ; publication normale conservée.")
+            return
+        sha = source["head_sha"]
+        build_id = source["id"]
+    else:
+        build_id = int(os.environ["GITHUB_RUN_ID"])
+        source = api(f"actions/runs/{build_id}")
     if source["head_sha"] != sha or source["event"] != "push":
         raise RuntimeError("La provenance du build Android est invalide")
     jobs = api(f"actions/runs/{build_id}/jobs?per_page=100")["jobs"]
@@ -137,9 +174,7 @@ def main():
             f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
         ensure_tag(tag, sha)
-        existing = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/releases/tags/{tag}"],
-                                  text=True, capture_output=True)
-        if existing.returncode != 0:
+        if find_release(tag) is None:
             gh("release", "create", tag, "--repo", REPOSITORY, "--target", sha, "--draft",
                "--prerelease", "--title", f"Kovelyx {version} — Windows, Android et TV",
                "--notes-file", str(notes))
@@ -148,7 +183,9 @@ def main():
             ref = api(f"git/tags/{ref['sha']}")["object"]
         if ref["sha"] != sha:
             raise RuntimeError("Le tag existant désigne un autre commit")
-        release = api(f"releases/tags/{tag}")
+        release = find_release(tag)
+        if release is None:
+            raise RuntimeError("Brouillon de publication introuvable")
         if not release["prerelease"]:
             raise RuntimeError("Refus de modifier une version stable")
         assets = {a["name"]: a for a in release["assets"]}

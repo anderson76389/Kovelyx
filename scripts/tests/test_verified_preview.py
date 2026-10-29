@@ -40,6 +40,28 @@ class VerifiedPreviewTests(unittest.TestCase):
                 PREVIEW.ensure_tag("v1.1.744-alpha", "a" * 40)
             command.assert_not_called()
 
+    def test_draft_release_is_found_without_the_public_tag_endpoint(self):
+        draft = {"tag_name": "v1.1.748-alpha", "draft": True}
+        with patch.object(PREVIEW, "api", return_value=[draft]) as request:
+            self.assertEqual(PREVIEW.find_release("v1.1.748-alpha"), draft)
+            request.assert_called_once_with("releases?per_page=100")
+
+    def test_recovery_refuses_any_application_change(self):
+        run = dict(name="Compiler Kovelyx (APK et diagnostic Windows)", head_sha="a" * 40,
+                   event="push", head_branch="fix/cloudflare-network-status-and-settings",
+                   head_repository={"full_name": PREVIEW.REPOSITORY}, id=1)
+        jobs = [{"name": name, "conclusion": "success"} for name in
+                ("Android TV - APK Full Debug", "Android mobile - APK Full Debug")]
+        with patch.object(PREVIEW.subprocess, "run", return_value=SimpleNamespace(returncode=0)), \
+             patch.object(PREVIEW.subprocess, "check_output", return_value="apps/tv/app/build.gradle.kts\n"), \
+             patch.object(PREVIEW, "api", return_value={"workflow_runs": [run]}) as request:
+            self.assertIsNone(PREVIEW.recoverable_source("b" * 40))
+            self.assertEqual(request.call_count, 1)
+        with patch.object(PREVIEW.subprocess, "run", return_value=SimpleNamespace(returncode=0)), \
+             patch.object(PREVIEW.subprocess, "check_output", return_value="scripts/publish-verified-preview.py\n"), \
+             patch.object(PREVIEW, "api", side_effect=[{"workflow_runs": [run]}, {"jobs": jobs}]):
+            self.assertEqual(PREVIEW.recoverable_source("b" * 40), run)
+
     def test_windows_artifacts_are_mapped_from_commit_to_public_version(self):
         sha = "a" * 40
         self.assertEqual(list(PREVIEW.windows_package_names(sha, "v1.1.748-alpha")), [
