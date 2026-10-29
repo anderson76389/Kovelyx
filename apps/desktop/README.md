@@ -35,7 +35,7 @@ Dans **Profils → Modifier / Ajouter** sur Windows :
 
 Les images PNG, JPG, GIF (première image) et BMP sont acceptées, dans la limite de **12 Mo et 32 mégapixels**. L'avatar est optimisé en PNG, le fond en JPEG. Les fonds **personnels** sont gratuits ; les fonds des catalogues réservés aux membres ne sont pas débloqués.
 
-Les copies sont conservées dans `%APPDATA%\Kovelyx\profile-media`. Tu peux déplacer ou supprimer l'image d'origine après importation. Les chemins de photos locales ne sont **pas envoyés au serveur** : ils ne sont pas automatiquement partagés avec tes autres appareils.
+Les copies sont conservées dans `%APPDATA%\Kovelyx\profile-media`. Tu peux déplacer ou supprimer l'image d'origine après importation. Les chemins locaux restent sur leur appareil. Avec le Worker mis à jour au schéma D1 `0003_profile_media`, les fichiers des photos et fonds sont transférés de façon privée au même compte/profil, puis conservés localement sur les autres appareils. Les images fixes sont redimensionnées ; les GIF de 2 Mio maximum conservent leur animation. Une panne réseau conserve la copie et la modification en attente.
 
 ## Vérifications
 

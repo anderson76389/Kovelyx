@@ -1,6 +1,7 @@
 package com.nuvio.app.features.profiles
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.cloud.CloudflareProfileMediaSync
 import com.nuvio.app.core.cloud.CloudflareAccountClient
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
@@ -169,7 +170,7 @@ object ProfileRepository {
                         original += incoming
                     }
                 }
-                val merged = original.sortedBy { it.profileIndex }
+                val merged = CloudflareProfileMediaSync.synchronize(original.sortedBy { it.profileIndex })
                 val active = merged.firstOrNull { it.profileIndex == activeProfileIndex }
                     ?: merged.firstOrNull()
                 _state.value = _state.value.copy(
@@ -178,18 +179,40 @@ object ProfileRepository {
                 persist()
                 return
             }
+            val withMedia = CloudflareProfileMediaSync.synchronize(remote)
             _state.value = _state.value.copy(
-                profiles = remote,
+                profiles = withMedia,
                 isLoaded = true,
-                activeProfile = remote.firstOrNull(),
+                activeProfile = withMedia.firstOrNull(),
             )
-            remote.firstOrNull()?.let {
+            withMedia.firstOrNull()?.let {
                 activeProfileIndex = it.profileIndex
                 persist()
             }
         } catch (error: Throwable) {
             log.e(error) { "Impossible de lire les profils Kovelyx Cloudflare : données locales préservées" }
             _state.value = _state.value.copy(isLoaded = true)
+        }
+    }
+
+    internal suspend fun syncCloudflareProfileImages(reportFailure: Boolean = false) {
+        if (!CloudflareAccountClient.enabled) return
+        val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId ?: return
+        try {
+            val images = CloudflareProfileMediaSync.synchronize(_state.value.profiles, reportFailure)
+            if ((AuthRepository.state.value as? AuthState.Authenticated)?.userId != owner) return
+            val byId = images.associateBy { it.id }
+            val merged = _state.value.profiles.map { current ->
+                val image = byId[current.id]
+                if (image == null) current else current.copy(avatarUrl = image.avatarUrl, profileBackgroundUrl = image.profileBackgroundUrl)
+            }
+            _state.value = _state.value.copy(profiles = merged, activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex })
+            persist()
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (error: Exception) {
+            log.w(error) { "Images Cloudflare différées ; profils locaux conservés" }
+            if (reportFailure) com.nuvio.app.core.ui.NuvioToastController.show(
+                getString(Res.string.profile_media_sync_pending, error.message.orEmpty()), durationMillis = 6000L)
         }
     }
 
@@ -276,6 +299,17 @@ object ProfileRepository {
             return
         }
         if (CloudflareAccountClient.enabled) {
+            val current = _state.value.profiles.associateBy { it.profileIndex }
+            val accountId = (AuthRepository.state.value as? AuthState.Authenticated)?.userId.orEmpty()
+            profiles.forEach { requested ->
+                val old = current[requested.profileIndex]
+                if (old != null && old.id.isNotBlank() && accountId.isNotBlank()) {
+                    if (old.avatarUrl != requested.avatarUrl) CloudflareProfileMediaSync.edited(accountId, old.id, "avatar", requested.avatarUrl)
+                    if (old.profileBackgroundUrl != requested.profileBackgroundUrl) CloudflareProfileMediaSync.edited(accountId, old.id, "background", requested.profileBackgroundUrl)
+                }
+            }
+            // Keep the desired local pictures even if profile metadata is temporarily offline.
+            applyPayloadsLocally(profiles, preserveCloudIds = true)
             // Preserve the cloud UUID of every existing profile; never send a
             // Better Auth user to the legacy Supabase profile RPC.
             try {
@@ -298,6 +332,9 @@ object ProfileRepository {
                     if (oldName != null && oldName != requested.name) {
                         CloudflareAccountClient.renameProfile(uuid, requested.name)
                     }
+                    val old = existingByIndex[requested.profileIndex]
+                    if (old?.avatarUrl != requested.avatarUrl) CloudflareProfileMediaSync.edited(account.userId, uuid, "avatar", requested.avatarUrl)
+                    if (old?.profileBackgroundUrl != requested.profileBackgroundUrl) CloudflareProfileMediaSync.edited(account.userId, uuid, "background", requested.profileBackgroundUrl)
                     NuvioProfile(
                         id = uuid, userId = account.userId,
                         profileIndex = requested.profileIndex, name = requested.name,
@@ -316,6 +353,7 @@ object ProfileRepository {
                 )
                 syncPinCache(merged)
                 persist()
+                syncCloudflareProfileImages(reportFailure = true)
             } catch (error: Throwable) {
                 if (error is kotlinx.coroutines.CancellationException) throw error
                 log.e(error) { "Échec de la mise à jour des profils Kovelyx Cloudflare" }
@@ -561,11 +599,11 @@ object ProfileRepository {
         }
     }
 
-    private fun applyPayloadsLocally(payloads: List<ProfilePushPayload>) {
+    private fun applyPayloadsLocally(payloads: List<ProfilePushPayload>, preserveCloudIds: Boolean = false) {
         val authState = AuthRepository.state.value as? AuthState.Authenticated ?: return
         val profiles = payloads.map { p ->
             NuvioProfile(
-                id = "",
+                id = if (preserveCloudIds) _state.value.profiles.firstOrNull { it.profileIndex == p.profileIndex }?.id.orEmpty() else "",
                 userId = authState.userId,
                 profileIndex = p.profileIndex,
                 name = p.name,

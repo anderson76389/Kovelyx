@@ -103,7 +103,7 @@ internal actual object ProfileLocalImages {
         }
     }
 
-    private fun readAndResize(path: Path, background: Boolean): BufferedImage {
+    internal fun readAndResize(path: Path, background: Boolean): BufferedImage {
         ImageIO.createImageInputStream(path.toFile()).use { stream ->
             requireNotNull(stream) { "Impossible de lire l'image." }
             val readers = ImageIO.getImageReaders(stream)

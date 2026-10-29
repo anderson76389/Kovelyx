@@ -3384,4 +3384,5 @@
     <string name="autosync_toast_failed_no_reference">Sync failed: this video has no embedded subtitles to compare with.</string>
     <string name="autosync_toast_failed_unsupported">Sync failed: Auto Sync doesn\'t support this subtitle format.</string>
     <string name="autosync_label_synced">Auto synced</string>
+    <string name="profile_media_sync_pending">Picture kept on this device. Synchronization pending: %1$s</string>
 </resources>

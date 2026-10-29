@@ -2535,4 +2535,5 @@
     <string name="stream_info_player_engine">Player Engine</string>
     <string name="stream_info_server">Server</string>
     <string name="plugin_select_option">Select an option</string>
+    <string name="profile_media_sync_pending">Picture kept on this device. Synchronization pending: %1$s</string>
 </resources>

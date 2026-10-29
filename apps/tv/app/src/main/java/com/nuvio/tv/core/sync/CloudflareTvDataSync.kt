@@ -39,7 +39,8 @@ class CloudflareTvDataSync @Inject constructor(
     private val library: LibraryPreferences,
     private val progress: WatchProgressPreferences,
     private val watched: WatchedItemsPreferences,
-    private val mutations: WatchStateMutationStore
+    private val mutations: WatchStateMutationStore,
+    private val profileMedia: CloudflareTvProfileMediaSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
@@ -132,6 +133,10 @@ class CloudflareTvDataSync @Inject constructor(
                 // created a profile. Create the default only on empty accounts.
                 CloudflareTvAccountClient.createCloudProfile(localProfile.name)
             }
+            matchingProfiles.isEmpty() && remoteProfiles.size < 8 &&
+                profileManager.profiles.value.count { it.name.equals(localProfile.name, true) } == 1 -> {
+                CloudflareTvAccountClient.createCloudProfile(localProfile.name)
+            }
             else -> {
                 Log.w(TAG, "Profil TV ambigu : synchronisation Cloudflare non effectuée")
                 return@withLock
@@ -140,6 +145,11 @@ class CloudflareTvDataSync @Inject constructor(
         if (localProfile.cloudProfileId != uuid) {
             profileManager.linkCloudProfile(profileId, uuid)
         }
+        // Private images are separate from the frequently polled watch/library payloads.
+        // A media migration/upload failure must never block already-working watch sync.
+        try { profileMedia.synchronize() }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { Log.w(TAG, "Images Cloudflare différées", error) }
         val remote = CloudflareTvAccountClient.syncRows(uuid).associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }

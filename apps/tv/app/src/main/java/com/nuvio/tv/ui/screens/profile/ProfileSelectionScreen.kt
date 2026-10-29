@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.profile
 
+import kotlinx.coroutines.flow.collect
+
 import androidx.tv.material3.MaterialTheme
 import com.nuvio.tv.ui.util.contentTextDirection
 import com.nuvio.tv.ui.theme.NuvioMotion
@@ -214,6 +216,12 @@ fun ProfileSelectionScreen(
     viewModel: ProfileSelectionViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    LaunchedEffect(viewModel) {
+        viewModel.mediaErrors.collect { reason ->
+            android.widget.Toast.makeText(context,
+                context.getString(R.string.profile_media_sync_pending, reason), android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
     val profiles by viewModel.profiles.collectAsState()
     val activeProfileId by viewModel.activeProfileId.collectAsState()
     val avatarCatalog by viewModel.avatarCatalog.collectAsState()

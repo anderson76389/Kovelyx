@@ -51,10 +51,10 @@ jobs:
               data = json.load(file)
           assert data.get('service') == 'Kovelyx Cloud', 'Mauvais service'
           assert data.get('status') == 'ok', 'Backend non prêt'
-          assert data.get('schema') == '0002_watched_history', 'La migration historique D1 manque'
+          assert data.get('schema') == '0003_profile_media', 'La migration historique D1 manque'
           print('Production Cloudflare D1 : schéma des comptes et historique confirmé.')
           PY
-          echo '✅ Vérification lecture seule du schéma D1 0002 réussie. Les tests multi-appareils restent nécessaires.' >> "$GITHUB_STEP_SUMMARY"
+          echo '✅ Vérification lecture seule du schéma D1 0003 réussie. Les tests multi-appareils restent nécessaires.' >> "$GITHUB_STEP_SUMMARY"
       - name: Vérifier route Better Auth sans créer de compte
         shell: bash
         run: |

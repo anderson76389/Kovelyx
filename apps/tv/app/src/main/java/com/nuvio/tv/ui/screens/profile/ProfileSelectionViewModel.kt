@@ -3,6 +3,8 @@ package com.nuvio.tv.ui.screens.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvProfileMediaSync
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.sync.ProfileSettingsSyncService
 import com.nuvio.tv.core.sync.ProfileSyncService
@@ -51,7 +53,8 @@ class ProfileSelectionViewModel @Inject constructor(
     private val profileBackgroundRepository: ProfileBackgroundRepository,
     memberAccessRepository: MemberAccessRepository,
     private val profileLockStateDataStore: ProfileLockStateDataStore,
-    private val themeDataStore: com.nuvio.tv.data.local.ThemeDataStore
+    private val themeDataStore: com.nuvio.tv.data.local.ThemeDataStore,
+    private val cloudProfileMedia: CloudflareTvProfileMediaSync
 ) : ViewModel() {
     val activeProfileId: StateFlow<Int> = profileManager.activeProfileId
     val profiles: StateFlow<List<UserProfile>> = profileManager.profiles
@@ -80,6 +83,9 @@ class ProfileSelectionViewModel @Inject constructor(
 
     private val _isCreating = MutableStateFlow(false)
     val isCreating: StateFlow<Boolean> = _isCreating.asStateFlow()
+
+    private val _mediaErrors = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val mediaErrors: kotlinx.coroutines.flow.SharedFlow<String> = _mediaErrors
 
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
@@ -249,10 +255,18 @@ class ProfileSelectionViewModel @Inject constructor(
         if (_isSaving.value) return
         viewModelScope.launch {
             _isSaving.value = true
-            profileManager.updateProfile(profile)
-            profileSyncService.pushToRemote()
-            refreshProfilePinStates()
-            _isSaving.value = false
+            val previous = profileManager.profiles.value.firstOrNull { it.id == profile.id }
+            try {
+                if (CloudflareTvAccountClient.enabled) cloudProfileMedia.markEdited(profile, previous)
+                profileManager.updateProfile(profile)
+                if (CloudflareTvAccountClient.enabled) cloudProfileMedia.publishEdit(profile, previous)
+                else { profileSyncService.pushToRemote(); refreshProfilePinStates() }
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (error: Exception) {
+                Log.w("KovelyxProfile", "Profil conservé localement ; images en attente de synchronisation", error)
+                _mediaErrors.tryEmit(error.message.orEmpty())
+            }
+            finally { _isSaving.value = false }
         }
     }
 

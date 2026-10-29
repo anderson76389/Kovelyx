@@ -117,11 +117,18 @@ actual suspend fun httpRequestRaw(
     val request = buildDesktopRequest(method, url, headers, body, bodyBytes)
 
     client.newCall(request).execute().use { response ->
+        val responseBody = response.body
+        val charset = responseBody?.contentType()?.charset(Charsets.UTF_8) ?: Charsets.UTF_8
+        val readResult = responseBody?.byteStream()?.use { readAtMostBytes(it, maxResponseBodyBytes.coerceAtLeast(0)) }
+            ?: LimitedReadResult(ByteArray(0), truncated = false)
+        val decoded = runCatching { String(readResult.bytes, charset) }
+            .getOrElse { String(readResult.bytes, Charsets.UTF_8) }
         RawHttpResponse(
             status = response.code,
             statusText = response.message,
             url = response.request.url.toString(),
-            body = readResponseBodyLimited(response.body, maxResponseBodyBytes),
+            body = if (readResult.truncated) decoded + truncationSuffix else decoded,
+            bodyBytes = readResult.bytes,
             headers = response.headers.toMultimap().mapValues { (_, values) ->
                 values.joinToString(",")
             }.mapKeys { (name, _) ->
@@ -215,20 +222,6 @@ private fun readAtMostBytes(stream: InputStream, maxBytes: Int): LimitedReadResu
     }
 
     return LimitedReadResult(out.toByteArray(), truncated)
-}
-
-private fun readResponseBodyLimited(body: ResponseBody?, maxBytes: Int): String {
-    if (body == null) return ""
-    val charset = body.contentType()?.charset(Charsets.UTF_8) ?: Charsets.UTF_8
-    val readResult = body.byteStream().use { stream ->
-        readAtMostBytes(stream, maxBytes.coerceAtLeast(0))
-    }
-    val decoded = runCatching {
-        String(readResult.bytes, charset)
-    }.getOrElse {
-        String(readResult.bytes, Charsets.UTF_8)
-    }
-    return if (readResult.truncated) decoded + truncationSuffix else decoded
 }
 
 private fun readResponseBody(body: ResponseBody?): String {

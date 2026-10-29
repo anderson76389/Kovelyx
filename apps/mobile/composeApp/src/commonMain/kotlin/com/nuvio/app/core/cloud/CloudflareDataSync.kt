@@ -106,6 +106,7 @@ object CloudflareDataSync {
             // Offline/new profile: try again after D1 profile creation.
             throw IllegalStateException("Profil Cloudflare non encore lié : reprise de synchronisation nécessaire")
         }
+        ProfileRepository.syncCloudflareProfileImages()
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
         val remote = records.associateBy {
             it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +

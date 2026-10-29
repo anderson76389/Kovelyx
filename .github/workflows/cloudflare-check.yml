@@ -33,6 +33,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Vérifier les anciens domaines dans les sources et bibliothèques
+        run: |
+          python3 scripts/tests/verify-upstream-independence.py
+          python3 scripts/tests/audit-tv-nuvio-urls.py
+          python3 scripts/tests/audit-packaged-binaries.py
+      - name: Signaler uniquement la disponibilité de l’accès de déploiement
+        if: github.event_name == 'push'
+        env:
+          CF_TOKEN_PRESENT: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_PRESENT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_D1_PRESENT: ${{ vars.KOVELYX_D1_DATABASE_ID }}
+        run: |
+          python3 - <<'PYDEPLOY'
+          import os
+          required = {'CLOUDFLARE_API_TOKEN':'CF_TOKEN_PRESENT', 'CLOUDFLARE_ACCOUNT_ID':'CF_ACCOUNT_PRESENT', 'KOVELYX_D1_DATABASE_ID':'CF_D1_PRESENT'}
+          missing = [name for name, env in required.items() if not os.environ.get(env)]
+          print('Accès de déploiement : ' + ('configuré' if not missing else 'non configuré ; champs manquants : ' + ', '.join(missing)))
+          print('Ce contrôle ne déploie rien et ne lit aucun compte utilisateur.')
+          PYDEPLOY
       - name: Vérifier la syntaxe Python et le schéma SQLite D1
         run: |
           python -m py_compile scripts/configure-cloud-build.py

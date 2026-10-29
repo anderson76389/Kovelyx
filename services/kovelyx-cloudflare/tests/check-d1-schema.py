@@ -39,6 +39,17 @@ class CloudflareDatabase(unittest.TestCase):
                 "VALUES ('bob','alice-profile','favorites','x','{}',1)"
             )
 
+    def test_private_media_is_owned_chunked_and_cascades(self):
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute("INSERT INTO kv_profile_media VALUES (?,?,?,?,?,?,?)", ("bob", "alice-profile", "avatar", "v", "image/png", 3, 1))
+        self.db.execute("INSERT INTO kv_profile_media VALUES (?,?,?,?,?,?,?)", ("alice", "alice-profile", "avatar", "v", "image/png", 3, 1))
+        self.db.execute("INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)", ("alice", "alice-profile", "avatar", 0, b"abc"))
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute("INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)", ("alice", "alice-profile", "avatar", 1, b"a" * 524289))
+        self.db.execute("DELETE FROM kv_profiles WHERE id='alice-profile'")
+        self.assertEqual(self.db.execute("SELECT count(*) FROM kv_profile_media").fetchone()[0], 0)
+        self.assertEqual(self.db.execute("SELECT count(*) FROM kv_profile_media_chunks").fetchone()[0], 0)
+
     def test_revision_conflict_query(self):
         self.db.execute(
             "INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,revision,updated_at) "

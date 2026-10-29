@@ -75,7 +75,7 @@ try {
   const ready=await req("/ready");
   assert.equal(ready.status,200,"La base locale et Better Auth doivent etre prets");
   assert.equal(ready.data?.status,"ok");
-  assert.equal(ready.data?.schema,"0002_watched_history");
+  assert.equal(ready.data?.schema,"0003_profile_media");
 
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
@@ -210,6 +210,39 @@ try {
   assert.equal((await req("/v1/sync","POST",{
     ...watched,itemKey:"movie:private",payload:{access_token:"private"}
   },alice.token)).status,400,"Credential fields must not sync");
+
+  // Private user pictures are real bytes, isolated by owner and protected by revisions.
+  const mediaUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=avatar";
+  const picture=Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aM5sAAAAASUVORK5CYII=","base64"));
+  const putPicture=(token,expected,bytes=picture)=>fetch(mediaUrl,{method:"PUT",
+    headers:{Authorization:"Bearer "+token,Origin:base,"Content-Type":"image/png","If-Match":expected},body:bytes});
+  assert.equal((await fetch(mediaUrl)).status,401,"Images require an authenticated account");
+  assert.equal((await putPicture(bob.token,"none")).status,404,"Other user cannot upload");
+  const imagePut=await putPicture(alice.token,"none");
+  assert.equal(imagePut.status,201,"First private picture upload");
+  const imageVersion=(await imagePut.json()).version;
+  assert.match(imageVersion,/^[a-f0-9]{64}$/);
+  const photoOnTv=await fetch(mediaUrl+"&version="+imageVersion,{headers:{Authorization:"Bearer "+tvToken}});
+  assert.equal(photoOnTv.status,200);
+  assert.equal(photoOnTv.headers.get("content-type"),"image/png");
+  assert.deepEqual(new Uint8Array(await photoOnTv.arrayBuffer()),picture,"Another session receives the actual private file");
+  assert.equal((await fetch(mediaUrl,{headers:{Authorization:"Bearer "+bob.token}})).status,404);
+  assert.equal((await putPicture(alice.token,"none")).status,409,"Stale uploads must not overwrite newer photos");
+  const largePicture=new Uint8Array(1_100_000);largePicture.set(picture);
+  const chunked=await putPicture(alice.token,imageVersion,largePicture);
+  assert.equal(chunked.status,201,"Photos are chunked below D1's cell limit");
+  const chunkVersion=(await chunked.json()).version;
+  const roundTrip=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}});
+  assert.deepEqual(new Uint8Array(await roundTrip.arrayBuffer()),largePicture);
+  assert.equal((await putPicture(alice.token,chunkVersion,new Uint8Array(2_097_153))).status,413);
+  const changed=picture.slice();changed[changed.length-1]^=1;
+  const racing=await Promise.all([putPicture(alice.token,chunkVersion,picture),putPicture(alice.token,chunkVersion,changed)]);
+  assert.deepEqual(racing.map(r=>r.status).sort(),[201,409],"Concurrent writers cannot overwrite one another");
+  const winner=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}});
+  const winnerVersion=winner.headers.get("x-kovelyx-media-version");
+  assert.equal((await fetch(mediaUrl,{method:"DELETE",headers:{Authorization:"Bearer "+alice.token,Origin:base,"If-Match":chunkVersion}})).status,409);
+  assert.equal((await fetch(mediaUrl,{method:"DELETE",headers:{Authorization:"Bearer "+alice.token,Origin:base,"If-Match":winnerVersion}})).status,200);
+  assert.equal((await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}})).status,404);
 
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);

@@ -22,7 +22,7 @@ jobs:
           code="$(curl --silent --show-error --location --max-time 25 --connect-timeout 10 \
             -H 'Accept: application/json' -o /tmp/kovelyx-cloud-ready.json -w '%{http_code}' "$url")"
           if [[ "$code" != "200" ]]; then
-            echo "::error::Kovelyx Cloudflare n'est pas prêt (HTTP $code). Vérifier déploiement Worker, migration D1 0002 et secret Better Auth. Aucun compte n'a été modifié."
+            echo "::error::Kovelyx Cloudflare n'est pas prêt (HTTP $code). Vérifier déploiement Worker, migration D1 0003 et secret Better Auth. Aucun compte n'a été modifié."
             exit 1
           fi
           python3 - <<'PY'
@@ -32,8 +32,8 @@ jobs:
           assert result.get('service') == 'Kovelyx Cloud', 'Service inattendu'
           assert result.get('provider') == 'Cloudflare D1', 'Mauvais backend'
           assert result.get('status') == 'ok', 'Backend non prêt'
-          assert result.get('schema') == '0002_watched_history', 'Migration watched non vérifiée'
-          print('OK : Better Auth configuré et schéma D1 0002 détecté.')
+          assert result.get('schema') == '0003_profile_media', 'Migration watched non vérifiée'
+          print('OK : Better Auth configuré et schéma D1 0003 détecté.')
           print('Ce diagnostic ne prouve pas encore la synchronisation entre appareils physiques.')
           PY
           echo '✅ Worker et schéma D1 opérationnels. Les connexions réelles multi-appareils doivent encore être testées.' >> "$GITHUB_STEP_SUMMARY"

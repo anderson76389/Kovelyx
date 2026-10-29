@@ -3475,4 +3475,5 @@
         <item quantity="one">%1$d minute</item>
         <item quantity="other">%1$d minutes</item>
     </plurals>
+    <string name="profile_media_sync_pending">Image conservée sur cet appareil. Synchronisation en attente : %1$s</string>
 </resources>

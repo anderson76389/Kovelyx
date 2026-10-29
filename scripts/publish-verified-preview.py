@@ -182,7 +182,11 @@ def main():
             "Préversion de Kovelyx pour Windows, Android et Android TV.\n\n"
             "- Mises à jour depuis la bannière en haut de l’application.\n"
             "- Logo Kovelyx centré au démarrage.\n"
-            "- Corrections des textes français.\n\n"
+            "- Corrections des textes français.\n"
+            "- Synchronisation privée des photos et fonds de profil, avec cache local.\n"
+            "  Cette fonction nécessite le Worker Cloudflare et la migration D1 0003_profile_media ; "
+            "installer l’application seule ne met pas le serveur à jour.\n"
+            "- Regroupement des envois TV, reprise des suppressions et réduction des appels hérités.\n\n"
             f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
         ensure_tag(tag, sha)

@@ -2661,4 +2661,5 @@
         <item quantity="other">%1$d saisons</item>
     </plurals>
     <string name="plugin_select_option">Choisir une option</string>
+    <string name="profile_media_sync_pending">Image conservée sur cet appareil. Synchronisation en attente : %1$s</string>
 </resources>
