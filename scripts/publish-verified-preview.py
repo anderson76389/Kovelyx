@@ -69,6 +69,17 @@ def find_release(tag):
     return next((r for r in api("releases?per_page=100") if r["tag_name"] == tag), None)
 
 
+def wait_for_release(tag):
+    # A new draft may not appear immediately in the collection read just before creation.
+    for attempt in range(13):
+        release = find_release(tag)
+        if release is not None:
+            return release
+        if attempt < 12:
+            time.sleep(5)
+    raise RuntimeError("Brouillon de publication introuvable après plusieurs essais")
+
+
 def recoverable_source(current_sha):
     allowed = {"scripts/publish-verified-preview.py", "scripts/tests/test_verified_preview.py",
                ".github/workflows/recover-verified-preview.yml", "scripts/prune-releases.py",
@@ -184,9 +195,7 @@ def main():
             ref = api(f"git/tags/{ref['sha']}")["object"]
         if ref["sha"] != sha:
             raise RuntimeError("Le tag existant désigne un autre commit")
-        release = find_release(tag)
-        if release is None:
-            raise RuntimeError("Brouillon de publication introuvable")
+        release = wait_for_release(tag)
         if not release["prerelease"]:
             raise RuntimeError("Refus de modifier une version stable")
         assets = {a["name"]: a for a in release["assets"]}

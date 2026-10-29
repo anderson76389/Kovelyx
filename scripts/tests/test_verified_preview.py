@@ -46,6 +46,18 @@ class VerifiedPreviewTests(unittest.TestCase):
             self.assertEqual(PREVIEW.find_release("v1.1.748-alpha"), draft)
             request.assert_called_once_with("releases?per_page=100")
 
+    def test_new_draft_is_retried_until_visible(self):
+        draft = {"tag_name": "v1.1.752-alpha", "draft": True}
+        with patch.object(PREVIEW, "find_release", side_effect=[None, None, draft]), \
+             patch.object(PREVIEW.time, "sleep") as pause:
+            self.assertEqual(PREVIEW.wait_for_release(draft["tag_name"]), draft)
+            self.assertEqual(pause.call_count, 2)
+        with patch.object(PREVIEW, "find_release", return_value=None), \
+             patch.object(PREVIEW.time, "sleep") as pause:
+            with self.assertRaises(RuntimeError):
+                PREVIEW.wait_for_release("absent")
+            self.assertEqual(pause.call_count, 12)
+
     def test_recovery_refuses_any_application_change(self):
         run = dict(name="Compiler Kovelyx (APK et diagnostic Windows)", head_sha="a" * 40,
                    event="push", head_branch="fix/cloudflare-network-status-and-settings",

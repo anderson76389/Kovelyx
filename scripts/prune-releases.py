@@ -10,7 +10,10 @@ REPOSITORY = "anderson76389/Kovelyx"
 def obsolete_releases(releases):
     published = sorted((r for r in releases if not r.get("draft") and r.get("published_at")),
                        key=lambda r: (r["published_at"], r["id"]), reverse=True)
-    return published[3:]
+    # Empty abandoned drafts older than an already published release are obsolete too.
+    abandoned = [r for r in releases if r.get("draft") and not r.get("assets")
+                 and published and r.get("created_at") and r["created_at"] < published[0]["published_at"]]
+    return published[3:] + abandoned
 
 
 def main():
