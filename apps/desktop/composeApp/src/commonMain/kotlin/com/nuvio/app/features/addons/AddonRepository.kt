@@ -86,6 +86,7 @@ object AddonRepository {
 
         val storedUrls = dedupeManifestUrls(AddonStorage.loadInstalledAddonUrls(currentProfileId))
         val enabledByUrl = loadLocalEnabledStates()
+        val namesByUrl = AddonStorage.loadAddonNames(currentProfileId)
         log.d { "initialize() — local addon count: ${storedUrls.size}" }
         if (storedUrls.isEmpty()) return
 
@@ -95,6 +96,7 @@ object AddonRepository {
                 existingByUrl[manifestUrl].toPendingAddon(
                     manifestUrl = manifestUrl,
                     enabled = enabledByUrl[manifestUrl],
+                    userSetName = namesByUrl[manifestUrl],
                 )
             },
         )
@@ -467,6 +469,9 @@ object AddonRepository {
             currentProfileId,
             dedupeManifestUrls(addons.map { it.manifestUrl }),
         )
+        AddonStorage.saveAddonNames(currentProfileId, addons.mapNotNull { addon ->
+            addon.userSetName?.let { addon.manifestUrl to it }
+        }.toMap())
         AddonStorage.saveAddonEnabledStates(
             currentProfileId,
             addons.associate { it.manifestUrl to it.enabled },
