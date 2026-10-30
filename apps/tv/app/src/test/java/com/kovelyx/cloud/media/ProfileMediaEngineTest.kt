@@ -42,6 +42,19 @@ class ProfileMediaEngineTest {
         override suspend fun remove(profileId: String, kind: String, expected: String?) { deletes++; this.expected = expected }
     }
 
+    @Test fun `TV receive only never sends a pending local photo or deletion`() = runTest {
+        val files = Files()
+        val remote = Remote()
+        val engine = ProfileMediaEngine(files, remote)
+        engine.edited("alice", "profile", "avatar", "file:old-tv-photo")
+        val downloaded = engine.synchronize("alice", "profile", "avatar", "file:old-tv-photo", v1, receiveOnly = true)
+        assertTrue(downloaded!!.startsWith("file:cache-"))
+        assertEquals(0, remote.uploads)
+        engine.edited("alice", "profile", "avatar", null)
+        assertEquals(null, engine.synchronize("alice", "profile", "avatar", downloaded, null, receiveOnly = true))
+        assertEquals(0, remote.deletes)
+    }
+
     @Test fun `a remote picture is downloaded once then reused from private cache`() = runTest {
         val files = Files(); val remote = Remote(); val engine = ProfileMediaEngine(files, remote)
         val first = engine.synchronize("alice", "profile", "avatar", null, v1)

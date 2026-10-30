@@ -2113,7 +2113,7 @@
     <string name="experience_mode_switch_to_essential">Passer en mode essentiel</string>
     <string name="experience_mode_switch_to_essential_subtitle">Masquer les écrans de configuration avancée sans modifier les valeurs enregistrées.</string>
     <string name="settings_experience">Expérience</string>
-    <string name="profile_custom_avatar_web_panel_note">La configuration des URL d’avatars personnalisés nécessite un panneau Web de compte compatible.</string>
+    <string name="profile_custom_avatar_web_panel_note">Modifiez les noms, photos et fonds des profils sur Android mobile ou PC. La TV affiche vos profils synchronisés.</string>
     <string name="tv_channel_continue_watching">Continuer à regarder</string>
 
     <!-- Repli titre catalogue voir tout -->

@@ -13,7 +13,7 @@ import urllib.request
 
 REPO = "anderson76389/Kovelyx"
 API = f"https://api.github.com/repos/{REPO}/releases?per_page=100"
-SEMVER = re.compile(r"^v(\d+)\.(\d+)\.(\d+)-(alpha|beta|rc)$")
+SEMVER = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc))?$")
 SHA_LINE = re.compile(r"^([a-fA-F0-9]{64})\s+\*?(.+)$")
 TRACKS = {
     "Windows installé (MSI)": lambda tag: f"Kovelyx-Windows-{tag}.msi",

@@ -251,24 +251,8 @@ class ProfileSelectionViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(profile: UserProfile) {
-        if (_isSaving.value) return
-        viewModelScope.launch {
-            _isSaving.value = true
-            val previous = profileManager.profiles.value.firstOrNull { it.id == profile.id }
-            try {
-                if (CloudflareTvAccountClient.enabled) cloudProfileMedia.markEdited(profile, previous)
-                profileManager.updateProfile(profile)
-                if (CloudflareTvAccountClient.enabled) cloudProfileMedia.publishEdit(profile, previous)
-                else { profileSyncService.pushToRemote(); refreshProfilePinStates() }
-            } catch (cancelled: CancellationException) { throw cancelled }
-            catch (error: Exception) {
-                Log.w("KovelyxProfile", "Profil conservé localement ; images en attente de synchronisation", error)
-                _mediaErrors.tryEmit(error.message.orEmpty())
-            }
-            finally { _isSaving.value = false }
-        }
-    }
+    // Profile identity is managed on Android mobile / PC; TV is a receiver.
+    fun updateProfile(profile: UserProfile) = Unit
 
     fun deleteProfile(id: Int) {
         viewModelScope.launch {

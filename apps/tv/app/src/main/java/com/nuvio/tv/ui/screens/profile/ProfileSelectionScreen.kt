@@ -406,7 +406,7 @@ fun ProfileSelectionScreen(
                     isManagementMode = isManagementMode,
                     profiles = profiles,
                     activeProfileId = activeProfileId,
-                    canAddProfile = viewModel.canAddProfile,
+                    canAddProfile = false,
                     profilePinEnabled = profilePinEnabled,
                     avatarImageUrlsById = avatarImageUrlsById,
                     brandWordmarkRes = focusedBrandWordmarkRes,
@@ -594,21 +594,7 @@ fun ProfileSelectionScreen(
         }
 
         // Edit Profile Overlay
-        profileToEdit?.let { profile ->
-            EditProfileOverlay(
-                profile = profile,
-                avatarCatalog = avatarCatalog,
-                profileBackgroundCatalog = profileBackgroundCatalog,
-                hasProfileBackgroundAccess = hasProfileBackgroundAccess,
-                isSaving = isSaving,
-                avatarUrlResolver = { avatarId -> viewModel.getAvatarImageUrl(avatarId) },
-                onDismiss = { profileToEdit = null },
-                onSaveProfile = { updated ->
-                    viewModel.updateProfile(updated)
-                    profileToEdit = null
-                }
-            )
-        }
+
 
         LaunchedEffect(profileActionMessage) {
             if (profileActionMessage != null) {
@@ -659,21 +645,8 @@ fun ProfileSelectionScreen(
                 width = 360.dp,
                 suppressFirstKeyUp = suppressOptionsDialogFirstKeyUp
             ) {
-                Button(
-                    onClick = {
-                        longPressedProfile = null
-                        profileToEdit = profile
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(primaryDialogFocusRequester),
-                    colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
-                    )
-                ) {
-                    Text(stringResource(R.string.profile_edit_label))
-                }
+                Text(stringResource(R.string.profile_custom_avatar_web_panel_note))
+
 
                 if (profiles.size > 1) {
                     Button(
@@ -682,7 +655,7 @@ fun ProfileSelectionScreen(
                             settingsCopyError = null
                             settingsCopyTarget = profile
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().focusRequester(primaryDialogFocusRequester),
                         colors = ButtonDefaults.colors(
                             containerColor = NuvioTheme.colors.BackgroundCard,
                             contentColor = NuvioTheme.colors.TextPrimary

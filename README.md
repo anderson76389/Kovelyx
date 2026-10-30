@@ -1,5 +1,9 @@
 <div align="center">
 
+[**Télécharger la dernière version — Windows · Android · Android TV**](https://github.com/anderson76389/Kovelyx/releases/latest)
+
+Les profils TV reçoivent les noms, photos et fonds du compte ; leur modification se fait sur Android mobile ou PC.
+
 <img src="./assets/brand/kovelyx-banner.svg" alt="Kovelyx : votre univers multimédia sur Windows, Android et Android TV" width="100%">
 
 <br>

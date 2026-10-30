@@ -143,8 +143,7 @@ def main():
         ["python3", "scripts/desktop-release-version.py", "--commit", sha], text=True
     ).strip()
     tag = "v" + version
-    if not version.endswith(("-alpha", "-beta", "-rc")):
-        raise RuntimeError("Ce workflow publie uniquement des préversions")
+    preview = version.endswith(("-alpha", "-beta", "-rc"))
     with tempfile.TemporaryDirectory(prefix="kovelyx-release-") as directory:
         root = Path(directory)
         for run, artifact, destination in (
@@ -179,7 +178,10 @@ def main():
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
         notes = root / "notes.md"
         notes.write_text(
-            "Préversion de Kovelyx pour Windows, Android et Android TV.\n\n"
+            "Kovelyx pour Windows, Android et Android TV.\n\n"
+            "- Profils TV en consultation : noms, photos et fonds reçus du cloud. Modification sur Android mobile ou PC.\n"
+            "- Politique de confidentialité, En savoir plus et Discord retirés de l’interface.\n"
+            "- Connexions Trakt et MDBList : accès direct à la configuration si les clés manquent.\n"
             "- Mises à jour depuis la bannière en haut de l’application.\n"
             "- Logo Kovelyx centré au démarrage.\n"
             "- Corrections des textes français.\n"
@@ -193,7 +195,7 @@ def main():
         ensure_tag(tag, sha)
         if find_release(tag) is None:
             gh("release", "create", tag, "--repo", REPOSITORY, "--target", sha, "--draft",
-               "--prerelease", "--title", f"Kovelyx {version} — Windows, Android et TV",
+               *( ["--prerelease"] if preview else [] ), "--title", f"Kovelyx {version} — Windows, Android et TV",
                "--notes-file", str(notes))
         ref = api(f"git/ref/tags/{tag}")["object"]
         if ref["type"] == "tag":
@@ -201,7 +203,7 @@ def main():
         if ref["sha"] != sha:
             raise RuntimeError("Le tag existant désigne un autre commit")
         release = wait_for_release(tag)
-        if not release["prerelease"]:
+        if not release["draft"] and not release["prerelease"]:
             raise RuntimeError("Refus de modifier une version stable")
         assets = {a["name"]: a for a in release["assets"]}
         for path in sorted(output.iterdir()):
@@ -210,8 +212,8 @@ def main():
                     raise RuntimeError("Un fichier publié différent existe déjà ; aucun écrasement")
             else:
                 gh("release", "upload", tag, str(path), "--repo", REPOSITORY)
-        gh("release", "edit", tag, "--repo", REPOSITORY, "--draft=false", "--prerelease", "--latest=false")
-        print(f"Préversion complète publiée : {tag}", flush=True)
+        gh("release", "edit", tag, "--repo", REPOSITORY, "--draft=false", f"--prerelease={str(preview).lower()}", f"--latest={str(not preview).lower()}")
+        print(f"Release complète publiée : {tag}", flush=True)
         subprocess.run(["python3", "scripts/prune-releases.py"], check=True)
 
 

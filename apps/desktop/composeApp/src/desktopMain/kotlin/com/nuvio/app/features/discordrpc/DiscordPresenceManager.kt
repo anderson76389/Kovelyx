@@ -32,7 +32,7 @@ internal object DiscordPresenceManager {
     private var lastActivity: DiscordActivity? = null
 
     fun start() {
-        if (DiscordConfig.CLIENT_ID.isBlank()) return
+        if (!DiscordRichPresenceRepository.isSupported || DiscordConfig.CLIENT_ID.isBlank()) return
         DiscordRichPresenceRepository.ensureLoaded()
         scope.launch {
             DiscordRichPresenceRepository.enabled.collectLatest { enabled ->

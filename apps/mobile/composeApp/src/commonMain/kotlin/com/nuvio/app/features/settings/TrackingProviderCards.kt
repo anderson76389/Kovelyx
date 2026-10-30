@@ -192,9 +192,10 @@ internal fun TrackingProviderCards(
         TraktProviderCard(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
+            onConfigure = { showCredentialEditor = true },
         )
         // SIMKL retiré de la liste des fournisseurs Kovelyx.
-        MdbListProviderCard(Modifier.fillMaxWidth())
+        MdbListProviderCard(Modifier.fillMaxWidth(), onConfigure = { showCredentialEditor = true })
     }
 
     if (showCredentialEditor && !isIos && KovelyxIntegrationCredentials.mobileConfigured) {
@@ -282,15 +283,18 @@ private fun KovelyxOAuthCredentialsDialog(
     }
 }
 
+private fun traktUiCredentialsReady() = KovelyxIntegrationCredentials.traktClientId.isNotBlank() && KovelyxIntegrationCredentials.traktClientSecret.isNotBlank()
+
 @Composable
 private fun TraktProviderCard(
     uiState: TraktAuthUiState,
     modifier: Modifier,
+    onConfigure: () -> Unit,
 ) {
     TrackingProviderCard(
         brand = TrackingBrand.TRAKT,
         mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
+        credentialsConfigured = true,
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_trakt_connected_as,
@@ -308,7 +312,7 @@ private fun TraktProviderCard(
             uiState.mode == TraktConnectionMode.CONNECTED
         },
         errorMessage = uiState.errorMessage,
-        onConnectRequested = TraktAuthRepository::onConnectRequested,
+        onConnectRequested = { if (!traktUiCredentialsReady()) { onConfigure(); null } else TraktAuthRepository.onConnectRequested() },
         onResumeAuthorization = {
             TraktAuthRepository.pendingAuthorizationUrl()
                 ?: TraktAuthRepository.onConnectRequested()
@@ -331,7 +335,7 @@ private fun SimklProviderCard(
     TrackingProviderCard(
         brand = TrackingBrand.SIMKL,
         mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
+        credentialsConfigured = true,
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_simkl_connected_as,
@@ -590,8 +594,7 @@ internal fun TrackingProviderCard(
 
                     val hasWebsiteAction = !websiteLabel.isNullOrBlank() && !websiteUrl.isNullOrBlank()
                     val hasDisconnectAction = mode == TrackingConnectionCardMode.CONNECTED
-                    val hasInfoAction = mode == TrackingConnectionCardMode.CONNECTED &&
-                        infoLabel != null && onInfoRequested != null
+                    val hasInfoAction = false
                     val footerActionCount = listOf(
                         hasWebsiteAction,
                         hasDisconnectAction,

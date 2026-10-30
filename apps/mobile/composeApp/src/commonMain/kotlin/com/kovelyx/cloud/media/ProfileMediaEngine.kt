@@ -38,13 +38,24 @@ class ProfileMediaEngine(private val files: ProfileMediaFiles, private val remot
         files.saveState(key, ProfileMediaState(uri, old?.version, pending = true))
     }
 
-    suspend fun synchronize(owner: String, profile: String, kind: String, local: String?, version: String?): String? {
+    suspend fun synchronize(owner: String, profile: String, kind: String, local: String?, version: String?, receiveOnly: Boolean = false): String? {
         require(kind == "avatar" || kind == "background")
         val key = key(owner, profile, kind)
         var state = files.loadState(key)
+        if (receiveOnly) {
+            // TV discards old upload intentions and takes the server as authority.
+            if (state?.pending == true) {
+                files.compareAndSaveState(key, state, ProfileMediaState())
+                state = files.loadState(key)
+            }
+            if (version == null) {
+                files.saveState(key, ProfileMediaState())
+                return null
+            }
+        }
         // One-time migration of an existing personal file only when the cloud has no image.
         // An unmarked old local cache must never overwrite another device's newer photo.
-        if (state == null && version == null && local?.startsWith("file:") == true) {
+        if (!receiveOnly && state == null && version == null && local?.startsWith("file:") == true) {
             files.compareAndSaveState(key, null, ProfileMediaState(local, pending = true, automatic = true))
             state = files.loadState(key)
         }

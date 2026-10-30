@@ -159,7 +159,8 @@ fun TrackingSettingsContent(
                 } else {
                     dismissOnConnected = provider
                     if (traktState.mode == TraktConnectionMode.DISCONNECTED && !traktState.isLoading) {
-                        traktViewModel.onConnectClick()
+                        if (!traktState.credentialsConfigured) { activeProvider = null; showTvTraktCredentials = true }
+                        else traktViewModel.onConnectClick()
                     }
                 }
             }
@@ -174,7 +175,8 @@ fun TrackingSettingsContent(
                     mdbListViewModel.onAccountOpened()
                 } else {
                     dismissOnConnected = provider
-                    mdbListViewModel.onConnect()
+                    if (!mdbListState.credentialsConfigured) { activeProvider = null; showTvMdbListCredentials = true }
+                    else mdbListViewModel.onConnect()
                 }
             }
         }

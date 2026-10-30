@@ -191,9 +191,10 @@ internal fun TrackingProviderCards(
         TraktProviderCard(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
+            onConfigure = { showCredentialEditor = true },
         )
         // SIMKL retiré de la liste des fournisseurs Kovelyx.
-        MdbListProviderCard(Modifier.fillMaxWidth())
+        MdbListProviderCard(Modifier.fillMaxWidth(), onConfigure = { showCredentialEditor = true })
     }
 
     if (showCredentialEditor && isDesktop) {
@@ -281,16 +282,19 @@ private fun KovelyxOAuthCredentialsDialog(
     }
 }
 
+private fun traktUiCredentialsReady() = KovelyxIntegrationCredentials.traktClientId.isNotBlank() && KovelyxIntegrationCredentials.traktClientSecret.isNotBlank()
+
 @Composable
 private fun TraktProviderCard(
     uiState: TraktAuthUiState,
     modifier: Modifier,
+    onConfigure: () -> Unit,
 ) {
     val usesDeviceCodeFlow = uiState.usesDeviceCodeFlow
     TrackingProviderCard(
         brand = TrackingBrand.TRAKT,
         mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
+        credentialsConfigured = true,
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_trakt_connected_as,
@@ -331,7 +335,7 @@ private fun TraktProviderCard(
         errorMessage = uiState.errorMessage,
         websiteLabel = stringResource(Res.string.settings_trakt_visit),
         websiteUrl = "https://trakt.tv",
-        onConnectRequested = TraktAuthRepository::onConnectRequested,
+        onConnectRequested = { if (!traktUiCredentialsReady()) { onConfigure(); null } else TraktAuthRepository.onConnectRequested() },
         onResumeAuthorization = {
             TraktAuthRepository.pendingAuthorizationUrl()
                 ?: TraktAuthRepository.onConnectRequested()
@@ -355,7 +359,7 @@ private fun SimklProviderCard(
     TrackingProviderCard(
         brand = TrackingBrand.SIMKL,
         mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
+        credentialsConfigured = true,
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_simkl_connected_as,

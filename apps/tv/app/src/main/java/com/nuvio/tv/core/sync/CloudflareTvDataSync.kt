@@ -109,6 +109,9 @@ class CloudflareTvDataSync @Inject constructor(
     suspend fun synchronize(profileId: Int) = mutex.withLock {
         if (CloudflareTvAccountClient.account == null ||
             profileManager.activeProfileId.value != profileId) return@withLock
+        try { profileMedia.synchronize() }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { Log.w(TAG, "Profils Cloudflare différés", error) }
         // Never equate the numeric local ID with an ordinal in the cloud list:
         // deleted/reordered profiles would silently mix another person's history.
         val localProfile = profileManager.profiles.value
@@ -146,11 +149,6 @@ class CloudflareTvDataSync @Inject constructor(
         if (localProfile.cloudProfileId != uuid) {
             profileManager.linkCloudProfile(profileId, uuid)
         }
-        // Private images are separate from the frequently polled watch/library payloads.
-        // A media migration/upload failure must never block already-working watch sync.
-        try { profileMedia.synchronize() }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { Log.w(TAG, "Images Cloudflare différées", error) }
         val rows = CloudflareTvAccountClient.syncRows(uuid)
         try { addons.synchronizeCloudAddons(uuid, rows) }
         catch (cancelled: CancellationException) { throw cancelled }
