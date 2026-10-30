@@ -128,7 +128,7 @@ jobs:
         run: |
           set -euo pipefail
           version="$(python3 scripts/desktop-release-version.py)"
-          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          [[ "$version" =~ ^1[.]1[.][0-9]+(-(alpha|beta|rc))?$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
           count="$(git rev-list --count HEAD)"
           echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
           echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
@@ -230,7 +230,7 @@ jobs:
         run: |
           set -euo pipefail
           version="$(python3 scripts/desktop-release-version.py)"
-          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          [[ "$version" =~ ^1[.]1[.][0-9]+(-(alpha|beta|rc))?$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
           count="$(git rev-list --count HEAD)"
           echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
           echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"

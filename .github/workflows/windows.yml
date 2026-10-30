@@ -81,7 +81,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $version = python scripts/desktop-release-version.py
-          if ($LASTEXITCODE -ne 0 -or $version -notmatch '^\d+\.\d+\.\d+-(alpha|beta|rc)$') {
+          if ($LASTEXITCODE -ne 0 -or $version -notmatch '^\d+\.\d+\.\d+(-(alpha|beta|rc))?$') {
             throw 'Version de la compilation invalide'
           }
           "KOVELYX_BUILD_VERSION=$version" >> $env:GITHUB_ENV

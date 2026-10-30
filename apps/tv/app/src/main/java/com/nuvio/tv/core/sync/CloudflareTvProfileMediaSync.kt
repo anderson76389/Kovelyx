@@ -12,6 +12,8 @@ import com.nuvio.tv.domain.model.UserProfile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -45,8 +47,14 @@ class CloudflareTvProfileMediaSync @Inject constructor(
             val match = linked ?: current.filter { it.cloudProfileId == null && it.name.equals(name, true) }.singleOrNull()
                 ?: current.firstOrNull { index == 0 && it.id == 1 && it.cloudProfileId == null }
             val local = match ?: profiles.createProfile(name, "#1E88E5") ?: continue
-            if (local.name != name || local.cloudProfileId != uuid)
+            if (local.name != name || local.cloudProfileId != uuid) {
                 profiles.updateProfile(local.copy(name = name, cloudProfileId = uuid))
+                // DataStore writes finish before the StateFlow collector necessarily updates.
+                // Wait before matching the next profile, especially with duplicate names.
+                withTimeout(5_000L) {
+                    profiles.profiles.first { list -> list.any { it.id == local.id && it.cloudProfileId == uuid && it.name == name } }
+                }
+            }
         }
         for (local in profiles.profiles.value) {
             val row = (if (local.cloudProfileId != null) remote.firstOrNull { it.optString("id") == local.cloudProfileId }
