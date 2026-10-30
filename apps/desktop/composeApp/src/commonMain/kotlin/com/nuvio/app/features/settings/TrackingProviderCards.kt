@@ -255,6 +255,10 @@ private fun KovelyxOAuthCredentialsDialog(
             runCatching { uriHandler.openUri("https://trakt.tv/oauth/applications") }
         }) { Text("Créer / gérer mon application Trakt") }
         TextButton(onClick = {
+            runCatching { uriHandler.openUri("https://mdblist.com/developer/") }
+        }) { Text("Créer mon application MDBList (Device Code)") }
+        Text("Pour la connexion MDBList, choisissez Device Code et saisissez son identifiant client ci-dessus.")
+        TextButton(onClick = {
             runCatching { uriHandler.openUri("https://mdblist.com/preferences/") }
         }) { Text("Obtenir ma clé API MDBList (rubrique MDBList)") }
         Text(

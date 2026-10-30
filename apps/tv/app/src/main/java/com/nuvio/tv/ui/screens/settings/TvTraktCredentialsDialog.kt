@@ -132,7 +132,7 @@ internal fun TvMdbListCredentialsDialog(
     NuvioDialog(
         onDismiss = onDismiss,
         title = "identifiant client OAuth MDBList",
-        subtitle = "Identifiant de votre application MDBList, différent de la clé API des notes.",
+        subtitle = "Créez une application Device Code sur mdblist.com/developer/, puis saisissez son identifiant client. La clé API des notes est différente.",
         width = 700.dp,
     ) {
         TvCredentialInput(
