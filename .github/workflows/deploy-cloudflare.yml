@@ -64,7 +64,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID }}
+      KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
       KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
     steps:
       - name: Vérifier que l'accès Cloudflare appartient au propriétaire
@@ -74,7 +74,7 @@ jobs:
           set -euo pipefail
           if [[ -z "${CLOUDFLARE_API_TOKEN:-}" || -z "${CLOUDFLARE_ACCOUNT_ID:-}" || -z "${KOVELYX_D1_DATABASE_ID:-}" ]]; then
             echo 'ready=false' >> "$GITHUB_OUTPUT"
-            echo '❌ Déploiement refusé : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID et la variable KOVELYX_D1_DATABASE_ID. Aucune migration exécutée.' >> "$GITHUB_STEP_SUMMARY"
+            echo '❌ Déploiement refusé : ajouter les secrets CLOUDFLARE_API_TOKEN et CLOUDFLARE_ACCOUNT_ID et le réglage KOVELYX_D1_DATABASE_ID (variable ou secret). Aucune migration exécutée.' >> "$GITHUB_STEP_SUMMARY"
             echo '::error::Accès Cloudflare D1 non configuré ; ne jamais afficher un déploiement réussi si aucun Worker n a été publié.'
             exit 1
           fi

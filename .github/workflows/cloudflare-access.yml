@@ -18,7 +18,7 @@ jobs:
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CF_DATABASE: ${{ vars.KOVELYX_D1_DATABASE_ID }}
+          CF_DATABASE: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
           CF_PUBLIC_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
         run: |
           python3 - <<'PY'
@@ -36,7 +36,7 @@ jobs:
           if not re.fullmatch(r'[0-9a-fA-F]{32}', account):
               stop('CLOUDFLARE_ACCOUNT_ID absent ou incomplet : 32 caractères hexadécimaux attendus.')
           if not re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', database):
-              stop('KOVELYX_D1_DATABASE_ID absent ou invalide dans les variables Actions : UUID attendu.')
+              stop('KOVELYX_D1_DATABASE_ID absent ou invalide dans les variables ou secrets Actions : UUID attendu.')
           print('Les trois réglages sont présents et les identifiants ont le bon format.')
 
           def get_api(path, label):
