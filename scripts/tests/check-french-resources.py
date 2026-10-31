@@ -22,6 +22,7 @@ RESOURCE_ROOT = (
     / "composeApp/src/commonMain/composeResources"
 )
 SOURCE_MODULES = (
+    "addon_actions.xml",
     "strings.xml",
     "autosync_strings.xml",
     "autosync_toast_strings.xml",
@@ -97,7 +98,13 @@ def main() -> int:
             raise ValueError(f"{filename} duplicates source keys: {sorted(overlap)}")
         english.update(values)
 
-    french = read_strings(RESOURCE_ROOT / "values-fr" / "strings.xml")
+    french: dict[str, str] = {}
+    for path in sorted((RESOURCE_ROOT / "values-fr").glob("*.xml")):
+        values = read_strings(path)
+        overlap = french.keys() & values.keys()
+        if overlap:
+            raise ValueError(f"{path.name} duplicates French keys: {sorted(overlap)}")
+        french.update(values)
     missing = sorted(english.keys() - french.keys())
     extra = sorted(french.keys() - english.keys())
     mismatches = []

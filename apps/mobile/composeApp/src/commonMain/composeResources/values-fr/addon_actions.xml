@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="addons_copy_link">Copier le lien de l’extension</string>
+    <string name="addons_link_copied">Lien de l’extension copié</string>
+</resources>
