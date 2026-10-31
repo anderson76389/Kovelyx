@@ -1,0 +1,84 @@
+name: Vérifier l’accès Cloudflare et la base existante (lecture seule)
+
+on:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/cloudflare-access.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Contrôler les identifiants et la liaison D1 sans modifier les comptes
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_DATABASE: ${{ vars.KOVELYX_D1_DATABASE_ID }}
+          CF_PUBLIC_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys, urllib.error, urllib.request
+
+          def stop(message):
+              print('::error::' + message)
+              sys.exit(1)
+
+          token = os.environ.get('CF_TOKEN', '').strip()
+          account = os.environ.get('CF_ACCOUNT', '').strip()
+          database = os.environ.get('CF_DATABASE', '').strip()
+          if not token:
+              stop('CLOUDFLARE_API_TOKEN absent des secrets Actions.')
+          if not re.fullmatch(r'[0-9a-fA-F]{32}', account):
+              stop('CLOUDFLARE_ACCOUNT_ID absent ou incomplet : 32 caractères hexadécimaux attendus.')
+          if not re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', database):
+              stop('KOVELYX_D1_DATABASE_ID absent ou invalide dans les variables Actions : UUID attendu.')
+          print('Les trois réglages sont présents et les identifiants ont le bon format.')
+
+          def get_api(path, label):
+              request = urllib.request.Request('https://api.cloudflare.com/client/v4/' + path,
+                  headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/json'})
+              try:
+                  with urllib.request.urlopen(request, timeout=25) as response:
+                      body = json.load(response)
+              except urllib.error.HTTPError as error:
+                  stop(label + ' : accès refusé ou ressource introuvable (HTTP ' + str(error.code) + '). Vérifier les identifiants et les droits du jeton.')
+              except (urllib.error.URLError, TimeoutError, ValueError):
+                  stop(label + ' : contrôle réseau impossible, aucune validation déduite.')
+              if not body.get('success') or not isinstance(body.get('result'), dict):
+                  stop(label + ' : réponse Cloudflare non validée.')
+              return body['result']
+
+          worker = get_api('accounts/' + account + '/workers/scripts/kovelyx-cloud/settings', 'Worker Kovelyx')
+          bindings = [binding for binding in worker.get('bindings', [])
+                      if binding.get('name') == 'DB' and binding.get('type') == 'd1']
+          if len(bindings) != 1:
+              stop('Le Worker existant ne possède pas une liaison D1 DB unique. Aucun déploiement effectué.')
+          bound = str(bindings[0].get('database_id') or bindings[0].get('id') or '').lower()
+          if bound != database.lower():
+              stop('La variable D1 ne correspond pas à la base actuellement utilisée par le Worker. Aucun déploiement effectué.')
+          db = get_api('accounts/' + account + '/d1/database/' + database, 'Base D1 Kovelyx')
+          if str(db.get('uuid', '')).lower() != database.lower():
+              stop('La réponse D1 ne confirme pas l’identifiant configuré.')
+          print('OK : le jeton autorise la lecture du Worker et de sa base D1 existante.')
+          print('OK : la variable D1 désigne exactement la base déjà liée au Worker.')
+          print('Aucune ligne utilisateur lue, aucune écriture, aucune migration, aucun déploiement.')
+
+          try:
+              request = urllib.request.Request(os.environ['CF_PUBLIC_URL'].rstrip('/') + '/ready',
+                  headers={'Accept': 'application/json'})
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  ready = json.load(response)
+              schema = ready.get('schema')
+              if schema not in ('0002_watched_history', '0003_profile_media'):
+                  stop('Le serveur public ne confirme pas un schéma Kovelyx reconnu.')
+              print('Serveur public : schéma ' + schema)
+              if schema == '0002_watched_history':
+                  print('Photos et fonds : sauvegarde puis migration 0003 et nouveau Worker encore nécessaires.')
+          except (urllib.error.URLError, TimeoutError, ValueError):
+              stop('Le contrôle du serveur public a échoué ; aucune disponibilité annoncée.')
+          PY
