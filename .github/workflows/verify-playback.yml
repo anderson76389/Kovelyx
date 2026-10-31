@@ -1,0 +1,50 @@
+name: Vérifier la lecture réelle Windows publiée
+on:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths:
+      - 'scripts/player/**'
+      - '.github/workflows/verify-playback.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Télécharger la dernière distribution Windows complète
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/latest" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0) { throw 'Latest Release unavailable' }
+          $dest = Join-Path $env:RUNNER_TEMP 'kovelyx-release-playback'
+          New-Item -ItemType Directory -Force $dest | Out-Null
+          gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY --pattern 'Kovelyx-Windows-Portable-*.zip*' --dir $dest
+          if ($LASTEXITCODE -ne 0) { throw 'Release download failed' }
+          $zip = @(Get-ChildItem $dest -Filter '*.zip')
+          if ($zip.Count -ne 1) { throw 'Ambiguous portable package' }
+          $expected = ((Get-Content ($zip[0].FullName + '.sha256') -Raw).Trim() -split '\s+')[0]
+          if ((Get-FileHash $zip[0].FullName -Algorithm SHA256).Hash -ne $expected) { throw 'Release checksum mismatch' }
+          Expand-Archive $zip[0].FullName (Join-Path $dest 'app')
+          $exe = Get-ChildItem (Join-Path $dest 'app') -Recurse -Filter Kovelyx.exe | Select-Object -First 1
+          if (-not $exe) { throw 'Kovelyx.exe missing' }
+          "PLAYBACK_APP_ROOT=$($exe.Directory.FullName)" >> $env:GITHUB_ENV
+          "Release exercised: $($release.tag_name)" >> $env:GITHUB_STEP_SUMMARY
+      - name: Lire un MP4 avec le lecteur natif réellement livré
+        shell: pwsh
+        run: ./scripts/player/test-windows-playback.ps1 -AppRoot $env:PLAYBACK_APP_ROOT
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-native-playback
+          path: ${{ runner.temp }}/kovelyx-native-playback/
+          retention-days: 14
