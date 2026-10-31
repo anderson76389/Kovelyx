@@ -9,8 +9,10 @@ $encoded = Get-Content 'apps/tv/app/src/androidTest/assets/media3-smoke.mp4.b64'
 if ((Get-FileHash $fixture -Algorithm SHA256).Hash.ToLowerInvariant() -ne '566c872a74649ee8c04e9c43dccb4d17ec40ebdb4c365acd1bf5387ce3416cef') { throw 'MP4 fixture checksum mismatch' }
 & javac -d $work scripts/player/WindowsNativePlaybackSmoke.java
 if ($LASTEXITCODE -ne 0) { throw 'Playback harness compilation failed' }
-$java = Join-Path $AppRoot 'runtime/bin/java.exe'
-if (-not (Test-Path $java)) { throw 'Packaged Java launcher missing' }
+$java = Join-Path $env:JAVA_HOME 'bin/java.exe'
+# jpackage deliberately strips command-line launchers from its private runtime.
+# Use the CI JDK to exercise the shipped JARs and native DLLs, without substituting libraries.
+if (-not (Test-Path $java)) { throw 'CI Java launcher missing' }
 $classpath = "$work;$(Join-Path $AppRoot 'app/*')"
 & $java '--add-opens=java.desktop/java.awt=ALL-UNNAMED' '--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED' '-cp' $classpath WindowsNativePlaybackSmoke ([Uri]$fixture).AbsoluteUri (Join-Path $work 'playback.png') 2>&1 | Tee-Object -FilePath (Join-Path $work 'playback.log')
 if ($LASTEXITCODE -ne 0) { throw 'Packaged video playback failed; inspect playback.log' }
