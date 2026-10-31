@@ -1296,7 +1296,11 @@ private fun AddonCard(
             colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
             shape = RoundedCornerShape(NuvioTheme.radii.md)
         ) {
-            AddonCardContent(addon = addon, isReadOnly = true)
+            AddonCardContent(
+                addon = addon,
+                isReadOnly = true,
+                toggleFocusRequester = toggleFocusRequester
+            )
         }
     } else {
         val internalToggleFocusRequester = remember { FocusRequester() }
@@ -1378,6 +1382,9 @@ private fun AddonCardContent(
                 }
             }
             Button(
+                modifier = if (isReadOnly && toggleFocusRequester != null) {
+                    Modifier.focusRequester(toggleFocusRequester)
+                } else Modifier,
                 onClick = {
                     clipboard.setText(AnnotatedString(addonManifestLink(addon.baseUrl)))
                     Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
