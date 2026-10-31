@@ -41,7 +41,7 @@ jobs:
 
           def get_api(path, label):
               request = urllib.request.Request('https://api.cloudflare.com/client/v4/' + path,
-                  headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/json'})
+                  headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/json', 'User-Agent': 'Kovelyx-readonly-diagnostic'})
               try:
                   with urllib.request.urlopen(request, timeout=25) as response:
                       body = json.load(response)
@@ -70,7 +70,7 @@ jobs:
 
           try:
               request = urllib.request.Request(os.environ['CF_PUBLIC_URL'].rstrip('/') + '/ready',
-                  headers={'Accept': 'application/json'})
+                  headers={'Accept': 'application/json', 'User-Agent': 'Kovelyx-readonly-diagnostic'})
               with urllib.request.urlopen(request, timeout=20) as response:
                   ready = json.load(response)
               schema = ready.get('schema')
@@ -79,6 +79,8 @@ jobs:
               print('Serveur public : schéma ' + schema)
               if schema == '0002_watched_history':
                   print('Photos et fonds : sauvegarde puis migration 0003 et nouveau Worker encore nécessaires.')
+          except urllib.error.HTTPError as error:
+              stop('Le serveur public répond HTTP ' + str(error.code) + ' ; vérifier le Worker avant migration.')
           except (urllib.error.URLError, TimeoutError, ValueError):
               stop('Le contrôle du serveur public a échoué ; aucune disponibilité annoncée.')
           PY
