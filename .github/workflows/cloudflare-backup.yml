@@ -1,0 +1,38 @@
+name: Sauvegarder D1 avant les images (copie chiffrée uniquement)
+on:
+  push:
+    branches: [fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/cloudflare-backup.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer les outils et tester le Worker hors production
+        working-directory: services/kovelyx-cloudflare
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+          python3 tests/check-d1-schema.py
+      - name: Exporter et chiffrer la base existante sans modifier les comptes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
+          BACKUP_OUTPUT_DIR: ${{ runner.temp }}/kovelyx-encrypted-backup
+          WRANGLER_SEND_METRICS: 'false'
+        run: python3 services/kovelyx-cloudflare/scripts/backup-remote.py
+      - name: Conserver uniquement la copie chiffrée et les contrôles non privés
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-d1-encrypted-backup-20261031
+          path: ${{ runner.temp }}/kovelyx-encrypted-backup/
+          if-no-files-found: error
+          retention-days: 7
