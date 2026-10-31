@@ -1,0 +1,29 @@
+name: Compléter le brouillon stable vérifié v1.1.777
+on:
+  push:
+    branches: [fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/prepare-v1777-draft.yml']
+permissions:
+  contents: read
+concurrency:
+  group: kovelyx-draft-v1777
+  cancel-in-progress: false
+jobs:
+  prepare:
+    name: Joindre les paquets vérifiés au brouillon privé
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier les preuves et joindre les dix fichiers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/prepare-v1777-draft.py
+      - name: Vérifier la publication stable et conserver trois Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WAIT_FOR_PUBLICATION: '1'
+        run: python3 .github/scripts/prepare-v1777-draft.py
