@@ -5,7 +5,8 @@ import java.nio.file.*;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import com.sun.net.httpserver.HttpServer;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Exercises the bridge and DLLs from the shipped application, without provider credentials. */

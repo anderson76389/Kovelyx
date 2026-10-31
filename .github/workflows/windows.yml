@@ -9,6 +9,7 @@ on:
       - 'apps/mobile/**'
       - 'apps/tv/**'
       - 'scripts/media3/**'
+      - 'scripts/player/**'
       - 'scripts/publish-unified-preview.sh'
       - '.github/workflows/publish-unified-preview.yml'
       - '.github/workflows/build.yml'
@@ -24,6 +25,7 @@ on:
     paths:
       - 'apps/desktop/**'
       - 'vendor/engine/**'
+      - 'scripts/player/**'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
 
