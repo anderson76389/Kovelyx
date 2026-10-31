@@ -282,6 +282,12 @@ fun main(args: Array<String>) {
                     )
                 }
             } else {
+                // Explicit CI smoke mode only: report actual surface progress from
+                // the packaged EXE, rather than accepting a merely alive process.
+                val smokeReport = remember {
+                    System.getenv("KOVELYX_PLAYBACK_SMOKE_RESULT")?.takeIf { it.isNotBlank() }?.let { java.io.File(it) }
+                }
+                val smokeReported = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
                 // The player surface reads LocalNuvioPlatformDensity, which only
                 // NuvioTheme provides — the bare smoke harness must supply it too.
                 NuvioTheme {
@@ -289,8 +295,18 @@ fun main(args: Array<String>) {
                         sourceUrl = smokePlayerUrl,
                         modifier = Modifier.fillMaxSize(),
                         onControllerReady = {},
-                        onSnapshot = {},
-                        onError = {},
+                        onSnapshot = { snapshot ->
+                            if (snapshot.positionMs >= 800L && snapshot.durationMs >= 1800L &&
+                                smokeReport != null && smokeReported.compareAndSet(false, true)
+                            ) {
+                                smokeReport.writeText("PASS position=${snapshot.positionMs} duration=${snapshot.durationMs}")
+                            }
+                        },
+                        onError = { error ->
+                            if (error != null && smokeReport != null && smokeReported.compareAndSet(false, true)) {
+                                smokeReport.writeText("FAIL $error")
+                            }
+                        },
                     )
                 }
             }

@@ -347,7 +347,7 @@ internal fun MainAppContent(
         NetworkStatusRepository.uiState
     }.collectAsStateWithLifecycle()
     val playbackAvailability = rememberPlaybackAvailability()
-    val playbackUnavailableMessage = stringResource(Res.string.playback_unavailable_message)
+    val playbackUnavailableMessage = stringResource(Res.string.streams_empty_no_stream_addon_message)
     val downloadedProviderLabel = stringResource(Res.string.provider_downloaded)
     val externalPlayerNotConfiguredText = stringResource(Res.string.external_player_not_configured)
     val externalPlayerUnavailableText = stringResource(Res.string.external_player_unavailable)

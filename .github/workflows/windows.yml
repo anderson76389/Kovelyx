@@ -293,6 +293,22 @@ jobs:
           $hash = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
           ($hash + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
           ('ZIP portable complet : ' + $target + ', SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Vérifier la vraie lecture dans Kovelyx.exe et son lecteur natif
+        if: steps.native.outputs.available == 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $exe = Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -Filter Kovelyx.exe | Select-Object -First 1
+          if (-not $exe) { throw 'Application Windows à tester introuvable' }
+          ./scripts/player/test-windows-playback.ps1 -AppRoot $exe.Directory.FullName -IncludeApplication
+      - name: Conserver les preuves de lecture Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-playback-proof
+          path: ${{ runner.temp }}/kovelyx-native-playback/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Exécuter les tests unitaires des fonctions Desktop
         if: steps.native.outputs.available == 'true'
         working-directory: apps/desktop

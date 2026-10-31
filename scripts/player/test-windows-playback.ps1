@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$AppRoot)
+param([Parameter(Mandatory=$true)][string]$AppRoot, [switch]$IncludeApplication)
 $ErrorActionPreference = 'Stop'
 $AppRoot = (Resolve-Path -LiteralPath $AppRoot).Path
 $work = Join-Path $env:RUNNER_TEMP 'kovelyx-native-playback'
@@ -17,3 +17,32 @@ $classpath = "$work;$(Join-Path $AppRoot 'app/*')"
 & $java '--add-opens=java.desktop/java.awt=ALL-UNNAMED' '--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED' '-cp' $classpath WindowsNativePlaybackSmoke ([Uri]$fixture).AbsoluteUri (Join-Path $work 'playback.png') 2>&1 | Tee-Object -FilePath (Join-Path $work 'playback.log')
 if ($LASTEXITCODE -ne 0) { throw 'Packaged video playback failed; inspect playback.log' }
 'Native MP4 playback and time progression passed using packaged libraries.' >> $env:GITHUB_STEP_SUMMARY
+if ($IncludeApplication) {
+    $report = Join-Path $work 'application-playback.txt'
+    Remove-Item $report -ErrorAction SilentlyContinue
+    $oldSource = $env:NUVIO_DESKTOP_SMOKE_PLAYER_URL
+    $oldReport = $env:KOVELYX_PLAYBACK_SMOKE_RESULT
+    $process = $null
+    try {
+        $env:NUVIO_DESKTOP_SMOKE_PLAYER_URL = ([Uri]$fixture).AbsoluteUri
+        $env:KOVELYX_PLAYBACK_SMOKE_RESULT = $report
+        $process = Start-Process -FilePath (Join-Path $AppRoot 'Kovelyx.exe') -WorkingDirectory $AppRoot -PassThru
+        $deadline = [DateTime]::UtcNow.AddSeconds(60)
+        while ([DateTime]::UtcNow -lt $deadline -and -not (Test-Path $report)) {
+            $process.Refresh()
+            if ($process.HasExited) { throw "Application exited during video startup: $($process.ExitCode)" }
+            Start-Sleep -Milliseconds 200
+        }
+        if (-not (Test-Path $report)) { throw 'Application never reported video progression within 60 seconds' }
+        $result = Get-Content $report -Raw
+        Write-Host $result
+        if (-not $result.StartsWith('PASS ')) { throw "Application player failed: $result" }
+        'Packaged Kovelyx.exe, private Java runtime and real player surface: video progression passed.' >> $env:GITHUB_STEP_SUMMARY
+    } finally {
+        $env:NUVIO_DESKTOP_SMOKE_PLAYER_URL = $oldSource
+        $env:KOVELYX_PLAYBACK_SMOKE_RESULT = $oldReport
+        if ($null -ne $process -and -not $process.HasExited) {
+            taskkill /PID $process.Id /T /F | Out-Null
+        }
+    }
+}
