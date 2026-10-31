@@ -1,0 +1,44 @@
+name: Publier les images de profils Cloudflare après sauvegarde vérifiée
+on:
+  push:
+    branches: [fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/cloudflare-profile-media-deploy.yml']
+permissions:
+  contents: read
+concurrency:
+  group: kovelyx-cloudflare-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    name: Tester puis publier le stockage privé des images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: services/kovelyx-cloudflare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/kovelyx-cloudflare/package-lock.json
+      - name: Installer les versions de dépendances de la sauvegarde vérifiée
+        run: npm ci --no-audit --no-fund
+      - name: Contrôler le contrat et la migration
+        run: |
+          npm test
+          python3 tests/check-d1-schema.py
+      - name: Tester les vrais comptes et images sur Worker et D1 locaux
+        timeout-minutes: 4
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: node tests/local-account-e2e.mjs
+      - name: Vérifier la sauvegarde et publier sur la cible existante autorisée
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+          CI: 'true'
+        run: python3 scripts/deploy-verified.py
