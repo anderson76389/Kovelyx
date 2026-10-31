@@ -32,6 +32,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.sync.AddonSyncService
 import javax.inject.Inject
@@ -86,6 +89,7 @@ class AddonRepositoryImpl(
         private const val MANIFEST_CACHE_TTL_MS = 6 * 60 * 60 * 1000L 
     }
 
+    private val manifestRequests = Semaphore(4)
     private val syncScope = CoroutineScope(SupervisorJob() + dispatcher)
     private var syncJob: Job? = null
     var isSyncingFromRemote = false
@@ -112,7 +116,7 @@ class AddonRepositoryImpl(
             Log.d(TAG, "triggerRemoteSync: skipped (syncing from remote)")
             return
         }
-        if (!authManager.isAuthenticated) {
+        if (!authManager.isAuthenticated && CloudflareTvAccountClient.account == null) {
             Log.d(TAG, "triggerRemoteSync: skipped (not authenticated, state=${authManager.authState.value})")
             return
         }
@@ -295,14 +299,14 @@ class AddonRepositoryImpl(
 
     override fun getInstalledAddons(): Flow<List<Addon>> = installedAddonsFlow
 
-    override suspend fun fetchAddon(baseUrl: String): NetworkResult<Addon> {
+    override suspend fun fetchAddon(baseUrl: String): NetworkResult<Addon> = manifestRequests.withPermit {
         val cleanBaseUrl = canonicalizeUrl(baseUrl)
         val queryStart = cleanBaseUrl.indexOf('?')
         val basePath = if (queryStart >= 0) cleanBaseUrl.substring(0, queryStart).trimEnd('/') else cleanBaseUrl
         val baseQuery = if (queryStart >= 0) cleanBaseUrl.substring(queryStart) else ""
         val manifestUrl = "$basePath/manifest.json$baseQuery"
 
-        return when (val result = safeApiCall(context) { api.getManifest(manifestUrl) }) {
+        return@withPermit when (val result = safeApiCall(context) { api.getManifest(manifestUrl) }) {
             is NetworkResult.Success -> {
                 val addon = result.data.toDomain(cleanBaseUrl)
                 if (putCachedManifestIfChanged(cleanBaseUrl, addon)) {

@@ -1,3 +1,4 @@
+import {handleProfileMedia} from "./profile-media.mjs";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validSyncInput, isAllowedOrigin } from "./contract.mjs";
@@ -5,9 +6,9 @@ import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validS
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
     ? { "access-control-allow-origin": origin,
-        "access-control-allow-headers": "content-type, authorization",
-        "access-control-allow-methods": "GET, POST, OPTIONS",
-        "access-control-expose-headers": "set-auth-token",
+        "access-control-allow-headers": "content-type, authorization, if-match",
+        "access-control-allow-methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "access-control-expose-headers": "set-auth-token, x-kovelyx-media-version",
         "vary": "Origin" }
     : {};
 }
@@ -139,7 +140,7 @@ async function handleProfiles(request,env,user,url) {
       "DELETE FROM kv_profiles WHERE owner_id=? AND id=? "+
       "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
     ).bind(user.id,profileId,user.id).run();
-    if (removed.meta?.changes !== 1)
+    if (Number(removed.meta?.changes || 0) < 1)
       return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
     return jsonResponse({deleted:true,id:profileId});
   }
@@ -178,9 +179,11 @@ async function productionReadiness(env) {
     ).first();
     if (typeof sync?.sql !== "string" || !sync.sql.includes("'watched_items'"))
       return unavailable();
+    const media = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('kv_profile_media','kv_profile_media_chunks')").all();
+    if ((media.results || []).length !== 2) return unavailable();
     return jsonResponse({
       service:"Kovelyx Cloud",provider:"Cloudflare D1",
-      status:"ok",schema:"0002_watched_history"
+      status:"ok",schema:"0003_profile_media"
     });
   } catch {
     return unavailable();
@@ -224,6 +227,7 @@ export default {
       if (url.pathname === "/v1/me" && request.method === "GET")
         return respond(jsonResponse({id:user.id,email:user.email,name:user.name}));
       if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user,url));
+      if (url.pathname === "/v1/profile-media") return respond(await handleProfileMedia(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {

@@ -3,6 +3,8 @@ package com.nuvio.tv.ui.screens.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvProfileMediaSync
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.core.sync.ProfileSettingsSyncService
 import com.nuvio.tv.core.sync.ProfileSyncService
@@ -51,7 +53,8 @@ class ProfileSelectionViewModel @Inject constructor(
     private val profileBackgroundRepository: ProfileBackgroundRepository,
     memberAccessRepository: MemberAccessRepository,
     private val profileLockStateDataStore: ProfileLockStateDataStore,
-    private val themeDataStore: com.nuvio.tv.data.local.ThemeDataStore
+    private val themeDataStore: com.nuvio.tv.data.local.ThemeDataStore,
+    private val cloudProfileMedia: CloudflareTvProfileMediaSync
 ) : ViewModel() {
     val activeProfileId: StateFlow<Int> = profileManager.activeProfileId
     val profiles: StateFlow<List<UserProfile>> = profileManager.profiles
@@ -80,6 +83,9 @@ class ProfileSelectionViewModel @Inject constructor(
 
     private val _isCreating = MutableStateFlow(false)
     val isCreating: StateFlow<Boolean> = _isCreating.asStateFlow()
+
+    private val _mediaErrors = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val mediaErrors: kotlinx.coroutines.flow.SharedFlow<String> = _mediaErrors
 
     private val _isSaving = MutableStateFlow(false)
     val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
@@ -245,16 +251,8 @@ class ProfileSelectionViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(profile: UserProfile) {
-        if (_isSaving.value) return
-        viewModelScope.launch {
-            _isSaving.value = true
-            profileManager.updateProfile(profile)
-            profileSyncService.pushToRemote()
-            refreshProfilePinStates()
-            _isSaving.value = false
-        }
-    }
+    // Profile identity is managed on Android mobile / PC; TV is a receiver.
+    fun updateProfile(profile: UserProfile) = Unit
 
     fun deleteProfile(id: Int) {
         viewModelScope.launch {
@@ -266,6 +264,8 @@ class ProfileSelectionViewModel @Inject constructor(
     }
 
     fun refreshProfilePinStates() {
+        // Cloudflare has no legacy PIN RPC; retain the locally stored lock state.
+        if (CloudflareTvAccountClient.enabled) return
         viewModelScope.launch {
             var attempt = 0
             while (attempt < 4) {

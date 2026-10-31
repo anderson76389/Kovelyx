@@ -46,6 +46,7 @@ class UpdateViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UpdateUiState())
     val uiState: StateFlow<UpdateUiState> = _uiState.asStateFlow()
     private var updateCheckJob: Job? = null
+    private var lastUpdateCheckAtMs = 0L
 
     init {
         viewModelScope.launch {
@@ -63,9 +64,17 @@ class UpdateViewModel @Inject constructor(
         }
     }
 
+    fun requestForegroundCheck() {
+        val state = _uiState.value
+        if (!state.updateBannerEnabled || state.isChecking || state.isDownloading || state.showBanner) return
+        if (System.currentTimeMillis() - lastUpdateCheckAtMs < 15 * 60_000L) return
+        checkForUpdates(force = false, showNoUpdateFeedback = false)
+    }
+
     fun checkForUpdates(force: Boolean, showNoUpdateFeedback: Boolean) {
         if (!force && !_uiState.value.updateBannerEnabled) return
 
+        lastUpdateCheckAtMs = System.currentTimeMillis()
         updateCheckJob?.cancel()
         updateCheckJob = viewModelScope.launch {
             val channel = _uiState.value.updateChannel

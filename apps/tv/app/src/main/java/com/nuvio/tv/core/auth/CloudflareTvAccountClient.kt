@@ -22,6 +22,16 @@ internal object CloudflareTvAccountClient {
     data class Account(val id: String, val email: String, val bearerToken: String)
     val enabled: Boolean get() = BuildConfig.KOVELYX_CLOUD_URL.startsWith("https://")
     private val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val builder = request.newBuilder()
+                .header("Accept", "application/json")
+                .header("User-Agent", "Kovelyx-Client")
+            if (request.method != "GET" && request.method != "HEAD") {
+                builder.header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            }
+            chain.proceed(builder.build())
+        }
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .followRedirects(false)
@@ -289,5 +299,63 @@ internal object CloudflareTvAccountClient {
             account = null
             sessionStore?.clear()
         }
+    }
+    suspend fun cloudProfileDetails(): List<JSONObject> = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles")
+            .header("Authorization", "Bearer ${active.bearerToken}").get().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Profils Cloudflare indisponibles" }
+            val rows = JSONObject(response.body?.string().orEmpty()).optJSONArray("profiles") ?: return@use emptyList()
+            (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }
+        }
+    }
+    suspend fun renameCloudProfile(profileId: String, name: String) = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(account)
+        val body = JSONObject().put("displayName", name).toString().toRequestBody("application/json".toMediaType())
+        val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles?profileId=$profileId")
+            .header("Authorization", "Bearer ${active.bearerToken}").patch(body).build()
+        client.newCall(request).execute().use { check(it.isSuccessful && account?.id == active.id) { "Nom de profil non synchronisé" } }
+    }
+    private fun mediaUrl(profileId: String, kind: String): String {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")) && kind in setOf("avatar", "background"))
+        return BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profile-media?profileId=$profileId&kind=$kind"
+    }
+    suspend fun uploadProfileMedia(profileId: String, kind: String, expected: String?, image: com.kovelyx.cloud.media.ProfileImageBytes): String = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account)
+        val request = Request.Builder().url(mediaUrl(profileId, kind))
+            .header("Authorization", "Bearer ${active.bearerToken}").header("If-Match", expected ?: "none")
+            .put(image.bytes.toRequestBody(image.mime.toMediaType())).build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Le service d’images est indisponible ou doit être mis à jour (HTTP ${response.code})." }
+            JSONObject(response.body?.string().orEmpty()).getString("version")
+        }
+    }
+    suspend fun downloadProfileMedia(profileId: String, kind: String, version: String): com.kovelyx.cloud.media.ProfileImageBytes = withContext(Dispatchers.IO) {
+        require(version.matches(Regex("[a-f0-9]{64}")))
+        val active = checkNotNull(account)
+        val request = Request.Builder().url(mediaUrl(profileId, kind) + "&version=$version")
+            .header("Authorization", "Bearer ${active.bearerToken}").get().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Image privée inaccessible" }
+            val body = checkNotNull(response.body)
+            val output = java.io.ByteArrayOutputStream()
+            body.byteStream().use { input ->
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val n = input.read(buffer); if (n < 0) break
+                    check(output.size() + n <= com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES) { "Image distante trop volumineuse" }
+                    output.write(buffer, 0, n)
+                }
+            }
+            com.kovelyx.cloud.media.ProfileImageBytes(response.header("Content-Type").orEmpty().substringBefore(';'), output.toByteArray())
+        }
+    }
+    suspend fun removeProfileMedia(profileId: String, kind: String, expected: String?) = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account)
+        val request = Request.Builder().url(mediaUrl(profileId, kind))
+            .header("Authorization", "Bearer ${active.bearerToken}").header("If-Match", expected ?: "none").delete().build()
+        client.newCall(request).execute().use { check(it.isSuccessful && account?.id == active.id) { "Suppression d’image non confirmée" } }
     }
 }

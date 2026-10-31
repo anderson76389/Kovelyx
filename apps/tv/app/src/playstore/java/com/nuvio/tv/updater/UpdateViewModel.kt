@@ -27,6 +27,8 @@ class UpdateViewModel @Inject constructor() : ViewModel() {
     private val _uiState = MutableStateFlow(UpdateUiState())
     val uiState: StateFlow<UpdateUiState> = _uiState.asStateFlow()
 
+    fun requestForegroundCheck() = Unit
+
     fun checkForUpdates(force: Boolean, showNoUpdateFeedback: Boolean) = Unit
 
     fun dismissBanner() = Unit

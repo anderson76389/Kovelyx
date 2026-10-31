@@ -12,12 +12,12 @@ cd /workspaces/Kovelyx && git pull --ff-only && cd services/kovelyx-cloudflare &
 
 Le script protège les comptes existants : avant chaque migration sur une base existante, il **exporte la totalité de D1 en SQL** dans `~/Kovelyx-sauvegardes-D1/` (hors du dépôt et des artefacts GitHub), vérifie que le fichier n'est pas vide, puis applique les migrations D1 restantes et publie le Worker. Il conserve le secret Better Auth s'il existe déjà ; il **ne supprime aucun utilisateur**. Un échec de sauvegarde **arrête** la migration. Téléchargez et protégez la sauvegarde avant toute suppression de Codespaces ; elle contient des informations privées.
 
-La dernière étape vérifie la **vraie URL HTTPS** du Worker par `/ready`, qui doit renvoyer `status: ok` et `schema: 0002_watched_history`. Si votre Worker possède un sous-domaine différent, exportez d'abord `KOVELYX_CLOUDFLARE_URL=https://VOTRE-SOUS-DOMAINE.workers.dev` dans le terminal. **Ne publiez aucun token, mot de passe ou export D1.**
+La dernière étape vérifie la **vraie URL HTTPS** du Worker par `/ready`, qui doit renvoyer `status: ok` et `schema: 0003_profile_media`. Si votre Worker possède un sous-domaine différent, exportez d'abord `KOVELYX_CLOUDFLARE_URL=https://VOTRE-SOUS-DOMAINE.workers.dev` dans le terminal. **Ne publiez aucun token, mot de passe ou export D1.**
 
 Ce contrôle atteste du Worker, de Better Auth et de la migration D1 nécessaires à la synchronisation ; il ne prouve pas qu'une vidéo lancée sur Windows reprend sur Android/TV. Ce dernier test nécessite le même compte, le même profil et une version Kovelyx intégrant les clients Cloudflare sur chaque appareil.
 
 
-**Vérification du serveur réellement déployé :** `/health` indique seulement que le Worker répond ; `/ready` (après publication de la nouvelle version) contrôle sans écrire de données la présence de D1, du secret Better Auth et du schéma `0002_watched_history`. Le workflow manuel [Diagnostic Cloudflare en production](../../.github/workflows/cloudflare-readiness.yml) effectue ce contrôle en lecture seule. Un résultat positif ne remplace pas un test de connexion et de synchronisation sur les trois appareils. Pour appliquer la migration sur la base réelle, utiliser uniquement le déploiement protégé avec sauvegarde D1 préalable. Aucun secret ni compte ne doit être envoyé à GitHub pour ce diagnostic.
+**Vérification du serveur réellement déployé :** `/health` indique seulement que le Worker répond ; `/ready` (après publication de la nouvelle version) contrôle sans écrire de données la présence de D1, du secret Better Auth et du schéma `0003_profile_media`. Le workflow manuel [Diagnostic Cloudflare en production](../../.github/workflows/cloudflare-readiness.yml) effectue ce contrôle en lecture seule. Un résultat positif ne remplace pas un test de connexion et de synchronisation sur les trois appareils. Pour appliquer la migration sur la base réelle, utiliser uniquement le déploiement protégé avec sauvegarde D1 préalable. Aucun secret ni compte ne doit être envoyé à GitHub pour ce diagnostic.
 
 **État réel au 19 octobre 2026 : Worker Cloudflare et D1 déployés et accessibles ; la création, la connexion, la lecture de l'identité et la création du profil « Principal » ont réussi depuis Codespaces sur le vrai serveur.** La connexion a passé ce test technique, mais les anciennes fonctions de synchronisation des applications ne sont pas encore toutes migrées. [Tests publics automatiques](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-live-check.yml). Les nouvelles applis disposent de premiers adaptateurs pour le formulaire e-mail. Les écrans, caches, profils, lecteurs et anciennes RPC Supabase **ne sont pas encore tous migrés**. Le mode invité reste disponible. Les sessions Cloudflare des premières versions sont en mémoire seulement : il faut se reconnecter après avoir fermé l'application. Les flux QR/code TV et la récupération de mot de passe ne sont pas prêts.
 
@@ -172,7 +172,7 @@ Les données **restent chez Cloudflare, pas sur GitHub Pages**. Exportez réguli
 | Route | Méthode | Protection | État |
 |---|---|---|---|
 | `/health` | GET | Publique | Implémentée |
-| `/ready` | GET | Publique, lecture seule | Contrôle D1, tables Better Auth et migration `0002` ; HTTP 503 si non prêt |
+| `/ready` | GET | Publique, lecture seule | Contrôle D1, tables Better Auth et migration `0003` (images privées) ; HTTP 503 si non prêt |
 | `/api/auth/sign-up/email` | POST | Inscriptions fermées par défaut | Implémentée via Better Auth |
 | `/api/auth/sign-in/email` | POST | Rate limiting Better Auth / D1 | Implémentée |
 | `/api/auth/get-session` | GET | Session Better Auth | Implémentée |

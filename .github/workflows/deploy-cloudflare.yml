@@ -158,7 +158,7 @@ jobs:
           with open('/tmp/kv-ready.json', encoding='utf-8') as file:
               data=json.load(file)
           assert data.get('status') == 'ok', 'Worker non prêt'
-          assert data.get('schema') == '0002_watched_history', 'D1 0002 absent'
+          assert data.get('schema') == '0003_profile_media', 'D1 0003 absent'
           print('Vrai serveur Kovelyx Cloudflare prêt : schéma D1 0002 vérifié.')
           PY
           echo '✅ Worker réellement déployé : comptes Better Auth et schéma D1 0002 vérifiés. Synchronisation multi-appareils à tester séparément.' >> "$GITHUB_STEP_SUMMARY"

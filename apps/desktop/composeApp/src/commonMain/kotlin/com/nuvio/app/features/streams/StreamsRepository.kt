@@ -3,6 +3,8 @@ package com.nuvio.app.features.streams
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.build.AppFeaturePolicy
 import com.nuvio.app.features.addons.AddonRepository
+import com.nuvio.app.features.addons.ManagedAddon
+import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.addons.buildAddonResourceUrl
 import com.nuvio.app.features.addons.enabledAddons
 import com.nuvio.app.features.addons.fetchAddonResponseText
@@ -30,6 +32,13 @@ import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.getString
 import kotlinx.coroutines.launch
 
+internal data class StreamLookupKey(
+    val requestToken: String,
+    val profileId: Int,
+    val addons: List<ManagedAddon>,
+    val plugins: PluginsUiState,
+)
+
 object StreamsRepository {
     private val log = Logger.withTag("StreamsRepo")
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -37,7 +46,7 @@ object StreamsRepository {
     val uiState: StateFlow<StreamsUiState> = _uiState.asStateFlow()
 
     private var activeJob: Job? = null
-    private var activeRequestKey: String? = null
+    private var activeRequestKey: StreamLookupKey? = null
 
     fun requestToken(
         type: String,
@@ -88,7 +97,9 @@ object StreamsRepository {
             episode = episode,
             manualSelection = manualSelection,
         )
-        val requestKey = "$requestToken::pluginsGrouped=${pluginUiState.groupStreamsByRepository}"
+        AddonRepository.initialize()
+        val addonSnapshot = AddonRepository.uiState.value.addons
+        val requestKey = StreamLookupKey(requestToken, ProfileRepository.activeProfileId, addonSnapshot, pluginUiState)
         val currentState = _uiState.value
         if (
             !forceRefresh &&
@@ -159,10 +170,14 @@ object StreamsRepository {
             return
         }
 
+        // A cloud-restored URL is not yet a failed/incompatible provider while its
+        // manifest is being fetched. StreamsScreen observes completion and retries
+        // with a different source key, instead of retaining an empty lookup forever.
         val isNativeServerRequest = ServerStreams.isNativeRequest(videoId)
+        if (!isNativeServerRequest && addonSnapshot.any { it.enabled && it.manifest == null && it.isRefreshing }) return
         val serverSources = ServerStreams.sources(type, videoId, season, episode, forceRefresh)
         val preferredGroupIds = serverSources.filter { it.preferred }.mapTo(mutableSetOf()) { it.addonId }
-        val installedAddons = if (isNativeServerRequest) emptyList() else AddonRepository.uiState.value.addons.enabledAddons()
+        val installedAddons = if (isNativeServerRequest) emptyList() else addonSnapshot.enabledAddons()
         val pluginScrapers = if (AppFeaturePolicy.pluginsEnabled && !isNativeServerRequest) {
             PluginRepository.getEnabledScrapersForType(type)
         } else {
@@ -201,7 +216,8 @@ object StreamsRepository {
             _uiState.value = StreamsUiState(
                 requestToken = requestToken,
                 isAnyLoading = false,
-                emptyStateReason = StreamsEmptyStateReason.NoCompatibleAddons,
+                emptyStateReason = if (installedAddons.any { it.manifest == null && it.errorMessage != null })
+                    StreamsEmptyStateReason.StreamFetchFailed else StreamsEmptyStateReason.NoCompatibleAddons,
                 autoPlayDecided = true,
             )
             return

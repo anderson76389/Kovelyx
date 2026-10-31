@@ -22,4 +22,14 @@ actual object SyncClientIdentityStorage {
             ?.putString(clientIdKey, clientId)
             ?.apply()
     }
+
+    actual fun loadCloudflareDeletes(): String? = preferences?.getString("cloudflare_deletes", null)
+    actual fun saveCloudflareDeletes(payload: String) {
+        checkNotNull(preferences) { "Stockage de synchronisation non initialisé" }
+            .edit().putString("cloudflare_deletes", payload).apply()
+    }
+    actual fun loadCloudflareAddons(key: String): String? = preferences?.getString("addons.$key", null)
+    actual fun saveCloudflareAddons(key: String, payload: String) {
+        checkNotNull(preferences).edit().putString("addons.$key", payload).apply()
+    }
 }

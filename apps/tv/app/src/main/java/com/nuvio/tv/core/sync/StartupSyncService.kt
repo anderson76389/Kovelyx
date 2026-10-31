@@ -146,7 +146,8 @@ class StartupSyncService @Inject constructor(
         if (periodicSurfacePullJob?.isActive == true) return
         periodicSurfacePullJob = scope.launch {
             while (true) {
-                delay(PERIODIC_SURFACE_PULL_INTERVAL_MS)
+                delay(if (CloudflareTvAccountClient.enabled) CLOUDFLARE_FOREGROUND_PULL_INTERVAL_MS
+                      else PERIODIC_SURFACE_PULL_INTERVAL_MS)
                 scheduleActivityPull(reason = "periodic")
             }
         }

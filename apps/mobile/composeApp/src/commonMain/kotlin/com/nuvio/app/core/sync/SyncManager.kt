@@ -402,7 +402,10 @@ object SyncManager {
         profileId: Int,
         reason: String,
     ) {
-        if (CloudflareAccountClient.enabled) return
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
         val authState = AuthRepository.state.value
         if (authState !is AuthState.Authenticated || authState.isAnonymous) return
         if (ProfileRepository.activeProfileId != profileId) return
@@ -530,7 +533,7 @@ object SyncManager {
             periodicNuvioSyncProfileId = profileId
             periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
                 while (isActive) {
-                    delay(PERIODIC_NUVIO_SYNC_PULL_INTERVAL_MS)
+                    delay(60_000L)
                     val state = AuthRepository.state.value as? AuthState.Authenticated
                     if (state != null && !state.isAnonymous &&
                         ProfileRepository.activeProfileId == profileId) {

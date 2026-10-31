@@ -1,6 +1,9 @@
 package com.nuvio.app.core.cloud
 
 import co.touchlab.kermit.Logger
+import com.nuvio.app.core.sync.SyncClientIdentityStorage
+import kotlin.random.Random
+import kotlin.time.Clock
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
 import com.nuvio.app.features.library.LibraryItem
@@ -49,6 +52,10 @@ object CloudflareDataSync {
     // a successful upload or leave a 409 reconciliation without another retry.
     // Conflation queues the latest profile once, even during continuous playback.
     private val requests = Channel<Int>(Channel.CONFLATED)
+    private val deletes = CloudflareDeleteOutbox(
+        SyncClientIdentityStorage::loadCloudflareDeletes,
+        SyncClientIdentityStorage::saveCloudflareDeletes
+    )
 
     init {
         scope.launch {
@@ -99,14 +106,43 @@ object CloudflareDataSync {
             // Offline/new profile: try again after D1 profile creation.
             throw IllegalStateException("Profil Cloudflare non encore lié : reprise de synchronisation nécessaire")
         }
+        ProfileRepository.syncCloudflareProfileImages()
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
+        try { com.nuvio.app.features.addons.AddonRepository.synchronizeCloudAddons(cloudId, records) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { log.w(error) { "Extensions Cloudflare différées, configuration locale conservée" } }
         val remote = records.associateBy {
             it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +
                 it["itemKey"]?.jsonPrimitive?.content.orEmpty()
         }
-        synchronizeLibrary(profileId, cloudId, remote)
-        synchronizeProgress(profileId, cloudId, remote)
-        synchronizeWatched(profileId, cloudId, remote)
+        val suppressed = mutableSetOf<String>()
+        for (pending in deletes.pending(account.userId, cloudId)) {
+            check(CloudflareAccountClient.currentSession?.userId == account.userId &&
+                ProfileRepository.activeProfileId == profileId) { "Session ou profil modifié" }
+            val identity = "${pending.category}|${pending.itemKey}"
+            val newerLocal = when (pending.category) {
+                "watch_progress" -> WatchProgressRepository.cloudLocalEntries(profileId)
+                    .any { it.resolvedProgressKey().take(200) == pending.itemKey &&
+                        it.lastUpdatedEpochMs > pending.createdAtMs }
+                "watched_items" -> WatchedRepository.cloudLocalItems(profileId)
+                    .any { watchedItemKey(it.type, it.id, it.season, it.episode) == pending.itemKey &&
+                        it.markedAtEpochMs > pending.createdAtMs }
+                else -> false
+            }
+            if (!newerLocal) {
+                val row = remote[identity]
+                if (row == null || !isDeleted(row)) CloudflareAccountClient.writeSync(
+                    cloudId, pending.category, pending.itemKey,
+                    buildJsonObject { put("removed", true) }, revision(row), deleted = true
+                )
+                suppressed += identity
+            }
+            deletes.acknowledge(pending)
+        }
+        val reconciled = remote.filterKeys { it !in suppressed }
+        synchronizeLibrary(profileId, cloudId, reconciled)
+        synchronizeProgress(profileId, cloudId, reconciled, suppressed)
+        synchronizeWatched(profileId, cloudId, reconciled, suppressed)
     }
 
     fun deleteProgress(profileId: Int, entries: Collection<WatchProgressEntry>) {
@@ -125,37 +161,18 @@ object CloudflareDataSync {
 
     private fun enqueueDeletes(profileId: Int, category: String, keys: Collection<String>) {
         if (!CloudflareAccountClient.enabled || keys.isEmpty()) return
-        scope.launch {
-            try {
-                mutex.withLock {
-                    val account = AuthRepository.state.value as? AuthState.Authenticated
-                        ?: return@withLock
-                    if (account.isAnonymous ||
-                        CloudflareAccountClient.currentSession?.userId != account.userId) return@withLock
-                    val profileIdCloud = ProfileRepository.state.value.profiles
-                        .firstOrNull { it.profileIndex == profileId }?.id.orEmpty()
-                    if (!profileIdCloud.matches(Regex("[a-fA-F0-9-]{36}"))) return@withLock
-                    val remote = CloudflareAccountClient.synchronizeAll(profileIdCloud).associateBy {
-                        it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +
-                            it["itemKey"]?.jsonPrimitive?.content.orEmpty()
-                    }
-                    for (key in keys) {
-                        if (key.isBlank() || key.length > 200) continue
-                        val row = remote["$category|$key"]
-                        if (row != null && isDeleted(row)) continue
-                        CloudflareAccountClient.writeSync(
-                            profileIdCloud, category, key,
-                            buildJsonObject { put("removed", true) },
-                            revision(row), deleted = true
-                        )
-                    }
-                }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (error: Exception) {
-                log.e(error) { "Suppression Cloudflare non confirmée ; données locales préservées" }
-            }
+        val account = AuthRepository.state.value as? AuthState.Authenticated ?: return
+        if (account.isAnonymous || CloudflareAccountClient.currentSession?.userId != account.userId) return
+        val cloudId = ProfileRepository.state.value.profiles
+            .firstOrNull { it.profileIndex == profileId }?.id.orEmpty()
+        if (!cloudId.matches(Regex("[a-fA-F0-9-]{36}"))) return
+        val now = Clock.System.now().toEpochMilliseconds()
+        for (key in keys) {
+            if (key.isBlank() || key.length > 200) continue
+            deletes.record(PendingCloudflareDelete(account.userId, cloudId, profileId,
+                category, key, now, Random.nextLong()))
         }
+        request(profileId)
     }
 
     private fun isDeleted(row: JsonObject): Boolean =
@@ -199,15 +216,16 @@ object CloudflareDataSync {
             )
         }
         LibraryRepository.acknowledgeCloudSnapshot(snapshot)
+        val pendingUpserts = snapshot.pendingUpsertKeys.mapTo(mutableSetOf()) {
+            libraryItemKey(it.contentId, it.contentType)
+        }
         val events = mutableListOf<LibraryDeltaEvent>()
         val localByKey = snapshot.items.associateBy { libraryItemKey(it.id, it.type) }
         var eventId = snapshot.deltaCursorEventId
         for ((key, row) in remote) {
             if (!key.startsWith("library|")) continue
             val itemKey = key.removePrefix("library|")
-            if (itemKey in pendingDeletes || snapshot.pendingUpsertKeys.any {
-                libraryItemKey(it.contentId, it.contentType) == itemKey
-            }) continue
+            if (itemKey in pendingDeletes || itemKey in pendingUpserts) continue
             val current = localByKey[itemKey]
             if (isDeleted(row)) {
                 // Deletions carry a small tombstone (often only id/type), not a
@@ -241,7 +259,7 @@ object CloudflareDataSync {
     }
 
     private suspend fun synchronizeProgress(
-        profileId: Int, cloudId: String, remote: Map<String, JsonObject>
+        profileId: Int, cloudId: String, remote: Map<String, JsonObject>, suppressed: Set<String>
     ) {
         val local = WatchProgressRepository.cloudLocalEntries(profileId)
         val localByKey = local.associateBy { it.resolvedProgressKey().take(200) }
@@ -266,6 +284,7 @@ object CloudflareDataSync {
         if (incoming.isNotEmpty()) WatchProgressRepository.applyExternalProgress(incoming)
         for (entry in local) {
             val key = entry.resolvedProgressKey().take(200)
+            if ("watch_progress|$key" in suppressed) continue
             if (key.isBlank()) continue
             val row = remote["watch_progress|$key"]
             val remoteDate = if (row != null && isDeleted(row)) {
@@ -294,7 +313,7 @@ object CloudflareDataSync {
     }
 
     private suspend fun synchronizeWatched(
-        profileId: Int, cloudId: String, remote: Map<String, JsonObject>
+        profileId: Int, cloudId: String, remote: Map<String, JsonObject>, suppressed: Set<String>
     ) {
         val local = WatchedRepository.cloudLocalItems(profileId)
         val localByKey = local.associateBy { watchedItemKey(it.type, it.id, it.season, it.episode) }
@@ -317,6 +336,7 @@ object CloudflareDataSync {
         if (incoming.isNotEmpty()) WatchedRepository.applyCloudWatched(incoming)
         for (item in local) {
             val key = watchedItemKey(item.type, item.id, item.season, item.episode)
+            if ("watched_items|$key" in suppressed) continue
             if (key.length > 200) continue
             val row = remote["watched_items|$key"]
             val remoteDate = if (row != null && isDeleted(row)) {

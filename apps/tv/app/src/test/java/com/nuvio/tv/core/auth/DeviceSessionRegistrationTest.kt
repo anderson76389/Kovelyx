@@ -18,7 +18,7 @@ class DeviceSessionRegistrationTest {
         )
 
         assertEquals("nuvio-tv-installation", params.getValue("p_installation_id").jsonPrimitive.content)
-        assertEquals("Nuvio TV", params.getValue("p_client_name").jsonPrimitive.content)
+        assertEquals("Kovelyx TV", params.getValue("p_client_name").jsonPrimitive.content)
         assertEquals("0.7.20-beta", params.getValue("p_client_version").jsonPrimitive.content)
         assertEquals("Android TV 14", params.getValue("p_platform").jsonPrimitive.content)
         assertEquals("Living Room TV", params.getValue("p_device_name").jsonPrimitive.content)

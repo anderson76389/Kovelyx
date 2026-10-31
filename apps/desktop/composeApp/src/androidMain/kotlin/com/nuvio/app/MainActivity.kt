@@ -107,6 +107,7 @@ open class MainActivity : AppCompatActivity() {
         P2pStreamingEngine.initialize(applicationContext)
         ExternalPlayerPlatform.initialize(applicationContext)
         SubtitleFileCache.initialize(applicationContext)
+        com.nuvio.app.core.cloud.CloudflareProfileMediaPlatform.initialize(applicationContext)
         ProfileStorage.initialize(applicationContext)
         AvatarStorage.initialize(applicationContext)
         ProfilePinCacheStorage.initialize(applicationContext)

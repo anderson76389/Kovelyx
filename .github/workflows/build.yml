@@ -2,7 +2,7 @@ name: Compiler Kovelyx (APK et diagnostic Windows)
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - '.github/workflows/build.yml'
       - 'apps/tv/**'
@@ -10,8 +10,11 @@ on:
       - 'apps/desktop/**'
       - 'vendor/engine/**'
       - 'scripts/media3/**'
+      - 'scripts/player/**'
       - 'scripts/desktop-release-version.py'
       - 'scripts/sign-ci-debug-apk.sh'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/publish-signed-android.yml'
       - 'scripts/publish-unified-preview.sh'
       - '.github/workflows/publish-unified-preview.yml'
@@ -22,9 +25,12 @@ on:
       - 'apps/tv/**'
       - 'apps/mobile/**'
       - 'apps/desktop/composeApp/Configuration/DesktopVersion.properties'
+      - 'scripts/player/**'
       - '.github/workflows/build.yml'
       - 'scripts/desktop-release-version.py'
       - 'scripts/sign-ci-debug-apk.sh'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/publish-signed-android.yml'
   workflow_dispatch:
     inputs:
@@ -42,7 +48,7 @@ on:
 concurrency:
   group: kovelyx-build-${{ github.ref }}
   # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
 
 permissions:
   contents: read
@@ -51,6 +57,8 @@ permissions:
 
 jobs:
   changes:
+    # This owned branch already builds on push; avoid duplicating APKs for its PR.
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository || github.head_ref != 'fix/cloudflare-network-status-and-settings' }}
     name: Détecter les plateformes modifiées
     runs-on: ubuntu-latest
     outputs:
@@ -58,6 +66,11 @@ jobs:
       mobile: ${{ steps.paths.outputs.mobile }}
     steps:
       - uses: actions/checkout@v4
+      - name: Vérifier la syntaxe du script de signature avant compilation
+        shell: bash
+        run: |
+          bash -n scripts/sign-ci-debug-apk.sh
+          python3 scripts/tests/test_verified_preview.py
       - uses: dorny/paths-filter@v3
         id: paths
         with:
@@ -68,8 +81,11 @@ jobs:
               - 'apps/desktop/**'
               - 'vendor/engine/**'
               - 'scripts/media3/**'
+              - 'scripts/player/**'
               - 'scripts/desktop-release-version.py'
               - 'scripts/sign-ci-debug-apk.sh'
+              - 'scripts/publish-verified-preview.py'
+              - 'scripts/tests/test_verified_preview.py'
               - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
               - '.github/workflows/publish-unified-preview.yml'
@@ -80,8 +96,11 @@ jobs:
               - 'apps/desktop/**'
               - 'vendor/engine/**'
               - 'scripts/media3/**'
+              - 'scripts/player/**'
               - 'scripts/desktop-release-version.py'
               - 'scripts/sign-ci-debug-apk.sh'
+              - 'scripts/publish-verified-preview.py'
+              - 'scripts/tests/test_verified_preview.py'
               - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
               - '.github/workflows/publish-unified-preview.yml'
@@ -98,12 +117,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Compiler sans accès aux anciens domaines Nuvio
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
       - name: Aligner la version Android sur la Release Windows
         shell: bash
         run: |
           set -euo pipefail
           version="$(python3 scripts/desktop-release-version.py)"
-          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          [[ "$version" =~ ^1[.]1[.][0-9]+(-(alpha|beta|rc))?$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
           count="$(git rev-list --count HEAD)"
           echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
           echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
@@ -134,7 +163,7 @@ jobs:
         working-directory: apps/tv
         shell: bash
         run: |
-          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Vérifier l'APK universel et son identité TV
         shell: bash
         run: |
@@ -190,12 +219,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Compiler sans accès aux anciens domaines Nuvio
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+            echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
+            echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
       - name: Aligner la version Android sur la Release Windows
         shell: bash
         run: |
           set -euo pipefail
           version="$(python3 scripts/desktop-release-version.py)"
-          [[ "$version" =~ ^1[.]1[.][0-9]+-(alpha|beta|rc)$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
+          [[ "$version" =~ ^1[.]1[.][0-9]+(-(alpha|beta|rc))?$ ]] || { echo "::error::Version multi-plateforme invalide : $version"; exit 1; }
           count="$(git rev-list --count HEAD)"
           echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
           echo "KOVELYX_BUILD_CODE=$((100000 + count))" >> "$GITHUB_ENV"
@@ -282,7 +321,7 @@ jobs:
       - name: Restaurer la DLL MPV archivée dans Kovelyx
         shell: pwsh
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
         run: |
           $ErrorActionPreference = "Stop"
           $runs = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/native-windows.yml/runs?branch=main&status=success&per_page=10" | ConvertFrom-Json
@@ -366,3 +405,21 @@ jobs:
           path: apps/desktop/composeApp/build/compose/binaries/**/*.msi
           if-no-files-found: error
           retention-days: 7
+
+  publish-verified-preview:
+    name: Publier les trois paquets vérifiés pour la bannière de mise à jour
+    needs: [tv, mobile]
+    if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Vérifier les preuves et publier une préversion complète
+        env:
+          GH_TOKEN: ${{ secrets.KOVELYX_RELEASE_TOKEN || github.token }}
+        run: python3 scripts/publish-verified-preview.py

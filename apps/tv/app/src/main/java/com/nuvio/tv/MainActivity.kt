@@ -1133,7 +1133,8 @@ open class MainActivity : ComponentActivity() {
                         onInstall = updateViewModel::installUpdateOrRequestPermission,
                         onDismissUnknownSources = updateViewModel::dismissUnknownSourcesDialog,
                         onOpenUnknownSources = updateViewModel::openUnknownSourcesSettings,
-                        onFeedbackShown = updateViewModel::consumeFeedbackMessage
+                        onFeedbackShown = updateViewModel::consumeFeedbackMessage,
+                        onForegroundCheck = updateViewModel::requestForegroundCheck
                     ) {
                         val handleSwitchProfile = {
                             startupSession++

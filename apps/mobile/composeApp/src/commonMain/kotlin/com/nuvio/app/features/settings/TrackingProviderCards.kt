@@ -129,7 +129,7 @@ import nuvio.composeapp.generated.resources.settings_trakt_sign_in_description
 import org.jetbrains.compose.resources.stringResource
 
 internal enum class TrackingBrand(val displayName: String) {
-    NUVIO("Nuvio"),
+    NUVIO("Kovelyx"),
     TRAKT("Trakt"),
     SIMKL("Simkl"),
     MDBLIST("MDBList"),
@@ -192,9 +192,10 @@ internal fun TrackingProviderCards(
         TraktProviderCard(
             uiState = traktUiState,
             modifier = Modifier.fillMaxWidth(),
+            onConfigure = { showCredentialEditor = true },
         )
         // SIMKL retiré de la liste des fournisseurs Kovelyx.
-        MdbListProviderCard(Modifier.fillMaxWidth())
+        MdbListProviderCard(Modifier.fillMaxWidth(), onConfigure = { showCredentialEditor = true })
     }
 
     if (showCredentialEditor && !isIos && KovelyxIntegrationCredentials.mobileConfigured) {
@@ -225,21 +226,21 @@ private fun KovelyxOAuthCredentialsDialog(
         onDismissRequest = onDismiss,
     ) {
         Text(
-            "Utilisez vos propres identifiants d'application OAuth. Ils restent sur cet appareil Android, " +
+            "Utilisez vos propres identifiants d'application OAuth. Ils restent sur cet appareil, " +
                 "sans être transmis au dépôt GitHub. Connectez ensuite vos comptes avec les boutons.",
             style = MaterialTheme.typography.bodySmall,
         )
         OutlinedTextField(
             value = traktId,
             onValueChange = { traktId = it; error = null },
-            label = { Text("Trakt — Client ID") },
+            label = { Text("Trakt — identifiant client") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
         OutlinedTextField(
             value = traktSecret,
             onValueChange = { traktSecret = it; error = null },
-            label = { Text("Trakt — Client Secret") },
+            label = { Text("Trakt — secret client") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -247,7 +248,7 @@ private fun KovelyxOAuthCredentialsDialog(
         OutlinedTextField(
             value = mdbId,
             onValueChange = { mdbId = it; error = null },
-            label = { Text("MDBList — Client ID OAuth (pas la clé API)") },
+            label = { Text("MDBList — identifiant client OAuth (pas la clé API)") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
@@ -255,10 +256,14 @@ private fun KovelyxOAuthCredentialsDialog(
             runCatching { uriHandler.openUri("https://trakt.tv/oauth/applications") }
         }) { Text("Créer / gérer mon application Trakt") }
         TextButton(onClick = {
+            runCatching { uriHandler.openUri("https://mdblist.com/developer/") }
+        }) { Text("Créer mon application MDBList (Device Code)") }
+        Text("Pour la connexion MDBList, choisissez Device Code et saisissez son identifiant client ci-dessus.")
+        TextButton(onClick = {
             runCatching { uriHandler.openUri("https://mdblist.com/preferences/") }
         }) { Text("Obtenir ma clé API MDBList (rubrique MDBList)") }
         Text(
-            "La clé API MDBList s'enregistre dans Paramètres > MDBList, pas dans le Client ID OAuth. " +
+            "La clé API MDBList s'enregistre dans Paramètres > MDBList, pas dans le identifiant client OAuth. " +
                 "Stockage privé local de Kovelyx, non chiffré : n'utilisez pas de clés partagées.",
             style = MaterialTheme.typography.bodySmall,
         )
@@ -282,15 +287,18 @@ private fun KovelyxOAuthCredentialsDialog(
     }
 }
 
+private fun traktUiCredentialsReady() = KovelyxIntegrationCredentials.traktClientId.isNotBlank() && KovelyxIntegrationCredentials.traktClientSecret.isNotBlank()
+
 @Composable
 private fun TraktProviderCard(
     uiState: TraktAuthUiState,
     modifier: Modifier,
+    onConfigure: () -> Unit,
 ) {
     TrackingProviderCard(
         brand = TrackingBrand.TRAKT,
         mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
+        credentialsConfigured = true,
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_trakt_connected_as,
@@ -308,7 +316,7 @@ private fun TraktProviderCard(
             uiState.mode == TraktConnectionMode.CONNECTED
         },
         errorMessage = uiState.errorMessage,
-        onConnectRequested = TraktAuthRepository::onConnectRequested,
+        onConnectRequested = { if (!traktUiCredentialsReady()) { onConfigure(); null } else TraktAuthRepository.onConnectRequested() },
         onResumeAuthorization = {
             TraktAuthRepository.pendingAuthorizationUrl()
                 ?: TraktAuthRepository.onConnectRequested()
@@ -331,7 +339,7 @@ private fun SimklProviderCard(
     TrackingProviderCard(
         brand = TrackingBrand.SIMKL,
         mode = uiState.mode.toTrackingConnectionCardMode(),
-        credentialsConfigured = uiState.credentialsConfigured,
+        credentialsConfigured = true,
         isLoading = uiState.isLoading,
         connectedLabel = stringResource(
             Res.string.settings_simkl_connected_as,
@@ -590,8 +598,7 @@ internal fun TrackingProviderCard(
 
                     val hasWebsiteAction = !websiteLabel.isNullOrBlank() && !websiteUrl.isNullOrBlank()
                     val hasDisconnectAction = mode == TrackingConnectionCardMode.CONNECTED
-                    val hasInfoAction = mode == TrackingConnectionCardMode.CONNECTED &&
-                        infoLabel != null && onInfoRequested != null
+                    val hasInfoAction = false
                     val footerActionCount = listOf(
                         hasWebsiteAction,
                         hasDisconnectAction,

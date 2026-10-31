@@ -716,7 +716,7 @@ internal class NativePlayerController(
                     active ?: Thread.currentThread()
                 }
                 active != null && releaseTimedOut -> {
-                    immediateFailure = "Native player is still shutting down. Please retry or quit Nuvio."
+                    immediateFailure = "Native player is still shutting down. Please retry or quit Kovelyx."
                     active
                 }
                 else -> {
@@ -737,7 +737,7 @@ internal class NativePlayerController(
                         runCatching { nativeDispose(current) }
                             .onSuccess { log.d { "pre-navigation dispose completed handle=$current" } }
                             .onFailure { error ->
-                                failureMessage = "Native player shutdown failed. Quit Nuvio before removing the player."
+                                failureMessage = "Native player shutdown failed. Quit Kovelyx before removing the player."
                                 log.w(error) { "pre-navigation dispose failed handle=$current" }
                             }
                     }
@@ -797,7 +797,7 @@ internal class NativePlayerController(
             SwingUtilities.invokeLater {
                 callbacks.forEach { pending ->
                     runCatching {
-                        pending.onFailed("Native player shutdown timed out. Please retry or quit Nuvio.")
+                        pending.onFailed("Native player shutdown timed out. Please retry or quit Kovelyx.")
                     }.onFailure { error -> log.w(error) { "release timeout callback failed" } }
                 }
             }
@@ -892,7 +892,7 @@ internal class NativePlayerController(
 
     private fun recordTerminalDisposeFailure(error: Throwable, operation: String, nativeHandle: Long) {
         synchronized(lifecycleLock) {
-            terminalReleaseFailure = "Native player shutdown failed. Quit Nuvio before removing the player."
+            terminalReleaseFailure = "Native player shutdown failed. Quit Kovelyx before removing the player."
         }
         log.w(error) { "$operation dispose failed handle=$nativeHandle" }
     }

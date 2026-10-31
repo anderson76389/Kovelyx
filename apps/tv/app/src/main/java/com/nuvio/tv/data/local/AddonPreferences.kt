@@ -1,5 +1,6 @@
 package com.nuvio.tv.data.local
 
+import com.kovelyx.cloud.addons.CloudAddon
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -177,6 +178,33 @@ class AddonPreferences @Inject constructor(
                 states.mapKeys { (url, _) -> canonicalizeUrl(url) }
             )
         }
+    }
+
+    suspend fun cloudSnapshot(profileId: Int): List<CloudAddon> = cloudSnapshot(store(profileId).data.first())
+
+    private fun cloudSnapshot(prefs: Preferences): List<CloudAddon> {
+        val names = prefs[userSetNamesKey]?.let(::parseNameMap).orEmpty()
+        val enabled = getCurrentEnabledStates(prefs)
+        return getCurrentList(prefs).map { raw ->
+            val url = canonicalizeUrl(raw)
+            val path = url.substringBefore('?').trimEnd('/')
+            val query = url.substringAfter('?', "")
+            CloudAddon(path + "/manifest.json" + if (query.isEmpty()) "" else "?$query",
+                names[url].orEmpty(), enabled[url] ?: true)
+        }
+    }
+
+    /** All fields change together; a concurrent local edit is never overwritten by a pull. */
+    suspend fun applyCloudSnapshot(profileId: Int, expected: List<CloudAddon>, next: List<CloudAddon>): Boolean {
+        var applied = false
+        store(profileId).edit { prefs ->
+            if (cloudSnapshot(prefs) != expected) return@edit
+            prefs[orderedUrlsKey] = gson.toJson(next.map { canonicalizeUrl(it.url) })
+            prefs[userSetNamesKey] = gson.toJson(next.associate { canonicalizeUrl(it.url) to it.name })
+            prefs[addonEnabledStatesKey] = gson.toJson(next.associate { canonicalizeUrl(it.url) to it.enabled })
+            applied = true
+        }
+        return applied
     }
 
     private fun getCurrentList(preferences: Preferences): List<String> {

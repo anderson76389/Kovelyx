@@ -144,26 +144,7 @@ fun AboutSettingsContent(
                                 UpdateChannelSettings(initialFocusRequester, modifier = firstRowModifier)
                             }
 
-                            SettingsActionRow(
-                                title = stringResource(R.string.about_privacy_policy),
-                                subtitle = stringResource(R.string.about_privacy_policy_subtitle),
-                                trailingIcon = Icons.Default.OpenInNew,
-                                modifier = if (!AppFeaturePolicy.inAppUpdatesEnabled) {
-                                    firstRowModifier.then(
-                                        if (initialFocusRequester != null) Modifier.focusRequester(initialFocusRequester)
-                                        else Modifier
-                                    )
-                                } else {
-                                    Modifier
-                                },
-                                onClick = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://anderson76389.github.io/Kovelyx/confidentialite.html")
-                                    )
-                                    context.startActivity(intent)
-                                }
-                            )
+
 
                             if (AppFeaturePolicy.supportNuvioEnabled) {
                                 SettingsActionRow(

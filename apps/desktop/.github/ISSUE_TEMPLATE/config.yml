@@ -1,8 +1,0 @@
-blank_issues_enabled: true
-contact_links:
-  - name: "Versions de Kovelyx"
-    url: https://github.com/anderson76389/Kovelyx/releases
-    about: "Télécharger les versions Windows, Android et Android TV de Kovelyx."
-  - name: "Documentation de Kovelyx"
-    url: https://github.com/anderson76389/Kovelyx/blob/main/README.md
-    about: "Documentation et installation du projet Kovelyx."

@@ -251,4 +251,40 @@ object CloudflareAccountClient {
         check(response.status == 200) { "Kovelyx Cloud : synchronisation indisponible (HTTP ${response.status})" }
         return json.parseToJsonElement(response.body).jsonObject
     }
+
+    private fun mediaPath(profileId: String, kind: String): String {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")) && kind in setOf("avatar", "background"))
+        return "/v1/profile-media?profileId=$profileId&kind=$kind"
+    }
+
+    suspend fun uploadProfileMedia(profileId: String, kind: String, expected: String?, image: com.kovelyx.cloud.media.ProfileImageBytes): String {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val response = httpRequestRaw("PUT", base() + mediaPath(profileId, kind), mapOf(
+            "Authorization" to "Bearer ${active.bearerToken}", "Origin" to base(),
+            "Content-Type" to image.mime, "If-Match" to (expected ?: "none"), "User-Agent" to "Kovelyx-Client"
+        ), "", followRedirects = false, maxResponseBodyBytes = 4096, bodyBytes = image.bytes)
+        check(response.status in 200..299) { "Le service d’images est indisponible ou doit être mis à jour (HTTP ${response.status})." }
+        check(session?.userId == active.userId) { "Compte modifié" }
+        return json.parseToJsonElement(response.body).jsonObject["version"]!!.jsonPrimitive.content
+    }
+
+    suspend fun downloadProfileMedia(profileId: String, kind: String, version: String): com.kovelyx.cloud.media.ProfileImageBytes {
+        require(version.matches(Regex("[a-f0-9]{64}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val response = httpRequestRaw("GET", base() + mediaPath(profileId, kind) + "&version=$version",
+            mapOf("Authorization" to "Bearer ${active.bearerToken}", "User-Agent" to "Kovelyx-Client"), "",
+            followRedirects = false, maxResponseBodyBytes = com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES)
+        check(response.status == 200 && session?.userId == active.userId) { "Téléchargement d’image non confirmé" }
+        val mime = response.headers.entries.firstOrNull { it.key.equals("Content-Type", true) }?.value?.substringBefore(';').orEmpty()
+        return com.kovelyx.cloud.media.ProfileImageBytes(mime, response.bodyBytes)
+    }
+
+    suspend fun removeProfileMedia(profileId: String, kind: String, expected: String?) {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val response = httpRequestRaw("DELETE", base() + mediaPath(profileId, kind), mapOf(
+            "Authorization" to "Bearer ${active.bearerToken}", "Origin" to base(),
+            "If-Match" to (expected ?: "none"), "User-Agent" to "Kovelyx-Client"
+        ), "", followRedirects = false, maxResponseBodyBytes = 4096)
+        check(response.status in 200..299 && session?.userId == active.userId) { "Suppression d’image non confirmée" }
+    }
 }

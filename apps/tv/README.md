@@ -7,9 +7,9 @@
 Une interface multimédia conçue pour la **télécommande**, les téléviseurs
 Android TV, Google TV et les boîtiers compatibles Android 7+.
 
-**Préversion de développement.** Les comptes Kovelyx indépendants et la
-synchronisation multiplateforme seront intégrés plus tard, après la
-stabilisation des applications.
+**Préversion de développement.** Le compte et la synchronisation Kovelyx utilisent
+le Worker Cloudflare configuré à la compilation. Les essais entre appareils
+physiques et la lecture sur les différents modèles de TV restent à valider.
 
 [**🏠 Dépôt Kovelyx**](https://github.com/anderson76389/Kovelyx) ·
 [**📦 Releases**](https://github.com/anderson76389/Kovelyx/releases) ·
@@ -19,11 +19,10 @@ stabilisation des applications.
 
 ## Où télécharger ?
 
-La première **préversion APK TV universelle** a été compilée, signée, installée et démarrée sur un émulateur Google TV, avec vérification des touches de navigation. Téléchargement direct :
-
-[**📺 Télécharger Kovelyx TV (APK universel)**](https://github.com/anderson76389/Kovelyx/releases/download/tv-preview-9c6ec281a980/Kovelyx-TV-tv-preview-9c6ec281a980-universal.apk) · [Notes de version](https://github.com/anderson76389/Kovelyx/releases/tag/tv-preview-9c6ec281a980)
-
-Ce résultat ne valide pas encore la lecture de tous les formats et les services externes sur une TV Box réelle.
+Les APK TV signés sont disponibles dans les [Releases Kovelyx](https://github.com/anderson76389/Kovelyx/releases).
+Choisir le fichier `Kovelyx-TV-v…-universal.apk`, compatible avec les différentes architectures TV.
+Les préversions sont proposées par la bannière de mise à jour sur le canal **Bêta**.
+Les trois Releases les plus récentes sont conservées ; les anciennes adresses de téléchargement peuvent donc disparaître.
 
 **Ne pas installer l'APK Android téléphone en lieu et place de l'APK TV** :
 ils ont des interfaces et des identifiants distincts.

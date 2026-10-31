@@ -888,7 +888,7 @@ class PlayerSettingsDataStore @Inject constructor(
                     ?.let(::normalizeSecondaryAudioLanguageCode),
                 loadingOverlayEnabled = prefs[loadingOverlayEnabledKey] ?: true,
                 showPlayerLoadingStatus = prefs[showPlayerLoadingStatusKey] ?: true,
-                playbackIssueReportsEnabled = prefs[playbackIssueReportsEnabledKey] ?: false,
+                playbackIssueReportsEnabled = false,
                 pauseOverlayEnabled = prefs[pauseOverlayEnabledKey] ?: true,
                 osdClockEnabled = prefs[osdClockEnabledKey] ?: true,
                 skipIntroEnabled = prefs[skipIntroEnabledKey] ?: true,
@@ -1234,7 +1234,7 @@ class PlayerSettingsDataStore @Inject constructor(
 
     suspend fun setPlaybackIssueReportsEnabled(enabled: Boolean) {
         store().edit { prefs ->
-            prefs[playbackIssueReportsEnabledKey] = enabled
+            prefs[playbackIssueReportsEnabledKey] = false
         }
     }
 

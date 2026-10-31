@@ -1,0 +1,47 @@
+name: Lire une vidéo dans les deux lecteurs Android mobile
+on:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-playback.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Préparer KVM et les bibliothèques de l'émulateur
+        run: |
+          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpulse0 libnss3 libx11-6 libxkbcommon0 libxcb1 libxcomposite1 libxcursor1 libxi6 libxtst6 libxrandr2 libxdamage1 libxfixes3
+      - name: Vérifier la lecture H264 dans les surfaces ExoPlayer et libmpv
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 3072M
+          heap-size: 512M
+          disable-animations: true
+          script: chmod +x apps/mobile/gradlew && ./apps/mobile/gradlew -p apps/mobile :androidApp:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class=com.nuvio.android.VideoPlaybackSmokeTest
+      - name: Rapports de lecture et diagnostics Android
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-mobile-real-playback
+          path: |
+            apps/mobile/androidApp/build/outputs/androidTest-results/connected/**
+            apps/mobile/androidApp/build/reports/androidTests/connected/**
+          retention-days: 14

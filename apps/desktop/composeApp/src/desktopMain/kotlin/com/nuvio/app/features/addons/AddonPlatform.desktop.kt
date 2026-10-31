@@ -33,6 +33,14 @@ internal actual object AddonStorage {
         store.putString("installed_addon_urls_$profileId", json.encodeToString(urls))
     }
 
+    actual fun loadAddonNames(profileId: Int): Map<String, String> =
+        store.getString("addon_names_$profileId")?.let {
+            runCatching { json.decodeFromString<Map<String, String>>(it) }.getOrNull()
+        } ?: emptyMap()
+    actual fun saveAddonNames(profileId: Int, names: Map<String, String>) {
+        store.putString("addon_names_$profileId", json.encodeToString(names))
+    }
+
     actual fun loadAddonEnabledStates(profileId: Int): Map<String, Boolean> =
         store.getString("addon_enabled_states_$profileId")
             ?.let { payload -> runCatching { json.decodeFromString<Map<String, Boolean>>(payload) }.getOrNull() }
@@ -117,11 +125,18 @@ actual suspend fun httpRequestRaw(
     val request = buildDesktopRequest(method, url, headers, body, bodyBytes)
 
     client.newCall(request).execute().use { response ->
+        val responseBody = response.body
+        val charset = responseBody?.contentType()?.charset(Charsets.UTF_8) ?: Charsets.UTF_8
+        val readResult = responseBody?.byteStream()?.use { readAtMostBytes(it, maxResponseBodyBytes.coerceAtLeast(0)) }
+            ?: LimitedReadResult(ByteArray(0), truncated = false)
+        val decoded = runCatching { String(readResult.bytes, charset) }
+            .getOrElse { String(readResult.bytes, Charsets.UTF_8) }
         RawHttpResponse(
             status = response.code,
             statusText = response.message,
             url = response.request.url.toString(),
-            body = readResponseBodyLimited(response.body, maxResponseBodyBytes),
+            body = if (readResult.truncated) decoded + truncationSuffix else decoded,
+            bodyBytes = readResult.bytes,
             headers = response.headers.toMultimap().mapValues { (_, values) ->
                 values.joinToString(",")
             }.mapKeys { (name, _) ->
@@ -215,20 +230,6 @@ private fun readAtMostBytes(stream: InputStream, maxBytes: Int): LimitedReadResu
     }
 
     return LimitedReadResult(out.toByteArray(), truncated)
-}
-
-private fun readResponseBodyLimited(body: ResponseBody?, maxBytes: Int): String {
-    if (body == null) return ""
-    val charset = body.contentType()?.charset(Charsets.UTF_8) ?: Charsets.UTF_8
-    val readResult = body.byteStream().use { stream ->
-        readAtMostBytes(stream, maxBytes.coerceAtLeast(0))
-    }
-    val decoded = runCatching {
-        String(readResult.bytes, charset)
-    }.getOrElse {
-        String(readResult.bytes, Charsets.UTF_8)
-    }
-    return if (readResult.truncated) decoded + truncationSuffix else decoded
 }
 
 private fun readResponseBody(body: ResponseBody?): String {
