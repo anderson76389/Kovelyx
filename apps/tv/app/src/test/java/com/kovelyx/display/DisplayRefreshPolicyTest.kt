@@ -16,7 +16,7 @@ class DisplayRefreshPolicyTest {
         assertEquals(144 to 144, writes.last())
         state.chooseMaximum(24)
         assertEquals(24 to 24, writes.last())
-        assertFailsWith<IllegalArgumentException> { state.chooseMaximum(90) }
+        assertThrows(IllegalArgumentException::class.java) { state.chooseMaximum(90) }
         assertEquals(2, writes.size)
     }
 

@@ -6,7 +6,8 @@ import java.util.Base64
 import java.util.zip.GZIPInputStream
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
-import kotlin.test.*
+import org.junit.Test
+import org.junit.Assert.*
 
 class CompleteCatalogueRoundTripTest {
     private fun digest(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it.toInt() and 255) }
@@ -58,12 +59,12 @@ class CompleteCatalogueRoundTripTest {
         for (folder in raw.flatMap { it.jsonObject["folders"]!!.jsonArray }) {
             val actual = receivedFolders[folder.jsonObject["id"]]!!.jsonObject
             for (key in listOf("title", "coverImageUrl", "titleLogoUrl", "focusGifUrl", "heroBackdropUrl", "heroVideoUrl")) {
-                folder.jsonObject[key]?.let { assertEquals(it, actual[key], "Dossier ou affiche perdue : $key") }
+                folder.jsonObject[key]?.let { assertEquals("Dossier ou affiche perdue : $key", it, actual[key]) }
             }
         }
         val before = writes to reads
         assertTrue(receiver.sync())
-        assertEquals(before, writes to reads, "Un catalogue inchangé ne doit pas être retransféré")
+        assertEquals("Un catalogue inchangé ne doit pas être retransféré", before, writes to reads)
         assertTrue(head!!.utf8Bytes <= CATALOGUE_MAX_BYTES)
         assertTrue(head!!.parts > 100)
     }
