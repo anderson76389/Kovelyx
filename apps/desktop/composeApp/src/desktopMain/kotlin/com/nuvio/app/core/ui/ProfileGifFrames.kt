@@ -8,6 +8,7 @@ import java.nio.file.Path
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Codec
+import org.jetbrains.skia.ColorSpace
 import org.jetbrains.skia.Data
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageInfo
@@ -32,7 +33,7 @@ internal class ProfileGifFrames(path: Path, maxSide: Int = 1024) : AutoCloseable
             val scale = minOf(1.0, maxSide.toDouble() / maxOf(codec.width, codec.height))
             width = (codec.width * scale).toInt().coerceAtLeast(1)
             height = (codec.height * scale).toInt().coerceAtLeast(1)
-            buffer = Bitmap().apply { allocPixels(ImageInfo.makeN32Premul(codec.width, codec.height)) }
+            buffer = Bitmap().apply { allocPixels(ImageInfo.makeN32Premul(codec.width, codec.height, ColorSpace.sRGB)) }
         } catch (error: Throwable) {
             codec.close()
             throw error
@@ -48,8 +49,11 @@ internal class ProfileGifFrames(path: Path, maxSide: Int = 1024) : AutoCloseable
     internal fun frameBitmap(index: Int): Bitmap {
         codec.readPixels(buffer, index)
         // Publish an independent frame so decoding cannot mutate a bitmap being drawn.
-        val output = Bitmap().apply { allocPixels(ImageInfo.makeN32Premul(width, height)) }
+        val output = Bitmap()
         try {
+            // Outside Bitmap.apply: its own width/height are zero before allocation.
+            output.allocPixels(ImageInfo.makeN32Premul(width, height, ColorSpace.sRGB))
+            check(output.width == width && output.height == height) { "Impossible d’allouer une image de l’animation." }
             Image.makeFromBitmap(buffer).use { image ->
                 Canvas(output).use { canvas ->
                     canvas.drawImageRect(image, Rect.makeWH(codec.width.toFloat(), codec.height.toFloat()),

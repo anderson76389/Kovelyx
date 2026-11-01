@@ -16,7 +16,10 @@ class ProfileGifFramesTest {
                 assertEquals(2, frames.frameCount)
                 assertEquals(100L, frames.durationMillis(0))
                 assertEquals(200L, frames.durationMillis(1))
-                val first = frames.frame(0).toPixelMap()[0, 0]
+                val image = frames.frame(0)
+                assertEquals(2, image.width)
+                assertEquals(2, image.height)
+                val first = image.toPixelMap()[0, 0]
                 val second = frames.frame(1).toPixelMap()[0, 0]
                 assertNotEquals(first, second)
             }
