@@ -48,8 +48,8 @@ class CatalogueSnapshotEngineTest {
             if (losePublishResponse) { losePublishResponse = false; error("Publication reçue, réponse perdue") }
         }
     }
-    private val one = """[{"id":"one","name":"Ma collection","folders":[{"id":"f","name":"Films","sources":[{"provider":"addon","addonId":"kaptain","catalogId":"films","type":"movie"}]}]}]"""
-    private val two = """[{"id":"two","name":"Autre appareil","folders":[]}]"""
+    private val one = """[{"id":"one","title":"Ma collection","folders":[{"id":"f","title":"Films","sources":[{"provider":"addon","addonId":"kaptain","catalogId":"films","type":"movie"}]}]}]"""
+    private val two = """[{"id":"two","title":"Autre appareil","folders":[]}]"""
     private inner class Device(val remote: Remote, var text: String = "[]", val kind: String = "collections") {
         val engine = CatalogueSnapshotEngine(Store(), ::digest, remote)
         var exports = 0
@@ -135,6 +135,19 @@ class CatalogueSnapshotEngineTest {
         assertEquals(2, obj["items"]!!.jsonArray.size)
         assertEquals(false, obj["items"]!!.jsonArray[0].jsonObject["enabled"]!!.jsonPrimitive.boolean)
         assertEquals(true, obj["items"]!!.jsonArray[0].jsonObject["future_option"]!!.jsonPrimitive.boolean)
+    }
+
+    @Test fun sameSourceWithDesktopDecorativeIdAndTvEncodingIsNotDuplicated() {
+        val desktop = """[{"id":"one","title":"Collection","folders":[{"id":"f","title":"Films","sources":[{"id":"src-legacy","name":"Films","title":"Liste","provider":"addon","addonId":"kaptain","type":"movie","catalogId":"films","genre":null}]}]}]"""
+        val tv = """[{"id":"one","title":"Collection","folders":[{"id":"f","title":"Films","sources":[{"provider":"addon","addonId":"kaptain","type":"movie","catalogId":"films"}]}]}]"""
+        val tmdbDesktop = """[{"id":"one","title":"Collection","folders":[{"id":"f","title":"Films","sources":[{"id":"src-legacy","name":"Top 10","title":"Liste","genre":"Top 10 Movies","provider":"tmdb","tmdbSourceType":"LIST","tmdbId":123,"mediaType":"MOVIE","sortBy":"original","filters":{"year":null}}]}]}]"""
+        val tmdbTv = """[{"id":"one","title":"Collection","folders":[{"id":"f","title":"Films","sources":[{"provider":"tmdb","tmdbSourceType":"LIST","tmdbId":123,"mediaType":"MOVIE","sortBy":"original","filters":{}}]}]}]"""
+        for ((remote, local) in listOf(desktop to tv, tmdbDesktop to tmdbTv)) {
+            for (preferLocal in listOf(true, false)) {
+                val merged = Json.parseToJsonElement(mergeInitialCatalogue("collections", remote, local, preferLocal)).jsonArray
+                assertEquals(1, merged[0].jsonObject["folders"]!!.jsonArray[0].jsonObject["sources"]!!.jsonArray.size)
+            }
+        }
     }
 
     @Test fun distinctNestedSourceTitlesAreNotDeduplicated() {

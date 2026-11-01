@@ -72,9 +72,10 @@ fun mergeInitialCatalogue(kind: String, remote: String, local: String, preferLoc
             JsonObject(second[identity(item)]?.jsonObject.orEmpty() + item.jsonObject)
         })
     }
+    val decorativeSourceKeys = setOf("id", "title", "name")
     fun canonical(value: JsonElement, root: Boolean = true): JsonElement = when (value) {
         is JsonObject -> JsonObject(value.entries.sortedBy { it.key }.mapNotNull { (key, child) ->
-            if ((root && key == "title") || child == JsonNull || (child is JsonPrimitive && child.isString && child.content.isEmpty())) null
+            if ((root && key in decorativeSourceKeys) || child == JsonNull || (child is JsonPrimitive && child.isString && child.content.isEmpty())) null
             else key to canonical(child, false)
         }.toMap())
         is JsonArray -> JsonArray(value.map { canonical(it, false) })
@@ -92,7 +93,12 @@ fun mergeInitialCatalogue(kind: String, remote: String, local: String, preferLoc
         return JsonArray((a + b).filter { seen.add(it.jsonObject["id"]!!.jsonPrimitive.content) }.map { row ->
             val other = secondary[row.jsonObject["id"]!!.jsonPrimitive.content]?.jsonObject ?: JsonObject(emptyMap())
             val merged = other + row.jsonObject
-            val uniqueSources = (sources(row.jsonObject) + sources(other)).distinctBy { canonical(it).toString() }
+            val uniqueSources = (sources(row.jsonObject) + sources(other)).distinctBy {
+                val source = it.jsonObject
+                val provider = source["provider"]?.jsonPrimitive?.content?.lowercase()
+                // genre is an addon parameter, but only a display label on TMDB/Trakt imports.
+                canonical(if (provider == "tmdb" || provider == "trakt") JsonObject(source - "genre") else source).toString()
+            }
             JsonObject(merged - "catalogSources" + ("sources" to JsonArray(uniqueSources)))
         })
     }
