@@ -94,6 +94,9 @@ import com.nuvio.app.isDesktop
 import com.nuvio.app.isIos
 import com.nuvio.app.isWindows
 import kotlinx.coroutines.launch
+import nuvio.composeapp.generated.resources.rtx_status_standard
+import nuvio.composeapp.generated.resources.rtx_status_configured
+import nuvio.composeapp.generated.resources.rtx_status_no_upscale
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -1271,6 +1274,15 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onCheckedChange = PlayerSettingsRepository::setNvidiaRtxSuperResolutionEnabled,
                     )
+                    val rtxStatus by com.nuvio.app.features.player.NvidiaRtxRuntimeStatus.state.collectAsStateWithLifecycle()
+                    if (autoPlayPlayerSettings.nvidiaRtxSuperResolutionEnabled && rtxStatus >= 0) {
+                        Text(text = stringResource(when (rtxStatus) {
+                            1 -> Res.string.rtx_status_configured
+                            2 -> Res.string.rtx_status_no_upscale
+                            else -> Res.string.rtx_status_standard
+                        }), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }

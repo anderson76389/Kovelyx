@@ -113,7 +113,8 @@ internal class NativePlayerController(
     private var onScrubFinished: (Long) -> Boolean = { false }
     private val eventSink = NativePlayerEventSink { type, value ->
         SwingUtilities.invokeLater {
-            handlePlayerEvent(type, value)
+            if (type == "rtxStatus") com.nuvio.app.features.player.NvidiaRtxRuntimeStatus.update(value.toInt())
+            else handlePlayerEvent(type, value)
         }
     }
 
@@ -126,6 +127,7 @@ internal class NativePlayerController(
         nvidiaRtxSuperResolutionEnabled: Boolean,
         onError: (String?) -> Unit,
     ) {
+        if (nvidiaRtxSuperResolutionEnabled) com.nuvio.app.features.player.NvidiaRtxRuntimeStatus.update(-1)
         val pending = PendingSource(
             sourceUrl = sourceUrl,
             headerLines = sourceHeaders.toHeaderLines(),

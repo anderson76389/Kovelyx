@@ -91,7 +91,10 @@ def validate_plurals() -> int:
 def main() -> int:
     english: dict[str, str] = {}
     for filename in SOURCE_MODULES:
-        path = RESOURCE_ROOT / "values" / filename
+        if not (RESOURCE_ROOT / "values" / filename).is_file():
+            raise ValueError(f"Missing required source module: {filename}")
+    for path in sorted((RESOURCE_ROOT / "values").glob("*.xml")):
+        filename = path.name
         values = read_strings(path)
         overlap = english.keys() & values.keys()
         if overlap:

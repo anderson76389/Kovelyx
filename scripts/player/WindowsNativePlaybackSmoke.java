@@ -37,8 +37,13 @@ public final class WindowsNativePlaybackSmoke {
             type = Class.forName("com.nuvio.app.features.player.desktop.NativePlayerBridge");
             bridge = type.getField("INSTANCE").get(null);
             Class<?> sinkType = Class.forName("com.nuvio.app.features.player.desktop.NativePlayerEventSink");
+            AtomicInteger rtxStatus = new AtomicInteger(-1);
             Object sink = Proxy.newProxyInstance(sinkType.getClassLoader(), new Class<?>[]{sinkType},
-                (proxy, method, values) -> null);
+                (proxy, method, values) -> {
+                    if (method.getName().equals("onPlayerEvent") && values != null && "rtxStatus".equals(values[0]))
+                        rtxStatus.set(((Number)values[1]).intValue());
+                    return null;
+                });
             String controls = (String) type.getMethod("getControlsPageUrl").invoke(bridge);
             System.out.println("Native library and control assets loaded");
             handle = ((Number) type.getMethod("create", long.class, String.class, String[].class,
@@ -99,7 +104,7 @@ public final class WindowsNativePlaybackSmoke {
             String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/video.mp4";
             handle = ((Number) type.getMethod("create", long.class, String.class, String[].class,
                 boolean.class, long.class, String.class, int.class, boolean.class, sinkType)
-                .invoke(bridge, hwnd, url, new String[]{"X-Kovelyx-Smoke: ok"}, true, 500L, controls, 1, false, sink)).longValue();
+                .invoke(bridge, hwnd, url, new String[]{"X-Kovelyx-Smoke: ok"}, true, 500L, controls, 1, true, sink)).longValue();
             deadline = System.nanoTime() + 30_000_000_000L;
             position = 0;
             duration = 0;
@@ -112,6 +117,8 @@ public final class WindowsNativePlaybackSmoke {
             if (served.get() == 0 || position < 1000 || duration < 1800) {
                 throw new AssertionError("HTTP video/headers/resume failed: requests=" + served.get() + ", position=" + position + ", duration=" + duration);
             }
+            if (rtxStatus.get() < 0) throw new AssertionError("RTX request never reported its runtime status");
+            System.out.println("RTX requested: status=" + rtxStatus.get() + " (0=standard fallback, 1=pipeline configured, 2=upscale unnecessary)");
             System.out.println("PASS: HTTP MP4, provider header, resume and second player creation, position=" + position);
         } catch (InvocationTargetException failure) {
             throw new RuntimeException("Packaged native player failed", failure.getCause());

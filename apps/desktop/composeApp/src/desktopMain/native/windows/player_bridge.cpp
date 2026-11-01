@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <d3d11.h>
+#include <dxgi1_2.h>
 #include <dwmapi.h>
 #include <shlobj.h>
 #include <wrl.h>
@@ -48,6 +49,8 @@ typedef enum mpv_format {
 typedef enum mpv_event_id {
     MPV_EVENT_NONE = 0,
     MPV_EVENT_SHUTDOWN = 1,
+    MPV_EVENT_END_FILE = 7,
+    MPV_EVENT_VIDEO_RECONFIG = 17,
 } mpv_event_id;
 
 typedef struct mpv_event {
@@ -56,6 +59,10 @@ typedef struct mpv_event {
     uint64_t reply_userdata;
     void *data;
 } mpv_event;
+typedef struct mpv_event_end_file {
+    int reason;
+    int error;
+} mpv_event_end_file;
 }
 
 namespace {
@@ -511,6 +518,31 @@ bool unifiedMemoryGpu() {
             options.UnifiedMemoryArchitecture;
     }();
     return unified;
+}
+
+std::string nvidiaRtxAdapter() {
+    HMODULE dxgi = LoadLibraryExW(L"dxgi.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+    if (!dxgi) return {};
+    using CreateFactory = HRESULT(WINAPI *)(REFIID, void **);
+    auto createFactory = reinterpret_cast<CreateFactory>(GetProcAddress(dxgi, "CreateDXGIFactory1"));
+    ComPtr<IDXGIFactory1> factory;
+    std::string result;
+    if (createFactory && SUCCEEDED(createFactory(__uuidof(IDXGIFactory1), reinterpret_cast<void **>(factory.GetAddressOf())))) {
+        for (UINT index = 0; index < 128; ++index) {
+            ComPtr<IDXGIAdapter1> adapter;
+            if (FAILED(factory->EnumAdapters1(index, adapter.GetAddressOf()))) break;
+            DXGI_ADAPTER_DESC1 description = {};
+            if (FAILED(adapter->GetDesc1(&description)) || (description.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)) continue;
+            std::wstring name(description.Description);
+            if (description.VendorId == 0x10DE && name.find(L"RTX") != std::wstring::npos) {
+                result = toUtf8(name);
+                break;
+            }
+        }
+    }
+    factory.Reset();
+    FreeLibrary(dxgi);
+    return result;
 }
 
 struct MpvApi {
@@ -1384,6 +1416,16 @@ private:
     std::atomic_bool stopping = false;
     std::atomic_bool shuttingDown = false;
     std::atomic_bool hwdecLogged = false;  // one-shot log for hwdec-current
+    bool rtxPending = false;
+    bool rtxAvailable = false;
+    bool rtxFilterTried = false;
+    bool rtxFilterAttempted = false;
+    bool rtxFilterInstalled = false;
+    bool rtxRetryDone = false;
+    std::atomic_bool rtxLayoutChanged = false;
+    LONG rtxTargetWidth = 0;
+    LONG rtxTargetHeight = 0;
+    std::string rtxSourceUrl;
 
     bool hasAppliedSubtitleStyle = false;
     bool appliedSubtitleUseLibass = false;
@@ -1702,6 +1744,9 @@ private:
         bool nvidiaRtxSuperResolutionEnabled
     ) {
         MpvApi &api = mpvApi();
+        const bool rtxRequested = nvidiaRtxSuperResolutionEnabled;
+        const std::string rtxAdapter = rtxRequested ? nvidiaRtxAdapter() : std::string();
+        nvidiaRtxSuperResolutionEnabled = rtxRequested && !rtxAdapter.empty();
         bool fastProfile = !nvidiaRtxSuperResolutionEnabled && unifiedMemoryGpu();
         {
             std::lock_guard<std::mutex> lock(mpvMutex);
@@ -1719,18 +1764,23 @@ private:
             setMpvOptionStringLocked("volume-max", "200");
             setMpvOptionStringLocked("vo", "gpu-next,gpu,");
             if (nvidiaRtxSuperResolutionEnabled) {
-                setMpvOptionStringLocked("gpu-api", "d3d11");
-                setMpvOptionStringLocked("hwdec", "d3d11va");
-                setMpvOptionStringLocked("d3d11-adapter", "NVIDIA");
-            } else {
+                nvidiaRtxSuperResolutionEnabled =
+                    api.setOptionString(mpv, "gpu-api", "d3d11") >= 0 &&
+                    api.setOptionString(mpv, "hwdec", "d3d11va") >= 0 &&
+                    api.setOptionString(mpv, "d3d11-adapter", rtxAdapter.c_str()) >= 0;
+            }
+            if (!nvidiaRtxSuperResolutionEnabled) {
                 setMpvOptionStringLocked("gpu-api", "auto");
                 setMpvOptionStringLocked("hwdec", "auto");
+                setMpvOptionStringLocked("d3d11-adapter", "");
             }
             setMpvOptionStringLocked("hwdec-codecs", "all");
 
-            if (nvidiaRtxSuperResolutionEnabled) {
-                setMpvOptionStringLocked("vf", "d3d11vpp=scale=2:scaling-mode=nvidia");
-            }
+            // Add VPP only when decoded dimensions and the output monitor are known.
+            // In particular, never turn a 4K input into an unnecessary 8K intermediate.
+            rtxPending = nvidiaRtxSuperResolutionEnabled;
+            rtxAvailable = nvidiaRtxSuperResolutionEnabled;
+            rtxSourceUrl = sourceUrl;
             setMpvOptionStringLocked("target-colorspace-hint", "yes");
             if (decoderPriority == 0) {
                 setMpvOptionStringLocked("vd-lavc-software-fallback", "no");
@@ -1806,6 +1856,7 @@ private:
         }
 
         setPaused(!playWhenReady);
+        if (rtxRequested && !nvidiaRtxSuperResolutionEnabled) sendPlayerEvent("rtxStatus", 0);
         auto self = shared_from_this();
         eventThread = std::thread([self]() { self->drainMpvEvents(); });
     }
@@ -1826,6 +1877,11 @@ private:
         }
         LONG width = std::max<LONG>(1, bounds.right - bounds.left);
         LONG height = std::max<LONG>(1, bounds.bottom - bounds.top);
+        if (rtxAvailable && (width != rtxTargetWidth || height != rtxTargetHeight)) {
+            rtxTargetWidth = width;
+            rtxTargetHeight = height;
+            rtxLayoutChanged.store(true);
+        }
         if (containerHwnd) {
             SetWindowPos(containerHwnd, HWND_TOP, 0, 0, width, height, SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOCOPYBITS);
         }
@@ -2014,6 +2070,64 @@ private:
             if (!event) continue;
             if (event->event_id == MPV_EVENT_SHUTDOWN) {
                 return;
+            }
+            const bool resized = rtxLayoutChanged.exchange(false);
+            if (resized && rtxAvailable && !rtxRetryDone) { rtxPending = true; rtxFilterTried = false; }
+            if ((event->event_id == MPV_EVENT_VIDEO_RECONFIG || resized) && rtxPending && !rtxFilterTried) {
+                const double sourceWidth = doubleProperty("video-params/w", 0);
+                const double sourceHeight = doubleProperty("video-params/h", 0);
+                if (sourceWidth <= 0 || sourceHeight <= 0) continue;
+                MONITORINFO monitor = {sizeof(MONITORINFO)};
+                GetMonitorInfoW(MonitorFromWindow(hostHwnd, MONITOR_DEFAULTTONEAREST), &monitor);
+                const double width = std::max<LONG>(1, monitor.rcMonitor.right - monitor.rcMonitor.left);
+                const double height = std::max<LONG>(1, monitor.rcMonitor.bottom - monitor.rcMonitor.top);
+                RECT viewport = {};
+                GetClientRect(hostHwnd, &viewport);
+                const double targetWidth = viewport.right > 0 ? std::min(width, double(viewport.right)) : width;
+                const double targetHeight = viewport.bottom > 0 ? std::min(height, double(viewport.bottom)) : height;
+                const double scale = std::min({2.0, targetWidth / sourceWidth, targetHeight / sourceHeight,
+                                              3840.0 / sourceWidth, 2160.0 / sourceHeight});
+                rtxFilterTried = true;
+                rtxPending = false;
+                if (rtxFilterInstalled) {
+                    std::lock_guard<std::mutex> lock(mpvMutex);
+                    const char *remove[] = {"vf", "remove", "@kovelyx-rtx", nullptr};
+                    (void)mpvApi().command(mpv, remove);
+                    rtxFilterInstalled = false;
+                }
+                if (scale <= 1.01) { sendPlayerEvent("rtxStatus", 2); continue; }
+                rtxFilterAttempted = true;
+                char filter[160];
+                std::snprintf(filter, sizeof(filter), "@kovelyx-rtx:d3d11vpp=scale=%.4f:scaling-mode=nvidia", scale);
+                int result;
+                {
+                    std::lock_guard<std::mutex> lock(mpvMutex);
+                    const char *command[] = {"vf", "add", filter, nullptr};
+                    result = mpvApi().command(mpv, command);
+                    rtxFilterInstalled = result >= 0;
+                    if (result < 0) {
+                        const char *remove[] = {"vf", "remove", "@kovelyx-rtx", nullptr};
+                        (void)mpvApi().command(mpv, remove);
+                    }
+                }
+                sendPlayerEvent("rtxStatus", result >= 0 ? 1 : 0);
+            }
+            if (event->event_id == MPV_EVENT_END_FILE && event->data && rtxFilterAttempted && !rtxRetryDone) {
+                const auto *ended = static_cast<const mpv_event_end_file *>(event->data);
+                if (ended->error >= 0) continue;
+                rtxRetryDone = true;
+                const double position = doubleProperty("time-pos", initialStartSeconds);
+                const bool paused = flagProperty("pause", false);
+                {
+                    std::lock_guard<std::mutex> lock(mpvMutex);
+                    (void)mpvApi().setPropertyString(mpv, "vf", "");
+                    char start[80];
+                    std::snprintf(start, sizeof(start), "start=%.3f", std::max(0.0, position));
+                    const char *retry[] = {"loadfile", rtxSourceUrl.c_str(), "replace", "-1", start, nullptr};
+                    (void)mpvApi().command(mpv, retry);
+                    (void)mpvApi().setPropertyString(mpv, "pause", paused ? "yes" : "no");
+                }
+                sendPlayerEvent("rtxStatus", 0);
             }
         }
     }

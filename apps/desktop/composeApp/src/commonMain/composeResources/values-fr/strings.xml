@@ -2450,7 +2450,7 @@
     <string name="cloud_library_search_label">Rechercher dans la bibliothèque cloud</string>
     <string name="settings_playback_nvidia_rtx_video_section">Vidéo NVIDIA RTX</string>
     <string name="settings_playback_nvidia_rtx_super_resolution">Super résolution vidéo RTX</string>
-    <string name="settings_playback_nvidia_rtx_super_resolution_desc">Améliorer la définition des vidéos basse résolution avec la super résolution par IA de NVIDIA RTX.</string>
+    <string name="settings_playback_nvidia_rtx_super_resolution_desc">Demander la super résolution pour une carte RTX compatible. Activez aussi la Super résolution vidéo dans le pilote NVIDIA. La lecture standard est conservée si le traitement est indisponible.</string>
     <string name="updates_update_asset_missing">Aucun fichier de mise à jour compatible trouvé dans la Release</string>
     <string name="updates_channel_title">Canal de mise à jour</string>
     <string name="updates_channel_description">Choisissez les types de mises à jour à recevoir.</string>

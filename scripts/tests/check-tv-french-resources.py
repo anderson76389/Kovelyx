@@ -60,8 +60,12 @@ def extract(path: Path) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
 def check() -> int:
     def modules(language):
         strings, plurals = {}, {}
-        for filename in ("strings.xml", "addon_actions.xml"):
-            values, forms = extract(BASE / language / filename)
+        for required in ("strings.xml", "addon_actions.xml"):
+            if not (BASE / language / required).is_file():
+                raise ValueError(f"Module requis absent : {language}/{required}")
+        for path in sorted((BASE / language).glob("*.xml")):
+            filename = path.name
+            values, forms = extract(path)
             if strings.keys() & values.keys() or plurals.keys() & forms.keys():
                 raise ValueError(f"Clés en double entre modules : {language}/{filename}")
             strings.update(values)
