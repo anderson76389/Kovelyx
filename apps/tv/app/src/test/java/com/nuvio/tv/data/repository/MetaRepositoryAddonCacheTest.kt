@@ -72,6 +72,21 @@ class MetaRepositoryAddonCacheTest {
         coVerify(exactly = 1) { api.getMeta(any()) }
     }
 
+    @Test fun `configured metadata token and trailing query slash reach the actual request and cache key`() = runTest {
+        val api = mockk<AddonApi>()
+        val upper = "https://aio.example/Config/meta/series/$contentId.json?token=AbC%2Fvalue&path=/"
+        val lower = "https://aio.example/Config/meta/series/$contentId.json?token=abc%2Fvalue&path=/"
+        coEvery { api.getMeta(upper) } returns metaResponse("Upper token")
+        coEvery { api.getMeta(lower) } returns metaResponse("Lower token")
+        val repository = newRepository(api)
+        val first = repository.getMeta("https://aio.example/Config?token=AbC%2Fvalue&path=/", "series", contentId).last()
+        val second = repository.getMeta("https://aio.example/Config?token=abc%2Fvalue&path=/", "series", contentId).last()
+        assertEquals("Upper token", (first as NetworkResult.Success).data.name)
+        assertEquals("Lower token", (second as NetworkResult.Success).data.name)
+        coVerify(exactly = 1) { api.getMeta(upper) }
+        coVerify(exactly = 1) { api.getMeta(lower) }
+    }
+
     private fun newRepository(vararg responsesByUrl: Pair<String, String>): MetaRepositoryImpl {
         val api = mockk<AddonApi>()
         responsesByUrl.forEach { (url, name) ->

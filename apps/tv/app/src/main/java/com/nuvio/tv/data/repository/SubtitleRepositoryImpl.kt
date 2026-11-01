@@ -175,10 +175,7 @@ class SubtitleRepositoryImpl @Inject constructor(
         val encodedActualId = encodePathSegment(actualId)
 
         // Build the subtitle URL with optional extra parameters
-        val rawBaseUrl = addon.baseUrl.trimEnd('/')
-        val queryStart = rawBaseUrl.indexOf('?')
-        val basePath = if (queryStart >= 0) rawBaseUrl.substring(0, queryStart).trimEnd('/') else rawBaseUrl
-        val baseQuery = if (queryStart >= 0) rawBaseUrl.substring(queryStart) else ""
+        val (basePath, baseQuery) = com.kovelyx.cloud.addons.splitConfiguredAddonBaseUrl(addon.baseUrl)
         val extraParams = buildExtraParams(videoHash, videoSize, filename)
         val subtitleUrl = if (extraParams.isNotEmpty()) {
             "$basePath/subtitles/$encodedType/$encodedActualId/$extraParams.json$baseQuery"

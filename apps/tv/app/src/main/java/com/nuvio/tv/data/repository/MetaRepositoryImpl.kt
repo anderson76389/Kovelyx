@@ -582,10 +582,7 @@ class MetaRepositoryImpl @Inject constructor(
      * always normalize equivalent base URLs identically.
      */
     private fun splitAddonBaseUrl(baseUrl: String): Pair<String, String> {
-        val cleanBaseUrl = baseUrl.trimEnd('/')
-        val queryStart = cleanBaseUrl.indexOf('?')
-        val basePath = if (queryStart >= 0) cleanBaseUrl.substring(0, queryStart).trimEnd('/') else cleanBaseUrl
-        val baseQuery = if (queryStart >= 0) cleanBaseUrl.substring(queryStart) else ""
+        val (basePath, baseQuery) = com.kovelyx.cloud.addons.splitConfiguredAddonBaseUrl(baseUrl)
         return basePath to baseQuery
     }
 

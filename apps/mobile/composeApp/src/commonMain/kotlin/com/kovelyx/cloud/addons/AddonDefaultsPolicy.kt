@@ -37,3 +37,11 @@ class AddonDefaultsPolicy(private val sha256: (String) -> String) {
         else clean + CloudAddon(OPENSUBTITLES_V3_MANIFEST)
     }
 }
+
+/** Separate the path before trimming; opaque query values can legitimately end in a slash. */
+fun splitConfiguredAddonBaseUrl(raw: String): Pair<String, String> {
+    val clean = raw.trim().substringBefore('#')
+    val index = clean.indexOf('?')
+    val path = (if (index < 0) clean else clean.substring(0, index)).trimEnd('/')
+    return path to if (index < 0) "" else clean.substring(index)
+}

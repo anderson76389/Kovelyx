@@ -66,6 +66,7 @@ class ConfiguredAddonSyncTest {
         assertFalse(cloud!!.items.any { it.url == configured[1].url })
     }
     @Test fun canonicalUrlsKeepCaseSensitiveTokensAndTheEntireQuery() {
+        assertEquals("https://addon.example/Config" to "?key=AbC%2Ftest&path=/", splitConfiguredAddonBaseUrl("https://addon.example/Config/?key=AbC%2Ftest&path=/"))
         val mixed = "https://STREAMFUSION.example/Config/AbC/manifest.json?key=aB%2Fcd%2B%3D&path=/"
         assertEquals("https://streamfusion.example/Config/AbC/manifest.json?key=aB%2Fcd%2B%3D&path=/", canonicalAddonManifestUrl(mixed))
         assertEquals("https://comet.example/Config/AbC/manifest.json?key=XyZ", canonicalAddonManifestUrl("stremio://COMET.example/Config/AbC?key=XyZ"))
