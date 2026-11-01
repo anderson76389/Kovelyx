@@ -1146,7 +1146,7 @@ private fun LibmpvPlayerSurface(
                 latestOnSnapshot.value(snapshot)
                 nowPlayingController?.syncPlayback(snapshot)
                 if (updateKeepScreenOn) {
-                    view.keepScreenOn = snapshot.isPlaying || snapshot.isLoading
+                    view.updateScreenAwake(snapshot.isPlaying || snapshot.isLoading)
                 }
             }
         }
@@ -1226,7 +1226,7 @@ private fun LibmpvPlayerSurface(
                             )
                             latestOnSnapshot.value(snapshot)
                             nowPlayingController?.syncPlayback(snapshot)
-                            view.keepScreenOn = snapshot.isPlaying || snapshot.isLoading
+                            view.updateScreenAwake(snapshot.isPlaying || snapshot.isLoading)
                         }
                     }
                 }
@@ -1270,7 +1270,7 @@ private fun LibmpvPlayerSurface(
         onDispose {
             PlayerPictureInPictureManager.registerPausePlaybackCallback(null)
             PlayerPictureInPictureManager.registerTogglePlaybackCallback(null)
-            view.keepScreenOn = false
+            view.updateScreenAwake(false)
         }
     }
 
@@ -1299,7 +1299,7 @@ private fun LibmpvPlayerSurface(
         val view = playerViewRef ?: return@LaunchedEffect
         view.setPaused(!latestPlayWhenReady.value)
         val snapshot = view.snapshot()
-        view.keepScreenOn = snapshot.isPlaying || snapshot.isLoading
+        view.updateScreenAwake(snapshot.isPlaying || snapshot.isLoading)
         latestOnSnapshot.value(snapshot)
         nowPlayingController?.syncPlayback(snapshot)
     }
@@ -1319,7 +1319,7 @@ private fun LibmpvPlayerSurface(
             val snapshot = view.snapshot()
             latestOnSnapshot.value(snapshot)
             nowPlayingController?.syncPlayback(snapshot)
-            view.keepScreenOn = snapshot.isPlaying || snapshot.isLoading
+            view.updateScreenAwake(snapshot.isPlaying || snapshot.isLoading)
             delay(250L)
         }
     }
@@ -1385,6 +1385,21 @@ private class NuvioLibmpvView(
     private var latestAudioTracks: List<LibmpvTrack> = emptyList()
     @Volatile
     private var latestSubtitleTracks: List<LibmpvTrack> = emptyList()
+
+    @Volatile
+    private var requestedScreenAwake = false
+
+    fun updateScreenAwake(enabled: Boolean) {
+        if (released.get() && enabled) return
+        requestedScreenAwake = enabled
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+            keepScreenOn = requestedScreenAwake
+        } else {
+            // MPV snapshot completion may resume on its native worker thread.
+            // Only the view's owner thread may update Android window flags.
+            post { keepScreenOn = requestedScreenAwake && !released.get() }
+        }
+    }
 
     override fun initOptions() {
         setVo(videoOutput.mpvValue)
