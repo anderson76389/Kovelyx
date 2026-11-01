@@ -44,13 +44,15 @@ internal fun DisplayRefreshChoice(isTablet: Boolean) {
             }
             SettingsGroupDivider(isTablet)
             SettingsNavigationRow(
-                title = stringResource(Res.string.display_refresh_minimum), isTablet = isTablet,
+                title = stringResource(Res.string.display_refresh_minimum), description = null, isTablet = isTablet,
+                enabled = state.available.isNotEmpty(),
                 trailingContent = { Text("${state.minimum} Hz") },
                 onClick = { if (state.available.isNotEmpty()) editingMinimum = true },
             )
             SettingsGroupDivider(isTablet)
             SettingsNavigationRow(
-                title = stringResource(Res.string.display_refresh_maximum), isTablet = isTablet,
+                title = stringResource(Res.string.display_refresh_maximum), description = null, isTablet = isTablet,
+                enabled = state.available.isNotEmpty(),
                 trailingContent = { Text("${state.maximum} Hz") },
                 onClick = { if (state.available.isNotEmpty()) editingMinimum = false },
             )

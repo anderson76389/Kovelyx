@@ -7,8 +7,8 @@
 - **Contenu et sources** : extensions, serveurs multimédias, modules complémentaires et historique de recherche. La gestion des sources vient avant les préférences de recherche.
 - **Lecture** : commandes du lecteur, langues, sous-titres, sélection des liens, épisode suivant et passage des segments. Les options techniques du moteur, de compatibilité, de tampon/cache et P2P viennent ensuite. Sur Windows, le panneau vide réservé aux moteurs Android est masqué ; RTX conserve son panneau dédié.
 - **Services et suivi** : services vidéo/débridage, enrichissement des fiches et notes, puis suivi Trakt/MDBList. Les identifiants de notes et les connexions de suivi restent des réglages distincts.
-- **Avancé** : démarrage, fréquences minimale/maximale par appareil, rendu Windows si disponible, maintenance du cache et diagnostics pris en charge.
-- **À propos** : mises à jour, puis informations du projet et licences.
+- **Avancé** : démarrage, fréquences minimale/maximale par appareil, mises à jour (canal et vérification), rendu Windows si disponible, maintenance du cache et diagnostics pris en charge.
+- **À propos** : informations du projet et licences.
 
 Le titre « Présentation des liens vidéo » désigne les badges et l’apparence des liens, et reste dans Apparence. Il ne désigne pas les options de choix automatique d’un stream.
 
@@ -16,7 +16,7 @@ Le titre « Présentation des liens vidéo » désigne les badges et l’apparen
 
 Le rail et les catégories restent conservés. Les sections de lecture sont ordonnées par usage (lecteur, interface, image, audio, sous-titres, choix de source, épisode suivant, segments), puis réseau/tampon et P2P. Les services vidéo, les fiches/notes et les services de lecture ont des sous-titres séparés dans leur écran commun.
 
-Dans Avancé, les cartes gardent leurs clés : mode d’expérience, démarrage, fréquence d’affichage, performance/navigation, cache, diagnostics de lecture/Dolby Vision, puis tests réseau et leurs résultats. Les demandes de focus initial restent sur les mêmes actions ; les nouveaux sous-titres ne sont pas des contrôles sélectionnables.
+Dans Avancé, les cartes gardent leurs clés : mode d’expérience, démarrage, fréquence d’affichage, performance/navigation, cache, diagnostics de lecture/Dolby Vision, puis tests réseau et leurs résultats. Le canal et la vérification des mises à jour sont dans Avancé, y compris dans le mode essentiel. Les demandes de focus initial restent sur les mêmes actions ; les nouveaux sous-titres ne sont pas des contrôles sélectionnables.
 
 ## Compatibilité
 
