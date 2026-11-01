@@ -75,7 +75,8 @@ try {
   const ready=await req("/ready");
   assert.equal(ready.status,200,"La base locale et Better Auth doivent etre prets");
   assert.equal(ready.data?.status,"ok");
-  assert.equal(ready.data?.schema,"0003_profile_media");
+  assert.equal(ready.data?.schema,"0004_profile_media_gifs");
+  assert.equal(ready.data?.maxProfileMediaBytes,18_000_000);
 
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
@@ -238,7 +239,13 @@ try {
   assert.deepEqual(new Uint8Array(await photoOnTv.arrayBuffer()),picture,"Another session receives the actual private file");
   assert.equal((await fetch(mediaUrl,{headers:{Authorization:"Bearer "+bob.token}})).status,404);
   assert.equal((await putPicture(alice.token,"none")).status,409,"Stale uploads must not overwrite newer photos");
-  const largePicture=new Uint8Array(1_100_000);largePicture.set(picture);
+  const gif=Buffer.from("R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBFAABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7","base64");
+  // A valid two-frame GIF with comment blocks crosses the former 2 MiB limit.
+  const comments=[Buffer.from([0x21,0xfe])];
+  for(let i=0;i<70300;i++)comments.push(Buffer.from([255]),Buffer.alloc(255,65));
+  comments.push(Buffer.from([0]));
+  const largePicture=new Uint8Array(Buffer.concat([gif.subarray(0,-1),...comments,gif.subarray(-1)]));
+  assert.ok(largePicture.length>17_000_000 && largePicture.length<=18_000_000);
   const chunked=await putPicture(alice.token,imageVersion,largePicture);
   assert.equal(chunked.status,201,"Photos are chunked below D1's cell limit");
   const chunkVersion=(await chunked.json()).version;
@@ -255,9 +262,10 @@ try {
   const backgroundGet=await fetch(backgroundUrl,{headers:{Authorization:"Bearer "+alice.token}});
   assert.equal(backgroundGet.status,200);
   assert.deepEqual(new Uint8Array(await backgroundGet.arrayBuffer()),backgroundPicture);
-  const roundTrip=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}});
+  const roundTrip=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+tvToken}});
+  assert.equal(roundTrip.headers.get("content-type"),"image/gif");
   assert.deepEqual(new Uint8Array(await roundTrip.arrayBuffer()),largePicture);
-  assert.equal((await putPicture(alice.token,chunkVersion,new Uint8Array(2_097_153))).status,413);
+  assert.equal((await putPicture(alice.token,chunkVersion,new Uint8Array(18_000_001))).status,413);
   const changed=picture.slice();changed[changed.length-1]^=1;
   const racing=await Promise.all([putPicture(alice.token,chunkVersion,picture),putPicture(alice.token,chunkVersion,changed)]);
   assert.deepEqual(racing.map(r=>r.status).sort(),[201,409],"Concurrent writers cannot overwrite one another");

@@ -37,7 +37,7 @@ def validate_export(path):
             raise RuntimeError('La base sauvegardée ne possède pas le schéma 0002 attendu.')
         if db.execute('PRAGMA foreign_key_check').fetchone() is not None:
             raise RuntimeError('La sauvegarde contient une référence de compte ou de profil invalide.')
-        return {table: db.execute('SELECT count(*) FROM "' + table + '"').fetchone()[0] for table in BASE_TABLES}
+        return {table: db.execute('SELECT count(*) FROM "' + table + '"').fetchone()[0] for table in (*BASE_TABLES, *(name for name in ('kv_profile_media','kv_profile_media_chunks','kv_profile_media_uploads','kv_profile_media_upload_chunks') if name in tables))}
 
 
 def run_private(command, label):

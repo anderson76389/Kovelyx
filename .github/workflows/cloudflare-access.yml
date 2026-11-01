@@ -74,11 +74,11 @@ jobs:
               with urllib.request.urlopen(request, timeout=20) as response:
                   ready = json.load(response)
               schema = ready.get('schema')
-              if schema not in ('0002_watched_history', '0003_profile_media'):
+              if schema not in ('0002_watched_history', '0004_profile_media_gifs'):
                   stop('Le serveur public ne confirme pas un schéma Kovelyx reconnu.')
               print('Serveur public : schéma ' + schema)
               if schema == '0002_watched_history':
-                  print('Photos et fonds : sauvegarde puis migration 0003 et nouveau Worker encore nécessaires.')
+                  print('Photos et fonds : sauvegarde puis migration 0004 et nouveau Worker encore nécessaires.')
           except urllib.error.HTTPError as error:
               stop('Le serveur public répond HTTP ' + str(error.code) + ' ; vérifier le Worker avant migration.')
           except (urllib.error.URLError, TimeoutError, ValueError):

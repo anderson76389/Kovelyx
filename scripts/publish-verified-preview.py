@@ -186,7 +186,7 @@ def main():
             "- Logo Kovelyx centré au démarrage.\n"
             "- Corrections des textes français.\n"
             "- Synchronisation privée des photos et fonds de profil, avec cache local.\n"
-            "  Cette fonction nécessite le Worker Cloudflare et la migration D1 0003_profile_media ; "
+            "  Cette fonction nécessite le Worker Cloudflare et la migration D1 0004_profile_media_gifs ; "
             "installer l’application seule ne met pas le serveur à jour.\n"
             "- Synchronisation des addons : URL configurée, ordre, nom et activation ; suppressions et reprise hors ligne.\n"
             "- Regroupement des envois TV, quatre requêtes de manifeste au maximum et reprise des suppressions.\n\n"

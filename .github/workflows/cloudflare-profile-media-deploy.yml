@@ -1,4 +1,5 @@
 name: Publier les images de profils Cloudflare après sauvegarde vérifiée
+# GIF animés privés jusqu’à 18 Mo ; préserver les images existantes par copie transactionnelle.
 on:
   push:
     branches: [fix/cloudflare-network-status-and-settings]
@@ -34,11 +35,27 @@ jobs:
         env:
           WRANGLER_SEND_METRICS: 'false'
         run: node tests/local-account-e2e.mjs
-      - name: Vérifier la sauvegarde et publier sur la cible existante autorisée
+      - name: Exporter et vérifier la sauvegarde chiffrée du déploiement courant
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
+          BACKUP_OUTPUT_DIR: ${{ runner.temp }}/kovelyx-encrypted-backup
+          WRANGLER_SEND_METRICS: 'false'
+        run: python3 scripts/backup-remote.py
+      - name: Conserver la sauvegarde chiffrée avant toute migration
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-d1-encrypted-backup-before-gifs
+          path: ${{ runner.temp }}/kovelyx-encrypted-backup/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Appliquer la migration vérifiée et publier le Worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
           WRANGLER_SEND_METRICS: 'false'
           CI: 'true'
+          BACKUP_OUTPUT_DIR: ${{ runner.temp }}/kovelyx-encrypted-backup
         run: python3 scripts/deploy-verified.py

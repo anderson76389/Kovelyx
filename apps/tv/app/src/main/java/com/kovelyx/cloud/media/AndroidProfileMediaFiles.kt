@@ -44,7 +44,7 @@ class AndroidProfileMediaFiles(context: Context) : ProfileMediaFiles {
         require(file.length() in 1..18_000_000L) { "Image locale vide ou supérieure à 18 Mo." }
         val header = file.inputStream().use { input -> ByteArray(12).also { input.read(it) } }
         if (String(header, 0, 6, Charsets.US_ASCII).startsWith("GIF8")) {
-            require(file.length() <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 2 Mio ; choisissez une animation plus légère pour la synchroniser." }
+            require(file.length() <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo ; choisissez une animation plus légère pour la synchroniser." }
             return@withContext ProfileImageBytes("image/gif", file.readBytes())
         }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }

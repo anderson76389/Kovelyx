@@ -14,6 +14,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -30,6 +31,53 @@ class AndroidProfileMediaRoundTripTest {
         override fun getFilesDir(): File = File(super.getFilesDir(), device).also { it.mkdirs() }
         override fun getSharedPreferences(name: String, mode: Int): SharedPreferences =
             super.getSharedPreferences("$device-$name", mode)
+    }
+
+    @Test
+    fun animatedGifAboveTwoMiBReachesBothProfileImageSlotsWithoutFlattening() = runBlocking {
+        val app = RuntimeEnvironment.getApplication() as Context
+        val senderContext = DeviceContext(app, "gif-sender-${UUID.randomUUID()}")
+        val receiverContext = DeviceContext(app, "gif-receiver-${UUID.randomUUID()}")
+        val senderFiles = AndroidProfileMediaFiles(senderContext)
+        val receiverFiles = AndroidProfileMediaFiles(receiverContext)
+        val gif = java.util.Base64.getDecoder().decode("R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBFAABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7")
+        val bytes = java.io.ByteArrayOutputStream().apply {
+            write(gif, 0, gif.size - 1)
+            write(byteArrayOf(0x21, 0xfe.toByte()))
+            repeat(8600) { write(255); write(ByteArray(255) { 65 }) }
+            write(0); write(0x3b)
+        }.toByteArray()
+        assertTrue(bytes.size > 2 * 1024 * 1024)
+        val stored = mutableMapOf<String, ProfileImageBytes>()
+        val remote = object : ProfileMediaRemote {
+            override suspend fun upload(profileId: String, kind: String, expected: String?, image: ProfileImageBytes): String {
+                stored[kind] = image
+                return senderFiles.sha256(image.bytes)
+            }
+            override suspend fun download(profileId: String, kind: String, version: String) = requireNotNull(stored[kind])
+            override suspend fun remove(profileId: String, kind: String, expected: String?) = Unit
+        }
+        val sender = ProfileMediaEngine(senderFiles, remote)
+        val receiver = ProfileMediaEngine(receiverFiles, remote)
+        for (kind in listOf("avatar", "background")) {
+            val folder = File(senderContext.filesDir, "kovelyx-profile-media").also { it.mkdirs() }
+            val source = File(folder, "$kind.gif").also { it.writeBytes(bytes) }
+            val uri = Uri.fromFile(source).toString()
+            sender.edited("account", "profile", kind, uri)
+            sender.synchronize("account", "profile", kind, uri, null)
+            val uploaded = requireNotNull(stored[kind])
+            assertEquals("image/gif", uploaded.mime)
+            assertArrayEquals(bytes, uploaded.bytes)
+            val version = senderFiles.sha256(bytes)
+            val copied = requireNotNull(receiver.synchronize("account", "profile", kind, null, version))
+            assertEquals(copied, normalizedAvatarUrl(copied))
+            val downloaded = File(requireNotNull(Uri.parse(copied).path))
+            assertArrayEquals(bytes, downloaded.readBytes())
+            val drawable = android.graphics.ImageDecoder.decodeDrawable(android.graphics.ImageDecoder.createSource(downloaded))
+            assertTrue("The synced file must still decode as an animation", drawable is android.graphics.drawable.AnimatedImageDrawable)
+            val restarted = ProfileMediaEngine(AndroidProfileMediaFiles(receiverContext), remote)
+            assertEquals(copied, restarted.synchronize("account", "profile", kind, copied, version))
+        }
     }
 
     @Test

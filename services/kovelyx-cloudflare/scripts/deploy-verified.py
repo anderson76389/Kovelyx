@@ -7,10 +7,11 @@ import re
 import subprocess
 import time
 import urllib.request
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parents[1]
-TABLES = ('user', 'account', 'kv_profiles', 'kv_sync')
+TABLES = ('user', 'account', 'kv_profiles', 'kv_sync', 'kv_profile_media', 'kv_profile_media_chunks')
 
 
 def require(condition, message):
@@ -28,8 +29,15 @@ def main():
     for path, expected in [
         ('package-lock.json', '6b12cf978aa050408737b8b7ffabd38b5bdf67a0ec9aa8d17ff6e48aac49f05f'),
         ('migrations/0003_profile_media.sql', 'cb74e4326ad512454147181df31074a8d0ea0ed3ec7f82ad3d4ebca7afa42256'),
+        ('migrations/0004_profile_media_gifs.sql', '10ef60499bfbfcf37cdda86c607a4f1960aead25ce375b0b7a7163595f24d31c'),
     ]:
         require(hashlib.sha256((ROOT/path).read_bytes()).hexdigest() == expected, 'Empreinte des fichiers publics différente des versions vérifiées.')
+    backup_dir = Path(os.environ['BACKUP_OUTPUT_DIR'])
+    backup = json.loads((backup_dir/'manifest.json').read_text())
+    require(backup.get('source_sha') == os.environ.get('GITHUB_SHA') and backup.get('run_id') == os.environ.get('GITHUB_RUN_ID'), 'Sauvegarde du déploiement courant absente.')
+    require(backup.get('target_fingerprint') == hashlib.sha256((account.lower()+':'+database.lower()).encode()).hexdigest(), 'Cible de sauvegarde différente.')
+    require(0 <= (datetime.now(timezone.utc)-datetime.fromisoformat(backup['created_at'])).total_seconds() < 1800, 'Sauvegarde trop ancienne.')
+    require(hashlib.sha256((backup_dir/'kovelyx-d1.sql.cms').read_bytes()).hexdigest() == backup.get('encrypted_sha256'), 'Intégrité de la copie chiffrée non confirmée.')
     base = 'https://api.cloudflare.com/client/v4/accounts/'+account
 
     def api(path, payload=None):
@@ -52,9 +60,9 @@ def main():
 
     original_bindings = bindings()
     migrations = {r['name'] for r in query('SELECT name FROM d1_migrations')}
-    previous = {'0001_accounts_and_sync.sql', '0002_watched_history.sql'}
-    require(previous.issubset(migrations), 'Les migrations 0001 et 0002 doivent déjà être enregistrées.')
-    allowed = previous | {'0003_profile_media.sql'}
+    previous = {'0001_accounts_and_sync.sql', '0002_watched_history.sql', '0003_profile_media.sql'}
+    require(previous.issubset(migrations), 'Les migrations 0001 à 0003 doivent déjà être enregistrées.')
+    allowed = previous | {'0004_profile_media_gifs.sql'}
     require(migrations.issubset(allowed), 'Historique D1 inattendu ; aucune migration appliquée.')
     require({p.name for p in (ROOT/'migrations').glob('*.sql')} == allowed, 'Liste des migrations inattendue.')
     before = {table:query('SELECT count(*) AS total FROM "'+table+'"')[0]['total'] for table in TABLES}
@@ -66,9 +74,10 @@ def main():
         def run(args, message):
             result = subprocess.run(['npx','--no-install','wrangler',*args,'--config',str(config)], cwd=ROOT, capture_output=True)
             require(result.returncode == 0, message+' a échoué ; sortie privée masquée.')
-        run(['d1','migrations','apply','DB','--remote'], 'Migration additive 0003')
-        require('0003_profile_media.sql' in {r['name'] for r in query('SELECT name FROM d1_migrations')}, 'Migration 0003 non enregistrée.')
-        print('OK : migration additive 0003 enregistrée.', flush=True)
+        run(['d1','migrations','apply','DB','--remote'], 'Migration 0004 avec conservation des images')
+        require('0004_profile_media_gifs.sql' in {r['name'] for r in query('SELECT name FROM d1_migrations')}, 'Migration 0004 non enregistrée.')
+        require(not query('PRAGMA foreign_key_check'), 'Références D1 invalides après migration.')
+        print('OK : migration 0004 enregistrée, références vérifiées.', flush=True)
         run(['deploy','--keep-vars'], 'Déploiement du Worker')
         print('OK : Worker publié en conservant les variables et secrets existants.', flush=True)
     finally:
@@ -83,14 +92,14 @@ def main():
             req = urllib.request.Request('https://kovelyx-cloud.mailpromahe.workers.dev/ready', headers={'User-Agent':'Kovelyx-verified-deployment','Accept':'application/json'})
             with urllib.request.urlopen(req, timeout=25) as response:
                 ready = json.load(response)
-            if ready.get('status') == 'ok' and ready.get('schema') == '0003_profile_media':
+            if ready.get('status') == 'ok' and ready.get('schema') == '0004_profile_media_gifs' and ready.get('maxProfileMediaBytes') == 18_000_000:
                 break
         except Exception:
             pass
         time.sleep(3)
     else:
-        raise RuntimeError('Worker publié mais /ready 0003 non confirmé ; vérifier la production.')
-    print('OK : serveur réel prêt avec schéma 0003 ; comptes, profils, liaison D1 et réglages conservés.', flush=True)
+        raise RuntimeError('Worker publié mais /ready 0004 non confirmé ; vérifier la production.')
+    print('OK : serveur réel prêt avec schéma 0004 et images privées de 18 Mo ; comptes, profils, images, liaison D1 et réglages conservés.', flush=True)
 
 
 if __name__ == '__main__':

@@ -121,7 +121,7 @@ const expectedUrl = rawCloudUrl.endsWith("/") ? rawCloudUrl.slice(0, -1) : rawCl
 try {
   const ready = await fetch(expectedUrl + "/ready", { headers: { accept: "application/json" }, signal: AbortSignal.timeout(20000) });
   const body = await ready.json().catch(() => ({}));
-  if (!ready.ok || body.status !== "ok" || body.schema !== "0003_profile_media")
+  if (!ready.ok || body.status !== "ok" || body.schema !== "0004_profile_media_gifs")
     throw new Error("HTTP " + ready.status + ", schema=" + String(body.schema || "absent"));
   console.log("✅ Production prête : /ready indique comptes Better Auth et D1 0003 (images privées).");
 } catch (error) {

@@ -30,6 +30,15 @@ class DesktopProfileMediaFilesTest {
                 }
                 writer.endWriteSequence()
             }
+            val original = Files.readAllBytes(source)
+            val largeGif = java.io.ByteArrayOutputStream().apply {
+                write(original, 0, original.size - 1)
+                write(byteArrayOf(0x21, 0xfe.toByte()))
+                repeat(8600) { write(255); write(ByteArray(255) { 65 }) }
+                write(0); write(0x3b)
+            }.toByteArray()
+            assertTrue(largeGif.size > 2 * 1024 * 1024)
+            Files.write(source, largeGif)
             val files = DesktopProfileMediaFiles()
             val image = files.encodeLocal(source.toUri().toString(), background = true)
             assertEquals("image/gif", image.mime)

@@ -66,10 +66,10 @@ jobs:
                   body = json.load(response)
                   schema = str(body.get('schema', 'absent'))[:80]
                   print('Serveur réel : HTTP', response.status, '; schéma :', schema)
-                  if body.get('status') == 'ok' and schema == '0003_profile_media':
+                  if body.get('status') == 'ok' and schema == '0004_profile_media_gifs':
                       print('Routes images du nouveau schéma disponibles ; échange authentifié sur appareils à vérifier séparément.')
                   else:
-                      print('Images privées : mise à jour du Worker et migration 0003 encore nécessaires.')
+                      print('Images privées : mise à jour du Worker et migration 0004 encore nécessaires.')
           except Exception as error:
               print('Diagnostic distant indisponible :', type(error).__name__)
               print('Aucune validation du serveur réel ne peut être déduite des tests locaux.')

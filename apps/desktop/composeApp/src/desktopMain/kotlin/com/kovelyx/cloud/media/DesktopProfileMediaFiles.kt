@@ -43,7 +43,7 @@ internal class DesktopProfileMediaFiles : ProfileMediaFiles {
         require(Files.size(file) in 1..18_000_000L)
         val header = Files.newInputStream(file).use { it.readNBytes(12) }
         if (header.size >= 6 && String(header, 0, 6, Charsets.US_ASCII).startsWith("GIF8")) {
-            require(Files.size(file) <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 2 Mio ; choisissez une animation plus légère pour la synchroniser." }
+            require(Files.size(file) <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo ; choisissez une animation plus légère pour la synchroniser." }
             return@withContext ProfileImageBytes("image/gif", Files.readAllBytes(file))
         }
         val bitmap = ProfileLocalImages.readAndResize(file, background)

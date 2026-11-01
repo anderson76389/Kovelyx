@@ -51,8 +51,8 @@ internal actual object ProfileLocalImages {
             }
 
             val original = selectedPath ?: return@withContext null
-            require(Files.isRegularFile(original) && Files.size(original) in 1..12_000_000L) {
-                "L'image doit être un fichier de 12 Mo maximum."
+            require(Files.isRegularFile(original) && Files.size(original) in 1..18_000_000L) {
+                "L'image doit être un fichier de 18 Mo maximum."
             }
             // Conserver les GIF animés tels quels : l'ancien redimensionnement
             // ImageIO ne gardait que la première image de l'animation.

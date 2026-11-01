@@ -1,7 +1,11 @@
 package com.nuvio.app.core.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -31,6 +35,13 @@ import org.jetbrains.skia.Image as SkiaImage
 import org.jetbrains.skia.MipmapMode
 import kotlin.math.max
 import kotlin.math.roundToInt
+import com.nuvio.app.core.storage.DesktopStorage
+import java.net.URI
+import java.nio.file.Path
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 private const val MinCustomDownscaleRatio = 1.08f
 private const val MaxDesktopSourceSizePx = 1536
@@ -60,6 +71,45 @@ internal actual fun NuvioAsyncImage(
     clipToBounds: Boolean,
     desktopImageScaling: NuvioDesktopImageScaling,
 ) {
+    val gifPath = remember(model) {
+        val data = if (model is ImageRequest) model.data else model
+        runCatching {
+            val uri = URI(data as? String ?: return@runCatching null)
+            if (!uri.scheme.equals("file", true)) return@runCatching null
+            val path = Path.of(uri).toRealPath()
+            val root = DesktopStorage.rootDir.toRealPath()
+            path.takeIf { it.startsWith(root.resolve("profile-media")) || it.startsWith(root.resolve("cloud-profile-media")) }
+                ?.takeIf { it.fileName.toString().endsWith(".gif", true) }
+        }.getOrNull()
+    }
+    var gifFrame by remember(gifPath) { mutableStateOf<ImageBitmap?>(null) }
+    LaunchedEffect(gifPath) {
+        if (gifPath != null) {
+            try {
+                withContext(Dispatchers.IO) {
+                    ProfileGifFrames(gifPath).use { frames ->
+                        var index = 0
+                        while (true) {
+                            val frame = frames.frame(index)
+                            withContext(Dispatchers.Main) { gifFrame = frame }
+                            delay(frames.durationMillis(index))
+                            index = (index + 1) % frames.frameCount
+                        }
+                    }
+                }
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { /* Keep Coil's normal fallback for unreadable files. */ }
+        }
+    }
+    val animatedFrame = gifFrame
+    if (animatedFrame != null) {
+        androidx.compose.foundation.Image(
+            bitmap = animatedFrame, contentDescription = contentDescription, modifier = modifier,
+            alignment = alignment, contentScale = contentScale, alpha = alpha,
+            colorFilter = colorFilter, filterQuality = filterQuality ?: FilterQuality.High,
+        )
+        return
+    }
     val context = LocalPlatformContext.current
     val effectiveDesktopImageScaling = remember(desktopImageScaling) {
         if (IsWindowsDesktop) desktopImageScaling else NuvioDesktopImageScaling.Disabled

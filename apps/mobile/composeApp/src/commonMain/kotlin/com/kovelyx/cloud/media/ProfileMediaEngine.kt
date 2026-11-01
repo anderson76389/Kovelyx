@@ -2,7 +2,7 @@ package com.kovelyx.cloud.media
 
 import kotlinx.serialization.Serializable
 
-const val MAX_PROFILE_MEDIA_BYTES = 2 * 1024 * 1024
+const val MAX_PROFILE_MEDIA_BYTES = 18_000_000
 
 @Serializable
 data class ProfileMediaState(val uri: String? = null, val version: String? = null, val pending: Boolean = false, val automatic: Boolean = false)
@@ -70,7 +70,7 @@ class ProfileMediaEngine(private val files: ProfileMediaFiles, private val remot
                 null
             } else {
                 val image = files.encodeLocal(state.uri, kind == "background")
-                require(image.bytes.size in 1..MAX_PROFILE_MEDIA_BYTES) { "Image trop volumineuse pour le cloud (2 Mio maximum)." }
+                require(image.bytes.size in 1..MAX_PROFILE_MEDIA_BYTES) { "Image trop volumineuse pour le cloud (18 Mo maximum)." }
                 remote.upload(profile, kind, version, image)
             }
             // Saving another photo during the request preserves that later pending edit.

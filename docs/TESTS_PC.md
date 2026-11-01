@@ -26,7 +26,7 @@ Ce plan complète les tests automatiques. **Cocher uniquement ce qui a été ess
 ### Profils et données
 
 - [ ] Création, modification, sélection et suppression d'un profil.
-- [ ] Import d'un avatar JPG/PNG/GIF/BMP de moins de 12 Mo ; aperçu visible.
+- [ ] Import d'un avatar JPG/PNG/GIF/BMP de 18 Mo maximum ; aperçu visible.
 - [ ] Import d'un fond de profil et bascule vers le fond par défaut.
 - [ ] Conservation des images après fermeture et redémarrage.
 - [ ] Images différentes pour deux profils indépendants.

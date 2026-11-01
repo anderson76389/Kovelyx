@@ -1,4 +1,4 @@
-import {handleProfileMedia} from "./profile-media.mjs";
+import {handleProfileMedia,MAX_PROFILE_MEDIA_BYTES} from "./profile-media.mjs";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validSyncInput, isAllowedOrigin } from "./contract.mjs";
@@ -179,11 +179,11 @@ async function productionReadiness(env) {
     ).first();
     if (typeof sync?.sql !== "string" || !sync.sql.includes("'watched_items'"))
       return unavailable();
-    const media = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('kv_profile_media','kv_profile_media_chunks')").all();
-    if ((media.results || []).length !== 2) return unavailable();
+    const media = await env.DB.prepare("SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN ('kv_profile_media','kv_profile_media_chunks','kv_profile_media_uploads','kv_profile_media_upload_chunks')").all();
+    if ((media.results || []).length !== 4 || !media.results.some(row => row.name === "kv_profile_media" && row.sql?.includes("18000000")) || !media.results.some(row => row.name === "kv_profile_media_chunks" && row.sql?.includes("0 AND 34"))) return unavailable();
     return jsonResponse({
       service:"Kovelyx Cloud",provider:"Cloudflare D1",
-      status:"ok",schema:"0003_profile_media"
+      status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES
     });
   } catch {
     return unavailable();

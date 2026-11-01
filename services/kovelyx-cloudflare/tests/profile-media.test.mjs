@@ -8,7 +8,7 @@ test('only supported raster signatures are accepted, not SVG or HTML',()=>{
   assert.equal(profileImageMime(new TextEncoder().encode('RIFFxxxxWEBP')),'image/webp');
   assert.equal(profileImageMime(new TextEncoder().encode('<svg><script>alert(1)</script></svg>')),null);
   assert.equal(profileImageMime(new Uint8Array()),null);
-  assert.equal(MAX_PROFILE_MEDIA_BYTES,2097152);
+  assert.equal(MAX_PROFILE_MEDIA_BYTES,18_000_000);
 });
 
 import {handleProfileMedia} from '../src/profile-media.mjs';

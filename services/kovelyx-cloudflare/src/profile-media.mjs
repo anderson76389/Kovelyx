@@ -1,5 +1,5 @@
 import {validProfileId,jsonResponse} from './contract.mjs';
-export const MAX_PROFILE_MEDIA_BYTES = 2 * 1024 * 1024;
+export const MAX_PROFILE_MEDIA_BYTES = 18_000_000;
 const CHUNK_BYTES = 512 * 1024;
 export function profileImageMime(bytes) {
   if (bytes.length >= 8 && [137,80,78,71,13,10,26,10].every((v,i)=>bytes[i]===v)) return 'image/png';
@@ -40,16 +40,26 @@ export async function handleProfileMedia(request,env,user,url) {
     if(!row)return jsonResponse({error:'Image absente'},404);
     const expected=url.searchParams.get('version');
     if(expected && expected!==row.version)return jsonResponse({error:'Image modifiée, actualiser le profil'},409);
-    const chunks=await env.DB.prepare('SELECT data FROM kv_profile_media_chunks WHERE owner_id=? AND profile_id=? AND kind=? ORDER BY position')
+    const chunks=await env.DB.prepare('SELECT position,length(data) AS size FROM kv_profile_media_chunks WHERE owner_id=? AND profile_id=? AND kind=? ORDER BY position')
       .bind(user.id,profileId,kind).all();
-    const bytes=new Uint8Array(row.size);let offset=0;
-    for(const chunk of chunks.results||[]) {
-      const data=new Uint8Array(chunk.data);
-      if(offset+data.length>bytes.length)return jsonResponse({error:'Image incomplète'},503);
-      bytes.set(data,offset);offset+=data.length;
-    }
-    if(offset!==row.size)return jsonResponse({error:'Image incomplète'},503);
-    return new Response(bytes,{headers:{'Content-Type':row.mime,'Content-Length':String(row.size),
+    const parts=chunks.results||[];
+    if(!parts.length || parts.some((part,i)=>part.position!==i || part.size<1 || part.size>CHUNK_BYTES) ||
+       parts.reduce((sum,part)=>sum+part.size,0)!==row.size)return jsonResponse({error:'Image incomplète'},503);
+    let next=0;
+    const stream=new ReadableStream({async pull(controller) {
+      try {
+        const part=parts[next];
+        const chunk=await env.DB.prepare(`SELECT data FROM kv_profile_media_chunks WHERE owner_id=? AND profile_id=? AND kind=? AND position=?
+          AND EXISTS(SELECT 1 FROM kv_profile_media WHERE owner_id=? AND profile_id=? AND kind=? AND version=?)`)
+          .bind(user.id,profileId,kind,part.position,user.id,profileId,kind,row.version).first();
+        if(!chunk)throw Error('Image modifiée pendant le téléchargement');
+        const data=new Uint8Array(chunk.data);
+        if(data.length!==part.size)throw Error('Image incomplète');
+        controller.enqueue(data);
+        if(++next===parts.length)controller.close();
+      } catch(error) { controller.error(error); }
+    }});
+    return new Response(stream,{headers:{'Content-Type':row.mime,'Content-Length':String(row.size),
       'X-Kovelyx-Media-Version':row.version,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
   }
   if(!['PUT','DELETE'].includes(request.method))return jsonResponse({error:'Méthode interdite'},405);
@@ -69,11 +79,26 @@ export async function handleProfileMedia(request,env,user,url) {
     return jsonResponse({version:null});
   }
   const bytes=await limitedBytes(request);
-  if(!bytes)return jsonResponse({error:'Image vide ou supérieure à 2 Mio'},413);
+  if(!bytes)return jsonResponse({error:'Image vide ou supérieure à 18 Mo'},413);
   const mime=profileImageMime(bytes);
   if(!mime)return jsonResponse({error:'Utiliser une image JPG, PNG, WebP ou GIF'},415);
   const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
   const version=Array.from(hash,b=>b.toString(16).padStart(2,'0')).join('');
+  // Keep D1's binary parameter serialization bounded for large animated GIFs.
+  // Partial uploads are never visible through GET or through profile metadata.
+  const uploadId=crypto.randomUUID();
+  await env.DB.prepare('DELETE FROM kv_profile_media_uploads WHERE updated_at<?').bind(now-30*60*1000).run();
+  await env.DB.prepare('INSERT INTO kv_profile_media_uploads(id,owner_id,profile_id,kind,updated_at) VALUES (?,?,?,?,?)')
+    .bind(uploadId,user.id,profileId,kind,now).run();
+  let published=false;
+  try {
+  let pending=[];
+  for(let offset=0;offset<bytes.length;offset+=CHUNK_BYTES) {
+    pending.push(env.DB.prepare('INSERT INTO kv_profile_media_upload_chunks(upload_id,position,data) VALUES (?,?,?)')
+      .bind(uploadId,offset/CHUNK_BYTES,bytes.slice(offset,offset+CHUNK_BYTES).buffer));
+    if(pending.length===4){await env.DB.batch(pending);pending=[];}
+  }
+  if(pending.length)await env.DB.batch(pending);
   // Serialize competing writers with the profile-row compare-and-swap. A failed
   // conditional update aborts the batch through the NOT NULL version assertion below.
   const statements=[
@@ -84,16 +109,20 @@ export async function handleProfileMedia(request,env,user,url) {
       ON CONFLICT(owner_id,profile_id,kind) DO UPDATE SET version=excluded.version,mime=excluded.mime,size=excluded.size,updated_at=excluded.updated_at`)
       .bind(user.id,profileId,kind,version,version,mime,bytes.length,now,user.id,profileId),
     env.DB.prepare('DELETE FROM kv_profile_media_chunks WHERE owner_id=? AND profile_id=? AND kind=?')
-      .bind(user.id,profileId,kind)
+      .bind(user.id,profileId,kind),
+    env.DB.prepare(`INSERT INTO kv_profile_media_chunks(owner_id,profile_id,kind,position,data)
+      SELECT ?,?,?,position,data FROM kv_profile_media_upload_chunks WHERE upload_id=?`)
+      .bind(user.id,profileId,kind,uploadId),
+    env.DB.prepare('DELETE FROM kv_profile_media_uploads WHERE id=?').bind(uploadId)
   ];
-  for(let offset=0;offset<bytes.length;offset+=CHUNK_BYTES)statements.push(
-    env.DB.prepare('INSERT INTO kv_profile_media_chunks(owner_id,profile_id,kind,position,data) VALUES (?,?,?,?,?)')
-      .bind(user.id,profileId,kind,offset/CHUNK_BYTES,bytes.slice(offset,offset+CHUNK_BYTES).buffer));
-  try { await env.DB.batch(statements); }
+  try { await env.DB.batch(statements); published=true; }
   catch(error) {
     const current=await env.DB.prepare(`SELECT ${column} AS version FROM kv_profiles WHERE owner_id=? AND id=?`).bind(user.id,profileId).first();
     if(current?.version!==expected && current?.version!==version)return jsonResponse({error:'Image modifiée par un autre appareil'},409);
     throw error;
   }
   return jsonResponse({version,mime,size:bytes.length},201);
+  } finally {
+    if(!published)await env.DB.prepare('DELETE FROM kv_profile_media_uploads WHERE id=?').bind(uploadId).run();
+  }
 }
