@@ -223,9 +223,8 @@ try {
   assert.equal((await req("/v1/sync","POST",addons,alice.token)).status,409,"Old device cannot resurrect removed addons with a stale revision");
   assert.equal((await req("/v1/sync","POST",addons,bob.token)).status,404);
 
-  // Private user pictures are real bytes, isolated by owner and protected by revisions.
   // Real chunk transfer, atomic publication, isolation, deletion and old-version cleanup.
-  const catalogueText=JSON.stringify([{id:"ma-collection",folders:[{id:"films",sources:[{provider:"addon",addonId:"kaptain",catalogId:"x"}],name:"é".repeat(6500)}]}]);
+  const catalogueText=JSON.stringify([{id:"ma-collection",folders:[{id:"films",sources:[{provider:"addon",addonId:"kaptain",catalogId:"x"}],name:"é".repeat(900000)}]}]);
   const catalogueHash=createHash('sha256').update(catalogueText).digest('hex');
   const catalogueParts=Array.from({length:Math.ceil(catalogueText.length/6000)},(_,i)=>catalogueText.slice(i*6000,(i+1)*6000));
   const chunk=(hash,index,text)=>({profileId,category:"catalogues",itemKey:`snapshot:collections:${hash}:${String(index).padStart(6,'0')}`,revision:0,deleted:false,payload:{index,text}});
@@ -237,8 +236,18 @@ try {
   assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,catalogueParts[0]),alice.token)).status,200,'Idempotent immutable chunk');
   assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,'different'),alice.token)).status,409);
   assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,201);
-  const fromTv=await req(`/v1/sync?profileId=${profileId}&snapshotKind=collections&snapshotHash=${catalogueHash}`,'GET',null,tvToken);
-  assert.equal(fromTv.status,200); assert.equal(fromTv.data.items.map(x=>x.payload.text).join(''),catalogueText);
+  let catalogueOffset=0,cataloguePages=0; const fromTvItems=[];
+  do {
+    const fromTv=await req(`/v1/sync?profileId=${profileId}&snapshotKind=collections&snapshotHash=${catalogueHash}&offset=${catalogueOffset}&limit=25`,'GET',null,tvToken);
+    assert.equal(fromTv.status,200); fromTvItems.push(...fromTv.data.items); cataloguePages++;
+    const nextCatalogueOffset=fromTv.data.nextOffset;
+    if(nextCatalogueOffset!==null) assert.equal(nextCatalogueOffset,catalogueOffset+25);
+    catalogueOffset=nextCatalogueOffset;
+  } while(catalogueOffset!==null);
+  assert.equal(fromTvItems.length,catalogueParts.length);
+  assert.deepEqual(fromTvItems.map(x=>x.payload.index),catalogueParts.map((_,i)=>i));
+  assert.equal(fromTvItems.map(x=>x.payload.text).join(''),catalogueText);
+  assert.ok(cataloguePages>1); console.log('PASS: catalogue volumineux, '+Buffer.byteLength(catalogueText)+' octets, '+catalogueParts.length+' blocs, '+cataloguePages+' pages, reconstruction exacte');
   const normal=await req(`/v1/sync?profileId=${profileId}`,'GET',null,tvToken);
   assert.equal(normal.data.items.some(x=>x.category==='catalogues'),false,'Progress sync never returns catalogue chunks');
   const emptyHash=createHash('sha256').update('[]').digest('hex');
@@ -249,6 +258,7 @@ try {
   assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,409,'Stale writer cannot resurrect deleted catalogues');
   assert.equal((await req('/v1/sync','POST',chunk(emptyHash,0,'[]'),alice.token)).status,400,'Generic writes cannot bypass immutable protocol');
 
+  // Private user pictures are real bytes, isolated by owner and protected by revisions.
   const mediaUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=avatar";
   const picture=Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aM5sAAAAASUVORK5CYII=","base64"));
   const putPicture=(token,expected,bytes=picture)=>fetch(mediaUrl,{method:"PUT",
