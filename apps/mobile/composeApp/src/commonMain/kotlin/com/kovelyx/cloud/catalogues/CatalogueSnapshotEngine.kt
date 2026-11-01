@@ -89,7 +89,7 @@ fun mergeInitialCatalogue(kind: String, remote: String, local: String, preferLoc
         val secondary = b.associateBy { it.jsonObject["id"]!!.jsonPrimitive.content }
         val seen = mutableSetOf<String>()
         return JsonArray((a + b).filter { seen.add(it.jsonObject["id"]!!.jsonPrimitive.content) }.map { row ->
-            val other = secondary[row.jsonObject["id"]!!.jsonPrimitive.content]?.jsonObject.orEmpty()
+            val other = secondary[row.jsonObject["id"]!!.jsonPrimitive.content]?.jsonObject ?: JsonObject(emptyMap())
             val merged = other + row.jsonObject
             val uniqueSources = (sources(row.jsonObject) + sources(other)).distinctBy { canonical(it).toString() }
             JsonObject(merged - "catalogSources" + ("sources" to JsonArray(uniqueSources)))

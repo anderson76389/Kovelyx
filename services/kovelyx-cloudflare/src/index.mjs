@@ -72,13 +72,13 @@ async function handleSync(request, env, user, url) {
     const filtered=kind!==null || hash!==null;
     if(filtered && (!catalogueKinds.has(kind)|| !/^[a-f0-9]{64}$/.test(hash||'')))
       return jsonResponse({error:'Version de catalogue invalide'},400);
-    const condition=filtered ? " AND category='catalogues' AND deleted=0 AND item_key LIKE ?" :
+    const condition=filtered ? " AND category='catalogues' AND deleted=0 AND item_key>=? AND item_key<?" :
       " AND category IN ('addons','favorites','library','plugins','preferences','profile_settings','watch_progress','watched_items')";
     // 25 x 32 KiB fits under the native clients' 1 MiB response ceiling.
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
       "FROM kv_sync WHERE owner_id=? AND profile_id=?"+condition+" ORDER BY category, item_key LIMIT ? OFFSET ?"
-    ).bind(user.id,profileId,...(filtered?[cataloguePrefix(kind,hash)+'%']:[]),limit+1,offset).all();
+    ).bind(user.id,profileId,...(filtered?[cataloguePrefix(kind,hash),cataloguePrefix(kind,hash)+'~']:[]),limit+1,offset).all();
     const rows = result.results || [];
     const partial = rows.length > limit;
     return jsonResponse({

@@ -1,4 +1,5 @@
 name: Publier les images de profils Cloudflare après sauvegarde vérifiée
+# D1 : plages de clés indexées pour les SHA-256 complets, sans motifs LIKE.
 # Catalogues par blocs immuables, lecture séparée de la progression ; sauvegarde avant publication.
 # GIF animés privés jusqu’à 18 Mo ; préserver les images existantes par copie transactionnelle.
 on:

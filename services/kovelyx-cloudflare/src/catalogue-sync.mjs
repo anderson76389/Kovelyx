@@ -49,28 +49,30 @@ export async function handleCatalogueManifest(request,env,user,body) {
   if(!owned)return jsonResponse({error:'Profil introuvable'},404);
   const key='catalogue_'+body.kind,prefix=cataloguePrefix(body.kind,body.sha256),now=Date.now();
   const payload=JSON.stringify({schema:1,sha256:body.sha256,parts:body.parts,utf8Bytes:body.utf8Bytes});
+  // D1 limits LIKE/GLOB patterns: use indexed key ranges, including the full SHA-256.
   // Count and CAS are one statement: cleanup cannot publish a partial snapshot.
   const complete=`(SELECT count(*) FROM kv_sync WHERE owner_id=? AND profile_id=?
-    AND category='catalogues' AND deleted=0 AND item_key LIKE ?
+    AND category='catalogues' AND deleted=0 AND item_key>=? AND item_key<?
     AND CAST(substr(item_key,length(?)+1) AS INTEGER) BETWEEN 0 AND ?)=?`;
   let result;
   if(body.revision===0) {
     result=await env.DB.prepare(`INSERT OR IGNORE INTO kv_sync
       (owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at)
       SELECT ?,?,'preferences',?,?,1,0,? WHERE ${complete}`)
-      .bind(user.id,body.profileId,key,payload,now,user.id,body.profileId,prefix+'%',prefix,body.parts-1,body.parts).run();
+      .bind(user.id,body.profileId,key,payload,now,user.id,body.profileId,prefix,prefix+'~',prefix,body.parts-1,body.parts).run();
   } else {
     result=await env.DB.prepare(`UPDATE kv_sync SET payload=?,revision=revision+1,deleted=0,updated_at=?
       WHERE owner_id=? AND profile_id=? AND category='preferences' AND item_key=? AND revision=? AND ${complete}`)
-      .bind(payload,now,user.id,body.profileId,key,body.revision,user.id,body.profileId,prefix+'%',prefix,body.parts-1,body.parts).run();
+      .bind(payload,now,user.id,body.profileId,key,body.revision,user.id,body.profileId,prefix,prefix+'~',prefix,body.parts-1,body.parts).run();
   }
   if(result.meta?.changes!==1)return jsonResponse({error:'Conflit ou transfert incomplet ; reprendre la synchronisation'},409);
   // Resolve the CURRENT head in this statement, not the head captured by this request.
   // Concurrent writers may retry missing chunks, but never expose partial files.
+  const kindPrefix='snapshot:'+body.kind+':';
   await env.DB.prepare(`DELETE FROM kv_sync WHERE owner_id=? AND profile_id=? AND category='catalogues'
-    AND item_key LIKE ? AND item_key NOT LIKE ('snapshot:' || ? || ':' ||
-      json_extract((SELECT payload FROM kv_sync WHERE owner_id=? AND profile_id=?
-        AND category='preferences' AND item_key=? AND deleted=0),'$.sha256') || ':%')`)
-    .bind(user.id,body.profileId,'snapshot:'+body.kind+':%',body.kind,user.id,body.profileId,key).run();
+    AND item_key>=? AND item_key<? AND substr(item_key,length(?)+1,64) <>
+      (SELECT json_extract(payload,'$.sha256') FROM kv_sync WHERE owner_id=? AND profile_id=?
+        AND category='preferences' AND item_key=? AND deleted=0)`)
+    .bind(user.id,body.profileId,kindPrefix,kindPrefix+'~',kindPrefix,user.id,body.profileId,key).run();
   return jsonResponse({revision:body.revision+1,updatedAt:now},body.revision===0?201:200);
 }
