@@ -965,6 +965,12 @@ private fun EssentialAdvancedSettingsContent(
             )
         }
         DisplayRefreshRangeSection()
+        if (AppFeaturePolicy.inAppUpdatesEnabled) {
+            SettingsGroupCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(R.string.settings_org_section_updates)
+            ) { UpdateChannelSettings(initialFocusRequester = null) }
+        }
     }
 
     if (showConfirmation) {
