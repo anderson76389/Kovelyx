@@ -352,7 +352,7 @@ object FrameRateUtils {
     ): DisplayModeSwitchResult? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return null
         if (frameRate <= 0f) return null
-        // Fixed 60/120 Hz owns the window; never let legacy AFR pick 24/50/144 Hz.
+        // The device refresh range owns the window; legacy AFR must not override its bounds.
         if (com.kovelyx.display.DisplayRefreshSettings.state.value.enabled) return null
 
         val switchPlan = withContext(Dispatchers.Main) {

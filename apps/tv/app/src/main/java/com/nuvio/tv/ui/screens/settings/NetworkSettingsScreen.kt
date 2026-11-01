@@ -432,6 +432,8 @@ fun AdvancedSettingsContent(
             }
         }
 
+        item(key = "display_refresh_range") { DisplayRefreshRangeSection() }
+
         item(key = "performance_settings") {
             SettingsGroupCard(
                 modifier = Modifier.fillMaxWidth(),

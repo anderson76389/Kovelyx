@@ -1,1 +1,8 @@
-<resources><string name="display_refresh_title">Fréquence d’affichage</string><string name="display_refresh_description">Choisissez 60 ou 120 Hz. La fréquence dépend de l’écran ; la résolution est conservée. Les vidéos gardent leur cadence d’origine.</string><string name="display_refresh_unavailable">La fréquence demandée n’est pas appliquée actuellement. 60 Hz est utilisé si disponible ; l’écran ou le système peut limiter la fréquence.</string></resources>
+<resources>
+    <string name="display_refresh_title">Fréquence d’affichage</string>
+    <string name="display_refresh_description">Choisissez les fréquences minimale et maximale de cet appareil, jusqu’à 144 Hz. Le mode disponible le plus élevé dans cette plage est demandé, sans modifier la résolution. Les vidéos gardent leur cadence d’origine.</string>
+    <string name="display_refresh_unavailable">La fréquence actuelle est hors de la plage choisie. L’écran ou le système peut limiter la fréquence ; aucun mode non pris en charge n’est imposé.</string>
+    <string name="display_refresh_minimum">Minimum</string>
+    <string name="display_refresh_maximum">Maximum</string>
+    <string name="display_refresh_actual">Fréquence actuelle : %1$d Hz</string>
+</resources>

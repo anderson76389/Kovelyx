@@ -28,7 +28,7 @@ class VideoPlaybackSmokeTest {
     @Test fun exoPlayerSurfaceReadsH264() = play(AndroidPlaybackEngine.ExoPlayer)
     @Test fun libmpvSurfaceReadsH264() = play(AndroidPlaybackEngine.Libmpv)
 
-    @Test fun displayPreferenceUsesOnlySupported60Or120HzWithoutChangingResolution() {
+    @Test fun displayRangeUsesOnlySupportedModesUpTo144HzWithoutChangingResolution() {
         val activity = AtomicReference<android.app.Activity>()
         compose.setContent {
             val context = androidx.compose.ui.platform.LocalContext.current
@@ -39,7 +39,7 @@ class VideoPlaybackSmokeTest {
             val host = activity.get()
             original.set(requireNotNull(host.window.decorView.display).mode)
             com.kovelyx.display.AndroidDisplayRefresh.bind(host)
-            com.kovelyx.display.DisplayRefreshSettings.select(120)
+            com.kovelyx.display.DisplayRefreshSettings.selectRange(1, 144)
         }
         compose.waitForIdle()
         try {
@@ -51,14 +51,17 @@ class VideoPlaybackSmokeTest {
                 val chosen = modes.firstOrNull { it.modeId == host.window.attributes.preferredDisplayModeId }
                 if (available.isNotEmpty()) {
                     org.junit.Assert.assertNotNull("A supported display mode must be requested", chosen)
-                    val expected = if (120 in available) 120 else 60
+                    val expected = available.maxOrNull()!!
                     org.junit.Assert.assertEquals(expected, com.kovelyx.display.nominalRefreshRate(requireNotNull(chosen).refreshRate))
+                    val stored = host.applicationContext.getSharedPreferences("kovelyx_display_refresh", 0)
+                    org.junit.Assert.assertEquals(1, stored.getInt("minimum_hertz", -1))
+                    org.junit.Assert.assertEquals(144, stored.getInt("maximum_hertz", -1))
                     org.junit.Assert.assertEquals(original.get().physicalWidth, chosen.physicalWidth)
                     org.junit.Assert.assertEquals(original.get().physicalHeight, chosen.physicalHeight)
                 }
             }
         } finally {
-            compose.runOnIdle { com.kovelyx.display.DisplayRefreshSettings.select(60) }
+            compose.runOnIdle { com.kovelyx.display.DisplayRefreshSettings.selectRange(60, 60) }
         }
     }
 

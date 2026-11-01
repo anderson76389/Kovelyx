@@ -63,28 +63,7 @@ internal fun PlaybackVideoSection(
     val showAfrWarning = settings.frameRateMatchingMode != FrameRateMatchingMode.OFF ||
         (settings.resolutionMatchingEnabled && !resolutionSwitchingSupported)
 
-    val refreshState by DisplayRefreshSettings.state.collectAsStateWithLifecycle()
-    var showRefreshDialog by remember { mutableStateOf(false) }
-    if (refreshState.enabled) {
-        SettingsSectionLabel(text = stringResource(R.string.display_refresh_title))
-        SettingsActionRow(
-            title = stringResource(R.string.display_refresh_title),
-            subtitle = stringResource(if (refreshState.actual == refreshState.requested) R.string.display_refresh_description else R.string.display_refresh_unavailable),
-            value = "${refreshState.requested} Hz",
-            enabled = refreshState.available.isNotEmpty(),
-            onClick = { showRefreshDialog = true }
-        )
-        if (showRefreshDialog) SettingsSingleChoiceDialog(
-            title = stringResource(R.string.display_refresh_title),
-            options = listOf(60, 120).filter { it in refreshState.available }.map {
-                SettingsPickerOption(it, "$it Hz", stringResource(R.string.display_refresh_description))
-            },
-            selectedValue = refreshState.requested,
-            onOptionSelected = { DisplayRefreshSettings.select(it); showRefreshDialog = false },
-            onDismiss = { showRefreshDialog = false },
-            width = 460.dp, maxHeight = 320.dp
-        )
-    } else {
+    if (!DisplayRefreshSettings.state.collectAsStateWithLifecycle().value.enabled) {
         SettingsSectionLabel(text = stringResource(R.string.playback_auto_frame_rate))
         SettingsActionRow(
             title = stringResource(R.string.playback_afr_mode),

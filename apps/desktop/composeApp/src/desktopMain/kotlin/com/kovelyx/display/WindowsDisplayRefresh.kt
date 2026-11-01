@@ -47,18 +47,20 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
     init {
         if (api != null) {
             val store = DesktopStorage.store("kovelyx_display_refresh")
-            DisplayRefreshSettings.initialize(store.getString("hertz")?.toIntOrNull() ?: 60) {
-                store.putString("hertz", it.toString())
+            val range = store.getString("range")?.split(':')
+            DisplayRefreshSettings.initialize(range?.getOrNull(0)?.toIntOrNull(), range?.getOrNull(1)?.toIntOrNull(),
+                store.getString("hertz")?.toIntOrNull() ?: 60) { minimum, maximum ->
+                store.putString("range", "$minimum:$maximum")
             }
             window.addComponentListener(movement)
             window.addWindowFocusListener(focus)
-            scope.launch { DisplayRefreshSettings.state.map { it.requested }.distinctUntilChanged().collect { apply() } }
+            scope.launch { DisplayRefreshSettings.state.map { it.minimum to it.maximum }.distinctUntilChanged().collect { apply() } }
             settle.start()
         }
     }
 
     private fun modeMemory() = Memory(220).apply { clear(); setShort(68, 220.toShort()) }
-    private fun Memory.spec(id: Int = -1) = DisplayModeSpec(id, getInt(172), getInt(176), when (val rate = getInt(184)) { 59 -> 59.94f; 119 -> 119.88f; else -> rate.toFloat() })
+    private fun Memory.spec(id: Int = -1) = DisplayModeSpec(id, getInt(172), getInt(176), when (val rate = getInt(184)) { 23, 29, 47, 59, 95, 119, 143 -> (rate + 1) / 1.001f; else -> rate.toFloat() })
     private fun current(device: String): Memory? = modeMemory().takeIf { api?.EnumDisplaySettingsW(WString(device), -1, it) == true }
 
     private fun apply() {
@@ -79,15 +81,12 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             while (index < 2048) {
                 val memory = modeMemory()
                 if (!api.EnumDisplaySettingsW(WString(device), index, memory)) break
-                if (memory.getInt(168) >= 32) modes += memory.spec(index) to memory
+                if (memory.getInt(168) >= 32 && (memory.getInt(180) and 2) == 0) modes += memory.spec(index) to memory
                 index++
             }
             val currentMode = before.spec()
-            val requested = DisplayRefreshSettings.state.value.requested
-            val candidates = listOfNotNull(
-                selectDisplayRefreshMode(modes.map { it.first }, currentMode, requested),
-                selectDisplayRefreshMode(modes.map { it.first }, currentMode, 60)
-            ).distinctBy { it.id }
+            val range = DisplayRefreshSettings.state.value
+            val candidates = displayRefreshCandidates(modes.map { it.first }, currentMode, range.minimum, range.maximum)
             for (choice in candidates) {
                 if (nominalRefreshRate(currentMode.hertz) == nominalRefreshRate(choice.hertz)) break
                 val memory = modes.first { it.first.id == choice.id }.second

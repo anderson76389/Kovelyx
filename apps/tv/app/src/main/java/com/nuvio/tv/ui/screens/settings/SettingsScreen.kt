@@ -2,6 +2,10 @@
 
 package com.nuvio.tv.ui.screens.settings
 
+import androidx.compose.foundation.verticalScroll
+
+import androidx.compose.foundation.rememberScrollState
+
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import androidx.activity.compose.BackHandler
@@ -940,7 +944,7 @@ private fun EssentialAdvancedSettingsContent(
     var showConfirmation by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
     ) {
         SettingsDetailHeader(
@@ -960,6 +964,7 @@ private fun EssentialAdvancedSettingsContent(
                 }
             )
         }
+        DisplayRefreshRangeSection()
     }
 
     if (showConfirmation) {
