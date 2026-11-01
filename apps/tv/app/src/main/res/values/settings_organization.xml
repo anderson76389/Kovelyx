@@ -1,0 +1,17 @@
+<resources>
+    <string name="settings_org_section_interface">INTERFACE</string>
+    <string name="settings_org_section_content">CONTENT AND SOURCES</string>
+    <string name="settings_org_section_playback">PLAYBACK</string>
+    <string name="settings_org_section_services">SERVICES AND TRACKING</string>
+    <string name="settings_org_section_updates">UPDATES</string>
+    <string name="settings_org_sources_title">Content sources</string>
+    <string name="settings_org_integrations_title">Services and metadata</string>
+    <string name="settings_org_stream_presentation">Video link appearance</string>
+    <string name="settings_org_debrid_title">Debrid services</string>
+    <string name="settings_org_section_video_services">VIDEO SERVICES</string>
+    <string name="settings_org_section_metadata">DETAILS AND RATINGS</string>
+    <string name="settings_org_section_playback_services">PLAYBACK SERVICES</string>
+    <string name="settings_org_appearance_interface">INTERFACE AND NAVIGATION</string>
+    <string name="settings_org_decoder_title">ENGINE AND COMPATIBILITY</string>
+    <string name="settings_org_buffering_title">BUFFERING AND VIDEO CACHE</string>
+</resources>

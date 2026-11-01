@@ -101,10 +101,10 @@ internal fun settingsSearchEntries(
     val trackingPage = stringResource(Res.string.compose_settings_page_tracking)
     val layoutPage = stringResource(Res.string.compose_settings_page_appearance)
     val advancedPage = stringResource(Res.string.compose_settings_page_advanced)
-    val contentDiscoveryPage = stringResource(Res.string.compose_settings_page_content_discovery)
+    val contentDiscoveryPage = stringResource(Res.string.settings_org_sources_title)
     val playbackPage = stringResource(Res.string.compose_settings_page_playback)
-    val streamsPage = stringResource(Res.string.compose_settings_page_streams)
-    val integrationsPage = stringResource(Res.string.compose_settings_page_integrations)
+    val streamsPage = stringResource(Res.string.settings_org_stream_presentation)
+    val integrationsPage = stringResource(Res.string.settings_org_integrations_title)
     val notificationsPage = stringResource(Res.string.compose_settings_page_notifications)
     val supportersPage = stringResource(Res.string.compose_settings_page_supporters_contributors)
     val licensesPage = stringResource(Res.string.compose_settings_page_licenses_attributions)
@@ -209,7 +209,7 @@ internal fun settingsSearchEntries(
         key = "tracking",
         title = trackingPage,
         description = stringResource(Res.string.compose_settings_root_tracking_description),
-        category = accountCategory,
+        category = generalCategory,
         icon = Icons.Default.Sync,
     )
     addPage(
@@ -378,7 +378,7 @@ internal fun settingsSearchEntries(
         title = stringResource(Res.string.settings_appearance_amoled_black),
         description = stringResource(Res.string.settings_appearance_amoled_description),
         pageLabel = layoutPage,
-        section = stringResource(Res.string.settings_appearance_section_display),
+        section = stringResource(Res.string.settings_org_appearance_interface),
         icon = Icons.Rounded.Palette,
     )
     if (liquidGlassNativeTabBarSupported) {
@@ -388,7 +388,7 @@ internal fun settingsSearchEntries(
             title = stringResource(Res.string.settings_appearance_liquid_glass),
             description = stringResource(Res.string.settings_appearance_liquid_glass_description),
             pageLabel = layoutPage,
-            section = stringResource(Res.string.settings_appearance_section_display),
+            section = stringResource(Res.string.settings_org_appearance_interface),
             icon = Icons.Rounded.Palette,
         )
     }
@@ -397,9 +397,24 @@ internal fun settingsSearchEntries(
         key = "app-language",
         title = stringResource(Res.string.settings_appearance_app_language),
         pageLabel = layoutPage,
-        section = stringResource(Res.string.settings_appearance_section_display),
+        section = stringResource(Res.string.settings_org_appearance_interface),
         icon = Icons.Rounded.Language,
     )
+    listOf(
+        "display-refresh-minimum" to Res.string.display_refresh_minimum,
+        "display-refresh-maximum" to Res.string.display_refresh_maximum,
+    ).forEach { (key, title) ->
+        addRow(
+            page = SettingsPage.Advanced,
+            key = key,
+            title = stringResource(title),
+            description = stringResource(Res.string.display_refresh_description),
+            pageLabel = advancedPage,
+            section = stringResource(Res.string.display_refresh_title),
+            category = advancedCategory,
+            icon = Icons.Rounded.Tune,
+        )
+    }
     addRow(
         page = SettingsPage.Advanced,
         key = "remember-last-profile",
@@ -532,7 +547,7 @@ internal fun settingsSearchEntries(
     val playbackSubtitleAudio = stringResource(Res.string.settings_playback_section_subtitle_audio)
     val playbackStreamSelection = stringResource(Res.string.settings_playback_section_stream_selection)
     val playbackStreamAutoPlay = stringResource(Res.string.settings_playback_section_stream_auto_play)
-    val playbackDecoder = stringResource(Res.string.settings_playback_section_decoder)
+    val playbackDecoder = stringResource(Res.string.settings_org_decoder_title)
     val playbackSubtitleRendering = stringResource(Res.string.settings_playback_section_subtitle_rendering)
     val playbackSkipSegments = stringResource(Res.string.settings_playback_section_skip_segments)
     val playbackNextEpisode = stringResource(Res.string.settings_playback_section_next_episode)
@@ -687,22 +702,24 @@ internal fun settingsSearchEntries(
         },
     )
     if (!isIos) {
-        addPlaybackRows(
-            addRow = ::addRow,
-            pageLabel = playbackPage,
-            section = playbackDecoder,
-            icon = Icons.Rounded.PlayArrow,
-            rows = buildList {
-                add(PlaybackSearchRow("decoder-priority", stringResource(Res.string.settings_playback_decoder_priority)))
-                if (!isDesktop) {
-                    add(PlaybackSearchRow("dv7-hevc", stringResource(Res.string.settings_playback_map_dv7_to_hevc), stringResource(Res.string.settings_playback_map_dv7_to_hevc_description)))
-                    add(PlaybackSearchRow("tunneled-playback", stringResource(Res.string.settings_playback_tunneled_playback), stringResource(Res.string.settings_playback_tunneled_playback_description)))
-                    add(PlaybackSearchRow("exo-native-memory", stringResource(Res.string.settings_playback_exo_native_memory), stringResource(Res.string.settings_playback_exo_native_memory_description)))
-                    add(PlaybackSearchRow("custom-buffers", stringResource(Res.string.settings_playback_buffer_custom), stringResource(Res.string.settings_playback_buffer_custom_description)))
-                    add(PlaybackSearchRow("vod-cache", stringResource(Res.string.settings_playback_vod_cache), stringResource(Res.string.settings_playback_vod_cache_description)))
-                }
-            },
-        )
+        if (!isDesktop) {
+            addPlaybackRows(
+                addRow = ::addRow,
+                pageLabel = playbackPage,
+                section = playbackDecoder,
+                icon = Icons.Rounded.PlayArrow,
+                rows = buildList {
+                    add(PlaybackSearchRow("decoder-priority", stringResource(Res.string.settings_playback_decoder_priority)))
+                    if (!isDesktop) {
+                        add(PlaybackSearchRow("dv7-hevc", stringResource(Res.string.settings_playback_map_dv7_to_hevc), stringResource(Res.string.settings_playback_map_dv7_to_hevc_description)))
+                        add(PlaybackSearchRow("tunneled-playback", stringResource(Res.string.settings_playback_tunneled_playback), stringResource(Res.string.settings_playback_tunneled_playback_description)))
+                        add(PlaybackSearchRow("exo-native-memory", stringResource(Res.string.settings_playback_exo_native_memory), stringResource(Res.string.settings_playback_exo_native_memory_description)))
+                        add(PlaybackSearchRow("custom-buffers", stringResource(Res.string.settings_playback_buffer_custom), stringResource(Res.string.settings_playback_buffer_custom_description)))
+                        add(PlaybackSearchRow("vod-cache", stringResource(Res.string.settings_playback_vod_cache), stringResource(Res.string.settings_playback_vod_cache_description)))
+                    }
+                },
+            )
+        }
         addPlaybackRows(
             addRow = ::addRow,
             pageLabel = playbackPage,
@@ -993,17 +1010,7 @@ internal fun settingsSearchEntries(
         description = stringResource(Res.string.settings_trakt_intro_description),
         pageLabel = trackingPage,
         section = stringResource(Res.string.settings_tracking_services),
-        category = accountCategory,
-        icon = Icons.Rounded.Link,
-    )
-    addRow(
-        page = SettingsPage.TraktAuthentication,
-        key = "simkl-authentication",
-        title = stringResource(Res.string.tracking_source_simkl),
-        description = stringResource(Res.string.settings_simkl_sign_in_description),
-        pageLabel = trackingPage,
-        section = stringResource(Res.string.settings_tracking_services),
-        category = accountCategory,
+        category = generalCategory,
         icon = Icons.Rounded.Link,
     )
     addRow(
@@ -1013,7 +1020,7 @@ internal fun settingsSearchEntries(
         description = stringResource(Res.string.settings_mdblist_sign_in_description),
         pageLabel = trackingPage,
         section = stringResource(Res.string.settings_tracking_services),
-        category = accountCategory,
+        category = generalCategory,
         icon = Icons.Rounded.Link,
     )
     listOf(
@@ -1030,7 +1037,7 @@ internal fun settingsSearchEntries(
             description = row.description,
             pageLabel = trackingPage,
             section = stringResource(Res.string.settings_tracking_features),
-            category = accountCategory,
+            category = generalCategory,
             icon = Icons.Rounded.Link,
         )
     }

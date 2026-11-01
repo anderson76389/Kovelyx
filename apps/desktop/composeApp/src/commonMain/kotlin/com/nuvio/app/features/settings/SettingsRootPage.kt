@@ -50,6 +50,13 @@ import nuvio.composeapp.generated.resources.updates_debug_test_description
 import nuvio.composeapp.generated.resources.updates_debug_test_title
 import nuvio.composeapp.generated.resources.about_supporters_contributors_subtitle
 import nuvio.composeapp.generated.resources.about_licenses_attributions_subtitle
+import nuvio.composeapp.generated.resources.settings_org_section_interface
+import nuvio.composeapp.generated.resources.settings_org_section_content
+import nuvio.composeapp.generated.resources.settings_org_section_playback
+import nuvio.composeapp.generated.resources.settings_org_section_services
+import nuvio.composeapp.generated.resources.settings_org_sources_title
+import nuvio.composeapp.generated.resources.settings_org_integrations_title
+import nuvio.composeapp.generated.resources.settings_org_section_updates
 import org.jetbrains.compose.resources.stringResource
 
 internal fun LazyListScope.settingsRootContent(
@@ -99,14 +106,6 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onAccountClick,
                     )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_tracking),
-                        description = stringResource(Res.string.compose_settings_root_tracking_description),
-                        icon = Icons.Default.Sync,
-                        isTablet = isTablet,
-                        onClick = onTrackingClick,
-                    )
                 }
             }
         }
@@ -114,7 +113,7 @@ internal fun LazyListScope.settingsRootContent(
     if (showGeneralSection) {
         item {
             SettingsSection(
-                title = stringResource(Res.string.compose_settings_root_general_section),
+                title = stringResource(Res.string.settings_org_section_interface),
                 isTablet = isTablet,
             ) {
                 SettingsGroup(isTablet = isTablet) {
@@ -127,13 +126,37 @@ internal fun LazyListScope.settingsRootContent(
                     )
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_content_discovery),
+                        title = stringResource(Res.string.compose_settings_page_notifications),
+                        description = stringResource(Res.string.compose_settings_root_notifications_description),
+                        icon = Icons.Rounded.Notifications,
+                        isTablet = isTablet,
+                        onClick = onNotificationsClick,
+                    )
+                }
+            }
+        }
+        item {
+            SettingsSection(
+                title = stringResource(Res.string.settings_org_section_content),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_org_sources_title),
                         description = stringResource(Res.string.compose_settings_root_content_discovery_description),
                         icon = Icons.Rounded.Extension,
                         isTablet = isTablet,
                         onClick = onContentDiscoveryClick,
                     )
-                    SettingsGroupDivider(isTablet = isTablet)
+                }
+            }
+        }
+        item {
+            SettingsSection(
+                title = stringResource(Res.string.settings_org_section_playback),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
                     SettingsNavigationRow(
                         title = stringResource(Res.string.compose_settings_page_playback),
                         description = stringResource(Res.string.settings_playback_subtitle),
@@ -141,31 +164,74 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onPlaybackClick,
                     )
-                    SettingsGroupDivider(isTablet = isTablet)
+                }
+            }
+        }
+        item {
+            SettingsSection(
+                title = stringResource(Res.string.settings_org_section_services),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
                     SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_integrations),
+                        title = stringResource(Res.string.settings_org_integrations_title),
                         description = stringResource(Res.string.compose_settings_root_integrations_description),
                         icon = Icons.Rounded.Link,
                         isTablet = isTablet,
                         onClick = onIntegrationsClick,
                     )
-                    if (showNotificationsEntry) {
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.compose_settings_page_notifications),
-                            description = stringResource(Res.string.compose_settings_root_notifications_description),
-                            icon = Icons.Rounded.Notifications,
-                            isTablet = isTablet,
-                            onClick = onNotificationsClick,
-                        )
-                    }
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.compose_settings_page_tracking),
+                        description = stringResource(Res.string.compose_settings_root_tracking_description),
+                        icon = Icons.Default.Sync,
+                        isTablet = isTablet,
+                        onClick = onTrackingClick,
+                    )
+                }
+            }
+        }
+    }
+    if (showAdvancedSection) {
+        item {
+            SettingsSection(
+                title = stringResource(Res.string.compose_settings_root_advanced_section),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.compose_settings_page_advanced),
+                        description = stringResource(Res.string.compose_settings_root_advanced_description),
+                        icon = Icons.Rounded.Tune,
+                        isTablet = isTablet,
+                        onClick = onAdvancedClick,
+                    )
                 }
             }
         }
     }
     if (showAboutSection) {
+        if (onCheckForUpdatesClick != null) {
+            item {
+                SettingsSection(
+                    title = stringResource(Res.string.settings_org_section_updates),
+                    isTablet = isTablet,
+                ) {
+                    SettingsGroup(isTablet = isTablet) {
+                        UpdateChannelSettingsRow(isTablet = isTablet)
+                        SettingsGroupDivider(isTablet = isTablet)
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.compose_settings_root_check_updates_title),
+                            description = stringResource(Res.string.compose_settings_root_check_updates_description),
+                            icon = Icons.Rounded.CloudDownload,
+                            isTablet = isTablet,
+                            onClick = onCheckForUpdatesClick,
+                        )
+                    }
+                }
+            }
+        }
         item {
-            val uriHandler = LocalUriHandler.current
             SettingsSection(
                 title = stringResource(Res.string.compose_settings_root_about_section),
                 isTablet = isTablet,
@@ -188,18 +254,7 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onLicensesAttributionsClick,
                     )
-                    if (onCheckForUpdatesClick != null) {
-                        SettingsGroupDivider(isTablet = isTablet)
-                        UpdateChannelSettingsRow(isTablet = isTablet)
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.compose_settings_root_check_updates_title),
-                            description = stringResource(Res.string.compose_settings_root_check_updates_description),
-                            icon = Icons.Rounded.CloudDownload,
-                            isTablet = isTablet,
-                            onClick = onCheckForUpdatesClick,
-                        )
-                    }
+
                     if (onTestUpdateBannerClick != null) {
                         SettingsGroupDivider(isTablet = isTablet)
                         SettingsNavigationRow(
@@ -210,24 +265,6 @@ internal fun LazyListScope.settingsRootContent(
                             onClick = onTestUpdateBannerClick,
                         )
                     }
-                }
-            }
-        }
-    }
-    if (showAdvancedSection) {
-        item {
-            SettingsSection(
-                title = stringResource(Res.string.compose_settings_root_advanced_section),
-                isTablet = isTablet,
-            ) {
-                SettingsGroup(isTablet = isTablet) {
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_advanced),
-                        description = stringResource(Res.string.compose_settings_root_advanced_description),
-                        icon = Icons.Rounded.Tune,
-                        isTablet = isTablet,
-                        onClick = onAdvancedClick,
-                    )
                 }
             }
         }

@@ -79,6 +79,8 @@ import nuvio.composeapp.generated.resources.settings_content_discovery_homescree
 import nuvio.composeapp.generated.resources.settings_content_discovery_meta_screen_description
 import nuvio.composeapp.generated.resources.compose_settings_root_streams_description
 import org.jetbrains.compose.resources.StringResource
+import nuvio.composeapp.generated.resources.settings_org_appearance_interface
+import nuvio.composeapp.generated.resources.settings_org_stream_presentation
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -118,6 +120,14 @@ internal fun LazyListScope.appearanceSettingsContent(
                     selectedTheme = selectedTheme,
                     onThemeSelected = onThemeSelected,
                 )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_appearance_amoled_black),
+                    description = stringResource(Res.string.settings_appearance_amoled_description),
+                    checked = amoledEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = onAmoledToggle,
+                )
             }
         }
     }
@@ -136,19 +146,12 @@ internal fun LazyListScope.appearanceSettingsContent(
         val glowEnabled by ThemeSettingsRepository.navBarGlowEnabled.collectAsStateWithLifecycle()
         val effectiveNavBarStyle = if (isTablet) NavBarStyle.COMPACT else selectedNavBarStyle
         SettingsSection(
-            title = stringResource(Res.string.settings_appearance_section_display),
+            title = stringResource(Res.string.settings_org_appearance_interface),
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_appearance_amoled_black),
-                    description = stringResource(Res.string.settings_appearance_amoled_description),
-                    checked = amoledEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = onAmoledToggle,
-                )
+
                 if (liquidGlassNativeTabBarSupported) {
-                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsSwitchRow(
                         title = stringResource(Res.string.settings_appearance_liquid_glass),
                         description = stringResource(Res.string.settings_appearance_liquid_glass_description),
@@ -158,7 +161,7 @@ internal fun LazyListScope.appearanceSettingsContent(
                     )
                 }
                 if (isDesktop) {
-                    SettingsGroupDivider(isTablet = isTablet)
+                    if (liquidGlassNativeTabBarSupported) SettingsGroupDivider(isTablet = isTablet)
                     val desktopNavDescription = if (isTablet) {
                         stringResource(desktopNavigationLayout.labelRes)
                     } else {
@@ -176,7 +179,7 @@ internal fun LazyListScope.appearanceSettingsContent(
                     )
                 }
                 if (!isIos) {
-                    SettingsGroupDivider(isTablet = isTablet)
+                    if (isDesktop || liquidGlassNativeTabBarSupported) SettingsGroupDivider(isTablet = isTablet)
                     val isSidebarActive = isDesktop && isTablet && desktopNavigationLayout == DesktopNavigationLayout.Sidebar
                     val styleTitle = if (isSidebarActive) {
                         stringResource(Res.string.settings_appearance_sidebar_style)
@@ -203,7 +206,7 @@ internal fun LazyListScope.appearanceSettingsContent(
                     )
                 }
                 if (AppIconPlatform.isSupported) {
-                    SettingsGroupDivider(isTablet = isTablet)
+                    if (!isIos || liquidGlassNativeTabBarSupported) SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_appearance_app_icon),
                         description = stringResource(appIconState.selected.labelResource),
@@ -222,7 +225,7 @@ internal fun LazyListScope.appearanceSettingsContent(
                         },
                     )
                 }
-                SettingsGroupDivider(isTablet = isTablet)
+                if (!isIos || liquidGlassNativeTabBarSupported || AppIconPlatform.isSupported) SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_appearance_app_language),
                     description = stringResource(selectedAppLanguage.labelRes),
@@ -343,7 +346,7 @@ internal fun LazyListScope.appearanceSettingsContent(
         ) {
             SettingsGroup(isTablet = isTablet) {
                 SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_streams),
+                    title = stringResource(Res.string.settings_org_stream_presentation),
                     description = stringResource(Res.string.compose_settings_root_streams_description),
                     isTablet = isTablet,
                     onClick = onStreamsClick,

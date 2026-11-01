@@ -56,7 +56,6 @@ internal fun LazyListScope.advancedSettingsContent(
     isTablet: Boolean,
     rememberLastProfileEnabled: Boolean,
 ) {
-    item { DisplayRefreshChoice(isTablet) }
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_advanced_section_startup),
@@ -69,6 +68,38 @@ internal fun LazyListScope.advancedSettingsContent(
                     checked = rememberLastProfileEnabled,
                     isTablet = isTablet,
                     onCheckedChange = ProfileRepository::setRememberLastProfileEnabled,
+                )
+            }
+        }
+    }
+    item { DisplayRefreshChoice(isTablet) }
+    item {
+        SettingsSection(
+            title = stringResource(Res.string.settings_advanced_section_cache),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                val scope = rememberCoroutineScope()
+                var cleared by rememberSaveable { mutableStateOf(false) }
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.settings_advanced_clear_cw_cache),
+                    description = if (cleared) {
+                        stringResource(Res.string.settings_advanced_clear_cw_cache_done)
+                    } else {
+                        stringResource(Res.string.settings_advanced_clear_cw_cache_subtitle)
+                    },
+                    isTablet = isTablet,
+                    onClick = {
+                        if (!cleared) {
+                            ContinueWatchingEnrichmentCache.clearAll(ProfileRepository.activeProfileId)
+                            cleared = true
+                            scope.launch {
+                                WatchProgressRepository.clearLocalAndForceSnapshotRefreshFromServer(
+                                    ProfileRepository.activeProfileId,
+                                )
+                            }
+                        }
+                    },
                 )
             }
         }
@@ -110,37 +141,7 @@ internal fun LazyListScope.advancedSettingsContent(
             }
         }
     }
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_advanced_section_cache),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                val scope = rememberCoroutineScope()
-                var cleared by rememberSaveable { mutableStateOf(false) }
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.settings_advanced_clear_cw_cache),
-                    description = if (cleared) {
-                        stringResource(Res.string.settings_advanced_clear_cw_cache_done)
-                    } else {
-                        stringResource(Res.string.settings_advanced_clear_cw_cache_subtitle)
-                    },
-                    isTablet = isTablet,
-                    onClick = {
-                        if (!cleared) {
-                            ContinueWatchingEnrichmentCache.clearAll(ProfileRepository.activeProfileId)
-                            cleared = true
-                            scope.launch {
-                                WatchProgressRepository.clearLocalAndForceSnapshotRefreshFromServer(
-                                    ProfileRepository.activeProfileId,
-                                )
-                            }
-                        }
-                    },
-                )
-            }
-        }
-    }
+
 }
 
 @Composable
