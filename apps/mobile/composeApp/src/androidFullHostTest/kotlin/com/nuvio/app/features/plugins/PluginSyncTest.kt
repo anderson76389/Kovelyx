@@ -153,6 +153,7 @@ class PluginSyncTest {
     fun emptyRemoteRemovesCachedAddonsWithoutUploadingAndStaysEmptyAfterReload(): Unit = runBlocking {
         AddonStorage.saveInstalledAddonUrls(1, listOf(manifestUrl))
         AddonStorage.saveAddonEnabledStates(1, mapOf(manifestUrl to false))
+        AddonStorage.markDefaultsInitialized(1) // Cached profile has already accepted the current defaults.
         AddonRepository.initialize()
         assertEquals(1, AddonRepository.uiState.value.addons.size)
         respond("[]")

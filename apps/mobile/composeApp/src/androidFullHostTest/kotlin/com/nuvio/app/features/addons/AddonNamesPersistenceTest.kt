@@ -7,13 +7,34 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import com.kovelyx.cloud.addons.OPENSUBTITLES_V3_MANIFEST
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class AddonNamesPersistenceTest {
+    @Test fun `subtitle default is seeded once and explicit empty state survives reload`() {
+        val context = RuntimeEnvironment.getApplication()
+        val prefs = context.getSharedPreferences("nuvio_addons", android.content.Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+        com.nuvio.app.features.profiles.ProfileRepository.clearInMemory()
+        AddonStorage.initialize(context)
+        try {
+            AddonRepository.clearLocalState(); AddonRepository.initialize()
+            assertEquals(listOf(OPENSUBTITLES_V3_MANIFEST), AddonRepository.uiState.value.addons.map { it.manifestUrl })
+            assertTrue(AddonStorage.defaultsInitialized(1))
+            AddonStorage.saveInstalledAddonUrls(1, emptyList())
+            repeat(2) {
+                AddonRepository.clearLocalState(); AddonRepository.initialize()
+                assertTrue(AddonRepository.uiState.value.addons.isEmpty())
+            }
+        } finally { AddonRepository.clearLocalState(); prefs.edit().clear().commit() }
+    }
+
     @Test fun `personal names and disabled state survive repository restart`() {
         val context = RuntimeEnvironment.getApplication()
         com.nuvio.app.features.profiles.ProfileRepository.clearInMemory()
+        context.getSharedPreferences("nuvio_addons", android.content.Context.MODE_PRIVATE).edit().clear().commit()
         AddonStorage.initialize(context)
         val url = "https://addon.example/config%2FA/manifest.json?lang=fr"
         val name = "Mes films — famille\nFrançais"
@@ -26,7 +47,8 @@ class AddonNamesPersistenceTest {
                 AddonRepository.clearLocalState()
                 AddonStorage.initialize(context)
                 AddonRepository.initialize()
-                val restored = AddonRepository.uiState.value.addons.single()
+                val restored = AddonRepository.uiState.value.addons.single { it.manifestUrl == url }
+                assertEquals(1, AddonRepository.uiState.value.addons.count { it.manifestUrl == OPENSUBTITLES_V3_MANIFEST })
                 assertEquals(url, restored.manifestUrl)
                 assertEquals(name, restored.userSetName)
                 assertFalse(restored.enabled)

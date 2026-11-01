@@ -137,6 +137,7 @@ class HomeCatalogSettingsRepositoryTest {
             server.enqueue(MockResponse().setBody("""{"metas":[{"id":"new","type":"movie","name":"New"}]}"""))
             try {
                 AddonStorage.saveInstalledAddonUrls(ProfileRepository.activeProfileId, listOf(server.url("/manifest.json").toString()))
+                AddonStorage.markDefaultsInitialized(ProfileRepository.activeProfileId)
                 AddonRepository.initialize()
                 withTimeout(5_000) { AddonRepository.awaitManifestsLoaded() }
                 val addons = AddonRepository.uiState.value.addons
