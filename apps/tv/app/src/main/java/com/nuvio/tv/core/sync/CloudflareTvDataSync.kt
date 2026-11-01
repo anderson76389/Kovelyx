@@ -152,9 +152,10 @@ class CloudflareTvDataSync @Inject constructor(
             profileManager.linkCloudProfile(profileId, uuid)
         }
         val rows = CloudflareTvAccountClient.syncRows(uuid)
+        var addonsReady = true
         try { addons.synchronizeCloudAddons(uuid, rows) }
         catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
+        catch (error: Exception) { addonsReady = false; Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
         val catalogueReady = try { catalogues.synchronize(profileId, uuid, rows) }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { false }
@@ -184,6 +185,7 @@ class CloudflareTvDataSync @Inject constructor(
         syncWatched(profileId, uuid, remote.filterKeys {
             !it.startsWith("watched_items|") || it.removePrefix("watched_items|") !in deletedKeys.watched
         }, deletedKeys.watched)
+        check(addonsReady) { "Extensions TV en attente" }
         check(catalogueReady) { "Catalogues TV en attente" }
         check(imagesReady) { "Images Cloudflare en attente" }
     }

@@ -24,6 +24,9 @@ internal actual object AddonStorage {
     private val store = DesktopStorage.store("nuvio_addons")
     private val json = Json { ignoreUnknownKeys = true }
 
+    actual fun defaultsInitialized(profileId: Int): Boolean = store.getString("kovelyx_defaults_v1_$profileId") == "1"
+    actual fun markDefaultsInitialized(profileId: Int) { store.putString("kovelyx_defaults_v1_$profileId", "1") }
+
     actual fun loadInstalledAddonUrls(profileId: Int): List<String> =
         store.getString("installed_addon_urls_$profileId")
             ?.let { payload -> runCatching { json.decodeFromString<List<String>>(payload) }.getOrNull() }

@@ -215,7 +215,11 @@ try {
 
   // Exact configured addon URL, ordered list and removal cross two independent sessions.
   const addons={profileId,category:"addons",itemKey:"installed",revision:0,deleted:false,
-    payload:{items:[{url:"https://addon.example/config%2FA/manifest.json?lang=fr",name:"Personnel",enabled:false}]}};
+    payload:{defaultsVersion:1,items:[
+      {url:"https://aio.example/Config%2FAbC/manifest.json?lang=fr&key=Test%2BOnly%3D",name:"AIO Metadata",enabled:true},
+      {url:"https://streamfusion.example/config/AbCDef/manifest.json?token=Test%2FOnly&path=/",name:"StreamFusion",enabled:false},
+      {url:"https://comet.example/eyJrZXkiOiJURVNUIn0=/manifest.json",name:"Comet",enabled:true}
+    ]}};
   assert.equal((await req("/v1/sync","POST",addons,alice.token)).status,201);
   const tvAddons=await req("/v1/sync?profileId="+profileId+"&limit=25","GET",null,tvToken);
   assert.deepEqual(tvAddons.data.items.find(x=>x.category==="addons").payload,addons.payload);

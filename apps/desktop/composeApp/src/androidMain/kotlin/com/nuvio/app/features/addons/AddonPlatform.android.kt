@@ -41,6 +41,9 @@ actual object AddonStorage {
         preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
     }
 
+    actual fun defaultsInitialized(profileId: Int): Boolean = preferences?.getBoolean("kovelyx_defaults_v1_$profileId", false) ?: false
+    actual fun markDefaultsInitialized(profileId: Int) { preferences?.edit()?.putBoolean("kovelyx_defaults_v1_$profileId", true)?.apply() }
+
     actual fun loadInstalledAddonUrls(profileId: Int): List<String> =
         preferences
             ?.getString("${addonUrlsKey}_$profileId", null)

@@ -57,7 +57,7 @@ E.g. [stremio://watchhub-us.strem.io/manifest.json](stremio://watchhub-us.strem.
 
 * `autoPlay` can be `true` or `false`, optional, attempt playing the video with `videoID`, success depends on if the user played that video or a video from that meta before (in which case a stream url for the video, or a stream [bingeGroup](./api/responses/stream.md#additional-properties-to-provide-information--behaviour-flags) may be already available), currently only supported in the Android TV app
 
-In the Cinemeta addon, the `videoID` is the same as the `id` for movies, and for series it's formed as `{id}:{season}:episode`
+In the Metadata Provider addon, the `videoID` is the same as the `id` for movies, and for series it's formed as `{id}:{season}:episode`
 
 In the Channels addon, the `videoID` is formed as `{id}:{youtube video ID}`
 

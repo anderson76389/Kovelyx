@@ -23,14 +23,14 @@ class MetaRepositoryAddonCacheTest {
     @Test
     fun `meta from one addon is not served for another addon with the same content id`() = runTest {
         val repository = newRepository(
-            "https://cinemeta.example/meta/series/$contentId.json" to "Cinemeta Meta",
+            "https://metadataprovider.example/meta/series/$contentId.json" to "Metadata Provider Meta",
             "https://aiometadata.example/meta/series/$contentId.json" to "AioMetadata Meta"
         )
 
-        val first = repository.getMeta("https://cinemeta.example", "series", contentId).last()
+        val first = repository.getMeta("https://metadataprovider.example", "series", contentId).last()
         val second = repository.getMeta("https://aiometadata.example", "series", contentId).last()
 
-        assertEquals("Cinemeta Meta", (first as NetworkResult.Success).data.name)
+        assertEquals("Metadata Provider Meta", (first as NetworkResult.Success).data.name)
         assertEquals("AioMetadata Meta", (second as NetworkResult.Success).data.name)
     }
 
@@ -40,8 +40,8 @@ class MetaRepositoryAddonCacheTest {
         coEvery { api.getMeta(any()) } returns metaResponse("Cached Meta")
         val repository = newRepository(api)
 
-        val first = repository.getMeta("https://cinemeta.example", "series", contentId).last()
-        val second = repository.getMeta("https://cinemeta.example", "series", contentId).last()
+        val first = repository.getMeta("https://metadataprovider.example", "series", contentId).last()
+        val second = repository.getMeta("https://metadataprovider.example", "series", contentId).last()
 
         assertEquals("Cached Meta", (first as NetworkResult.Success).data.name)
         assertEquals("Cached Meta", (second as NetworkResult.Success).data.name)
@@ -54,8 +54,8 @@ class MetaRepositoryAddonCacheTest {
         coEvery { api.getMeta(any()) } returns metaResponse("Slash Meta")
         val repository = newRepository(api)
 
-        repository.getMeta("https://cinemeta.example/", "series", contentId).last()
-        repository.getMeta("https://cinemeta.example", "series", contentId).last()
+        repository.getMeta("https://metadataprovider.example/", "series", contentId).last()
+        repository.getMeta("https://metadataprovider.example", "series", contentId).last()
 
         coVerify(exactly = 1) { api.getMeta(any()) }
     }

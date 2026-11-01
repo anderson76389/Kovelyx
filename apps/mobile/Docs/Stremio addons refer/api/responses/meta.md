@@ -94,7 +94,7 @@ Used as a response for [`defineMetaHandler`](../requests/defineMetaHandler.md)
 }
 ```
 
-You can see a comprehensive example of how detailed Meta objects with videos are returned [here, on the Cinemeta addon](https://v3-cinemeta.strem.io/meta/series/tt0386676/lastVideos=1.json)
+You can see a comprehensive example of how detailed Meta objects with videos are returned [here, on the Metadata Provider addon](https://metadata.example/meta/series/tt0386676/lastVideos=1.json)
 
 ##### Video object - YouTube video example (channels)
 

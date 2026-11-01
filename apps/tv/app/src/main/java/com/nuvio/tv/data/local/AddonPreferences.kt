@@ -1,6 +1,12 @@
 package com.nuvio.tv.data.local
 
 import com.kovelyx.cloud.addons.CloudAddon
+import com.kovelyx.cloud.addons.AddonDefaultsPolicy
+import com.kovelyx.cloud.addons.canonicalAddonManifestUrl
+import com.kovelyx.cloud.addons.OPENSUBTITLES_V3_MANIFEST
+import java.security.MessageDigest
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import kotlinx.coroutines.flow.onStart
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -50,22 +56,17 @@ class AddonPreferences @Inject constructor(
     private val userSetNamesKey = stringPreferencesKey("addon_user_set_names")
     private val addonEnabledStatesKey = stringPreferencesKey("installed_addon_enabled_states")
     private val manifestSuffix = "/manifest.json"
+    private val defaultsMigratedKey = booleanPreferencesKey("kovelyx_defaults_v1")
+    private val defaultsPolicy = AddonDefaultsPolicy { value -> MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it.toInt() and 255) } }
 
     private fun canonicalizeUrl(url: String): String {
-        val trimmed = url.trim().trimEnd('/')
-        val queryStart = trimmed.indexOf('?')
-        val path = if (queryStart >= 0) trimmed.substring(0, queryStart) else trimmed
-        val query = if (queryStart >= 0) trimmed.substring(queryStart) else ""
-        val cleanPath = if (path.endsWith(manifestSuffix, ignoreCase = true)) {
-            path.dropLast(manifestSuffix.length).trimEnd('/')
-        } else {
-            path.trimEnd('/')
-        }
-        return cleanPath + query
+        val manifest = canonicalAddonManifestUrl(url)
+        val path = manifest.substringBefore('?').removeSuffix(manifestSuffix)
+        return path + if ('?' in manifest) "?${manifest.substringAfter('?')}" else ""
     }
 
     val installedAddonUrls: Flow<List<String>> = effectiveProfileIdFlow.flatMapLatest { pid ->
-        factory.get(pid, FEATURE).data.map { preferences ->
+        factory.get(pid, FEATURE).data.onStart { ensureMigrated(pid) }.map { preferences ->
             val json = preferences[orderedUrlsKey]
             if (json != null) {
                 parseUrlList(json)
@@ -84,15 +85,20 @@ class AddonPreferences @Inject constructor(
         }
     }
 
-    suspend fun ensureMigrated() {
-        val ds = store()
-        val prefs = ds.data.first()
-        if (prefs[orderedUrlsKey] == null) {
-            val legacySet = prefs[legacyUrlsKey] ?: getDefaultAddons()
-            ds.edit { preferences ->
-                preferences[orderedUrlsKey] = gson.toJson(legacySet.toList())
-                preferences.remove(legacyUrlsKey)
-            }
+    suspend fun ensureMigrated(profileId: Int = effectiveProfileId()) {
+        val ds = store(profileId)
+        ds.edit { prefs ->
+            val original = getCurrentList(prefs)
+            val items = original.map { CloudAddon(canonicalAddonManifestUrl(it)) }
+            val migrated = if (prefs[defaultsMigratedKey] != true) defaultsPolicy.seed(items) else defaultsPolicy.clean(items)
+            val urls = migrated.map { canonicalizeUrl(it.url) }
+            prefs[orderedUrlsKey] = gson.toJson(urls)
+            prefs.remove(legacyUrlsKey)
+            val names = prefs[userSetNamesKey]?.let(::parseNameMap).orEmpty()
+            val enabled = getCurrentEnabledStates(prefs)
+            if (names.keys.any(defaultsPolicy::retired)) prefs[userSetNamesKey] = gson.toJson(names.filterKeys { !defaultsPolicy.retired(it) })
+            if (enabled.keys.any(defaultsPolicy::retired)) prefs[addonEnabledStatesKey] = gson.toJson(enabled.filterKeys { !defaultsPolicy.retired(it) })
+            prefs[defaultsMigratedKey] = true
         }
     }
 
@@ -103,7 +109,8 @@ class AddonPreferences @Inject constructor(
         store().edit { preferences ->
             val current = getCurrentList(preferences)
             val normalizedUrl = canonicalizeUrl(url)
-            if (current.any { canonicalizeUrl(it).equals(normalizedUrl, ignoreCase = true) }) return@edit
+            if (defaultsPolicy.retired(normalizedUrl)) return@edit
+            if (current.any { canonicalizeUrl(it) == normalizedUrl }) return@edit
             preferences[orderedUrlsKey] = gson.toJson(current + normalizedUrl)
             val states = getCurrentEnabledStates(preferences).toMutableMap()
             states[normalizedUrl] = true
@@ -122,7 +129,7 @@ class AddonPreferences @Inject constructor(
             val normalizedUrl = canonicalizeUrl(url)
 
             val indexToRemove = current.indexOfFirst {
-                canonicalizeUrl(it).equals(normalizedUrl, ignoreCase = true)
+                canonicalizeUrl(it) == normalizedUrl
             }
             if (indexToRemove != -1) {
                 current.removeAt(indexToRemove)
@@ -180,7 +187,10 @@ class AddonPreferences @Inject constructor(
         }
     }
 
-    suspend fun cloudSnapshot(profileId: Int): List<CloudAddon> = cloudSnapshot(store(profileId).data.first())
+    suspend fun cloudSnapshot(profileId: Int): List<CloudAddon> {
+        ensureMigrated(profileId)
+        return cloudSnapshot(store(profileId).data.first())
+    }
 
     private fun cloudSnapshot(prefs: Preferences): List<CloudAddon> {
         val names = prefs[userSetNamesKey]?.let(::parseNameMap).orEmpty()
@@ -199,7 +209,8 @@ class AddonPreferences @Inject constructor(
         var applied = false
         store(profileId).edit { prefs ->
             if (cloudSnapshot(prefs) != expected) return@edit
-            prefs[orderedUrlsKey] = gson.toJson(next.map { canonicalizeUrl(it.url) })
+            prefs[orderedUrlsKey] = gson.toJson(defaultsPolicy.clean(next).map { canonicalizeUrl(it.url) })
+            prefs[defaultsMigratedKey] = true
             prefs[userSetNamesKey] = gson.toJson(next.associate { canonicalizeUrl(it.url) to it.name })
             prefs[addonEnabledStatesKey] = gson.toJson(next.associate { canonicalizeUrl(it.url) to it.enabled })
             applied = true
@@ -220,7 +231,7 @@ class AddonPreferences @Inject constructor(
     private fun parseUrlList(json: String): List<String> {
         return try {
             val type = object : TypeToken<List<String>>() {}.type
-            gson.fromJson(json, type) ?: getDefaultAddons().toList()
+            (gson.fromJson<List<String>>(json, type) ?: getDefaultAddons().toList()).filterNot(defaultsPolicy::retired)
         } catch (e: Exception) {
             getDefaultAddons().toList()
         }
@@ -267,7 +278,6 @@ class AddonPreferences @Inject constructor(
     }
 
     private fun getDefaultAddons(): Set<String> = setOf(
-        "https://v3-cinemeta.strem.io",
-        "https://opensubtitles-v3.strem.io"
+        OPENSUBTITLES_V3_MANIFEST.removeSuffix(manifestSuffix)
     )
 }

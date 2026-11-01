@@ -3,6 +3,10 @@ package com.nuvio.tv.core.sync
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.kovelyx.cloud.addons.CloudAddon
+import com.kovelyx.cloud.addons.AddonDefaultsPolicy
+import com.kovelyx.cloud.addons.canonicalAddonManifestUrl
+import com.kovelyx.cloud.addons.ADDON_DEFAULTS_VERSION
+import java.security.MessageDigest
 import com.kovelyx.cloud.addons.CloudAddonEngine
 import com.kovelyx.cloud.addons.CloudAddonRow
 import com.nuvio.tv.core.auth.CloudflareTvAccountClient
@@ -40,10 +44,24 @@ class AddonSyncService @Inject constructor(
     private val syncClientIdentity: SyncClientIdentity
 ) {
     private val cloudMutex = Mutex()
+    private val localOutboxLock = Any()
     private val cloudJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val cloudStore = context.getSharedPreferences("kovelyx_cloud_addons", Context.MODE_PRIVATE)
     private val cloudEngine = CloudAddonEngine({ key -> cloudStore.getString(key, null) },
-        { key, value -> cloudStore.edit().putString(key, value).apply() })
+        { key, value -> cloudStore.edit().putString(key, value).apply() },
+        AddonDefaultsPolicy { value -> MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it.toInt() and 255) } })
+
+    suspend fun markLocalAddonsChanged() {
+        val owner = CloudflareTvAccountClient.account?.id ?: return
+        val activeId = profileManager.activeProfileId.value
+        val effectiveId = if (profileManager.activeProfile?.usesPrimaryAddons == true) 1 else activeId
+        // The snapshot call also makes local default migration durable before a queued push.
+        addonPreferences.cloudSnapshot(effectiveId)
+        if (CloudflareTvAccountClient.account?.id != owner || profileManager.activeProfileId.value != activeId) return
+        synchronized(localOutboxLock) {
+            cloudStore.edit().putString("$owner.local-addon-edit.$effectiveId", java.util.UUID.randomUUID().toString()).apply()
+        }
+    }
 
     suspend fun synchronizeCloudAddons(knownProfileId: String? = null, knownRows: List<JSONObject>? = null) = cloudMutex.withLock {
         val account = CloudflareTvAccountClient.account ?: return@withLock
@@ -65,21 +83,28 @@ class AddonSyncService @Inject constructor(
         check(valid())
         if (profile.cloudProfileId != uuid) profileManager.linkCloudProfile(effectiveId, uuid)
         val captured = addonPreferences.cloudSnapshot(effectiveId)
+        val pendingKey = "${account.id}.local-addon-edit.$effectiveId"
+        val pending = synchronized(localOutboxLock) { cloudStore.getString(pendingKey, "").orEmpty() }
+        if (pending.isNotEmpty()) cloudEngine.edited("${account.id}.$uuid", captured)
         val row = (if (uuid == knownProfileId && knownRows != null) knownRows else CloudflareTvAccountClient.syncRows(uuid)).firstOrNull {
             it.optString("category") == "addons" && it.optString("itemKey") == "installed"
         }
         val remote = row?.let {
             val items = if (it.optBoolean("deleted")) emptyList() else
                 cloudJson.decodeFromString<List<CloudAddon>>(it.getJSONObject("payload").getJSONArray("items").toString())
-            CloudAddonRow(it.optInt("revision"), items)
+            CloudAddonRow(it.optInt("revision"), items, it.optJSONObject("payload")?.optInt("defaultsVersion") ?: 0)
         }
         check(valid())
-        cloudEngine.synchronize("${account.id}.$uuid", captured, remote, write = { items, revision ->
+        val synchronizedSuccessfully = cloudEngine.synchronize("${account.id}.$uuid", captured, remote, write = { items, revision ->
             check(valid())
-            val payload = buildJsonObject { put("items", cloudJson.encodeToJsonElement(items)) }.toString()
+            val payload = buildJsonObject { put("items", cloudJson.encodeToJsonElement(items)); put("defaultsVersion", ADDON_DEFAULTS_VERSION) }.toString()
             require(payload.length <= 32000) { "Configuration des extensions trop volumineuse" }
             CloudflareTvAccountClient.writeSync(uuid, "addons", "installed", JSONObject(payload), revision)
         }, apply = { items -> valid() && addonPreferences.applyCloudSnapshot(effectiveId, captured, items) })
+        check(synchronizedSuccessfully) { "Extensions TV modifiées ; nouvelle tentative" }
+        synchronized(localOutboxLock) {
+            if (cloudStore.getString(pendingKey, "").orEmpty() == pending) cloudStore.edit().remove(pendingKey).apply()
+        }
     }
 
     private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
@@ -193,15 +218,8 @@ class AddonSyncService @Inject constructor(
     }
 
     private fun canonicalizeUrl(url: String): String {
-        val trimmed = url.trim().trimEnd('/')
-        val queryStart = trimmed.indexOf('?')
-        val path = if (queryStart >= 0) trimmed.substring(0, queryStart) else trimmed
-        val query = if (queryStart >= 0) trimmed.substring(queryStart) else ""
-        val cleanPath = if (path.endsWith("/manifest.json", ignoreCase = true)) {
-            path.dropLast("/manifest.json".length).trimEnd('/')
-        } else {
-            path.trimEnd('/')
-        }
-        return cleanPath + query
+        val manifest = canonicalAddonManifestUrl(url)
+        return manifest.substringBefore('?').removeSuffix("/manifest.json") +
+            if ('?' in manifest) "?${manifest.substringAfter('?')}" else ""
     }
 }

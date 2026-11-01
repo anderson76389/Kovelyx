@@ -30,6 +30,9 @@ actual object AddonStorage {
     private const val addonUrlsKey = "installed_manifest_urls"
     private const val addonEnabledStatesKey = "installed_manifest_enabled_states"
 
+    actual fun defaultsInitialized(profileId: Int): Boolean = NSUserDefaults.standardUserDefaults.boolForKey("kovelyx_defaults_v1_$profileId")
+    actual fun markDefaultsInitialized(profileId: Int) { NSUserDefaults.standardUserDefaults.setBool(true, forKey = "kovelyx_defaults_v1_$profileId") }
+
     actual fun loadInstalledAddonUrls(profileId: Int): List<String> =
         NSUserDefaults.standardUserDefaults
             .stringForKey("${addonUrlsKey}_$profileId")

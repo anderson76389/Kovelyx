@@ -1,0 +1,11 @@
+# Extensions entre appareils
+
+Windows, Android mobile et Android TV partagent, pour le même compte et le même profil Cloudflare, les URL de manifeste complètes, noms personnalisés, ordre et états d’activation. Les configurations AIO Metadata, StreamFusion, Comet et autres extensions restent dans leur URL opaque : casse des jetons, chemins encodés, paramètres et barre oblique finale ne sont pas modifiés. Les profils utilisant les extensions principales suivent le profil principal. Les serveurs locaux doivent être joignables depuis chaque appareil ; copier une URL localhost ne rend pas ce serveur accessible à une télévision distante.
+
+OpenSubtitles v3 est proposé par défaut : https://opensubtitles-v3.strem.io/manifest.json. Une migration locale par profil et un numéro de migration dans la liste cloud l’ajoutent une seule fois. Une extension déjà présente, configurée ou désactivée reste telle quelle. Une suppression ultérieure est synchronisée sans réinstallation forcée sur un nouvel appareil.
+
+L’ancien fournisseur de métadonnées intégré et le repli public caché sont supprimés des sources actives. Les empreintes des anciens hôtes permettent uniquement de nettoyer les anciennes installations et leurs listes cloud ; aucun endpoint ancien n’est conservé ni appelé. Les extensions de métadonnées choisies et TMDB configuré fournissent les fiches. La bibliothèque et la progression ne sont pas effacées. L’historique des commits et les sauvegardes privées ne sont pas réécrits.
+
+Une modification locale est marquée avant l’envoi. La première migration conserve aussi les fournisseurs déjà présents sur l’autre appareil. Les révisions contrôlent les conflits ; une réponse de publication perdue ne doit ni effacer la configuration distante, ni faire réapparaître une suppression locale récente. Les échecs d’extensions relancent la synchronisation tout en laissant les images, catalogues et données de lecture continuer leur traitement.
+
+Limites : 100 extensions par profil, URL individuelle de 24 000 caractères maximum et configuration JSON totale bornée à 32 000 caractères par la voie actuelle. Le service d’extension et ses identifiants doivent être valides et accessibles sur chaque appareil. Les tests utilisent des URL de configuration factices et n’annoncent pas une validation des comptes privés des fournisseurs.

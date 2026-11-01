@@ -108,9 +108,10 @@ object CloudflareDataSync {
         }
         val profileImagesReady = ProfileRepository.syncCloudflareProfileImages()
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
+        var addonsReady = true
         try { com.nuvio.app.features.addons.AddonRepository.synchronizeCloudAddons(cloudId, records) }
         catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { log.w(error) { "Extensions Cloudflare différées, configuration locale conservée" } }
+        catch (error: Exception) { addonsReady = false; log.w(error) { "Extensions Cloudflare différées, configuration locale conservée" } }
         val catalogueReady = CloudflareCatalogueSync.synchronize(profileId, cloudId, records)
         val remote = records.associateBy {
             it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +
@@ -144,6 +145,7 @@ object CloudflareDataSync {
         synchronizeLibrary(profileId, cloudId, reconciled)
         synchronizeProgress(profileId, cloudId, reconciled, suppressed)
         synchronizeWatched(profileId, cloudId, reconciled, suppressed)
+        check(addonsReady) { "Extensions en attente de synchronisation" }
         check(catalogueReady) { "Catalogues en attente de synchronisation" }
         check(profileImagesReady) { "Images de profil en attente de synchronisation" }
     }
