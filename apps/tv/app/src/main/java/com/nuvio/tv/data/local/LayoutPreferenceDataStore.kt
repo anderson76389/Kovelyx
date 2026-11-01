@@ -915,10 +915,10 @@ class LayoutPreferenceDataStore @Inject constructor(
         applyCataloguePayload(payload, null, profileManager.activeProfileId.value)
     }
 
-    internal suspend fun applyCloudflareLayout(profileId: Int, expected: LocalHomeCatalogSettingsState, payload: SyncHomeCatalogPayload): Boolean =
-        applyCataloguePayload(payload, expected, profileId)
+    internal suspend fun applyCloudflareLayout(profileId: Int, expected: LocalHomeCatalogSettingsState, payload: SyncHomeCatalogPayload, isCurrent: () -> Boolean): Boolean =
+        applyCataloguePayload(payload, expected, profileId, isCurrent)
 
-    private suspend fun applyCataloguePayload(payload: SyncHomeCatalogPayload, expected: LocalHomeCatalogSettingsState?, profileId: Int): Boolean {
+    private suspend fun applyCataloguePayload(payload: SyncHomeCatalogPayload, expected: LocalHomeCatalogSettingsState?, profileId: Int, isCurrent: () -> Boolean = { true }): Boolean {
         val sortedItems = payload.items.sortedBy { it.order }
         val remoteOrderKeys = sortedItems.map { item ->
             if (item.isCollection) homeCollectionKey(item.collectionId)
@@ -936,7 +936,7 @@ class LayoutPreferenceDataStore @Inject constructor(
 
         var applied = false
         store(profileId).edit { prefs ->
-            check(profileManager.activeProfileId.value == profileId) { "Profil modifié" }
+            check(profileManager.activeProfileId.value == profileId && isCurrent()) { "Compte ou profil modifié" }
             val local = readHomeCatalogSettingsState(prefs)
             if (expected != null && local != expected) return@edit
             val orderKeys = remoteOrderKeys.withLocalServerKeys(local.orderKeys)

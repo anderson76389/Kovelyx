@@ -23,6 +23,7 @@ class CatalogueSnapshotEngineTest {
     private inner class Remote : CatalogueRemote {
         var head: CatalogueHead? = null
         val pieces = mutableMapOf<String, MutableList<CatalogueChunk>>()
+        var losePublishResponse = false
         var reads = 0
         var writes = 0
         var duringWrite: (() -> Unit)? = null
@@ -38,6 +39,7 @@ class CatalogueSnapshotEngineTest {
         override suspend fun publish(profile: String, kind: String, head: CatalogueHead) {
             check(head.revision == (this.head?.revision ?: 0))
             this.head = head.copy(revision = head.revision + 1)
+            if (losePublishResponse) { losePublishResponse = false; error("Publication reçue, réponse perdue") }
         }
     }
     private val one = """[{"id":"one","name":"Ma collection","folders":[{"id":"f","name":"Films","sources":[{"provider":"addon","addonId":"kaptain","catalogId":"films","type":"movie"}]}]}]"""
@@ -92,6 +94,16 @@ class CatalogueSnapshotEngineTest {
         val remote = Remote(); val pc = Device(remote, one)
         remote.duringWrite = { pc.edit(two) }
         assertFalse(pc.sync()); assertEquals(two, pc.text)
+        assertTrue(pc.sync())
+        val tv = Device(remote); assertTrue(tv.sync())
+        assertEquals(Json.parseToJsonElement(two), Json.parseToJsonElement(tv.text))
+    }
+
+    @Test fun lostPublishResponseDoesNotResurrectReplacedInitialCollection() = runBlocking {
+        val remote = Remote(); val pc = Device(remote, one)
+        remote.losePublishResponse = true
+        assertFailsWith<IllegalStateException> { pc.sync() }
+        pc.edit(two)
         assertTrue(pc.sync())
         val tv = Device(remote); assertTrue(tv.sync())
         assertEquals(Json.parseToJsonElement(two), Json.parseToJsonElement(tv.text))

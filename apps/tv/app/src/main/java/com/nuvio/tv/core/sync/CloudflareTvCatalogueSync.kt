@@ -104,8 +104,8 @@ class CloudflareTvCatalogueSync @Inject constructor(
                     }
                 }, apply = { expected, text ->
                     check(current())
-                    if (kind == "collections") collections.applyCloudflareJson(profileId, expected, text)
-                    else layout.applyCloudflareLayout(profileId, capturedLayout, json.decodeFromString<SyncHomeCatalogPayload>(text))
+                    if (kind == "collections") collections.applyCloudflareJson(profileId, expected, text, ::current)
+                    else layout.applyCloudflareLayout(profileId, capturedLayout, json.decodeFromString<SyncHomeCatalogPayload>(text), ::current)
                 }, isCurrent = ::current)
             if (!done) ready = false
         }

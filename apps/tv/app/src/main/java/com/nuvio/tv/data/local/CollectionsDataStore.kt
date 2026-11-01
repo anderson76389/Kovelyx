@@ -119,11 +119,11 @@ class CollectionsDataStore @Inject constructor(
         committed?.invoke()
     }
 
-    internal suspend fun applyCloudflareJson(profileId: Int, expected: String, next: String): Boolean {
+    internal suspend fun applyCloudflareJson(profileId: Int, expected: String, next: String, isCurrent: () -> Boolean): Boolean {
         if (next != "[]") require(validateCollectionsJson(next).valid) { "Catalogue non compatible" }
         var applied = false
         store(profileId).edit { prefs ->
-            check(profileManager.activeProfileId.value == profileId) { "Profil modifié" }
+            check(profileManager.activeProfileId.value == profileId && isCurrent()) { "Compte ou profil modifié" }
             if ((prefs[collectionsKey] ?: "[]") != expected) return@edit
             prefs[collectionsKey] = next
             applied = true

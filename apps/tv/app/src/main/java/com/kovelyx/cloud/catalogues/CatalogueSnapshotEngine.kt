@@ -28,6 +28,7 @@ private data class CatalogueState(
     val dirty: Boolean = false,
     val initialized: Boolean = false,
     val remoteHash: String? = null,
+    val pendingHash: String? = null,
 )
 
 fun splitCatalogue(text: String): List<CatalogueChunk> {
@@ -153,7 +154,8 @@ class CatalogueSnapshotEngine(
             entry = load(key)
         }
         val state = entry.state
-        if (!state.dirty && state.initialized && state.remoteHash == head?.sha256) return@withLock true
+        val initialized = state.initialized || (head != null && state.pendingHash == head.sha256)
+        if (!state.dirty && initialized && state.remoteHash == head?.sha256) return@withLock true
         val local = current()
         valid()
 
@@ -169,17 +171,17 @@ class CatalogueSnapshotEngine(
             return text
         }
 
-        if (head != null && (!state.initialized || !state.dirty)) {
+        if (head != null && (!initialized || !state.dirty)) {
             val received = receive(head)
             valid()
             if (load(key).raw != entry.raw || current() != local) return@withLock false
-            val merged = if (!state.initialized) mergeInitialCatalogue(kind, received, local, state.dirty) else received
+            val merged = if (!initialized) mergeInitialCatalogue(kind, received, local, state.dirty) else received
             require(merged.encodeToByteArray().size <= CATALOGUE_MAX_BYTES) { "Ensemble des catalogues supérieur à 4 Mo ; données locales conservées" }
             if (Json.parseToJsonElement(merged) != Json.parseToJsonElement(local) && !apply(local, merged)) return@withLock false
             valid()
             val pending = Json.parseToJsonElement(merged) != Json.parseToJsonElement(received)
             return@withLock save(key, entry, state.copy(profileUuid = profileUuid, initialized = true,
-                remoteHash = head.sha256, dirty = pending)) && !pending
+                remoteHash = head.sha256, dirty = pending, pendingHash = null)) && !pending
         }
 
         var publication = local
@@ -207,13 +209,26 @@ class CatalogueSnapshotEngine(
         validate(Json.parseToJsonElement(publication))
         val hash = digest(bytes)
         if (hash != head?.sha256) {
+            // Persist the attempted hash before network I/O. If publication succeeds
+            // but its response is lost, its own old snapshot is never unioned back
+            // into a newer local edit during initial migration.
+            if (!save(key, entry, state.copy(profileUuid = profileUuid, pendingHash = hash, dirty = true))) return@withLock false
+            entry = load(key)
             val parts = splitCatalogue(publication)
             for (part in parts) { valid(); remote.putChunk(profileUuid, kind, hash, part) }
             valid()
             remote.publish(profileUuid, kind, CatalogueHead(hash, parts.size, bytes.size, head?.revision ?: 0))
         }
         valid()
-        if (current() != local) return@withLock false
-        save(key, entry, state.copy(profileUuid = profileUuid, initialized = true, remoteHash = hash, dirty = false))
+        while (true) {
+            val latest = load(key)
+            if (latest.state.profileUuid != null && latest.state.profileUuid != profileUuid) return@withLock false
+            val unchanged = latest.raw == entry.raw && current() == local
+            valid()
+            if (save(key, latest, latest.state.copy(profileUuid = profileUuid, initialized = true,
+                remoteHash = hash, pendingHash = null, dirty = !unchanged))) return@withLock unchanged
+        }
+        @Suppress("UNREACHABLE_CODE")
+        false
     }
 }

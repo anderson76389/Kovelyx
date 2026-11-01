@@ -63,7 +63,8 @@ object CloudflareCatalogueSync {
         val account = AuthRepository.state.value as? AuthState.Authenticated ?: return true
         val engine = engine() ?: return true
         fun current() = (AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId &&
-            CloudflareAccountClient.currentSession?.userId == account.userId && ProfileRepository.activeProfileId == profileId
+            CloudflareAccountClient.currentSession?.userId == account.userId && ProfileRepository.activeProfileId == profileId &&
+            ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == profileId }?.id == uuid
         var ready = true
         for (kind in listOf("collections", "layout")) {
             try {
