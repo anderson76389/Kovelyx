@@ -240,15 +240,18 @@ internal object CloudflareTvAccountClient {
         }
     }
 
-    suspend fun syncRows(profileId: String): List<JSONObject> = withContext(Dispatchers.IO) {
+    suspend fun syncRows(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JSONObject> = withContext(Dispatchers.IO) {
         val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require((snapshotKind == null && snapshotHash == null) ||
+            (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
+        val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
         val rows = mutableListOf<JSONObject>()
         var offset = 0
         do {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
-                    "/v1/sync?profileId=$profileId&offset=$offset&limit=25")
+                    "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery")
                 .header("Authorization", "Bearer ${active.bearerToken}")
                 .get().build()
             val next = client.newCall(request).execute().use { response ->
@@ -267,6 +270,25 @@ internal object CloudflareTvAccountClient {
             offset = next
         } while (true)
         rows
+    }
+
+    private suspend fun postCatalogue(path: String, body: JSONObject) = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + path)
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .post(body.toString().toRequestBody("application/json".toMediaType())).build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Catalogue Cloudflare HTTP ${response.code}" }
+        }
+    }
+    suspend fun putCatalogueChunk(profile: String, kind: String, hash: String, index: Int, text: String) {
+        postCatalogue("/v1/catalogue-chunk", JSONObject().put("profileId", profile).put("category", "catalogues")
+            .put("itemKey", "snapshot:$kind:$hash:${index.toString().padStart(6, '0')}")
+            .put("revision", 0).put("deleted", false).put("payload", JSONObject().put("index", index).put("text", text)))
+    }
+    suspend fun publishCatalogueHead(profile: String, kind: String, head: com.kovelyx.cloud.catalogues.CatalogueHead) {
+        postCatalogue("/v1/catalogue-manifest", JSONObject().put("profileId", profile).put("kind", kind)
+            .put("sha256", head.sha256).put("parts", head.parts).put("utf8Bytes", head.utf8Bytes).put("revision", head.revision))
     }
 
     suspend fun writeSync(

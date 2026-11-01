@@ -16,4 +16,10 @@ internal actual object SyncClientIdentityStorage {
     actual fun saveCloudflareDeletes(payload: String) { store.putString("cloudflare_deletes", payload) }
     actual fun loadCloudflareAddons(key: String): String? = store.getString("addons.$key")
     actual fun saveCloudflareAddons(key: String, payload: String) { store.putString("addons.$key", payload) }
+    private val catalogueLock = Any()
+    actual fun loadCloudflareCatalogues(key: String): String? = store.getString("catalogues.$key")
+    actual fun compareAndSaveCloudflareCatalogues(key: String, expected: String?, next: String): Boolean = synchronized(catalogueLock) {
+        if (loadCloudflareCatalogues(key) != expected) false
+        else { store.putString("catalogues.$key", next); true }
+    }
 }

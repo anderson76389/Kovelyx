@@ -215,15 +215,40 @@ object CloudflareAccountClient {
         return json.parseToJsonElement(response).jsonObject
     }
 
+    suspend fun putCatalogueChunk(profileId: String, kind: String, hash: String, index: Int, text: String) {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId); put("category", "catalogues")
+            put("itemKey", "snapshot:$kind:$hash:${index.toString().padStart(6, '0')}")
+            put("revision", 0); put("deleted", false)
+            put("payload", buildJsonObject { put("index", index); put("text", text) })
+        }
+        request("/v1/catalogue-chunk", body.toString(), active.bearerToken)
+        check(session?.userId == active.userId) { "Compte modifié" }
+    }
+
+    suspend fun publishCatalogueHead(profileId: String, kind: String, head: com.kovelyx.cloud.catalogues.CatalogueHead) {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId); put("kind", kind); put("sha256", head.sha256)
+            put("parts", head.parts); put("utf8Bytes", head.utf8Bytes); put("revision", head.revision)
+        }
+        request("/v1/catalogue-manifest", body.toString(), active.bearerToken)
+        check(session?.userId == active.userId) { "Compte modifié" }
+    }
+
     /** Read all pages, instead of silently truncating the library at 500 entries. */
-    suspend fun synchronizeAll(profileId: String): List<JsonObject> {
+    suspend fun synchronizeAll(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JsonObject> {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require((snapshotKind == null && snapshotHash == null) ||
+            (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
+        val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
         val all = mutableListOf<JsonObject>()
         var offset = 0
         while (true) {
             val response = httpRequestRaw(
-                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25",
+                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery",
                 headers = mapOf("Authorization" to "Bearer ${active.bearerToken}"),
                 body = "", followRedirects = false, maxResponseBodyBytes = 1048576
             )

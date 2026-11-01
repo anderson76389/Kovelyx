@@ -23,6 +23,8 @@ import com.nuvio.tv.domain.model.TraktCollectionSource
 import com.nuvio.tv.domain.model.TraktListSort
 import com.nuvio.tv.domain.model.TraktSortHow
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -55,33 +57,43 @@ class CollectionsDataStore @Inject constructor(
     private val collectionsKey = stringPreferencesKey("collections_json")
     private fun string(resId: Int, vararg args: Any): String = appContext.getString(resId, *args)
 
+    internal var captureCloudEdit: ((Int) -> (() -> Unit))? = null
+
     val collections: Flow<List<Collection>> =
         profileManager.activeProfileId.flatMapLatest { pid ->
             factory.get(pid, FEATURE).data.map { prefs ->
                 parseCollections(prefs[collectionsKey])
             }
-        }
+        }.flowOn(Dispatchers.Default)
 
     suspend fun setCollections(collections: List<Collection>) {
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             if (collections.isEmpty()) {
                 prefs.remove(collectionsKey)
             } else {
                 prefs[collectionsKey] = gson.toJson(collections.map { it.toSerializable() })
             }
         }
+        committed?.invoke()
     }
 
     suspend fun addCollection(collection: Collection) {
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             val current = parseCollections(prefs[collectionsKey]).toMutableList()
             current.add(collection)
             prefs[collectionsKey] = gson.toJson(current.map { it.toSerializable() })
         }
+        committed?.invoke()
     }
 
     suspend fun updateCollection(collection: Collection) {
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             val current = parseCollections(prefs[collectionsKey]).toMutableList()
             val index = current.indexOfFirst { it.id == collection.id }
             if (index >= 0) {
@@ -89,10 +101,13 @@ class CollectionsDataStore @Inject constructor(
             }
             prefs[collectionsKey] = gson.toJson(current.map { it.toSerializable() })
         }
+        committed?.invoke()
     }
 
     suspend fun removeCollection(collectionId: String) {
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             val current = parseCollections(prefs[collectionsKey]).toMutableList()
             current.removeAll { it.id == collectionId }
             if (current.isEmpty()) {
@@ -101,6 +116,19 @@ class CollectionsDataStore @Inject constructor(
                 prefs[collectionsKey] = gson.toJson(current.map { it.toSerializable() })
             }
         }
+        committed?.invoke()
+    }
+
+    internal suspend fun applyCloudflareJson(profileId: Int, expected: String, next: String): Boolean {
+        if (next != "[]") require(validateCollectionsJson(next).valid) { "Catalogue non compatible" }
+        var applied = false
+        store(profileId).edit { prefs ->
+            check(profileManager.activeProfileId.value == profileId) { "Profil modifié" }
+            if ((prefs[collectionsKey] ?: "[]") != expected) return@edit
+            prefs[collectionsKey] = next
+            applied = true
+        }
+        return applied
     }
 
     fun generateId(): String = UUID.randomUUID().toString()

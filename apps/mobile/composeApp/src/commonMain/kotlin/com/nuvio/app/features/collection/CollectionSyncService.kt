@@ -45,6 +45,10 @@ object CollectionSyncService {
     }
 
     suspend fun pullFromServer(profileId: Int) {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
+            return
+        }
         if (ProfileRepository.activeProfileId != profileId) return
         runCatching {
             val params = buildJsonObject {
@@ -107,6 +111,10 @@ object CollectionSyncService {
     }
 
     private suspend fun pushToRemote(profileId: Int) {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
+            return
+        }
         runCatching {
             if (ProfileRepository.activeProfileId != profileId) return@runCatching
             val collectionsJson = CollectionRepository.exportToJson()

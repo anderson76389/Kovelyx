@@ -41,6 +41,7 @@ class CloudflareTvDataSync @Inject constructor(
     private val watched: WatchedItemsPreferences,
     private val mutations: WatchStateMutationStore,
     private val addons: AddonSyncService,
+    private val catalogues: CloudflareTvCatalogueSync,
     private val profileMedia: CloudflareTvProfileMediaSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -153,6 +154,9 @@ class CloudflareTvDataSync @Inject constructor(
         try { addons.synchronizeCloudAddons(uuid, rows) }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (error: Exception) { Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
+        val catalogueReady = try { catalogues.synchronize(profileId, uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (_: Exception) { false }
         val remote = rows.associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }
@@ -179,6 +183,7 @@ class CloudflareTvDataSync @Inject constructor(
         syncWatched(profileId, uuid, remote.filterKeys {
             !it.startsWith("watched_items|") || it.removePrefix("watched_items|") !in deletedKeys.watched
         }, deletedKeys.watched)
+        check(catalogueReady) { "Catalogues TV en attente" }
     }
 
     private fun revision(record: JSONObject?): Int = record?.optInt("revision") ?: 0

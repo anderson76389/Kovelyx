@@ -49,6 +49,8 @@ internal expect object SyncClientIdentityStorage {
     fun saveClientId(clientId: String)
     fun loadCloudflareAddons(key: String): String?
     fun saveCloudflareAddons(key: String, payload: String)
+    fun loadCloudflareCatalogues(key: String): String?
+    fun compareAndSaveCloudflareCatalogues(key: String, expected: String?, next: String): Boolean
     fun loadCloudflareDeletes(): String?
     fun saveCloudflareDeletes(payload: String)
 }

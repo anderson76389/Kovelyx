@@ -231,6 +231,8 @@ object CollectionRepository {
     }
 
     private fun persist(sync: Boolean = true) {
+        if (sync) com.nuvio.app.core.cloud.CloudflareCatalogueSync.edited("collections")
+
         runCatching {
             CollectionStorage.savePayload(mergedCollectionsJson().toString())
             if (sync) {

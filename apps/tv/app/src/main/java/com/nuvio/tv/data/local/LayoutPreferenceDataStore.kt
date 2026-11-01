@@ -61,6 +61,8 @@ class LayoutPreferenceDataStore @Inject constructor(
         private const val MIN_FOCUSED_POSTER_BACKDROP_EXPAND_DELAY_SECONDS = 0
     }
 
+    internal var captureCloudEdit: ((Int) -> (() -> Unit))? = null
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private fun store(profileId: Int = profileManager.activeProfileId.value) =
@@ -534,24 +536,30 @@ class LayoutPreferenceDataStore @Inject constructor(
 
     suspend fun setHomeCatalogOrderKeys(keys: List<String>) {
         val normalizedKeys = normalizeCatalogOrderKeys(keys)
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             if (normalizedKeys.isEmpty()) {
                 prefs.remove(homeCatalogOrderKeysKey)
             } else {
                 prefs[homeCatalogOrderKeysKey] = gson.toJson(normalizedKeys)
             }
         }
+        committed?.invoke()
     }
 
     suspend fun setDisabledHomeCatalogKeys(keys: List<String>) {
         val normalizedKeys = normalizeCatalogOrderKeys(keys)
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             if (normalizedKeys.isEmpty()) {
                 prefs.remove(disabledHomeCatalogKeysKey)
             } else {
                 prefs[disabledHomeCatalogKeysKey] = gson.toJson(normalizedKeys)
             }
         }
+        committed?.invoke()
     }
 
     suspend fun setSidebarCollapsedByDefault(collapsed: Boolean) {
@@ -831,9 +839,12 @@ class LayoutPreferenceDataStore @Inject constructor(
     }
 
     suspend fun setHideUnreleasedContent(enabled: Boolean) {
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             prefs[hideUnreleasedContentKey] = enabled
         }
+        committed?.invoke()
     }
 
     suspend fun setShowFullReleaseDate(enabled: Boolean) {
@@ -872,7 +883,9 @@ class LayoutPreferenceDataStore @Inject constructor(
     }
 
     suspend fun setCustomCatalogTitles(titles: Map<String, String>) {
-        store().edit { prefs ->
+        val profileId = profileManager.activeProfileId.value
+        val committed = captureCloudEdit?.invoke(profileId)
+        store(profileId).edit { prefs ->
             val filtered = titles.filterValues { it.isNotBlank() }
             if (filtered.isEmpty()) {
                 prefs.remove(customCatalogTitlesKey)
@@ -880,6 +893,7 @@ class LayoutPreferenceDataStore @Inject constructor(
                 prefs[customCatalogTitlesKey] = gson.toJson(filtered)
             }
         }
+        committed?.invoke()
     }
 
     internal suspend fun getHomeCatalogSettingsState(): LocalHomeCatalogSettingsState {
@@ -898,6 +912,13 @@ class LayoutPreferenceDataStore @Inject constructor(
     }
 
     suspend fun applyCatalogSettingsFromRemote(payload: SyncHomeCatalogPayload) {
+        applyCataloguePayload(payload, null, profileManager.activeProfileId.value)
+    }
+
+    internal suspend fun applyCloudflareLayout(profileId: Int, expected: LocalHomeCatalogSettingsState, payload: SyncHomeCatalogPayload): Boolean =
+        applyCataloguePayload(payload, expected, profileId)
+
+    private suspend fun applyCataloguePayload(payload: SyncHomeCatalogPayload, expected: LocalHomeCatalogSettingsState?, profileId: Int): Boolean {
         val sortedItems = payload.items.sortedBy { it.order }
         val remoteOrderKeys = sortedItems.map { item ->
             if (item.isCollection) homeCollectionKey(item.collectionId)
@@ -913,8 +934,11 @@ class LayoutPreferenceDataStore @Inject constructor(
             key to item.customTitle
         }.filterValues { it.isNotBlank() }
 
-        store().edit { prefs ->
+        var applied = false
+        store(profileId).edit { prefs ->
+            check(profileManager.activeProfileId.value == profileId) { "Profil modifié" }
             val local = readHomeCatalogSettingsState(prefs)
+            if (expected != null && local != expected) return@edit
             val orderKeys = remoteOrderKeys.withLocalServerKeys(local.orderKeys)
             val disabledKeys = remoteDisabledKeys + local.disabledKeys.filter(ServerCatalog::isServerKey)
             val titles = remoteTitles + local.customTitles.filterKeys(ServerCatalog::isServerKey)
@@ -934,7 +958,9 @@ class LayoutPreferenceDataStore @Inject constructor(
             } else {
                 prefs.remove(customCatalogTitlesKey)
             }
+            applied = true
         }
+        return applied
     }
 
     private fun readHomeCatalogSettingsState(prefs: Preferences): LocalHomeCatalogSettingsState {

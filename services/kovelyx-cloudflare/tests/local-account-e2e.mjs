@@ -5,7 +5,7 @@
  */
 import assert from "node:assert/strict";
 import {spawn,spawnSync} from "node:child_process";
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
 import {mkdtempSync,readFileSync,writeFileSync,rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {resolve,join} from "node:path";
@@ -77,6 +77,7 @@ try {
   assert.equal(ready.data?.status,"ok");
   assert.equal(ready.data?.schema,"0004_profile_media_gifs");
   assert.equal(ready.data?.maxProfileMediaBytes,18_000_000);
+  assert.equal(ready.data?.catalogueSnapshotSchema,1);
 
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
@@ -223,6 +224,31 @@ try {
   assert.equal((await req("/v1/sync","POST",addons,bob.token)).status,404);
 
   // Private user pictures are real bytes, isolated by owner and protected by revisions.
+  // Real chunk transfer, atomic publication, isolation, deletion and old-version cleanup.
+  const catalogueText=JSON.stringify([{id:"ma-collection",folders:[{id:"films",sources:[{provider:"addon",addonId:"kaptain",catalogId:"x"}],name:"é".repeat(6500)}]}]);
+  const catalogueHash=createHash('sha256').update(catalogueText).digest('hex');
+  const catalogueParts=Array.from({length:Math.ceil(catalogueText.length/6000)},(_,i)=>catalogueText.slice(i*6000,(i+1)*6000));
+  const chunk=(hash,index,text)=>({profileId,category:"catalogues",itemKey:`snapshot:collections:${hash}:${String(index).padStart(6,'0')}`,revision:0,deleted:false,payload:{index,text}});
+  const manifest={profileId,kind:"collections",sha256:catalogueHash,parts:catalogueParts.length,utf8Bytes:Buffer.byteLength(catalogueText),revision:0};
+  assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,409,'Cannot publish missing chunks');
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,catalogueParts[0]),bob.token)).status,404);
+  for(const [index,text] of catalogueParts.entries())
+    assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,index,text),alice.token)).status,201);
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,catalogueParts[0]),alice.token)).status,200,'Idempotent immutable chunk');
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,'different'),alice.token)).status,409);
+  assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,201);
+  const fromTv=await req(`/v1/sync?profileId=${profileId}&snapshotKind=collections&snapshotHash=${catalogueHash}`,'GET',null,tvToken);
+  assert.equal(fromTv.status,200); assert.equal(fromTv.data.items.map(x=>x.payload.text).join(''),catalogueText);
+  const normal=await req(`/v1/sync?profileId=${profileId}`,'GET',null,tvToken);
+  assert.equal(normal.data.items.some(x=>x.category==='catalogues'),false,'Progress sync never returns catalogue chunks');
+  const emptyHash=createHash('sha256').update('[]').digest('hex');
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(emptyHash,0,'[]'),tvToken)).status,201);
+  assert.equal((await req('/v1/catalogue-manifest','POST',{...manifest,sha256:emptyHash,parts:1,utf8Bytes:2,revision:1},tvToken)).status,200);
+  const removedCatalogues=await req(`/v1/sync?profileId=${profileId}&snapshotKind=collections&snapshotHash=${catalogueHash}`,'GET',null,alice.token);
+  assert.equal(removedCatalogues.data.items.length,0,'Obsolete snapshots do not accumulate');
+  assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,409,'Stale writer cannot resurrect deleted catalogues');
+  assert.equal((await req('/v1/sync','POST',chunk(emptyHash,0,'[]'),alice.token)).status,400,'Generic writes cannot bypass immutable protocol');
+
   const mediaUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=avatar";
   const picture=Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aM5sAAAAASUVORK5CYII=","base64"));
   const putPicture=(token,expected,bytes=picture)=>fetch(mediaUrl,{method:"PUT",

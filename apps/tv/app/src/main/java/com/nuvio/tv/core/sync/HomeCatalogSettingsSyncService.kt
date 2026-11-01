@@ -1,6 +1,8 @@
 package com.nuvio.tv.core.sync
 
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import dagger.Lazy
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.CollectionsDataStore
@@ -77,6 +79,7 @@ class HomeCatalogSettingsSyncService @Inject constructor(
     private val profileManager: ProfileManager,
     private val addonRepository: AddonRepository,
     private val collectionsDataStore: CollectionsDataStore,
+    private val catalogues: Lazy<CloudflareTvCatalogueSync>,
     private val syncClientIdentity: SyncClientIdentity
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -102,6 +105,10 @@ class HomeCatalogSettingsSyncService @Inject constructor(
     }
 
     suspend fun pushToRemote(reason: String = "unspecified"): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            catalogues.get().edited("layout")
+            return@withContext Result.success(Unit)
+        }
         try {
             val profileId = profileManager.activeProfileId.value
             val syncScope = currentScope(profileId)
@@ -119,6 +126,10 @@ class HomeCatalogSettingsSyncService @Inject constructor(
     }
 
     suspend fun pullFromRemote(): Result<Boolean> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            catalogues.get().request()
+            return@withContext Result.success(false)
+        }
         try {
             val profileId = profileManager.activeProfileId.value
             val syncScope = currentScope(profileId)
@@ -183,6 +194,7 @@ class HomeCatalogSettingsSyncService @Inject constructor(
 
     fun triggerPush() {
         if (isSyncingFromRemote) return
+        if (CloudflareTvAccountClient.enabled) { catalogues.get().edited("layout"); return }
         if (!authManager.isAuthenticated) return
         pushJob?.cancel()
         pushJob = scope.launch {

@@ -32,4 +32,11 @@ actual object SyncClientIdentityStorage {
     actual fun saveCloudflareAddons(key: String, payload: String) {
         checkNotNull(preferences).edit().putString("addons.$key", payload).apply()
     }
+    private val catalogueLock = Any()
+    actual fun loadCloudflareCatalogues(key: String): String? = preferences?.getString("catalogues.$key", null)
+    actual fun compareAndSaveCloudflareCatalogues(key: String, expected: String?, next: String): Boolean = synchronized(catalogueLock) {
+        val prefs = checkNotNull(preferences) { "Stockage de synchronisation non initialisé" }
+        if (prefs.getString("catalogues.$key", null) != expected) false
+        else { prefs.edit().putString("catalogues.$key", next).apply(); true }
+    }
 }

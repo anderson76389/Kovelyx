@@ -92,7 +92,7 @@ def main():
             req = urllib.request.Request('https://kovelyx-cloud.mailpromahe.workers.dev/ready', headers={'User-Agent':'Kovelyx-verified-deployment','Accept':'application/json'})
             with urllib.request.urlopen(req, timeout=25) as response:
                 ready = json.load(response)
-            if ready.get('status') == 'ok' and ready.get('schema') == '0004_profile_media_gifs' and ready.get('maxProfileMediaBytes') == 18_000_000:
+            if ready.get('status') == 'ok' and ready.get('schema') == '0004_profile_media_gifs' and ready.get('maxProfileMediaBytes') == 18_000_000 and ready.get('catalogueSnapshotSchema') == 1:
                 break
         except Exception:
             pass
