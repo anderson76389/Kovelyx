@@ -56,16 +56,20 @@ class CloudflareTvProfileMediaSync @Inject constructor(
                 }
             }
         }
+        var failure: Exception? = null
         for (local in profiles.profiles.value) {
             val row = (if (local.cloudProfileId != null) remote.firstOrNull { it.optString("id") == local.cloudProfileId }
                 else remote.filter { it.optString("displayName").equals(local.name, true) }.singleOrNull())
                 ?: continue
             val uuid = row.optString("id")
             try {
-                val avatar = engine.synchronize(account.id, uuid, "avatar", local.avatarUrl,
-                    row.optString("avatarPath").takeIf { it != "null" && it.isNotBlank() }, receiveOnly = true)
-                val background = engine.synchronize(account.id, uuid, "background", local.profileBackgroundUrl,
-                    row.optString("backgroundPath").takeIf { it != "null" && it.isNotBlank() }, receiveOnly = true)
+                suspend fun receive(kind: String, uri: String?, field: String): String? = try {
+                    engine.synchronize(account.id, uuid, kind, uri,
+                        row.optString(field).takeIf { it != "null" && it.isNotBlank() }, receiveOnly = true)
+                } catch (cancelled: CancellationException) { throw cancelled }
+                catch (error: Exception) { failure = error; uri }
+                val avatar = receive("avatar", local.avatarUrl, "avatarPath")
+                val background = receive("background", local.profileBackgroundUrl, "backgroundPath")
                 check(CloudflareTvAccountClient.account?.id == account.id) { "Compte modifié" }
                 val current = profiles.profiles.value.firstOrNull { it.id == local.id } ?: continue
                 val nextAvatar = if (current.avatarUrl == local.avatarUrl) avatar else current.avatarUrl
@@ -75,8 +79,9 @@ class CloudflareTvProfileMediaSync @Inject constructor(
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (error: Exception) {
                 Log.w("KovelyxTvMedia", "Images en attente, fichiers locaux conservés", error)
-                if (reportFailure) throw error
+                failure = error
             }
         }
+        if (reportFailure) failure?.let { throw it }
     }
 }

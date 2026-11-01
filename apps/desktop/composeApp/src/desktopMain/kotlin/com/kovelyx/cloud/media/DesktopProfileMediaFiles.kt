@@ -40,9 +40,9 @@ internal class DesktopProfileMediaFiles : ProfileMediaFiles {
         .joinToString("") { "%02x".format(it.toInt() and 255) }
     override suspend fun encodeLocal(uri: String, background: Boolean): ProfileImageBytes = withContext(Dispatchers.IO) {
         val file = privateFile(uri)
-        require(Files.size(file) in 1..18_000_000L)
+        require(Files.size(file) in 1..MAX_PROFILE_SOURCE_BYTES)
         val header = Files.newInputStream(file).use { it.readNBytes(12) }
-        if (header.size >= 6 && String(header, 0, 6, Charsets.US_ASCII).startsWith("GIF8")) {
+        if (isProfileGif(header)) {
             require(Files.size(file) <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo ; choisissez une animation plus légère pour la synchroniser." }
             return@withContext ProfileImageBytes("image/gif", Files.readAllBytes(file))
         }

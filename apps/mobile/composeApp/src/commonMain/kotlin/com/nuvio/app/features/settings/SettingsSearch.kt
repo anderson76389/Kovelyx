@@ -321,13 +321,20 @@ internal fun settingsSearchEntries(
         )
     }
     if (checkForUpdatesAvailable) {
+        addRow(
+            page = SettingsPage.Advanced, key = "update-channel",
+            title = stringResource(Res.string.updates_channel_title),
+            description = stringResource(Res.string.updates_channel_description),
+            pageLabel = advancedPage, section = stringResource(Res.string.settings_org_section_updates),
+            category = advancedCategory, icon = Icons.Rounded.CloudDownload,
+        )
         add(
             key = "check-updates",
             title = stringResource(Res.string.compose_settings_root_check_updates_title),
             description = stringResource(Res.string.compose_settings_root_check_updates_description),
-            page = if (supportersContributorsPageEnabled) supportersPage else licensesPage,
-            section = stringResource(Res.string.compose_settings_root_about_section),
-            category = aboutCategory,
+            page = advancedPage,
+            section = stringResource(Res.string.settings_org_section_updates),
+            category = advancedCategory,
             icon = Icons.Rounded.CloudDownload,
             target = SettingsSearchTarget.CheckForUpdates,
         )

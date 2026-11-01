@@ -3,6 +3,10 @@ package com.kovelyx.cloud.media
 import kotlinx.serialization.Serializable
 
 const val MAX_PROFILE_MEDIA_BYTES = 18_000_000
+const val MAX_PROFILE_SOURCE_BYTES = 64_000_000L
+fun isProfileGif(header: ByteArray): Boolean = header.size >= 6 &&
+    header[0] == 71.toByte() && header[1] == 73.toByte() && header[2] == 70.toByte() &&
+    header[3] == 56.toByte() && (header[4] == 55.toByte() || header[4] == 57.toByte()) && header[5] == 97.toByte()
 
 @Serializable
 data class ProfileMediaState(val uri: String? = null, val version: String? = null, val pending: Boolean = false, val automatic: Boolean = false)

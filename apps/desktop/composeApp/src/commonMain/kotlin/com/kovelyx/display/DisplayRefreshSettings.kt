@@ -65,6 +65,14 @@ open class DisplayRefreshController {
     }
     fun selectMinimum(hertz: Int) = selectRange(hertz, mutable.value.maximum)
     fun selectMaximum(hertz: Int) = selectRange(mutable.value.minimum, hertz)
+    fun chooseMinimum(hertz: Int) {
+        require(hertz in mutable.value.available) { "Fréquence non proposée par cet écran" }
+        selectRange(hertz, maxOf(hertz, mutable.value.maximum))
+    }
+    fun chooseMaximum(hertz: Int) {
+        require(hertz in mutable.value.available) { "Fréquence non proposée par cet écran" }
+        selectRange(minOf(hertz, mutable.value.minimum), hertz)
+    }
     fun displayChanged(available: Set<Int>, actual: Float) {
         mutable.value = mutable.value.copy(available = available.filter { it in 1..MAX_DISPLAY_HERTZ }.toSet(), actual = actual.takeIf { it.isFinite() && it > 0f }?.roundToInt())
     }

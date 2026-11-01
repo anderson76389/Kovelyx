@@ -5,4 +5,8 @@
     <string name="display_refresh_minimum">Minimum</string>
     <string name="display_refresh_maximum">Maximum</string>
     <string name="display_refresh_actual">Fréquence actuelle : %1$d Hz</string>
+    <string name="display_refresh_supported">Modes de cet écran : %1$s</string>
+    <string name="display_refresh_pending">Détection des modes de l’écran…</string>
+    <string name="display_refresh_range">Plage choisie : %1$d–%2$d Hz</string>
+    <string name="display_refresh_adjust_bounds">Si nécessaire, l’autre borne s’ajuste pour garder une plage valide. Ce réglage concerne cet appareil.</string>
 </resources>

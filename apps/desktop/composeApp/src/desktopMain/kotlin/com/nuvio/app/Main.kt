@@ -189,8 +189,15 @@ fun main(args: Array<String>) {
             init = ::configureMacosWindowBeforePeer,
         ) {
             DisposableEffect(window) {
+                com.nuvio.app.features.notifications.EpisodeReleaseNotificationPlatform.bind { link ->
+                    window.isVisible = true
+                    window.extendedState = window.extendedState and java.awt.Frame.ICONIFIED.inv()
+                    window.toFront()
+                    window.requestFocus()
+                    link?.takeIf { it != "kovelyx://" }?.let(::handleAppUrl)
+                }
                 val refresh = com.kovelyx.display.WindowsDisplayRefresh(window)
-                onDispose { refresh.close() }
+                onDispose { refresh.close(); com.nuvio.app.features.notifications.EpisodeReleaseNotificationPlatform.close() }
             }
             SideEffect {
                 window.background = KovelyxDesktopNativeBackground

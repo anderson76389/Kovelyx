@@ -37,6 +37,7 @@ import kotlin.coroutines.resume
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual object EpisodeReleaseNotificationPlatform {
+    actual suspend fun openSystemSettings(): Boolean = false
     private const val scheduledIdsKey = "episode_release_notification_scheduled_ids"
     private const val attachmentDirectoryName = "episode_release_notification_attachments"
     private val httpClient = HttpClient(Darwin) {

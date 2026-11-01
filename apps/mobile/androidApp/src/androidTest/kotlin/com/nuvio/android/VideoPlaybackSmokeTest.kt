@@ -25,6 +25,30 @@ import org.junit.runner.RunWith
 class VideoPlaybackSmokeTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun notificationTestActuallyReachesAndroidWithoutAnySavedSeries() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        instrumentation.uiAutomation.grantRuntimePermission(context.packageName, android.Manifest.permission.POST_NOTIFICATIONS)
+        // This app module exercises the library's real platform implementation.
+        for (name in listOf("EpisodeReleaseNotificationsStorage", "EpisodeReleaseNotificationPlatform")) {
+            val type = Class.forName("com.nuvio.app.features.notifications.$name")
+            type.getMethod("initialize", android.content.Context::class.java).invoke(type.getField("INSTANCE").get(null), context)
+        }
+        val manager = context.getSystemService(android.app.NotificationManager::class.java)
+        manager.cancelAll()
+        try {
+            com.nuvio.app.features.notifications.EpisodeReleaseNotificationsRepository.sendTestNotification()
+            compose.waitUntil(15_000) { manager.activeNotifications.any {
+                it.notification.channelId == "episode_release_notifications" &&
+                    it.notification.extras.getCharSequence(android.app.Notification.EXTRA_TITLE)?.isNotBlank() == true
+            } }
+            assertTrue("The platform must report a sent notification", manager.activeNotifications.isNotEmpty())
+            compose.waitUntil(5_000) {
+                com.nuvio.app.features.notifications.EpisodeReleaseNotificationsRepository.uiState.value.statusMessage != null
+            }
+        } finally { manager.cancelAll() }
+    }
+
     @Test fun exoPlayerSurfaceReadsH264() = play(AndroidPlaybackEngine.ExoPlayer)
     @Test fun libmpvSurfaceReadsH264() = play(AndroidPlaybackEngine.Libmpv)
 

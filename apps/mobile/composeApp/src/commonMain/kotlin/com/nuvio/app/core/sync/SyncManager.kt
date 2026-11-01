@@ -531,6 +531,7 @@ object SyncManager {
                 periodicNuvioSyncProfileId == profileId) return
             stopPeriodicNuvioSyncPull()
             periodicNuvioSyncProfileId = profileId
+            CloudflareDataSync.request(profileId)
             periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
                 while (isActive) {
                     delay(60_000L)

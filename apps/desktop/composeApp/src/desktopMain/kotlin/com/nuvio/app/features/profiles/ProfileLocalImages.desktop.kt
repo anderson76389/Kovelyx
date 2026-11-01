@@ -42,8 +42,8 @@ internal actual object ProfileLocalImages {
                     dialogTitle = if (background) "Choisir un fond de profil" else "Choisir une photo de profil"
                     fileSelectionMode = JFileChooser.FILES_ONLY
                     isMultiSelectionEnabled = false
-                    isAcceptAllFileFilterUsed = false
-                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, GIF, BMP)", "jpg", "jpeg", "png", "gif", "bmp")
+                    isAcceptAllFileFilterUsed = true
+                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, WebP, GIF, BMP)", "jpg", "jpeg", "png", "webp", "gif", "bmp")
                 }
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     selectedPath = chooser.selectedFile?.toPath()
@@ -51,12 +51,13 @@ internal actual object ProfileLocalImages {
             }
 
             val original = selectedPath ?: return@withContext null
-            require(Files.isRegularFile(original) && Files.size(original) in 1..18_000_000L) {
-                "L'image doit être un fichier de 18 Mo maximum."
+            require(Files.isRegularFile(original) && Files.size(original) in 1..com.kovelyx.cloud.media.MAX_PROFILE_SOURCE_BYTES) {
+                "L’image doit être un fichier de 64 Mo maximum avant optimisation."
             }
             // Conserver les GIF animés tels quels : l'ancien redimensionnement
             // ImageIO ne gardait que la première image de l'animation.
-            val keepGif = original.fileName.toString().lowercase(Locale.ROOT).endsWith(".gif")
+            val keepGif = Files.newInputStream(original).use { com.kovelyx.cloud.media.isProfileGif(it.readNBytes(12)) }
+            if (keepGif) require(Files.size(original) <= com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo." }
             if (keepGif) validateImageDimensions(original)
             val resized = if (keepGif) null else readAndResize(original, background)
             val outputExtension = if (keepGif) ".gif" else if (background) ".jpg" else ".png"
@@ -84,8 +85,20 @@ internal actual object ProfileLocalImages {
         }
     }
 
+    private fun imageInput(path: Path): javax.imageio.stream.ImageInputStream {
+        val original = requireNotNull(ImageIO.createImageInputStream(path.toFile())) { "Impossible de lire l’image." }
+        if (ImageIO.getImageReaders(original).hasNext()) return original
+        original.close()
+        val bytes = Files.readAllBytes(path)
+        val png = org.jetbrains.skia.Image.makeFromEncoded(bytes).use { image ->
+            require(image.width > 0 && image.height > 0 && image.width.toLong() * image.height <= 32_000_000L) { "Image supérieure à 32 mégapixels." }
+            requireNotNull(image.encodeToData(org.jetbrains.skia.EncodedImageFormat.PNG)).use { it.bytes }
+        }
+        return requireNotNull(ImageIO.createImageInputStream(java.io.ByteArrayInputStream(png))) { "Format d’image non pris en charge." }
+    }
+
     private fun validateImageDimensions(path: Path) {
-        ImageIO.createImageInputStream(path.toFile()).use { stream ->
+        imageInput(path).use { stream ->
             requireNotNull(stream) { "Impossible de lire l'image." }
             val readers = ImageIO.getImageReaders(stream)
             require(readers.hasNext()) { "Format d'image non reconnu." }
@@ -104,7 +117,7 @@ internal actual object ProfileLocalImages {
     }
 
     internal fun readAndResize(path: Path, background: Boolean): BufferedImage {
-        ImageIO.createImageInputStream(path.toFile()).use { stream ->
+        imageInput(path).use { stream ->
             requireNotNull(stream) { "Impossible de lire l'image." }
             val readers = ImageIO.getImageReaders(stream)
             require(readers.hasNext()) { "Format d'image non reconnu." }

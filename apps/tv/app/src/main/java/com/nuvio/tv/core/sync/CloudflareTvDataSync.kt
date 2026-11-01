@@ -110,9 +110,10 @@ class CloudflareTvDataSync @Inject constructor(
     suspend fun synchronize(profileId: Int) = mutex.withLock {
         if (CloudflareTvAccountClient.account == null ||
             profileManager.activeProfileId.value != profileId) return@withLock
-        try { profileMedia.synchronize() }
+        var imagesReady = true
+        try { profileMedia.synchronize(reportFailure = true) }
         catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { Log.w(TAG, "Profils Cloudflare différés", error) }
+        catch (error: Exception) { imagesReady = false; Log.w(TAG, "Profils Cloudflare différés", error) }
         // Never equate the numeric local ID with an ordinal in the cloud list:
         // deleted/reordered profiles would silently mix another person's history.
         val localProfile = profileManager.profiles.value
@@ -184,6 +185,7 @@ class CloudflareTvDataSync @Inject constructor(
             !it.startsWith("watched_items|") || it.removePrefix("watched_items|") !in deletedKeys.watched
         }, deletedKeys.watched)
         check(catalogueReady) { "Catalogues TV en attente" }
+        check(imagesReady) { "Images Cloudflare en attente" }
     }
 
     private fun revision(record: JSONObject?): Int = record?.optInt("revision") ?: 0

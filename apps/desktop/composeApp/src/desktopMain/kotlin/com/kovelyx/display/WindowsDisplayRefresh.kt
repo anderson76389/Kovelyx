@@ -81,7 +81,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             while (index < 2048) {
                 val memory = modeMemory()
                 if (!api.EnumDisplaySettingsW(WString(device), index, memory)) break
-                if (memory.getInt(168) >= 32 && (memory.getInt(180) and 2) == 0) modes += memory.spec(index) to memory
+                if (memory.getInt(168) >= 32 && memory.getInt(184) > 1 && (memory.getInt(180) and 2) == 0) modes += memory.spec(index) to memory
                 index++
             }
             val currentMode = before.spec()

@@ -31,8 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -140,9 +140,7 @@ fun AboutSettingsContent(
 
                             Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
 
-                            if (AppFeaturePolicy.inAppUpdatesEnabled) {
-                                UpdateChannelSettings(initialFocusRequester, modifier = firstRowModifier)
-                            }
+
 
 
 
@@ -159,7 +157,8 @@ fun AboutSettingsContent(
                                 title = stringResource(R.string.about_licenses_attributions),
                                 subtitle = stringResource(R.string.about_licenses_attributions_subtitle),
                                 trailingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                onClick = onNavigateToLicensesAttributions
+                                onClick = onNavigateToLicensesAttributions,
+                                modifier = firstRowModifier.then(if (initialFocusRequester != null) Modifier.focusRequester(initialFocusRequester) else Modifier)
                             )
                         }
                     }

@@ -11,6 +11,23 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ProfileLocalImagesDesktopTest {
+    @Test fun webpWithoutAnImageIoPluginNormalizesThroughTheShippedDecoder() {
+        val original = BufferedImage(20, 10, BufferedImage.TYPE_INT_ARGB)
+        original.setRGB(0, 0, 0xff336699.toInt())
+        val buffer = java.io.ByteArrayOutputStream()
+        ImageIO.write(original, "png", buffer)
+        val webp = org.jetbrains.skia.Image.makeFromEncoded(buffer.toByteArray()).use { image ->
+            requireNotNull(image.encodeToData(org.jetbrains.skia.EncodedImageFormat.WEBP)).use { it.bytes }
+        }
+        val file = Files.createTempFile("kovelyx-webp-test-", ".webp")
+        try {
+            Files.write(file, webp)
+            val normalized = ProfileLocalImages.readAndResize(file, false)
+            try { assertEquals(20, normalized.width); assertEquals(10, normalized.height) }
+            finally { normalized.flush() }
+        } finally { Files.deleteIfExists(file); original.flush() }
+    }
+
     @Test
     fun `image references are accepted only inside Kovelyx managed profile media`() {
         if (!ProfileLocalImages.supported) return

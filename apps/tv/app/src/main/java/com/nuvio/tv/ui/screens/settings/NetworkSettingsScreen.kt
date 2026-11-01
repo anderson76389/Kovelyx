@@ -432,6 +432,15 @@ fun AdvancedSettingsContent(
             }
         }
 
+        if (com.nuvio.tv.core.build.AppFeaturePolicy.inAppUpdatesEnabled) {
+            item(key = "update_settings") {
+                SettingsGroupCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(R.string.settings_org_section_updates)
+                ) { UpdateChannelSettings(initialFocusRequester = null) }
+            }
+        }
+
         item(key = "startup_settings") {
             SettingsGroupCard(
                 modifier = Modifier.fillMaxWidth(),

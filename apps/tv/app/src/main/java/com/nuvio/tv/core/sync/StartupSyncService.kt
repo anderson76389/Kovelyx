@@ -144,6 +144,7 @@ class StartupSyncService @Inject constructor(
 
     fun startPeriodicSurfacePulls() {
         if (periodicSurfacePullJob?.isActive == true) return
+        if (CloudflareTvAccountClient.enabled) cloudflareSync.request(profileManager.activeProfileId.value)
         periodicSurfacePullJob = scope.launch {
             while (true) {
                 delay(if (CloudflareTvAccountClient.enabled) CLOUDFLARE_FOREGROUND_PULL_INTERVAL_MS

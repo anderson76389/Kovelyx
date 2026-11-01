@@ -7,6 +7,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 
 class ProfileMediaEngineTest {
+    @kotlin.test.Test fun gifDetectionUsesActualSignatureAndHandlesShortOrInvalidFiles() {
+        kotlin.test.assertTrue(isProfileGif("GIF89a".encodeToByteArray()))
+        kotlin.test.assertTrue(isProfileGif("GIF87a".encodeToByteArray()))
+        kotlin.test.assertFalse(isProfileGif("GIF88a".encodeToByteArray()))
+        kotlin.test.assertFalse(isProfileGif("GIF".encodeToByteArray()))
+        kotlin.test.assertFalse(isProfileGif(byteArrayOf()))
+        kotlin.test.assertFalse(isProfileGif("notgif".encodeToByteArray()))
+    }
+
     private val v1 = "a".repeat(64)
     private val v2 = "b".repeat(64)
     private class Files : ProfileMediaFiles {

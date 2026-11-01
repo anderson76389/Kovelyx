@@ -7,6 +7,19 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.assertThrows
 
 class DisplayRefreshPolicyTest {
+    @Test fun pickerAdjustsOtherBoundAtomicallyAndRejectsInventedModes() {
+        val state = DisplayRefreshController()
+        val writes = mutableListOf<Pair<Int, Int>>()
+        state.initialize(60, 60, 60) { minimum, maximum -> writes += minimum to maximum }
+        state.displayChanged(setOf(24, 60, 120, 144), 60f)
+        state.chooseMinimum(144)
+        assertEquals(144 to 144, writes.last())
+        state.chooseMaximum(24)
+        assertEquals(24 to 24, writes.last())
+        assertFailsWith<IllegalArgumentException> { state.chooseMaximum(90) }
+        assertEquals(2, writes.size)
+    }
+
     private val mode60 = DisplayModeSpec(1, 3840, 2160, 59.94f)
     private val mode90 = mode60.copy(id = 2, hertz = 90f)
     private val mode120 = mode60.copy(id = 3, hertz = 119.88f)

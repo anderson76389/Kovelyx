@@ -211,26 +211,6 @@ internal fun LazyListScope.settingsRootContent(
         }
     }
     if (showAboutSection) {
-        if (onCheckForUpdatesClick != null) {
-            item {
-                SettingsSection(
-                    title = stringResource(Res.string.settings_org_section_updates),
-                    isTablet = isTablet,
-                ) {
-                    SettingsGroup(isTablet = isTablet) {
-                        UpdateChannelSettingsRow(isTablet = isTablet)
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.compose_settings_root_check_updates_title),
-                            description = stringResource(Res.string.compose_settings_root_check_updates_description),
-                            icon = Icons.Rounded.CloudDownload,
-                            isTablet = isTablet,
-                            onClick = onCheckForUpdatesClick,
-                        )
-                    }
-                }
-            }
-        }
         item {
             SettingsSection(
                 title = stringResource(Res.string.compose_settings_root_about_section),

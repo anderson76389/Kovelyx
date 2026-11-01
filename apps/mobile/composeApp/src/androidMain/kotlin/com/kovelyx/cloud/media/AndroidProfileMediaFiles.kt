@@ -41,10 +41,13 @@ class AndroidProfileMediaFiles(context: Context) : ProfileMediaFiles {
         .joinToString("") { "%02x".format(it.toInt() and 255) }
     override suspend fun encodeLocal(uri: String, background: Boolean): ProfileImageBytes = withContext(Dispatchers.IO) {
         val file = privateFile(uri)
-        require(file.length() in 1..18_000_000L) { "Image locale vide ou supérieure à 18 Mo." }
+        require(file.length() in 1..MAX_PROFILE_SOURCE_BYTES) { "Image locale vide ou supérieure à 64 Mo avant optimisation." }
         val header = file.inputStream().use { input -> ByteArray(12).also { input.read(it) } }
-        if (String(header, 0, 6, Charsets.US_ASCII).startsWith("GIF8")) {
+        if (isProfileGif(header)) {
             require(file.length() <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo ; choisissez une animation plus légère pour la synchroniser." }
+            val gifBounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(file.path, gifBounds)
+            require(gifBounds.outWidth > 0 && gifBounds.outHeight > 0 && gifBounds.outWidth.toLong() * gifBounds.outHeight <= 32_000_000L) { "Dimensions du GIF non prises en charge (32 mégapixels maximum)." }
             return@withContext ProfileImageBytes("image/gif", file.readBytes())
         }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
