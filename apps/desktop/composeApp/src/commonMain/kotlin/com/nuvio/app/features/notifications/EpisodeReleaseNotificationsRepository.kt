@@ -449,6 +449,7 @@ object EpisodeReleaseNotificationsRepository {
         return meta.videos.mapNotNull { episode ->
             val releaseDate = releaseDateIso(episode.released) ?: return@mapNotNull null
             if (releaseDate < trackedShow.followedOnIsoDate) return@mapNotNull null
+            if (releaseDate < CurrentDateProvider.todayIsoDate()) return@mapNotNull null
             if (episode.season == null && episode.episode == null) return@mapNotNull null
 
             EpisodeReleaseNotificationRequest(
