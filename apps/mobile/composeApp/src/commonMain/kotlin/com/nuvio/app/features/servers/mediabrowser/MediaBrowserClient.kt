@@ -57,6 +57,7 @@ internal class MediaBrowserClient(
                 this.method = method
                 header("Accept", "application/json")
                 header(authorizationHeader, authorizationValue(token))
+                if (token != null) header("X-Emby-Token", token)
                 if (body != null) {
                     header("Content-Type", "application/json")
                     setBody(body)
@@ -81,7 +82,7 @@ internal class MediaBrowserClient(
     }
 
     fun authorizationValue(token: String?): String = buildString {
-        append("MediaBrowser Client=\"Nuvio\", Device=\"")
+        append("MediaBrowser Client=\"Kovelyx\", Device=\"")
         append(getPlatform().name.headerValue())
         append("\", DeviceId=\"")
         append(deviceId.headerValue())
@@ -150,3 +151,27 @@ internal fun normalizeServerAddress(input: String, apiPath: String = ""): String
 }
 
 private fun String.headerValue(): String = filter { it != '"' && it != '\r' && it != '\n' }
+
+/** Resolve only a same-host public-info redirect before any password is sent. */
+internal fun redirectedServerAddress(baseUrl: String, apiPath: String, location: String?): String? {
+    if (location.isNullOrBlank()) return null
+    val suffix = apiPath + "/System/Info/Public"
+    val source = Url(buildUrl(baseUrl + apiPath, "/System/Info/Public"))
+    val origin = URLBuilder(source).apply { encodedPath = "/"; parameters.clear(); fragment = "" }.buildString().trimEnd('/')
+    val destination = when {
+        location.startsWith("//") -> source.protocol.name + ":" + location
+        location.startsWith("http://") || location.startsWith("https://") -> location
+        location.startsWith('/') -> origin + location
+        else -> origin + source.encodedPath.substringBeforeLast('/') + "/" + location
+    }
+    val target = runCatching { Url(destination) }.getOrNull() ?: return null
+    if (!target.host.equals(source.host, ignoreCase = true) || !target.user.isNullOrEmpty() || !target.password.isNullOrEmpty()) return null
+    if (target.protocol != URLProtocol.HTTP && target.protocol != URLProtocol.HTTPS) return null
+    if (source.protocol == URLProtocol.HTTPS && target.protocol != URLProtocol.HTTPS) return null
+    if (!target.encodedPath.endsWith(suffix)) return null
+    return normalizeServerAddress(URLBuilder(target).apply {
+        encodedPath = target.encodedPath.dropLast(suffix.length)
+        parameters.clear()
+        fragment = ""
+    }.buildString())
+}

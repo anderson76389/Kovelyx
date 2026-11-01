@@ -148,10 +148,12 @@ internal actual object ProfileLocalImages {
     actual fun isManagedUri(url: String): Boolean {
         if (!supported || !url.startsWith("file:", ignoreCase = true)) return false
         return runCatching {
-            val path = Path.of(URI(url)).toAbsolutePath().normalize()
-            path.startsWith(imageDir) && Files.isRegularFile(path) &&
+            val path = Path.of(URI(url)).toRealPath()
+            val cloudDir = DesktopStorage.rootDir.resolve("cloud-profile-media").toAbsolutePath().normalize()
+            (path.startsWith(imageDir) || path.startsWith(cloudDir)) && Files.isRegularFile(path) &&
                 (path.fileName.toString().lowercase(Locale.ROOT).endsWith(".png") ||
                     path.fileName.toString().lowercase(Locale.ROOT).endsWith(".jpg") ||
+                    path.fileName.toString().lowercase(Locale.ROOT).endsWith(".webp") ||
                     path.fileName.toString().lowercase(Locale.ROOT).endsWith(".gif"))
         }.getOrDefault(false)
     }

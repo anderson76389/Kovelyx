@@ -53,7 +53,6 @@ import nuvio.composeapp.generated.resources.settings_tracking_connect_first
 import nuvio.composeapp.generated.resources.settings_tracking_data_sources
 import nuvio.composeapp.generated.resources.settings_tracking_nuvio_library_description
 import nuvio.composeapp.generated.resources.settings_tracking_nuvio_progress_description
-import nuvio.composeapp.generated.resources.settings_tracking_progress_refresh_failed
 import nuvio.composeapp.generated.resources.settings_tracking_services
 import nuvio.composeapp.generated.resources.settings_tracking_simkl_library_description
 import nuvio.composeapp.generated.resources.settings_tracking_simkl_progress_description
@@ -247,18 +246,6 @@ private fun TrackingDataSources(
             isTablet = isTablet,
             onClick = { activePickerName = TrackingDataPicker.WATCH_PROGRESS.name },
         )
-        if (transitionState.lastRefreshSucceeded == false && !transitionState.isRefreshing) {
-            SettingsGroupDivider(isTablet = isTablet)
-            TrackingInlineErrorRow(
-                isTablet = isTablet,
-                message = stringResource(Res.string.settings_tracking_progress_refresh_failed),
-                onRetry = {
-                    scope.launch {
-                        WatchProgressSourceCoordinator.refreshActiveSource(ProfileRepository.activeProfileId)
-                    }
-                },
-            )
-        }
         if (traktConnected || simklConnected) {
             val effectiveRecommendationsSource = effectiveTrackingRecommendationsSource(
                 source = settingsUiState.moreLikeThisSource,

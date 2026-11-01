@@ -106,7 +106,7 @@ object CloudflareDataSync {
             // Offline/new profile: try again after D1 profile creation.
             throw IllegalStateException("Profil Cloudflare non encore lié : reprise de synchronisation nécessaire")
         }
-        ProfileRepository.syncCloudflareProfileImages()
+        val profileImagesReady = ProfileRepository.syncCloudflareProfileImages()
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
         try { com.nuvio.app.features.addons.AddonRepository.synchronizeCloudAddons(cloudId, records) }
         catch (cancelled: CancellationException) { throw cancelled }
@@ -143,6 +143,7 @@ object CloudflareDataSync {
         synchronizeLibrary(profileId, cloudId, reconciled)
         synchronizeProgress(profileId, cloudId, reconciled, suppressed)
         synchronizeWatched(profileId, cloudId, reconciled, suppressed)
+        check(profileImagesReady) { "Images de profil en attente de synchronisation" }
     }
 
     fun deleteProgress(profileId: Int, entries: Collection<WatchProgressEntry>) {

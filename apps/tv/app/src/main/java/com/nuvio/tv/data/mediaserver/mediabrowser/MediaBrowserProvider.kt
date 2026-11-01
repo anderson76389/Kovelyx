@@ -87,18 +87,15 @@ internal abstract class MediaBrowserProvider(
     }
 
     private suspend fun publicInfo(baseUrl: String): Pair<String, PublicInfo> {
-        val path = "/System/Info/Public"
-        val response = client.execute("GET", baseUrl + apiPath, path, token = null, allowRedirect = true)
-        if (response.status in 300..399) {
-            val redirected = response.location
-                ?.substringBefore(apiPath + path)
-                ?.let { normalizeServerAddress(it, apiPath) }
-                ?.takeIf { it != baseUrl }
-                ?: throw ServerException(ServerFailure.FAILED)
-            val retried = client.execute("GET", redirected + apiPath, path, token = null)
-            return redirected to client.json.decodeFromString(PublicInfo.serializer(), retried.body)
+        var current = baseUrl
+        repeat(4) {
+            val response = client.execute("GET", current + apiPath, "/System/Info/Public", token = null, allowRedirect = true)
+            if (response.status !in 300..399) return current to client.json.decodeFromString(PublicInfo.serializer(), response.body)
+            val next = redirectedServerAddress(current, apiPath, response.location)
+                ?.takeIf { it != current } ?: throw ServerException(ServerFailure.NOT_FOUND)
+            current = next
         }
-        return baseUrl to client.json.decodeFromString(PublicInfo.serializer(), response.body)
+        throw ServerException(ServerFailure.FAILED)
     }
 
     override suspend fun signOut(session: ServerSession) {

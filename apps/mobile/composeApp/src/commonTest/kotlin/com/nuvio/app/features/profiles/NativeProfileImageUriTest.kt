@@ -14,6 +14,15 @@ class NativeProfileImageUriTest {
     }
 
     @Test
+    fun acceptsDownloadedCloudAvatarAfterSyncAndRestart() {
+        val downloaded = "file:///data/user/0/com.kovelyx.mobile/files/kovelyx-cloud-profile-media/owner-version.webp"
+        assertTrue(downloaded.isValidAvatarUrl())
+        assertEquals(downloaded, normalizedAvatarUrl(downloaded))
+        assertFalse("file:///data/user/0/com.kovelyx.mobile/files/kovelyx-cloud-profile-media/../secret.png".isValidAvatarUrl())
+        assertFalse("file:///data/user/0/com.kovelyx.mobile/files/kovelyx-cloud-profile-media/%2e%2e/secret.png".isValidAvatarUrl())
+    }
+
+    @Test
     fun rejectsArbitraryLocalFilesAndContentGrants() {
         assertFalse("file:///storage/emulated/0/Download/private.jpg".isValidAvatarUrl())
         assertFalse("content://gallery/provider/1".isValidAvatarUrl())

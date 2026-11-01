@@ -39,6 +39,7 @@ class DesktopProfileMediaFilesTest {
             val cached = Path.of(java.net.URI(downloaded))
             try {
                 assertTrue(cached.startsWith(DesktopStorage.rootDir))
+                assertEquals(downloaded, com.nuvio.app.features.profiles.normalizedAvatarUrl(downloaded), "A downloaded avatar must remain displayable")
                 assertContentEquals(image.bytes, Files.readAllBytes(cached))
                 ImageIO.createImageInputStream(cached.toFile()).use { stream ->
                     val reader = ImageIO.getImageReaders(stream).next()

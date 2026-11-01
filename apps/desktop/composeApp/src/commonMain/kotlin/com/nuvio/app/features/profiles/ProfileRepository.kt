@@ -202,14 +202,15 @@ object ProfileRepository {
         }
     }
 
-    internal suspend fun syncCloudflareProfileImages(reportFailure: Boolean = false) {
-        if (!CloudflareAccountClient.enabled) return
-        val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId ?: return
+    internal suspend fun syncCloudflareProfileImages(reportFailure: Boolean = false): Boolean {
+        if (!CloudflareAccountClient.enabled) return true
+        val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId ?: return true
         try {
             val captured = _state.value.profiles
-            val images = CloudflareProfileMediaSync.synchronize(captured, reportFailure)
+            var mediaFailure: Exception? = null
+            val images = CloudflareProfileMediaSync.synchronize(captured, onFailure = { mediaFailure = it })
             val beforeById = captured.associateBy { it.id }
-            if ((AuthRepository.state.value as? AuthState.Authenticated)?.userId != owner) return
+            if ((AuthRepository.state.value as? AuthState.Authenticated)?.userId != owner) return false
             val byId = images.associateBy { it.id }
             val merged = _state.value.profiles.map { current ->
                 val image = byId[current.id]
@@ -222,11 +223,15 @@ object ProfileRepository {
                 _state.value = _state.value.copy(profiles = merged, activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex })
                 persist()
             }
+            if (mediaFailure != null && reportFailure) com.nuvio.app.core.ui.NuvioToastController.show(
+                getString(Res.string.profile_media_sync_pending, mediaFailure?.message.orEmpty()), durationMillis = 6000L)
+            return mediaFailure == null
         } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
         catch (error: Exception) {
             log.w(error) { "Images Cloudflare différées ; profils locaux conservés" }
             if (reportFailure) com.nuvio.app.core.ui.NuvioToastController.show(
                 getString(Res.string.profile_media_sync_pending, error.message.orEmpty()), durationMillis = 6000L)
+            return false
         }
     }
 
@@ -404,6 +409,9 @@ object ProfileRepository {
             } catch (error: Throwable) {
                 if (error is kotlinx.coroutines.CancellationException) throw error
                 log.e(error) { "Échec de la mise à jour des profils Kovelyx Cloudflare" }
+            } finally {
+                // The durable image outbox also retries after leaving the edit screen.
+                com.nuvio.app.core.cloud.CloudflareDataSync.request(activeProfileIndex)
             }
             return
         }
