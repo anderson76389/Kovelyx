@@ -28,6 +28,40 @@ class VideoPlaybackSmokeTest {
     @Test fun exoPlayerSurfaceReadsH264() = play(AndroidPlaybackEngine.ExoPlayer)
     @Test fun libmpvSurfaceReadsH264() = play(AndroidPlaybackEngine.Libmpv)
 
+    @Test fun displayPreferenceUsesOnlySupported60Or120HzWithoutChangingResolution() {
+        val activity = AtomicReference<android.app.Activity>()
+        compose.setContent {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            androidx.compose.runtime.SideEffect { activity.set(context as android.app.Activity) }
+        }
+        val original = AtomicReference<android.view.Display.Mode>()
+        compose.runOnIdle {
+            val host = activity.get()
+            original.set(requireNotNull(host.window.decorView.display).mode)
+            com.kovelyx.display.AndroidDisplayRefresh.bind(host)
+            com.kovelyx.display.DisplayRefreshSettings.select(120)
+        }
+        compose.waitForIdle()
+        try {
+            compose.runOnIdle {
+                val host = activity.get()
+                val modes = host.window.decorView.display.supportedModes.toList()
+                val sameSize = modes.filter { it.physicalWidth == original.get().physicalWidth && it.physicalHeight == original.get().physicalHeight }
+                val available = sameSize.mapNotNull { com.kovelyx.display.nominalRefreshRate(it.refreshRate) }.toSet()
+                val chosen = modes.firstOrNull { it.modeId == host.window.attributes.preferredDisplayModeId }
+                if (available.isNotEmpty()) {
+                    org.junit.Assert.assertNotNull("A supported display mode must be requested", chosen)
+                    val expected = if (120 in available) 120 else 60
+                    org.junit.Assert.assertEquals(expected, com.kovelyx.display.nominalRefreshRate(requireNotNull(chosen).refreshRate))
+                    org.junit.Assert.assertEquals(original.get().physicalWidth, chosen.physicalWidth)
+                    org.junit.Assert.assertEquals(original.get().physicalHeight, chosen.physicalHeight)
+                }
+            }
+        } finally {
+            compose.runOnIdle { com.kovelyx.display.DisplayRefreshSettings.select(60) }
+        }
+    }
+
     private fun play(engine: AndroidPlaybackEngine) {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val bytes = instrumentation.context.assets.open("media3-smoke.mp4.b64").use {

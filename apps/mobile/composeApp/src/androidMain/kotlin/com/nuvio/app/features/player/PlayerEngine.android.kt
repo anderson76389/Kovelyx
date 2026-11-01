@@ -84,6 +84,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
@@ -441,6 +442,7 @@ private fun ExoPlayerSurface(
 
         val player = if (useLibass) {
             ExoPlayer.Builder(context)
+                .setVideoChangeFrameRateStrategy(androidx.media3.common.C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF)
                 .setTrackSelector(trackSelector)
                 .setLoadControl(loadControl)
                 .buildWithAssSupportCompat(
@@ -457,6 +459,7 @@ private fun ExoPlayerSurface(
             )
 
             ExoPlayer.Builder(context)
+                .setVideoChangeFrameRateStrategy(androidx.media3.common.C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF)
                 .setRenderersFactory(renderersFactory)
                 .setTrackSelector(trackSelector)
                 .setLoadControl(loadControl)
@@ -1370,6 +1373,8 @@ private class NuvioLibmpvView(
     private val yuv420pEnabled: Boolean,
     attrs: AttributeSet? = null,
 ) : BaseMPVView(context, attrs) {
+    private enum class VideoSurfaceState { Detached, Attached, Released }
+    private val videoSurface = kotlinx.coroutines.flow.MutableStateFlow(VideoSurfaceState.Detached)
     private val mpvDispatcher = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "NuvioLibmpv").apply { isDaemon = true }
     }.asCoroutineDispatcher()
@@ -1399,6 +1404,18 @@ private class NuvioLibmpvView(
             // Only the view's owner thread may update Android window flags.
             post { keepScreenOn = requestedScreenAwake && !released.get() }
         }
+    }
+
+    override fun surfaceCreated(holder: android.view.SurfaceHolder) {
+        if (released.get()) return
+        super.surfaceCreated(holder)
+        // A valid Surface alone does not prove BaseMPVView has attached it to mpv.
+        videoSurface.value = VideoSurfaceState.Attached
+    }
+
+    override fun surfaceDestroyed(holder: android.view.SurfaceHolder) {
+        videoSurface.value = if (released.get()) VideoSurfaceState.Released else VideoSurfaceState.Detached
+        if (!released.get()) super.surfaceDestroyed(holder)
     }
 
     override fun initOptions() {
@@ -1444,23 +1461,31 @@ private class NuvioLibmpvView(
         requestHeaders: Map<String, String>,
         externalSubtitles: List<com.nuvio.app.features.streams.StreamSubtitle>,
         playWhenReady: Boolean,
-    ) = withContext(mpvDispatcher) {
-        if (!released.get()) {
-            val sameSource =
-                currentSourceUrl == sourceUrl &&
-                    currentSourceAudioUrl == sourceAudioUrl &&
-                    currentRequestHeaders == requestHeaders &&
-                    currentExternalSubtitles == externalSubtitles
-            currentSourceUrl = sourceUrl
-            currentSourceAudioUrl = sourceAudioUrl
-            currentRequestHeaders = requestHeaders
-            currentExternalSubtitles = externalSubtitles
-            if (!sameSource) {
-                loadCurrentSourceNow(playWhenReady = playWhenReady)
-            } else {
-                applyRequestHeadersNow(requestHeaders)
-                setPausedNow(!playWhenReady)
+    ) {
+        while (!released.get()) {
+            val surface = videoSurface.first { it != VideoSurfaceState.Detached }
+            if (surface == VideoSurfaceState.Released) return
+            val prepared = withContext(mpvDispatcher) {
+                if (released.get()) return@withContext true
+                if (videoSurface.value != VideoSurfaceState.Attached) return@withContext false
+                val sameSource =
+                    currentSourceUrl == sourceUrl &&
+                        currentSourceAudioUrl == sourceAudioUrl &&
+                        currentRequestHeaders == requestHeaders &&
+                        currentExternalSubtitles == externalSubtitles
+                currentSourceUrl = sourceUrl
+                currentSourceAudioUrl = sourceAudioUrl
+                currentRequestHeaders = requestHeaders
+                currentExternalSubtitles = externalSubtitles
+                if (!sameSource) {
+                    loadCurrentSourceNow(playWhenReady = playWhenReady)
+                } else {
+                    applyRequestHeadersNow(requestHeaders)
+                    setPausedNow(!playWhenReady)
+                }
+                true
             }
+            if (prepared) return
         }
     }
 
@@ -1751,6 +1776,7 @@ private class NuvioLibmpvView(
 
     fun releaseMpv() {
         if (!released.compareAndSet(false, true)) return
+        videoSurface.value = VideoSurfaceState.Released
         holder.removeCallback(this)
         mpvScope.launch {
             runCatching { mpv.destroy() }

@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kovelyx.display.DisplayRefreshSettings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,42 +63,66 @@ internal fun PlaybackVideoSection(
     val showAfrWarning = settings.frameRateMatchingMode != FrameRateMatchingMode.OFF ||
         (settings.resolutionMatchingEnabled && !resolutionSwitchingSupported)
 
-    SettingsSectionLabel(text = stringResource(R.string.playback_auto_frame_rate))
-    SettingsActionRow(
-        title = stringResource(R.string.playback_afr_mode),
-        subtitle = null,
-        value = frameRateMatchingLabel(settings.frameRateMatchingMode),
-        titleTrailingIcon = if (showAfrWarning) Icons.Default.Warning else null,
-        titleTrailingIconTint = NuvioTheme.colors.Warning,
-        enabled = enabled,
-        modifier = Modifier.focusRequester(frameRateFocusRequester),
-        onClick = { onOpenDialog(PlaybackDialog.FRAME_RATE_MATCHING) }
-    )
-    SettingsToggleRow(
-        title = stringResource(R.string.playback_resolution_matching),
-        subtitle = stringResource(
-            if (resolutionSwitchingSupported) R.string.playback_resolution_matching_sub
-            else R.string.playback_resolution_matching_unsupported_sub
-        ),
-        checked = settings.resolutionMatchingEnabled,
-        onToggle = { onUpdate { setResolutionMatchingEnabled(!settings.resolutionMatchingEnabled) } },
-        titleTrailingIcon = if (settings.resolutionMatchingEnabled && !resolutionSwitchingSupported) {
-            Icons.Default.Warning
-        } else {
-            null
-        },
-        titleTrailingIconTint = NuvioTheme.colors.Warning,
-        enabled = enabled
-    )
-    AfrCapabilityWarningCard(
-        snapshot = displayCapabilities,
-        afrModeOn = settings.frameRateMatchingMode != FrameRateMatchingMode.OFF,
-        resolutionMatchingOn = settings.resolutionMatchingEnabled,
-        onDisableAll = { onUpdate { disableAfrAndResolution() } },
-        onDisableAfrOnly = { onUpdate { setFrameRateMatchingMode(FrameRateMatchingMode.OFF) } },
-        onDisableResolutionOnly = { onUpdate { setResolutionMatchingEnabled(false) } },
-        focusAfterDisable = frameRateFocusRequester
-    )
+    val refreshState by DisplayRefreshSettings.state.collectAsStateWithLifecycle()
+    var showRefreshDialog by remember { mutableStateOf(false) }
+    if (refreshState.enabled) {
+        SettingsSectionLabel(text = stringResource(R.string.display_refresh_title))
+        SettingsActionRow(
+            title = stringResource(R.string.display_refresh_title),
+            subtitle = stringResource(if (refreshState.actual == refreshState.requested) R.string.display_refresh_description else R.string.display_refresh_unavailable),
+            value = "${refreshState.requested} Hz",
+            enabled = refreshState.available.isNotEmpty(),
+            onClick = { showRefreshDialog = true }
+        )
+        if (showRefreshDialog) SettingsSingleChoiceDialog(
+            title = stringResource(R.string.display_refresh_title),
+            options = listOf(60, 120).filter { it in refreshState.available }.map {
+                SettingsPickerOption(it, "$it Hz", stringResource(R.string.display_refresh_description))
+            },
+            selectedValue = refreshState.requested,
+            onOptionSelected = { DisplayRefreshSettings.select(it); showRefreshDialog = false },
+            onDismiss = { showRefreshDialog = false },
+            width = 460.dp, maxHeight = 320.dp
+        )
+    } else {
+        SettingsSectionLabel(text = stringResource(R.string.playback_auto_frame_rate))
+        SettingsActionRow(
+            title = stringResource(R.string.playback_afr_mode),
+            subtitle = null,
+            value = frameRateMatchingLabel(settings.frameRateMatchingMode),
+            titleTrailingIcon = if (showAfrWarning) Icons.Default.Warning else null,
+            titleTrailingIconTint = NuvioTheme.colors.Warning,
+            enabled = enabled,
+            modifier = Modifier.focusRequester(frameRateFocusRequester),
+            onClick = { onOpenDialog(PlaybackDialog.FRAME_RATE_MATCHING) }
+        )
+        SettingsToggleRow(
+            title = stringResource(R.string.playback_resolution_matching),
+            subtitle = stringResource(
+                if (resolutionSwitchingSupported) R.string.playback_resolution_matching_sub
+                else R.string.playback_resolution_matching_unsupported_sub
+            ),
+            checked = settings.resolutionMatchingEnabled,
+            onToggle = { onUpdate { setResolutionMatchingEnabled(!settings.resolutionMatchingEnabled) } },
+            titleTrailingIcon = if (settings.resolutionMatchingEnabled && !resolutionSwitchingSupported) {
+                Icons.Default.Warning
+            } else {
+                null
+            },
+            titleTrailingIconTint = NuvioTheme.colors.Warning,
+            enabled = enabled
+        )
+        AfrCapabilityWarningCard(
+            snapshot = displayCapabilities,
+            afrModeOn = settings.frameRateMatchingMode != FrameRateMatchingMode.OFF,
+            resolutionMatchingOn = settings.resolutionMatchingEnabled,
+            onDisableAll = { onUpdate { disableAfrAndResolution() } },
+            onDisableAfrOnly = { onUpdate { setFrameRateMatchingMode(FrameRateMatchingMode.OFF) } },
+            onDisableResolutionOnly = { onUpdate { setResolutionMatchingEnabled(false) } },
+            focusAfterDisable = frameRateFocusRequester
+        )
+
+    }
 
     if (settings.usesExoPlayerEngine) {
         val dv81Conversion = settings.dv7HandlingMode == Dv7HandlingMode.DV81_LIBDOVI

@@ -188,6 +188,10 @@ fun main(args: Array<String>) {
             icon = painterResource(appIconState.selected.transparentPreviewResource),
             init = ::configureMacosWindowBeforePeer,
         ) {
+            DisposableEffect(window) {
+                val refresh = com.kovelyx.display.WindowsDisplayRefresh(window)
+                onDispose { refresh.close() }
+            }
             SideEffect {
                 window.background = KovelyxDesktopNativeBackground
                 window.rootPane.background = KovelyxDesktopNativeBackground

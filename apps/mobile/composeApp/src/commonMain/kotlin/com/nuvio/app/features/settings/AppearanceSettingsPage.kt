@@ -92,6 +92,7 @@ internal fun LazyListScope.appearanceSettingsContent(
     onContinueWatchingClick: () -> Unit,
     onPosterCustomizationClick: () -> Unit,
 ) {
+    item { DisplayRefreshChoice(isTablet) }
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_appearance_section_theme),

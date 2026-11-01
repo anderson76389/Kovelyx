@@ -171,6 +171,7 @@ open class MainActivity : AppCompatActivity() {
         EpisodeReleaseNotificationPlatform.bindActivity(this)
         handleIncomingAppIntent(intent)
 
+        com.kovelyx.display.AndroidDisplayRefresh.bind(this)
         setContent {
             App()
         }
