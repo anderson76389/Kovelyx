@@ -1,6 +1,7 @@
 package com.kovelyx.cloud.preferences
 
-import kotlin.test.*
+import org.junit.Test
+import org.junit.Assert.*
 
 class PluginRepositoryUrlsTest {
     @Test fun configuredPathAndQueryKeepTheirCaseAndTrailingSlash() {

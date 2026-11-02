@@ -3,9 +3,15 @@ package com.kovelyx.cloud.preferences
 import com.kovelyx.cloud.catalogues.CatalogueStateStore
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
-import kotlin.test.*
+import org.junit.Test
+import org.junit.Assert.*
 
 class PreferenceSnapshotEngineTest {
+    private suspend inline fun <reified T : Throwable> assertFailsWith(crossinline block: suspend () -> Unit) {
+        try { block() } catch (error: Throwable) { if (error is T) return; throw error }
+        fail("Expected " + T::class.simpleName)
+    }
+
     private class Store : CatalogueStateStore {
         val data = mutableMapOf<String, String>()
         override fun load(key: String) = data[key]
@@ -85,7 +91,7 @@ class PreferenceSnapshotEngineTest {
         var published: JsonObject? = null
         val restarted = PreferenceSnapshotEngine(store)
         assertTrue(restarted.synchronize("owner", "profile", "visual", PreferenceRow(red, 2),
-            current = { blue }, apply = { _, _ -> fail("Une modification locale ne doit pas être écrasée") },
+            current = { blue }, apply = { _, _ -> throw AssertionError("Une modification locale ne doit pas être écrasée") },
             publish = { payload, revision -> assertEquals(2, revision); published = payload }, isCurrent = { true }))
         assertEquals(blue, published)
     }
