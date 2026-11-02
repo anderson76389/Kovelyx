@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="catalogue_sync_transferring">Transferring complete collections… Keep this device connected.</string>
+    <string name="catalogue_sync_done">Collections and home layout are synchronized for this profile.</string>
+    <string name="catalogue_sync_failed">Collections could not be synchronized. Your local data is safe; automatic retries continue.</string>
+    <string name="catalogue_sync_pending">Collections awaiting synchronization. Use the same account and profile on each device.</string>
+    <string name="catalogue_sync_now">Synchronize collections now</string>
+</resources>

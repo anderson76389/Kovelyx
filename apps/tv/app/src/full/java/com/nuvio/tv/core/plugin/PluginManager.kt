@@ -269,6 +269,10 @@ class PluginManager @Inject constructor(
             pendingPushAfterSync = true
             return
         }
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) {
+            pluginSyncService.markCloudChange()
+            return
+        }
         if (!authManager.isAuthenticated) {
             Log.d(TAG, "triggerRemoteSync: skipped (not authenticated, state=${authManager.authState.value})")
             return
@@ -616,6 +620,7 @@ class PluginManager @Inject constructor(
             if (scraper.id == scraperId) scraper.copy(enabled = enabled) else scraper
         }
         dataStore.saveScrapers(updatedScrapers)
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled && !isSyncingFromRemote) triggerRemoteSync()
     }
 
     /**
@@ -627,6 +632,7 @@ class PluginManager @Inject constructor(
             if (scraper.repositoryId == repoId) scraper.copy(enabled = enabled) else scraper
         }
         dataStore.saveScrapers(updatedScrapers)
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled && !isSyncingFromRemote) triggerRemoteSync()
     }
 
     /**
@@ -634,10 +640,12 @@ class PluginManager @Inject constructor(
      */
     suspend fun setPluginsEnabled(enabled: Boolean) {
         dataStore.setPluginsEnabled(enabled)
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled && !isSyncingFromRemote) triggerRemoteSync()
     }
 
     suspend fun setGroupStreamsByRepository(enabled: Boolean) {
         dataStore.setGroupStreamsByRepository(enabled)
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled && !isSyncingFromRemote) triggerRemoteSync()
     }
     
     /**

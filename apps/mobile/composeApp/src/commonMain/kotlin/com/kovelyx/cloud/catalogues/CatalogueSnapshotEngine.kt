@@ -29,6 +29,7 @@ private data class CatalogueState(
     val initialized: Boolean = false,
     val remoteHash: String? = null,
     val pendingHash: String? = null,
+    val localHash: String? = null,
 )
 
 fun splitCatalogue(text: String): List<CatalogueChunk> {
@@ -161,9 +162,10 @@ class CatalogueSnapshotEngine(
         }
         val state = entry.state
         val initialized = state.initialized || (head != null && state.pendingHash == head.sha256)
-        if (!state.dirty && initialized && state.remoteHash == head?.sha256) return@withLock true
         val local = current()
         valid()
+        if (!state.dirty && initialized && state.remoteHash == head?.sha256 &&
+            state.localHash == digest(local.encodeToByteArray())) return@withLock true
 
         suspend fun receive(remoteHead: CatalogueHead): String {
             require(remoteHead.sha256.matches(Regex("[a-f0-9]{64}")) && remoteHead.parts in 1..CATALOGUE_MAX_PARTS &&
@@ -187,7 +189,8 @@ class CatalogueSnapshotEngine(
             valid()
             val pending = Json.parseToJsonElement(merged) != Json.parseToJsonElement(received)
             return@withLock save(key, entry, state.copy(profileUuid = profileUuid, initialized = true,
-                remoteHash = head.sha256, dirty = pending, pendingHash = null)) && !pending
+                remoteHash = head.sha256, dirty = pending, pendingHash = null,
+                localHash = digest(current().encodeToByteArray()))) && !pending
         }
 
         var publication = local
@@ -232,7 +235,8 @@ class CatalogueSnapshotEngine(
             val unchanged = latest.raw == entry.raw && current() == local
             valid()
             if (save(key, latest, latest.state.copy(profileUuid = profileUuid, initialized = true,
-                remoteHash = hash, pendingHash = null, dirty = !unchanged))) return@withLock unchanged
+                remoteHash = hash, pendingHash = null, dirty = !unchanged,
+                localHash = if (unchanged) digest(local.encodeToByteArray()) else latest.state.localHash))) return@withLock unchanged
         }
         @Suppress("UNREACHABLE_CODE")
         false

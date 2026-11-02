@@ -56,6 +56,21 @@ class CatalogueSnapshotEngineTest {
             }, isCurrent = { active })
     }
 
+    @Test fun missingLocalCatalogueIsRecoveredEvenWhenCloudRevisionIsUnchanged() = runBlocking {
+        val remote = Remote()
+        val pc = Device(remote, one); assertTrue(pc.sync())
+        val phone = Device(remote); assertTrue(phone.sync())
+        assertTrue(phone.text.contains("Ma collection"))
+        val writes = remote.writes
+        phone.text = "[]" // restored checkpoint with missing/reset local storage
+        assertTrue(phone.sync())
+        assertTrue(phone.text.contains("Ma collection"))
+        assertEquals(writes, remote.writes)
+        phone.edit("[]") // intentional removal must still win
+        assertTrue(phone.sync())
+        assertTrue(pc.sync()); assertEquals("[]", pc.text)
+    }
+
     @Test fun unicodeBoundaryPreservesExactText() {
         val text = "x".repeat(5999) + "😀" + "é".repeat(6000)
         val parts = splitCatalogue(text)
@@ -69,7 +84,7 @@ class CatalogueSnapshotEngineTest {
         assertEquals(Json.parseToJsonElement(one), Json.parseToJsonElement(tv.text))
         val reads = remote.reads; val writes = remote.writes; val exports = tv.exports
         repeat(10) { assertTrue(tv.sync()) }
-        assertEquals(reads, remote.reads); assertEquals(writes, remote.writes); assertEquals(exports, tv.exports)
+        assertEquals(reads, remote.reads); assertEquals(writes, remote.writes); assertEquals(exports + 1, tv.exports)
     }
 
     @Test fun initialMigrationKeepsEachDevicesCollectionsThenSyncsDeletion() = runBlocking {

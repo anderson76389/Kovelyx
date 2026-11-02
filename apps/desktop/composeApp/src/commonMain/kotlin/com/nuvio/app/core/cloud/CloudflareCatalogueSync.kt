@@ -19,7 +19,17 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
+enum class CatalogueSyncPhase { IDLE, PENDING, TRANSFERRING, DONE, FAILED }
+data class CatalogueSyncStatus(val profileId: Int = 0, val phase: CatalogueSyncPhase = CatalogueSyncPhase.IDLE)
+
 object CloudflareCatalogueSync {
+    private val _status = kotlinx.coroutines.flow.MutableStateFlow(CatalogueSyncStatus())
+    val status: kotlinx.coroutines.flow.StateFlow<CatalogueSyncStatus> = _status
+    fun requestSync() {
+        val profileId = ProfileRepository.activeProfileId
+        _status.value = CatalogueSyncStatus(profileId, CatalogueSyncPhase.PENDING)
+        CloudflareDataSync.request(profileId)
+    }
     private val log = Logger.withTag("KovelyxCatalogues")
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
     private val cachedEngine = atomic<CatalogueSnapshotEngine?>(null)
@@ -45,11 +55,28 @@ object CloudflareCatalogueSync {
         }
     }
 
+    /** Await the catalogue itself before a website import, without depending on unrelated media/services. */
+    suspend fun synchronizeNow(profileId: Int): Boolean {
+        val owner = CloudflareAccountClient.currentSession?.userId ?: return false
+        repeat(3) {
+            if (ProfileRepository.activeProfileId != profileId || CloudflareAccountClient.currentSession?.userId != owner) return false
+            var id = ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == profileId }?.id
+            if (id.isNullOrBlank()) {
+                ProfileRepository.pullProfiles()
+                id = ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == profileId }?.id
+            }
+            if (id.isNullOrBlank()) return false
+            if (synchronize(profileId, id, CloudflareAccountClient.synchronizeAll(id))) return true
+        }
+        return false
+    }
+
     fun edited(kind: String) {
         if (!CloudflareAccountClient.enabled) return
         val account = AuthRepository.state.value as? AuthState.Authenticated ?: return
         if (account.isAnonymous) return
         val profileId = ProfileRepository.activeProfileId
+        _status.value = CatalogueSyncStatus(profileId, CatalogueSyncPhase.PENDING)
         val uuid = ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == profileId }?.id
         runCatching {
             val engine = engine() ?: return
@@ -65,7 +92,9 @@ object CloudflareCatalogueSync {
         fun current() = (AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId &&
             CloudflareAccountClient.currentSession?.userId == account.userId && ProfileRepository.activeProfileId == profileId &&
             ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == profileId }?.id == uuid
+        _status.value = CatalogueSyncStatus(profileId, CatalogueSyncPhase.TRANSFERRING)
         var ready = true
+        var failed = false
         for (kind in listOf("collections", "layout")) {
             try {
                 val synchronized = engine.synchronize(account.userId, profileId, uuid, kind, readCatalogueHead(rows, kind),
@@ -109,9 +138,15 @@ object CloudflareCatalogueSync {
             } catch (cancelled: CancellationException) { throw cancelled }
             catch (_: Exception) {
                 ready = false
+                failed = true
                 log.w { "Catalogue en attente ; définitions locales conservées" }
             }
         }
+        if (current()) _status.value = CatalogueSyncStatus(profileId, when {
+            ready -> CatalogueSyncPhase.DONE
+            failed -> CatalogueSyncPhase.FAILED
+            else -> CatalogueSyncPhase.PENDING
+        })
         return ready
     }
 }

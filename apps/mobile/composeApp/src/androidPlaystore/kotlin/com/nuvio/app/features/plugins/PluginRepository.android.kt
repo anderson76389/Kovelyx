@@ -18,6 +18,8 @@ actual object PluginRepository {
 
     actual fun clearLocalState() = Unit
 
+    actual suspend fun synchronizeCloudPlugins(profileId: Int, uuid: String, rows: List<kotlinx.serialization.json.JsonObject>): Boolean = true
+
     actual suspend fun pullFromServer(profileId: Int) = Unit
 
     actual suspend fun addRepository(rawUrl: String): AddPluginRepositoryResult =

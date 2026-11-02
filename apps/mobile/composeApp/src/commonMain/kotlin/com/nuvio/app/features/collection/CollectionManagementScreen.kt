@@ -72,6 +72,7 @@ fun CollectionManagementScreen(
     onNavigateToEditor: (String?) -> Unit,
 ) {
     val collections by CollectionRepository.collections.collectAsState()
+    val cloudStatus by com.nuvio.app.core.cloud.CloudflareCatalogueSync.status.collectAsState()
     val clipboardManager = LocalClipboardManager.current
     var showImportDialog by remember { mutableStateOf(false) }
     var importText by remember { mutableStateOf("") }
@@ -117,6 +118,23 @@ fun CollectionManagementScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        }
+
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.currentSession != null) {
+            item {
+                NuvioSurfaceCard {
+                    val phase = cloudStatus.takeIf { it.profileId == com.nuvio.app.features.profiles.ProfileRepository.activeProfileId }?.phase
+                    Text(stringResource(when (phase) {
+                        com.nuvio.app.core.cloud.CatalogueSyncPhase.TRANSFERRING -> Res.string.catalogue_sync_transferring
+                        com.nuvio.app.core.cloud.CatalogueSyncPhase.DONE -> Res.string.catalogue_sync_done
+                        com.nuvio.app.core.cloud.CatalogueSyncPhase.FAILED -> Res.string.catalogue_sync_failed
+                        else -> Res.string.catalogue_sync_pending
+                    }), style = MaterialTheme.typography.bodyMedium)
+                    Spacer(Modifier.height(12.dp))
+                    NuvioPrimaryButton(text = stringResource(Res.string.catalogue_sync_now),
+                        onClick = { com.nuvio.app.core.cloud.CloudflareCatalogueSync.requestSync() })
+                }
             }
         }
 

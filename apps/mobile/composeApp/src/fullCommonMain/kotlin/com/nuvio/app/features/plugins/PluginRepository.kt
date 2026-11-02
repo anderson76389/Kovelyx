@@ -26,7 +26,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.*
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
@@ -117,6 +117,9 @@ actual object PluginRepository {
     }
 
     actual suspend fun pullFromServer(profileId: Int) {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId); return
+        }
         val effectiveProfileId = resolveEffectiveProfileId(profileId)
         ensureStateLoadedForProfile(effectiveProfileId)
         runCatching {
@@ -304,18 +307,21 @@ actual object PluginRepository {
             )
         }
         persist()
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) cloudEdited()
     }
 
     actual fun setPluginsEnabled(enabled: Boolean) {
         initialize()
         _uiState.update { it.copy(pluginsEnabled = enabled) }
         persist()
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) cloudEdited()
     }
 
     actual fun setGroupStreamsByRepository(enabled: Boolean) {
         initialize()
         _uiState.update { it.copy(groupStreamsByRepository = enabled) }
         persist()
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) cloudEdited()
     }
 
     actual fun setLocalPluginSearchPaused(paused: Boolean) {
@@ -502,7 +508,69 @@ actual object PluginRepository {
         }
     }
 
+    private val cloudFeature = "plugin_repositories_v1"
+    private fun cloudSnapshot(): kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.buildJsonObject {
+        put("repositories", kotlinx.serialization.json.buildJsonArray {
+            _uiState.value.repositories.forEach { repo -> add(kotlinx.serialization.json.buildJsonObject {
+                put("url", repo.manifestUrl); put("name", repo.name); put("repo_type", "NUVIO_JS")
+            }) }
+        })
+        put("disabled", kotlinx.serialization.json.JsonArray(_uiState.value.scrapers.filter { !it.enabled }.map { kotlinx.serialization.json.JsonPrimitive(it.repositoryUrl + "|" + it.filename) }))
+        put("enabled", _uiState.value.pluginsEnabled)
+        put("group", _uiState.value.groupStreamsByRepository)
+    }
+    private fun cloudEdited() {
+        if (!com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) return
+        val owner = com.nuvio.app.core.cloud.CloudflareAccountClient.currentSession?.userId ?: return
+        val pid = ProfileRepository.activeProfileId
+        val id = ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == pid }?.id ?: return
+        com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.engine.edited(owner, id, cloudFeature)
+        com.nuvio.app.core.cloud.CloudflareDataSync.request(pid)
+    }
+    actual suspend fun synchronizeCloudPlugins(profileId: Int, uuid: String, rows: List<kotlinx.serialization.json.JsonObject>): Boolean {
+        if (resolveEffectiveProfileId(profileId) != profileId) return true
+        ensureStateLoadedForProfile(profileId)
+        val owner = com.nuvio.app.core.cloud.CloudflareAccountClient.currentSession?.userId ?: return true
+        fun current() = ProfileRepository.activeProfileId == profileId && currentProfileId == profileId &&
+            com.nuvio.app.core.cloud.CloudflareAccountClient.currentSession?.userId == owner &&
+            ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == profileId }?.id == uuid
+        return com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.engine.synchronize(owner, uuid, cloudFeature,
+            com.kovelyx.cloud.preferences.preferenceRow(rows, cloudFeature),
+            current = { check(current()); cloudSnapshot() },
+            apply = { expected, next ->
+                val before = _uiState.value
+                val desired = next["repositories"]?.jsonArray.orEmpty().map { it.jsonObject }
+                require(desired.size <= 100)
+                // DEX repositories are TV-only; retain them in cloud without trying to execute them here.
+                val supported = desired.filter { it["repo_type"]?.jsonPrimitive?.content != "EXTERNAL_DEX" }
+                val loaded = supported.map { item ->
+                    val url = normalizeManifestUrl(item["url"]!!.jsonPrimitive.content)
+                    val existing = before.repositories.firstOrNull { it.manifestUrl == url }
+                    if (existing != null) existing to before.scrapers.filter { it.repositoryUrl == url }
+                    else fetchRepositoryData(url, before.scrapers.associateBy { it.id })
+                }
+                if (!current() || cloudSnapshot() != expected) false else {
+                    val disabled = next["disabled"]?.jsonArray.orEmpty().map { it.jsonPrimitive.content }.toSet()
+                    _uiState.value = before.copy(
+                        repositories = loaded.map { it.first },
+                        scrapers = loaded.flatMap { it.second }.map { it.copy(enabled = it.manifestEnabled && (it.repositoryUrl + "|" + it.filename) !in disabled) },
+                        pluginsEnabled = next["enabled"]?.jsonPrimitive?.booleanOrNull ?: true,
+                        groupStreamsByRepository = next["group"]?.jsonPrimitive?.booleanOrNull ?: false)
+                    persist()
+                    true
+                }
+            },
+            publish = { value, revision -> check(current())
+                // Preserve unsupported repository types received from another platform.
+                val unsupported = com.kovelyx.cloud.preferences.preferenceRow(rows, cloudFeature)?.payload
+                    ?.get("repositories")?.jsonArray.orEmpty().filter { it.jsonObject["repo_type"]?.jsonPrimitive?.content == "EXTERNAL_DEX" }
+                val merged = kotlinx.serialization.json.JsonObject(value + ("repositories" to kotlinx.serialization.json.JsonArray(value["repositories"]!!.jsonArray + unsupported)))
+                com.nuvio.app.core.cloud.CloudflareAccountClient.writeSync(uuid, "profile_settings", cloudFeature, merged, revision)
+            }, isCurrent = ::current)
+    }
+
     private fun pushToServer() {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) { cloudEdited(); return }
         scope.launch {
             runCatching {
                 val repos = _uiState.value.repositories.mapIndexed { index, repo ->

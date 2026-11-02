@@ -42,6 +42,7 @@ class CloudflareTvDataSync @Inject constructor(
     private val mutations: WatchStateMutationStore,
     private val addons: AddonSyncService,
     private val catalogues: CloudflareTvCatalogueSync,
+    private val preferences: CloudflareTvPreferencesSync,
     private val profileMedia: CloudflareTvProfileMediaSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -159,6 +160,10 @@ class CloudflareTvDataSync @Inject constructor(
         val catalogueReady = try { catalogues.synchronize(profileId, uuid, rows) }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (_: Exception) { false }
+        var preferencesReady = true
+        try { preferencesReady = preferences.synchronize(profileId, uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { preferencesReady = false; Log.w(TAG, "Préférences TV différées", error) }
         val remote = rows.associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }
@@ -185,6 +190,7 @@ class CloudflareTvDataSync @Inject constructor(
         syncWatched(profileId, uuid, remote.filterKeys {
             !it.startsWith("watched_items|") || it.removePrefix("watched_items|") !in deletedKeys.watched
         }, deletedKeys.watched)
+        check(preferencesReady) { "Préférences TV en attente" }
         check(addonsReady) { "Extensions TV en attente" }
         check(catalogueReady) { "Catalogues TV en attente" }
         check(imagesReady) { "Images Cloudflare en attente" }
