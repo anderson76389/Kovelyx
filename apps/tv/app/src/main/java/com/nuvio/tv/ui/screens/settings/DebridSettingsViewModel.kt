@@ -395,6 +395,7 @@ data class DebridSettingsUiState(
     val cloudLibraryEnabled: Boolean = true,
     val torboxApiKey: String = "",
     val premiumizeApiKey: String = "",
+    val allDebridApiKey: String = "",
     val realDebridApiKey: String = "",
     val preferredResolverProviderId: String = "",
     val instantPlaybackPreparationLimit: Int = 0,
@@ -416,6 +417,7 @@ data class DebridSettingsUiState(
         get() = mapOf(
             DebridProviders.TORBOX_ID to torboxApiKey,
             DebridProviders.PREMIUMIZE_ID to premiumizeApiKey,
+            DebridProviders.ALL_DEBRID_ID to allDebridApiKey,
             DebridProviders.REAL_DEBRID_ID to realDebridApiKey
         )
 
@@ -461,6 +463,7 @@ data class DebridSettingsUiState(
         cloudLibraryEnabled = settings.cloudLibraryEnabled,
         torboxApiKey = settings.torboxApiKey,
         premiumizeApiKey = settings.premiumizeApiKey,
+        allDebridApiKey = settings.allDebridApiKey,
         realDebridApiKey = settings.realDebridApiKey,
         preferredResolverProviderId = settings.preferredResolverProviderId,
         instantPlaybackPreparationLimit = settings.instantPlaybackPreparationLimit,

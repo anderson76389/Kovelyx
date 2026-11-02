@@ -12,6 +12,11 @@ class DebridProvidersTest {
         val settings = DebridSettings(enabled = true, allDebridApiKey = "ad")
         assertEquals("ad", settings.apiKeyFor("alldebrid"))
         assertEquals("alldebrid", settings.activeResolverProviderId)
+        val ui = com.nuvio.tv.ui.screens.settings.DebridSettingsUiState().fromSettings(settings)
+        assertEquals("ad", ui.apiKeyFor("alldebrid"))
+        assertTrue(ui.hasAnyApiKey)
+        assertTrue(ui.canResolvePlayableLinks)
+        assertEquals("alldebrid", ui.activeResolverProvider?.id)
     }
 
     @Test
