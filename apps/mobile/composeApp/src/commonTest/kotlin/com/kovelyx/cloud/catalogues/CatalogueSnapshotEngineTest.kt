@@ -84,7 +84,7 @@ class CatalogueSnapshotEngineTest {
         assertEquals(Json.parseToJsonElement(one), Json.parseToJsonElement(tv.text))
         val reads = remote.reads; val writes = remote.writes; val exports = tv.exports
         repeat(10) { assertTrue(tv.sync()) }
-        assertEquals(reads, remote.reads); assertEquals(writes, remote.writes); assertEquals(exports + 1, tv.exports)
+        assertEquals(reads, remote.reads); assertEquals(writes, remote.writes); assertEquals(exports + 10, tv.exports) // One local integrity check per poll, no network transfer.
     }
 
     @Test fun initialMigrationKeepsEachDevicesCollectionsThenSyncsDeletion() = runBlocking {
