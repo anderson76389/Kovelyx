@@ -179,31 +179,14 @@ class PluginManager @Inject constructor(
         }
     }
 
-    private fun canonicalizeManifestUrl(url: String): String {
-        val trimmed = sanitizeScheme(url).trimEnd('/')
-        return if (trimmed.endsWith(MANIFEST_SUFFIX, ignoreCase = true)) {
-            trimmed
-        } else {
-            "$trimmed$MANIFEST_SUFFIX"
-        }
-    }
+    private fun canonicalizeManifestUrl(url: String): String =
+        com.kovelyx.cloud.preferences.canonicalPluginRepositoryUrl(sanitizeScheme(url))
 
-    /**
-     * Canonicalize a URL for deduplication. For NuvioTV-style URLs (that don't end in .json),
-     * appends /manifest.json. For URLs already ending in .json (external repos), keeps them as-is.
-     */
-    private fun canonicalizeRepoUrl(url: String): String {
-        val trimmed = sanitizeScheme(url).trimEnd('/')
-        // If URL already ends with a .json file, it's likely an external repo URL — keep as-is
-        if (trimmed.substringAfterLast("/").endsWith(".json", ignoreCase = true)) {
-            return trimmed
-        }
-        // Otherwise canonicalize as NuvioTV manifest
-        return canonicalizeManifestUrl(trimmed)
-    }
+    private fun canonicalizeRepoUrl(url: String): String =
+        com.kovelyx.cloud.preferences.canonicalPluginRepositoryUrl(sanitizeScheme(url), allowJsonFile = true)
 
-    private fun normalizeUrl(url: String): String = canonicalizeRepoUrl(url).lowercase()
-    
+    private fun normalizeUrl(url: String): String = canonicalizeRepoUrl(url)
+
     // Single-flight map to prevent duplicate scraper executions
     private val inFlightScrapers = ConcurrentHashMap<String, kotlinx.coroutines.Deferred<List<LocalScraperResult>>>()
     
@@ -317,7 +300,7 @@ class PluginManager @Inject constructor(
             if (existingRepository != null) {
                 return@withContext Result.success(existingRepository)
             }
-            val filename = sanitizedUrl.substringAfterLast("/")
+            val filename = sanitizedUrl.substringBefore("?").substringAfterLast("/")
             val isExplicitJsonFile = filename.endsWith(".json", ignoreCase = true)
                     && !filename.equals("manifest.json", ignoreCase = true)
 
@@ -412,8 +395,8 @@ class PluginManager @Inject constructor(
             type = RepositoryType.NUVIO_JS
         )
 
-        dataStore.addRepository(repo)
         downloadJsScrapers(repo.id, canonicalManifestUrl, manifest.scrapers)
+        dataStore.addRepository(repo)
 
         Log.d(TAG, "NuvioTV repository added: ${repo.name} with ${manifest.scrapers.size} scrapers")
         triggerRemoteSync()
@@ -476,7 +459,9 @@ class PluginManager @Inject constructor(
 
         // Push synchronously when user-initiated (not during reconciliation)
         // to prevent the next sync pull from re-adding the removed repo
-        if (!isSyncingFromRemote && authManager.isAuthenticated) {
+        if (!isSyncingFromRemote && com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) {
+            pluginSyncService.markCloudChange()
+        } else if (!isSyncingFromRemote && authManager.isAuthenticated) {
             Log.d(TAG, "removeRepository: pushing removal to remote synchronously")
             pluginSyncService.pushToRemote()
         } else if (isSyncingFromRemote) {
@@ -974,17 +959,13 @@ class PluginManager @Inject constructor(
         manifestUrl: String,
         scraperInfos: List<ScraperManifestInfo>
     ) = withContext(Dispatchers.IO) {
-        val baseUrl = manifestUrl.substringBeforeLast("/")
+        var downloaded = 0
         val existingScrapers = dataStore.scrapers.first().toMutableList()
         
         scraperInfos.forEach { info ->
             try {
-                val codeUrl = if (info.filename.startsWith("http")) {
-                    info.filename
-                } else {
-                    "$baseUrl/${info.filename}"
-                }
-                
+                val codeUrl = com.kovelyx.cloud.preferences.pluginCodeUrl(manifestUrl, info.filename)
+
                 // Check response size before downloading
                 val headRequest = Request.Builder()
                     .url(codeUrl)
@@ -1057,6 +1038,7 @@ class PluginManager @Inject constructor(
                 // Update scraper list
                 existingScrapers.removeAll { it.id == scraperId }
                 existingScrapers.add(scraper)
+                downloaded++
                 
                 Log.d(TAG, "Downloaded scraper: ${info.name}")
                 
@@ -1065,6 +1047,7 @@ class PluginManager @Inject constructor(
             }
         }
         
+        check(downloaded == scraperInfos.size) { "Le code de certains modules n’a pas pu être téléchargé ; réessayez lorsque le fournisseur est disponible." }
         dataStore.saveScrapers(existingScrapers)
     }
 

@@ -416,19 +416,13 @@ actual object PluginRepository {
         return withContext(Dispatchers.Default) {
             val payload = httpGetText(manifestUrl)
             val manifest = PluginManifestParser.parse(payload)
-            val baseUrl = manifestUrl.substringBefore("?").removeSuffix("/manifest.json")
-
-            val scrapers = manifest.scrapers
-                .filter { scraper -> scraper.isSupportedOnCurrentPlatform() }
+            val supported = manifest.scrapers.filter { it.isSupportedOnCurrentPlatform() }
+            val scrapers = supported
                 .mapNotNull { info ->
-                    val codeUrl = if (info.filename.startsWith("http://") || info.filename.startsWith("https://")) {
-                        info.filename
-                    } else {
-                        "$baseUrl/${info.filename.trimStart('/')}"
-                    }
+                    val codeUrl = com.kovelyx.cloud.preferences.pluginCodeUrl(manifestUrl, info.filename)
                     runCatching {
                         val code = httpGetText(codeUrl)
-                        val scraperId = "${manifestUrl.lowercase()}:${info.id}"
+                        val scraperId = "${manifestUrl}:${info.id}"
                         val cached = PluginStorage.saveScraperCode(
                             profileId = storageProfileId,
                             scraperId = scraperId,
@@ -438,7 +432,7 @@ actual object PluginRepository {
                         if (!cached) {
                             log.w { "Failed to cache plugin scraper $scraperId" }
                         }
-                        val previous = previousScrapers[scraperId]
+                        val previous = previousScrapers[scraperId] ?: previousScrapers["${manifestUrl.lowercase()}:${info.id}"]
                         val enabled = when {
                             !info.enabled -> false
                             previous != null -> previous.enabled
@@ -464,6 +458,7 @@ actual object PluginRepository {
                     }.getOrNull()
                 }
 
+            check(scrapers.size == supported.size) { "Le code de certains modules n’a pas pu être téléchargé. Réessayez lorsque le fournisseur est disponible." }
             val repo = PluginRepositoryItem(
                 manifestUrl = manifestUrl,
                 name = manifest.name,
@@ -713,19 +708,8 @@ actual object PluginRepository {
     }
 
     private fun normalizeManifestUrl(rawUrl: String): String {
-        val trimmed = rawUrl.trim()
-        require(trimmed.isNotEmpty()) { runBlocking { getString(Res.string.plugins_error_enter_repo_url) } }
-
-        val normalizedScheme = when {
-            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
-            else -> "https://$trimmed"
-        }
-
-        val withoutFragment = normalizedScheme.substringBefore("#")
-        val query = withoutFragment.substringAfter("?", "")
-        val path = withoutFragment.substringBefore("?").trimEnd('/')
-        val manifestPath = if (path.endsWith("/manifest.json")) path else "$path/manifest.json"
-        return if (query.isEmpty()) manifestPath else "$manifestPath?$query"
+        require(rawUrl.isNotBlank()) { runBlocking { getString(Res.string.plugins_error_enter_repo_url) } }
+        return com.kovelyx.cloud.preferences.canonicalPluginRepositoryUrl(rawUrl)
     }
 
     private fun resolveEffectiveProfileId(profileId: Int): Int {
