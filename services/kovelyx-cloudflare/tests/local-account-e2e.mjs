@@ -228,6 +228,24 @@ try {
   assert.equal((await req("/v1/sync","POST",addons,bob.token)).status,404);
 
   // Real chunk transfer, atomic publication, isolation, deletion and old-version cleanup.
+
+  for (const [itemKey,payload] of Object.entries({
+    visual_theme_v1:{selected_theme:{type:"string",value:"PURPLE"},amoled_enabled:{type:"boolean",value:true}},
+    visual_meta_v1:{value:JSON.stringify({background_mode:"cinematic",hero_trailer_playback:true,items:[{key:"CAST",enabled:false,order:2}]})},
+    plugin_repositories_v1:{repositories:[{url:"https://modules.example/Config/AbC/manifest.json?token=AbC%2F&path=/",name:"Module configuré",repo_type:"NUVIO_JS"}],disabled:["https://modules.example/Config/AbC/manifest.json?token=AbC%2F&path=/|Code.js"],enabled:true,group:true}
+  })) {
+    const row={profileId,category:"profile_settings",itemKey,payload,revision:0,deleted:false};
+    assert.equal((await req('/v1/sync','POST',row,alice.token)).status,201);
+    const items=[]; let cursor=0;
+    do {
+      const other=await req(`/v1/sync?profileId=${profileId}&limit=25&offset=${cursor}`,'GET',null,tvToken);
+      assert.equal(other.status,200); items.push(...other.data.items); cursor=other.data.nextOffset;
+    } while(cursor!==null);
+    assert.deepEqual(items.find(x=>x.category==='profile_settings'&&x.itemKey===itemKey).payload,payload);
+    assert.equal((await req('/v1/sync','POST',row,tvToken)).status,409);
+    assert.equal((await req('/v1/sync','POST',row,bob.token)).status,404);
+  }
+  console.log('PASS: apparence, écran méta et modules configurés reçus exactement dans une seconde session, conflits et isolation vérifiés');
   const catalogueText=JSON.stringify([{id:"ma-collection",folders:[{id:"films",sources:[{provider:"addon",addonId:"kaptain",catalogId:"x"}],name:"é".repeat(900000)}]}]);
   const catalogueHash=createHash('sha256').update(catalogueText).digest('hex');
   const catalogueParts=Array.from({length:Math.ceil(catalogueText.length/6000)},(_,i)=>catalogueText.slice(i*6000,(i+1)*6000));

@@ -395,7 +395,12 @@ class PluginManager @Inject constructor(
             type = RepositoryType.NUVIO_JS
         )
 
-        downloadJsScrapers(repo.id, canonicalManifestUrl, manifest.scrapers)
+        try {
+            downloadJsScrapers(repo.id, canonicalManifestUrl, manifest.scrapers)
+        } catch (error: Exception) {
+            manifest.scrapers.forEach { dataStore.deleteScraperCode("${repo.id}:${it.id}") }
+            throw error
+        }
         dataStore.addRepository(repo)
 
         Log.d(TAG, "NuvioTV repository added: ${repo.name} with ${manifest.scrapers.size} scrapers")

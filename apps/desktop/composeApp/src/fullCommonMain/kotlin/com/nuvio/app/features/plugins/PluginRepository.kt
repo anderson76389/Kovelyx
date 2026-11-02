@@ -424,15 +424,6 @@ actual object PluginRepository {
                     runCatching {
                         val code = httpGetText(codeUrl)
                         val scraperId = "${manifestUrl}:${info.id}"
-                        val cached = PluginStorage.saveScraperCode(
-                            profileId = storageProfileId,
-                            scraperId = scraperId,
-                            code = code,
-                            overwrite = true,
-                        )
-                        if (!cached) {
-                            log.w { "Failed to cache plugin scraper $scraperId" }
-                        }
                         val previous = previousScrapers[scraperId] ?: previousScrapers["${manifestUrl.lowercase()}:${info.id}"]
                         val enabled = when {
                             !info.enabled -> false
@@ -460,6 +451,12 @@ actual object PluginRepository {
                 }
 
             check(scrapers.size == supported.size) { "Le code de certains modules n’a pas pu être téléchargé. Réessayez lorsque le fournisseur est disponible." }
+            // Download every file before replacing any cached code from a working installation.
+            scrapers.forEach { scraper ->
+                check(PluginStorage.saveScraperCode(storageProfileId, scraper.id, scraper.code, overwrite = true)) {
+                    "Le code du module n’a pas pu être conservé sur cet appareil."
+                }
+            }
             val repo = PluginRepositoryItem(
                 manifestUrl = manifestUrl,
                 name = manifest.name,
