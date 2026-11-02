@@ -16,7 +16,7 @@ class PreferenceSnapshotEngineTest {
     }
     private val red = buildJsonObject { put("theme", "red") }
     private val blue = buildJsonObject { put("theme", "blue") }
-    private class Remote(var row: PreferenceRow? = null) { var writes = 0; var lost = false }
+    private class Remote(var row: PreferenceRow? = null) { var writes = 0; var lost = false; var conflict = false }
     private inner class Device(val remote: Remote, var local: JsonObject = JsonObject(emptyMap()), val owner: String = "owner", val profile: String = "profile") {
         val engine = PreferenceSnapshotEngine(Store())
         var active = true
@@ -27,6 +27,7 @@ class PreferenceSnapshotEngineTest {
             current = { local }, apply = { expected, next ->
                 if (local != expected) false else { local = next; if (failApply) error("Réception interrompue"); true }
             }, publish = { payload, revision ->
+                if (remote.conflict) { remote.conflict = false; remote.row = PreferenceRow(blue, 1); error("Autre appareil publié en premier") }
                 check(revision == (remote.row?.revision ?: 0))
                 remote.row = PreferenceRow(payload, revision + 1); remote.writes++
                 duringPublish?.also { duringPublish = null; it() }
@@ -43,6 +44,11 @@ class PreferenceSnapshotEngineTest {
         assertEquals(blue, pc.local); assertEquals(blue, tv.local)
         repeat(3) { assertTrue(pc.sync()); assertTrue(phone.sync()); assertTrue(tv.sync()) }
         assertEquals(2, remote.writes)
+    }
+    @Test fun firstEmptyDeviceCannotOverwriteAConcurrentConfiguredDevice() = runBlocking {
+        val d = Device(Remote()); d.remote.conflict = true
+        assertFailsWith<IllegalStateException> { d.sync() }
+        assertTrue(d.sync()); assertEquals(blue, d.local); assertEquals(0, d.remote.writes)
     }
     @Test fun firstLocalEditWinsOlderCloudValue() = runBlocking {
         val d = Device(Remote(PreferenceRow(red, 3))); d.edit(blue)

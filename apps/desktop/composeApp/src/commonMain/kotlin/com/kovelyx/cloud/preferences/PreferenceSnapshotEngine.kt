@@ -8,7 +8,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 @Serializable
-private data class PreferenceCheckpoint(val baseline: JsonObject? = null, val pending: Boolean = false, val generation: Long = 0, val receiving: Boolean = false)
+private data class PreferenceCheckpoint(val baseline: JsonObject? = null, val pending: Boolean = false, val generation: Long = 0, val receiving: Boolean = false, val attempted: JsonObject? = null)
 data class PreferenceRow(val payload: JsonObject, val revision: Int)
 
 /** One small record per feature. The checkpoint is durable and scoped by owner and cloud profile. */
@@ -50,7 +50,7 @@ class PreferenceSnapshotEngine(private val store: CatalogueStateStore) {
         } else if (row?.payload != local) {
             require(local.toString().length <= 32000) { "Préférences trop volumineuses" }
             // Keep pending across a lost HTTP response or a restart.
-            val pending = json.encodeToString(saved.copy(pending = true))
+            val pending = json.encodeToString(saved.copy(attempted = local))
             if (!save(key, raw, pending)) return@withLock false
             publish(local, row?.revision ?: 0)
             check(isCurrent())
