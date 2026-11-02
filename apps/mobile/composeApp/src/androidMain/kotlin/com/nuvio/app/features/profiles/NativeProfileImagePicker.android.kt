@@ -85,7 +85,7 @@ private suspend fun copyPrivateImage(context: Context, source: Uri, background: 
             }
         }
         val encoded = com.kovelyx.cloud.media.AndroidProfileMediaFiles(context).encodeLocal(Uri.fromFile(temp).toString(), background)
-        val extension = when (encoded.mime) { "image/gif" -> "gif"; "image/png" -> "png"; else -> "jpg" }
+        val extension = when (encoded.mime) { "image/gif" -> "gif"; "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
         val destination = File(folder, (if (background) "fond-" else "avatar-") + UUID.randomUUID().toString() + "." + extension)
         temp.writeBytes(encoded.bytes)
         if (!temp.renameTo(destination)) {

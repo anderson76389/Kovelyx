@@ -212,6 +212,13 @@ internal object DesktopCollectionImportBridge {
         }
     }
 
+    @Synchronized fun stop() {
+        val running = server ?: return
+        server = null
+        running.stop(0)
+        (running.executor as? java.util.concurrent.ExecutorService)?.shutdownNow()
+    }
+
     /** A custom-protocol launch must not start a second instance of an already running Kovelyx. */
     fun alreadyRunning(): Boolean = runCatching {
         val connection = (URL("http://127.0.0.1:$Port/health").openConnection() as HttpURLConnection)

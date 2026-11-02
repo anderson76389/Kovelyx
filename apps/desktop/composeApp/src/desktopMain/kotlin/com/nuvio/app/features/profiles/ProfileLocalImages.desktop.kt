@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 /**
  * Local, private Windows images. This does NOT upload photographs to Supabase.
  * The file chooser accepts common raster formats, validates decoded dimensions
- * and stores an optimized copy inside %APPDATA%/Kovelyx/profile-media.
+ * and stores an unchanged copy inside %APPDATA%/Kovelyx/profile-media.
  */
 internal actual object ProfileLocalImages {
     actual val supported: Boolean =
@@ -43,7 +43,7 @@ internal actual object ProfileLocalImages {
                     fileSelectionMode = JFileChooser.FILES_ONLY
                     isMultiSelectionEnabled = false
                     isAcceptAllFileFilterUsed = true
-                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, WebP, GIF, BMP)", "jpg", "jpeg", "png", "webp", "gif", "bmp")
+                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, WebP, GIF)", "jpg", "jpeg", "png", "webp", "gif")
                 }
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     selectedPath = chooser.selectedFile?.toPath()
@@ -54,13 +54,19 @@ internal actual object ProfileLocalImages {
             require(Files.isRegularFile(original) && Files.size(original) in 1..com.kovelyx.cloud.media.MAX_PROFILE_SOURCE_BYTES) {
                 "L’image doit être un fichier de 64 Mo maximum avant optimisation."
             }
-            // Conserver les GIF animés tels quels : l'ancien redimensionnement
-            // ImageIO ne gardait que la première image de l'animation.
-            val keepGif = Files.newInputStream(original).use { com.kovelyx.cloud.media.isProfileGif(it.readNBytes(12)) }
-            if (keepGif) require(Files.size(original) <= com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo." }
-            if (keepGif) validateImageDimensions(original)
-            val resized = if (keepGif) null else readAndResize(original, background)
-            val outputExtension = if (keepGif) ".gif" else if (background) ".jpg" else ".png"
+            require(Files.size(original) <= com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES) { "L’image originale dépasse 18 Mo ; aucune compression automatique n’est appliquée." }
+            val mime = Files.newInputStream(original).use {
+                requireNotNull(com.kovelyx.cloud.media.profileOriginalMime(it.readNBytes(12))) {
+                    "Format non pris en charge : choisissez JPEG, PNG, WebP ou GIF."
+                }
+            }
+            validateImageDimensions(original)
+            val outputExtension = when (mime) {
+                "image/jpeg" -> ".jpg"
+                "image/png" -> ".png"
+                "image/webp" -> ".webp"
+                else -> ".gif"
+            }
             val target = imageDir.resolve(
                 (if (background) "background-" else "avatar-") +
                     UUID.randomUUID().toString() + outputExtension
@@ -68,15 +74,7 @@ internal actual object ProfileLocalImages {
             Files.createDirectories(imageDir)
             val pending = Files.createTempFile(imageDir, "kovelyx-import-", ".tmp")
             try {
-                if (keepGif) {
-                    Files.copy(original, pending, StandardCopyOption.REPLACE_EXISTING)
-                } else {
-                    Files.newOutputStream(pending).use { output ->
-                        check(ImageIO.write(requireNotNull(resized), if (background) "jpg" else "png", output)) {
-                            "L'encodeur de l'image n'est pas disponible."
-                        }
-                    }
-                }
+                Files.copy(original, pending, StandardCopyOption.REPLACE_EXISTING)
                 Files.move(pending, target, StandardCopyOption.REPLACE_EXISTING)
             } finally {
                 Files.deleteIfExists(pending)
@@ -97,7 +95,7 @@ internal actual object ProfileLocalImages {
         return requireNotNull(ImageIO.createImageInputStream(java.io.ByteArrayInputStream(png))) { "Format d’image non pris en charge." }
     }
 
-    private fun validateImageDimensions(path: Path) {
+    internal fun validateImageDimensions(path: Path) {
         imageInput(path).use { stream ->
             requireNotNull(stream) { "Impossible de lire l'image." }
             val readers = ImageIO.getImageReaders(stream)

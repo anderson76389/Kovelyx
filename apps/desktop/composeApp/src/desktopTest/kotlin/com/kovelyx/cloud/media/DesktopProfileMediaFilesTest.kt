@@ -14,6 +14,28 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 
 class DesktopProfileMediaFilesTest {
+    @Test fun `static originals keep identical bytes dimensions and transparency for either slot`() = runBlocking {
+        val folder = DesktopStorage.rootDir.resolve("profile-media")
+        Files.createDirectories(folder)
+        for (format in listOf("png", "jpg")) {
+            val source = Files.createTempFile(folder, "original-", ".$format")
+            val bitmap = BufferedImage(2048, 1024, if (format == "png") BufferedImage.TYPE_INT_ARGB else BufferedImage.TYPE_INT_RGB)
+            try {
+                bitmap.setRGB(0, 0, 0x70336699)
+                check(ImageIO.write(bitmap, format, source.toFile()))
+                val original = Files.readAllBytes(source)
+                for (background in listOf(false, true)) {
+                    val files = DesktopProfileMediaFiles()
+                    val encoded = files.encodeLocal(source.toUri().toString(), background)
+                    assertContentEquals(original, encoded.bytes)
+                    val copied = Path.of(java.net.URI(files.saveDownloaded("original-${UUID.randomUUID()}", files.sha256(original), encoded)))
+                    try { assertContentEquals(original, Files.readAllBytes(copied)) }
+                    finally { Files.deleteIfExists(copied) }
+                }
+            } finally { bitmap.flush(); Files.deleteIfExists(source) }
+        }
+    }
+
     @Test fun `animated GIF bytes remain intact and downloaded bytes are kept in a private file`() = runBlocking {
         val folder = DesktopStorage.rootDir.resolve("profile-media")
         Files.createDirectories(folder)

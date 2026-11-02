@@ -18,11 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-/** Temporary mode of this window's monitor; never writes Windows display settings to the registry. */
+/** Observe at launch/focus; change the monitor only after an explicit range edit. */
 internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable {
     private interface DisplayApi : StdCallLibrary {
         fun MonitorFromWindow(window: Pointer, flags: Int): Pointer?
@@ -32,9 +33,9 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
     }
     private val api: DisplayApi? = if (System.getProperty("os.name").startsWith("Windows", true))
         runCatching { Native.load("user32", DisplayApi::class.java, W32APIOptions.UNICODE_OPTIONS) }.getOrNull() else null
-    private data class Original(val bytes: ByteArray, val applied: DisplayModeSpec)
-    private val originals = mutableMapOf<String, Original>()
     private var currentDevice: String? = null
+    private var observedMode: DisplayModeSpec? = null
+    private var cachedModes = emptyList<Pair<DisplayModeSpec, Memory>>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val settle = Timer(150) { apply() }.apply { isRepeats = false }
     private val movement = object : ComponentAdapter() {
@@ -54,7 +55,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             }
             window.addComponentListener(movement)
             window.addWindowFocusListener(focus)
-            scope.launch { DisplayRefreshSettings.state.map { it.minimum to it.maximum }.distinctUntilChanged().collect { apply() } }
+            scope.launch { DisplayRefreshSettings.state.map { it.minimum to it.maximum }.distinctUntilChanged().drop(1).collect { apply(changeMode = true) } }
             settle.start()
         }
     }
@@ -63,7 +64,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
     private fun Memory.spec(id: Int = -1) = DisplayModeSpec(id, getInt(172), getInt(176), when (val rate = getInt(184)) { 23, 29, 47, 59, 95, 119, 143 -> (rate + 1) / 1.001f; else -> rate.toFloat() })
     private fun current(device: String): Memory? = modeMemory().takeIf { api?.EnumDisplaySettingsW(WString(device), -1, it) == true }
 
-    private fun apply() {
+    private fun apply(changeMode: Boolean = false) {
         val api = api ?: return
         if (!window.isDisplayable) return
         runCatching {
@@ -71,30 +72,30 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             val info = Memory(104).apply { clear(); setInt(0, 104) }
             if (!api.GetMonitorInfoW(monitor, info)) return
             val device = info.getWideString(40)
-            if (device != currentDevice) {
-                currentDevice?.let(::restore)
-                currentDevice = device
-            }
             val before = current(device) ?: return
-            val modes = mutableListOf<Pair<DisplayModeSpec, Memory>>()
-            var index = 0
-            while (index < 2048) {
-                val memory = modeMemory()
-                if (!api.EnumDisplaySettingsW(WString(device), index, memory)) break
-                if (memory.getInt(168) >= 32 && memory.getInt(184) > 1 && (memory.getInt(180) and 2) == 0) modes += memory.spec(index) to memory
-                index++
-            }
             val currentMode = before.spec()
+            if (device != currentDevice || currentMode != observedMode) {
+                val modes = mutableListOf<Pair<DisplayModeSpec, Memory>>()
+                var index = 0
+                while (index < 2048) {
+                    val memory = modeMemory()
+                    if (!api.EnumDisplaySettingsW(WString(device), index, memory)) break
+                    if (memory.getInt(168) >= 32 && memory.getInt(184) > 1 && (memory.getInt(180) and 2) == 0) modes += memory.spec(index) to memory
+                    index++
+                }
+                cachedModes = modes
+                currentDevice = device
+                observedMode = currentMode
+            }
+            val modes = cachedModes
             val range = DisplayRefreshSettings.state.value
             val candidates = displayRefreshCandidates(modes.map { it.first }, currentMode, range.minimum, range.maximum)
-            for (choice in candidates) {
+            for (choice in if (changeMode) candidates else emptyList()) {
                 if (nominalRefreshRate(currentMode.hertz) == nominalRefreshRate(choice.hertz)) break
                 val memory = modes.first { it.first.id == choice.id }.second
                 memory.setInt(72, 0x00400000) // DM_DISPLAYFREQUENCY only: preserve resolution, position and colour depth.
                 if (api.ChangeDisplaySettingsExW(WString(device), memory, null, 2, null) == 0 &&
                     api.ChangeDisplaySettingsExW(WString(device), memory, null, 4, null) == 0) {
-                    val original = originals[device]?.bytes ?: before.getByteArray(0, 220)
-                    originals[device] = Original(original, choice)
                     break
                 }
             }
@@ -105,21 +106,10 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
         }
     }
 
-    private fun restore(device: String) {
-        val original = originals.remove(device) ?: return
-        val actual = current(device)?.spec() ?: return
-        // A user or another app may have changed the monitor since our request.
-        if (actual.width != original.applied.width || actual.height != original.applied.height ||
-            nominalRefreshRate(actual.hertz) != nominalRefreshRate(original.applied.hertz)) return
-        val memory = modeMemory().apply { write(0, original.bytes, 0, original.bytes.size) }
-        api?.ChangeDisplaySettingsExW(WString(device), memory, null, 4, null)
-    }
-
     override fun close() {
         settle.stop()
         scope.cancel()
         window.removeComponentListener(movement)
         window.removeWindowFocusListener(focus)
-        originals.keys.toList().forEach { runCatching { restore(it) } }
     }
 }

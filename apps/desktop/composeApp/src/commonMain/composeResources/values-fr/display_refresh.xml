@@ -1,6 +1,6 @@
 <resources>
     <string name="display_refresh_title">Fréquence d’affichage</string>
-    <string name="display_refresh_description">Choisissez les fréquences minimale et maximale de cet appareil, jusqu’à 144 Hz. Le mode disponible le plus élevé dans cette plage est demandé, sans modifier la résolution. Les vidéos gardent leur cadence d’origine.</string>
+    <string name="display_refresh_description">Choisissez les fréquences minimale et maximale de cet appareil, jusqu’à 144 Hz. Le mode disponible le plus élevé dans cette plage est demandé, sans modifier la résolution. Les vidéos gardent leur cadence d’origine. Sous Windows, le changement est effectué uniquement quand vous modifiez ce réglage ; le démarrage et la fermeture ne changent pas la fréquence de l’écran.</string>
     <string name="display_refresh_unavailable">La fréquence actuelle est hors de la plage choisie. L’écran ou le système peut limiter la fréquence ; aucun mode non pris en charge n’est imposé.</string>
     <string name="display_refresh_minimum">Minimum</string>
     <string name="display_refresh_maximum">Maximum</string>

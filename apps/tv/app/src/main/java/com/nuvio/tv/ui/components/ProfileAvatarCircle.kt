@@ -21,6 +21,9 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.request.allowRgb565
+import androidx.compose.ui.platform.LocalDensity
+import kotlin.math.roundToInt
 
 @Composable
 fun ProfileAvatarCircle(
@@ -37,10 +40,13 @@ fun ProfileAvatarCircle(
     val initial = name.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
     val fontSize = (size.value * 0.4f).sp
     val context = LocalContext.current
-    val imageRequest = remember(context, avatarImageUrl, imageCrossfade) {
+    val pixels = with(LocalDensity.current) { size.toPx().roundToInt().coerceAtLeast(1) }
+    val imageRequest = remember(context, avatarImageUrl, imageCrossfade, pixels) {
         avatarImageUrl?.let {
             ImageRequest.Builder(context)
                 .data(it)
+                .size(pixels, pixels)
+                .allowRgb565(false)
                 .crossfade(imageCrossfade)
                 .build()
         }

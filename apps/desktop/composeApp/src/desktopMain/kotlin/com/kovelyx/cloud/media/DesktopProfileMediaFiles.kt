@@ -2,13 +2,11 @@ package com.kovelyx.cloud.media
 
 import com.nuvio.app.core.storage.DesktopStorage
 import com.nuvio.app.features.profiles.ProfileLocalImages
-import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
-import javax.imageio.ImageIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -41,19 +39,11 @@ internal class DesktopProfileMediaFiles : ProfileMediaFiles {
     override suspend fun encodeLocal(uri: String, background: Boolean): ProfileImageBytes = withContext(Dispatchers.IO) {
         val file = privateFile(uri)
         require(Files.size(file) in 1..MAX_PROFILE_SOURCE_BYTES)
+        require(Files.size(file) <= MAX_PROFILE_MEDIA_BYTES) { "L’image originale dépasse 18 Mo ; aucune compression automatique n’est appliquée." }
         val header = Files.newInputStream(file).use { it.readNBytes(12) }
-        if (isProfileGif(header)) {
-            require(Files.size(file) <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo ; choisissez une animation plus légère pour la synchroniser." }
-            return@withContext ProfileImageBytes("image/gif", Files.readAllBytes(file))
-        }
-        val bitmap = ProfileLocalImages.readAndResize(file, background)
-        try {
-            val output = ByteArrayOutputStream()
-            check(ImageIO.write(bitmap, if (background) "jpg" else "png", output))
-            val bytes = output.toByteArray()
-            require(bytes.size <= MAX_PROFILE_MEDIA_BYTES) { "Image trop volumineuse après optimisation." }
-            ProfileImageBytes(if (background) "image/jpeg" else "image/png", bytes)
-        } finally { bitmap.flush() }
+        val mime = requireNotNull(profileOriginalMime(header)) { "Format non pris en charge : choisissez JPEG, PNG, WebP ou GIF." }
+        ProfileLocalImages.validateImageDimensions(file)
+        ProfileImageBytes(mime, Files.readAllBytes(file))
     }
     override suspend fun saveDownloaded(key: String, version: String, image: ProfileImageBytes): String = withContext(Dispatchers.IO) {
         require(version.matches(Regex("[a-f0-9]{64}")))

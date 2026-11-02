@@ -106,7 +106,7 @@ class AndroidProfileMediaRoundTripTest {
         for ((kind, color) in listOf("avatar" to Color.BLUE, "background" to Color.GREEN)) {
             val dir = File(senderContext.filesDir, "kovelyx-profile-media").also { it.mkdirs() }
             val source = File(dir, "$kind.png")
-            val bitmap = Bitmap.createBitmap(96, 64, Bitmap.Config.ARGB_8888)
+            val bitmap = Bitmap.createBitmap(2048, 1024, Bitmap.Config.ARGB_8888)
             try {
                 bitmap.eraseColor(color)
                 source.outputStream().use { assertTrue(bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)) }
@@ -114,13 +114,14 @@ class AndroidProfileMediaRoundTripTest {
             val picked = Uri.fromFile(source).toString()
             sender.edited("account", "profile", kind, picked)
             sender.synchronize("account", "profile", kind, picked, null)
+            assertArrayEquals(source.readBytes(), requireNotNull(stored[kind]).bytes)
             val version = senderFiles.sha256(requireNotNull(stored[kind]).bytes)
             val copied = requireNotNull(receiver.synchronize("account", "profile", kind, null, version))
             assertNotEquals(picked, copied)
             assertTrue(receiverFiles.exists(copied))
             assertEquals(copied, normalizedAvatarUrl(copied))
             val decoded = requireNotNull(BitmapFactory.decodeFile(Uri.parse(copied).path))
-            try { assertEquals(96, decoded.width); assertEquals(64, decoded.height) }
+            try { assertEquals(2048, decoded.width); assertEquals(1024, decoded.height) }
             finally { decoded.recycle() }
             received[kind] = copied
             val restarted = ProfileMediaEngine(AndroidProfileMediaFiles(receiverContext), remote)

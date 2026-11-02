@@ -38,6 +38,18 @@ if ($IncludeApplication) {
         Write-Host $result
         if (-not $result.StartsWith('PASS ')) { throw "Application player failed: $result" }
         'Packaged Kovelyx.exe, private Java runtime and real player surface: video progression passed.' >> $env:GITHUB_STEP_SUMMARY
+        $second = Start-Process -FilePath (Join-Path $AppRoot 'Kovelyx.exe') -WorkingDirectory $AppRoot -PassThru
+        if (-not $second.WaitForExit(10000)) {
+            taskkill /PID $second.Id /T /F | Out-Null
+            throw 'A second launch left a duplicate application running'
+        }
+        $process.Refresh()
+        if ($process.HasExited) { throw 'The primary application exited when launched a second time' }
+        "Primary application working set on CI VM: $([math]::Round($process.WorkingSet64 / 1MB)) MiB; not a physical-device benchmark." | Add-Content $report
+        if (-not $process.CloseMainWindow()) { throw 'Cannot request normal window close' }
+        if (-not $process.WaitForExit(15000)) { throw 'Application process remained alive after normal window close' }
+        'Second launch forwarded; original process exited after normal window close.' >> $env:GITHUB_STEP_SUMMARY
+
     } finally {
         $env:NUVIO_DESKTOP_SMOKE_PLAYER_URL = $oldSource
         $env:KOVELYX_PLAYBACK_SMOKE_RESULT = $oldReport

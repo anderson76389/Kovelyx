@@ -1,10 +1,8 @@
 package com.kovelyx.cloud.media
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.MessageDigest
 import kotlinx.coroutines.Dispatchers
@@ -42,56 +40,15 @@ class AndroidProfileMediaFiles(context: Context) : ProfileMediaFiles {
     override suspend fun encodeLocal(uri: String, background: Boolean): ProfileImageBytes = withContext(Dispatchers.IO) {
         val file = privateFile(uri)
         require(file.length() in 1..MAX_PROFILE_SOURCE_BYTES) { "Image locale vide ou supérieure à 64 Mo avant optimisation." }
+        require(file.length() <= MAX_PROFILE_MEDIA_BYTES) { "L’image originale dépasse 18 Mo ; aucune compression automatique n’est appliquée." }
         val header = file.inputStream().use { input -> ByteArray(12).also { input.read(it) } }
-        if (isProfileGif(header)) {
-            require(file.length() <= MAX_PROFILE_MEDIA_BYTES) { "Le GIF animé dépasse 18 Mo ; choisissez une animation plus légère pour la synchroniser." }
-            val gifBounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeFile(file.path, gifBounds)
-            require(gifBounds.outWidth > 0 && gifBounds.outHeight > 0 && gifBounds.outWidth.toLong() * gifBounds.outHeight <= 32_000_000L) { "Dimensions du GIF non prises en charge (32 mégapixels maximum)." }
-            return@withContext ProfileImageBytes("image/gif", file.readBytes())
-        }
+        val mime = requireNotNull(profileOriginalMime(header)) { "Format non pris en charge : choisissez JPEG, PNG, WebP ou GIF." }
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
         BitmapFactory.decodeFile(file.path, bounds)
         require(bounds.outWidth > 0 && bounds.outHeight > 0 && bounds.outWidth.toLong() * bounds.outHeight <= 32_000_000L) {
             "Dimensions d’image non prises en charge (32 mégapixels maximum)."
         }
-        val target = if (background) 1920 else 512
-        var sample = 1
-        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > target * 2) sample *= 2
-        val decoded = requireNotNull(BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inSampleSize = sample }))
-        val oriented = orient(decoded, file)
-        var bitmap = oriented
-        try {
-            val ratio = minOf(1.0, target.toDouble() / maxOf(oriented.width, oriented.height))
-            if (ratio < 1.0) bitmap = Bitmap.createScaledBitmap(oriented,
-                (oriented.width * ratio).toInt().coerceAtLeast(1), (oriented.height * ratio).toInt().coerceAtLeast(1), true)
-            val output = ByteArrayOutputStream()
-            val png = !background && bitmap.hasAlpha()
-            check(bitmap.compress(if (png) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG, 88, output))
-            val bytes = output.toByteArray()
-            require(bytes.size <= MAX_PROFILE_MEDIA_BYTES) { "Image trop volumineuse après optimisation." }
-            ProfileImageBytes(if (png) "image/png" else "image/jpeg", bytes)
-        } finally {
-            if (bitmap !== oriented) bitmap.recycle()
-            if (oriented !== decoded) oriented.recycle()
-            decoded.recycle()
-        }
-    }
-    private fun orient(source: Bitmap, file: File): Bitmap {
-        val orientation = runCatching {
-            android.media.ExifInterface(file.path).getAttributeInt(android.media.ExifInterface.TAG_ORIENTATION, 1)
-        }.getOrDefault(1)
-        val matrix = android.graphics.Matrix()
-        when (orientation) {
-            2 -> matrix.setScale(-1f, 1f)
-            3 -> matrix.setRotate(180f)
-            4 -> { matrix.setRotate(180f); matrix.postScale(-1f, 1f) }
-            5 -> { matrix.setRotate(90f); matrix.postScale(-1f, 1f) }
-            6 -> matrix.setRotate(90f)
-            7 -> { matrix.setRotate(-90f); matrix.postScale(-1f, 1f) }
-            8 -> matrix.setRotate(-90f)
-        }
-        return if (matrix.isIdentity) source else Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+        ProfileImageBytes(mime, file.readBytes())
     }
     override suspend fun saveDownloaded(key: String, version: String, image: ProfileImageBytes): String = withContext(Dispatchers.IO) {
         require(version.matches(Regex("[a-f0-9]{64}")))
