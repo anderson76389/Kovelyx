@@ -8,7 +8,9 @@ Mode enumeration is reused while the monitor and its current mode are unchanged.
 A per-user file lock prevents duplicate application launches, including simultaneous
 launches. A private filesystem mailbox forwards protocol arguments unchanged and
 brings the existing window forward. The lock is released by the OS on a crash.
-Native player/WebView warmup no longer runs at application startup. The collection
+Native player/WebView warmup no longer runs at application startup. Profile GIFs
+pause and release their decoder when the window is unfocused, retaining one still
+frame; animation restarts on focus. The collection
 HTTP bridge is explicitly stopped on window close. Player subprocesses during
 playback can still be legitimate; their number alone is not a memory-leak diagnosis.
 

@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.asSkiaBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import coil3.BitmapImage
@@ -83,7 +84,8 @@ internal actual fun NuvioAsyncImage(
         }.getOrNull()
     }
     var gifFrame by remember(gifPath) { mutableStateOf<ImageBitmap?>(null) }
-    LaunchedEffect(gifPath) {
+    val animateProfileImage = LocalWindowInfo.current.isWindowFocused
+    LaunchedEffect(gifPath, animateProfileImage) {
         if (gifPath != null) {
             try {
                 withContext(Dispatchers.IO) {
@@ -92,6 +94,8 @@ internal actual fun NuvioAsyncImage(
                         while (true) {
                             val frame = frames.frame(index)
                             withContext(Dispatchers.Main) { gifFrame = frame }
+                            // An unfocused/minimized app keeps one still frame and releases the codec.
+                            if (!animateProfileImage) break
                             delay(frames.durationMillis(index))
                             index = (index + 1) % frames.frameCount
                         }
