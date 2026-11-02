@@ -46,8 +46,53 @@ if ($IncludeApplication) {
         $process.Refresh()
         if ($process.HasExited) { throw 'The primary application exited when launched a second time' }
         "Primary application working set on CI VM: $([math]::Round($process.WorkingSet64 / 1MB)) MiB; not a physical-device benchmark." | Add-Content $report
-        if (-not $process.CloseMainWindow()) { throw 'Cannot request normal window close' }
+        # jpackage can keep a launcher process while a child owns the AWT window.
+        # Resolve the actual application HWND instead of Process.MainWindowHandle.
+        Add-Type -TypeDefinition @'
+using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+public static class KovelyxSmokeWindows {
+    public delegate bool EnumProc(IntPtr window, IntPtr data);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc callback, IntPtr data);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window, out uint pid);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr window, StringBuilder text, int count);
+    [DllImport("user32.dll", SetLastError = true)] public static extern bool PostMessage(IntPtr window, uint message, IntPtr wparam, IntPtr lparam);
+    public static IntPtr[] Find(uint[] processes) {
+        var ids = new HashSet<uint>(processes);
+        var result = new List<IntPtr>();
+        EnumWindows((window, data) => {
+            uint pid; GetWindowThreadProcessId(window, out pid);
+            if (ids.Contains(pid)) {
+                var title = new StringBuilder(512);
+                GetWindowText(window, title, title.Capacity);
+                if (title.ToString() == "Kovelyx Player Smoke") result.Add(window);
+            }
+            return true;
+        }, IntPtr.Zero);
+        return result.ToArray();
+    }
+}
+'@
+        $deadline = [DateTime]::UtcNow.AddSeconds(15)
+        $windows = @()
+        do {
+            $appProcesses = @(Get-CimInstance Win32_Process | Where-Object {
+                $_.ExecutablePath -and $_.ExecutablePath.StartsWith($AppRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+            })
+            $windows = @([KovelyxSmokeWindows]::Find([uint[]]@($appProcesses.ProcessId)))
+            if ($windows.Count -eq 0) { Start-Sleep -Milliseconds 200 }
+        } while ($windows.Count -eq 0 -and [DateTime]::UtcNow -lt $deadline)
+        if ($windows.Count -ne 1) { throw "Expected one application window after second launch, found $($windows.Count)" }
+        # WM_CLOSE takes the same Swing/Compose path as the user's window close button.
+        if (-not [KovelyxSmokeWindows]::PostMessage($windows[0], 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)) {
+            throw 'Cannot send normal close to application window'
+        }
         if (-not $process.WaitForExit(15000)) { throw 'Application process remained alive after normal window close' }
+        $remaining = @(Get-Process -Id @($appProcesses.ProcessId) -ErrorAction SilentlyContinue)
+        if ($remaining.Count -gt 0) { throw "Application child processes remained after normal close: $($remaining.Id -join ',')" }
+
         'Second launch forwarded; original process exited after normal window close.' >> $env:GITHUB_STEP_SUMMARY
 
     } finally {
