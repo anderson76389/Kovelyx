@@ -30,6 +30,28 @@ object AndroidDisplayRefresh {
         }
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         val manager = activity.getSystemService(DisplayManager::class.java) ?: return
+        var requestedRate = 0f
+        val surfaces = mutableMapOf<android.view.SurfaceView, android.view.SurfaceHolder.Callback>()
+        fun voteSurface(view: android.view.SurfaceView) {
+            if (Build.VERSION.SDK_INT >= 30 && view.holder.surface.isValid) {
+                runCatching { view.holder.surface.setFrameRate(requestedRate, android.view.Surface.FRAME_RATE_COMPATIBILITY_DEFAULT) }
+            }
+        }
+        fun voteViews(view: android.view.View) {
+            if (view is android.view.SurfaceView && !surfaces.containsKey(view)) {
+                val callback = object : android.view.SurfaceHolder.Callback {
+                    override fun surfaceCreated(holder: android.view.SurfaceHolder) = voteSurface(view)
+                    override fun surfaceChanged(holder: android.view.SurfaceHolder, format: Int, width: Int, height: Int) = voteSurface(view)
+                    override fun surfaceDestroyed(holder: android.view.SurfaceHolder) = Unit
+                }
+                surfaces[view] = callback
+                view.holder.addCallback(callback)
+                voteSurface(view)
+            }
+            if (view is android.view.ViewGroup) {
+                for (index in 0 until view.childCount) voteViews(view.getChildAt(index))
+            }
+        }
         fun apply() {
             if (activity.isDestroyed || activity.isFinishing) return
             val display = activity.window.decorView.display ?: return
@@ -46,9 +68,20 @@ object AndroidDisplayRefresh {
                 attributes.preferredRefreshRate = refreshRate
                 activity.window.attributes = attributes
             }
+            if (requestedRate != refreshRate) {
+                requestedRate = refreshRate
+                surfaces.keys.forEach(::voteSurface)
+            }
+            surfaces.keys.filter { !it.isAttachedToWindow }.forEach { detached ->
+                surfaces.remove(detached)?.let { detached.holder.removeCallback(it) }
+            }
+            applyAndroidViewFrameRate(activity.window.decorView, requestedRate)
+            voteViews(activity.window.decorView)
             DisplayRefreshSettings.displayChanged(modes.filter { it.width == current.physicalWidth && it.height == current.physicalHeight }
-                .mapNotNull { nominalRefreshRate(it.hertz) }.toSet(), current.refreshRate)
+                .mapNotNull { nominalRefreshRate(it.hertz) }.toSet(), display.refreshRate)
         }
+        val layoutListener = android.view.ViewTreeObserver.OnGlobalLayoutListener { apply() }
+        activity.window.decorView.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
         val listener = object : DisplayManager.DisplayListener {
             override fun onDisplayAdded(id: Int) = apply()
             override fun onDisplayRemoved(id: Int) = apply()
@@ -61,8 +94,20 @@ object AndroidDisplayRefresh {
             if (event == Lifecycle.Event.ON_RESUME) apply()
             if (event == Lifecycle.Event.ON_DESTROY) {
                 manager.unregisterDisplayListener(listener)
+                activity.window.decorView.viewTreeObserver.removeOnGlobalLayoutListener(layoutListener)
+                surfaces.forEach { (view, callback) -> view.holder.removeCallback(callback) }
+                surfaces.clear()
                 scope.cancel()
             }
         })
+    }
+}
+
+/** Android 15 does not inherit a ViewGroup vote in its child rendering views. */
+internal fun applyAndroidViewFrameRate(view: android.view.View, rate: Float) {
+    if (Build.VERSION.SDK_INT < 35) return
+    if (view.requestedFrameRate != rate) view.setRequestedFrameRate(rate)
+    if (view is android.view.ViewGroup) {
+        for (index in 0 until view.childCount) applyAndroidViewFrameRate(view.getChildAt(index), rate)
     }
 }

@@ -112,7 +112,7 @@ class CloudflareTvDataSync @Inject constructor(
         if (CloudflareTvAccountClient.account == null ||
             profileManager.activeProfileId.value != profileId) return@withLock
         var imagesReady = true
-        try { profileMedia.synchronize(reportFailure = true) }
+        try { profileMedia.synchronize(reportFailure = true, includeImages = false) }
         catch (cancelled: CancellationException) { throw cancelled }
         catch (error: Exception) { imagesReady = false; Log.w(TAG, "Profils Cloudflare différés", error) }
         // Never equate the numeric local ID with an ordinal in the cloud list:
@@ -153,17 +153,6 @@ class CloudflareTvDataSync @Inject constructor(
             profileManager.linkCloudProfile(profileId, uuid)
         }
         val rows = CloudflareTvAccountClient.syncRows(uuid)
-        var addonsReady = true
-        try { addons.synchronizeCloudAddons(uuid, rows) }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { addonsReady = false; Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
-        val catalogueReady = try { catalogues.synchronize(profileId, uuid, rows) }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (_: Exception) { false }
-        var preferencesReady = true
-        try { preferencesReady = preferences.synchronize(profileId, uuid, rows) }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { preferencesReady = false; Log.w(TAG, "Préférences TV différées", error) }
         val remote = rows.associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }
@@ -190,6 +179,21 @@ class CloudflareTvDataSync @Inject constructor(
         syncWatched(profileId, uuid, remote.filterKeys {
             !it.startsWith("watched_items|") || it.removePrefix("watched_items|") !in deletedKeys.watched
         }, deletedKeys.watched)
+        // Sync watch state before external providers; install addons before applying their layout.
+        var addonsReady = true
+        try { addons.synchronizeCloudAddons(uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { addonsReady = false; Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
+        val catalogueReady = try { catalogues.synchronize(profileId, uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (_: Exception) { false }
+        var preferencesReady = true
+        try { preferencesReady = preferences.synchronize(profileId, uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { preferencesReady = false; Log.w(TAG, "Préférences TV différées", error) }
+        try { profileMedia.synchronize(reportFailure = true) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { imagesReady = false; Log.w(TAG, "Images Cloudflare différées", error) }
         check(preferencesReady) { "Préférences TV en attente" }
         check(addonsReady) { "Extensions TV en attente" }
         check(catalogueReady) { "Catalogues TV en attente" }

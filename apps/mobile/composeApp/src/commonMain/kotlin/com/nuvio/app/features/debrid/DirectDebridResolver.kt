@@ -226,6 +226,10 @@ private class LocalDebridAddonStreamResolver(
         val resolve = stream.toResolveMetadata(season, episode, account.provider.id)
 
         return when (account.provider.id) {
+            DebridProviders.ALL_DEBRID_ID, DebridProviders.REAL_DEBRID_ID ->
+                DebridProviderApis.apiFor(account.provider.id)?.resolveClientStream(
+                    stream.copy(clientResolve = resolve.copy(magnetUri = magnet)), apiKey, season, episode)
+                    ?: DirectDebridResolveResult.Error
             DebridProviders.TORBOX_ID -> resolveTorbox(stream, resolve, apiKey, magnet, season, episode)
             DebridProviders.PREMIUMIZE_ID -> resolvePremiumizeDirectDownload(
                 apiKey = apiKey,

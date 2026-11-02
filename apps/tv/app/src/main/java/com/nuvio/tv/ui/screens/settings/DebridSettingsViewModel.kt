@@ -47,6 +47,8 @@ class DebridSettingsViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val dataStore: DebridSettingsDataStore,
     private val torboxApi: TorboxApi,
+    private val allDebridService: com.nuvio.tv.core.debrid.AllDebridService,
+    private val realDebridApi: com.nuvio.tv.data.remote.api.RealDebridApi,
     private val premiumizeApi: PremiumizeApi
 ) : ViewModel() {
     private var formatterServer: DebridFormatterConfigServer? = null
@@ -230,6 +232,13 @@ class DebridSettingsViewModel @Inject constructor(
     private suspend fun validateProviderApiKey(providerId: String, apiKey: String): Boolean {
         return try {
             when (DebridProviders.byId(providerId)?.id) {
+                DebridProviders.ALL_DEBRID_ID -> allDebridService.validate(apiKey)
+                DebridProviders.REAL_DEBRID_ID -> {
+                    val response = realDebridApi.getUser("Bearer $apiKey")
+                    response.body()?.close()
+                    response.errorBody()?.close()
+                    response.isSuccessful
+                }
                 DebridProviders.TORBOX_ID -> {
                     val response = torboxApi.getUser("Bearer $apiKey")
                     response.body()?.close()
@@ -251,7 +260,7 @@ class DebridSettingsViewModel @Inject constructor(
     suspend fun startDeviceAuthorization(providerId: String): DebridDeviceAuthorization? {
         return when (DebridProviders.byId(providerId)?.id) {
             DebridProviders.TORBOX_ID -> {
-                val response = torboxApi.startDeviceAuthorization("Nuvio")
+                val response = torboxApi.startDeviceAuthorization("Kovelyx")
                 val data = response.body()?.takeIf { response.isSuccessful && it.success != false }?.data
                     ?: return null
                 val deviceCode = data.deviceCode?.takeIf { it.isNotBlank() } ?: return null

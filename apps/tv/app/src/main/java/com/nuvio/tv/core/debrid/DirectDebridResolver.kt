@@ -20,6 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class DirectDebridResolver @Inject constructor(
     private val dataStore: DebridSettingsDataStore,
+    private val allDebridService: AllDebridService,
     private val torboxResolver: TorboxDirectDebridResolver,
     private val realDebridResolver: RealDebridDirectDebridResolver,
     private val premiumizeResolver: PremiumizeDirectDebridResolver,
@@ -153,6 +154,7 @@ class DirectDebridResolver @Inject constructor(
         return when (DebridProviders.byId(stream.clientResolve?.service)?.id) {
             DebridProviders.TORBOX_ID -> torboxResolver.resolve(stream, season, episode)
             DebridProviders.PREMIUMIZE_ID -> premiumizeResolver.resolve(stream, season, episode)
+            DebridProviders.ALL_DEBRID_ID -> allDebridService.resolve(stream, season, episode)
             DebridProviders.REAL_DEBRID_ID -> realDebridResolver.resolve(stream, season, episode)
             else -> DirectDebridResolveResult.Error
         }
@@ -244,6 +246,8 @@ class DirectDebridResolver @Inject constructor(
         )
 
         return when (account.provider.id) {
+            DebridProviders.ALL_DEBRID_ID -> allDebridService.resolve(resolveStream, season, episode)
+            DebridProviders.REAL_DEBRID_ID -> realDebridResolver.resolve(resolveStream, season, episode)
             DebridProviders.TORBOX_ID -> torboxResolver.resolve(resolveStream, season, episode)
             DebridProviders.PREMIUMIZE_ID -> premiumizeResolver.resolve(resolveStream, season, episode)
             else -> DirectDebridResolveResult.Error

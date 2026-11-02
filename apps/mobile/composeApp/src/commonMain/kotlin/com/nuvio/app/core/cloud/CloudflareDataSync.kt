@@ -106,21 +106,7 @@ object CloudflareDataSync {
             // Offline/new profile: try again after D1 profile creation.
             throw IllegalStateException("Profil Cloudflare non encore lié : reprise de synchronisation nécessaire")
         }
-        val profileImagesReady = ProfileRepository.syncCloudflareProfileImages()
         val records = CloudflareAccountClient.synchronizeAll(cloudId)
-        var addonsReady = true
-        try { com.nuvio.app.features.addons.AddonRepository.synchronizeCloudAddons(cloudId, records) }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { addonsReady = false; log.w(error) { "Extensions Cloudflare différées, configuration locale conservée" } }
-        val catalogueReady = CloudflareCatalogueSync.synchronize(profileId, cloudId, records)
-        var pluginsReady = true
-        try { pluginsReady = com.nuvio.app.features.plugins.PluginRepository.synchronizeCloudPlugins(profileId, cloudId, records) }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { pluginsReady = false; log.w(error) { "Modules complémentaires différés" } }
-        var visualReady = true
-        try { visualReady = CloudflareVisualSettingsSync.synchronize(profileId, cloudId, records) }
-        catch (cancelled: CancellationException) { throw cancelled }
-        catch (error: Exception) { visualReady = false; log.w(error) { "Préférences visuelles différées" } }
         val remote = records.associateBy {
             it["category"]?.jsonPrimitive?.content.orEmpty() + "|" +
                 it["itemKey"]?.jsonPrimitive?.content.orEmpty()
@@ -153,6 +139,21 @@ object CloudflareDataSync {
         synchronizeLibrary(profileId, cloudId, reconciled)
         synchronizeProgress(profileId, cloudId, reconciled, suppressed)
         synchronizeWatched(profileId, cloudId, reconciled, suppressed)
+        // Essential account state must not wait behind large photos or third-party manifests/code.
+        var addonsReady = true
+        try { com.nuvio.app.features.addons.AddonRepository.synchronizeCloudAddons(cloudId, records) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { addonsReady = false; log.w(error) { "Extensions Cloudflare différées, configuration locale conservée" } }
+        val catalogueReady = CloudflareCatalogueSync.synchronize(profileId, cloudId, records)
+        var pluginsReady = true
+        try { pluginsReady = com.nuvio.app.features.plugins.PluginRepository.synchronizeCloudPlugins(profileId, cloudId, records) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { pluginsReady = false; log.w(error) { "Modules complémentaires différés" } }
+        var visualReady = true
+        try { visualReady = CloudflareVisualSettingsSync.synchronize(profileId, cloudId, records) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { visualReady = false; log.w(error) { "Préférences visuelles différées" } }
+        val profileImagesReady = ProfileRepository.syncCloudflareProfileImages()
         check(pluginsReady) { "Modules complémentaires en attente de synchronisation" }
         check(visualReady) { "Préférences visuelles en attente de synchronisation" }
         check(addonsReady) { "Extensions en attente de synchronisation" }

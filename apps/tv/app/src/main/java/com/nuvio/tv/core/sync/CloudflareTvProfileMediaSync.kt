@@ -33,7 +33,7 @@ class CloudflareTvProfileMediaSync @Inject constructor(
             error("Cette télévision ne supprime pas les images du cloud.")
     })
 
-    suspend fun synchronize(reportFailure: Boolean = false) = mutex.withLock {
+    suspend fun synchronize(reportFailure: Boolean = false, includeImages: Boolean = true) = mutex.withLock {
         val account = CloudflareTvAccountClient.account ?: return@withLock
         val remote = CloudflareTvAccountClient.cloudProfileDetails()
         // Establish stable UUID links before names may change on another device.
@@ -56,6 +56,7 @@ class CloudflareTvProfileMediaSync @Inject constructor(
                 }
             }
         }
+        if (!includeImages) return@withLock
         var failure: Exception? = null
         for (local in profiles.profiles.value) {
             val row = (if (local.cloudProfileId != null) remote.firstOrNull { it.optString("id") == local.cloudProfileId }

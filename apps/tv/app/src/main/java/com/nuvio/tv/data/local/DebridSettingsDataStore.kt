@@ -46,6 +46,7 @@ class DebridSettingsDataStore @Inject constructor(
     private val cloudLibraryEnabledKey = booleanPreferencesKey("cloud_library_enabled")
     private val torboxApiKeyKey = stringPreferencesKey("torbox_api_key")
     private val premiumizeApiKeyKey = stringPreferencesKey("premiumize_api_key")
+    private val allDebridApiKeyKey = stringPreferencesKey("all_debrid_api_key")
     private val realDebridApiKeyKey = stringPreferencesKey("real_debrid_api_key")
     private val preferredResolverProviderIdKey = stringPreferencesKey("preferred_resolver_provider_id")
     private val instantPlaybackPreparationLimitKey = intPreferencesKey("instant_playback_preparation_limit")
@@ -80,11 +81,13 @@ class DebridSettingsDataStore @Inject constructor(
                 cloudLibraryEnabled = prefs[cloudLibraryEnabledKey] ?: true,
                 torboxApiKey = prefs[torboxApiKeyKey] ?: "",
                 premiumizeApiKey = prefs[premiumizeApiKeyKey] ?: "",
+                allDebridApiKey = prefs[allDebridApiKeyKey] ?: "",
                 realDebridApiKey = prefs[realDebridApiKeyKey] ?: "",
                 preferredResolverProviderId = preferredResolverProviderId(
                     stored = prefs[preferredResolverProviderIdKey],
                     torboxApiKey = prefs[torboxApiKeyKey] ?: "",
                     premiumizeApiKey = prefs[premiumizeApiKeyKey] ?: "",
+                    allDebridApiKey = prefs[allDebridApiKeyKey] ?: "",
                     realDebridApiKey = prefs[realDebridApiKeyKey] ?: ""
                 ),
                 instantPlaybackPreparationLimit = normalizeDebridInstantPlaybackPreparationLimit(
@@ -142,6 +145,7 @@ class DebridSettingsDataStore @Inject constructor(
                 stored = prefs[preferredResolverProviderIdKey],
                 torboxApiKey = prefs[torboxApiKeyKey] ?: "",
                 premiumizeApiKey = prefs[premiumizeApiKeyKey] ?: "",
+                allDebridApiKey = prefs[allDebridApiKeyKey] ?: "",
                 realDebridApiKey = prefs[realDebridApiKeyKey] ?: ""
             )
             prefs[preferredResolverProviderIdKey] = preferred
@@ -285,6 +289,7 @@ class DebridSettingsDataStore @Inject constructor(
     private fun providerKey(providerId: String) = when (providerId) {
         DebridProviders.TORBOX_ID -> torboxApiKeyKey
         DebridProviders.PREMIUMIZE_ID -> premiumizeApiKeyKey
+        DebridProviders.ALL_DEBRID_ID -> allDebridApiKeyKey
         DebridProviders.REAL_DEBRID_ID -> realDebridApiKeyKey
         else -> null
     }
@@ -303,12 +308,14 @@ class DebridSettingsDataStore @Inject constructor(
         stored: String?,
         torboxApiKey: String,
         premiumizeApiKey: String,
-        realDebridApiKey: String
+        realDebridApiKey: String,
+        allDebridApiKey: String
     ): String {
         val connected = listOf(
             DebridProviders.TORBOX_ID to torboxApiKey,
             DebridProviders.PREMIUMIZE_ID to premiumizeApiKey,
-            DebridProviders.REAL_DEBRID_ID to realDebridApiKey
+            DebridProviders.REAL_DEBRID_ID to realDebridApiKey,
+            DebridProviders.ALL_DEBRID_ID to allDebridApiKey
         ).mapNotNull { (id, key) ->
             DebridProviders.byId(id)
                 ?.takeIf { provider -> provider.visibleInUi && key.isNotBlank() }
