@@ -24,15 +24,17 @@ class DebridSettingsTest {
                 DebridProviders.TORBOX_ID to "tb_key",
                 DebridProviders.PREMIUMIZE_ID to "pm_key",
                 DebridProviders.REAL_DEBRID_ID to "rd_key",
+                DebridProviders.ALL_DEBRID_ID to "ad_key",
             ),
         )
 
         val services = DebridProviders.configuredServices(settings)
 
-        assertEquals(listOf(DebridProviders.TORBOX_ID, DebridProviders.PREMIUMIZE_ID), services.map { it.provider.id })
-        assertEquals(listOf("tb_key", "pm_key"), services.map { it.apiKey })
+        assertEquals(listOf(DebridProviders.ALL_DEBRID_ID, DebridProviders.REAL_DEBRID_ID, DebridProviders.TORBOX_ID, DebridProviders.PREMIUMIZE_ID), services.map { it.provider.id })
+        assertEquals(listOf("ad_key", "rd_key", "tb_key", "pm_key"), services.map { it.apiKey })
         assertTrue(settings.hasAnyApiKey)
-        assertFalse(DebridProviders.isVisible(DebridProviders.REAL_DEBRID_ID))
+        assertTrue(DebridProviders.isVisible(DebridProviders.REAL_DEBRID_ID))
+        assertTrue(DebridProviders.isVisible(DebridProviders.ALL_DEBRID_ID))
     }
 
     @Test
