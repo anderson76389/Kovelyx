@@ -419,7 +419,7 @@ jobs:
     name: Publier les trois paquets vérifiés pour la bannière de mise à jour
     # Publish the tested default-branch commit; GITHUB_TOKEN cannot grant workflow-write scope.
     needs: [tv, mobile]
-    if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
+    if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     permissions:
