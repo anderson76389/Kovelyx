@@ -324,6 +324,17 @@ jobs:
           }
           '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
 
+      - name: Afficher les échecs des tests Desktop
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
+            [xml]$report = Get-Content $_.FullName -Raw
+            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
+              Write-Output $_.name
+              Write-Output $_.failure.InnerText
+            }
+          }
       - name: Enregistrer les rapports des tests Windows
         if: always()
         uses: actions/upload-artifact@v4

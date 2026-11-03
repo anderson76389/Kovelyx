@@ -52,6 +52,7 @@ class PluginRuntimeDesktopTest {
                         code = """
                             module.exports.getStreams = async function(tmdbId, mediaType) {
                                 await Promise.resolve();
+                                await new Promise(resolve => setTimeout(() => Promise.resolve().then(resolve), 1));
                                 return [{
                                     title: "Concurrent stream " + tmdbId + " " + mediaType,
                                     url: "https://example.test/" + tmdbId + ".mp4",

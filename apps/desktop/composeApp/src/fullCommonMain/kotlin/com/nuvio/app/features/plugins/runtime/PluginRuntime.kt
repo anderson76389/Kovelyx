@@ -13,6 +13,8 @@ import com.nuvio.app.features.plugins.runtime.network.UrlBridge
 import com.nuvio.app.features.plugins.runtime.wasm.WasmBridge
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -110,7 +112,7 @@ internal object PluginRuntime {
                         evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                         evaluate<Any?>(wrapPluginModule(code))
                         evaluateCached({ JsRuntime.settingsCallBytecode(this) }, JsBindings.staticSettingsCallCode)
-                        (evaluate<Any?>("globalThis.__kovelyx_plugin_result") as? String) ?: deferred.await()
+                        awaitPluginResult(deferred)
                     }
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -168,11 +170,26 @@ internal object PluginRuntime {
                 // Some QuickJS versions stringify the Promise object rather
                 // than unwrapping it. Read the completed value in this VM;
                 // retain the capture callback for older runtime compatibility.
-                (evaluate<Any?>("globalThis.__kovelyx_plugin_result") as? String) ?: deferred.await()
+                awaitPluginResult(deferred)
             }
             return parseJsonResults(rawJson)
         } finally {
             domBridge.clear()
+        }
+    }
+
+    private suspend fun com.dokar.quickjs.QuickJs.awaitPluginResult(
+        captured: Deferred<String?>,
+    ): String {
+        while (true) {
+            // A native microtask can remain queued after evaluate() returns.
+            // Re-enter this VM to pump it instead of waiting on a host callback
+            // that cannot run while the VM is idle. The caller's existing
+            // timeout and cancellation still bound the entire scraper call.
+            val value = evaluate<Any?>("globalThis.__kovelyx_plugin_result")
+            if (value is String) return value
+            if (captured.isCompleted) return captured.await() ?: "[]"
+            delay(10)
         }
     }
 
