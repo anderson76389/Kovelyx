@@ -1,6 +1,7 @@
 name: Compiler Kovelyx (APK et diagnostic Windows)
 
 on:
+  # A source change must also trigger the functional/French proof workflows.
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
