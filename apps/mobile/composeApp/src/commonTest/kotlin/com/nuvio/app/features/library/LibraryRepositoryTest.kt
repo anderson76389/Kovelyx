@@ -17,9 +17,9 @@ class LibraryRepositoryTest {
 
     @Test
     fun `display title uses exact type formatting`() {
-        assertEquals("Movie", "movie".toLibraryDisplayTitle())
-        assertEquals("Anime Series", "anime-series".toLibraryDisplayTitle())
-        assertEquals("Tv", "tv".toLibraryDisplayTitle())
+        assertEquals("Movies", "movie".toLibraryDisplayTitle())
+        assertEquals("Anime", "anime-series".toLibraryDisplayTitle())
+        assertEquals("Series", "tv".toLibraryDisplayTitle())
         assertEquals("Other", "".toLibraryDisplayTitle())
     }
 

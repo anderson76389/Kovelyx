@@ -82,8 +82,8 @@ internal actual fun FloatingNavigationBar(
     val currentItems by rememberUpdatedState(items)
     val currentIsRtl by rememberUpdatedState(isRtl)
     val density = LocalDensity.current
-    val trackHeight = 48.dp + (if (compactSize) 8.dp else 16.dp) * labelFraction
-    val horizontalPadding = 58.dp - 30.dp * labelFraction
+    val trackHeight = 48.dp + (if (compactSize) 16.dp else 20.dp) * density.fontScale * labelFraction
+    val horizontalPadding = 58.dp - 46.dp * labelFraction
 
     LaunchedEffect(visualSelectedIndex, items.size) {
         motion.select(visualSelectedIndex)
@@ -108,7 +108,7 @@ internal actual fun FloatingNavigationBar(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 400.dp)
+                .widthIn(max = 480.dp)
                 .fillMaxWidth()
                 .height(trackHeight)
                 .onSizeChanged {

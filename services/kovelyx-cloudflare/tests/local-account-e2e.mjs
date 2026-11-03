@@ -336,6 +336,36 @@ try {
   assert.equal((await fetch(backgroundUrl,{headers:{Authorization:"Bearer "+tvToken}})).status,200,
     "Deleting the avatar must not remove the background");
 
+  // Batch marks span multiple pages and keep film/series identities and episode numbers.
+  const batchMarks = Array.from({length:31}, (_, n) => ({
+    profileId, category:"watched_items", itemKey:`series:tt-batch:1:${n+1}`, revision:0,
+    deleted:false, payload:{id:"tt-batch",type:"series",name:"Série française",season:1,episode:n+1,markedAtEpochMs:1720010600000+n}
+  }));
+  for (const mark of batchMarks) {
+    assert.equal((await req("/v1/sync","POST",mark,alice.token)).status,201,"Mark episode watched");
+  }
+  async function readAllSync(token) {
+    const rows=[];
+    let offset=0;
+    do {
+      const page=await req(`/v1/sync?profileId=${profileId}&limit=25&offset=${offset}`,"GET",null,token);
+      assert.equal(page.status,200);
+      rows.push(...page.data.items);
+      offset=page.data.nextOffset;
+    } while(offset!==null);
+    return rows;
+  }
+  const secondSessionRows=await readAllSync(tvToken);
+  assert.equal(secondSessionRows.filter(row=>row.category==="watched_items" && row.payload?.id==="tt-batch").length,31,
+    "All batch watched marks must cross sessions and pagination");
+  const unmark={...batchMarks[5],revision:1,deleted:true,payload:{removed:true}};
+  assert.equal((await req("/v1/sync","POST",unmark,tvToken)).status,200,"Unmark one episode");
+  assert.equal((await req("/v1/sync","POST",batchMarks[5],alice.token)).status,409,"Offline stale mark must not resurrect an unmarked episode");
+  const afterUnmark=await readAllSync(alice.token);
+  const tombstone=afterUnmark.find(row=>row.category==="watched_items" && row.itemKey===unmark.itemKey);
+  assert.equal(tombstone?.deleted,true,"Unmark tombstone visible to first session");
+  assert.equal(afterUnmark.filter(row=>row.category==="watched_items" && row.payload?.id==="tt-batch" && !row.deleted).length,30);
+
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);
   assert.equal(renamed.status,200,"Rename profile from second device");

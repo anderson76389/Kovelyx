@@ -889,6 +889,11 @@ class LibraryViewModel @Inject constructor(
     }
 
     private fun prettifyTypeLabel(key: String): String {
+        when (key.lowercase(Locale.ROOT)) {
+            "movie", "movies", "film", "films" -> return context.getString(R.string.type_movies)
+            "series", "tv", "show", "shows" -> return context.getString(R.string.type_series_plural)
+            "anime", "anime-series", "anime_series" -> return context.getString(R.string.genre_anime)
+        }
         return key
             .replace('_', ' ')
             .replace('-', ' ')

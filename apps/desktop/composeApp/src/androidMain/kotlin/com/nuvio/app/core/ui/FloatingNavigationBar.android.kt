@@ -42,8 +42,8 @@ internal actual fun FloatingNavigationBar(
         animationSpec = tween(NuvioTokens.Motion.sheetEnterMillis, easing = NuvioTokens.Motion.standard),
         label = "jelly_labels",
     )
-    val trackHeight = 48.dp + (if (compactSize) 8.dp else 16.dp) * labelFraction
-    val horizontalPadding = 58.dp - 30.dp * labelFraction
+    val trackHeight = 48.dp + (if (compactSize) 16.dp else 20.dp) * density.fontScale * labelFraction
+    val horizontalPadding = 58.dp - 46.dp * labelFraction
 
     Box(
         modifier = modifier
@@ -57,7 +57,7 @@ internal actual fun FloatingNavigationBar(
             labelFraction = labelFraction,
             compactSize = compactSize,
             glowStrength = glowStrength,
-            modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth().height(trackHeight),
+            modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().height(trackHeight),
         ) {
             GlassBarSurface(hazeState, Modifier.matchParentSize(), glowStrength)
         }

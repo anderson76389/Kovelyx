@@ -48,6 +48,10 @@ import kotlinx.coroutines.sync.withLock
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.library_local_tab_title
 import nuvio.composeapp.generated.resources.library_server_title_unsupported
+import nuvio.composeapp.generated.resources.media_movies
+import nuvio.composeapp.generated.resources.media_series
+import nuvio.composeapp.generated.resources.media_anime
+import nuvio.composeapp.generated.resources.media_channels
 import nuvio.composeapp.generated.resources.library_other
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -786,6 +790,13 @@ internal fun libraryMembershipWithRemovedList(
 internal fun String.toLibraryDisplayTitle(): String {
     val normalized = trim()
     if (normalized.isBlank()) return localizedLibraryOtherTitle()
+    // Translate only the visible category; provider type keys stay unchanged in storage/sync.
+    when (normalized.lowercase()) {
+        "movie", "movies", "film", "films" -> return localizedStringOrDefault(Res.string.media_movies, "Movies")
+        "series", "tv", "show", "shows" -> return localizedStringOrDefault(Res.string.media_series, "Series")
+        "anime", "anime-series", "anime_series" -> return localizedStringOrDefault(Res.string.media_anime, "Anime")
+        "channel", "channels" -> return localizedStringOrDefault(Res.string.media_channels, "Channels")
+    }
 
     return normalized
         .split('-', '_', ' ')

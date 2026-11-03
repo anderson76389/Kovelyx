@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDownward
@@ -468,13 +469,14 @@ private fun InstalledAddonCard(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Row(
+            modifier = Modifier.widthIn(max = 320.dp).fillMaxWidth().align(Alignment.End),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             onMoveUpClick?.let { onMoveUp ->
                 NuvioIconActionButton(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Rounded.ArrowUpward,
                     contentDescription = stringResource(Res.string.addons_move_up),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -483,6 +485,7 @@ private fun InstalledAddonCard(
             }
             onMoveDownClick?.let { onMoveDown ->
                 NuvioIconActionButton(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Rounded.ArrowDownward,
                     contentDescription = stringResource(Res.string.addons_move_down),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -490,6 +493,7 @@ private fun InstalledAddonCard(
                 )
             }
             NuvioIconActionButton(
+                modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.Refresh,
                 contentDescription = stringResource(Res.string.addons_refresh),
                 tint = MaterialTheme.colorScheme.primary,
@@ -497,6 +501,7 @@ private fun InstalledAddonCard(
             )
             onConfigureClick?.let { onConfigure ->
                 NuvioIconActionButton(
+                    modifier = Modifier.weight(1f),
                     icon = Icons.Rounded.Settings,
                     contentDescription = stringResource(Res.string.addons_configure),
                     tint = MaterialTheme.colorScheme.tertiary,
@@ -504,6 +509,7 @@ private fun InstalledAddonCard(
                 )
             }
             NuvioIconActionButton(
+                modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.ContentCopy,
                 contentDescription = stringResource(Res.string.addons_copy_link),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -513,6 +519,7 @@ private fun InstalledAddonCard(
                 },
             )
             NuvioIconActionButton(
+                modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.Delete,
                 contentDescription = stringResource(Res.string.addons_delete),
                 tint = MaterialTheme.colorScheme.error,
