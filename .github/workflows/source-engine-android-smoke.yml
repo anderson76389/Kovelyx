@@ -29,7 +29,7 @@ jobs:
           test "$(git rev-parse FETCH_HEAD)" = 6d80f0b4c7b09982cba8719683d9e19f760e64b9
           # This immutable AAR proves the archived source revision, not every
           # later change on HEAD. New rebuild candidates have separate proofs.
-          echo 'AAR conservé : source 6d80f0b4c7b09982cba8719683d9e19f760e64b9 ; empreinte binaire vérifiée à l’étape suivante.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'AAR conservé : source 6d80f0b4c7b09982cba8719683d9e19f760e64b9 ; empreinte binaire vérifiée à la prochaine etape.' >> "$GITHUB_STEP_SUMMARY"
       - name: Récupérer le candidat conservé dans Kovelyx
         shell: bash
         env:
