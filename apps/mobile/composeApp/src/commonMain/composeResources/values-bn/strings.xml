@@ -1169,8 +1169,6 @@
     <string name="settings_playback_show_loading_overlay_description">প্রথম ভিডিও ফ্রেম প্রদর্শিত না হওয়া পর্যন্ত লোডিং স্ক্রীন দেখান।</string>
     <string name="settings_playback_pause_overlay">পজ ওভারলে</string>
     <string name="settings_playback_pause_overlay_description">পজ করার ৫ সেকেন্ড পর বিস্তারিত ওভারলে দেখান।</string>
-    <string name="settings_playback_parental_guide">কন্টেন্ট সতর্কতা</string>
-    <string name="settings_playback_parental_guide_description">প্লেব্যাক শুরু হলে অভিভাবকীয় নির্দেশিকা ওভারলে দেখান।</string>
     <string name="settings_playback_subtitle_background_color">ব্যাকগ্রাউন্ডের রঙ</string>
     <string name="settings_playback_subtitle_bold">বোল্ড</string>
     <string name="settings_playback_subtitle_bold_description">মোটা সাবটাইটেল ফন্ট ওয়েট ব্যবহার করুন।</string>

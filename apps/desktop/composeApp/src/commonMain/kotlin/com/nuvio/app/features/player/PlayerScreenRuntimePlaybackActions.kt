@@ -330,31 +330,6 @@ internal fun PlayerScreenRuntime.emitTrackingSeekScrobbleStart() {
     }
 }
 
-internal fun PlayerScreenRuntime.tryShowParentalGuide() {
-    if (!playerSettingsUiState.showParentalGuide) return
-    if (!parentalGuideHasShown && parentalWarnings.isNotEmpty() && !playbackStartedForParentalGuide) {
-        playbackStartedForParentalGuide = true
-        showParentalGuide = true
-        parentalGuideHasShown = true
-    }
-}
-
-internal suspend fun PlayerScreenRuntime.resolveParentalGuideImdbId(): String? {
-    val candidates = listOf(parentMetaId, activeVideoId)
-    candidates.firstNotNullOfOrNull(::extractParentalGuideImdbId)?.let { return it }
-    // Fallback: use imdb_id from addon meta response
-    val metaImdbId = (metaUiState.meta ?: playerMeta)
-        ?.takeIf { it.id == parentMetaId }
-        ?.imdbId
-        ?.takeIf { it.startsWith("tt") }
-    if (metaImdbId != null) return metaImdbId
-    val tmdbId = candidates.firstNotNullOfOrNull(::extractParentalGuideTmdbId) ?: return null
-    return TmdbService.tmdbToImdb(
-        tmdbId = tmdbId,
-        mediaType = contentType ?: parentMetaType,
-    )
-}
-
 internal fun PlayerScreenRuntime.flushWatchProgress(
     scrobbleAction: TrackingScrobbleAction = TrackingScrobbleAction.STOP,
 ) {

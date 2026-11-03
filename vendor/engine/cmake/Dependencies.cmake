@@ -46,6 +46,7 @@ function(nuvio_engine_add_libtorrent)
         nuvio_libtorrent
         GIT_REPOSITORY https://github.com/arvidn/libtorrent.git
         GIT_TAG 740a0b9aeabe00e762cc0efe4a0f27593db2550b
+        GIT_CONFIG core.autocrlf=false
         GIT_SHALLOW FALSE
         GIT_PROGRESS TRUE
         # try_signal is part of libtorrent's portable signal handling. The
@@ -59,79 +60,21 @@ function(nuvio_engine_add_libtorrent)
         FetchContent_Populate(nuvio_libtorrent)
     endif()
 
-    set(
-        nuvio_libtorrent_patches
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-macos-route-bounds.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-ca-bundle.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-apple-trust.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-windows-trust.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-windows-system-trust.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-streaming-stall.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-request-queue-limit.patch"
-        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/libtorrent-2.0.12-nuvio-block-start.patch"
+    # Validate the complete pinned patch state, including context and line endings.
+    # Windows checkouts can be CRLF; hashes and patches use canonical LF bytes.
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    execute_process(
+        COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../scripts/apply-libtorrent-patches.py"
+            "${nuvio_libtorrent_SOURCE_DIR}"
+        RESULT_VARIABLE nuvio_patch_result
+        OUTPUT_VARIABLE nuvio_patch_output
+        ERROR_VARIABLE nuvio_patch_error
     )
-    set(
-        nuvio_libtorrent_patch_files
-        "src/enum_net.cpp"
-        "include/libtorrent/settings_pack.hpp"
-        "src/session_impl.cpp"
-        "src/session_impl.cpp"
-        "src/session_impl.cpp"
-        "src/torrent.cpp"
-        "src/bt_peer_connection.cpp"
-        "src/piece_picker.cpp"
-    )
-    set(
-        nuvio_libtorrent_patch_sentinels
-        "message_end = reinterpret_cast<char*>"
-        "nuvio_ssl_ca_bundle"
-        "nuvio_apple_configure_tls_trust"
-        "nuvio_windows_configure_tls_trust"
-        "live Windows store without replacing an explicit PEM store"
-        "nuvio_stall_budget_ms"
-        "nuvio_reqq"
-        "nuvio_block_start"
-    )
-    list(LENGTH nuvio_libtorrent_patches nuvio_libtorrent_patch_count)
-    math(EXPR nuvio_libtorrent_last_patch "${nuvio_libtorrent_patch_count} - 1")
-    foreach(nuvio_libtorrent_patch_index RANGE 0 ${nuvio_libtorrent_last_patch})
-        list(GET nuvio_libtorrent_patches ${nuvio_libtorrent_patch_index} nuvio_libtorrent_patch)
-        list(GET nuvio_libtorrent_patch_files ${nuvio_libtorrent_patch_index} nuvio_libtorrent_patch_file)
-        list(GET nuvio_libtorrent_patch_sentinels ${nuvio_libtorrent_patch_index} nuvio_libtorrent_patch_sentinel)
-        file(
-            READ
-            "${nuvio_libtorrent_SOURCE_DIR}/${nuvio_libtorrent_patch_file}"
-            nuvio_libtorrent_patch_source
-        )
-        string(
-            FIND
-            "${nuvio_libtorrent_patch_source}"
-            "${nuvio_libtorrent_patch_sentinel}"
-            nuvio_libtorrent_patch_position
-        )
-        if(nuvio_libtorrent_patch_position EQUAL -1)
-            execute_process(
-                COMMAND git apply --unidiff-zero --check "${nuvio_libtorrent_patch}"
-                WORKING_DIRECTORY "${nuvio_libtorrent_SOURCE_DIR}"
-                RESULT_VARIABLE nuvio_libtorrent_patch_needed
-                OUTPUT_QUIET
-                ERROR_QUIET
-            )
-            if(NOT nuvio_libtorrent_patch_needed EQUAL 0)
-                get_filename_component(
-                    nuvio_libtorrent_patch_name
-                    "${nuvio_libtorrent_patch}"
-                    NAME
-                )
-                message(FATAL_ERROR "Pinned libtorrent patch does not apply: ${nuvio_libtorrent_patch_name}")
-            endif()
-            execute_process(
-                COMMAND git apply --unidiff-zero "${nuvio_libtorrent_patch}"
-                WORKING_DIRECTORY "${nuvio_libtorrent_SOURCE_DIR}"
-                COMMAND_ERROR_IS_FATAL ANY
-            )
-        endif()
-    endforeach()
+    if(NOT nuvio_patch_result EQUAL 0)
+        message(FATAL_ERROR "Verified libtorrent patching failed: ${nuvio_patch_error}")
+    endif()
+    message(STATUS "${nuvio_patch_output}")
 
     set(BUILD_SHARED_LIBS OFF)
     set(build_tests OFF)

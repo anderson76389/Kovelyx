@@ -44,10 +44,10 @@ $releases = @($releasesJson | ConvertFrom-Json)
 $work = Join-Path ([System.IO.Path]::GetTempPath()) ("kovelyx-own-runtime-" + [guid]::NewGuid().ToString("N"))
 New-Item -Path $work -ItemType Directory -Force | Out-Null
 try {
-    foreach ($release in $releases) {
+    foreach ($release in @($releases | Sort-Object @{ Expression = { $_.tag_name -eq 'native-vault-v1' }; Descending = $true })) {
         if ($release.draft) { continue }
         $asset = @($release.assets | Where-Object {
-            $_.name -match '^Kovelyx-Windows-Portable-.*[.]zip$'
+            $_.name -match '^(Kovelyx-Windows-Portable-.*|Kovelyx-native-windows-runtime)[.]zip$'
         } | Select-Object -First 1)
         if ($asset.Count -eq 0) { continue }
 

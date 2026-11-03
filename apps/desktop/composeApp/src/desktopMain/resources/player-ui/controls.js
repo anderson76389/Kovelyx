@@ -59,9 +59,6 @@ const openingStatus = document.getElementById("openingStatus");
 const openingMessage = document.getElementById("openingMessage");
 const openingProgressTrack = document.getElementById("openingProgressTrack");
 const openingProgressBar = document.getElementById("openingProgressBar");
-const parentalGuide = document.getElementById("parentalGuide");
-const parentalGuideLine = document.getElementById("parentalGuideLine");
-const parentalGuideList = document.getElementById("parentalGuideList");
 const skipPrompt = document.getElementById("skipPrompt");
 const skipPromptLabel = document.getElementById("skipPromptLabel");
 const skipPromptProgress = document.getElementById("skipPromptProgress");
@@ -394,9 +391,6 @@ let submitIntroDraft = {
   status: "",
 };
 let hasReceivedPlayerControls = false;
-let parentalGuideRunId = 0;
-let parentalGuideStartedKey = "";
-let parentalGuideCompletedKey = "";
 let skipPromptKey = "";
 let skipPromptWasDismissed = false;
 let skipPromptAutoHidden = false;
@@ -618,128 +612,6 @@ const queueSettingToast = command => {
 const animationDelay = ms => new Promise(resolve => {
   window.setTimeout(resolve, prefersReducedMotion ? 1 : ms);
 });
-
-const normalizedParentalWarnings = () =>
-  Array.isArray(state.parentalWarnings)
-    ? state.parentalWarnings
-        .map(warning => ({
-          label: String(warning && warning.label || "").trim(),
-          severity: String(warning && warning.severity || "").trim(),
-        }))
-        .filter(warning => warning.label || warning.severity)
-        .slice(0, 5)
-    : [];
-
-const parentalWarningKey = warnings =>
-  warnings.map(warning => `${warning.label}\u0000${warning.severity}`).join("\u0001");
-
-const hideParentalGuide = () => {
-  root.classList.remove("parental-visible", "parental-line-visible");
-  parentalGuide.setAttribute("aria-hidden", "true");
-  parentalGuideList.querySelectorAll(".parental-guide-row").forEach(row => {
-    row.classList.remove("visible");
-  });
-};
-
-const renderParentalGuideRows = warnings => {
-  parentalGuideList.innerHTML = "";
-  const rowHeight = 18;
-  const rowGap = 2;
-  const totalHeight = warnings.length > 0
-    ? (rowHeight * warnings.length) + (rowGap * (warnings.length - 1))
-    : 0;
-  parentalGuideLine.style.height = `${totalHeight}px`;
-
-  warnings.forEach(warning => {
-    const row = document.createElement("div");
-    row.className = "parental-guide-row";
-
-    const label = document.createElement("span");
-    label.className = "parental-guide-label";
-    label.textContent = warning.label;
-
-    const separator = document.createElement("span");
-    separator.className = "parental-guide-separator";
-    separator.textContent = " · ";
-
-    const severity = document.createElement("span");
-    severity.className = "parental-guide-severity";
-    severity.textContent = warning.severity;
-
-    row.appendChild(label);
-    row.appendChild(separator);
-    row.appendChild(severity);
-    parentalGuideList.appendChild(row);
-  });
-};
-
-const runParentalGuideAnimation = async (warnings, key, runId) => {
-  renderParentalGuideRows(warnings);
-  parentalGuide.setAttribute("aria-hidden", "false");
-  root.classList.add("parental-visible");
-  await animationDelay(300);
-  if (runId !== parentalGuideRunId) return;
-
-  root.classList.add("parental-line-visible");
-  await animationDelay(400);
-  if (runId !== parentalGuideRunId) return;
-
-  const rows = Array.from(parentalGuideList.querySelectorAll(".parental-guide-row"));
-  for (const row of rows) {
-    await animationDelay(80);
-    if (runId !== parentalGuideRunId) return;
-    row.classList.add("visible");
-    await animationDelay(200);
-    if (runId !== parentalGuideRunId) return;
-  }
-
-  await animationDelay(5000);
-  if (runId !== parentalGuideRunId) return;
-
-  for (const row of rows.slice().reverse()) {
-    await animationDelay(60);
-    if (runId !== parentalGuideRunId) return;
-    row.classList.remove("visible");
-    await animationDelay(150);
-    if (runId !== parentalGuideRunId) return;
-  }
-
-  await animationDelay(100);
-  if (runId !== parentalGuideRunId) return;
-  root.classList.remove("parental-line-visible");
-
-  await animationDelay(300);
-  if (runId !== parentalGuideRunId) return;
-
-  await animationDelay(200);
-  if (runId !== parentalGuideRunId) return;
-  root.classList.remove("parental-visible");
-  await animationDelay(300);
-  if (runId !== parentalGuideRunId) return;
-  parentalGuide.setAttribute("aria-hidden", "true");
-  parentalGuideCompletedKey = key;
-  send("parentalGuideComplete", 0);
-};
-
-const syncParentalGuide = showOpening => {
-  const warnings = normalizedParentalWarnings();
-  const shouldShow = Boolean(state.showParentalGuide && warnings.length && !showOpening);
-  if (!shouldShow) {
-    parentalGuideRunId += 1;
-    parentalGuideStartedKey = "";
-    if (!state.showParentalGuide) {
-      parentalGuideCompletedKey = "";
-    }
-    hideParentalGuide();
-    return;
-  }
-
-  const key = parentalWarningKey(warnings);
-  if (parentalGuideStartedKey === key || parentalGuideCompletedKey === key) return;
-  parentalGuideStartedKey = key;
-  parentalGuideRunId += 1;
-  runParentalGuideAnimation(warnings, key, parentalGuideRunId);
-};
 
 const cssColorOrFallback = (value, fallback) => {
   const text = String(value || "").trim();
@@ -2407,7 +2279,6 @@ const renderChrome = () => {
   syncHiddenCursor();
   const showOpening = renderOpeningOverlay(showError);
   if (state.pauseOverlayEnabled || showError) renderPauseMetadataOverlay(showOpening || showError);
-  syncParentalGuide(showOpening || showError);
 
   title.textContent = state.title || "";
   setText(episode, state.episodeText);

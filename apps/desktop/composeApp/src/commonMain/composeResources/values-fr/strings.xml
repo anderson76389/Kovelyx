@@ -2266,8 +2266,6 @@
     <string name="settings_playback_preload_next_episode_description">Rechercher des sources en arrière-plan avant l’apparition du bouton de l’épisode suivant.</string>
     <string name="settings_playback_pause_overlay">Informations en pause</string>
     <string name="settings_playback_pause_overlay_description">Afficher les informations après 5 secondes de pause.</string>
-    <string name="settings_playback_parental_guide">Avertissements sur le contenu</string>
-    <string name="settings_playback_parental_guide_description">Afficher les recommandations parentales au début de la lecture.</string>
     <string name="settings_playback_subtitle_strip_sdh">Nettoyer les sous-titres pour malentendants</string>
     <string name="settings_playback_subtitle_strip_sdh_description">Masquer les descriptions sonores et les noms des intervenants dans les sous-titres textuels.</string>
     <string name="settings_playback_auto_skip_segments">Passage automatique</string>

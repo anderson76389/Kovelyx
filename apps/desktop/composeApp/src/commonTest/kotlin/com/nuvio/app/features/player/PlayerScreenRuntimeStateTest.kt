@@ -158,17 +158,6 @@ class PlayerScreenRuntimeStateTest {
     }
 
     @Test
-    fun parentalGuideDoesNotRevealPlaybackControls() {
-        val runtime = PlayerScreenRuntime(testPlayerScreenArgs())
-        runtime.parentalWarnings = listOf(ParentalWarning(label = "Violence", severity = "Mild"))
-
-        runtime.tryShowParentalGuide()
-
-        assertTrue(runtime.showParentalGuide)
-        assertFalse(runtime.controlsVisible)
-    }
-
-    @Test
     fun sourceFilterUpdatesInvalidateUiWithoutPlaybackUpdates() {
         val runtime = PlayerScreenRuntime(testPlayerScreenArgs())
         val selectedFilter = derivedStateOf { runtime.sourceStreamsState.selectedFilter }

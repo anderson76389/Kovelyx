@@ -21,6 +21,11 @@ class RetentionTests(unittest.TestCase):
         occupied = dict(id=4, draft=True, created_at="2026-10-27", assets=[{"name": "a.apk"}])
         self.assertEqual([old_empty], prune.obsolete_releases([published, old_empty, new_empty, occupied]))
 
+    def test_native_vault_does_not_count_as_an_app_release_or_expire(self):
+        releases = [dict(id=i, tag_name=f"v1.1.{i}", draft=False, published_at=f"2026-10-{i:02d}") for i in range(1, 5)]
+        releases += [dict(id=9, tag_name="native-vault-v1", draft=False, published_at="2026-10-31")]
+        self.assertEqual([1], [r["id"] for r in prune.obsolete_releases(releases)])
+
     def test_does_not_delete_when_less_than_four_releases_exist(self):
         self.assertEqual([], prune.obsolete_releases([
             dict(id=1, draft=False, published_at="2026-10-28")]))

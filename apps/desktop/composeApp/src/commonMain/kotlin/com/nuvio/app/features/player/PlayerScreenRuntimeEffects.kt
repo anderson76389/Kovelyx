@@ -492,27 +492,6 @@ private fun PlayerScreenRuntime.BindPlayerMetadataAndSkipEffects() {
         profile.settings(parentMetaId, parentMetaType)
     }
 
-    LaunchedEffect(activeVideoId, activeSeasonNumber, activeEpisodeNumber, parentMetaId, parentMetaType) {
-        parentalWarnings = emptyList()
-        showParentalGuide = false
-        parentalGuideHasShown = false
-        playbackStartedForParentalGuide = false
-
-        val imdbId = resolveParentalGuideImdbId() ?: return@LaunchedEffect
-        val guide = ParentalGuideRepository.getParentalGuide(imdbId) ?: return@LaunchedEffect
-        parentalWarnings = buildParentalWarnings(guide, parentalGuideLabels)
-
-        if (playbackSnapshot.isPlaying) {
-            tryShowParentalGuide()
-        }
-    }
-
-    LaunchedEffect(playbackSnapshot.isPlaying, parentalWarnings) {
-        if (playbackSnapshot.isPlaying) {
-            tryShowParentalGuide()
-        }
-    }
-
     LaunchedEffect(
         activeVideoId,
         activeSeasonNumber,

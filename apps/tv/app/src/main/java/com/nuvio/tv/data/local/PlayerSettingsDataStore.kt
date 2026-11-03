@@ -242,7 +242,7 @@ data class PlayerSettings(
     val pauseOverlayEnabled: Boolean = true,
     val osdClockEnabled: Boolean = true,
     val skipIntroEnabled: Boolean = true,
-    val parentalGuideEnabled: Boolean = true,
+    val parentalGuideEnabled: Boolean = false,
     val autoSkipSegmentTypes: Set<AutoSkipSegmentType> = emptySet(),
     // Dolby Vision settings (libdovi conversion). dv7HandlingMode == HDR10_BASE_LAYER
     // replaces the legacy mapDV7ToHevc boolean (strip DV7, play HEVC base layer).
@@ -892,7 +892,7 @@ class PlayerSettingsDataStore @Inject constructor(
                 pauseOverlayEnabled = prefs[pauseOverlayEnabledKey] ?: true,
                 osdClockEnabled = prefs[osdClockEnabledKey] ?: true,
                 skipIntroEnabled = prefs[skipIntroEnabledKey] ?: true,
-                parentalGuideEnabled = prefs[parentalGuideEnabledKey] ?: true,
+                parentalGuideEnabled = false,
                 autoSkipSegmentTypes = prefs[autoSkipSegmentTypesKey]
                     ?.mapNotNull(AutoSkipSegmentType::fromStoredValue)
                     ?.toSet()
@@ -1205,7 +1205,7 @@ class PlayerSettingsDataStore @Inject constructor(
 
     suspend fun setParentalGuideEnabled(enabled: Boolean) {
         store().edit { prefs ->
-            prefs[parentalGuideEnabledKey] = enabled
+            prefs[parentalGuideEnabledKey] = false
         }
     }
 

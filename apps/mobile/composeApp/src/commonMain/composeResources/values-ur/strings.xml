@@ -1167,8 +1167,6 @@
     <string name="settings_playback_show_loading_overlay_description">پہلا video frame ظاہر ہونے تک loading screen دکھائیں۔</string>
     <string name="settings_playback_pause_overlay">Pause Overlay</string>
     <string name="settings_playback_pause_overlay_description">Playback pause ہونے کے 5 سیکنڈ بعد details overlay دکھائیں۔</string>
-    <string name="settings_playback_parental_guide">مواد کی تنبیہات</string>
-    <string name="settings_playback_parental_guide_description">Playback شروع ہونے پر parental guidance overlay دکھائیں۔</string>
     <string name="settings_playback_subtitle_background_color">پس منظر کا رنگ</string>
     <string name="settings_playback_subtitle_bold">بولڈ</string>
     <string name="settings_playback_subtitle_bold_description">سب ٹائٹل کے لیے موٹا فونٹ استعمال کریں۔</string>

@@ -1606,8 +1606,6 @@
   <string name="settings_playback_libmpv_hardware_decoding_description">Usa la decodifica hardware di mpv quando disponibile.</string>
   <string name="settings_playback_libmpv_yuv420p">Compatibilità YUV420P di libmpv</string>
   <string name="settings_playback_libmpv_yuv420p_description">Forza l’uscita YUV420P sui dispositivi con problemi di rendering o colore.</string>
-  <string name="settings_playback_parental_guide">Avvisi sui contenuti</string>
-  <string name="settings_playback_parental_guide_description">Mostra una sovrimpressione con le indicazioni per i genitori all’avvio della riproduzione.</string>
   <string name="trakt_more_like_this_source_title">Sorgente di Altri titoli simili</string>
   <string name="trakt_more_like_this_source_subtitle">Scegli da dove provengono i consigli nelle pagine dei dettagli</string>
   <string name="trakt_more_like_this_source_dialog_title">Sorgente di Altri titoli simili</string>

@@ -162,13 +162,6 @@ internal fun PlaybackPlayerInterfaceSection(
         onToggle = { onUpdate { setOsdClockEnabled(!settings.osdClockEnabled) } },
         enabled = internalPlayer
     )
-    SettingsToggleRow(
-        title = stringResource(R.string.playback_parental_guide),
-        subtitle = stringResource(R.string.playback_parental_guide_sub),
-        checked = settings.parentalGuideEnabled,
-        onToggle = { onUpdate { setParentalGuideEnabled(!settings.parentalGuideEnabled) } },
-        enabled = internalPlayer
-    )
 }
 
 @Composable

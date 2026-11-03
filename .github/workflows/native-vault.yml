@@ -1,0 +1,50 @@
+name: Préserver les sources et composants natifs Kovelyx
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/native-vault.yml', 'scripts/archive-native-vault.py']
+permissions:
+  contents: write
+concurrency:
+  group: kovelyx-native-vault-v1
+  cancel-in-progress: false
+jobs:
+  preserve:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restaurer MPV depuis les propres fichiers Kovelyx
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/restore-windows-mpv.ps1
+      - name: Archiver et relire toutes les sources et bibliothèques
+        run: python scripts/archive-native-vault.py native-vault
+      - name: Publier une archive durable distincte des versions applicatives
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = 'native-vault-v1'
+          gh release view $tag --repo $env:GITHUB_REPOSITORY --json tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            # Never overwrite a prior recovery archive, even after a merge reruns this workflow.
+            'Archive durable déjà publiée ; copie originale conservée.' >> $env:GITHUB_STEP_SUMMARY
+            exit 0
+          }
+          $assets = @(Get-ChildItem native-vault -File | ForEach-Object { $_.FullName })
+          gh release create $tag --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --latest=false --title 'Archive de récupération des sources et bibliothèques natives' --notes 'Archive publique des sources suivies, bibliothèques conservées et MPV vérifié. Ne contient ni comptes privés ni secrets. Conservation des binaires ; reconstruction exacte de chaque composant non certifiée.' @assets
+          if ($LASTEXITCODE -ne 0) { throw 'Publication de l’archive native échouée' }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kovelyx-native-vault
+          path: native-vault/
+          retention-days: 90
+          if-no-files-found: error

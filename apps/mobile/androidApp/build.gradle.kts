@@ -204,6 +204,8 @@ dependencies {
     implementation(project(":composeApp"))
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.runtime)
+    // AndroidJUnitRunner invokes Trace by reflection in the optimized test target.
+    implementation("androidx.tracing:tracing:1.3.0")
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     debugImplementation(libs.compose.uiTooling)
     androidTestImplementation("androidx.test:runner:1.7.0")

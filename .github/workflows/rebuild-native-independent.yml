@@ -3,10 +3,13 @@ name: Reconstruire les moteurs natifs Windows et Android sans Nuvio
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths: ['.github/workflows/rebuild-native-independent.yml']
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/rebuild-native-independent.yml', 'vendor/engine/**']
 permissions:
   contents: read
+concurrency:
+  group: kovelyx-native-rebuild-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   windows-p2p:
     name: Windows x64 - P2P complet depuis les sources
@@ -14,11 +17,14 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Bloquer les anciens domaines
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          foreach ($domain in @('nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'www.nuvio.tv')) {
+          foreach ($domain in @('nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'www.nuvio.tv', 'nuvioapp.space', 'api.nuvioapp.space')) {
             Add-Content -Path "$env:WINDIR\System32\drivers\etc\hosts" -Value "127.0.0.1 $domain"
           }
           git config --global url.https://blocked-upstream.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/
@@ -99,23 +105,28 @@ jobs:
           name: kovelyx-native-windows-p2p-preuve
           path: native-proof/windows/
           if-no-files-found: ignore
-          retention-days: 30
+          retention-days: 90
   android-aar:
     name: Android - reconstruire AAR natif 4 architectures
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Libérer la place nécessaire aux quatre ABI
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY/CodeQL"
       - name: Bloquer Nuvio et installer NDK
         shell: bash
         run: |
           set -euo pipefail
-          for domain in nuvio.tv api.nuvio.tv cdn.nuvio.tv auth.nuvio.tv www.nuvio.tv; do
+          for domain in nuvio.tv api.nuvio.tv cdn.nuvio.tv auth.nuvio.tv www.nuvio.tv nuvioapp.space api.nuvioapp.space; do
             echo "127.0.0.1 $domain" | sudo tee -a /etc/hosts >/dev/null
           done
           git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
@@ -152,4 +163,4 @@ jobs:
           name: kovelyx-native-android-multiabi-preuve
           path: native-proof/android/
           if-no-files-found: ignore
-          retention-days: 30
+          retention-days: 90

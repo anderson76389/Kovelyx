@@ -1547,7 +1547,6 @@ internal fun PlayerRuntimeController.switchToEpisodeStream(
     lastActiveSkipType = null
     autoSkippedIntervalKeys.clear()
 
-    fetchParentalGuide(contentId, contentType, currentSeason, currentEpisode)
     fetchSkipIntervals(contentId, currentSeason, currentEpisode)
 
     queuePlaybackRawEventLine(
@@ -1659,7 +1658,6 @@ private fun PlayerRuntimeController.switchToEpisodeStreamCommon(
     lastActiveSkipType = null
     autoSkippedIntervalKeys.clear()
 
-    fetchParentalGuide(contentId, contentType, currentSeason, currentEpisode)
     fetchSkipIntervals(contentId, currentSeason, currentEpisode)
 }
 

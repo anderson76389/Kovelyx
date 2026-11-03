@@ -62,3 +62,6 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+
+# AndroidJUnitRunner calls this entry point from the separate instrumentation APK.
+-keep class androidx.tracing.Trace { *; }

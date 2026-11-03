@@ -2387,8 +2387,6 @@
     <string name="licenses_attributions_libmpv_body">Utilisé comme moteur de lecture Android. Le wrapper libmpv-android est distribué sous licence MIT&#160;; mpv/libmpv et les composants natifs intégrés conservent leurs conditions de licence d’origine.</string>
 
     <!-- Lecture&#160;: avertissements de contenu -->
-    <string name="playback_parental_guide">Avertissements de contenu</string>
-    <string name="playback_parental_guide_sub">Afficher l’avertissement de contrôle parental au démarrage de la lecture.</string>
 
     <!-- Mise en page&#160;: emplacement de Découvrir -->
     <string name="layout_discover_location_action">Emplacement de Découvrir</string>

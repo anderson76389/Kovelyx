@@ -2135,8 +2135,6 @@
     <string name="settings_playback_player_preference_internal">Εσωτερικός</string>
     <string name="settings_playback_reuse_binge_group">Επαναχρησιμοποίηση ομάδας binge</string>
     <string name="settings_playback_reuse_binge_group_description">Απομνημόνευση και επαναχρησιμοποίηση της τελευταίας ομάδας binge μεταξύ συνεδριών (Συνέχεια παρακολούθησης, Λεπτομέρειες κ.λπ.).</string>
-    <string name="settings_playback_parental_guide">Προειδοποιήσεις περιεχομένου</string>
-    <string name="settings_playback_parental_guide_description">Εμφάνιση επικάλυψης γονικής καθοδήγησης κατά την έναρξη της αναπαραγωγής.</string>
     <string name="settings_playback_pause_overlay">Επικάλυψη παύσης</string>
     <string name="settings_playback_pause_overlay_description">Εμφάνιση της επικάλυψης λεπτομερειών μετά από 5 δευτερόλεπτα κατά την παύση.</string>
     <string name="settings_playback_subtitle_background_color">Χρώμα φόντου</string>

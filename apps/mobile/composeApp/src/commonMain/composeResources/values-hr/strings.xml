@@ -1173,8 +1173,6 @@
     <string name="settings_playback_show_loading_overlay_description">Prikaži zaslon učitavanja do pojave prvog video kadra.</string>
     <string name="settings_playback_pause_overlay">Sloj pri pauzi</string>
     <string name="settings_playback_pause_overlay_description">Prikaži sloj s pojedinostima nakon 5 sekundi pauze.</string>
-    <string name="settings_playback_parental_guide">Upozorenja o sadržaju</string>
-    <string name="settings_playback_parental_guide_description">Prikaži roditeljski vodič pri pokretanju reprodukcije.</string>
     <string name="settings_playback_subtitle_background_color">Boja pozadine</string>
     <string name="settings_playback_subtitle_bold">Podebljano</string>
     <string name="settings_playback_subtitle_bold_description">Koristi deblji font za titlove.</string>

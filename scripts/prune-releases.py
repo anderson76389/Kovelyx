@@ -2,12 +2,18 @@
 """Keep the three newest published Releases; Git tags and drafts are preserved."""
 import json
 import os
+import re
 import subprocess
 
 REPOSITORY = "anderson76389/Kovelyx"
 
 
+def is_native_archive(release):
+    return bool(re.fullmatch(r"native-vault-v[0-9]+", release.get("tag_name", "")))
+
+
 def obsolete_releases(releases):
+    releases = [r for r in releases if not is_native_archive(r)]
     published = sorted((r for r in releases if not r.get("draft") and r.get("published_at")),
                        key=lambda r: (r["published_at"], r["id"]), reverse=True)
     # Empty abandoned drafts older than an already published release are obsolete too.
