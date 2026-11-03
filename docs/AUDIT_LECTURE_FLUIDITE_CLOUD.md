@@ -7,6 +7,8 @@ Cet audit distingue le raccordement dans le code, les tests automatisés et la v
 - Premiumize retiré des registres actifs des trois applications et du registre API mobile/PC. Les anciens champs de stockage et les implémentations internes restent pour éviter une migration destructive ; ils ne donnent plus accès au service dans l’application.
 - APK publics : optimisation R8 et ressources, débogage désactivé, identifiant `.debug` historique et certificat permanent conservés. Les APK de développement/test ordinaires conservent leur configuration.
 - Adaptation automatique de cadence TV : rétablie dans Lecture, vote temporaire coordonné avec le contrôleur de fréquence et limité à la plage min/max. La fin de lecture retire le vote temporaire sans changer les réglages sauvegardés.
+- Windows vidéo : présentation synchronisée sur l’écran (display-resample), sans interpolation ; repli automatique mpv selon le flux/driver. Aucun gain matériel chiffré n’est annoncé.
+- AutoSync automatique Android : commandes retirées des réglages Windows car ces préférences ne sont pas consommées par le lecteur natif ; le réglage manuel par lignes de sous-titres reste disponible dans le lecteur Windows.
 - Fonds dégradés mobile/PC : brosses mises en cache entre les dessins, sans réduction de résolution ni changement de couleurs.
 - Bibliothèque cloud : affiches et URL d’extension avec leur casse et leur requête ; fond, logo, description, genres, année, note et format transférés. Enrichissement à date égale sans écraser les métadonnées d’un autre appareil. Les informations perdues antérieurement ne peuvent réapparaître que si une copie locale les possède encore.
 
@@ -17,7 +19,7 @@ Cet audit distingue le raccordement dans le code, les tests automatisés et la v
 | Lecteur interne/externe | Choix sauvegardé, sélection du moteur et lancement externe | Une application externe gère ses propres fonctions et doit être installée |
 | Superpositions et commandes | Chargement, statut, pause, contrôle parental, gestes et appui accéléré | Gestes mobile ; commandes différentes dans le lecteur natif Windows |
 | Audio et sous-titres | Langues, priorité, forcés, SDH, styles et piste sélectionnée | Traduction fournie par les sources ; formats/rendu dépendent du moteur |
-| Synchronisation des sous-titres | AutoSync, tolérance et mode | Dépendances natives et langue sélectionnée ; ne signifie pas synchronisation cloud |
+| Synchronisation des sous-titres | AutoSync, tolérance et mode | Automatisation Android uniquement, dépendances natives et langue sélectionnée ; ne signifie pas synchronisation cloud |
 | Sélection de flux | Réutilisation du lien, durée de cache, automatique, regex, filtres d’extensions/modules, délai | Liens expirables, fournisseurs disponibles et regex valides |
 | Épisodes | Suivant, seuil, repli, groupe de visionnage, préchargement | Épisode suivant identifiable et flux disponible |
 | Intro/générique | Marqueurs, sélection de segments, AnimeSkip/IntroDB | Identifiants et données de service nécessaires ; absence de marqueur n’est pas une panne du lecteur |
@@ -50,7 +52,7 @@ Inventaire généré depuis les modèles et leurs références hors écran de r�
 
 ### mobile — 75 champs du modèle
 
-| Réglage | Consommation hors réglages/stockage |
+| Réglage | Consommation dans les sources de la cible |
 |---|---|
 | `useLegacyPlayerLayout` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenContent.kt`; `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeUi.kt` |
 | `showLoadingOverlay` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeUi.kt` |
@@ -113,24 +115,24 @@ Inventaire généré depuis les modèles et leurs références hors écran de r�
 | `useLibass` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
 | `libassRenderType` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
 | `iosVideoOutputPreset` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
-| `iosToneMappingMode` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosTargetPrimaries` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosTargetTransfer` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosHardwareDecoderMode` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosAudioOutputMode` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosExtendedDynamicRangeEnabled` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosTargetColorspaceHintEnabled` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosHdrComputePeakEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosDebandEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosInterpolationEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosBrightness` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosContrast` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosSaturation` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosGamma` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
+| `iosToneMappingMode` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosTargetPrimaries` | iOS uniquement, hors cible |
+| `iosTargetTransfer` | iOS uniquement, hors cible |
+| `iosHardwareDecoderMode` | iOS uniquement, hors cible |
+| `iosAudioOutputMode` | iOS uniquement, hors cible |
+| `iosExtendedDynamicRangeEnabled` | iOS uniquement, hors cible |
+| `iosTargetColorspaceHintEnabled` | iOS uniquement, hors cible |
+| `iosHdrComputePeakEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosDebandEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosInterpolationEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosBrightness` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosContrast` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosSaturation` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosGamma` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
 
 ### desktop — 76 champs du modèle
 
-| Réglage | Consommation hors réglages/stockage |
+| Réglage | Consommation dans les sources de la cible |
 |---|---|
 | `useLegacyPlayerLayout` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenContent.kt`; `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeUi.kt` |
 | `showLoadingOverlay` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeUi.kt` |
@@ -152,24 +154,24 @@ Inventaire généré depuis les modèles et leurs références hors écran de r�
 | `subtitleStyle` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeTrackActions.kt`; `commonMain/kotlin/com/nuvio/app/features/player/PlayerTrackSelection.kt` |
 | `streamReuseLastLinkEnabled` | `commonMain/kotlin/com/nuvio/app/StreamDestination.kt`; `commonMain/kotlin/com/nuvio/app/features/streams/StreamAutoPlayPolicy.kt` |
 | `streamReuseLastLinkCacheHours` | `commonMain/kotlin/com/nuvio/app/StreamDestination.kt` |
-| `androidPlaybackEngine` | `commonMain/kotlin/com/nuvio/app/features/servers/ServerPlayback.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `androidLibmpvVideoOutput` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `androidLibmpvHardwareDecodingEnabled` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `androidLibmpvYuv420pEnabled` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
+| `androidPlaybackEngine` | `commonMain/kotlin/com/nuvio/app/features/servers/ServerPlayback.kt` |
+| `androidLibmpvVideoOutput` | Option Android masquée sur Windows, hors moteur natif |
+| `androidLibmpvHardwareDecodingEnabled` | Option Android masquée sur Windows, hors moteur natif |
+| `androidLibmpvYuv420pEnabled` | Option Android masquée sur Windows, hors moteur natif |
 | `decoderPriority` | `desktopMain/kotlin/com/nuvio/app/features/player/PlayerEngine.desktop.kt`; `desktopMain/kotlin/com/nuvio/app/features/player/desktop/NativePlayerController.kt` |
-| `mapDV7ToHevc` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `tunnelingEnabled` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `exoNativeMemoryEnabled` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `bufferEngineEnabled` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `minBufferMs` | `androidMain/kotlin/com/nuvio/app/features/player/NuvioExoPlayerPerformanceHelper.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `maxBufferMs` | `androidMain/kotlin/com/nuvio/app/features/player/NuvioExoPlayerPerformanceHelper.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `bufferForPlaybackMs` | `androidMain/kotlin/com/nuvio/app/features/player/NuvioExoPlayerPerformanceHelper.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `bufferForPlaybackAfterRebufferMs` | `androidMain/kotlin/com/nuvio/app/features/player/NuvioExoPlayerPerformanceHelper.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `backBufferDurationMs` | `androidMain/kotlin/com/nuvio/app/features/player/NuvioExoPlayerPerformanceHelper.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `targetBufferSizeMb` | `androidMain/kotlin/com/nuvio/app/features/player/NuvioExoPlayerPerformanceHelper.kt`; `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `vodCacheEnabled` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `vodCacheSizeMode` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
-| `vodCacheSizeMb` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
+| `mapDV7ToHevc` | Option Android masquée sur Windows, hors moteur natif |
+| `tunnelingEnabled` | Option Android masquée sur Windows, hors moteur natif |
+| `exoNativeMemoryEnabled` | Option Android masquée sur Windows, hors moteur natif |
+| `bufferEngineEnabled` | Option Android masquée sur Windows, hors moteur natif |
+| `minBufferMs` | Option Android masquée sur Windows, hors moteur natif |
+| `maxBufferMs` | Option Android masquée sur Windows, hors moteur natif |
+| `bufferForPlaybackMs` | Option Android masquée sur Windows, hors moteur natif |
+| `bufferForPlaybackAfterRebufferMs` | Option Android masquée sur Windows, hors moteur natif |
+| `backBufferDurationMs` | Option Android masquée sur Windows, hors moteur natif |
+| `targetBufferSizeMb` | Option Android masquée sur Windows, hors moteur natif |
+| `vodCacheEnabled` | Option Android masquée sur Windows, hors moteur natif |
+| `vodCacheSizeMode` | Option Android masquée sur Windows, hors moteur natif |
+| `vodCacheSizeMb` | Option Android masquée sur Windows, hors moteur natif |
 | `streamAutoPlayMode` | `commonMain/kotlin/com/nuvio/app/features/streams/StreamAutoPlayPolicy.kt`; `commonMain/kotlin/com/nuvio/app/features/streams/StreamAutoPlayLoadingPolicy.kt` |
 | `streamAutoPlaySource` | `commonMain/kotlin/com/nuvio/app/features/streams/StreamsRepository.kt`; `commonMain/kotlin/com/nuvio/app/features/debrid/DirectDebridStreamPreparer.kt` |
 | `streamAutoPlaySelectedAddons` | `commonMain/kotlin/com/nuvio/app/features/streams/StreamsRepository.kt`; `commonMain/kotlin/com/nuvio/app/features/debrid/DirectDebridStreamPreparer.kt` |
@@ -191,27 +193,27 @@ Inventaire généré depuis les modèles et leurs références hors écran de r�
 | `nextEpisodeThresholdMinutesBeforeEnd` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeEffects.kt`; `commonMain/kotlin/com/nuvio/app/features/player/PlayerNextEpisodeAutoPlay.kt` |
 | `preloadNextEpisodeSources` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerNextEpisodeAutoPlay.kt` |
 | `useLibass` | `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeEffects.kt`; `commonMain/kotlin/com/nuvio/app/features/player/PlayerScreenRuntimeUi.kt` |
-| `libassRenderType` | `androidMain/kotlin/com/nuvio/app/features/player/PlayerEngine.android.kt` |
+| `libassRenderType` | Option Android masquée sur Windows, hors moteur natif |
 | `iosVideoOutputPreset` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
-| `iosToneMappingMode` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosTargetPrimaries` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosTargetTransfer` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosHardwareDecoderMode` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosAudioOutputMode` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosExtendedDynamicRangeEnabled` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosTargetColorspaceHintEnabled` | `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosHdrComputePeakEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosDebandEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosInterpolationEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosBrightness` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosContrast` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosSaturation` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
-| `iosGamma` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt`; `iosMain/kotlin/com/nuvio/app/features/player/PlayerEngine.ios.kt` |
+| `iosToneMappingMode` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosTargetPrimaries` | iOS uniquement, hors cible |
+| `iosTargetTransfer` | iOS uniquement, hors cible |
+| `iosHardwareDecoderMode` | iOS uniquement, hors cible |
+| `iosAudioOutputMode` | iOS uniquement, hors cible |
+| `iosExtendedDynamicRangeEnabled` | iOS uniquement, hors cible |
+| `iosTargetColorspaceHintEnabled` | iOS uniquement, hors cible |
+| `iosHdrComputePeakEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosDebandEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosInterpolationEnabled` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosBrightness` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosContrast` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosSaturation` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
+| `iosGamma` | `commonMain/kotlin/com/nuvio/app/features/player/IosVideoSettingsModal.kt` |
 | `nvidiaRtxSuperResolutionEnabled` | `desktopMain/kotlin/com/nuvio/app/features/player/PlayerEngine.desktop.kt`; `desktopMain/kotlin/com/nuvio/app/features/player/desktop/NativePlayerController.kt` |
 
 ### tv — 74 champs du modèle
 
-| Réglage | Consommation hors réglages/stockage |
+| Réglage | Consommation dans les sources de la cible |
 |---|---|
 | `playerPreference` | `com/nuvio/tv/ui/screens/library/LibraryViewModel.kt`; `com/nuvio/tv/ui/screens/stream/StreamScreen.kt` |
 | `internalPlayerEngine` | `com/nuvio/tv/ui/screens/player/PlayerRuntimeControllerInitialization.kt`; `com/nuvio/tv/ui/screens/player/PlayerRuntimeControllerPlaybackEvents.kt` |
@@ -287,7 +289,6 @@ Inventaire généré depuis les modèles et leurs références hors écran de r�
 | `enableBufferLogs` | `com/nuvio/tv/ui/screens/player/PlayerRuntimeControllerObservers.kt` |
 | `resizeMode` | `com/nuvio/tv/ui/components/TrailerPlayer.kt`; `com/nuvio/tv/ui/screens/player/PlayerRuntimeControllerInitialization.kt` |
 | `nuvioPerformanceModeEnabled` | `com/nuvio/tv/core/player/TrailerPlayerPool.kt`; `com/nuvio/tv/ui/screens/player/PlayerRuntimeControllerInitialization.kt` |
-
 ## Validation
 
 Les résultats CI exacts et les identifiants de compilation sont consignés dans la PR #75 après validation. Les tests de politique de fréquence vérifient le vote temporaire et les bornes ; les tests de métadonnées vérifient la conservation de liens configurés et l’enrichissement idempotent. Les suites existantes couvrent sélection des pistes, sous-titres, lecture, épisodes, catalogues, extensions et images. Les essais physiques multiappareil et les comptes privés ne sont pas remplacés par ces tests.

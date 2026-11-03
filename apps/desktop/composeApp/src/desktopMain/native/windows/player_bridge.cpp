@@ -1807,6 +1807,10 @@ private:
                 "stream-lavf-o",
                 "reconnect=1,reconnect_streamed=1,reconnect_on_network_error=1,reconnect_on_http_error=%23%408,429,500,502,503,504,reconnect_delay_max=15"
             );
+            // Pace presentation against the actual display instead of the audio clock.
+            // mpv falls back to audio timing for unsupported/variable frame-rate streams.
+            setMpvOptionStringLocked("video-sync", "display-resample");
+            setMpvOptionStringLocked("interpolation", "no");
             setMpvOptionStringLocked("hr-seek", "no");
             std::string shaderCacheDirectory = mpvShaderCacheDirectory();
             if (!shaderCacheDirectory.empty()) {

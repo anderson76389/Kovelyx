@@ -44,7 +44,7 @@ internal suspend fun PlayerRuntimeController.runAfrPreflightIfEnabled(
     if (isStale()) return
     mpvDelayStartAfterAfrSwitch = false
 
-    if (com.kovelyx.display.DisplayRefreshSettings.state.value.enabled || frameRateMatchingMode == FrameRateMatchingMode.OFF) {
+    if (frameRateMatchingMode == FrameRateMatchingMode.OFF) {
         _uiState.update {
             it.clearFrameRateDetection().copy(afrProbeRunning = false)
         }
