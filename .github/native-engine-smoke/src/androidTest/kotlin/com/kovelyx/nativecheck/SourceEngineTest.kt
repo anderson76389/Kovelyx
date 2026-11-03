@@ -33,7 +33,7 @@ class SourceEngineTest {
     }
 
     @Test
-    fun releaseAarVerifiesTorrentAndServesFullAndRangeBytes() = runBlocking {
+    fun releaseAarVerifiesTorrentAndServesFullAndRangeBytes() = runBlocking<Unit> {
         val root = newRoot("stream")
         val torrentId = "13ade5f13f4e7ce4021a3cc82f72e504b9ef35ac"
         val payload = File(root, "cache/payload/$torrentId/test.bin")
