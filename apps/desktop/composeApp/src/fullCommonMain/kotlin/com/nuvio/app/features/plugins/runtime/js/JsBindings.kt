@@ -26,12 +26,14 @@ internal object JsBindings {
         """.trimIndent()
 
     val staticCallCode: String = """
+            globalThis.__kovelyx_plugin_result = null;
             (async function() {
                 try {
                     var getStreams = module.exports.getStreams || globalThis.getStreams;
                     if (!getStreams) {
                         console.error("getStreams function not found on module.exports or globalThis");
-                        __capture_result("[]");
+                        globalThis.__kovelyx_plugin_result = "[]";
+                    try { __capture_result("[]"); } catch (_) {}
                         return "[]";
                     }
                     var args = JSON.parse(__get_call_args());
@@ -39,32 +41,38 @@ internal object JsBindings {
                     var episode = args.episode == null ? undefined : args.episode;
                     var result = await getStreams(args.tmdbId, args.mediaType, season, episode);
                     var serialized = JSON.stringify(result || []);
-                    __capture_result(serialized);
+                    globalThis.__kovelyx_plugin_result = serialized;
+                    try { __capture_result(serialized); } catch (_) {}
                     return serialized;
                 } catch (e) {
                     console.error("getStreams error:", e && e.message ? e.message : e, e && e.stack ? e.stack : "");
-                    __capture_result("[]");
+                    globalThis.__kovelyx_plugin_result = "[]";
+                    try { __capture_result("[]"); } catch (_) {}
                     return "[]";
                 }
             })();
         """.trimIndent()
 
     val staticSettingsCallCode: String = """
+            globalThis.__kovelyx_plugin_result = null;
             (async function() {
                 try {
                     var onSettings = (typeof module !== 'undefined' && module.exports && module.exports.onSettings) || globalThis.onSettings;
                     if (typeof onSettings === 'function') {
                         var layout = await onSettings();
                         var serialized = JSON.stringify(layout || []);
-                        __capture_result(serialized);
+                        globalThis.__kovelyx_plugin_result = serialized;
+                        try { __capture_result(serialized); } catch (_) {}
                         return serialized;
                     } else {
-                        __capture_result("[]");
+                        globalThis.__kovelyx_plugin_result = "[]";
+                    try { __capture_result("[]"); } catch (_) {}
                         return "[]";
                     }
                 } catch (e) {
                     console.error("onSettings error:", e);
-                    __capture_result("[]");
+                    globalThis.__kovelyx_plugin_result = "[]";
+                    try { __capture_result("[]"); } catch (_) {}
                     return "[]";
                 }
             })();

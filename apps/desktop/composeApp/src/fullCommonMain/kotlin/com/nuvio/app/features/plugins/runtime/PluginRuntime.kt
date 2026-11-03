@@ -109,8 +109,8 @@ internal object PluginRuntime {
 
                         evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                         evaluate<Any?>(wrapPluginModule(code))
-                        val evaluated = evaluateCached({ JsRuntime.settingsCallBytecode(this) }, JsBindings.staticSettingsCallCode)
-                        (evaluated as? String) ?: deferred.await()
+                        evaluateCached({ JsRuntime.settingsCallBytecode(this) }, JsBindings.staticSettingsCallCode)
+                        (evaluate<Any?>("globalThis.__kovelyx_plugin_result") as? String) ?: deferred.await()
                     }
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -164,10 +164,11 @@ internal object PluginRuntime {
                 hostRegistry.registerAll(this)
                 evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                 evaluate<Any?>(wrapPluginModule(code))
-                val evaluated = evaluateCached({ JsRuntime.callBytecode(this) }, JsBindings.staticCallCode)
-                // QuickJS/JVM returns the fulfilled promise value. Keep the
-                // capture fallback for runtimes that don't expose that value.
-                (evaluated as? String) ?: deferred.await()
+                evaluateCached({ JsRuntime.callBytecode(this) }, JsBindings.staticCallCode)
+                // Some QuickJS versions stringify the Promise object rather
+                // than unwrapping it. Read the completed value in this VM;
+                // retain the capture callback for older runtime compatibility.
+                (evaluate<Any?>("globalThis.__kovelyx_plugin_result") as? String) ?: deferred.await()
             }
             return parseJsonResults(rawJson)
         } finally {

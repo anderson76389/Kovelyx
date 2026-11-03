@@ -1,0 +1,36 @@
+name: Tester rapidement les extensions natives Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths:
+      - 'apps/desktop/composeApp/src/fullCommonMain/kotlin/com/nuvio/app/features/plugins/**'
+      - 'apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/features/plugins/**'
+      - 'apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/plugins/**'
+      - '.github/workflows/desktop-plugin-runtime.yml'
+permissions:
+  contents: read
+concurrency:
+  group: kovelyx-desktop-plugin-runtime-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  runtime:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Exécuter les vrais scrapers et formulaires asynchrones en concurrence
+        working-directory: apps/desktop
+        shell: pwsh
+        run: ./gradlew.bat :composeApp:desktopTest --tests '*PluginRuntimeDesktopTest*' --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kovelyx-desktop-plugin-runtime-report
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          retention-days: 30
