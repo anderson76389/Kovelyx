@@ -27,7 +27,18 @@ jobs:
       - name: Exécuter les vrais scrapers et formulaires asynchrones en concurrence
         working-directory: apps/desktop
         shell: pwsh
-        run: ./gradlew.bat :composeApp:desktopTest --tests '*PluginRuntimeDesktopTest*' --no-daemon --max-workers=2 '-Pkotlin.compiler.execution.strategy=in-process' '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'
+        run: ./gradlew.bat :composeApp:desktopTest --tests '*PluginRuntimeDesktopTest*' --no-daemon --no-configuration-cache -x :composeApp:buildWindowsPlayerBridge --max-workers=2 '-Pkotlin.compiler.execution.strategy=in-process' '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'
+      - name: Afficher les échecs éventuels des tests
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
+            [xml]$report = Get-Content $_.FullName -Raw
+            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
+              Write-Output $_.name
+              Write-Output $_.failure.InnerText
+            }
+          }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
