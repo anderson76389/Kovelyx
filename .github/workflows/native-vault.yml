@@ -40,7 +40,7 @@ jobs:
           }
           $assets = @(Get-ChildItem native-vault -File | ForEach-Object { $_.FullName })
           gh release create $tag --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --prerelease --latest=false --title 'Archive de récupération des sources et bibliothèques natives' --notes 'Archive publique des sources suivies, bibliothèques conservées et MPV vérifié. Ne contient ni comptes privés ni secrets. Conservation des binaires ; reconstruction exacte de chaque composant non certifiée.' @assets
-          if ($LASTEXITCODE -ne 0) { throw 'Publication de l’archive native échouée' }
+          if ($LASTEXITCODE -ne 0) { throw "Publication de l'archive native echouee" }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
