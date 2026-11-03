@@ -9,7 +9,7 @@ permissions:
   contents: read
 concurrency:
   group: kovelyx-native-rebuild-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   windows-p2p:
     name: Windows x64 - P2P complet depuis les sources

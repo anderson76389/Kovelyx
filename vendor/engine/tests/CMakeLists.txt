@@ -15,7 +15,6 @@ add_executable(
     ${PROJECT_SOURCE_DIR}/src/cache/verified_piece_cache.cpp
     disk_cache_manager_test.cpp
     ${PROJECT_SOURCE_DIR}/src/cache/disk_cache_manager.cpp
-    disk_cache_policy_integration_test.cpp
     engine_api_test.cpp
     file_selection_test.cpp
     ${PROJECT_SOURCE_DIR}/src/torrent/file_selection.cpp
@@ -26,6 +25,12 @@ add_executable(
     random_bytes_test.cpp
     ${PROJECT_SOURCE_DIR}/src/security/random_bytes.cpp
 )
+
+# These integration cases submit real torrents and cannot run with the stub.
+# They remain required in both full P2P source-rebuild jobs.
+if(NUVIO_ENGINE_ENABLE_LIBTORRENT)
+    target_sources(nuvio_engine_tests PRIVATE disk_cache_policy_integration_test.cpp)
+endif()
 
 target_link_libraries(nuvio_engine_tests PRIVATE Nuvio::Engine)
 target_compile_features(nuvio_engine_tests PRIVATE cxx_std_20)
