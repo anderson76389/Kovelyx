@@ -27,6 +27,14 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - name: Réserver de la place pour Android et le code optimisé
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Ephemeral GitHub runner only: these toolchains are unused by this Android job.
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /opt/hostedtoolcache/CodeQL
+          sudo apt-get clean
+          df -h .
       - uses: gradle/actions/setup-gradle@v4
       - name: Rendre KVM accessible
         shell: bash
@@ -74,7 +82,7 @@ jobs:
           cores: 2
           ram-size: 3072M
           heap-size: 512M
-          disk-size: 6144M
+          disk-size: 4096M
           disable-animations: true
           script: |
             # Emulator runner starts a separate /bin/sh for EACH command line.
