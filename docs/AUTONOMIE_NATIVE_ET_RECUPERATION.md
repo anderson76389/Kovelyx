@@ -8,7 +8,7 @@
 - La reconstruction Windows P2P et Android quatre ABI est déclenchée sur les modifications du moteur. Elle produit des candidats, pas un remplacement automatique des bibliothèques utilisées par les applications.
 - Archive publique de récupération `native-vault-v1` : copie du commit source avec tous ses fichiers suivis, bibliothèques précompilées incluses, plus MPV Windows récupéré depuis Kovelyx et vérifié. Chaque fichier est relu et contrôlé ; les vrais contenus Git LFS sont vérifiés contre leurs empreintes, et non confondus avec leurs fichiers pointeurs. Cette archive est exclue du nettoyage des trois dernières versions applicatives et n'est pas la dernière version applicative.
 - MPV peut être restauré depuis cette archive durable ou depuis les ZIP portables Kovelyx. L'empreinte et la taille attendues restent imposées.
-- La dépendance AndroidX Trace utilisée par le lanceur de tests Android est conservée dans la variante optimisée pour permettre les essais du vrai APK.
+- La dépendance AndroidX Trace utilisée par le lanceur de tests Android est conservée. Les essais instrumentés optimisés utilisent des règles de conservation supplémentaires, uniquement pour permettre à l’APK de test séparé d’appeler les points d’entrée. Ils ne certifient donc pas un APK bit à bit identique à la distribution.
 
 ## Ce que ces changements ne prouvent pas
 
@@ -16,7 +16,7 @@ Conserver un binaire permet de continuer à le distribuer sans le dépôt d'orig
 
 | Composant | Conservation | Reconstruction exacte de l'ancien binaire |
 |---|---|---|
-| Moteur P2P | Sources et binaires archivés | Candidat complet Windows/Android à valider en CI puis en lecture réelle avant remplacement |
+| Moteur P2P | Sources et binaires archivés ; AAR reconstruit conservé dans la release technique | Android quatre ABI reconstruit, puis chargement JNI et lecture torrent intégrale/partielle validés sur émulateur ; remplacement en production non effectué. Windows complet compilé, tests en cours après correction de l’arrêt réseau |
 | MPV Windows | DLL vérifiée dans l'archive durable, SHA-256 et taille imposés | Non certifiée : le binaire historique n'indique pas à lui seul tous ses patches/options |
 | QuickJS Android modifié | AAR existant archivé | Sources exactes du fork historique à établir |
 | Media3 et FFmpeg | AARs, sources et patches présents selon composant | Toute la chaîne de génération des AAR historiques n'est pas certifiée |
@@ -38,3 +38,9 @@ Le workflow chiffre les exports et les conserve 90 jours ; le calendrier quotidi
 ## Sources natives identifiées
 
 La DLL MPV annonce `v0.40.0-465-gf6c116491`. Le commit public correspondant est `f6c116491a82314332f8ded74fc92b2b5cdf7e25`. Son archive source est préservée avec SHA-256, ainsi que Boost 1.86.0, libtorrent et try_signal aux commits épinglés, et OpenSSL 3.5.7. Les licences se trouvent dans ces archives. La version MPV identifie une base de sources, pas tous les patches ni toutes les versions des bibliothèques liées statiquement. Les sources exactes de QuickJS/Nextlib historiques restent non établies ; leur AAR original est préservé.
+
+## Preuves Android déjà obtenues
+
+Le candidat AAR conservé correspond à la révision source `6d80f0b4c7b09982cba8719683d9e19f760e64b9`, SHA-256 `d4efcc2cffff911e90448a2efa28e7105b8a7bdec784fe3c9444514050a44dec`. Sa compatibilité publique JVM/JNI a été comparée au binaire historique. Les exécutions [41675824970](https://github.com/anderson76389/Kovelyx/actions/runs/41675824970) et [41680600339](https://github.com/anderson76389/Kovelyx/actions/runs/41680600339) ont chargé ce vrai AAR et lu les octets vérifiés d’un torrent, en entier et par intervalle HTTP. Sa copie et son empreinte sont disponibles dans [native-vault-v1](https://github.com/anderson76389/Kovelyx/releases/tag/native-vault-v1).
+
+Ce résultat porte sur ce candidat précis. Il ne prouve pas toute modification ultérieure du moteur, tous les codecs, tous les pairs réseau ou tous les appareils. Les reconstructions suivantes conservent leurs propres rapports et ne remplacent pas automatiquement les bibliothèques en production.
