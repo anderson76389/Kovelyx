@@ -13,6 +13,15 @@ REPOSITORY = "anderson76389/Kovelyx"
 WINDOWS = "Kovelyx Windows - MSI et tests de packaging"
 FUNCTIONAL = "Tester les fonctions Kotlin Android TV et Android mobile"
 FRENCH = "Vérifier le français et les logos Windows Android et TV"
+ANDROID_JOB_NAMES = (
+    {"Android TV - APK Full Debug", "Android TV - APK optimisé (identité existante)"},
+    {"Android mobile - APK Full Debug", "Android mobile - APK optimisé (identité existante)"},
+)
+
+
+def android_jobs_succeeded(jobs):
+    return all(any(job.get("name") in names and job.get("conclusion") == "success"
+                   for job in jobs) for names in ANDROID_JOB_NAMES)
 
 
 def gh(*args):
@@ -99,8 +108,7 @@ def recoverable_source(current_sha):
         if not changed or not changed.issubset(allowed):
             continue
         jobs = api(f"actions/runs/{run["id"]}/jobs?per_page=100")["jobs"]
-        if all(any(j["name"] == name and j["conclusion"] == "success" for j in jobs)
-               for name in ("Android TV - APK Full Debug", "Android mobile - APK Full Debug")):
+        if android_jobs_succeeded(jobs):
             return run
     return None
 
@@ -122,9 +130,8 @@ def main():
     if source["head_sha"] != sha or source["event"] != "push":
         raise RuntimeError("La provenance du build Android est invalide")
     jobs = api(f"actions/runs/{build_id}/jobs?per_page=100")["jobs"]
-    for name in ("Android TV - APK Full Debug", "Android mobile - APK Full Debug"):
-        if not any(j["name"] == name and j["conclusion"] == "success" for j in jobs):
-            raise RuntimeError(f"Build Android non validé : {name}")
+    if not android_jobs_succeeded(jobs):
+        raise RuntimeError("Les deux builds Android doivent être validés sur le même commit")
     deadline = time.monotonic() + 1800
     while True:
         runs = api("actions/runs?per_page=100")["workflow_runs"]

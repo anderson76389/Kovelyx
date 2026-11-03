@@ -14,6 +14,18 @@ SPEC.loader.exec_module(PREVIEW)
 
 
 class VerifiedPreviewTests(unittest.TestCase):
+    def test_real_optimized_workflow_jobs_match_the_publication_gate(self):
+        import re
+        workflow = (Path(__file__).resolve().parents[2] / ".github/workflows/build.yml").read_text()
+        names = re.findall(r"^    name: (Android (?:TV|mobile) - APK .+)$", workflow, re.MULTILINE)
+        self.assertEqual(len(names), 2)
+        jobs = [{"name": name, "conclusion": "success"} for name in names]
+        self.assertTrue(PREVIEW.android_jobs_succeeded(jobs))
+        self.assertFalse(PREVIEW.android_jobs_succeeded(jobs[:1]))
+        jobs[1]["conclusion"] = "failure"
+        self.assertFalse(PREVIEW.android_jobs_succeeded(jobs))
+
+
     def test_proofs_cannot_come_from_a_different_commit_repo_or_pull_request(self):
         correct = dict(name=PREVIEW.WINDOWS, head_sha="a" * 40, event="push", run_number=1,
                        head_repository={"full_name": PREVIEW.REPOSITORY})
