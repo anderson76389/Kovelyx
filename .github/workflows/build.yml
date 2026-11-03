@@ -49,7 +49,7 @@ on:
 concurrency:
   group: kovelyx-build-${{ github.ref }}
   # Chaque commit validé peut recevoir sa propre préversion ; ne pas annuler l'ancien build.
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
 
 permissions:
   contents: read
@@ -417,6 +417,7 @@ jobs:
 
   publish-verified-preview:
     name: Publier les trois paquets vérifiés pour la bannière de mise à jour
+    # Publish the tested default-branch commit; GITHUB_TOKEN cannot grant workflow-write scope.
     needs: [tv, mobile]
     if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/fix/cloudflare-network-status-and-settings' }}
     runs-on: ubuntu-latest

@@ -134,7 +134,7 @@ def main():
         raise RuntimeError("Les deux builds Android doivent être validés sur le même commit")
     deadline = time.monotonic() + 1800
     while True:
-        runs = api("actions/runs?per_page=100")["workflow_runs"]
+        runs = api(f"actions/runs?head_sha={sha}&per_page=100")["workflow_runs"]
         proofs = [matching_run(runs, name, sha) for name in (WINDOWS, FUNCTIONAL, FRENCH)]
         failed = [r for r in proofs if r and r["status"] == "completed" and r["conclusion"] != "success"]
         if failed:

@@ -24,7 +24,8 @@ concurrency:
 jobs:
   publish:
     name: Mettre le Setup.exe directement dans Releases
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # Automatic releases are unified in build.yml; keep this fallback manual.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

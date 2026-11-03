@@ -28,7 +28,8 @@ concurrency:
 jobs:
   publish:
     name: Vérifier et publier uniquement l'APK mobile de test
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.conclusion == 'success') }}
+    # Automatic releases are unified in build.yml; keep this fallback manual.
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
