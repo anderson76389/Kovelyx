@@ -219,3 +219,19 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:${libs.versions.composeMultiplatform.get()}")
     debugImplementation("androidx.compose.ui:ui-test-manifest:${libs.versions.composeMultiplatform.get()}")
 }
+
+// The target and the separate instrumentation APK share one class loader.
+// Give their desugared Java libraries stable identities in this test-only
+// variant; independent L8 obfuscation can otherwise map an interface to a
+// different class in the other APK. Distributed APKs keep normal L8 shrinking.
+if (providers.gradleProperty("kovelyx.optimizedInstrumentation").orNull == "true") {
+    tasks.withType<com.android.build.gradle.internal.tasks.L8DexDesugarLibTask>().configureEach {
+        if (name.contains("FullDebug")) {
+            keepRulesConfigurations.addAll(
+                "-dontobfuscate",
+                "-dontoptimize",
+                "-keep class j\$.** { *; }",
+            )
+        }
+    }
+}
