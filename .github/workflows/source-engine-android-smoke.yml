@@ -22,7 +22,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD:vendor/engine)" = 384b04b34187d5febb9513a6b11708689a61f683
+          git fetch --depth=1 origin 6d80f0b4c7b09982cba8719683d9e19f760e64b9
+          git diff --exit-code FETCH_HEAD HEAD -- vendor/engine/src vendor/engine/include vendor/engine/cmake vendor/engine/platform/android vendor/engine/scripts vendor/engine/CMakeLists.txt
       - uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}

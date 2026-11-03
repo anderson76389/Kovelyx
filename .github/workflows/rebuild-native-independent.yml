@@ -58,7 +58,7 @@ jobs:
             ('call "' + $vsdev + '" -arch=x64 -host_arch=x64'),
             'if errorlevel 1 exit /b 1',
             ('cd /d "' + $source + '"'),
-            ('perl Configure VC-WIN64A no-shared no-asm --prefix="' + $install + '" --openssldir="' + $install + '"'),
+            ('perl Configure VC-WIN64A no-shared no-asm no-tests --prefix="' + $install + '" --openssldir="' + $install + '"'),
             'if errorlevel 1 exit /b 1',
             'nmake /nologo',
             'if errorlevel 1 exit /b 1',
@@ -86,7 +86,6 @@ jobs:
             'if errorlevel 1 exit /b 1',
             ('cmake --build "' + $build + '" --parallel 2'),
             'if errorlevel 1 exit /b 1',
-            ('ctest --test-dir "' + $build + '" --output-on-failure'),
             'exit /b %errorlevel%'
           ) | Set-Content -Path $batch -Encoding ASCII
           & cmd /c $batch
@@ -97,7 +96,16 @@ jobs:
           Copy-Item $dll[0].FullName native-proof/windows/nuvio_engine.dll
           (Get-FileHash native-proof/windows/nuvio_engine.dll -Algorithm SHA256).Hash |
             Set-Content native-proof/windows/sha256.txt
-          "Moteur Windows P2P compile et tests CTest valides sous blocage Nuvio." >> $env:GITHUB_STEP_SUMMARY
+          "Moteur Windows P2P compile ; validation CTest dans l’étape suivante." >> $env:GITHUB_STEP_SUMMARY
+      - name: Tester le moteur et identifier immédiatement tout blocage
+        shell: pwsh
+        run: |
+          $build = Join-Path $env:RUNNER_TEMP 'kv-engine-windows-p2p'
+          ctest --test-dir $build --verbose --timeout 180 --output-junit "$build/native-tests.xml"
+          $testExit = $LASTEXITCODE
+          Copy-Item "$build/native-tests.xml" native-proof/windows/ -ErrorAction SilentlyContinue
+          Copy-Item "$build/Testing/Temporary/LastTest.log" native-proof/windows/ -ErrorAction SilentlyContinue
+          if ($testExit -ne 0) { throw "Tests natifs echoues ; consulter START dans les logs et le rapport." }
       - name: Conserver DLL de preuve, sans remplacer la DLL de production
         if: always()
         uses: actions/upload-artifact@v4

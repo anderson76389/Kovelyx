@@ -52,3 +52,6 @@ if(WIN32)
     target_compile_definitions(nuvio_engine_tests PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
     target_link_libraries(nuvio_engine_tests PRIVATE ws2_32 bcrypt)
 endif()
+
+# A blocked socket must fail the check rather than consume the whole CI job.
+set_tests_properties(nuvio_engine_tests nuvio_engine_c_api_smoke PROPERTIES TIMEOUT 180)

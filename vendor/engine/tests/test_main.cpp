@@ -133,8 +133,9 @@ int main() {
     std::size_t failures = 0;
     for (const auto& [name, test] : nuvio::test::registry()) {
         try {
+            std::cout << "START " << name << std::endl;
             test();
-            std::cout << "PASS " << name << '\n';
+            std::cout << "PASS " << name << std::endl;
         } catch (const std::exception& error) {
             ++failures;
             std::cerr << "FAIL " << name << ": " << error.what() << '\n';
