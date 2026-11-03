@@ -27,7 +27,7 @@ jobs:
       - name: Exécuter les vrais scrapers et formulaires asynchrones en concurrence
         working-directory: apps/desktop
         shell: pwsh
-        run: ./gradlew.bat :composeApp:desktopTest --tests '*PluginRuntimeDesktopTest*' --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'
+        run: ./gradlew.bat :composeApp:desktopTest --tests '*PluginRuntimeDesktopTest*' --no-daemon --max-workers=2 '-Pkotlin.compiler.execution.strategy=in-process' '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

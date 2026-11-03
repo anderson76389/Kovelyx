@@ -2,7 +2,7 @@ name: Tester les sources du moteur sauvegardé
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - 'vendor/engine/**'
       - '.github/workflows/engine-source-test.yml'
