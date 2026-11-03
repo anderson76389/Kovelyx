@@ -6,7 +6,7 @@
 - Les frameworks Apple ne sont plus téléchargés depuis Nuvio. La préparation Apple réclame explicitement des frameworks locaux. Apple reste hors distribution Windows/Android/TV : ce changement ne certifie pas un build Apple fonctionnel.
 - Libtorrent : les 11 fichiers concernés doivent correspondre aux SHA-256 des sources épinglées ou de l'intégralité du résultat patché. Les huit patches sont appliqués dans une copie temporaire puis leurs résultats vérifiés. Les fins de ligne CRLF Windows sont normalisées pour les patches. Un cache partiellement modifié est refusé, au lieu d'être accepté sur la présence d'une simple chaîne.
 - La reconstruction Windows P2P et Android quatre ABI est déclenchée sur les modifications du moteur. Elle produit des candidats, pas un remplacement automatique des bibliothèques utilisées par les applications.
-- Archive publique de récupération `native-vault-v1` : copie du commit source avec tous ses fichiers suivis, bibliothèques précompilées incluses, plus MPV Windows récupéré depuis Kovelyx et vérifié. Chaque fichier est relu et contrôlé. Cette archive est exclue du nettoyage des trois dernières versions applicatives et n'est pas la dernière version applicative.
+- Archive publique de récupération `native-vault-v1` : copie du commit source avec tous ses fichiers suivis, bibliothèques précompilées incluses, plus MPV Windows récupéré depuis Kovelyx et vérifié. Chaque fichier est relu et contrôlé ; les vrais contenus Git LFS sont vérifiés contre leurs empreintes, et non confondus avec leurs fichiers pointeurs. Cette archive est exclue du nettoyage des trois dernières versions applicatives et n'est pas la dernière version applicative.
 - MPV peut être restauré depuis cette archive durable ou depuis les ZIP portables Kovelyx. L'empreinte et la taille attendues restent imposées.
 - La dépendance AndroidX Trace utilisée par le lanceur de tests Android est conservée dans la variante optimisée pour permettre les essais du vrai APK.
 
@@ -30,3 +30,7 @@ L'archive publique n'inclut aucune base D1 privée, clé de signature, secret de
 Tests locaux : application et réapplication des huit patches sur les entrées du commit libtorrent épinglé, variantes LF et CRLF, refus d'une source altérée ; analyse des connexions Nuvio codées en dur ; syntaxe JavaScript du lecteur Windows ; XML des traductions modifiées ; tests de rétention protégeant l'archive native.
 
 Les résultats des constructions et tests d'applications sont visibles dans GitHub Actions. Un workflow simplement ajouté ou déclenché n'est pas un workflow réussi.
+
+## Sauvegarde privée D1
+
+Le workflow chiffre les exports et les conserve 90 jours ; le calendrier quotidien à 03:40 UTC devient actif sur la branche principale. Le contrôle de restauration reconstruit chaque image/GIF et chaque catalogue publié pour vérifier taille et SHA-256, y compris les caractères Unicode entre blocs. Une validation échouée laisse la copie brute chiffrée disponible, avec un statut explicite d’échec ; elle ne la présente pas comme valide. Le bundle de signature Android est également chiffré avec le même certificat de récupération lorsqu’il est configuré dans GitHub ; le manifeste précise sa présence. Le secret Better Auth existant ne peut pas être exporté depuis Cloudflare et n’est pas présenté comme sauvegardé.

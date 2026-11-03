@@ -7,37 +7,13 @@ import json
 import os
 from pathlib import Path
 import re
-import sqlite3
 import subprocess
 import tempfile
 from datetime import datetime, timezone
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE_TABLES = ('user', 'session', 'account', 'verification', 'rateLimit', 'kv_profiles', 'kv_sync')
-
-
-def validate_export(path):
-    with sqlite3.connect(':memory:') as db:
-        def authorize(action, first, second, *_):
-            if action in (sqlite3.SQLITE_ATTACH, sqlite3.SQLITE_DETACH):
-                return sqlite3.SQLITE_DENY
-            if action == sqlite3.SQLITE_FUNCTION and str(second).lower() in ('load_extension', 'readfile', 'writefile'):
-                return sqlite3.SQLITE_DENY
-            return sqlite3.SQLITE_OK
-        db.set_authorizer(authorize)
-        db.executescript(path.read_text(encoding='utf-8'))
-        if db.execute('PRAGMA integrity_check').fetchone() != ('ok',):
-            raise RuntimeError('Intégrité de la sauvegarde non confirmée.')
-        tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        if not set(BASE_TABLES).issubset(tables):
-            raise RuntimeError('La sauvegarde ne contient pas toutes les tables de comptes et de synchronisation.')
-        schema = db.execute("SELECT sql FROM sqlite_master WHERE name='kv_sync'").fetchone()[0]
-        if "'watched_items'" not in schema:
-            raise RuntimeError('La base sauvegardée ne possède pas le schéma 0002 attendu.')
-        if db.execute('PRAGMA foreign_key_check').fetchone() is not None:
-            raise RuntimeError('La sauvegarde contient une référence de compte ou de profil invalide.')
-        return {table: db.execute('SELECT count(*) FROM "' + table + '"').fetchone()[0] for table in (*BASE_TABLES, *(name for name in ('kv_profile_media','kv_profile_media_chunks','kv_profile_media_uploads','kv_profile_media_upload_chunks') if name in tables))}
+from backup_validation import validate_export
 
 
 def run_private(command, label):
@@ -77,11 +53,27 @@ def main():
             sql = Path(directory) / 'backup.sql'
             run_private(['npx', '--no-install', 'wrangler', 'd1', 'export', 'DB', '--remote', '--skip-confirmation', '--output', str(sql), '--config', str(config)], 'Export D1')
             sql.chmod(0o600)
-            counts = validate_export(sql)
             encrypted = out / 'kovelyx-d1.sql.cms'
             run_private(['openssl', 'cms', '-encrypt', '-binary', '-aes-256-gcm', '-in', str(sql), '-out', str(encrypted), '-outform', 'DER', str(certificate)], 'Chiffrement de la sauvegarde')
+            signing_bundle = os.environ.get('KOVELYX_ANDROID_SIGNING_BUNDLE', '')
+            signing_saved = False
+            if signing_bundle:
+                signing = Path(directory) / 'android-signing-bundle.txt'
+                signing.write_text(signing_bundle, encoding='utf-8')
+                signing.chmod(0o600)
+                run_private(['openssl', 'cms', '-encrypt', '-binary', '-aes-256-gcm', '-in', str(signing), '-out', str(out / 'android-signing-bundle.cms'), '-outform', 'DER', str(certificate)], 'Sauvegarde chiffrée de la signature Android')
+                signing.unlink()
+                signing_saved = True
+            validation_error = None
+            counts = None
+            try:
+                counts = validate_export(sql)
+            except Exception as error:
+                validation_error = type(error).__name__
             manifest = {
                 'format': 'CMS-AES-256-GCM-RSA4096',
+                'android_signing_bundle_saved': signing_saved,
+                'better_auth_secret_exported': False,
                 'created_at': datetime.now(timezone.utc).isoformat(),
                 'source_sha': os.environ.get('GITHUB_SHA'),
                 'run_id': os.environ.get('GITHUB_RUN_ID'),
@@ -90,13 +82,17 @@ def main():
                 'encrypted_sha256': hashlib.sha256(encrypted.read_bytes()).hexdigest(),
                 'certificate_sha256': hashlib.sha256(certificate.read_bytes()).hexdigest(),
                 'counts': counts,
+                'validation_status': 'failed' if validation_error else 'passed',
+                'validation_error_type': validation_error,
             }
             lock = ROOT / 'package-lock.json'
             if lock.is_file():
                 (out / 'package-lock.json').write_bytes(lock.read_bytes())
                 manifest['package_lock_sha256'] = hashlib.sha256(lock.read_bytes()).hexdigest()
             (out / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
-            print('Export SQL restauré en mémoire : intégrité, références et tables vérifiées.')
+            if validation_error:
+                raise RuntimeError('Copie chiffrée conservée, mais validation de récupération échouée ; ne pas la considérer comme une sauvegarde validée.')
+            print('Export SQL restauré en mémoire : intégrité, références, médias et catalogues vérifiés.')
             print('Copie chiffrée créée. Aucun export SQL lisible ni URL privée publié.')
             print('Aucune migration ni aucun déploiement exécuté.')
     finally:

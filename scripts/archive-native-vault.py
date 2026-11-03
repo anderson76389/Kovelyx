@@ -2,6 +2,7 @@
 """Preserve tracked sources/binaries and verified MPV; never include local secrets."""
 import hashlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -25,7 +26,7 @@ def create(output):
     if len(mpv) != MPV_SIZE or sha(mpv) != MPV_SHA:
         raise RuntimeError("MPV archive refused: unexpected size or SHA-256")
     sources = output / "Kovelyx-source-and-native-snapshot.zip"
-    subprocess.run(["git", "archive", "--format=zip", "--output", str(sources), head], cwd=root, check=True)
+    subprocess.run(["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf", "archive", "--format=zip", "--output", str(sources), head], cwd=root, check=True)
     manifest = {"source_commit": head, "source_archive": sources.name, "files": [],
                 "limitation": "Binary preservation is not proof of exact source reproducibility. No private cloud data or signing secrets included."}
     entries = subprocess.check_output(["git", "ls-tree", "-r", "-z", head], cwd=root).split(b"\0")
@@ -39,7 +40,12 @@ def create(output):
             expected = tracked[item.filename]
             actual = hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest()
             if expected != actual:
-                raise RuntimeError(f"Source archive differs from Git object: {item.filename}")
+                # git archive smudges LFS objects; preserve their actual bytes,
+                # verified against the pointer SHA-256 rather than the pointer blob.
+                pointer = subprocess.check_output(["git", "cat-file", "blob", expected], cwd=root)
+                match = re.fullmatch(rb"version https://git-lfs.github.com/spec/v1\noid sha256:([a-f0-9]{64})\nsize ([0-9]+)\n", pointer)
+                if not match or sha(data) != match[1].decode() or len(data) != int(match[2]):
+                    raise RuntimeError(f"Source archive differs from Git/LFS object: {item.filename}")
             manifest["files"].append({"path": item.filename, "size": len(data), "sha256": sha(data)})
     runtime = output / "Kovelyx-native-windows-runtime.zip"
     with zipfile.ZipFile(runtime, "w", compression=zipfile.ZIP_DEFLATED) as archive:

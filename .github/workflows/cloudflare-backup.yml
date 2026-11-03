@@ -1,11 +1,16 @@
-name: Sauvegarder D1 avant les images (copie chiffrée uniquement)
+name: Sauvegarder les comptes et médias D1 (copie chiffrée vérifiée)
 on:
+  schedule:
+    - cron: '40 3 * * *'
   push:
-    branches: [fix/cloudflare-network-status-and-settings]
-    paths: ['.github/workflows/cloudflare-backup.yml']
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/cloudflare-backup.yml', 'services/kovelyx-cloudflare/scripts/backup-remote.py', 'services/kovelyx-cloudflare/scripts/backup_validation.py']
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: kovelyx-encrypted-d1-backup
+  cancel-in-progress: false
 jobs:
   backup:
     runs-on: ubuntu-latest
@@ -18,11 +23,13 @@ jobs:
       - name: Installer les outils et tester le Worker hors production
         working-directory: services/kovelyx-cloudflare
         run: |
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm test
           python3 tests/check-d1-schema.py
+          python3 tests/test_backup_validation.py
       - name: Exporter et chiffrer la base existante sans modifier les comptes
         env:
+          KOVELYX_ANDROID_SIGNING_BUNDLE: ${{ secrets.KOVELYX_ANDROID_SIGNING_BUNDLE }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
@@ -30,9 +37,10 @@ jobs:
           WRANGLER_SEND_METRICS: 'false'
         run: python3 services/kovelyx-cloudflare/scripts/backup-remote.py
       - name: Conserver uniquement la copie chiffrée et les contrôles non privés
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kovelyx-d1-encrypted-backup-20261031
+          name: kovelyx-d1-encrypted-backup-${{ github.run_id }}
           path: ${{ runner.temp }}/kovelyx-encrypted-backup/
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 90

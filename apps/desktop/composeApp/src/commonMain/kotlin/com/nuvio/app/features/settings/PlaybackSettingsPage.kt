@@ -433,7 +433,8 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
-                SettingsGroupDivider(isTablet = isTablet)
+                if (externalPlayerSupported) {
+                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_player_preference),
                         description = if (autoPlayPlayerSettings.externalPlayerEnabled) {
