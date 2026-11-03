@@ -5,8 +5,11 @@ on:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths: ['.github/workflows/source-engine-android-smoke.yml', '.github/native-engine-smoke/**']
 permissions:
-  contents: read
+  contents: write
   actions: read
+concurrency:
+  group: kovelyx-validate-and-preserve-source-aar
+  cancel-in-progress: false
 jobs:
   source-aar:
     runs-on: ubuntu-latest
@@ -24,12 +27,19 @@ jobs:
           set -euo pipefail
           git fetch --depth=1 origin 6d80f0b4c7b09982cba8719683d9e19f760e64b9
           git diff --exit-code FETCH_HEAD HEAD -- vendor/engine/src vendor/engine/include vendor/engine/cmake vendor/engine/platform/android vendor/engine/scripts vendor/engine/CMakeLists.txt
-      - uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          run-id: 41599581369
-          name: kovelyx-native-android-multiabi-preuve
-          path: .github/native-engine-smoke/libs
+      - name: Récupérer le candidat conservé dans Kovelyx
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          directory=.github/native-engine-smoke/libs
+          mkdir -p "$directory"
+          if ! gh release download native-vault-v1 --repo "$GITHUB_REPOSITORY" --pattern kovelyx-engine-source-built.aar --dir "$directory" --clobber; then
+            # Bootstrap only; a successful runtime test below preserves the AAR
+            # in the durable vault, independent of the 90-day CI artifact.
+            gh run download 41599581369 --repo "$GITHUB_REPOSITORY" --name kovelyx-native-android-multiabi-preuve --dir "$directory"
+          fi
       - name: Vérifier le binaire et préparer l'émulateur
         shell: bash
         run: |
@@ -51,6 +61,18 @@ jobs:
           disk-size: 4096M
           disable-animations: true
           script: chmod +x vendor/engine/platform/android/gradlew && ./vendor/engine/platform/android/gradlew -p .github/native-engine-smoke connectedDebugAndroidTest --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g"
+      - name: Conserver durablement le candidat seulement après réussite des tests
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view native-vault-v1 --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' > source-vault-assets.txt
+          if ! grep -qxF kovelyx-engine-source-built.aar source-vault-assets.txt; then
+            cd .github/native-engine-smoke/libs
+            sha256sum kovelyx-engine-source-built.aar > kovelyx-engine-source-built.aar.sha256
+            gh release upload native-vault-v1 --repo "$GITHUB_REPOSITORY" kovelyx-engine-source-built.aar kovelyx-engine-source-built.aar.sha256
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
