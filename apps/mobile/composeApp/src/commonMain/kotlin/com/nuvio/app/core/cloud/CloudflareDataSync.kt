@@ -228,7 +228,8 @@ object CloudflareDataSync {
                 row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
             } else row?.get("payload")?.jsonObject
                 ?.get("savedAtEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
-            if (row != null && item.savedAtEpochMs < remoteDate) continue
+            if (row != null && (item.savedAtEpochMs < remoteDate ||
+                (isDeleted(row) && item.savedAtEpochMs == remoteDate))) continue
             val localPayload = libraryPayload(item)
             val previous = row?.get("payload") as? JsonObject
             val outgoing = if (item.savedAtEpochMs == remoteDate && previous != null)

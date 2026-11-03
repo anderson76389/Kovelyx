@@ -214,7 +214,7 @@ android {
                 proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             }
 
-            buildConfigField("boolean", "IS_DEBUG_BUILD", "true")
+            buildConfigField("boolean", "IS_DEBUG_BUILD", (!optimizedDistribution).toString())
             buildConfigField("String", "SENTRY_ENVIRONMENT", buildConfigString("debug"))
 
             // Better Auth / D1 uses KOVELYX_CLOUD_URL. Never ship old Supabase credentials.
@@ -282,7 +282,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("boolean", "IS_DEBUG_BUILD", "true")
+            buildConfigField("boolean", "IS_DEBUG_BUILD", (!optimizedDistribution).toString())
             buildConfigField("String", "SENTRY_ENVIRONMENT", buildConfigString("benchmark"))
             applicationIdSuffix = ".debug"
             matchingFallbacks += "release"

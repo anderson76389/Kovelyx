@@ -225,7 +225,8 @@ class CloudflareTvDataSync @Inject constructor(
                 record.optLong("updatedAt", Long.MAX_VALUE)
             } else payload(record)?.optLong("savedAtEpochMs", Long.MIN_VALUE)
                 ?: Long.MIN_VALUE
-            if (record != null && item.addedAt < remoteAdded) continue
+            if (record != null && (item.addedAt < remoteAdded ||
+                (deleted(record) && item.addedAt == remoteAdded))) continue
             val itemData = JSONObject()
                 .put("id", item.id).put("type", item.type)
                 .put("name", item.name.take(500)).put("savedAtEpochMs", item.addedAt)
