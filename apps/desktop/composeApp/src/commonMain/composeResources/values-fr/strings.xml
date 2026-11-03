@@ -2266,8 +2266,6 @@
     <string name="settings_playback_preload_next_episode_description">Rechercher des sources en arrière-plan avant l’apparition du bouton de l’épisode suivant.</string>
     <string name="settings_playback_pause_overlay">Informations en pause</string>
     <string name="settings_playback_pause_overlay_description">Afficher les informations après 5 secondes de pause.</string>
-    <string name="settings_playback_parental_guide">Avertissements sur le contenu</string>
-    <string name="settings_playback_parental_guide_description">Afficher les recommandations parentales au début de la lecture.</string>
     <string name="settings_playback_subtitle_strip_sdh">Nettoyer les sous-titres pour malentendants</string>
     <string name="settings_playback_subtitle_strip_sdh_description">Masquer les descriptions sonores et les noms des intervenants dans les sous-titres textuels.</string>
     <string name="settings_playback_auto_skip_segments">Passage automatique</string>
@@ -2450,7 +2448,7 @@
     <string name="cloud_library_search_label">Rechercher dans la bibliothèque cloud</string>
     <string name="settings_playback_nvidia_rtx_video_section">Vidéo NVIDIA RTX</string>
     <string name="settings_playback_nvidia_rtx_super_resolution">Super résolution vidéo RTX</string>
-    <string name="settings_playback_nvidia_rtx_super_resolution_desc">Améliorer la définition des vidéos basse résolution avec la super résolution par IA de NVIDIA RTX.</string>
+    <string name="settings_playback_nvidia_rtx_super_resolution_desc">Demander la super résolution pour une carte RTX compatible. Activez aussi la Super résolution vidéo dans le pilote NVIDIA. La lecture standard est conservée si le traitement est indisponible.</string>
     <string name="updates_update_asset_missing">Aucun fichier de mise à jour compatible trouvé dans la Release</string>
     <string name="updates_channel_title">Canal de mise à jour</string>
     <string name="updates_channel_description">Choisissez les types de mises à jour à recevoir.</string>
@@ -2660,4 +2658,6 @@
         <item quantity="one">%1$d saison</item>
         <item quantity="other">%1$d saisons</item>
     </plurals>
+    <string name="plugin_select_option">Choisir une option</string>
+    <string name="profile_media_sync_pending">Image conservée sur cet appareil. Synchronisation en attente : %1$s</string>
 </resources>

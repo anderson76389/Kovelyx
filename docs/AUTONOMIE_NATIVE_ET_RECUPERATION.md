@@ -1,0 +1,56 @@
+# Autonomie native et récupération — 3 novembre 2026
+
+## Changements
+
+- Guide parental retiré des réglages, des affichages et des clients réseau Windows/mobile/TV. Le service externe n'est plus appelé. Les anciens champs de préférences et certains DTO sont conservés pour la compatibilité des données ; une ancienne préférence activée ne réactive plus le service.
+- Les frameworks Apple ne sont plus téléchargés depuis Nuvio. La préparation Apple réclame explicitement des frameworks locaux. Apple reste hors distribution Windows/Android/TV : ce changement ne certifie pas un build Apple fonctionnel.
+- Libtorrent : les 11 fichiers concernés doivent correspondre aux SHA-256 des sources épinglées ou de l'intégralité du résultat patché. Les huit patches sont appliqués dans une copie temporaire puis leurs résultats vérifiés. Les fins de ligne CRLF Windows sont normalisées pour les patches. Un cache partiellement modifié est refusé, au lieu d'être accepté sur la présence d'une simple chaîne.
+- La reconstruction Windows P2P et Android quatre ABI est déclenchée sur les modifications du moteur. Elle produit des candidats, pas un remplacement automatique des bibliothèques utilisées par les applications.
+- Archive publique de récupération `native-vault-v1` : copie du commit source avec tous ses fichiers suivis, bibliothèques précompilées incluses, plus MPV Windows récupéré depuis Kovelyx et vérifié. Chaque fichier est relu et contrôlé ; les vrais contenus Git LFS sont vérifiés contre leurs empreintes, et non confondus avec leurs fichiers pointeurs. Cette archive est exclue du nettoyage des trois dernières versions applicatives et n'est pas la dernière version applicative.
+- MPV peut être restauré depuis cette archive durable ou depuis les ZIP portables Kovelyx. L'empreinte et la taille attendues restent imposées.
+- La dépendance AndroidX Trace utilisée par le lanceur de tests Android est conservée. Les essais instrumentés optimisés utilisent des règles de conservation supplémentaires, uniquement pour permettre à l’APK de test séparé d’appeler les points d’entrée. Ils ne certifient donc pas un APK bit à bit identique à la distribution.
+
+## Ce que ces changements ne prouvent pas
+
+Conserver un binaire permet de continuer à le distribuer sans le dépôt d'origine. Cela ne prouve pas qu'il a été reconstruit depuis les sources exactes. La réussite d'une reconstruction du moteur n'est pas une preuve pour MPV, QuickJS, libdovi ou Nextlib.
+
+| Composant | Conservation | Reconstruction exacte de l'ancien binaire |
+|---|---|---|
+| Moteur P2P | Sources et binaires archivés ; AAR reconstruit conservé dans la release technique | Android quatre ABI reconstruit, puis chargement JNI et lecture torrent intégrale/partielle validés sur émulateur ; remplacement en production non effectué. Windows complet reconstruit avec libtorrent, 97 tests réussis et smoke test C API réussi ; remplacement en production non effectué |
+| MPV Windows | DLL vérifiée dans l'archive durable, SHA-256 et taille imposés | Non certifiée : le binaire historique n'indique pas à lui seul tous ses patches/options |
+| QuickJS Android modifié | AAR existant archivé | Sources exactes du fork historique à établir |
+| Media3 et FFmpeg | AARs, sources et patches présents selon composant | Toute la chaîne de génération des AAR historiques n'est pas certifiée |
+| Nextlib MediaInfo TV | AAR local archivé | Source et recette exactes de cette variante statique à établir |
+| libdovi TV | Bibliothèques statiques par ABI archivées | Correspondance exacte source/outillage à établir |
+
+L'archive publique n'inclut aucune base D1 privée, clé de signature, secret de compte ni clé de récupération. Elle ne remplace donc pas une sauvegarde privée des comptes. La fusion de la branche de travail vers main doit préserver le commit réellement testé ; vérifier le statut des contrôles et ne pas masquer un échec de reconstruction native derrière les tests unitaires de l'application.
+
+## Vérifications
+
+Tests locaux : application et réapplication des huit patches sur les entrées du commit libtorrent épinglé, variantes LF et CRLF, refus d'une source altérée ; analyse des connexions Nuvio codées en dur ; syntaxe JavaScript du lecteur Windows ; XML des traductions modifiées ; tests de rétention protégeant l'archive native.
+
+Les résultats des constructions et tests d'applications sont visibles dans GitHub Actions. Un workflow simplement ajouté ou déclenché n'est pas un workflow réussi.
+
+## Sauvegarde privée D1
+
+Le workflow chiffre les exports et les conserve 90 jours ; le calendrier quotidien à 03:40 UTC devient actif sur la branche principale. Le contrôle de restauration reconstruit chaque image/GIF et chaque catalogue publié pour vérifier taille et SHA-256, y compris les caractères Unicode entre blocs. Une validation échouée laisse la copie brute chiffrée disponible, avec un statut explicite d’échec ; elle ne la présente pas comme valide. Le bundle de signature Android est également chiffré avec le même certificat de récupération lorsqu’il est configuré dans GitHub ; le manifeste précise sa présence. Le secret Better Auth existant ne peut pas être exporté depuis Cloudflare et n’est pas présenté comme sauvegardé.
+
+## Sources natives identifiées
+
+La DLL MPV annonce `v0.40.0-465-gf6c116491`. Le commit public correspondant est `f6c116491a82314332f8ded74fc92b2b5cdf7e25`. Son archive source est préservée avec SHA-256, ainsi que Boost 1.86.0, libtorrent et try_signal aux commits épinglés, et OpenSSL 3.5.7. Les licences se trouvent dans ces archives. La version MPV identifie une base de sources, pas tous les patches ni toutes les versions des bibliothèques liées statiquement. Les sources exactes de QuickJS/Nextlib historiques restent non établies ; leur AAR original est préservé.
+
+## Preuves Android déjà obtenues
+
+Le candidat AAR conservé correspond à la révision source `6d80f0b4c7b09982cba8719683d9e19f760e64b9`, SHA-256 `d4efcc2cffff911e90448a2efa28e7105b8a7bdec784fe3c9444514050a44dec`. Sa compatibilité publique JVM/JNI a été comparée au binaire historique. Les exécutions [41675824970](https://github.com/anderson76389/Kovelyx/actions/runs/41675824970) et [41680600339](https://github.com/anderson76389/Kovelyx/actions/runs/41680600339) ont chargé ce vrai AAR et lu les octets vérifiés d’un torrent, en entier et par intervalle HTTP. Sa copie et son empreinte sont disponibles dans [native-vault-v1](https://github.com/anderson76389/Kovelyx/releases/tag/native-vault-v1).
+
+Ce résultat porte sur ce candidat précis. Il ne prouve pas toute modification ultérieure du moteur, tous les codecs, tous les pairs réseau ou tous les appareils. Les reconstructions suivantes conservent leurs propres rapports et ne remplacent pas automatiquement les bibliothèques en production.
+
+## Preuves Windows et contrôles des applications
+
+Le moteur Windows complet a été reconstruit avec OpenSSL et libtorrent, avec les domaines Nuvio et remotes NuvioMedia bloqués. L’exécution [41683461179, job Windows](https://github.com/anderson76389/Kovelyx/actions/runs/41683461179/job/126082879581) a réussi ses 97 cas et le smoke test C API : zéro échec. L’arrêt d’une requête HTTP incomplète reste borné au lieu d’attendre le délai Winsock de cinq secondes.
+
+Le contrôle [41684771031](https://github.com/anderson76389/Kovelyx/actions/runs/41684771031) a aussi réussi : moteur P2P Linux complet, tests C++ Windows sans P2P et module JVM. Les cas qui soumettent de vrais torrents sont conservés dans les suites P2P ; ils ne sont pas exécutés contre le backend volontairement désactivé.
+
+Sur l’application mobile, [41683896716](https://github.com/anderson76389/Kovelyx/actions/runs/41683896716) a réussi ses quatre essais instrumentés : lecture H264 avec ExoPlayer/libmpv, choix des modes d’affichage et notification effectivement reçue par Android. Cette variante utilise les règles réservées à l’instrumentation décrites plus haut.
+
+La suite complète de l’application PC a ensuite réussi dans [41687701315](https://github.com/anderson76389/Kovelyx/actions/runs/41687701315), avec les tests d’extensions concurrentes et leurs minuteurs/promesses. Le résultat est lu dans la VM isolée et les microtâches sont relancées tant qu’il reste en attente, sous la limite existante de 60 secondes. La lecture dans le vrai Kovelyx.exe et les paquets MSI/EXE/portable ont également été validés. Les suites unitaires mobile et TV du même commit ont réussi dans [41687701295](https://github.com/anderson76389/Kovelyx/actions/runs/41687701295). La publication conserve ses contrôles de provenance et exige les trois paquets du même commit.

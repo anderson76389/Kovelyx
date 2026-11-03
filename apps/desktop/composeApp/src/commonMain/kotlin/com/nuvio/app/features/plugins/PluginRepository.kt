@@ -11,6 +11,8 @@ expect object PluginRepository {
 
     fun clearLocalState()
 
+    suspend fun synchronizeCloudPlugins(profileId: Int, uuid: String, rows: List<kotlinx.serialization.json.JsonObject>): Boolean
+
     suspend fun pullFromServer(profileId: Int)
 
     suspend fun addRepository(rawUrl: String): AddPluginRepositoryResult

@@ -72,7 +72,7 @@ Create a directory called `example-addon`
 
 In this simple example, we set the id prefix of the streams to `tt`, which is the prefix for IMDB IDs (example: `tt1254207`).
 Because we're using IMDB IDs, we do not need to handle the Meta requests, as all IMDB IDs from all addons are handled
-internally by Stremio's Cinemeta Addon.
+internally by Stremio's Metadata Provider Addon.
 
 
 `/catalog/movie/bbbcatalog.json`:

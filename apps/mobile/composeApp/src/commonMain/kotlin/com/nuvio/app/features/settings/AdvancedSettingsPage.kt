@@ -25,6 +25,11 @@ import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.watchprogress.ContinueWatchingEnrichmentCache
 import com.nuvio.app.features.watchprogress.WatchProgressRepository
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CloudDownload
+import nuvio.composeapp.generated.resources.settings_org_section_updates
+import nuvio.composeapp.generated.resources.compose_settings_root_check_updates_title
+import nuvio.composeapp.generated.resources.compose_settings_root_check_updates_description
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.action_cancel
 import nuvio.composeapp.generated.resources.settings_advanced_clear_cw_cache
@@ -55,6 +60,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun LazyListScope.advancedSettingsContent(
     isTablet: Boolean,
     rememberLastProfileEnabled: Boolean,
+    onCheckForUpdatesClick: (() -> Unit)? = null,
 ) {
     item {
         SettingsSection(
@@ -68,6 +74,59 @@ internal fun LazyListScope.advancedSettingsContent(
                     checked = rememberLastProfileEnabled,
                     isTablet = isTablet,
                     onCheckedChange = ProfileRepository::setRememberLastProfileEnabled,
+                )
+            }
+        }
+    }
+    item { DisplayRefreshChoice(isTablet) }
+        if (onCheckForUpdatesClick != null) {
+            item {
+                SettingsSection(
+                    title = stringResource(Res.string.settings_org_section_updates),
+                    isTablet = isTablet,
+                ) {
+                    SettingsGroup(isTablet = isTablet) {
+                        UpdateChannelSettingsRow(isTablet = isTablet)
+                        SettingsGroupDivider(isTablet = isTablet)
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.compose_settings_root_check_updates_title),
+                            description = stringResource(Res.string.compose_settings_root_check_updates_description),
+                            icon = Icons.Rounded.CloudDownload,
+                            isTablet = isTablet,
+                            onClick = onCheckForUpdatesClick,
+                        )
+                    }
+                }
+            }
+        }
+
+    item {
+        SettingsSection(
+            title = stringResource(Res.string.settings_advanced_section_cache),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                val scope = rememberCoroutineScope()
+                var cleared by rememberSaveable { mutableStateOf(false) }
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.settings_advanced_clear_cw_cache),
+                    description = if (cleared) {
+                        stringResource(Res.string.settings_advanced_clear_cw_cache_done)
+                    } else {
+                        stringResource(Res.string.settings_advanced_clear_cw_cache_subtitle)
+                    },
+                    isTablet = isTablet,
+                    onClick = {
+                        if (!cleared) {
+                            ContinueWatchingEnrichmentCache.clearAll(ProfileRepository.activeProfileId)
+                            cleared = true
+                            scope.launch {
+                                WatchProgressRepository.clearLocalAndForceSnapshotRefreshFromServer(
+                                    ProfileRepository.activeProfileId,
+                                )
+                            }
+                        }
+                    },
                 )
             }
         }
@@ -109,37 +168,7 @@ internal fun LazyListScope.advancedSettingsContent(
             }
         }
     }
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_advanced_section_cache),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                val scope = rememberCoroutineScope()
-                var cleared by rememberSaveable { mutableStateOf(false) }
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.settings_advanced_clear_cw_cache),
-                    description = if (cleared) {
-                        stringResource(Res.string.settings_advanced_clear_cw_cache_done)
-                    } else {
-                        stringResource(Res.string.settings_advanced_clear_cw_cache_subtitle)
-                    },
-                    isTablet = isTablet,
-                    onClick = {
-                        if (!cleared) {
-                            ContinueWatchingEnrichmentCache.clearAll(ProfileRepository.activeProfileId)
-                            cleared = true
-                            scope.launch {
-                                WatchProgressRepository.clearLocalAndForceSnapshotRefreshFromServer(
-                                    ProfileRepository.activeProfileId,
-                                )
-                            }
-                        }
-                    },
-                )
-            }
-        }
-    }
+
 }
 
 @Composable

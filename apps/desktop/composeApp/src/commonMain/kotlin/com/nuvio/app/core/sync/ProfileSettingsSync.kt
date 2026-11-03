@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -90,6 +91,7 @@ object ProfileSettingsSync {
     fun startObserving() {
         if (observeJob?.isActive == true) return
         ensureRepositoriesLoaded()
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.observeBaseline()
         ProviderCredentialSync.startObserving()
         MediaServerSync.startObserving()
         observeLocalChangesAndPush()
@@ -106,10 +108,14 @@ object ProfileSettingsSync {
     fun onProfileChanged() {
         if (observeJob?.isActive != true) return
         skipNextPushSignature = currentObservedStateSignature()
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.observeBaseline()
         ProviderCredentialSync.onProfileChanged()
     }
 
     suspend fun pull(profileId: Int): Boolean {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId); return false
+        }
         ensureRepositoriesLoaded()
         return syncMutex.withLock {
             if (ProfileRepository.activeProfileId != profileId) {
@@ -169,6 +175,9 @@ object ProfileSettingsSync {
     }
 
     suspend fun pushCurrentProfileToRemote(): Boolean {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.edited(); return true
+        }
         ensureRepositoriesLoaded()
         return syncMutex.withLock {
             runCatching {
@@ -214,6 +223,7 @@ object ProfileSettingsSync {
             combine(signatureFlows) { currentObservedStateSignature() }
                 .distinctUntilChanged()
                 .drop(1)
+                .onEach { if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.edited() }
                 .debounce(PUSH_DEBOUNCE_MS)
                 .collect { signature ->
                     val authState = AuthRepository.state.value

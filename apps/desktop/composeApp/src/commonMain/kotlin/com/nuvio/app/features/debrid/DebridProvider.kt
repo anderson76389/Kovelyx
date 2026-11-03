@@ -29,6 +29,7 @@ enum class DebridProviderAuthMethod {
 object DebridProviders {
     const val TORBOX_ID = "torbox"
     const val PREMIUMIZE_ID = "premiumize"
+    const val ALL_DEBRID_ID = "alldebrid"
     const val REAL_DEBRID_ID = "realdebrid"
 
     val Torbox = DebridProvider(
@@ -61,11 +62,17 @@ object DebridProviders {
         id = REAL_DEBRID_ID,
         displayName = "Real-Debrid",
         shortName = "RD",
-        visibleInUi = false,
-        capabilities = setOf(DebridProviderCapability.ClientResolve),
+        capabilities = setOf(DebridProviderCapability.ClientResolve, DebridProviderCapability.LocalTorrentResolve),
     )
 
-    private val registered = listOf(Torbox, Premiumize, RealDebrid)
+    val AllDebrid = DebridProvider(
+        id = ALL_DEBRID_ID,
+        displayName = "AllDebrid",
+        shortName = "AD",
+        capabilities = setOf(DebridProviderCapability.ClientResolve, DebridProviderCapability.LocalTorrentResolve),
+    )
+
+    private val registered = listOf(AllDebrid, RealDebrid, Torbox)
 
     fun all(): List<DebridProvider> = registered
 

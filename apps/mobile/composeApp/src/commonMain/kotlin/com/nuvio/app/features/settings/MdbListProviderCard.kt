@@ -20,7 +20,7 @@ import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
+internal fun MdbListProviderCard(modifier: Modifier = Modifier, onConfigure: () -> Unit = {}) {
     val auth by remember { MdbListTracker.ensureLoaded(); MdbListTracker.auth.state }.collectAsStateWithLifecycle()
     val accountStatus by MdbListTracker.account.status.collectAsStateWithLifecycle()
     val sync by MdbListTracker.sync.state.collectAsStateWithLifecycle()
@@ -37,7 +37,7 @@ internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
             auth.session != null -> TrackingConnectionCardMode.AWAITING_APPROVAL
             else -> TrackingConnectionCardMode.DISCONNECTED
         },
-        credentialsConfigured = MdbListTracker.auth.hasRequiredCredentials(),
+        credentialsConfigured = true,
         isLoading = status?.isBusy == true,
         connectedLabel = stringResource(Res.string.settings_mdblist_connected_as, auth.user?.username ?: stringResource(Res.string.settings_mdblist_account_fallback)),
         connectedDescription = stringResource(Res.string.settings_mdblist_connected_description),
@@ -61,7 +61,10 @@ internal fun MdbListProviderCard(modifier: Modifier = Modifier) {
             else mdbListAccountError(auth.error ?: status?.authError, status?.error ?: syncStatus?.error),
         websiteLabel = stringResource(Res.string.settings_mdblist_visit),
         websiteUrl = "https://mdblist.com",
-        onConnectRequested = { MdbListTracker.account.connect(auth.scope) },
+        onConnectRequested = {
+            if (!MdbListTracker.auth.hasRequiredCredentials()) { onConfigure(); null }
+            else MdbListTracker.account.connect(auth.scope)
+        },
         onResumeAuthorization = { MdbListTracker.account.resumePolling(auth.scope) },
         onCancelAuthorization = { MdbListTracker.account.cancel(auth.scope) },
         onDisconnect = { scope.launch { MdbListTracker.account.disconnect(auth.scope) } },

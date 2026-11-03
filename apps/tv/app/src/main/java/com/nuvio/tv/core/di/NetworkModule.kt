@@ -16,7 +16,6 @@ import com.nuvio.tv.data.remote.api.TrailerApi
 import com.nuvio.tv.data.remote.api.IntroDbApi
 import com.nuvio.tv.data.remote.api.ImdbTapframeApi
 import com.nuvio.tv.data.remote.api.MDBListApi
-import com.nuvio.tv.data.remote.api.ParentalGuideApi
 import com.nuvio.tv.data.remote.api.PlaybackIssueReportApi
 import com.nuvio.tv.data.remote.api.PremiumizeApi
 import com.nuvio.tv.data.remote.api.RealDebridApi
@@ -405,21 +404,6 @@ object NetworkModule {
     @Singleton
     fun provideTraktApi(@Named("trakt") retrofit: Retrofit): TraktApi =
         retrofit.create(TraktApi::class.java)
-
-    @Provides
-    @Singleton
-    @Named("parentalGuide")
-    fun provideParentalGuideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit =
-        Retrofit.Builder()
-            .baseUrl("https://api.tiffara.com/")
-            .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-
-    @Provides
-    @Singleton
-    fun provideParentalGuideApi(@Named("parentalGuide") retrofit: Retrofit): ParentalGuideApi =
-        retrofit.create(ParentalGuideApi::class.java)
 
     // --- Skip Intro APIs ---
 

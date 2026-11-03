@@ -218,7 +218,12 @@ class TrailerPlayerPool @Inject constructor(
                     .setInitialBitrateEstimate(50_000_000L) // 50 Mbps – force highest HLS variant from start
                     .build()
             )
-            .setVideoChangeFrameRateStrategy(C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_ONLY_IF_SEAMLESS)
+            // Trailers must respect the same device display range as the main player.
+            .setVideoChangeFrameRateStrategy(
+                if (com.kovelyx.display.DisplayRefreshSettings.state.value.enabled)
+                    C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_OFF
+                else C.VIDEO_CHANGE_FRAME_RATE_STRATEGY_ONLY_IF_SEAMLESS
+            )
             .build()
             .apply {
                 repeatMode = Player.REPEAT_MODE_OFF

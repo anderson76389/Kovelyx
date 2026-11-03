@@ -177,4 +177,4 @@ For more examples of addon manifests, see:
 
 * https://github.com/Stremio/stremio-local-addon/blob/master/lib/manifest.js
 * https://stremio-public-domain-foreign.now.sh/manifest.json
-* https://v3-cinemeta.strem.io/manifest.json
+* https://metadata.example/manifest.json

@@ -15,6 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -225,6 +227,21 @@ class AddonManifestPlaceholderTest {
         )
     }
 
+    @Test
+    fun `TV limits concurrent manifest requests while loading many addons`() = runTest {
+        val inFlight = AtomicInteger()
+        val peak = AtomicInteger()
+        val harness = newRepository(reachable = true, installedUrls = emptyList(), onRequest = {
+            val active = inFlight.incrementAndGet()
+            peak.updateAndGet { maxOf(it, active) }
+            try { delay(100L) } finally { inFlight.decrementAndGet() }
+        })
+        (0 until 12).map { index -> async { harness.repository.fetchAddon("https://addon$index.example") } }.awaitAll()
+        assertEquals(12, harness.manifestCalls.get())
+        assertEquals(4, peak.get())
+        assertEquals(0, inFlight.get())
+    }
+
     private fun newContext(): Context = mockk(relaxed = true)
 
     private data class Harness(
@@ -238,13 +255,16 @@ class AddonManifestPlaceholderTest {
         userSetNames: kotlinx.coroutines.flow.Flow<Map<String, String>> = flowOf(emptyMap()),
         reachable: Boolean = false,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
-        clock: () -> Long = System::currentTimeMillis
+        clock: () -> Long = System::currentTimeMillis,
+        onRequest: suspend () -> Unit = {},
+        installedUrls: List<String> = listOf(addonUrl)
     ): Harness {
         val manifestCalls = AtomicInteger()
         val isReachable = AtomicBoolean(reachable)
         val api = mockk<AddonApi>()
         coEvery { api.getManifest(any()) } coAnswers {
             manifestCalls.incrementAndGet()
+            onRequest()
             if (!isReachable.get()) throw IOException("offline")
             Response.success(
                 AddonManifestDto(id = "test-addon", name = REAL_NAME, version = REAL_VERSION)
@@ -252,7 +272,7 @@ class AddonManifestPlaceholderTest {
         }
 
         val preferences = mockk<AddonPreferences>()
-        every { preferences.installedAddonUrls } returns flowOf(listOf(addonUrl))
+        every { preferences.installedAddonUrls } returns flowOf(installedUrls)
         every { preferences.userSetNames } returns userSetNames
         every { preferences.addonEnabledStates } returns flowOf(emptyMap())
         coEvery { preferences.removeAddon(any()) } returns true

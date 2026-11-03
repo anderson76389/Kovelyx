@@ -32,12 +32,55 @@ class CloudflareDatabase(unittest.TestCase):
         self.assertTrue({"user","session","account","verification",
                          "rateLimit","kv_profiles","kv_sync"} <= tables)
 
+    def test_gif_upgrade_preserves_existing_images_bytes_and_foreign_keys(self):
+        with sqlite3.connect(":memory:") as db:
+            db.execute("PRAGMA foreign_keys=ON")
+            for migration in migrations:
+                if migration.name.startswith("0004_"):
+                    break
+                db.executescript(migration.read_text(encoding="utf-8"))
+            db.execute('INSERT INTO "user" (id,name,email,emailVerified,createdAt,updatedAt) VALUES (?,?,?,?,?,?)',
+                       ('existing','Existing','existing@example.invalid',1,1,1))
+            db.execute('INSERT INTO kv_profiles (id,owner_id,display_name,created_at,updated_at) VALUES (?,?,?,?,?)',
+                       ('existing-profile','existing','Profil',1,1))
+            for kind in ('avatar','background'):
+                db.execute('INSERT INTO kv_profile_media VALUES (?,?,?,?,?,?,?)',
+                           ('existing','existing-profile',kind,'version-'+kind,'image/gif',3,1))
+                db.execute('INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)',
+                           ('existing','existing-profile',kind,0,b'GIF'))
+            before = {table:list(db.execute('SELECT * FROM '+table)) for table in ('user','kv_profiles','kv_profile_media','kv_profile_media_chunks')}
+            db.executescript(next(m for m in migrations if m.name.startswith('0004_')).read_text(encoding='utf-8'))
+            for table, rows in before.items():
+                self.assertEqual(list(db.execute('SELECT * FROM '+table)), rows)
+            self.assertEqual(list(db.execute('PRAGMA foreign_key_check')), [])
+            db.execute('UPDATE kv_profile_media SET size=18000000')
+            db.execute('INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)',
+                       ('existing','existing-profile','avatar',34,b'last-chunk'))
+            with self.assertRaises(sqlite3.IntegrityError):
+                db.execute('UPDATE kv_profile_media SET size=18000001')
+            with self.assertRaises(sqlite3.IntegrityError):
+                db.execute('INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)',
+                           ('existing','existing-profile','avatar',35,b'overflow'))
+            db.execute("DELETE FROM kv_profiles WHERE id='existing-profile'")
+            self.assertEqual(db.execute('SELECT count(*) FROM kv_profile_media_chunks').fetchone()[0], 0)
+
     def test_owner_and_profile_foreign_keys(self):
         with self.assertRaises(sqlite3.IntegrityError):
             self.db.execute(
                 "INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,updated_at) "
                 "VALUES ('bob','alice-profile','favorites','x','{}',1)"
             )
+
+    def test_private_media_is_owned_chunked_and_cascades(self):
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute("INSERT INTO kv_profile_media VALUES (?,?,?,?,?,?,?)", ("bob", "alice-profile", "avatar", "v", "image/png", 3, 1))
+        self.db.execute("INSERT INTO kv_profile_media VALUES (?,?,?,?,?,?,?)", ("alice", "alice-profile", "avatar", "v", "image/png", 3, 1))
+        self.db.execute("INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)", ("alice", "alice-profile", "avatar", 0, b"abc"))
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute("INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)", ("alice", "alice-profile", "avatar", 1, b"a" * 524289))
+        self.db.execute("DELETE FROM kv_profiles WHERE id='alice-profile'")
+        self.assertEqual(self.db.execute("SELECT count(*) FROM kv_profile_media").fetchone()[0], 0)
+        self.assertEqual(self.db.execute("SELECT count(*) FROM kv_profile_media_chunks").fetchone()[0], 0)
 
     def test_revision_conflict_query(self):
         self.db.execute(

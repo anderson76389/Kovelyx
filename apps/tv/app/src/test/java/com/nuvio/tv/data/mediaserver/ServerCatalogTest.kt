@@ -170,9 +170,9 @@ class ServerCatalogTest {
             TrackingExternalIds(imdb = "tt1", tmdb = 2, kitsu = 3)
         )
         val kitsu = metaAddon("kitsu", listOf("kitsu:"))
-        val cinemeta = metaAddon("cinemeta", listOf("tt"))
-        assertEquals("kitsu:3", title.catalogPreview(listOf(kitsu, cinemeta)).id)
-        assertEquals("tt1", title.catalogPreview(listOf(cinemeta, kitsu)).id)
+        val metadataprovider = metaAddon("metadataprovider", listOf("tt"))
+        assertEquals("kitsu:3", title.catalogPreview(listOf(kitsu, metadataprovider)).id)
+        assertEquals("tt1", title.catalogPreview(listOf(metadataprovider, kitsu)).id)
         assertEquals("tmdb:2", title.catalogPreview(listOf(metaAddon("mal", listOf("mal:")))).id)
         assertEquals(title.preview.id, title.copy(externalIds = TrackingExternalIds(kitsu = 3)).catalogPreview(emptyList()).id)
     }

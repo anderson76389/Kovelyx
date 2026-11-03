@@ -360,6 +360,7 @@ open class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        com.kovelyx.display.AndroidDisplayRefresh.bind(this)
         isFirstResumeAfterCreate = true
         window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
 
@@ -1133,7 +1134,8 @@ open class MainActivity : ComponentActivity() {
                         onInstall = updateViewModel::installUpdateOrRequestPermission,
                         onDismissUnknownSources = updateViewModel::dismissUnknownSourcesDialog,
                         onOpenUnknownSources = updateViewModel::openUnknownSourcesSettings,
-                        onFeedbackShown = updateViewModel::consumeFeedbackMessage
+                        onFeedbackShown = updateViewModel::consumeFeedbackMessage,
+                        onForegroundCheck = updateViewModel::requestForegroundCheck
                     ) {
                         val handleSwitchProfile = {
                             startupSession++

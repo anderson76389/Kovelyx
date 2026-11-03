@@ -23,14 +23,14 @@ class MetaRepositoryAddonCacheTest {
     @Test
     fun `meta from one addon is not served for another addon with the same content id`() = runTest {
         val repository = newRepository(
-            "https://cinemeta.example/meta/series/$contentId.json" to "Cinemeta Meta",
+            "https://metadataprovider.example/meta/series/$contentId.json" to "Metadata Provider Meta",
             "https://aiometadata.example/meta/series/$contentId.json" to "AioMetadata Meta"
         )
 
-        val first = repository.getMeta("https://cinemeta.example", "series", contentId).last()
+        val first = repository.getMeta("https://metadataprovider.example", "series", contentId).last()
         val second = repository.getMeta("https://aiometadata.example", "series", contentId).last()
 
-        assertEquals("Cinemeta Meta", (first as NetworkResult.Success).data.name)
+        assertEquals("Metadata Provider Meta", (first as NetworkResult.Success).data.name)
         assertEquals("AioMetadata Meta", (second as NetworkResult.Success).data.name)
     }
 
@@ -40,8 +40,8 @@ class MetaRepositoryAddonCacheTest {
         coEvery { api.getMeta(any()) } returns metaResponse("Cached Meta")
         val repository = newRepository(api)
 
-        val first = repository.getMeta("https://cinemeta.example", "series", contentId).last()
-        val second = repository.getMeta("https://cinemeta.example", "series", contentId).last()
+        val first = repository.getMeta("https://metadataprovider.example", "series", contentId).last()
+        val second = repository.getMeta("https://metadataprovider.example", "series", contentId).last()
 
         assertEquals("Cached Meta", (first as NetworkResult.Success).data.name)
         assertEquals("Cached Meta", (second as NetworkResult.Success).data.name)
@@ -54,8 +54,8 @@ class MetaRepositoryAddonCacheTest {
         coEvery { api.getMeta(any()) } returns metaResponse("Slash Meta")
         val repository = newRepository(api)
 
-        repository.getMeta("https://cinemeta.example/", "series", contentId).last()
-        repository.getMeta("https://cinemeta.example", "series", contentId).last()
+        repository.getMeta("https://metadataprovider.example/", "series", contentId).last()
+        repository.getMeta("https://metadataprovider.example", "series", contentId).last()
 
         coVerify(exactly = 1) { api.getMeta(any()) }
     }
@@ -70,6 +70,21 @@ class MetaRepositoryAddonCacheTest {
         repository.getMeta("https://addon.example/cfg?token=abc", "series", contentId).last()
 
         coVerify(exactly = 1) { api.getMeta(any()) }
+    }
+
+    @Test fun `configured metadata token and trailing query slash reach the actual request and cache key`() = runTest {
+        val api = mockk<AddonApi>()
+        val upper = "https://aio.example/Config/meta/series/$contentId.json?token=AbC%2Fvalue&path=/"
+        val lower = "https://aio.example/Config/meta/series/$contentId.json?token=abc%2Fvalue&path=/"
+        coEvery { api.getMeta(upper) } returns metaResponse("Upper token")
+        coEvery { api.getMeta(lower) } returns metaResponse("Lower token")
+        val repository = newRepository(api)
+        val first = repository.getMeta("https://aio.example/Config?token=AbC%2Fvalue&path=/", "series", contentId).last()
+        val second = repository.getMeta("https://aio.example/Config?token=abc%2Fvalue&path=/", "series", contentId).last()
+        assertEquals("Upper token", (first as NetworkResult.Success).data.name)
+        assertEquals("Lower token", (second as NetworkResult.Success).data.name)
+        coVerify(exactly = 1) { api.getMeta(upper) }
+        coVerify(exactly = 1) { api.getMeta(lower) }
     }
 
     private fun newRepository(vararg responsesByUrl: Pair<String, String>): MetaRepositoryImpl {

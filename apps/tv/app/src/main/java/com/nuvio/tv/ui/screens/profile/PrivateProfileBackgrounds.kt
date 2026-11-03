@@ -11,7 +11,7 @@ import java.util.UUID
  *
  * Les URI content:// du sélecteur ne sont pas durables : on recopie le fichier
  * dans le stockage privé de Kovelyx TV. Aucune donnée n'est envoyée aux anciens
- * serveurs Nuvio ; une synchronisation multiplateforme exigerait un vrai upload R2.
+ * serveurs Nuvio. Le client Cloudflare transfère ensuite les images privées si le Worker est à jour.
  */
 internal fun importPrivateProfileBackground(context: Context, selected: Uri): String {
     val mime = context.contentResolver.getType(selected)?.lowercase()

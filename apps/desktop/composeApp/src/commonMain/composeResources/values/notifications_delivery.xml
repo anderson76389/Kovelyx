@@ -1,0 +1,5 @@
+<resources>
+    <string name="notifications_delivery_description">On Windows, keep Kovelyx open or minimized. Windows notification settings may hide alerts.</string>
+    <string name="notifications_test_generic_description">Send a notification to check delivery on this device.</string>
+    <string name="notifications_open_system_settings">System notification settings</string>
+</resources>

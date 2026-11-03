@@ -58,27 +58,12 @@ internal actual fun rememberNativeProfileImagePicker(
 }
 
 /** Never store temporary content:// grants. Store an app-private durable copy. */
-private fun copyPrivateImage(context: Context, source: Uri, background: Boolean): String {
+private suspend fun copyPrivateImage(context: Context, source: Uri, background: Boolean): String {
     val resolver = context.contentResolver
-    val mime = resolver.getType(source)?.lowercase()
-        ?: throw IOException("Le type du fichier est inconnu.")
-    val extension = when (mime) {
-        "image/jpeg", "image/jpg" -> "jpg"
-        "image/png" -> "png"
-        "image/webp" -> "webp"
-        "image/gif" -> "gif"
-        "image/heic", "image/heif" -> "heic"
-        "image/avif" -> "avif"
-        else -> throw IOException("Format non pris en charge : utilisez JPG, PNG, WebP, GIF ou HEIC.")
-    }
     val folder = File(context.filesDir, "kovelyx-profile-media")
     check(folder.isDirectory || folder.mkdirs()) {
         "Impossible de créer le dossier des photos de profil."
     }
-    val destination = File(
-        folder,
-        (if (background) "fond-" else "avatar-") + UUID.randomUUID().toString() + "." + extension
-    )
     val temp = File.createTempFile("import-", ".tmp", folder)
     try {
         val sourceStream = resolver.openInputStream(source)
@@ -91,14 +76,18 @@ private fun copyPrivateImage(context: Context, source: Uri, background: Boolean)
                     val count = input.read(buffer)
                     if (count < 0) break
                     size += count
-                    if (size > 18_000_000L) {
-                        throw IOException("L'image est trop volumineuse (maximum 18 Mo).")
+                    if (size > com.kovelyx.cloud.media.MAX_PROFILE_SOURCE_BYTES) {
+                        throw IOException("L'image est trop volumineuse (maximum 64 Mo avant optimisation).")
                     }
                     output.write(buffer, 0, count)
                 }
                 if (size == 0L) throw IOException("Le fichier sélectionné est vide.")
             }
         }
+        val encoded = com.kovelyx.cloud.media.AndroidProfileMediaFiles(context).encodeLocal(Uri.fromFile(temp).toString(), background)
+        val extension = when (encoded.mime) { "image/gif" -> "gif"; "image/png" -> "png"; "image/webp" -> "webp"; else -> "jpg" }
+        val destination = File(folder, (if (background) "fond-" else "avatar-") + UUID.randomUUID().toString() + "." + extension)
+        temp.writeBytes(encoded.bytes)
         if (!temp.renameTo(destination)) {
             throw IOException("Impossible de conserver la photo sélectionnée.")
         }

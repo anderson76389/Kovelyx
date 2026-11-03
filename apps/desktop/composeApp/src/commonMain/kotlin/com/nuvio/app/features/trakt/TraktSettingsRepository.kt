@@ -47,7 +47,8 @@ enum class MoreLikeThisSourcePreference {
 
     companion object {
         fun fromStorage(value: String?): MoreLikeThisSourcePreference =
-            entries.firstOrNull { it.name == value } ?: DEFAULT_MORE_LIKE_THIS_SOURCE
+            if (value == "SIMKL") TMDB
+            else entries.firstOrNull { it.name == value } ?: DEFAULT_MORE_LIKE_THIS_SOURCE
     }
 }
 

@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Extension
 import androidx.compose.material.icons.rounded.Refresh
@@ -40,7 +41,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,6 +58,7 @@ import com.nuvio.app.core.ui.NuvioScreenHeader
 import com.nuvio.app.core.ui.NuvioSectionLabel
 import com.nuvio.app.core.ui.NuvioStatusModal
 import com.nuvio.app.core.ui.NuvioSurfaceCard
+import com.nuvio.app.core.ui.NuvioToastController
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
@@ -418,6 +422,8 @@ private fun InstalledAddonCard(
     onDeleteClick: () -> Unit,
 ) {
     val manifest = addon.manifest
+    val clipboard = LocalClipboardManager.current
+    val copiedMessage = stringResource(Res.string.addons_link_copied)
 
     NuvioSurfaceCard {
         Row(
@@ -462,10 +468,10 @@ private fun InstalledAddonCard(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             onMoveUpClick?.let { onMoveUp ->
                 NuvioIconActionButton(
@@ -497,6 +503,15 @@ private fun InstalledAddonCard(
                     onClick = onConfigure,
                 )
             }
+            NuvioIconActionButton(
+                icon = Icons.Rounded.ContentCopy,
+                contentDescription = stringResource(Res.string.addons_copy_link),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                onClick = {
+                    clipboard.setText(AnnotatedString(addon.manifestUrl))
+                    NuvioToastController.show(copiedMessage)
+                },
+            )
             NuvioIconActionButton(
                 icon = Icons.Rounded.Delete,
                 contentDescription = stringResource(Res.string.addons_delete),

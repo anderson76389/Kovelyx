@@ -386,7 +386,6 @@ fun AdvancedSettingsContent(
 
     val networkListState = rememberLazyListState()
     var showExperienceModeConfirmation by remember { mutableStateOf(false) }
-    var showSentryDialog by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         state = networkListState,
@@ -433,47 +432,12 @@ fun AdvancedSettingsContent(
             }
         }
 
-        item(key = "performance_settings") {
-            SettingsGroupCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.advanced_section_performance)
-            ) {
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_fast_horizontal_navigation),
-                    subtitle = stringResource(R.string.advanced_fast_horizontal_navigation_subtitle),
-                    checked = uiState.fastHorizontalNavigationEnabled,
-                    onToggle = {
-                        viewModel.onEvent(
-                            AdvancedSettingsEvent.SetFastHorizontalNavigationEnabled(
-                                !uiState.fastHorizontalNavigationEnabled
-                            )
-                        )
-                    }
-                )
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_nuvio_focus_scroll),
-                    subtitle = stringResource(R.string.advanced_nuvio_focus_scroll_subtitle),
-                    checked = uiState.smoothBringIntoViewEnabled,
-                    onToggle = {
-                        viewModel.onEvent(
-                            AdvancedSettingsEvent.SetSmoothBringIntoViewEnabled(
-                                !uiState.smoothBringIntoViewEnabled
-                            )
-                        )
-                    }
-                )
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_rgb565),
-                    subtitle = stringResource(R.string.advanced_rgb565_subtitle),
-                    checked = uiState.rgb565Enabled,
-                    onToggle = {
-                        viewModel.onEvent(
-                            AdvancedSettingsEvent.SetRgb565Enabled(
-                                !uiState.rgb565Enabled
-                            )
-                        )
-                    }
-                )
+        if (com.nuvio.tv.core.build.AppFeaturePolicy.inAppUpdatesEnabled) {
+            item(key = "update_settings") {
+                SettingsGroupCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(R.string.settings_org_section_updates)
+                ) { UpdateChannelSettings(initialFocusRequester = null) }
             }
         }
 
@@ -525,29 +489,87 @@ fun AdvancedSettingsContent(
             }
         }
 
+        item(key = "display_refresh_range") { DisplayRefreshRangeSection() }
+
+        item(key = "performance_settings") {
+            SettingsGroupCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(R.string.advanced_section_performance)
+            ) {
+                SettingsToggleRow(
+                    title = stringResource(R.string.advanced_fast_horizontal_navigation),
+                    subtitle = stringResource(R.string.advanced_fast_horizontal_navigation_subtitle),
+                    checked = uiState.fastHorizontalNavigationEnabled,
+                    onToggle = {
+                        viewModel.onEvent(
+                            AdvancedSettingsEvent.SetFastHorizontalNavigationEnabled(
+                                !uiState.fastHorizontalNavigationEnabled
+                            )
+                        )
+                    }
+                )
+                SettingsToggleRow(
+                    title = stringResource(R.string.advanced_nuvio_focus_scroll),
+                    subtitle = stringResource(R.string.advanced_nuvio_focus_scroll_subtitle),
+                    checked = uiState.smoothBringIntoViewEnabled,
+                    onToggle = {
+                        viewModel.onEvent(
+                            AdvancedSettingsEvent.SetSmoothBringIntoViewEnabled(
+                                !uiState.smoothBringIntoViewEnabled
+                            )
+                        )
+                    }
+                )
+                SettingsToggleRow(
+                    title = stringResource(R.string.advanced_rgb565),
+                    subtitle = stringResource(R.string.advanced_rgb565_subtitle),
+                    checked = uiState.rgb565Enabled,
+                    onToggle = {
+                        viewModel.onEvent(
+                            AdvancedSettingsEvent.SetRgb565Enabled(
+                                !uiState.rgb565Enabled
+                            )
+                        )
+                    }
+                )
+            }
+        }
+
+        item(key = "clear_cw_cache") {
+            SettingsGroupCard(
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(R.string.advanced_section_cache)
+            ) {
+                var cleared by remember { mutableStateOf(false) }
+                SettingsActionRow(
+                    title = stringResource(R.string.advanced_clear_cw_cache),
+                    subtitle = if (cleared) {
+                        stringResource(R.string.advanced_clear_cw_cache_done)
+                    } else {
+                        stringResource(R.string.advanced_clear_cw_cache_subtitle)
+                    },
+                    onClick = {
+                        if (!cleared) {
+                            scope.launch {
+                                val entryPoint = dagger.hilt.android.EntryPointAccessors
+                                    .fromApplication(
+                                        context.applicationContext,
+                                        ClearCwCacheEntryPoint::class.java
+                                    )
+                                entryPoint.cwEnrichmentCache().clearAll()
+                                cleared = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
         item(key = "playback_issue_reports") {
             SettingsGroupCard(
                 modifier = Modifier.fillMaxWidth(),
                 title = stringResource(R.string.advanced_section_diagnostics)
             ) {
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_sentry_reports),
-                    subtitle = stringResource(R.string.advanced_sentry_reports_subtitle),
-                    checked = uiState.sentryEnabled,
-                    onToggle = { showSentryDialog = true }
-                )
-                SettingsToggleRow(
-                    title = stringResource(R.string.advanced_playback_issue_reports),
-                    subtitle = stringResource(R.string.advanced_playback_issue_reports_subtitle),
-                    checked = uiState.playbackIssueReportsEnabled,
-                    onToggle = {
-                        viewModel.onEvent(
-                            AdvancedSettingsEvent.SetPlaybackIssueReportsEnabled(
-                                !uiState.playbackIssueReportsEnabled
-                            )
-                        )
-                    }
-                )
                 SettingsToggleRow(
                     title = stringResource(R.string.advanced_player_stats_hud),
                     subtitle = stringResource(R.string.advanced_player_stats_hud_subtitle),
@@ -561,6 +583,61 @@ fun AdvancedSettingsContent(
                     }
                 )
             }
+        }
+
+        if (dvPlayerSettings.internalPlayerEngine == InternalPlayerEngine.EXOPLAYER ||
+            dvPlayerSettings.internalPlayerEngine == InternalPlayerEngine.AUTO) {
+            item(key = "dv_conversion_mode") {
+                val overrideEnabled = dvPlayerSettings.dv7HandlingMode == Dv7HandlingMode.DV81_LIBDOVI
+                var showModeDialog by remember { mutableStateOf(false) }
+                val modeOptions = listOf(
+                    SettingsPickerOption(
+                        -1,
+                        stringResource(R.string.dv7_libdovi_mode_none_title),
+                        stringResource(R.string.dv7_libdovi_mode_none_sub)
+                    ),
+                    SettingsPickerOption(0, stringResource(R.string.dv7_libdovi_mode_0_title), stringResource(R.string.dv7_libdovi_mode_0_sub)),
+                    SettingsPickerOption(1, stringResource(R.string.dv7_libdovi_mode_1_title), stringResource(R.string.dv7_libdovi_mode_1_sub)),
+                    SettingsPickerOption(2, stringResource(R.string.dv7_libdovi_mode_2_title), stringResource(R.string.dv7_libdovi_mode_2_sub)),
+                    SettingsPickerOption(3, stringResource(R.string.dv7_libdovi_mode_3_title), stringResource(R.string.dv7_libdovi_mode_3_sub)),
+                    SettingsPickerOption(4, stringResource(R.string.dv7_libdovi_mode_4_title), stringResource(R.string.dv7_libdovi_mode_4_sub))
+                )
+                val effectiveOverride = if (overrideEnabled) dvPlayerSettings.dv7LibdoviModeOverride else -1
+                val currentLabel = modeOptions.firstOrNull { it.value == effectiveOverride }?.title
+                    ?: modeOptions.first().title
+                SettingsGroupCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = stringResource(R.string.advanced_section_dv_diagnostics)
+                ) {
+                    SettingsActionRow(
+                        title = stringResource(R.string.dv7_libdovi_mode_row_title),
+                        subtitle = stringResource(R.string.dv7_libdovi_mode_caption),
+                        value = currentLabel,
+                        onClick = { showModeDialog = true },
+                        enabled = overrideEnabled
+                    )
+                }
+                if (showModeDialog) {
+                    SettingsSingleChoiceDialog(
+                        title = stringResource(R.string.dv7_libdovi_mode_row_title),
+                        subtitle = stringResource(R.string.dv7_libdovi_mode_caption),
+                        options = modeOptions,
+                        selectedValue = effectiveOverride,
+                        onOptionSelected = { value ->
+                            scope.launch { playbackVm.setDv7LibdoviModeOverride(value) }
+                            showModeDialog = false
+                        },
+                        onDismiss = { showModeDialog = false },
+                        width = 460.dp,
+                        maxHeight = 360.dp
+                    )
+                }
+            }
+
+            diagnosticsCardItems(
+                diagnostics = dvDiagnostics,
+                dvCurrentlyEnabled = dvPlayerSettings.dv7HandlingMode != Dv7HandlingMode.OFF
+            )
         }
 
         item(key = "network_tests") {
@@ -733,90 +810,6 @@ fun AdvancedSettingsContent(
             }
         }
 
-        item(key = "clear_cw_cache") {
-            SettingsGroupCard(
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.advanced_section_cache)
-            ) {
-                var cleared by remember { mutableStateOf(false) }
-                SettingsActionRow(
-                    title = stringResource(R.string.advanced_clear_cw_cache),
-                    subtitle = if (cleared) {
-                        stringResource(R.string.advanced_clear_cw_cache_done)
-                    } else {
-                        stringResource(R.string.advanced_clear_cw_cache_subtitle)
-                    },
-                    onClick = {
-                        if (!cleared) {
-                            scope.launch {
-                                val entryPoint = dagger.hilt.android.EntryPointAccessors
-                                    .fromApplication(
-                                        context.applicationContext,
-                                        ClearCwCacheEntryPoint::class.java
-                                    )
-                                entryPoint.cwEnrichmentCache().clearAll()
-                                cleared = true
-                            }
-                        }
-                    }
-                )
-            }
-        }
-
-        if (dvPlayerSettings.internalPlayerEngine == InternalPlayerEngine.EXOPLAYER ||
-            dvPlayerSettings.internalPlayerEngine == InternalPlayerEngine.AUTO) {
-            item(key = "dv_conversion_mode") {
-                val overrideEnabled = dvPlayerSettings.dv7HandlingMode == Dv7HandlingMode.DV81_LIBDOVI
-                var showModeDialog by remember { mutableStateOf(false) }
-                val modeOptions = listOf(
-                    SettingsPickerOption(
-                        -1,
-                        stringResource(R.string.dv7_libdovi_mode_none_title),
-                        stringResource(R.string.dv7_libdovi_mode_none_sub)
-                    ),
-                    SettingsPickerOption(0, stringResource(R.string.dv7_libdovi_mode_0_title), stringResource(R.string.dv7_libdovi_mode_0_sub)),
-                    SettingsPickerOption(1, stringResource(R.string.dv7_libdovi_mode_1_title), stringResource(R.string.dv7_libdovi_mode_1_sub)),
-                    SettingsPickerOption(2, stringResource(R.string.dv7_libdovi_mode_2_title), stringResource(R.string.dv7_libdovi_mode_2_sub)),
-                    SettingsPickerOption(3, stringResource(R.string.dv7_libdovi_mode_3_title), stringResource(R.string.dv7_libdovi_mode_3_sub)),
-                    SettingsPickerOption(4, stringResource(R.string.dv7_libdovi_mode_4_title), stringResource(R.string.dv7_libdovi_mode_4_sub))
-                )
-                val effectiveOverride = if (overrideEnabled) dvPlayerSettings.dv7LibdoviModeOverride else -1
-                val currentLabel = modeOptions.firstOrNull { it.value == effectiveOverride }?.title
-                    ?: modeOptions.first().title
-                SettingsGroupCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = stringResource(R.string.advanced_section_dv_diagnostics)
-                ) {
-                    SettingsActionRow(
-                        title = stringResource(R.string.dv7_libdovi_mode_row_title),
-                        subtitle = stringResource(R.string.dv7_libdovi_mode_caption),
-                        value = currentLabel,
-                        onClick = { showModeDialog = true },
-                        enabled = overrideEnabled
-                    )
-                }
-                if (showModeDialog) {
-                    SettingsSingleChoiceDialog(
-                        title = stringResource(R.string.dv7_libdovi_mode_row_title),
-                        subtitle = stringResource(R.string.dv7_libdovi_mode_caption),
-                        options = modeOptions,
-                        selectedValue = effectiveOverride,
-                        onOptionSelected = { value ->
-                            scope.launch { playbackVm.setDv7LibdoviModeOverride(value) }
-                            showModeDialog = false
-                        },
-                        onDismiss = { showModeDialog = false },
-                        width = 460.dp,
-                        maxHeight = 360.dp
-                    )
-                }
-            }
-
-            diagnosticsCardItems(
-                diagnostics = dvDiagnostics,
-                dvCurrentlyEnabled = dvPlayerSettings.dv7HandlingMode != Dv7HandlingMode.OFF
-            )
-        }
     }
         SettingsVerticalScrollIndicators(state = networkListState)
     }
@@ -829,17 +822,7 @@ fun AdvancedSettingsContent(
         )
     }
 
-    if (showSentryDialog) {
-        SentrySettingsDialog(
-            enabled = uiState.sentryEnabled,
-            onConfirm = {
-                viewModel.onEvent(
-                    AdvancedSettingsEvent.SetSentryEnabled(!uiState.sentryEnabled)
-                )
-            },
-            onDismiss = { showSentryDialog = false }
-        )
-    }
+
 }
 
 @Composable

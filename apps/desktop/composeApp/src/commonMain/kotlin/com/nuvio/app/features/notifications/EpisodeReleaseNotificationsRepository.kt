@@ -174,15 +174,6 @@ object EpisodeReleaseNotificationsRepository {
         ensureLoaded()
         scope.launch {
             val target = currentTestTarget()
-            if (target == null) {
-                _uiState.value = _uiState.value.copy(
-                    isSendingTest = false,
-                    statusMessage = null,
-                    errorMessage = getString(Res.string.settings_notifications_test_requires_saved_show),
-                )
-                return@launch
-            }
-
             _uiState.value = _uiState.value.copy(
                 isSendingTest = true,
                 statusMessage = null,
@@ -207,11 +198,11 @@ object EpisodeReleaseNotificationsRepository {
 
             val request = EpisodeReleaseNotificationRequest(
                 requestId = "episode-release-test-${ProfileRepository.activeProfileId}-${EpisodeReleaseDatePlatform.nowEpochMs()}",
-                notificationTitle = target.name,
+                notificationTitle = target?.name ?: "Kovelyx",
                 notificationBody = getString(Res.string.notifications_test_preview_body),
                 releaseDateIso = CurrentDateProvider.todayIsoDate(),
-                deepLinkUrl = buildMetaDeepLinkUrl(type = target.type, id = target.id),
-                backdropUrl = target.banner ?: target.poster,
+                deepLinkUrl = target?.let { buildMetaDeepLinkUrl(type = it.type, id = it.id) } ?: "kovelyx://",
+                backdropUrl = target?.let { it.banner ?: it.poster },
             )
 
             runCatching {
@@ -222,7 +213,7 @@ object EpisodeReleaseNotificationsRepository {
                 _uiState.value = _uiState.value.copy(
                     isSendingTest = false,
                     permissionGranted = true,
-                    statusMessage = getString(Res.string.notifications_test_sent_for, target.name),
+                    statusMessage = getString(Res.string.notifications_test_sent_for, target?.name ?: "Kovelyx"),
                     errorMessage = null,
                 )
             }.onFailure {
@@ -234,6 +225,15 @@ object EpisodeReleaseNotificationsRepository {
                 )
             }
         }
+    }
+
+    fun openSystemSettings() {
+        scope.launch { EpisodeReleaseNotificationPlatform.openSystemSettings() }
+    }
+
+    fun refreshAuthorization() {
+        ensureLoaded()
+        scope.launch { syncAuthorizationState(refreshIfEnabled = false) }
     }
 
     fun refreshAsync() {
@@ -295,6 +295,7 @@ object EpisodeReleaseNotificationsRepository {
             permissionGranted = granted,
             testTargetTitle = currentTestTarget()?.name,
             errorMessage = when {
+                granted -> null
                 _uiState.value.isEnabled && !granted -> runBlocking { getString(Res.string.settings_notifications_permission_disabled) }
                 else -> _uiState.value.errorMessage
             },
@@ -338,6 +339,7 @@ object EpisodeReleaseNotificationsRepository {
 
     private suspend fun refreshScheduledNotifications() {
         refreshMutex.withLock {
+            val profileId = ProfileRepository.activeProfileId
             LibraryRepository.ensureLoaded()
 
             val currentLibraryState = LibraryRepository.uiState.value
@@ -402,18 +404,19 @@ object EpisodeReleaseNotificationsRepository {
                 }
             }.awaitAll().flatten()
 
-            runCatching {
+            if (ProfileRepository.activeProfileId != profileId || !_uiState.value.isEnabled) return
+            val scheduled = runCatching {
                 EpisodeReleaseNotificationPlatform.scheduleEpisodeReleaseNotifications(requests)
             }.onFailure { error ->
                 log.e(error) { "Failed to schedule episode release notifications" }
-            }
+            }.isSuccess
 
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
                 permissionGranted = true,
-                scheduledCount = requests.size,
+                scheduledCount = if (scheduled) requests.size else 0,
                 testTargetTitle = currentTestTarget()?.name,
-                errorMessage = null,
+                errorMessage = if (scheduled) null else getString(Res.string.notifications_test_send_failed),
             )
         }
     }
@@ -446,10 +449,11 @@ object EpisodeReleaseNotificationsRepository {
         return meta.videos.mapNotNull { episode ->
             val releaseDate = releaseDateIso(episode.released) ?: return@mapNotNull null
             if (releaseDate < trackedShow.followedOnIsoDate) return@mapNotNull null
+            if (releaseDate < CurrentDateProvider.todayIsoDate()) return@mapNotNull null
             if (episode.season == null && episode.episode == null) return@mapNotNull null
 
             EpisodeReleaseNotificationRequest(
-                requestId = buildEpisodeReleaseNotificationId(
+                requestId = "${com.nuvio.app.core.auth.AuthRepository.state.value.let { (it as? com.nuvio.app.core.auth.AuthState.Authenticated)?.userId }.orEmpty()}:" + buildEpisodeReleaseNotificationId(
                     profileId = ProfileRepository.activeProfileId,
                     contentType = trackedShow.contentType,
                     contentId = trackedShow.contentId,

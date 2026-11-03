@@ -1,5 +1,24 @@
 package com.nuvio.app.features.addons
 
+import com.kovelyx.cloud.addons.CloudAddon
+import com.kovelyx.cloud.addons.AddonDefaultsPolicy
+import com.kovelyx.cloud.addons.ADDON_DEFAULTS_VERSION
+import com.kovelyx.cloud.addons.canonicalAddonManifestUrl
+import com.nuvio.app.features.profiles.ProfilePinCrypto
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
+import com.kovelyx.cloud.addons.CloudAddonEngine
+import com.kovelyx.cloud.addons.CloudAddonRow
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareDataSync
+import com.nuvio.app.core.sync.SyncClientIdentityStorage
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
 import co.touchlab.kermit.Logger
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.sync.putSyncOriginClientId
@@ -55,6 +74,12 @@ object AddonRepository {
     private val _uiState = MutableStateFlow(AddonsUiState())
     val uiState: StateFlow<AddonsUiState> = _uiState.asStateFlow()
 
+    private val cloudMutex = Mutex()
+    private val localOutboxLock = SynchronizedObject()
+    private val defaultsPolicy = AddonDefaultsPolicy(ProfilePinCrypto::sha256Hex)
+    private val cloudEngine = CloudAddonEngine(SyncClientIdentityStorage::loadCloudflareAddons,
+        SyncClientIdentityStorage::saveCloudflareAddons, defaultsPolicy)
+
     private var initialized = false
     private var currentProfileId: Int = 1
     private val activeRefreshJobs = mutableMapOf<String, Job>()
@@ -67,8 +92,18 @@ object AddonRepository {
         currentProfileId = effectiveProfileId
         log.d { "initialize() — loading local addons for profile $currentProfileId" }
 
-        val storedUrls = dedupeManifestUrls(AddonStorage.loadInstalledAddonUrls(currentProfileId))
+        val originalUrls = dedupeManifestUrls(AddonStorage.loadInstalledAddonUrls(currentProfileId))
+        val needsDefaults = !AddonStorage.defaultsInitialized(currentProfileId)
+        val cleaned = originalUrls.map { CloudAddon(it) }.let { if (needsDefaults) defaultsPolicy.seed(it) else defaultsPolicy.clean(it) }
+        val storedUrls = cleaned.map { it.url }
+        if (needsDefaults || storedUrls != originalUrls) {
+            AddonStorage.saveInstalledAddonUrls(currentProfileId, storedUrls)
+            AddonStorage.markDefaultsInitialized(currentProfileId)
+            AddonStorage.saveAddonNames(currentProfileId, AddonStorage.loadAddonNames(currentProfileId).filterKeys { !defaultsPolicy.retired(it) })
+            AddonStorage.saveAddonEnabledStates(currentProfileId, AddonStorage.loadAddonEnabledStates(currentProfileId).filterKeys { !defaultsPolicy.retired(it) })
+        }
         val enabledByUrl = loadLocalEnabledStates()
+        val namesByUrl = AddonStorage.loadAddonNames(currentProfileId).mapKeys { canonicalAddonManifestUrl(it.key) }
         log.d { "initialize() — local addon count: ${storedUrls.size}" }
         if (storedUrls.isEmpty()) return
 
@@ -78,6 +113,7 @@ object AddonRepository {
                 existingByUrl[manifestUrl].toPendingAddon(
                     manifestUrl = manifestUrl,
                     enabled = enabledByUrl[manifestUrl],
+                    userSetName = namesByUrl[manifestUrl],
                 )
             },
         )
@@ -110,6 +146,7 @@ object AddonRepository {
     }
 
     suspend fun pullFromServer(profileId: Int) {
+        if (CloudflareAccountClient.enabled) { synchronizeCloudAddons(); return }
         currentProfileId = resolveEffectiveProfileId(profileId)
         log.i { "pullFromServer() — profileId=$profileId, initialized=$initialized" }
         runCatching {
@@ -122,7 +159,7 @@ object AddonRepository {
                 .decodeList<AddonRow>()
 
             val rowsByUrl = linkedMapOf<String, AddonRow>()
-            rows.forEach { row ->
+            rows.filterNot { defaultsPolicy.retired(it.url) }.forEach { row ->
                 val manifestUrl = ensureManifestSuffix(row.url)
                 if (!rowsByUrl.containsKey(manifestUrl)) {
                     rowsByUrl[manifestUrl] = row.copy(url = manifestUrl)
@@ -131,7 +168,6 @@ object AddonRepository {
 
             val urls = rowsByUrl.keys.toList()
             log.i { "pullFromServer() — server returned ${rows.size} addons" }
-            urls.forEachIndexed { i, u -> log.d { "  server[$i]: $u" } }
 
             val existingByUrl = _uiState.value.addons.associateBy(ManagedAddon::manifestUrl)
             _uiState.value = AddonsUiState(
@@ -339,6 +375,16 @@ object AddonRepository {
     }
 
     private fun pushToServer() {
+        if (CloudflareAccountClient.enabled) {
+            CloudflareAccountClient.currentSession?.let { account ->
+                val key = "${account.userId}.local-addon-edit.$currentProfileId"
+                synchronized(localOutboxLock) {
+                    SyncClientIdentityStorage.saveCloudflareAddons(key, kotlin.random.Random.nextLong().toString())
+                }
+            }
+            CloudflareDataSync.request(ProfileRepository.activeProfileId)
+            return
+        }
         if (isUsingPrimaryAddonsFromSecondaryProfile()) return
         val profileId = currentProfileId
         val addons = _uiState.value.addons
@@ -377,6 +423,60 @@ object AddonRepository {
         pushJobsByProfile[profileId] = pushJob
     }
 
+    /** Shares exact manifest URLs (including personal configuration), order and enabled flags. */
+    suspend fun synchronizeCloudAddons(knownProfileId: String? = null, knownRows: List<kotlinx.serialization.json.JsonObject>? = null) = cloudMutex.withLock {
+        val account = CloudflareAccountClient.currentSession ?: return@withLock
+        initialize()
+        val activeId = ProfileRepository.activeProfileId
+        val effectiveId = resolveEffectiveProfileId(activeId)
+        if (currentProfileId != effectiveId) return@withLock
+        val uuid = ProfileRepository.state.value.profiles.firstOrNull { it.profileIndex == effectiveId }?.id
+            ?.takeIf { it.matches(Regex("[a-fA-F0-9-]{36}")) } ?: return@withLock
+        fun snapshot() = _uiState.value.addons.map {
+            CloudAddon(it.manifestUrl, it.userSetName.orEmpty(), it.enabled)
+        }
+        val captured = snapshot()
+        val pendingKey = "${account.userId}.local-addon-edit.$effectiveId"
+        val pending = synchronized(localOutboxLock) { SyncClientIdentityStorage.loadCloudflareAddons(pendingKey).orEmpty() }
+        if (pending.isNotEmpty()) cloudEngine.edited("${account.userId}.$uuid", captured)
+        fun valid() = CloudflareAccountClient.currentSession?.userId == account.userId &&
+            ProfileRepository.activeProfileId == activeId && currentProfileId == effectiveId
+        val row = (if (knownProfileId == uuid && knownRows != null) knownRows else CloudflareAccountClient.synchronizeAll(uuid)).firstOrNull {
+            it["category"]?.jsonPrimitive?.content == "addons" && it["itemKey"]?.jsonPrimitive?.content == "installed"
+        }
+        val remote = row?.let {
+            val items = if (it["deleted"]?.jsonPrimitive?.booleanOrNull == true) emptyList() else
+                json.decodeFromJsonElement<List<CloudAddon>>(checkNotNull(it["payload"]?.jsonObject?.get("items")))
+            CloudAddonRow(it["revision"]?.jsonPrimitive?.intOrNull ?: 0, items,
+                it["payload"]?.jsonObject?.get("defaultsVersion")?.jsonPrimitive?.intOrNull ?: 0)
+        }
+        if (!valid()) return@withLock
+        val synchronizedSuccessfully = cloudEngine.synchronize("${account.userId}.$uuid", captured, remote, write = { items, revision ->
+            check(valid()) { "Compte ou profil modifié" }
+            val payload = buildJsonObject { put("items", json.encodeToJsonElement(items)); put("defaultsVersion", ADDON_DEFAULTS_VERSION) }
+            require(payload.toString().length <= 32000) { "Configuration des extensions trop volumineuse" }
+            CloudflareAccountClient.writeSync(uuid, "addons", "installed", payload, revision)
+        }, apply = { items ->
+            if (!valid() || snapshot() != captured) false else {
+                if (items != captured) {
+                    cancelActiveRefreshes()
+                    val existing = _uiState.value.addons.associateBy { it.manifestUrl }
+                    _uiState.value = AddonsUiState(addons = items.map { item ->
+                        existing[item.url].toPendingAddon(item.url, item.name, item.enabled)
+                    })
+                    persist()
+                    items.filter { it.enabled }.forEach { refreshAddon(it.url) }
+                }
+                true
+            }
+        })
+        check(synchronizedSuccessfully) { "Extensions modifiées pendant la synchronisation ; nouvelle tentative" }
+        synchronized(localOutboxLock) {
+            if (SyncClientIdentityStorage.loadCloudflareAddons(pendingKey).orEmpty() == pending)
+                SyncClientIdentityStorage.saveCloudflareAddons(pendingKey, "")
+        }
+    }
+
     private fun markRefreshing(manifestUrl: String) {
         _uiState.update { current ->
             current.copy(
@@ -400,6 +500,9 @@ object AddonRepository {
             currentProfileId,
             dedupeManifestUrls(addons.map { it.manifestUrl }),
         )
+        AddonStorage.saveAddonNames(currentProfileId, addons.mapNotNull { addon ->
+            addon.userSetName?.let { addon.manifestUrl to it }
+        }.toMap())
         AddonStorage.saveAddonEnabledStates(
             currentProfileId,
             addons.associate { it.manifestUrl to it.enabled },
@@ -408,7 +511,7 @@ object AddonRepository {
 
     private fun loadLocalEnabledStates(): Map<String, Boolean> =
         AddonStorage.loadAddonEnabledStates(currentProfileId)
-            .mapKeys { (url, _) -> ensureManifestSuffix(url) }
+            .mapKeys { (url, _) -> canonicalAddonManifestUrl(url) }
 
     private fun cancelActiveRefreshes() {
         activeRefreshJobs.values.forEach(Job::cancel)
@@ -459,7 +562,7 @@ private fun ManagedAddon?.toPendingAddon(
     }
 
 private fun dedupeManifestUrls(urls: List<String>): List<String> =
-    urls.map(::ensureManifestSuffix).distinct()
+    urls.map(::canonicalAddonManifestUrl).distinct()
 
 private fun ensureManifestSuffix(url: String): String {
     val path = url.substringBefore("?").trimEnd('/')
@@ -478,6 +581,7 @@ private fun normalizeManifestUrl(rawUrl: String): String {
         else -> "https://$trimmed"
     }
 
+    require(!AddonDefaultsPolicy(ProfilePinCrypto::sha256Hex).retired(normalizedScheme)) { "Cette extension de métadonnées a été retirée de Kovelyx." }
     val withoutFragment = normalizedScheme.substringBefore("#")
     val query = withoutFragment.substringAfter("?", "")
     val path = withoutFragment.substringBefore("?").trimEnd('/')

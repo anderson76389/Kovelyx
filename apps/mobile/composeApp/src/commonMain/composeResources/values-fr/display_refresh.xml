@@ -1,0 +1,12 @@
+<resources>
+    <string name="display_refresh_title">Fréquence d’affichage</string>
+    <string name="display_refresh_description">Choisissez les fréquences minimale et maximale de cet appareil, jusqu’à 144 Hz. Le mode disponible le plus élevé dans cette plage est demandé, sans modifier la résolution. Les vidéos gardent leur cadence d’origine.</string>
+    <string name="display_refresh_unavailable">La fréquence actuelle est hors de la plage choisie. L’écran ou le système peut limiter la fréquence ; aucun mode non pris en charge n’est imposé.</string>
+    <string name="display_refresh_minimum">Minimum</string>
+    <string name="display_refresh_maximum">Maximum</string>
+    <string name="display_refresh_actual">Fréquence actuelle : %1$d Hz</string>
+    <string name="display_refresh_supported">Modes de cet écran : %1$s</string>
+    <string name="display_refresh_pending">Détection des modes de l’écran…</string>
+    <string name="display_refresh_range">Plage choisie : %1$d–%2$d Hz</string>
+    <string name="display_refresh_adjust_bounds">Si nécessaire, l’autre borne s’ajuste pour garder une plage valide. Ce réglage concerne cet appareil.</string>
+</resources>

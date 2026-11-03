@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal object DiscordRichPresenceRepository {
     val isSupported: Boolean
-        get() = DiscordRichPresencePlatform.isSupported
+        get() = false
 
     private val _enabled = MutableStateFlow(false)
     val enabled: StateFlow<Boolean> = _enabled.asStateFlow()
@@ -16,10 +16,12 @@ internal object DiscordRichPresenceRepository {
     fun ensureLoaded() {
         if (hasLoaded) return
         hasLoaded = true
-        _enabled.value = DiscordRichPresenceStorage.loadEnabled() ?: false
+        DiscordRichPresenceStorage.saveEnabled(false)
+        _enabled.value = false
     }
 
-    fun setEnabled(enabled: Boolean) {
+    fun setEnabled(requested: Boolean) {
+        val enabled = false
         ensureLoaded()
         if (_enabled.value == enabled) return
         _enabled.value = enabled

@@ -7,7 +7,7 @@ private val isWindowsDesktop = System.getProperty("os.name")
 actual object AppFeaturePolicy {
     actual val pluginsEnabled: Boolean = true
     actual val downloadsEnabled: Boolean = true
-    actual val notificationsEnabled: Boolean = false
+    actual val notificationsEnabled: Boolean = true
     // Kovelyx has no own supporters portal. Do not expose links to the original publisher.
     actual val supportersContributorsPageEnabled: Boolean = false
     actual val donationActionsEnabled: Boolean = false

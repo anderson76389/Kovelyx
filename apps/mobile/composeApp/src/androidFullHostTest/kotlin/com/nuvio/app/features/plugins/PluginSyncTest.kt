@@ -67,6 +67,30 @@ class PluginSyncTest {
     }
 
     @Test
+    fun configuredRepositoryKeepsTokensWhenDownloadingItsCode(): Unit = runBlocking {
+        seedPlugins(emptyList())
+        respond("""{"name":"Configured module","version":"1","scrapers":[{"id":"S","name":"Scraper","version":"1","filename":"Code.js"}]}""")
+        respond("module.exports = {}")
+        respond("{}") // legacy test backend acknowledgement; production uses D1
+        val url = server.url("/Config/AbC/manifest.json?key=AbC%2F&path=/").toString()
+        assertTrue(PluginRepository.addRepository(url) is AddPluginRepositoryResult.Success)
+        assertEquals("/Config/AbC/manifest.json?key=AbC%2F&path=/", server.takeRequest(5, TimeUnit.SECONDS)?.path)
+        assertEquals("/Config/AbC/Code.js?key=AbC%2F&path=/", server.takeRequest(5, TimeUnit.SECONDS)?.path)
+        assertEquals(url, PluginRepository.uiState.value.repositories.single().manifestUrl)
+        assertEquals(url + ":S", PluginRepository.uiState.value.scrapers.single().id)
+    }
+
+    @Test
+    fun missingScraperCodeCannotBeAnnouncedAsAnInstalledModule(): Unit = runBlocking {
+        seedPlugins(emptyList())
+        respond("""{"name":"Unavailable module","version":"1","scrapers":[{"id":"S","name":"Scraper","version":"1","filename":"Code.js"}]}""")
+        server.enqueue(MockResponse().setResponseCode(404))
+        assertTrue(PluginRepository.addRepository(manifestUrl) is AddPluginRepositoryResult.Error)
+        assertTrue(PluginRepository.uiState.value.repositories.isEmpty())
+        assertTrue(PluginRepository.uiState.value.scrapers.isEmpty())
+    }
+
+    @Test
     fun emptyRemoteRemovesCachedPluginsWithoutUploadingAndStaysEmptyAfterReload(): Unit = runBlocking {
         seedPlugins()
         PluginRepository.initialize()
@@ -153,6 +177,7 @@ class PluginSyncTest {
     fun emptyRemoteRemovesCachedAddonsWithoutUploadingAndStaysEmptyAfterReload(): Unit = runBlocking {
         AddonStorage.saveInstalledAddonUrls(1, listOf(manifestUrl))
         AddonStorage.saveAddonEnabledStates(1, mapOf(manifestUrl to false))
+        AddonStorage.markDefaultsInitialized(1) // Cached profile has already accepted the current defaults.
         AddonRepository.initialize()
         assertEquals(1, AddonRepository.uiState.value.addons.size)
         respond("[]")

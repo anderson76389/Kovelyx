@@ -70,13 +70,27 @@ class AppUpdaterControllerTest {
 
     @Test
     fun channelChangeDiscardsPendingUpdate() {
-        val controller = controller { Result.success(update("999.0.0")) }
+        val betaResult = CompletableDeferred<Result<AppUpdate>>()
+        val controller = controller { channel ->
+            if (channel == UpdateChannel.STABLE) Result.success(update("999.0.0"))
+            else betaResult.await()
+        }
         controller.checkForUpdates(force = true, showNoUpdateFeedback = false)
         assertTrue(controller.uiState.value.showDialog)
 
         preferences.setChannel(UpdateChannel.BETA)
 
-        assertEquals(AppUpdaterUiState(updateChannel = UpdateChannel.BETA), controller.uiState.value)
+        // A real channel change starts a fresh check, even in a Debug build.
+        // The previous channel's offered release must disappear while it is pending.
+        assertEquals(UpdateChannel.BETA, controller.uiState.value.updateChannel)
+        assertNull(controller.uiState.value.update)
+        assertFalse(controller.uiState.value.showDialog)
+        assertTrue(controller.uiState.value.isChecking)
+
+        betaResult.complete(Result.success(update("999.0.0-beta.1")))
+        assertEquals("999.0.0-beta.1", controller.uiState.value.update?.tag)
+        assertTrue(controller.uiState.value.showDialog)
+        assertFalse(controller.uiState.value.isChecking)
     }
 
     @Test

@@ -118,16 +118,6 @@ internal fun PlayerScreenContent(args: PlayerScreenArgs) {
         runtime.airsPrefix = stringResource(Res.string.compose_player_airs_prefix)
         runtime.tbaLabel = stringResource(Res.string.compose_player_tba)
         runtime.genericUnknownLabel = stringResource(Res.string.generic_unknown)
-        runtime.parentalGuideLabels = ParentalGuideLabels(
-            nudity = stringResource(Res.string.parental_nudity),
-            violence = stringResource(Res.string.parental_violence),
-            profanity = stringResource(Res.string.parental_profanity),
-            alcohol = stringResource(Res.string.parental_alcohol),
-            frightening = stringResource(Res.string.parental_frightening),
-            severe = stringResource(Res.string.parental_severity_severe),
-            moderate = stringResource(Res.string.parental_severity_moderate),
-            mild = stringResource(Res.string.parental_severity_mild),
-        )
         if (runtime.playerMetaVideos.isEmpty()) {
             runtime.playerMetaVideos = MetaDetailsRepository.peek(
                 args.parentMetaType,

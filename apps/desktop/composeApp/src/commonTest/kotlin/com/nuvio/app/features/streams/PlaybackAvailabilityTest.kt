@@ -11,6 +11,24 @@ import kotlin.test.assertTrue
 
 class PlaybackAvailabilityTest {
     @Test
+    fun `a restored addon can be searched while its manifest is loading`() {
+        val loading = addon().copy(manifest = null, isRefreshing = true)
+        assertTrue(canSearchPlaybackSources(listOf(loading), PluginsUiState(), "movie", "tt123"))
+        assertFalse(canSearchPlaybackSources(listOf(loading.copy(enabled = false)), PluginsUiState(), "movie", "tt123"))
+        assertFalse(canSearchPlaybackSources(listOf(loading.copy(isRefreshing = false, errorMessage = "HTTP 503")), PluginsUiState(), "movie", "tt123"))
+    }
+
+    @Test
+    fun `empty lookup cache is invalidated when restored sources become ready`() {
+        val loading = addon().copy(manifest = null, isRefreshing = true)
+        val key = StreamLookupKey("movie::tt123", 1, listOf(loading), PluginsUiState())
+        assertFalse(key == key.copy(addons = listOf(addon())))
+        assertFalse(key == key.copy(profileId = 2))
+        assertFalse(key == key.copy(addons = listOf(loading.copy(isRefreshing = false, errorMessage = "HTTP 503"))))
+        assertTrue(key == key.copy())
+    }
+
+    @Test
     fun `empty setup and catalog only addons do not enable playback`() {
         assertFalse(available())
         assertFalse(available(addons = listOf(addon(resource = "catalog"))))

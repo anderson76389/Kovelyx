@@ -44,6 +44,19 @@ class MediaBrowserConnectionTest {
     }
 
     @Test
+    fun resolvesSafeProxyRedirectsBeforeAuthentication() {
+        assertEquals("https://media.example.com/proxy", redirectedServerAddress(
+            "https://media.example.com", "", "/proxy/System/Info/Public"))
+        assertEquals("https://media.example.com/proxy", redirectedServerAddress(
+            "https://media.example.com", "/emby", "/proxy/emby/System/Info/Public"))
+        assertEquals("https://media.example.com/proxy", redirectedServerAddress(
+            "http://media.example.com/proxy", "", "https://media.example.com/proxy/System/Info/Public"))
+        assertNull(redirectedServerAddress("https://media.example.com", "", "http://media.example.com/System/Info/Public"))
+        assertNull(redirectedServerAddress("https://media.example.com", "", "https://other.example.com/System/Info/Public"))
+        assertNull(redirectedServerAddress("https://media.example.com", "", "/login"))
+    }
+
+    @Test
     fun requiresSupportedJellyfinVersion() {
         assertTrue(jellyfin.isSupportedVersion("10.9.0"))
         assertTrue(jellyfin.isSupportedVersion("10.10.7"))

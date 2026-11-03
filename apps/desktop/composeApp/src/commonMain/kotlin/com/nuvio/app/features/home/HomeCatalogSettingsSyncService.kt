@@ -91,6 +91,10 @@ object HomeCatalogSettingsSyncService {
     private var cachedSharedSettings: CachedSharedSettings? = null
 
     suspend fun pullFromServer(profileId: Int) {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
+            return
+        }
         runCatching {
             val pullToken = currentPullToken(profileId) ?: return
             val localPayload = HomeCatalogSettingsRepository.exportToSyncPayload()
@@ -132,6 +136,11 @@ object HomeCatalogSettingsSyncService {
     }
 
     fun triggerPush() {
+        if (isSyncingFromRemote) return
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareCatalogueSync.edited("layout")
+            return
+        }
         val requestedToken = currentPullToken()
         if (requestedToken == null || !hasCompletedInitialPull(requestedToken)) {
             log.d { "triggerPush — skipped before initial home catalog pull completed" }

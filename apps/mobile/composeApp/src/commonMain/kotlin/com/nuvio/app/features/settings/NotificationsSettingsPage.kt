@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Button
@@ -16,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nuvio.app.features.notifications.EpisodeReleaseNotificationsRepository
 import com.nuvio.app.features.notifications.EpisodeReleaseNotificationsUiState
+import nuvio.composeapp.generated.resources.notifications_test_generic_description
+import nuvio.composeapp.generated.resources.notifications_delivery_description
+import nuvio.composeapp.generated.resources.notifications_open_system_settings
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.settings_notifications_disabled_in_app
 import nuvio.composeapp.generated.resources.settings_notifications_episode_release_alerts
@@ -36,6 +40,7 @@ internal fun LazyListScope.notificationsSettingsContent(
     uiState: EpisodeReleaseNotificationsUiState,
 ) {
     item {
+        androidx.compose.runtime.LaunchedEffect(Unit) { EpisodeReleaseNotificationsRepository.refreshAuthorization() }
         SettingsSection(
             title = stringResource(Res.string.settings_notifications_section_alerts),
             isTablet = isTablet,
@@ -54,14 +59,16 @@ internal fun LazyListScope.notificationsSettingsContent(
     }
 
     item {
+        androidx.compose.runtime.LaunchedEffect(Unit) { EpisodeReleaseNotificationsRepository.refreshAuthorization() }
         SettingsSection(
             title = stringResource(Res.string.settings_notifications_section_test),
             isTablet = isTablet,
         ) {
-            NotificationTestCard(
-                isTablet = isTablet,
-                uiState = uiState,
-            )
+            SettingsGroup(isTablet = isTablet) {
+                Column(Modifier.padding(16.dp)) {
+                    NotificationTestCard(isTablet = isTablet, uiState = uiState)
+                }
+            }
         }
     }
 }
@@ -71,8 +78,7 @@ private fun NotificationTestCard(
     isTablet: Boolean,
     uiState: EpisodeReleaseNotificationsUiState,
 ) {
-    val horizontalPadding = if (isTablet) 20.dp else 16.dp
-    val verticalPadding = if (isTablet) 18.dp else 16.dp
+
 
     Column(
         modifier = Modifier
@@ -93,10 +99,11 @@ private fun NotificationTestCard(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                 )
+                Text(text = stringResource(Res.string.notifications_delivery_description), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
                     text = uiState.testTargetTitle?.let { title ->
                         stringResource(Res.string.settings_notifications_test_for_title, title)
-                    } ?: stringResource(Res.string.settings_notifications_test_requires_saved_show),
+                    } ?: stringResource(Res.string.notifications_test_generic_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -115,7 +122,7 @@ private fun NotificationTestCard(
 
             Button(
                 onClick = EpisodeReleaseNotificationsRepository::sendTestNotification,
-                enabled = !uiState.isSendingTest && !uiState.isLoading && uiState.testTargetTitle != null,
+                enabled = !uiState.isSendingTest && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -147,6 +154,9 @@ private fun NotificationTestCard(
                 )
             }
 
+            Button(onClick = EpisodeReleaseNotificationsRepository::openSystemSettings, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.notifications_open_system_settings))
+            }
             if (!uiState.permissionGranted) {
                 Text(
                     text = stringResource(Res.string.settings_notifications_permission_disabled),

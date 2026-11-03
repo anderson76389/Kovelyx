@@ -14,11 +14,11 @@ import nuvio.composeapp.generated.resources.compose_settings_page_account
 import nuvio.composeapp.generated.resources.compose_settings_page_addons
 import nuvio.composeapp.generated.resources.compose_settings_page_advanced
 import nuvio.composeapp.generated.resources.compose_settings_page_appearance
-import nuvio.composeapp.generated.resources.compose_settings_page_content_discovery
-import nuvio.composeapp.generated.resources.compose_settings_page_debrid
+import nuvio.composeapp.generated.resources.settings_org_sources_title
+import nuvio.composeapp.generated.resources.settings_org_debrid_title
 import nuvio.composeapp.generated.resources.compose_settings_page_continue_watching
 import nuvio.composeapp.generated.resources.compose_settings_page_homescreen
-import nuvio.composeapp.generated.resources.compose_settings_page_integrations
+import nuvio.composeapp.generated.resources.settings_org_integrations_title
 import nuvio.composeapp.generated.resources.compose_settings_page_licenses_attributions
 import nuvio.composeapp.generated.resources.compose_settings_page_mdblist_ratings
 import nuvio.composeapp.generated.resources.compose_settings_page_media_server
@@ -29,7 +29,7 @@ import nuvio.composeapp.generated.resources.compose_settings_page_playback
 import nuvio.composeapp.generated.resources.compose_settings_page_plugins
 import nuvio.composeapp.generated.resources.compose_settings_page_poster_customization
 import nuvio.composeapp.generated.resources.compose_settings_page_root
-import nuvio.composeapp.generated.resources.compose_settings_page_streams
+import nuvio.composeapp.generated.resources.settings_org_stream_presentation
 import nuvio.composeapp.generated.resources.compose_settings_page_supporters_contributors
 import nuvio.composeapp.generated.resources.compose_settings_page_tmdb_enrichment
 import nuvio.composeapp.generated.resources.compose_settings_page_trakt
@@ -43,8 +43,8 @@ internal enum class SettingsCategory(
 ) {
     Account(Res.string.settings_account, Icons.Rounded.AccountCircle),
     General(Res.string.compose_settings_category_general, Icons.Rounded.Settings),
-    About(Res.string.compose_settings_category_about, Icons.Rounded.Info),
     Advanced(Res.string.compose_settings_page_advanced, Icons.Rounded.Tune),
+    About(Res.string.compose_settings_category_about, Icons.Rounded.Info),
 }
 
 internal enum class SettingsPage(
@@ -83,7 +83,7 @@ internal enum class SettingsPage(
         parentPage = Root,
     ),
     Streams(
-        titleRes = Res.string.compose_settings_page_streams,
+        titleRes = Res.string.settings_org_stream_presentation,
         category = SettingsCategory.General,
         parentPage = Appearance,
     ),
@@ -108,7 +108,7 @@ internal enum class SettingsPage(
         parentPage = Appearance,
     ),
     ContentDiscovery(
-        titleRes = Res.string.compose_settings_page_content_discovery,
+        titleRes = Res.string.settings_org_sources_title,
         category = SettingsCategory.General,
         parentPage = Root,
     ),
@@ -143,7 +143,7 @@ internal enum class SettingsPage(
         parentPage = Appearance,
     ),
     Integrations(
-        titleRes = Res.string.compose_settings_page_integrations,
+        titleRes = Res.string.settings_org_integrations_title,
         category = SettingsCategory.General,
         parentPage = Root,
     ),
@@ -158,14 +158,14 @@ internal enum class SettingsPage(
         parentPage = Integrations,
     ),
     Debrid(
-        titleRes = Res.string.compose_settings_page_debrid,
+        titleRes = Res.string.settings_org_debrid_title,
         category = SettingsCategory.General,
         parentPage = Integrations,
     ),
     TraktAuthentication(
         // Keep the enum name for saved navigation-state compatibility.
         titleRes = Res.string.compose_settings_page_tracking,
-        category = SettingsCategory.Account,
+        category = SettingsCategory.General,
         parentPage = Root,
     ),
 }

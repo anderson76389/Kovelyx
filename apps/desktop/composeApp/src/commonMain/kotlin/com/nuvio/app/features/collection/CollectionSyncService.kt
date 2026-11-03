@@ -45,11 +45,24 @@ object CollectionSyncService {
     }
 
     suspend fun pullFromServer(profileId: Int) {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
+            return
+        }
         pullFromServerChecked(profileId)
     }
 
     /** Un import destructif ne doit jamais continuer si le chargement du compte a échoué. */
     suspend fun pullFromServerChecked(profileId: Int): Boolean {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            return try {
+                com.nuvio.app.core.cloud.CloudflareCatalogueSync.synchronizeNow(profileId)
+            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+            catch (error: Exception) {
+                log.w(error) { "Import différé : le catalogue Cloudflare doit être reçu avant sa modification" }
+                false
+            }
+        }
         if (ProfileRepository.activeProfileId != profileId) return false
         return runCatching {
             val params = buildJsonObject { put("p_profile_id", profileId) }
@@ -106,6 +119,10 @@ object CollectionSyncService {
     }
 
     private suspend fun pushToRemote(profileId: Int) {
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
+            return
+        }
         runCatching {
             if (ProfileRepository.activeProfileId != profileId) return@runCatching
             val collectionsJson = CollectionRepository.exportToJson()

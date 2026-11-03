@@ -98,6 +98,7 @@ internal fun PlaybackVideoSection(
         focusAfterDisable = frameRateFocusRequester
     )
 
+
     if (settings.usesExoPlayerEngine) {
         val dv81Conversion = settings.dv7HandlingMode == Dv7HandlingMode.DV81_LIBDOVI
         SettingsSectionLabel(text = stringResource(R.string.playback_dv_hdr_label))

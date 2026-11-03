@@ -5,7 +5,7 @@
  */
 import assert from "node:assert/strict";
 import {spawn,spawnSync} from "node:child_process";
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
 import {mkdtempSync,readFileSync,writeFileSync,rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {resolve,join} from "node:path";
@@ -75,7 +75,9 @@ try {
   const ready=await req("/ready");
   assert.equal(ready.status,200,"La base locale et Better Auth doivent etre prets");
   assert.equal(ready.data?.status,"ok");
-  assert.equal(ready.data?.schema,"0002_watched_history");
+  assert.equal(ready.data?.schema,"0004_profile_media_gifs");
+  assert.equal(ready.data?.maxProfileMediaBytes,18_000_000);
+  assert.equal(ready.data?.catalogueSnapshotSchema,1);
 
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
@@ -210,6 +212,129 @@ try {
   assert.equal((await req("/v1/sync","POST",{
     ...watched,itemKey:"movie:private",payload:{access_token:"private"}
   },alice.token)).status,400,"Credential fields must not sync");
+
+  // Exact configured addon URL, ordered list and removal cross two independent sessions.
+  const addons={profileId,category:"addons",itemKey:"installed",revision:0,deleted:false,
+    payload:{defaultsVersion:1,items:[
+      {url:"https://aio.example/Config%2FAbC/manifest.json?lang=fr&key=Test%2BOnly%3D",name:"AIO Metadata",enabled:true},
+      {url:"https://streamfusion.example/config/AbCDef/manifest.json?token=Test%2FOnly&path=/",name:"StreamFusion",enabled:false},
+      {url:"https://comet.example/eyJrZXkiOiJURVNUIn0=/manifest.json",name:"Comet",enabled:true}
+    ]}};
+  assert.equal((await req("/v1/sync","POST",addons,alice.token)).status,201);
+  const tvAddons=await req("/v1/sync?profileId="+profileId+"&limit=25","GET",null,tvToken);
+  assert.deepEqual(tvAddons.data.items.find(x=>x.category==="addons").payload,addons.payload);
+  assert.equal((await req("/v1/sync","POST",{...addons,revision:1,payload:{items:[]}},tvToken)).status,200);
+  assert.equal((await req("/v1/sync","POST",addons,alice.token)).status,409,"Old device cannot resurrect removed addons with a stale revision");
+  assert.equal((await req("/v1/sync","POST",addons,bob.token)).status,404);
+
+  // Real chunk transfer, atomic publication, isolation, deletion and old-version cleanup.
+
+  for (const [itemKey,payload] of Object.entries({
+    visual_theme_v1:{selected_theme:{type:"string",value:"PURPLE"},amoled_enabled:{type:"boolean",value:true}},
+    visual_meta_v1:{value:JSON.stringify({background_mode:"cinematic",hero_trailer_playback:true,items:[{key:"CAST",enabled:false,order:2}]})},
+    plugin_repositories_v1:{repositories:[{url:"https://modules.example/Config/AbC/manifest.json?token=AbC%2F&path=/",name:"Module configuré",repo_type:"NUVIO_JS"}],disabled:["https://modules.example/Config/AbC/manifest.json?token=AbC%2F&path=/|Code.js"],enabled:true,group:true}
+  })) {
+    const row={profileId,category:"profile_settings",itemKey,payload,revision:0,deleted:false};
+    assert.equal((await req('/v1/sync','POST',row,alice.token)).status,201);
+    const items=[]; let cursor=0;
+    do {
+      const other=await req(`/v1/sync?profileId=${profileId}&limit=25&offset=${cursor}`,'GET',null,tvToken);
+      assert.equal(other.status,200); items.push(...other.data.items); cursor=other.data.nextOffset;
+    } while(cursor!==null);
+    assert.deepEqual(items.find(x=>x.category==='profile_settings'&&x.itemKey===itemKey).payload,payload);
+    assert.equal((await req('/v1/sync','POST',row,tvToken)).status,409);
+    assert.equal((await req('/v1/sync','POST',row,bob.token)).status,404);
+  }
+  console.log('PASS: apparence, écran méta et modules configurés reçus exactement dans une seconde session, conflits et isolation vérifiés');
+  const catalogueText=JSON.stringify([{id:"ma-collection",folders:[{id:"films",sources:[{provider:"addon",addonId:"kaptain",catalogId:"x"}],name:"é".repeat(900000)}]}]);
+  const catalogueHash=createHash('sha256').update(catalogueText).digest('hex');
+  const catalogueParts=Array.from({length:Math.ceil(catalogueText.length/6000)},(_,i)=>catalogueText.slice(i*6000,(i+1)*6000));
+  const chunk=(hash,index,text)=>({profileId,category:"catalogues",itemKey:`snapshot:collections:${hash}:${String(index).padStart(6,'0')}`,revision:0,deleted:false,payload:{index,text}});
+  const manifest={profileId,kind:"collections",sha256:catalogueHash,parts:catalogueParts.length,utf8Bytes:Buffer.byteLength(catalogueText),revision:0};
+  assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,409,'Cannot publish missing chunks');
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,catalogueParts[0]),bob.token)).status,404);
+  for(const [index,text] of catalogueParts.entries())
+    assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,index,text),alice.token)).status,201);
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,catalogueParts[0]),alice.token)).status,200,'Idempotent immutable chunk');
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(catalogueHash,0,'different'),alice.token)).status,409);
+  assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,201);
+  let catalogueOffset=0,cataloguePages=0; const fromTvItems=[];
+  do {
+    const fromTv=await req(`/v1/sync?profileId=${profileId}&snapshotKind=collections&snapshotHash=${catalogueHash}&offset=${catalogueOffset}&limit=25`,'GET',null,tvToken);
+    assert.equal(fromTv.status,200); fromTvItems.push(...fromTv.data.items); cataloguePages++;
+    const nextCatalogueOffset=fromTv.data.nextOffset;
+    if(nextCatalogueOffset!==null) assert.equal(nextCatalogueOffset,catalogueOffset+25);
+    catalogueOffset=nextCatalogueOffset;
+  } while(catalogueOffset!==null);
+  assert.equal(fromTvItems.length,catalogueParts.length);
+  assert.deepEqual(fromTvItems.map(x=>x.payload.index),catalogueParts.map((_,i)=>i));
+  assert.equal(fromTvItems.map(x=>x.payload.text).join(''),catalogueText);
+  assert.ok(cataloguePages>1); console.log('PASS: catalogue volumineux, '+Buffer.byteLength(catalogueText)+' octets, '+catalogueParts.length+' blocs, '+cataloguePages+' pages, reconstruction exacte');
+  const normal=await req(`/v1/sync?profileId=${profileId}`,'GET',null,tvToken);
+  assert.equal(normal.data.items.some(x=>x.category==='catalogues'),false,'Progress sync never returns catalogue chunks');
+  const emptyHash=createHash('sha256').update('[]').digest('hex');
+  assert.equal((await req('/v1/catalogue-chunk','POST',chunk(emptyHash,0,'[]'),tvToken)).status,201);
+  assert.equal((await req('/v1/catalogue-manifest','POST',{...manifest,sha256:emptyHash,parts:1,utf8Bytes:2,revision:1},tvToken)).status,200);
+  const removedCatalogues=await req(`/v1/sync?profileId=${profileId}&snapshotKind=collections&snapshotHash=${catalogueHash}`,'GET',null,alice.token);
+  assert.equal(removedCatalogues.data.items.length,0,'Obsolete snapshots do not accumulate');
+  assert.equal((await req('/v1/catalogue-manifest','POST',manifest,alice.token)).status,409,'Stale writer cannot resurrect deleted catalogues');
+  assert.equal((await req('/v1/sync','POST',chunk(emptyHash,0,'[]'),alice.token)).status,400,'Generic writes cannot bypass immutable protocol');
+
+  // Private user pictures are real bytes, isolated by owner and protected by revisions.
+  const mediaUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=avatar";
+  const picture=Uint8Array.from(Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aM5sAAAAASUVORK5CYII=","base64"));
+  const putPicture=(token,expected,bytes=picture)=>fetch(mediaUrl,{method:"PUT",
+    headers:{Authorization:"Bearer "+token,Origin:base,"Content-Type":"image/png","If-Match":expected},body:bytes});
+  assert.equal((await fetch(mediaUrl)).status,401,"Images require an authenticated account");
+  assert.equal((await putPicture(bob.token,"none")).status,404,"Other user cannot upload");
+  const imagePut=await putPicture(alice.token,"none");
+  assert.equal(imagePut.status,201,"First private picture upload");
+  const imageVersion=(await imagePut.json()).version;
+  assert.match(imageVersion,/^[a-f0-9]{64}$/);
+  const photoOnTv=await fetch(mediaUrl+"&version="+imageVersion,{headers:{Authorization:"Bearer "+tvToken}});
+  assert.equal(photoOnTv.status,200);
+  assert.equal(photoOnTv.headers.get("content-type"),"image/png");
+  assert.deepEqual(new Uint8Array(await photoOnTv.arrayBuffer()),picture,"Another session receives the actual private file");
+  assert.equal((await fetch(mediaUrl,{headers:{Authorization:"Bearer "+bob.token}})).status,404);
+  assert.equal((await putPicture(alice.token,"none")).status,409,"Stale uploads must not overwrite newer photos");
+  const gif=Buffer.from("R0lGODlhAgACAIEAAP8AAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQACgAAACwAAAAAAgACAAAIBgABCAQQEAAh+QQBFAABACwAAAAAAgACAIEAAP8AAAAAAAAAAAAIBgABCAQQEAA7","base64");
+  // A valid two-frame GIF with comment blocks crosses the former 2 MiB limit.
+  const comments=[Buffer.from([0x21,0xfe])];
+  for(let i=0;i<70300;i++)comments.push(Buffer.from([255]),Buffer.alloc(255,65));
+  comments.push(Buffer.from([0]));
+  const largePicture=new Uint8Array(Buffer.concat([gif.subarray(0,-1),...comments,gif.subarray(-1)]));
+  assert.ok(largePicture.length>17_000_000 && largePicture.length<=18_000_000);
+  const chunked=await putPicture(alice.token,imageVersion,largePicture);
+  assert.equal(chunked.status,201,"Photos are chunked below D1's cell limit");
+  const chunkVersion=(await chunked.json()).version;
+  // Background and avatar have independent files and profile-version columns.
+  const backgroundUrl=base+"/v1/profile-media?profileId="+profileId+"&kind=background";
+  const backgroundPicture=new Uint8Array([...picture,0]);
+  const backgroundPut=await fetch(backgroundUrl,{method:"PUT",headers:{Authorization:"Bearer "+tvToken,
+    Origin:base,"Content-Type":"image/png","If-Match":"none"},body:backgroundPicture});
+  assert.equal(backgroundPut.status,201);
+  const backgroundVersion=(await backgroundPut.json()).version;
+  const imageProfiles=await req("/v1/profiles","GET",null,alice.token);
+  assert.equal(imageProfiles.data.profiles[0].avatarPath,chunkVersion);
+  assert.equal(imageProfiles.data.profiles[0].backgroundPath,backgroundVersion);
+  const backgroundGet=await fetch(backgroundUrl,{headers:{Authorization:"Bearer "+alice.token}});
+  assert.equal(backgroundGet.status,200);
+  assert.deepEqual(new Uint8Array(await backgroundGet.arrayBuffer()),backgroundPicture);
+  const roundTrip=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+tvToken}});
+  assert.equal(roundTrip.headers.get("content-type"),"image/gif");
+  assert.deepEqual(new Uint8Array(await roundTrip.arrayBuffer()),largePicture);
+  assert.equal((await putPicture(alice.token,chunkVersion,new Uint8Array(18_000_001))).status,413);
+  const changed=picture.slice();changed[changed.length-1]^=1;
+  const racing=await Promise.all([putPicture(alice.token,chunkVersion,picture),putPicture(alice.token,chunkVersion,changed)]);
+  assert.deepEqual(racing.map(r=>r.status).sort(),[201,409],"Concurrent writers cannot overwrite one another");
+  const winner=await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}});
+  const winnerVersion=winner.headers.get("x-kovelyx-media-version");
+  assert.equal((await fetch(mediaUrl,{method:"DELETE",headers:{Authorization:"Bearer "+alice.token,Origin:base,"If-Match":chunkVersion}})).status,409);
+  assert.equal((await fetch(mediaUrl,{method:"DELETE",headers:{Authorization:"Bearer "+alice.token,Origin:base,"If-Match":winnerVersion}})).status,200);
+  assert.equal((await fetch(mediaUrl,{headers:{Authorization:"Bearer "+alice.token}})).status,404);
+
+  assert.equal((await fetch(backgroundUrl,{headers:{Authorization:"Bearer "+tvToken}})).status,200,
+    "Deleting the avatar must not remove the background");
 
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);

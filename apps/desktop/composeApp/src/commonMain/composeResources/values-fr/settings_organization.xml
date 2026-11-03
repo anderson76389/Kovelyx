@@ -1,0 +1,17 @@
+<resources>
+    <string name="settings_org_section_interface">INTERFACE</string>
+    <string name="settings_org_section_content">CONTENU ET SOURCES</string>
+    <string name="settings_org_section_playback">LECTURE</string>
+    <string name="settings_org_section_services">SERVICES ET SUIVI</string>
+    <string name="settings_org_section_updates">MISES À JOUR</string>
+    <string name="settings_org_sources_title">Sources et recherche</string>
+    <string name="settings_org_integrations_title">Services et métadonnées</string>
+    <string name="settings_org_stream_presentation">Présentation des liens vidéo</string>
+    <string name="settings_org_debrid_title">Services de débridage</string>
+    <string name="settings_org_section_video_services">SERVICES VIDÉO</string>
+    <string name="settings_org_section_metadata">FICHES ET NOTES</string>
+    <string name="settings_org_section_playback_services">SERVICES DE LECTURE</string>
+    <string name="settings_org_appearance_interface">INTERFACE ET NAVIGATION</string>
+    <string name="settings_org_decoder_title">MOTEUR ET COMPATIBILITÉ</string>
+    <string name="settings_org_buffering_title">TAMPON ET CACHE VIDÉO</string>
+</resources>

@@ -22,6 +22,16 @@ internal object CloudflareTvAccountClient {
     data class Account(val id: String, val email: String, val bearerToken: String)
     val enabled: Boolean get() = BuildConfig.KOVELYX_CLOUD_URL.startsWith("https://")
     private val client = OkHttpClient.Builder()
+        .addInterceptor { chain ->
+            val request = chain.request()
+            val builder = request.newBuilder()
+                .header("Accept", "application/json")
+                .header("User-Agent", "Kovelyx-Client")
+            if (request.method != "GET" && request.method != "HEAD") {
+                builder.header("Origin", BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
+            }
+            chain.proceed(builder.build())
+        }
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .followRedirects(false)
@@ -230,15 +240,18 @@ internal object CloudflareTvAccountClient {
         }
     }
 
-    suspend fun syncRows(profileId: String): List<JSONObject> = withContext(Dispatchers.IO) {
+    suspend fun syncRows(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JSONObject> = withContext(Dispatchers.IO) {
         val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require((snapshotKind == null && snapshotHash == null) ||
+            (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
+        val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
         val rows = mutableListOf<JSONObject>()
         var offset = 0
         do {
             val request = Request.Builder()
                 .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
-                    "/v1/sync?profileId=$profileId&offset=$offset&limit=25")
+                    "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery")
                 .header("Authorization", "Bearer ${active.bearerToken}")
                 .get().build()
             val next = client.newCall(request).execute().use { response ->
@@ -257,6 +270,25 @@ internal object CloudflareTvAccountClient {
             offset = next
         } while (true)
         rows
+    }
+
+    private suspend fun postCatalogue(path: String, body: JSONObject) = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + path)
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .post(body.toString().toRequestBody("application/json".toMediaType())).build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Catalogue Cloudflare HTTP ${response.code}" }
+        }
+    }
+    suspend fun putCatalogueChunk(profile: String, kind: String, hash: String, index: Int, text: String) {
+        postCatalogue("/v1/catalogue-chunk", JSONObject().put("profileId", profile).put("category", "catalogues")
+            .put("itemKey", "snapshot:$kind:$hash:${index.toString().padStart(6, '0')}")
+            .put("revision", 0).put("deleted", false).put("payload", JSONObject().put("index", index).put("text", text)))
+    }
+    suspend fun publishCatalogueHead(profile: String, kind: String, head: com.kovelyx.cloud.catalogues.CatalogueHead) {
+        postCatalogue("/v1/catalogue-manifest", JSONObject().put("profileId", profile).put("kind", kind)
+            .put("sha256", head.sha256).put("parts", head.parts).put("utf8Bytes", head.utf8Bytes).put("revision", head.revision))
     }
 
     suspend fun writeSync(
@@ -289,5 +321,63 @@ internal object CloudflareTvAccountClient {
             account = null
             sessionStore?.clear()
         }
+    }
+    suspend fun cloudProfileDetails(): List<JSONObject> = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles")
+            .header("Authorization", "Bearer ${active.bearerToken}").get().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Profils Cloudflare indisponibles" }
+            val rows = JSONObject(response.body?.string().orEmpty()).optJSONArray("profiles") ?: return@use emptyList()
+            (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }
+        }
+    }
+    suspend fun renameCloudProfile(profileId: String, name: String) = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(account)
+        val body = JSONObject().put("displayName", name).toString().toRequestBody("application/json".toMediaType())
+        val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles?profileId=$profileId")
+            .header("Authorization", "Bearer ${active.bearerToken}").patch(body).build()
+        client.newCall(request).execute().use { check(it.isSuccessful && account?.id == active.id) { "Nom de profil non synchronisé" } }
+    }
+    private fun mediaUrl(profileId: String, kind: String): String {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")) && kind in setOf("avatar", "background"))
+        return BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profile-media?profileId=$profileId&kind=$kind"
+    }
+    suspend fun uploadProfileMedia(profileId: String, kind: String, expected: String?, image: com.kovelyx.cloud.media.ProfileImageBytes): String = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account)
+        val request = Request.Builder().url(mediaUrl(profileId, kind))
+            .header("Authorization", "Bearer ${active.bearerToken}").header("If-Match", expected ?: "none")
+            .put(image.bytes.toRequestBody(image.mime.toMediaType())).build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Le service d’images est indisponible ou doit être mis à jour (HTTP ${response.code})." }
+            JSONObject(response.body?.string().orEmpty()).getString("version")
+        }
+    }
+    suspend fun downloadProfileMedia(profileId: String, kind: String, version: String): com.kovelyx.cloud.media.ProfileImageBytes = withContext(Dispatchers.IO) {
+        require(version.matches(Regex("[a-f0-9]{64}")))
+        val active = checkNotNull(account)
+        val request = Request.Builder().url(mediaUrl(profileId, kind) + "&version=$version")
+            .header("Authorization", "Bearer ${active.bearerToken}").get().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.id == active.id) { "Image privée inaccessible" }
+            val body = checkNotNull(response.body)
+            val output = java.io.ByteArrayOutputStream()
+            body.byteStream().use { input ->
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val n = input.read(buffer); if (n < 0) break
+                    check(output.size() + n <= com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES) { "Image distante trop volumineuse" }
+                    output.write(buffer, 0, n)
+                }
+            }
+            com.kovelyx.cloud.media.ProfileImageBytes(response.header("Content-Type").orEmpty().substringBefore(';'), output.toByteArray())
+        }
+    }
+    suspend fun removeProfileMedia(profileId: String, kind: String, expected: String?) = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account)
+        val request = Request.Builder().url(mediaUrl(profileId, kind))
+            .header("Authorization", "Bearer ${active.bearerToken}").header("If-Match", expected ?: "none").delete().build()
+        client.newCall(request).execute().use { check(it.isSuccessful && account?.id == active.id) { "Suppression d’image non confirmée" } }
     }
 }

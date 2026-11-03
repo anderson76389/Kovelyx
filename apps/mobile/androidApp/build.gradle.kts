@@ -140,6 +140,17 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            if (providers.gradleProperty("kovelyx.optimizedDistribution").orNull == "true") {
+                isDebuggable = false
+                isMinifyEnabled = true
+                isShrinkResources = true
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "../composeApp/proguard-rules.pro")
+                if (providers.gradleProperty("kovelyx.optimizedInstrumentation").orNull == "true") {
+                    proguardFiles("instrumentation-runtime.pro")
+                }
+            }
+        }
         getByName("release") {
             val minifyRelease = providers.gradleProperty("releaseMinifyEnabled")
                 .map(String::toBooleanStrict)
@@ -196,12 +207,31 @@ dependencies {
     implementation(project(":composeApp"))
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.runtime)
+    // AndroidJUnitRunner invokes Trace by reflection in the optimized test target.
+    implementation("androidx.tracing:tracing:1.3.0")
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     debugImplementation(libs.compose.uiTooling)
     androidTestImplementation("androidx.test:runner:1.7.0")
     androidTestImplementation("androidx.test:core:1.7.0")
     androidTestImplementation(libs.androidx.testExt.junit)
     androidTestImplementation(libs.androidx.activity.compose)
+    androidTestImplementation("org.jetbrains.compose.foundation:foundation-layout:${libs.versions.composeMultiplatform.get()}")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:${libs.versions.composeMultiplatform.get()}")
     debugImplementation("androidx.compose.ui:ui-test-manifest:${libs.versions.composeMultiplatform.get()}")
+}
+
+// The target and the separate instrumentation APK share one class loader.
+// Give their desugared Java libraries stable identities in this test-only
+// variant; independent L8 obfuscation can otherwise map an interface to a
+// different class in the other APK. Distributed APKs keep normal L8 shrinking.
+if (providers.gradleProperty("kovelyx.optimizedInstrumentation").orNull == "true") {
+    tasks.withType<com.android.build.gradle.internal.tasks.L8DexDesugarLibTask>().configureEach {
+        if (name.contains("FullDebug")) {
+            keepRulesConfigurations.addAll(
+                "-dontobfuscate",
+                "-dontoptimize",
+                "-keep class j\$.** { *; }",
+            )
+        }
+    }
 }

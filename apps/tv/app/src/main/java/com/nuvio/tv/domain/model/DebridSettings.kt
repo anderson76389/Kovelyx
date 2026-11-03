@@ -9,6 +9,7 @@ data class DebridSettings(
     val cloudLibraryEnabled: Boolean = true,
     val torboxApiKey: String = "",
     val premiumizeApiKey: String = "",
+    val allDebridApiKey: String = "",
     val realDebridApiKey: String = "",
     val preferredResolverProviderId: String = "",
     val instantPlaybackPreparationLimit: Int = 0,
@@ -51,6 +52,7 @@ data class DebridSettings(
         return when (DebridProviders.byId(providerId)?.id ?: providerId?.trim()?.lowercase()) {
             DebridProviders.TORBOX_ID -> torboxApiKey
             DebridProviders.PREMIUMIZE_ID -> premiumizeApiKey
+            DebridProviders.ALL_DEBRID_ID -> allDebridApiKey
             DebridProviders.REAL_DEBRID_ID -> realDebridApiKey
             else -> ""
         }

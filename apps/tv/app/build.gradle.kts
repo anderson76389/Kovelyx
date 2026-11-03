@@ -206,9 +206,15 @@ android {
         debug {
             signingConfig = signingConfigs.getByName("debug")
             isDebuggable = parseBooleanProperty(providers.gradleProperty("debuggable").orNull)
-            isMinifyEnabled = false
+            val optimizedDistribution = providers.gradleProperty("kovelyx.optimizedDistribution").orNull == "true"
+            isMinifyEnabled = optimizedDistribution
+            isShrinkResources = optimizedDistribution
+            if (optimizedDistribution) {
+                isDebuggable = false
+                proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            }
 
-            buildConfigField("boolean", "IS_DEBUG_BUILD", "true")
+            buildConfigField("boolean", "IS_DEBUG_BUILD", (!optimizedDistribution).toString())
             buildConfigField("String", "SENTRY_ENVIRONMENT", buildConfigString("debug"))
 
             // Better Auth / D1 uses KOVELYX_CLOUD_URL. Never ship old Supabase credentials.
@@ -276,7 +282,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("boolean", "IS_DEBUG_BUILD", "true")
+            buildConfigField("boolean", "IS_DEBUG_BUILD", "false")
             buildConfigField("String", "SENTRY_ENVIRONMENT", buildConfigString("benchmark"))
             applicationIdSuffix = ".debug"
             matchingFallbacks += "release"

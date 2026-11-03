@@ -1,9 +1,9 @@
 # Advanced Usage
 
 - [Understanding Catalogs](#understanding-catalogs) (searching, filtering, paginating)
-- [Understanding Cinemeta](#understanding-cinemeta)
-- [Adding Stream Results to Cinemeta Items](#adding-stream-results-to-cinemeta-items)
-- [Getting Metadata from Cinemeta](#getting-metadata-from-cinemeta)
+- [Understanding Metadata Provider](#understanding-metadata-provider)
+- [Adding Stream Results to Metadata Provider Items](#adding-stream-results-to-metadata-provider-items)
+- [Getting Metadata from Metadata Provider](#getting-metadata-from-metadata-provider)
 - [Resolving Movie / Series names to IMDB ID](#resolving-movie--series-names-to-imdb-id)
 - [Using User Data in Addons](#using-user-data-in-addons)
 - [Using Deep Links in Addons](#using-deep-links-in-addons)
@@ -243,24 +243,24 @@ builder.defineCatalogHandler(function(args) {
 ```
 
 
-## Understanding Cinemeta
+## Understanding Metadata Provider
 
-Cinemeta is the primary addon that Stremio uses to show Movie, Series and Anime items. Other addons can choose to create their own catalogs of items or respond with streams to the Cinemeta items.
+Installed metadata providers can show Movie, Series and Anime items. Other addons can create their own catalogs or provide streams for these items.
 
-Cinemeta uses IMDB IDs for their metadata, to understand it's pattern:
+Metadata Provider uses IMDB IDs for their metadata, to understand it's pattern:
 - `tt0111161` is the meta ID (and video ID) of a movie
 - `tt3107288` is the meta ID of a series, and `tt3107288:1:1` is the video ID for season 1, episode 1 of the series with the `tt3107288` meta ID
 
 
-## Adding Stream Results to Cinemeta Items
+## Adding Stream Results to Metadata Provider Items
 
-To add only stream results to Cinemeta items, you will first need to state that your addons id prefix is `tt` (as for IMDB IDs).
+To add only stream results to Metadata Provider items, you will first need to state that your addons id prefix is `tt` (as for IMDB IDs).
 
 Add these to your [manifest](./api/responses/manifest.md):
 - `resources: ["stream"]`
 - `idPrefixes: ["tt"]`
 
-Now here is an example of returning stream responses for Cinemeta items:
+Now here is an example of returning stream responses for Metadata Provider items:
 
 ```javascript
 builder.defineStreamHandler(function(args) {
@@ -282,13 +282,13 @@ builder.defineStreamHandler(function(args) {
 ```
 
 
-## Getting Metadata from Cinemeta
+## Getting Metadata from Metadata Provider
 
 There might be cases where you would need metadata based on IMDB ID. To do this, you will need both IMDB ID and the type of the item (either `movie` or `series`).
 
-Because Cinemeta is also an addon, you can request the metadata from it.
+Because Metadata Provider is also an addon, you can request the metadata from it.
 
-Here is an example using `needle` to do a HTTP request to Cinemeta for metadata:
+Here is an example using `needle` to do a HTTP request to Metadata Provider for metadata:
 
 ```javascript
 var needle = require('needle')
@@ -298,7 +298,7 @@ var needle = require('needle')
 var itemType = 'movie'
 var itemImdbId = 'tt1254207'
 
-needle.get('https://v3-cinemeta.strem.io/meta/' + itemType + '/' + itemImdbId + '.json', function(err, resp, body) {
+needle.get('https://metadata.example/meta/' + itemType + '/' + itemImdbId + '.json', function(err, resp, body) {
 
   if (body && body.meta) {
 

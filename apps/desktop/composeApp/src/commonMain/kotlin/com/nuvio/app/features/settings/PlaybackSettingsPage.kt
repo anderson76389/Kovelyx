@@ -94,6 +94,9 @@ import com.nuvio.app.isDesktop
 import com.nuvio.app.isIos
 import com.nuvio.app.isWindows
 import kotlinx.coroutines.launch
+import nuvio.composeapp.generated.resources.rtx_status_standard
+import nuvio.composeapp.generated.resources.rtx_status_configured
+import nuvio.composeapp.generated.resources.rtx_status_no_upscale
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -430,14 +433,6 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_parental_guide),
-                    description = stringResource(Res.string.settings_playback_parental_guide_description),
-                    checked = autoPlayPlayerSettings.showParentalGuide,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setShowParentalGuide,
-                )
                 if (externalPlayerSupported) {
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
@@ -729,89 +724,6 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (P2pSettingsRepository.isVisible) {
-            SettingsSection(
-                title = stringResource(Res.string.settings_playback_section_p2p),
-                isTablet = isTablet,
-            ) {
-                SettingsGroup(isTablet = isTablet) {
-                    SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_p2p_title),
-                        description = stringResource(Res.string.settings_p2p_subtitle),
-                        checked = p2pSettings.p2pEnabled,
-                        isTablet = isTablet,
-                        onCheckedChange = { enabled ->
-                            if (enabled && !p2pSettings.p2pEnabled) {
-                                showP2pConsentDialog = true
-                            } else {
-                                P2pSettingsRepository.setP2pEnabled(enabled)
-                            }
-                        },
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_p2p_hide_stats_title),
-                        description = stringResource(Res.string.settings_p2p_hide_stats_subtitle),
-                        checked = p2pSettings.hideTorrentStats,
-                        isTablet = isTablet,
-                        onCheckedChange = P2pSettingsRepository::setHideTorrentStats,
-                    )
-                    if (!isDesktop) {
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.settings_p2p_profile_title),
-                            description = p2pProfileLabel(p2pSettings.torrentProfile),
-                            isTablet = isTablet,
-                            onClick = { showP2pProfileDialog = true },
-                        )
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.settings_p2p_cache_size_title),
-                            description = p2pCacheSizeLabel(p2pSettings.cacheSize),
-                            isTablet = isTablet,
-                            onClick = { showP2pCacheSizeDialog = true },
-                        )
-                        SettingsGroupDivider(isTablet = isTablet)
-                        val cacheClearAvailable = p2pStreamingState !is P2pStreamingState.Connecting &&
-                            p2pStreamingState !is P2pStreamingState.Streaming &&
-                            !p2pCacheState.isClearing
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.settings_p2p_clear_cache_title),
-                            description = when {
-                                p2pCacheState.isClearing ->
-                                    stringResource(Res.string.settings_p2p_clear_cache_clearing)
-                                !cacheClearAvailable ->
-                                    stringResource(Res.string.settings_p2p_clear_cache_playback_active)
-                                p2pCacheClearFailed ->
-                                    stringResource(Res.string.settings_p2p_clear_cache_failed)
-                                p2pCacheClearResult != null -> stringResource(
-                                    Res.string.settings_p2p_clear_cache_done,
-                                    formatP2pCacheBytes(p2pCacheClearResult!!.reclaimedBytes),
-                                )
-                                !p2pCacheState.hasMeasurement ->
-                                    stringResource(Res.string.settings_p2p_clear_cache_usage_pending)
-                                else -> stringResource(
-                                    Res.string.settings_p2p_clear_cache_usage,
-                                    formatP2pCacheBytes(p2pCacheState.usedBytes),
-                                )
-                            },
-                            enabled = cacheClearAvailable,
-                            isTablet = isTablet,
-                            onClick = {
-                                p2pCacheClearResult = null
-                                p2pCacheClearFailed = false
-                                coroutineScope.launch {
-                                    runCatching { P2pStreamingEngine.clearCache() }
-                                        .onSuccess { p2pCacheClearResult = it }
-                                        .onFailure { p2pCacheClearFailed = true }
-                                }
-                            },
-                        )
-                    }
-                }
-            }
-        }
-
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_stream_selection),
             isTablet = isTablet,
@@ -960,13 +872,275 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (!isIos) {
+        SettingsSection(
+            title = stringResource(Res.string.settings_playback_section_next_episode),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_auto_play_next_episode),
+                    description = stringResource(Res.string.settings_playback_auto_play_next_episode_description),
+                    checked = autoPlayPlayerSettings.streamAutoPlayNextEpisodeEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayNextEpisodeEnabled,
+                )
+                if (autoPlayPlayerSettings.streamAutoPlayNextEpisodeEnabled &&
+                    autoPlayPlayerSettings.streamAutoPlayMode == StreamAutoPlayMode.MANUAL) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsSwitchRow(
+                        title = stringResource(Res.string.settings_playback_auto_play_next_episode_fallback),
+                        description = stringResource(Res.string.settings_playback_auto_play_next_episode_fallback_description),
+                        checked = autoPlayPlayerSettings.streamAutoPlayNextEpisodeFallbackEnabled,
+                        isTablet = isTablet,
+                        onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayNextEpisodeFallbackEnabled,
+                    )
+                }
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_prefer_binge_group),
+                    description = stringResource(Res.string.settings_playback_prefer_binge_group_description),
+                    checked = autoPlayPlayerSettings.streamAutoPlayPreferBingeGroup,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayPreferBingeGroup,
+                )
+                if (autoPlayPlayerSettings.streamAutoPlayPreferBingeGroup) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsSwitchRow(
+                        title = stringResource(Res.string.settings_playback_reuse_binge_group),
+                        description = stringResource(Res.string.settings_playback_reuse_binge_group_description),
+                        checked = autoPlayPlayerSettings.streamAutoPlayReuseBingeGroup,
+                        isTablet = isTablet,
+                        onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayReuseBingeGroup,
+                    )
+                }
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_preload_next_episode),
+                    description = stringResource(Res.string.settings_playback_preload_next_episode_description),
+                    checked = autoPlayPlayerSettings.preloadNextEpisodeSources,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setPreloadNextEpisodeSources,
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                var showThresholdModeDialog by remember { mutableStateOf(false) }
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.settings_playback_threshold_mode),
+                    description = stringResource(autoPlayPlayerSettings.nextEpisodeThresholdMode.labelRes),
+                    isTablet = isTablet,
+                    onClick = { showThresholdModeDialog = true },
+                )
+                if (showThresholdModeDialog) {
+                    NextEpisodeThresholdModeDialog(
+                        selected = autoPlayPlayerSettings.nextEpisodeThresholdMode,
+                        onSelect = {
+                            PlayerSettingsRepository.setNextEpisodeThresholdMode(it)
+                            showThresholdModeDialog = false
+                        },
+                        onDismiss = { showThresholdModeDialog = false },
+                    )
+                }
+                SettingsGroupDivider(isTablet = isTablet)
+                when (autoPlayPlayerSettings.nextEpisodeThresholdMode) {
+                    com.nuvio.app.features.player.skip.NextEpisodeThresholdMode.PERCENTAGE -> {
+                        val thresholdPercent = autoPlayPlayerSettings.nextEpisodeThresholdPercent
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = if (isTablet) 18.dp else 16.dp, vertical = 10.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                                    Text(
+                                        text = stringResource(Res.string.settings_playback_threshold_percentage),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = stringResource(Res.string.settings_playback_threshold_percentage_description),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                ValueBox(text = stringResource(
+                                    Res.string.settings_playback_threshold_percentage_value,
+                                    formatStep(thresholdPercent)), modifier = Modifier.wrapContentWidth())
+                            }
+                            var sliderValue by remember(thresholdPercent) { mutableFloatStateOf(thresholdPercent) }
+                            var lastHapticPercent by remember(thresholdPercent) { mutableStateOf(thresholdPercent) }
+                            Slider(
+                                value = sliderValue,
+                                onValueChange = {
+                                    val snapped = snapToStep(it, 0.5f)
+                                    sliderValue = snapped
+
+                                    if (snapped != lastHapticPercent) {
+                                        lastHapticPercent = snapped
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                },
+                                onValueChangeFinished = {
+                                    PlayerSettingsRepository.setNextEpisodeThresholdPercent(sliderValue)
+                                },
+                                valueRange = 97f..100f,
+                                steps = calculateSteps(97f, 100f, 0.5f),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                    com.nuvio.app.features.player.skip.NextEpisodeThresholdMode.MINUTES_BEFORE_END -> {
+                        val thresholdMinutes = autoPlayPlayerSettings.nextEpisodeThresholdMinutesBeforeEnd
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = if (isTablet) 18.dp else 16.dp, vertical = 10.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                                    Text(
+                                        text = stringResource(Res.string.settings_playback_minutes_before_end),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = stringResource(Res.string.settings_playback_minutes_before_end_description),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                ValueBox(text = stringResource(
+                                        Res.string.settings_playback_minutes_value,
+                                        formatStep(thresholdMinutes)), modifier = Modifier.wrapContentWidth())
+                            }
+                            var sliderValue by remember(thresholdMinutes) { mutableFloatStateOf(thresholdMinutes) }
+                            var lastHapticMin by remember(thresholdMinutes) { mutableStateOf(thresholdMinutes) }
+                            Slider(
+                                value = sliderValue,
+                                onValueChange = {
+                                    val snapped = snapToStep(it, 0.5f)
+                                    sliderValue = snapped
+
+                                    if (snapped != lastHapticMin) {
+                                        lastHapticMin = snapped
+                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                },
+                                onValueChangeFinished = {
+                                    PlayerSettingsRepository.setNextEpisodeThresholdMinutesBeforeEnd(sliderValue)
+                                },
+                                valueRange = 0f..3.5f,
+                                steps = calculateSteps(0f, 3.5f, 0.5f),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        SettingsSection(
+            title = stringResource(Res.string.settings_playback_section_skip_segments),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_skip_intro_outro_recap),
+                    description = stringResource(Res.string.settings_playback_skip_intro_outro_recap_description),
+                    checked = autoPlayPlayerSettings.skipIntroEnabled,
+                    enabled = !externalPlayerSupported || !autoPlayPlayerSettings.externalPlayerEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setSkipIntroEnabled,
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.settings_playback_auto_skip_segments),
+                    description = autoSkipSelectionSummary(autoPlayPlayerSettings.autoSkipSegmentTypes),
+                    enabled = autoPlayPlayerSettings.skipIntroEnabled &&
+                        (!externalPlayerSupported || !autoPlayPlayerSettings.externalPlayerEnabled),
+                    isTablet = isTablet,
+                    onClick = { showAutoSkipSegmentDialog = true },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_anime_skip),
+                    description = stringResource(Res.string.settings_playback_anime_skip_description),
+                    checked = autoPlayPlayerSettings.animeSkipEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setAnimeSkipEnabled,
+                )
+                if (autoPlayPlayerSettings.animeSkipEnabled) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    var showAnimeSkipClientIdDialog by remember { mutableStateOf(false) }
+                    val notSetLabel = stringResource(Res.string.settings_playback_not_set)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_playback_anime_skip_client_id),
+                        description = autoPlayPlayerSettings.animeSkipClientId.ifBlank { notSetLabel },
+                        isTablet = isTablet,
+                        onClick = { showAnimeSkipClientIdDialog = true },
+                    )
+                    if (showAnimeSkipClientIdDialog) {
+                        AnimeSkipClientIdDialog(
+                            initialValue = autoPlayPlayerSettings.animeSkipClientId,
+                            onSave = {
+                                PlayerSettingsRepository.setAnimeSkipClientId(it)
+                                showAnimeSkipClientIdDialog = false
+                            },
+                            onDismiss = { showAnimeSkipClientIdDialog = false },
+                        )
+                    }
+                }
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_playback_intro_submit_enabled),
+                    description = stringResource(Res.string.settings_playback_intro_submit_enabled_description),
+                    checked = autoPlayPlayerSettings.introSubmitEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = PlayerSettingsRepository::setIntroSubmitEnabled,
+                )
+                if (autoPlayPlayerSettings.introSubmitEnabled) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    var showIntroDbApiKeyDialog by remember { mutableStateOf(false) }
+                    val notSetLabel = stringResource(Res.string.settings_playback_not_set)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_playback_introdb_api_key),
+                        description = autoPlayPlayerSettings.introDbApiKey.ifBlank { notSetLabel },
+                        isTablet = isTablet,
+                        onClick = { showIntroDbApiKeyDialog = true },
+                    )
+                    if (showIntroDbApiKeyDialog) {
+                        IntroDbApiKeyDialog(
+                            initialValue = autoPlayPlayerSettings.introDbApiKey,
+                            onSave = {
+                                PlayerSettingsRepository.setIntroDbApiKey(it)
+                                showIntroDbApiKeyDialog = false
+                            },
+                            onDismiss = { showIntroDbApiKeyDialog = false },
+                        )
+                    }
+                }
+            }
+        }
+
+        if (!isIos && !isDesktop) {
             val decoderEnabled = !autoPlayPlayerSettings.externalPlayerEnabled
             val exoOptionsEnabled = decoderEnabled && (isDesktop || androidPlaybackEngine != AndroidPlaybackEngine.Libmpv)
             val libmpvOptionsVisible = !isDesktop && androidPlaybackEngine != AndroidPlaybackEngine.ExoPlayer
             val libmpvOptionsEnabled = decoderEnabled && libmpvOptionsVisible
             SettingsSection(
-                title = stringResource(Res.string.settings_playback_section_decoder),
+                title = stringResource(Res.string.settings_org_decoder_title),
                 isTablet = isTablet,
             ) {
                 SettingsGroup(isTablet = isTablet) {
@@ -1271,6 +1445,15 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onCheckedChange = PlayerSettingsRepository::setNvidiaRtxSuperResolutionEnabled,
                     )
+                    val rtxStatus by com.nuvio.app.features.player.NvidiaRtxRuntimeStatus.state.collectAsStateWithLifecycle()
+                    if (autoPlayPlayerSettings.nvidiaRtxSuperResolutionEnabled && rtxStatus >= 0) {
+                        Text(text = stringResource(when (rtxStatus) {
+                            1 -> Res.string.rtx_status_configured
+                            2 -> Res.string.rtx_status_no_upscale
+                            else -> Res.string.rtx_status_standard
+                        }), modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }
@@ -1335,267 +1518,89 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_skip_segments),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_skip_intro_outro_recap),
-                    description = stringResource(Res.string.settings_playback_skip_intro_outro_recap_description),
-                    checked = autoPlayPlayerSettings.skipIntroEnabled,
-                    enabled = !externalPlayerSupported || !autoPlayPlayerSettings.externalPlayerEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setSkipIntroEnabled,
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.settings_playback_auto_skip_segments),
-                    description = autoSkipSelectionSummary(autoPlayPlayerSettings.autoSkipSegmentTypes),
-                    enabled = autoPlayPlayerSettings.skipIntroEnabled &&
-                        (!externalPlayerSupported || !autoPlayPlayerSettings.externalPlayerEnabled),
-                    isTablet = isTablet,
-                    onClick = { showAutoSkipSegmentDialog = true },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_anime_skip),
-                    description = stringResource(Res.string.settings_playback_anime_skip_description),
-                    checked = autoPlayPlayerSettings.animeSkipEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setAnimeSkipEnabled,
-                )
-                if (autoPlayPlayerSettings.animeSkipEnabled) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    var showAnimeSkipClientIdDialog by remember { mutableStateOf(false) }
-                    val notSetLabel = stringResource(Res.string.settings_playback_not_set)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_playback_anime_skip_client_id),
-                        description = autoPlayPlayerSettings.animeSkipClientId.ifBlank { notSetLabel },
-                        isTablet = isTablet,
-                        onClick = { showAnimeSkipClientIdDialog = true },
-                    )
-                    if (showAnimeSkipClientIdDialog) {
-                        AnimeSkipClientIdDialog(
-                            initialValue = autoPlayPlayerSettings.animeSkipClientId,
-                            onSave = {
-                                PlayerSettingsRepository.setAnimeSkipClientId(it)
-                                showAnimeSkipClientIdDialog = false
-                            },
-                            onDismiss = { showAnimeSkipClientIdDialog = false },
-                        )
-                    }
-                }
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_intro_submit_enabled),
-                    description = stringResource(Res.string.settings_playback_intro_submit_enabled_description),
-                    checked = autoPlayPlayerSettings.introSubmitEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setIntroSubmitEnabled,
-                )
-                if (autoPlayPlayerSettings.introSubmitEnabled) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    var showIntroDbApiKeyDialog by remember { mutableStateOf(false) }
-                    val notSetLabel = stringResource(Res.string.settings_playback_not_set)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_playback_introdb_api_key),
-                        description = autoPlayPlayerSettings.introDbApiKey.ifBlank { notSetLabel },
-                        isTablet = isTablet,
-                        onClick = { showIntroDbApiKeyDialog = true },
-                    )
-                    if (showIntroDbApiKeyDialog) {
-                        IntroDbApiKeyDialog(
-                            initialValue = autoPlayPlayerSettings.introDbApiKey,
-                            onSave = {
-                                PlayerSettingsRepository.setIntroDbApiKey(it)
-                                showIntroDbApiKeyDialog = false
-                            },
-                            onDismiss = { showIntroDbApiKeyDialog = false },
-                        )
-                    }
-                }
-            }
-        }
-
-        SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_next_episode),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_auto_play_next_episode),
-                    description = stringResource(Res.string.settings_playback_auto_play_next_episode_description),
-                    checked = autoPlayPlayerSettings.streamAutoPlayNextEpisodeEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayNextEpisodeEnabled,
-                )
-                if (autoPlayPlayerSettings.streamAutoPlayNextEpisodeEnabled &&
-                    autoPlayPlayerSettings.streamAutoPlayMode == StreamAutoPlayMode.MANUAL) {
-                    SettingsGroupDivider(isTablet = isTablet)
+        if (P2pSettingsRepository.isVisible) {
+            SettingsSection(
+                title = stringResource(Res.string.settings_playback_section_p2p),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
                     SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_playback_auto_play_next_episode_fallback),
-                        description = stringResource(Res.string.settings_playback_auto_play_next_episode_fallback_description),
-                        checked = autoPlayPlayerSettings.streamAutoPlayNextEpisodeFallbackEnabled,
+                        title = stringResource(Res.string.settings_p2p_title),
+                        description = stringResource(Res.string.settings_p2p_subtitle),
+                        checked = p2pSettings.p2pEnabled,
                         isTablet = isTablet,
-                        onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayNextEpisodeFallbackEnabled,
-                    )
-                }
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_prefer_binge_group),
-                    description = stringResource(Res.string.settings_playback_prefer_binge_group_description),
-                    checked = autoPlayPlayerSettings.streamAutoPlayPreferBingeGroup,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayPreferBingeGroup,
-                )
-                if (autoPlayPlayerSettings.streamAutoPlayPreferBingeGroup) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsSwitchRow(
-                        title = stringResource(Res.string.settings_playback_reuse_binge_group),
-                        description = stringResource(Res.string.settings_playback_reuse_binge_group_description),
-                        checked = autoPlayPlayerSettings.streamAutoPlayReuseBingeGroup,
-                        isTablet = isTablet,
-                        onCheckedChange = PlayerSettingsRepository::setStreamAutoPlayReuseBingeGroup,
-                    )
-                }
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_playback_preload_next_episode),
-                    description = stringResource(Res.string.settings_playback_preload_next_episode_description),
-                    checked = autoPlayPlayerSettings.preloadNextEpisodeSources,
-                    isTablet = isTablet,
-                    onCheckedChange = PlayerSettingsRepository::setPreloadNextEpisodeSources,
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                var showThresholdModeDialog by remember { mutableStateOf(false) }
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.settings_playback_threshold_mode),
-                    description = stringResource(autoPlayPlayerSettings.nextEpisodeThresholdMode.labelRes),
-                    isTablet = isTablet,
-                    onClick = { showThresholdModeDialog = true },
-                )
-                if (showThresholdModeDialog) {
-                    NextEpisodeThresholdModeDialog(
-                        selected = autoPlayPlayerSettings.nextEpisodeThresholdMode,
-                        onSelect = {
-                            PlayerSettingsRepository.setNextEpisodeThresholdMode(it)
-                            showThresholdModeDialog = false
+                        onCheckedChange = { enabled ->
+                            if (enabled && !p2pSettings.p2pEnabled) {
+                                showP2pConsentDialog = true
+                            } else {
+                                P2pSettingsRepository.setP2pEnabled(enabled)
+                            }
                         },
-                        onDismiss = { showThresholdModeDialog = false },
                     )
-                }
-                SettingsGroupDivider(isTablet = isTablet)
-                when (autoPlayPlayerSettings.nextEpisodeThresholdMode) {
-                    com.nuvio.app.features.player.skip.NextEpisodeThresholdMode.PERCENTAGE -> {
-                        val thresholdPercent = autoPlayPlayerSettings.nextEpisodeThresholdPercent
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = if (isTablet) 18.dp else 16.dp, vertical = 10.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                                    Text(
-                                        text = stringResource(Res.string.settings_playback_threshold_percentage),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                    )
-                                    Text(
-                                        text = stringResource(Res.string.settings_playback_threshold_percentage_description),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsSwitchRow(
+                        title = stringResource(Res.string.settings_p2p_hide_stats_title),
+                        description = stringResource(Res.string.settings_p2p_hide_stats_subtitle),
+                        checked = p2pSettings.hideTorrentStats,
+                        isTablet = isTablet,
+                        onCheckedChange = P2pSettingsRepository::setHideTorrentStats,
+                    )
+                    if (!isDesktop) {
+                        SettingsGroupDivider(isTablet = isTablet)
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.settings_p2p_profile_title),
+                            description = p2pProfileLabel(p2pSettings.torrentProfile),
+                            isTablet = isTablet,
+                            onClick = { showP2pProfileDialog = true },
+                        )
+                        SettingsGroupDivider(isTablet = isTablet)
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.settings_p2p_cache_size_title),
+                            description = p2pCacheSizeLabel(p2pSettings.cacheSize),
+                            isTablet = isTablet,
+                            onClick = { showP2pCacheSizeDialog = true },
+                        )
+                        SettingsGroupDivider(isTablet = isTablet)
+                        val cacheClearAvailable = p2pStreamingState !is P2pStreamingState.Connecting &&
+                            p2pStreamingState !is P2pStreamingState.Streaming &&
+                            !p2pCacheState.isClearing
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.settings_p2p_clear_cache_title),
+                            description = when {
+                                p2pCacheState.isClearing ->
+                                    stringResource(Res.string.settings_p2p_clear_cache_clearing)
+                                !cacheClearAvailable ->
+                                    stringResource(Res.string.settings_p2p_clear_cache_playback_active)
+                                p2pCacheClearFailed ->
+                                    stringResource(Res.string.settings_p2p_clear_cache_failed)
+                                p2pCacheClearResult != null -> stringResource(
+                                    Res.string.settings_p2p_clear_cache_done,
+                                    formatP2pCacheBytes(p2pCacheClearResult!!.reclaimedBytes),
+                                )
+                                !p2pCacheState.hasMeasurement ->
+                                    stringResource(Res.string.settings_p2p_clear_cache_usage_pending)
+                                else -> stringResource(
+                                    Res.string.settings_p2p_clear_cache_usage,
+                                    formatP2pCacheBytes(p2pCacheState.usedBytes),
+                                )
+                            },
+                            enabled = cacheClearAvailable,
+                            isTablet = isTablet,
+                            onClick = {
+                                p2pCacheClearResult = null
+                                p2pCacheClearFailed = false
+                                coroutineScope.launch {
+                                    runCatching { P2pStreamingEngine.clearCache() }
+                                        .onSuccess { p2pCacheClearResult = it }
+                                        .onFailure { p2pCacheClearFailed = true }
                                 }
-                                ValueBox(text = stringResource(
-                                    Res.string.settings_playback_threshold_percentage_value,
-                                    formatStep(thresholdPercent)), modifier = Modifier.wrapContentWidth())
-                            }
-                            var sliderValue by remember(thresholdPercent) { mutableFloatStateOf(thresholdPercent) }
-                            var lastHapticPercent by remember(thresholdPercent) { mutableStateOf(thresholdPercent) }
-                            Slider(
-                                value = sliderValue,
-                                onValueChange = {
-                                    val snapped = snapToStep(it, 0.5f)
-                                    sliderValue = snapped
-
-                                    if (snapped != lastHapticPercent) {
-                                        lastHapticPercent = snapped
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    }
-                                },
-                                onValueChangeFinished = {
-                                    PlayerSettingsRepository.setNextEpisodeThresholdPercent(sliderValue)
-                                },
-                                valueRange = 97f..100f,
-                                steps = calculateSteps(97f, 100f, 0.5f),
-                                colors = SliderDefaults.colors(
-                                    thumbColor = MaterialTheme.colorScheme.primary,
-                                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
-                    }
-                    com.nuvio.app.features.player.skip.NextEpisodeThresholdMode.MINUTES_BEFORE_END -> {
-                        val thresholdMinutes = autoPlayPlayerSettings.nextEpisodeThresholdMinutesBeforeEnd
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = if (isTablet) 18.dp else 16.dp, vertical = 10.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-                                    Text(
-                                        text = stringResource(Res.string.settings_playback_minutes_before_end),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                    )
-                                    Text(
-                                        text = stringResource(Res.string.settings_playback_minutes_before_end_description),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                ValueBox(text = stringResource(
-                                        Res.string.settings_playback_minutes_value,
-                                        formatStep(thresholdMinutes)), modifier = Modifier.wrapContentWidth())
-                            }
-                            var sliderValue by remember(thresholdMinutes) { mutableFloatStateOf(thresholdMinutes) }
-                            var lastHapticMin by remember(thresholdMinutes) { mutableStateOf(thresholdMinutes) }
-                            Slider(
-                                value = sliderValue,
-                                onValueChange = {
-                                    val snapped = snapToStep(it, 0.5f)
-                                    sliderValue = snapped
-
-                                    if (snapped != lastHapticMin) {
-                                        lastHapticMin = snapped
-                                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    }
-                                },
-                                onValueChangeFinished = {
-                                    PlayerSettingsRepository.setNextEpisodeThresholdMinutesBeforeEnd(sliderValue)
-                                },
-                                valueRange = 0f..3.5f,
-                                steps = calculateSteps(0f, 3.5f, 0.5f),
-                                colors = SliderDefaults.colors(
-                                    thumbColor = MaterialTheme.colorScheme.primary,
-                                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        }
+                            },
+                        )
                     }
                 }
             }
         }
+
     }
 
     if (showPreferredAudioDialog) {

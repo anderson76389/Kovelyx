@@ -1,0 +1,12 @@
+<resources>
+    <string name="display_refresh_title">Display refresh rate</string>
+    <string name="display_refresh_description">Choose this device’s minimum and maximum refresh rates, up to 144 Hz. The highest supported mode within this range is requested without changing resolution. Videos keep their original frame rate.</string>
+    <string name="display_refresh_unavailable">The current rate is outside the selected range. The display or system may limit it; unsupported modes are never forced.</string>
+    <string name="display_refresh_minimum">Minimum</string>
+    <string name="display_refresh_maximum">Maximum</string>
+    <string name="display_refresh_actual">Current rate: %1$d Hz</string>
+    <string name="display_refresh_supported">Modes reported by this screen: %1$s</string>
+    <string name="display_refresh_pending">Detecting screen modes…</string>
+    <string name="display_refresh_range">Selected range: %1$d–%2$d Hz</string>
+    <string name="display_refresh_adjust_bounds">The other bound adjusts when needed to keep the range valid. This setting belongs to this device.</string>
+</resources>

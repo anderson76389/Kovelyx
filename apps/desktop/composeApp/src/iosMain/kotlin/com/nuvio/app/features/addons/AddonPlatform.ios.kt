@@ -21,11 +21,17 @@ import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.network_empty_response_body
 import nuvio.composeapp.generated.resources.network_request_failed_http
 import org.jetbrains.compose.resources.getString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 import platform.Foundation.NSUserDefaults
 
 actual object AddonStorage {
     private const val addonUrlsKey = "installed_manifest_urls"
     private const val addonEnabledStatesKey = "installed_manifest_enabled_states"
+
+    actual fun defaultsInitialized(profileId: Int): Boolean = NSUserDefaults.standardUserDefaults.boolForKey("kovelyx_defaults_v1_$profileId")
+    actual fun markDefaultsInitialized(profileId: Int) { NSUserDefaults.standardUserDefaults.setBool(true, forKey = "kovelyx_defaults_v1_$profileId") }
 
     actual fun loadInstalledAddonUrls(profileId: Int): List<String> =
         NSUserDefaults.standardUserDefaults
@@ -41,6 +47,14 @@ actual object AddonStorage {
             urls.joinToString(separator = "\n"),
             forKey = "${addonUrlsKey}_$profileId",
         )
+    }
+
+    actual fun loadAddonNames(profileId: Int): Map<String, String> =
+        NSUserDefaults.standardUserDefaults.stringForKey("addon_names_$profileId")?.let {
+            runCatching { Json.decodeFromString<Map<String, String>>(it) }.getOrNull()
+        } ?: emptyMap()
+    actual fun saveAddonNames(profileId: Int, names: Map<String, String>) {
+        NSUserDefaults.standardUserDefaults.setObject(Json.encodeToString(names), forKey = "addon_names_$profileId")
     }
 
     actual fun loadAddonEnabledStates(profileId: Int): Map<String, Boolean> =

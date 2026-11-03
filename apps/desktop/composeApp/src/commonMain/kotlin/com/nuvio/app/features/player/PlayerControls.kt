@@ -205,13 +205,6 @@ internal fun PlayerControlsShell(
                             .padding(horizontal = metrics.horizontalPadding, vertical = metrics.verticalPadding / 4),
                     )
                 }
-                ParentalGuideOverlay(
-                    warnings = parentalWarnings,
-                    isVisible = showParentalGuide,
-                    onAnimationComplete = onParentalGuideAnimationComplete,
-                    contentPadding = PaddingValues(horizontal = metrics.horizontalPadding, vertical = metrics.verticalPadding),
-                    modifier = Modifier.align(Alignment.TopStart),
-                )
             }
 
             if (showPlaybackControls) {
@@ -414,12 +407,6 @@ private fun PlayerHeader(
                         )
                     }
                 }
-                ParentalGuideOverlay(
-                    warnings = parentalWarnings,
-                    isVisible = showParentalGuide,
-                    onAnimationComplete = onParentalGuideAnimationComplete,
-                    contentPadding = PaddingValues(0.dp),
-                )
             }
 
             if (showActions) {

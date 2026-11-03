@@ -32,7 +32,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import com.nuvio.tv.core.auth.AuthManager
+import com.kovelyx.cloud.addons.canonicalAddonManifestUrl
 import com.nuvio.tv.core.sync.AddonSyncService
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -86,33 +90,25 @@ class AddonRepositoryImpl(
         private const val MANIFEST_CACHE_TTL_MS = 6 * 60 * 60 * 1000L 
     }
 
+    private val manifestRequests = Semaphore(4)
     private val syncScope = CoroutineScope(SupervisorJob() + dispatcher)
     private var syncJob: Job? = null
     var isSyncingFromRemote = false
 
     private fun canonicalizeUrl(url: String): String {
-        val trimmed = url.trim().trimEnd('/')
-        // Separate path from query string so we can detect /manifest.json
-        // even when the URL carries query parameters (e.g. configurable addons).
-        val queryStart = trimmed.indexOf('?')
-        val path = if (queryStart >= 0) trimmed.substring(0, queryStart) else trimmed
-        val query = if (queryStart >= 0) trimmed.substring(queryStart) else ""
-        val cleanPath = if (path.endsWith(MANIFEST_SUFFIX, ignoreCase = true)) {
-            path.dropLast(MANIFEST_SUFFIX.length).trimEnd('/')
-        } else {
-            path.trimEnd('/')
-        }
-        return cleanPath + query
+        val manifest = canonicalAddonManifestUrl(url)
+        val path = manifest.substringBefore('?').removeSuffix(MANIFEST_SUFFIX)
+        return path + if ('?' in manifest) "?${manifest.substringAfter('?')}" else ""
     }
 
-    private fun normalizeUrl(url: String): String = canonicalizeUrl(url).lowercase()
+    private fun normalizeUrl(url: String): String = canonicalizeUrl(url)
 
     private fun triggerRemoteSync() {
         if (isSyncingFromRemote) {
             Log.d(TAG, "triggerRemoteSync: skipped (syncing from remote)")
             return
         }
-        if (!authManager.isAuthenticated) {
+        if (!authManager.isAuthenticated && CloudflareTvAccountClient.account == null) {
             Log.d(TAG, "triggerRemoteSync: skipped (not authenticated, state=${authManager.authState.value})")
             return
         }
@@ -295,14 +291,14 @@ class AddonRepositoryImpl(
 
     override fun getInstalledAddons(): Flow<List<Addon>> = installedAddonsFlow
 
-    override suspend fun fetchAddon(baseUrl: String): NetworkResult<Addon> {
+    override suspend fun fetchAddon(baseUrl: String): NetworkResult<Addon> = manifestRequests.withPermit {
         val cleanBaseUrl = canonicalizeUrl(baseUrl)
         val queryStart = cleanBaseUrl.indexOf('?')
         val basePath = if (queryStart >= 0) cleanBaseUrl.substring(0, queryStart).trimEnd('/') else cleanBaseUrl
         val baseQuery = if (queryStart >= 0) cleanBaseUrl.substring(queryStart) else ""
         val manifestUrl = "$basePath/manifest.json$baseQuery"
 
-        return when (val result = safeApiCall(context) { api.getManifest(manifestUrl) }) {
+        return@withPermit when (val result = safeApiCall(context) { api.getManifest(manifestUrl) }) {
             is NetworkResult.Success -> {
                 val addon = result.data.toDomain(cleanBaseUrl)
                 if (putCachedManifestIfChanged(cleanBaseUrl, addon)) {
@@ -321,6 +317,7 @@ class AddonRepositoryImpl(
     override suspend fun addAddon(url: String) {
         val cleanUrl = canonicalizeUrl(url)
         if (!preferences.addAddon(cleanUrl)) return
+        if (CloudflareTvAccountClient.enabled) addonSyncService.markLocalAddonsChanged()
         triggerRemoteSync()
     }
 
@@ -331,11 +328,13 @@ class AddonRepositoryImpl(
             persistManifestCacheToDisk()
             bumpManifestCacheRevision()
         }
+        if (CloudflareTvAccountClient.enabled) addonSyncService.markLocalAddonsChanged()
         triggerRemoteSync()
     }
 
     override suspend fun setAddonOrder(urls: List<String>) {
         if (!preferences.setAddonOrder(urls)) return
+        if (CloudflareTvAccountClient.enabled) addonSyncService.markLocalAddonsChanged()
         triggerRemoteSync()
     }
 
@@ -345,6 +344,7 @@ class AddonRepositoryImpl(
         if (enabled && getCachedManifest(cleanUrl) == null) {
             fetchAddon(cleanUrl)
         }
+        if (CloudflareTvAccountClient.enabled) addonSyncService.markLocalAddonsChanged()
         triggerRemoteSync()
     }
 

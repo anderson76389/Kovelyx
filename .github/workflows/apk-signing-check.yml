@@ -1,0 +1,27 @@
+name: Vérifier la signature des APK mobile et TV
+
+on:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths:
+      - 'scripts/sign-ci-debug-apk.sh'
+      - 'scripts/tests/test_ci_apk_signing.py'
+      - '.github/workflows/apk-signing-check.yml'
+  pull_request:
+    paths:
+      - 'scripts/sign-ci-debug-apk.sh'
+      - 'scripts/tests/test_ci_apk_signing.py'
+      - '.github/workflows/apk-signing-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  signing-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tester un APK mobile et les cinq APK TV sans clé privée
+        run: python3 scripts/tests/test_ci_apk_signing.py

@@ -90,7 +90,7 @@ private fun ContentDiscoveryHub(
         verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
     ) {
         SettingsDetailHeader(
-            title = stringResource(R.string.settings_content_discovery),
+            title = stringResource(R.string.settings_org_sources_title),
             subtitle = stringResource(R.string.settings_content_discovery_subtitle)
         )
         SettingsGroupCard(modifier = Modifier.fillMaxWidth()) {

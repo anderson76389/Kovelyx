@@ -35,6 +35,7 @@ fun UpdateBannerHost(
     onDismissUnknownSources: () -> Unit,
     onOpenUnknownSources: () -> Unit,
     onFeedbackShown: () -> Unit,
+    onForegroundCheck: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -53,8 +54,8 @@ fun UpdateBannerHost(
 
     DisposableEffect(lifecycleOwner, state.showUnknownSourcesDialog) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && state.showUnknownSourcesDialog) {
-                onInstall()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (state.showUnknownSourcesDialog) onInstall() else onForegroundCheck()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

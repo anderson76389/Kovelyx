@@ -614,10 +614,7 @@ class StreamRepositoryImpl @Inject constructor(
         type: String,
         videoId: String
     ): NetworkResult<List<Stream>> {
-        val cleanBaseUrl = addon.baseUrl.trimEnd('/')
-        val queryStart = cleanBaseUrl.indexOf('?')
-        val basePath = if (queryStart >= 0) cleanBaseUrl.substring(0, queryStart).trimEnd('/') else cleanBaseUrl
-        val baseQuery = if (queryStart >= 0) cleanBaseUrl.substring(queryStart) else ""
+        val (basePath, baseQuery) = com.kovelyx.cloud.addons.splitConfiguredAddonBaseUrl(addon.baseUrl)
         val encodedType = encodePathSegment(type)
         val encodedVideoId = encodePathSegment(videoId)
         val streamUrl = "$basePath/stream/$encodedType/$encodedVideoId.json$baseQuery"
@@ -684,10 +681,7 @@ class StreamRepositoryImpl @Inject constructor(
                 videoId
             }
         }
-        val cleanBaseUrl = addon.baseUrl.trimEnd('/')
-        val queryStart = cleanBaseUrl.indexOf('?')
-        val basePath = if (queryStart >= 0) cleanBaseUrl.substring(0, queryStart).trimEnd('/') else cleanBaseUrl
-        val baseQuery = if (queryStart >= 0) cleanBaseUrl.substring(queryStart) else ""
+        val (basePath, baseQuery) = com.kovelyx.cloud.addons.splitConfiguredAddonBaseUrl(addon.baseUrl)
         val encodedType = encodePathSegment(type)
         val encodedMetaId = encodePathSegment(metaId)
         val metaUrl = "$basePath/meta/$encodedType/$encodedMetaId.json$baseQuery"

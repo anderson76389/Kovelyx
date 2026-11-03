@@ -1822,8 +1822,6 @@ Du bruker denne funksjonen helt på eget ansvar. P2P kan deaktiveres når som he
     <string name="settings_playback_option_none">Ingen</string>
     <string name="settings_playback_option_original">Originalspråk</string>
     <string name="settings_playback_option_original_hint">Krever at TMDB-berikelse er aktivert</string>
-    <string name="settings_playback_parental_guide">Innholdsadvarsler</string>
-    <string name="settings_playback_parental_guide_description">Vis foreldreveilednings-overlay når avspilling starter.</string>
     <string name="settings_playback_pause_overlay">Pause-overlay</string>
     <string name="settings_playback_pause_overlay_description">Vis detalj-overlay etter 5 sekunder mens pauset.</string>
     <string name="settings_playback_player_preference">Avspiller</string>

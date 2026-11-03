@@ -89,7 +89,6 @@ internal class PlayerScreenRuntime(
     var airsPrefix: String = ""
     var tbaLabel: String = ""
     var genericUnknownLabel: String = ""
-    var parentalGuideLabels: ParentalGuideLabels = ParentalGuideLabels("", "", "", "", "", "", "", "")
 
     var gestureController: PlayerGestureController? = null
 

@@ -61,13 +61,47 @@ def wordmark(palette, *, gold=False):
     font=load_font(132)
     ink=(244,226,179,255) if gold else (251,249,255,255)
     draw.text((247,123),'KOVELYX',font=font,fill=ink,anchor='lm',stroke_width=0)
+    # Center the visible ink, not the asymmetric transparent source canvas.
+    bounds = image.getchannel('A').getbbox()
+    if bounds:
+        ink = image.crop(bounds)
+        image = Image.new('RGBA', image.size, (0, 0, 0, 0))
+        image.alpha_composite(ink, ((image.width-ink.width)//2, (image.height-ink.height)//2))
     return image
+
+def splash_icon(palette):
+    """Place the visible K inside Android's centered, circular splash safe area."""
+    icon = make_icon(palette, transparent=True)
+    ink = icon.crop(icon.getchannel('A').getbbox())
+    diameter = 512 * 2 / 3
+    scale = diameter / (ink.width ** 2 + ink.height ** 2) ** .5
+    ink = ink.resize((round(ink.width * scale), round(ink.height * scale)), Image.Resampling.LANCZOS)
+    image = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
+    image.alpha_composite(ink, ((512 - ink.width) // 2, (512 - ink.height) // 2))
+    return image
+
 
 def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--project',default='apps/desktop')
     args=ap.parse_args()
     project=Path(args.project).resolve()
+    tv_drawable = project / 'app/src/main/res/drawable'
+    if tv_drawable.is_dir():
+        for key in ('original', 'arctic_blue', 'emerald', 'rose_gold', 'graphite', 'gold'):
+            suffix = {'original': '', 'emerald': '_jade'}.get(key, '_' + key)
+            wordmark(PALETTES[key], gold=key == 'gold').save(tv_drawable / ('app_logo_wordmark' + suffix + '.png'))
+        splash_icon(PALETTES['original']).save(tv_drawable / 'app_logo_mark.png')
+        # Keep the repository presentation aligned with the installed TV branding.
+        brand = project / 'assets/brand'
+        if brand.is_dir():
+            wordmark(PALETTES['original']).save(brand / 'app_logo_wordmark.png')
+        return
+    native_splash = project / 'composeApp/src/androidMain/res/drawable-nodpi'
+    if (native_splash / 'ic_splash_logo.png').exists():
+        for key in ('original', 'arctic_blue', 'emerald', 'rose_gold', 'copper', 'graphite'):
+            suffix = '' if key == 'original' else '_' + key
+            splash_icon(PALETTES[key]).save(native_splash / ('ic_splash_logo' + suffix + '.png'))
     common=project/'composeApp/src/commonMain/composeResources/drawable'
     desktop=project/'composeApp/src/desktopMain/resources/icons'
     common.mkdir(parents=True,exist_ok=True)
@@ -87,8 +121,6 @@ def main():
             wordmark(palette).save(common/'app_logo_wordmark.png')
             opaque.save(desktop/'kovelyx.png')
             opaque.save(desktop/'kovelyx.ico',format='ICO',sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])
-            transparent.save(desktop/'nuvio-app-icon-transparent.png')  # compatibility path; artwork is Kovelyx
-            transparent.save(desktop/'nuvio-app-icon-transparent.ico',format='ICO',sizes=[(16,16),(32,32),(48,48),(128,128),(256,256)])
     print('Generated six authentic Kovelyx icons, transparent variants and seven wordmarks.')
 
 if __name__ == '__main__': main()

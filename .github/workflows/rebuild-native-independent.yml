@@ -3,10 +3,13 @@ name: Reconstruire les moteurs natifs Windows et Android sans Nuvio
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths: ['.github/workflows/rebuild-native-independent.yml']
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/rebuild-native-independent.yml', 'vendor/engine/**']
 permissions:
   contents: read
+concurrency:
+  group: kovelyx-native-rebuild-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   windows-p2p:
     name: Windows x64 - P2P complet depuis les sources
@@ -14,11 +17,14 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Bloquer les anciens domaines
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          foreach ($domain in @('nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'www.nuvio.tv')) {
+          foreach ($domain in @('nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'www.nuvio.tv', 'nuvioapp.space', 'api.nuvioapp.space')) {
             Add-Content -Path "$env:WINDIR\System32\drivers\etc\hosts" -Value "127.0.0.1 $domain"
           }
           git config --global url.https://blocked-upstream.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/
@@ -52,7 +58,7 @@ jobs:
             ('call "' + $vsdev + '" -arch=x64 -host_arch=x64'),
             'if errorlevel 1 exit /b 1',
             ('cd /d "' + $source + '"'),
-            ('perl Configure VC-WIN64A no-shared no-asm --prefix="' + $install + '" --openssldir="' + $install + '"'),
+            ('perl Configure VC-WIN64A no-shared no-asm no-tests --prefix="' + $install + '" --openssldir="' + $install + '"'),
             'if errorlevel 1 exit /b 1',
             'nmake /nologo',
             'if errorlevel 1 exit /b 1',
@@ -80,7 +86,6 @@ jobs:
             'if errorlevel 1 exit /b 1',
             ('cmake --build "' + $build + '" --parallel 2'),
             'if errorlevel 1 exit /b 1',
-            ('ctest --test-dir "' + $build + '" --output-on-failure'),
             'exit /b %errorlevel%'
           ) | Set-Content -Path $batch -Encoding ASCII
           & cmd /c $batch
@@ -91,7 +96,16 @@ jobs:
           Copy-Item $dll[0].FullName native-proof/windows/nuvio_engine.dll
           (Get-FileHash native-proof/windows/nuvio_engine.dll -Algorithm SHA256).Hash |
             Set-Content native-proof/windows/sha256.txt
-          "Moteur Windows P2P compile et tests CTest valides sous blocage Nuvio." >> $env:GITHUB_STEP_SUMMARY
+          "Moteur Windows P2P compile ; validation CTest dans l’étape suivante." >> $env:GITHUB_STEP_SUMMARY
+      - name: Tester le moteur et identifier immédiatement tout blocage
+        shell: pwsh
+        run: |
+          $build = Join-Path $env:RUNNER_TEMP 'kv-engine-windows-p2p'
+          ctest --test-dir $build --verbose --timeout 180 --output-junit "$build/native-tests.xml"
+          $testExit = $LASTEXITCODE
+          Copy-Item "$build/native-tests.xml" native-proof/windows/ -ErrorAction SilentlyContinue
+          Copy-Item "$build/Testing/Temporary/LastTest.log" native-proof/windows/ -ErrorAction SilentlyContinue
+          if ($testExit -ne 0) { throw "Tests natifs echoues ; consulter START dans les logs et le rapport." }
       - name: Conserver DLL de preuve, sans remplacer la DLL de production
         if: always()
         uses: actions/upload-artifact@v4
@@ -99,23 +113,28 @@ jobs:
           name: kovelyx-native-windows-p2p-preuve
           path: native-proof/windows/
           if-no-files-found: ignore
-          retention-days: 30
+          retention-days: 90
   android-aar:
     name: Android - reconstruire AAR natif 4 architectures
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Libérer la place nécessaire aux quatre ABI
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc /usr/local/share/boost "$AGENT_TOOLSDIRECTORY/CodeQL"
       - name: Bloquer Nuvio et installer NDK
         shell: bash
         run: |
           set -euo pipefail
-          for domain in nuvio.tv api.nuvio.tv cdn.nuvio.tv auth.nuvio.tv www.nuvio.tv; do
+          for domain in nuvio.tv api.nuvio.tv cdn.nuvio.tv auth.nuvio.tv www.nuvio.tv nuvioapp.space api.nuvioapp.space; do
             echo "127.0.0.1 $domain" | sudo tee -a /etc/hosts >/dev/null
           done
           git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
@@ -152,4 +171,4 @@ jobs:
           name: kovelyx-native-android-multiabi-preuve
           path: native-proof/android/
           if-no-files-found: ignore
-          retention-days: 30
+          retention-days: 90

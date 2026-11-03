@@ -1,0 +1,5 @@
+# Native patches and build recipes must have identical bytes on all runners.
+*.patch text eol=lf
+*.cmake text eol=lf
+*.sh text eol=lf
+*.py text eol=lf

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 internal object SentrySettingsRepository {
     val isSupported: Boolean
-        get() = SentrySettingsPlatform.crashReportsSupported
+        get() = false // Crash reporting is removed from Kovelyx.
 
     private val _enabled = MutableStateFlow(false)
     val enabled: StateFlow<Boolean> = _enabled.asStateFlow()
@@ -20,13 +20,13 @@ internal object SentrySettingsRepository {
 
     private fun loadFromDisk() {
         hasLoaded = true
-        _enabled.value = SentrySettingsStorage.loadEnabled() ?: false
+        _enabled.value = false
     }
 
     fun setEnabled(enabled: Boolean) {
         ensureLoaded()
-        if (_enabled.value == enabled) return
-        _enabled.value = enabled
-        SentrySettingsStorage.saveEnabled(enabled)
+        // Ignore the historical preference, including enabled values from older builds.
+        _enabled.value = false
+        SentrySettingsStorage.saveEnabled(false)
     }
 }

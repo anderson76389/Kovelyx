@@ -21,6 +21,7 @@ private const val TAG = "PluginSyncService"
 
 @Singleton
 class PluginSyncService @Inject constructor(
+    private val cloud: CloudflareTvPreferencesSync,
     private val postgrest: Postgrest,
     private val authManager: AuthManager,
     private val pluginDataStore: PluginDataStore,
@@ -40,7 +41,13 @@ class PluginSyncService @Inject constructor(
      * Push local plugin repository URLs to Supabase via RPC.
      * Uses a SECURITY DEFINER function to handle RLS for linked devices.
      */
+    fun markCloudChange() { cloud.edited() }
+
     suspend fun pushToRemote(): Result<Unit> = withContext(Dispatchers.IO) {
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) {
+            cloud.edited()
+            return@withContext runCatching { check(cloud.synchronize(profileManager.activeProfileId.value)) }
+        }
         try {
             val activeProfile = profileManager.activeProfile
             val profileId = profileManager.activeProfileId.value
@@ -83,6 +90,12 @@ class PluginSyncService @Inject constructor(
     }
 
     suspend fun getRemoteRepoUrls(): Result<List<RemotePluginInfo>> = withContext(Dispatchers.IO) {
+        if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) {
+            return@withContext runCatching {
+                check(cloud.synchronize(profileManager.activeProfileId.value))
+                pluginDataStore.repositories.first().map { RemotePluginInfo(it.url, it.type.name) }
+            }
+        }
         try {
             val effectiveUserId = authManager.getEffectiveUserId(fallbackToOwnIdOnFailure = false)
                 ?: return@withContext Result.failure(

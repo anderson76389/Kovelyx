@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="catalogue_sync_transferring">Transfert des collections complètes… Gardez cet appareil connecté.</string>
+    <string name="catalogue_sync_done">Collections et disposition de l’accueil synchronisées pour ce profil.</string>
+    <string name="catalogue_sync_failed">Échec de la synchronisation des collections. Vos données locales sont conservées ; les tentatives automatiques continuent.</string>
+    <string name="catalogue_sync_pending">Collections en attente de synchronisation. Utilisez le même compte et le même profil sur chaque appareil.</string>
+    <string name="catalogue_sync_now">Synchroniser les collections maintenant</string>
+</resources>

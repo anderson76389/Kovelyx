@@ -50,7 +50,7 @@ private val UNRELATED = listOf("Alpha", "Beasts of No Nation")
 private const val UNRELATED_CATALOG = "unrelated"
 private const val MATCHING_CATALOG = "matching"
 
-/** Two catalogs answering "slo" the way Cinemeta does, each best match first. */
+/** Two catalogs answering "slo" the way Metadata Provider does, each best match first. */
 private const val MOVIE_CATALOG = "movie"
 private const val SERIES_CATALOG = "series"
 private val SLO_CATALOGS = linkedMapOf(

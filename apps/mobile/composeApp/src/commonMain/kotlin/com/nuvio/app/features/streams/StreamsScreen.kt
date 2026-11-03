@@ -58,6 +58,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import com.nuvio.app.features.addons.AddonRepository
+import com.nuvio.app.features.plugins.PluginRepository
+import com.nuvio.app.features.plugins.PluginsUiState
 import com.nuvio.app.core.build.AppFeaturePolicy
 import com.nuvio.app.core.ui.NuvioBackButton
 import com.nuvio.app.core.ui.NuvioBottomSheetActionRow
@@ -123,6 +126,18 @@ fun StreamsScreen(
 ) {
     val useNativeNavigation = LocalUseNativeNavigation.current
     val uiState by StreamsRepository.uiState.collectAsStateWithLifecycle()
+    val addonSources by remember {
+        AddonRepository.initialize()
+        AddonRepository.uiState
+    }.collectAsStateWithLifecycle()
+    val pluginSources = if (AppFeaturePolicy.pluginsEnabled) {
+        val state by remember {
+            PluginRepository.initialize()
+            PluginRepository.uiState
+        }.collectAsStateWithLifecycle()
+        state
+    } else PluginsUiState(pluginsEnabled = false)
+
     val streamDisplaySettings by remember {
         StreamBadgeSettingsRepository.ensureLoaded()
         StreamBadgeSettingsRepository.uiState
@@ -177,7 +192,7 @@ fun StreamsScreen(
     val effectiveResumePositionMs = resumeState.positionMs
     val effectiveResumeProgressFraction = resumeState.progressFraction
 
-    LaunchedEffect(type, videoId, seasonNumber, episodeNumber, manualSelection) {
+    LaunchedEffect(type, videoId, seasonNumber, episodeNumber, manualSelection, addonSources, pluginSources) {
         StreamsRepository.load(
             type = type,
             videoId = videoId,
@@ -1113,10 +1128,13 @@ private fun EmptyStateBlock(
     val message: String
 
     when (reason) {
-        StreamsEmptyStateReason.NoAddonsInstalled,
+        StreamsEmptyStateReason.NoAddonsInstalled -> {
+            title = stringResource(Res.string.streams_empty_no_stream_addon_title)
+            message = stringResource(Res.string.streams_empty_no_addons_message)
+        }
         StreamsEmptyStateReason.NoCompatibleAddons -> {
-            title = stringResource(Res.string.playback_unavailable)
-            message = stringResource(Res.string.playback_unavailable_message)
+            title = stringResource(Res.string.streams_empty_no_stream_addon_title)
+            message = stringResource(Res.string.streams_empty_no_stream_addon_message)
         }
 
         StreamsEmptyStateReason.StreamFetchFailed -> {

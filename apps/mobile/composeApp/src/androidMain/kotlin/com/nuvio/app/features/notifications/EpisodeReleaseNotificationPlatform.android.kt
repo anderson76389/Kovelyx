@@ -53,7 +53,7 @@ internal actual object EpisodeReleaseNotificationPlatform {
 
     private var appContext: Context? = null
     private var currentActivity: ComponentActivity? = null
-    private var pendingPermissionContinuation: kotlin.coroutines.Continuation<Boolean>? = null
+    private var pendingPermissionContinuation: kotlinx.coroutines.CancellableContinuation<Boolean>? = null
     private val httpClient by lazy {
         HttpClient(OkHttp) {
             install(HttpTimeout) {
@@ -85,10 +85,22 @@ internal actual object EpisodeReleaseNotificationPlatform {
     ): Boolean {
         if (requestCode != permissionRequestCode) return false
         val granted = grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
-        pendingPermissionContinuation?.resume(granted)
+        pendingPermissionContinuation?.takeIf { it.isActive }?.resume(granted)
         pendingPermissionContinuation = null
         return true
     }
+
+    actual suspend fun openSystemSettings(): Boolean = withContext(Dispatchers.Main.immediate) {
+        val context = appContext ?: return@withContext false
+        runCatching {
+            val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+            else Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, UriForSettings(context))
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            true
+        }.getOrDefault(false)
+    }
+    private fun UriForSettings(context: Context) = android.net.Uri.parse("package:${context.packageName}")
 
     actual suspend fun notificationsAuthorized(): Boolean {
         val context = appContext ?: return false
@@ -101,14 +113,19 @@ internal actual object EpisodeReleaseNotificationPlatform {
                 return false
             }
         }
-        return NotificationManagerCompat.from(context).areNotificationsEnabled()
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = context.getSystemService(NotificationManager::class.java)
+            if (manager?.getNotificationChannel(channelId)?.importance == NotificationManager.IMPORTANCE_NONE) return false
+        }
+        return true
     }
 
-    actual suspend fun requestAuthorization(): Boolean {
-        val context = appContext ?: return false
+    actual suspend fun requestAuthorization(): Boolean = withContext(Dispatchers.Main.immediate) {
+        val context = appContext ?: return@withContext false
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             ensureNotificationChannel()
-            return NotificationManagerCompat.from(context).areNotificationsEnabled()
+            return@withContext notificationsAuthorized()
         }
 
         val permissionState = ContextCompat.checkSelfPermission(
@@ -117,12 +134,14 @@ internal actual object EpisodeReleaseNotificationPlatform {
         )
         if (permissionState == PackageManager.PERMISSION_GRANTED) {
             ensureNotificationChannel()
-            return true
+            return@withContext notificationsAuthorized()
         }
 
-        val activity = currentActivity ?: return false
-        return suspendCancellableCoroutine { continuation ->
+        val activity = currentActivity ?: return@withContext false
+        return@withContext suspendCancellableCoroutine { continuation ->
+            if (pendingPermissionContinuation?.isActive == true) { continuation.resume(false); return@suspendCancellableCoroutine }
             pendingPermissionContinuation = continuation
+            continuation.invokeOnCancellation { if (pendingPermissionContinuation === continuation) pendingPermissionContinuation = null }
             ActivityCompat.requestPermissions(
                 activity,
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -144,8 +163,9 @@ internal actual object EpisodeReleaseNotificationPlatform {
 
             requests.forEach { request ->
                 val triggerAtEpochMs = triggerAtEpochMs(request.releaseDateIso) ?: return@forEach
-                val initialDelayMs = triggerAtEpochMs - nowEpochMs
-                if (initialDelayMs <= 0L) return@forEach
+                if (LocalDate.parse(request.releaseDateIso).isBefore(LocalDate.now())) return@forEach
+                if (wasDelivered(request.requestId)) return@forEach
+                val initialDelayMs = (triggerAtEpochMs - nowEpochMs).coerceAtLeast(0L)
 
                 val inputData = Data.Builder()
                     .putString(workerRequestIdKey, request.requestId)
@@ -192,7 +212,8 @@ internal actual object EpisodeReleaseNotificationPlatform {
     }
 
     actual suspend fun showTestNotification(request: EpisodeReleaseNotificationRequest) {
-        val context = appContext ?: return
+        val context = checkNotNull(appContext) { "Notifications non initialisées" }
+        check(notificationsAuthorized()) { "Notifications désactivées dans les paramètres système" }
         ensureNotificationChannel()
 
         val notification = buildNotification(context, request)
@@ -305,5 +326,11 @@ internal actual object EpisodeReleaseNotificationPlatform {
         notificationManager.createNotificationChannel(channel)
     }
 
+    internal fun wasDelivered(requestId: String): Boolean = appContext?.let {
+        preferences(it).getBoolean("delivered:$requestId", false)
+    } ?: false
+    internal fun markDelivered(requestId: String) {
+        appContext?.let { preferences(it).edit().putBoolean("delivered:$requestId", true).apply() }
+    }
     private fun uniqueWorkName(requestId: String): String = "$workTag:$requestId"
 }

@@ -48,12 +48,12 @@ internal fun TvTraktCredentialsDialog(
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             TvCredentialInput(
-                title = "Client ID",
+                title = "identifiant client",
                 value = clientId,
                 onValueChange = { clientId = it; error = null },
             )
             TvCredentialInput(
-                title = "Client Secret (nécessaire au flux actuel)",
+                title = "secret client (nécessaire au flux actuel)",
                 value = clientSecret,
                 onValueChange = { clientSecret = it; error = null },
                 secret = true,
@@ -131,12 +131,12 @@ internal fun TvMdbListCredentialsDialog(
     var error by remember { mutableStateOf<String?>(null) }
     NuvioDialog(
         onDismiss = onDismiss,
-        title = "Client ID OAuth MDBList",
-        subtitle = "Identifiant de votre application MDBList, différent de la clé API des notes.",
+        title = "identifiant client OAuth MDBList",
+        subtitle = "Créez une application Device Code sur mdblist.com/developer/, puis saisissez son identifiant client. La clé API des notes est différente.",
         width = 700.dp,
     ) {
         TvCredentialInput(
-            title = "Client ID MDBList",
+            title = "identifiant client MDBList",
             value = clientId,
             onValueChange = { clientId = it; error = null },
         )

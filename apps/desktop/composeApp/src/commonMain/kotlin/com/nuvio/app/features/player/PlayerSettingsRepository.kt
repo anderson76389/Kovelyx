@@ -37,7 +37,7 @@ data class PlayerSettingsUiState(
     val showLoadingOverlay: Boolean = true,
     val showPlayerLoadingStatus: Boolean = true,
     val pauseOverlayEnabled: Boolean = true,
-    val showParentalGuide: Boolean = true,
+    val showParentalGuide: Boolean = false,
     val resizeMode: PlayerResizeMode = PlayerResizeMode.Fit,
     val holdToSpeedEnabled: Boolean = true,
     val holdToSpeedValue: Float = 2f,
@@ -120,7 +120,7 @@ object PlayerSettingsRepository {
     private var showLoadingOverlay = true
     private var showPlayerLoadingStatus = true
     private var pauseOverlayEnabled = true
-    private var showParentalGuide = true
+    private var showParentalGuide = false
     private var resizeMode = PlayerResizeMode.Fit
     private var holdToSpeedEnabled = true
     private var holdToSpeedValue = 2f
@@ -208,7 +208,7 @@ object PlayerSettingsRepository {
         showLoadingOverlay = true
         showPlayerLoadingStatus = true
         pauseOverlayEnabled = true
-        showParentalGuide = true
+        showParentalGuide = false
         resizeMode = PlayerResizeMode.Fit
         holdToSpeedEnabled = true
         holdToSpeedValue = 2f
@@ -290,7 +290,7 @@ object PlayerSettingsRepository {
         showLoadingOverlay = PlayerSettingsStorage.loadShowLoadingOverlay() ?: true
         showPlayerLoadingStatus = PlayerSettingsStorage.loadShowPlayerLoadingStatus() ?: true
         pauseOverlayEnabled = PlayerSettingsStorage.loadPauseOverlayEnabled() ?: true
-        showParentalGuide = PlayerSettingsStorage.loadShowParentalGuide() ?: true
+        showParentalGuide = false
         resizeMode = PlayerSettingsStorage.loadResizeMode()
             ?.let { runCatching { PlayerResizeMode.valueOf(it) }.getOrNull() }
             ?: PlayerResizeMode.Fit
@@ -492,9 +492,9 @@ object PlayerSettingsRepository {
     fun setShowParentalGuide(enabled: Boolean) {
         ensureLoaded()
         if (showParentalGuide == enabled) return
-        showParentalGuide = enabled
+        showParentalGuide = false
         publish()
-        PlayerSettingsStorage.saveShowParentalGuide(enabled)
+        PlayerSettingsStorage.saveShowParentalGuide(false)
     }
 
     fun setResizeMode(mode: PlayerResizeMode) {

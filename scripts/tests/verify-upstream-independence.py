@@ -17,8 +17,12 @@ ROOT = Path(__file__).resolve().parents[2]
 RUNTIME = (
     "apps/desktop/composeApp/src/commonMain",
     "apps/desktop/composeApp/src/desktopMain",
+    "apps/desktop/composeApp/src/fullCommonMain",
+    "apps/desktop/composeApp/src/windowsDesktopMain",
     "apps/mobile/composeApp/src/commonMain",
     "apps/mobile/composeApp/src/androidMain",
+    "apps/mobile/composeApp/src/fullCommonMain",
+    "apps/mobile/composeApp/src/androidFull",
     "apps/mobile/composeApp/src/androidFull",
     "apps/tv/app/src/main/java",
     "apps/tv/app/src/full/java",

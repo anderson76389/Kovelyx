@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <cerrno>
+#include <chrono>
 #include <condition_variable>
 #include <deque>
 #include <limits>
@@ -373,12 +374,37 @@ std::optional<std::string> receive_request_head(
     std::string received;
     received.reserve(4096);
     std::array<char, 4096> buffer{};
+#if defined(_WIN32)
+    auto idle_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+#endif
     while (!stop_token.stop_requested()) {
 #if defined(_WIN32)
+        // Wait in bounded intervals so stopping never waits for SO_RCVTIMEO.
+        fd_set readable;
+        FD_ZERO(&readable);
+        FD_SET(socket, &readable);
+        timeval wait{0, 100000};
+        const auto ready = select(0, &readable, nullptr, nullptr, &wait);
+        if (stop_token.stop_requested()) {
+            return std::nullopt;
+        }
+        if (ready == SOCKET_ERROR) {
+            if (WSAGetLastError() == WSAEINTR) {
+                continue;
+            }
+            return std::nullopt;
+        }
+        if (ready == 0) {
+            if (std::chrono::steady_clock::now() >= idle_deadline) {
+                return std::nullopt;
+            }
+            continue;
+        }
         const auto count = recv(socket, buffer.data(), static_cast<int>(buffer.size()), 0);
         if (count == SOCKET_ERROR || count == 0) {
             return std::nullopt;
         }
+        idle_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
 #else
         const auto count = recv(socket, buffer.data(), buffer.size(), 0);
         if (count < 0) {

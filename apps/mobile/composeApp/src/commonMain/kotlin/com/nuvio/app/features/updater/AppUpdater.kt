@@ -9,6 +9,7 @@ import com.nuvio.app.core.i18n.localizedByteUnit
 import com.nuvio.app.core.ui.NuvioToastController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlin.time.TimeSource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -53,6 +54,7 @@ class AppUpdaterController internal constructor(
     private val _uiState = MutableStateFlow(AppUpdaterUiState(updateChannel = preferences.channel.value))
     val uiState: StateFlow<AppUpdaterUiState> = _uiState.asStateFlow()
 
+    private var lastUpdateCheck = TimeSource.Monotonic.markNow()
     private var autoCheckStarted = false
     private var updateCheckJob: Job? = null
     private var downloadJob: Job? = null
@@ -77,6 +79,14 @@ class AppUpdaterController internal constructor(
         }
     }
 
+    /** Refresh after returning to the app without resetting a download or an offered update. */
+    fun requestForegroundCheck() {
+        val state = _uiState.value
+        if (!autoCheckStarted || state.isChecking || state.isDownloading || state.showDialog) return
+        if (lastUpdateCheck.elapsedNow().inWholeMinutes < 15) return
+        checkForUpdates(force = false, showNoUpdateFeedback = false)
+    }
+
     fun ensureAutoCheckStarted() {
         if (autoCheckStarted || !AppFeaturePolicy.inAppUpdaterEnabled ||
             !AppUpdaterPlatform.isSupported
@@ -98,6 +108,7 @@ class AppUpdaterController internal constructor(
         }
 
         if (_uiState.value.isDownloading) return
+        lastUpdateCheck = TimeSource.Monotonic.markNow()
         updateCheckJob?.cancel()
         val channel = preferences.channel.value
         updateCheckJob = scope.launch {

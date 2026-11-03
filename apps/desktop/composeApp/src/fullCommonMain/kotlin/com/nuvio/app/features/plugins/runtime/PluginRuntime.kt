@@ -13,6 +13,8 @@ import com.nuvio.app.features.plugins.runtime.network.UrlBridge
 import com.nuvio.app.features.plugins.runtime.wasm.WasmBridge
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -110,7 +112,7 @@ internal object PluginRuntime {
                         evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                         evaluate<Any?>(wrapPluginModule(code))
                         evaluateCached({ JsRuntime.settingsCallBytecode(this) }, JsBindings.staticSettingsCallCode)
-                        deferred.await()
+                        awaitPluginResult(deferred)
                     }
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -160,16 +162,34 @@ internal object PluginRuntime {
         }
 
         try {
-            jsRuntime.use {
+            val rawJson = jsRuntime.use {
                 hostRegistry.registerAll(this)
                 evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                 evaluate<Any?>(wrapPluginModule(code))
                 evaluateCached({ JsRuntime.callBytecode(this) }, JsBindings.staticCallCode)
-                deferred.await()
+                // Some QuickJS versions stringify the Promise object rather
+                // than unwrapping it. Read the completed value in this VM;
+                // retain the capture callback for older runtime compatibility.
+                awaitPluginResult(deferred)
             }
-            return parseJsonResults(deferred.await())
+            return parseJsonResults(rawJson)
         } finally {
             domBridge.clear()
+        }
+    }
+
+    private suspend fun com.dokar.quickjs.QuickJs.awaitPluginResult(
+        captured: Deferred<String?>,
+    ): String {
+        while (true) {
+            // A native microtask can remain queued after evaluate() returns.
+            // Re-enter this VM to pump it instead of waiting on a host callback
+            // that cannot run while the VM is idle. The caller's existing
+            // timeout and cancellation still bound the entire scraper call.
+            val value = evaluate<Any?>("globalThis.__kovelyx_plugin_result")
+            if (value is String) return value
+            if (captured.isCompleted) return captured.await() ?: "[]"
+            delay(10)
         }
     }
 
@@ -184,9 +204,9 @@ internal object PluginRuntime {
     private suspend fun com.dokar.quickjs.QuickJs.evaluateCached(
         bytecode: com.dokar.quickjs.QuickJs.() -> ByteArray,
         source: String,
-    ) {
+    ): Any? {
         val compiled = runCatching { bytecode() }.getOrNull()
-        if (compiled != null) {
+        return if (compiled != null) {
             evaluate<Any?>(compiled)
         } else {
             evaluate<Any?>(source)

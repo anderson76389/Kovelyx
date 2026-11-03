@@ -14,12 +14,14 @@ class EpisodeReleaseNotificationWorker(
 ) : CoroutineWorker(appContext, workerParameters) {
 
     override suspend fun doWork(): Result {
+        EpisodeReleaseNotificationPlatform.initialize(applicationContext)
         if (!EpisodeReleaseNotificationPlatform.notificationsAuthorized()) {
             return Result.success()
         }
 
         val requestId = inputData.getString(EpisodeReleaseNotificationPlatform.workerRequestIdKey)
             ?: return Result.failure()
+        if (EpisodeReleaseNotificationPlatform.wasDelivered(requestId)) return Result.success()
         val title = inputData.getString(EpisodeReleaseNotificationPlatform.workerTitleKey)
             ?: return Result.failure()
         val body = inputData.getString(EpisodeReleaseNotificationPlatform.workerBodyKey)
@@ -44,6 +46,7 @@ class EpisodeReleaseNotificationWorker(
 
         NotificationManagerCompat.from(applicationContext)
             .notify(abs(requestId.hashCode()), notification)
+        EpisodeReleaseNotificationPlatform.markDelivered(requestId)
 
         return Result.success()
     }

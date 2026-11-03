@@ -1,6 +1,8 @@
 package com.nuvio.tv.core.sync
 
 import android.util.Log
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import dagger.Lazy
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.CollectionsDataStore
@@ -28,6 +30,7 @@ class CollectionSyncService @Inject constructor(
     private val authManager: AuthManager,
     private val collectionsDataStore: CollectionsDataStore,
     private val profileManager: ProfileManager,
+    private val catalogues: Lazy<CloudflareTvCatalogueSync>,
     private val syncClientIdentity: SyncClientIdentity
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -51,6 +54,10 @@ class CollectionSyncService @Inject constructor(
      * Uses a SECURITY DEFINER function to handle RLS for linked devices.
      */
     suspend fun pushToRemote(): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            catalogues.get().edited("collections")
+            return@withContext Result.success(Unit)
+        }
         try {
             val profileId = profileManager.activeProfileId.value
             val json = collectionsDataStore.exportCurrentProfileJson()
@@ -84,6 +91,10 @@ class CollectionSyncService @Inject constructor(
      * Returns true if local state was updated.
      */
     suspend fun pullFromRemote(): Result<Boolean> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) {
+            catalogues.get().request()
+            return@withContext Result.success(false)
+        }
         try {
             val profileId = profileManager.activeProfileId.value
 
@@ -138,6 +149,7 @@ class CollectionSyncService @Inject constructor(
      */
     fun triggerPush() {
         if (isSyncingFromRemote) return
+        if (CloudflareTvAccountClient.enabled) { catalogues.get().edited("collections"); return }
         if (!authManager.isAuthenticated) return
         pushJob?.cancel()
         pushJob = scope.launch {

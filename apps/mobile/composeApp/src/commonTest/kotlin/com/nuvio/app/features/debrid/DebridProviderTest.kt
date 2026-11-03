@@ -5,6 +5,16 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DebridProviderTest {
+    @Test fun premiumizeIsRetiredEvenWithAnOldStoredCredential() {
+        kotlin.test.assertNull(DebridProviders.byId("premiumize"))
+        assertTrue(DebridProviders.configuredServices(DebridSettings(providerApiKeys = mapOf("premiumize" to "old"))).isEmpty())
+    }
+
+    @Test fun `provider order starts with AllDebrid and Real Debrid before Torbox`() {
+        kotlin.test.assertEquals(listOf("alldebrid", "realdebrid", "torbox"), DebridProviders.visible().map { it.id })
+        assertTrue(DebridProviders.AllDebrid.supports(DebridProviderCapability.LocalTorrentResolve))
+    }
+
     @Test
     fun `torbox exposes local addon capabilities`() {
         assertTrue(DebridProviders.Torbox.authMethod == DebridProviderAuthMethod.DeviceCode)
@@ -25,12 +35,12 @@ class DebridProviderTest {
     }
 
     @Test
-    fun `real debrid stays hidden from local addon capability paths`() {
+    fun `real debrid is visible and resolves torrents without claiming cache or cloud support`() {
         assertTrue(DebridProviders.RealDebrid.authMethod == DebridProviderAuthMethod.ApiKey)
-        assertFalse(DebridProviders.RealDebrid.visibleInUi)
+        assertTrue(DebridProviders.RealDebrid.visibleInUi)
         assertTrue(DebridProviders.RealDebrid.supports(DebridProviderCapability.ClientResolve))
         assertFalse(DebridProviders.RealDebrid.supports(DebridProviderCapability.LocalTorrentCacheCheck))
-        assertFalse(DebridProviders.RealDebrid.supports(DebridProviderCapability.LocalTorrentResolve))
+        assertTrue(DebridProviders.RealDebrid.supports(DebridProviderCapability.LocalTorrentResolve))
         assertFalse(DebridProviders.RealDebrid.supports(DebridProviderCapability.CloudLibrary))
     }
 }

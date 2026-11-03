@@ -12,6 +12,7 @@ fun UpdateBannerHost(
     onDismissUnknownSources: () -> Unit,
     onOpenUnknownSources: () -> Unit,
     onFeedbackShown: () -> Unit,
+    onForegroundCheck: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     content()

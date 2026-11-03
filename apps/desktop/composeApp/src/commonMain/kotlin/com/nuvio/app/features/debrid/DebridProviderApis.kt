@@ -25,8 +25,8 @@ internal interface DebridProviderApi {
 
 internal object DebridProviderApis {
     private val registered = listOf(
+        AllDebridProviderApi(),
         TorboxDebridProviderApi(),
-        PremiumizeDebridProviderApi(),
         RealDebridProviderApi(),
     )
 
@@ -264,7 +264,7 @@ private class RealDebridProviderApi(
     }
 }
 
-private fun buildMagnetUri(resolve: StreamClientResolve): String? {
+internal fun buildMagnetUri(resolve: StreamClientResolve): String? {
     val hash = resolve.infoHash?.takeIf { it.isNotBlank() } ?: return null
     return buildString {
         append("magnet:?xt=urn:btih:")

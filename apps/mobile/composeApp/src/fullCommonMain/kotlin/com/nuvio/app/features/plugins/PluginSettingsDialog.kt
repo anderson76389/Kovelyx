@@ -19,6 +19,11 @@ import com.nuvio.app.core.ui.Menu
 import com.nuvio.app.core.ui.MenuItem
 import com.nuvio.app.core.ui.NuvioInputField
 import kotlinx.serialization.json.*
+import nuvio.composeapp.generated.resources.Res
+import nuvio.composeapp.generated.resources.action_cancel
+import nuvio.composeapp.generated.resources.action_save
+import nuvio.composeapp.generated.resources.plugin_select_option
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun PluginSettingsDialog(
@@ -116,7 +121,7 @@ fun PluginSettingsDialog(
                                             it.jsonObject["value"]?.jsonPrimitive?.content == currentValue 
                                         }?.jsonObject?.get("label")?.jsonPrimitive?.content ?: currentValue
                                         
-                                        Text(text = selectedLabel.ifBlank { "Select option" })
+                                        Text(text = if (selectedLabel.isBlank()) stringResource(Res.string.plugin_select_option) else selectedLabel)
                                         Icon(Icons.Rounded.ArrowDropDown, contentDescription = null)
                                     }
                                 }
@@ -179,11 +184,11 @@ fun PluginSettingsDialog(
 
         DialogButtons {
             DialogButton(
-                text = "Cancel",
+                text = stringResource(Res.string.action_cancel),
                 onClick = onDismiss,
             )
             DialogButton(
-                text = "Save",
+                text = stringResource(Res.string.action_save),
                 onClick = {
                     val result = JsonObject(currentSettings.toMap())
                     PluginStorage.saveScraperSettings(scraperId, result.toString())

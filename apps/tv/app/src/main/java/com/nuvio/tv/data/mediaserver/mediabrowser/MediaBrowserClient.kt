@@ -68,6 +68,7 @@ internal class MediaBrowserClient(
                 .url(buildUrl(baseUrl, path, query))
                 .header("Accept", "application/json")
                 .header(authorizationHeader, authorizationValue(token))
+                .apply { if (token != null) header("X-Emby-Token", token) }
                 .method(
                     method,
                     body?.toRequestBody(JSON_MEDIA_TYPE) ?: if (method == "POST") ByteArray(0).toRequestBody() else null
@@ -89,7 +90,7 @@ internal class MediaBrowserClient(
     }
 
     fun authorizationValue(token: String?): String = buildString {
-        append("MediaBrowser Client=\"Nuvio\", Device=\"")
+        append("MediaBrowser Client=\"Kovelyx\", Device=\"")
         append(identity.device.headerValue())
         append("\", DeviceId=\"")
         append(deviceId.headerValue())
@@ -197,3 +198,17 @@ private fun readBoundedBody(source: BufferedSource, contentLength: Long, maxByte
 }
 
 private fun String.headerValue(): String = filter { it != '"' && it != '\r' && it != '\n' }
+
+/** No credentials are sent to a redirect on a different host or weaker TLS. */
+internal fun redirectedServerAddress(baseUrl: String, apiPath: String, location: String?): String? {
+    if (location.isNullOrBlank()) return null
+    val source = buildUrl(baseUrl + apiPath, "/System/Info/Public").toHttpUrlOrNull() ?: return null
+    val target = source.resolve(location) ?: return null
+    val suffix = apiPath + "/System/Info/Public"
+    if (target.host != source.host || target.username.isNotEmpty() || target.password.isNotEmpty()) return null
+    if (source.isHttps && !target.isHttps) return null
+    if (!target.encodedPath.endsWith(suffix)) return null
+    return normalizeServerAddress(target.newBuilder()
+        .encodedPath(target.encodedPath.dropLast(suffix.length).ifEmpty { "/" })
+        .query(null).fragment(null).build().toString())
+}

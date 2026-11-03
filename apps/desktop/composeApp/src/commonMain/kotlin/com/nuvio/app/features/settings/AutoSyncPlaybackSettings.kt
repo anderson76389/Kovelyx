@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nuvio.app.features.autosync.AutoSyncPreferencesRepository
 import com.nuvio.app.features.player.SubtitleLanguageOption
+import com.nuvio.app.isDesktop
 import com.nuvio.app.isIos
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.settings_playback_auto_sync_mode_aggressive
@@ -38,7 +39,7 @@ internal fun AutoSyncPlaybackSettingsRows(
         AutoSyncPreferencesRepository.ensureLoaded()
         AutoSyncPreferencesRepository.syncToleranceMs
     }.collectAsStateWithLifecycle()
-    if (isIos) return
+    if (isIos || isDesktop) return
 
     val preferredLanguageAvailable =
         preferredSubtitleLanguage.isNotBlank() &&

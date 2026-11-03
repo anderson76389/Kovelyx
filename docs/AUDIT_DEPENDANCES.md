@@ -156,7 +156,6 @@ Fichiers texte examinés : **1406** ; références statiques à Nuvio/NuvioMedia
 | `192.168.1.10` | 5 |
 | `a.com` | 5 |
 | `fake.example` | 4 |
-| `v3-cinemeta.strem.io` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
 

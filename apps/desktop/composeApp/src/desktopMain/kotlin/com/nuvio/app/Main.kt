@@ -41,7 +41,6 @@ import com.nuvio.app.features.player.desktop.NativePlayerBridge
 import com.nuvio.app.features.player.desktop.applyNativeDesktopWindowChrome
 import com.nuvio.app.features.player.desktop.configureMacosWindowBeforePeer
 import com.nuvio.app.features.player.desktop.installDesktopAppFullscreenShortcuts
-import com.nuvio.app.features.player.desktop.preloadNativePlayerBridgeAsync
 import com.nuvio.app.features.player.desktop.registerDesktopAppFullscreenToggle
 import com.nuvio.app.features.player.desktop.trackMaximizedBoundsForCurrentScreen
 import com.nuvio.app.features.profiles.ProfileRepository
@@ -84,10 +83,18 @@ private val kovelyxDesktopUriHandler = object : UriHandler {
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) {
-    if (args.any { it.trim().equals("kovelyx://import", ignoreCase = true) } &&
-        DesktopCollectionImportBridge.alreadyRunning()) {
-        return // Local import is handled by the already running desktop process.
-    }
+    val instance = DesktopSingleInstance(DesktopStorage.rootDir.resolve("launch-mailbox"))
+    if (!instance.acquireOrForward(args) { forwarded ->
+        java.awt.EventQueue.invokeLater {
+            handleDesktopLaunchArgs(forwarded)
+            java.awt.Window.getWindows().firstOrNull { it.isDisplayable && it.isVisible }?.let { existing ->
+                if (existing is java.awt.Frame) existing.extendedState = existing.extendedState and java.awt.Frame.ICONIFIED.inv()
+                existing.toFront()
+                existing.requestFocus()
+            }
+        }
+    }) return
+    Runtime.getRuntime().addShutdownHook(Thread { instance.close() })
     DesktopCollectionImportBridge.start()
     DesktopCollectionImportBridge.registerWindowsProtocol()
 
@@ -116,7 +123,6 @@ fun main(args: Array<String>) {
     configureLinuxSwingGlobalsBeforeAwt()
     installDesktopOpenUriHandler()
     handleDesktopLaunchArgs(args)
-    preloadNativePlayerBridgeAsync()
     // Load cached profile data synchronously so the profile color is available
     // on the very first Compose frame (matching Android's SharedPreferences behavior).
     ProfileRepository.loadCachedProfiles()
@@ -176,6 +182,7 @@ fun main(args: Array<String>) {
 
         SwingWindow(
             onCloseRequest = {
+                DesktopCollectionImportBridge.stop()
                 P2pStreamingEngine.shutdown()
                 DiscordPresenceManager.shutdown()
                 SentryInitializer.close()
@@ -188,6 +195,17 @@ fun main(args: Array<String>) {
             icon = painterResource(appIconState.selected.transparentPreviewResource),
             init = ::configureMacosWindowBeforePeer,
         ) {
+            DisposableEffect(window) {
+                com.nuvio.app.features.notifications.EpisodeReleaseNotificationPlatform.bind { link ->
+                    window.isVisible = true
+                    window.extendedState = window.extendedState and java.awt.Frame.ICONIFIED.inv()
+                    window.toFront()
+                    window.requestFocus()
+                    link?.takeIf { it != "kovelyx://" }?.let(::handleAppUrl)
+                }
+                val refresh = com.kovelyx.display.WindowsDisplayRefresh(window)
+                onDispose { refresh.close(); com.nuvio.app.features.notifications.EpisodeReleaseNotificationPlatform.close() }
+            }
             SideEffect {
                 window.background = KovelyxDesktopNativeBackground
                 window.rootPane.background = KovelyxDesktopNativeBackground
@@ -282,6 +300,12 @@ fun main(args: Array<String>) {
                     )
                 }
             } else {
+                // Explicit CI smoke mode only: report actual surface progress from
+                // the packaged EXE, rather than accepting a merely alive process.
+                val smokeReport = remember {
+                    System.getenv("KOVELYX_PLAYBACK_SMOKE_RESULT")?.takeIf { it.isNotBlank() }?.let { java.io.File(it) }
+                }
+                val smokeReported = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
                 // The player surface reads LocalNuvioPlatformDensity, which only
                 // NuvioTheme provides — the bare smoke harness must supply it too.
                 NuvioTheme {
@@ -289,8 +313,18 @@ fun main(args: Array<String>) {
                         sourceUrl = smokePlayerUrl,
                         modifier = Modifier.fillMaxSize(),
                         onControllerReady = {},
-                        onSnapshot = {},
-                        onError = {},
+                        onSnapshot = { snapshot ->
+                            if (snapshot.positionMs >= 800L && snapshot.durationMs >= 1800L &&
+                                smokeReport != null && smokeReported.compareAndSet(false, true)
+                            ) {
+                                smokeReport.writeText("PASS position=${snapshot.positionMs} duration=${snapshot.durationMs}")
+                            }
+                        },
+                        onError = { error ->
+                            if (error != null && smokeReport != null && smokeReported.compareAndSet(false, true)) {
+                                smokeReport.writeText("FAIL $error")
+                            }
+                        },
                     )
                 }
             }

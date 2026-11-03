@@ -42,7 +42,7 @@ jobs:
           set -euo pipefail
           version="$(python3 scripts/desktop-release-version.py)"
           echo "Version candidate : $version"
-          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-(alpha|beta|rc)$ ]] || exit 1
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc))?$ ]] || exit 1
           git rev-list --count HEAD
       - name: Contrôler les ressources portables
         shell: bash

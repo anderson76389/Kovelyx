@@ -1,0 +1,51 @@
+name: Préserver les sources identifiées des composants natifs
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/native-source-vault.yml', 'scripts/preserve-native-sources.py']
+permissions:
+  contents: write
+concurrency:
+  group: kovelyx-native-source-vault
+  cancel-in-progress: false
+jobs:
+  sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Archiver les sources épinglées et vérifier les SHA-256
+        run: python3 scripts/preserve-native-sources.py native-sources
+      - name: Ajouter les sources à l'archive de récupération sans écraser ses fichiers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=native-vault-v1
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets > existing-assets.json
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          existing = {x['name']:x for x in json.loads(pathlib.Path('existing-assets.json').read_text())['assets']}
+          for path in sorted(pathlib.Path('native-sources').iterdir()):
+              if path.name in existing:
+                  # Validate existing bytes instead of overwriting recovery material.
+                  target = pathlib.Path('existing-source-check')
+                  target.mkdir(exist_ok=True)
+                  subprocess.run(['gh','release','download','native-vault-v1','--repo',os.environ['GITHUB_REPOSITORY'],'--pattern',path.name,'--dir',str(target),'--clobber'],check=True)
+                  if hashlib.sha256((target/path.name).read_bytes()).digest() != hashlib.sha256(path.read_bytes()).digest():
+                      raise RuntimeError('Existing source archive differs: '+path.name)
+              else:
+                  subprocess.run(['gh','release','upload','native-vault-v1',str(path),'--repo',os.environ['GITHUB_REPOSITORY']],check=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kovelyx-pinned-native-source-archives
+          path: native-sources/
+          retention-days: 90
+          if-no-files-found: error

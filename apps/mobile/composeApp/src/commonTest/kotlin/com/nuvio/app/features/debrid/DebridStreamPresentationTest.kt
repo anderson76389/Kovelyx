@@ -94,8 +94,8 @@ class DebridStreamPresentationTest {
 
     @Test
     fun `default formatter replaces addon source labels for managed streams`() {
-        val stream = premiumizeDirectStream(
-            name = "[P2P] Torrentio 2160p - PM Instant",
+        val stream = allDebridDirectStream(
+            name = "[P2P] Torrentio 2160p - AD Instant",
             filename = "The.Boys.S03E01.Payback.2160p.WEB-DL.H265.mkv",
             size = 12_000_000_000,
         )
@@ -110,12 +110,12 @@ class DebridStreamPresentationTest {
             ),
             settings = DebridSettings(
                 enabled = true,
-                providerApiKeys = mapOf(DebridProviders.PREMIUMIZE_ID to "pm_key"),
+                providerApiKeys = mapOf(DebridProviders.ALL_DEBRID_ID to "ad_key"),
             ),
         ).single().streams.single()
 
         val name = presented.name.orEmpty()
-        assertEquals("2160p PM Instant", name)
+        assertEquals("2160p AD Instant", name)
         assertFalse(name.contains("P2P", ignoreCase = true))
         assertFalse(name.contains("torrent", ignoreCase = true))
         assertFalse(name.contains("Torrentio", ignoreCase = true))
@@ -320,7 +320,7 @@ class DebridStreamPresentationTest {
             ),
         )
 
-    private fun premiumizeDirectStream(
+    private fun allDebridDirectStream(
         name: String,
         filename: String,
         size: Long,
@@ -331,7 +331,7 @@ class DebridStreamPresentationTest {
             addonId = "addon:torrentio",
             clientResolve = StreamClientResolve(
                 type = "debrid",
-                service = DebridProviders.PREMIUMIZE_ID,
+                service = DebridProviders.ALL_DEBRID_ID,
                 filename = filename,
                 isCached = true,
                 stream = StreamClientResolveStream(

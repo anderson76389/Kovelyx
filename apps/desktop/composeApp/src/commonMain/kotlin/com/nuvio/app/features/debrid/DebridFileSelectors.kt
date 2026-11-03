@@ -58,7 +58,7 @@ internal class PremiumizeDirectDownloadFileSelector {
 internal fun PremiumizeDirectDownloadFileDto.displayName(): String =
     path.orEmpty().substringAfterLast('/').substringAfterLast('\\').ifBlank { path.orEmpty() }
 
-private fun <T> selectDebridFile(
+internal fun <T> selectDebridFile(
     files: List<T>,
     resolve: StreamClientResolve,
     season: Int?,
@@ -125,7 +125,7 @@ private fun buildEpisodePattern(season: Int?, episode: Int?): Regex? {
     )
 }
 
-private fun String.hasVideoExtension(): Boolean = videoExtensions.any { endsWith(it, ignoreCase = true) }
+internal fun String.hasVideoExtension(): Boolean = videoExtensions.any { endsWith(it, ignoreCase = true) }
 
 private val videoExtensions = setOf(
     ".mp4",

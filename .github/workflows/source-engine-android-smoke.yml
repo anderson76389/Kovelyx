@@ -1,0 +1,86 @@
+name: Tester le vrai AAR Android reconstruit depuis les sources
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, fix/cloudflare-network-status-and-settings]
+    paths: ['.github/workflows/source-engine-android-smoke.yml', '.github/native-engine-smoke/**']
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: kovelyx-validate-and-preserve-source-aar
+  cancel-in-progress: false
+jobs:
+  source-aar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Vérifier la révision source du candidat archivé
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin 6d80f0b4c7b09982cba8719683d9e19f760e64b9
+          test "$(git rev-parse FETCH_HEAD)" = 6d80f0b4c7b09982cba8719683d9e19f760e64b9
+          # This immutable AAR proves the archived source revision, not every
+          # later change on HEAD. New rebuild candidates have separate proofs.
+          echo 'AAR conservé : source 6d80f0b4c7b09982cba8719683d9e19f760e64b9 ; empreinte binaire vérifiée à l’étape suivante.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Récupérer le candidat conservé dans Kovelyx
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          directory=.github/native-engine-smoke/libs
+          mkdir -p "$directory"
+          if ! gh release download native-vault-v1 --repo "$GITHUB_REPOSITORY" --pattern kovelyx-engine-source-built.aar --dir "$directory" --clobber; then
+            # Bootstrap only; a successful runtime test below preserves the AAR
+            # in the durable vault, independent of the 90-day CI artifact.
+            gh run download 41599581369 --repo "$GITHUB_REPOSITORY" --name kovelyx-native-android-multiabi-preuve --dir "$directory"
+          fi
+      - name: Vérifier le binaire et préparer l'émulateur
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'd4efcc2cffff911e90448a2efa28e7105b8a7bdec784fe3c9444514050a44dec  .github/native-engine-smoke/libs/kovelyx-engine-source-built.aar' | sha256sum --check
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libpulse0 libnss3 libxkbcommon0 libxcb1 libxcomposite1 libxcursor1 libxi6 libxtst6 libxrandr2 libxdamage1 libxfixes3
+      - name: Charger le JNI, ouvrir un torrent et lire ses octets vérifiés
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 3072M
+          disk-size: 4096M
+          disable-animations: true
+          script: chmod +x vendor/engine/platform/android/gradlew && ./vendor/engine/platform/android/gradlew -p .github/native-engine-smoke connectedDebugAndroidTest --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g"
+      - name: Conserver durablement le candidat seulement après réussite des tests
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view native-vault-v1 --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' > source-vault-assets.txt
+          if ! grep -qxF kovelyx-engine-source-built.aar source-vault-assets.txt; then
+            cd .github/native-engine-smoke/libs
+            sha256sum kovelyx-engine-source-built.aar > kovelyx-engine-source-built.aar.sha256
+            gh release upload native-vault-v1 --repo "$GITHUB_REPOSITORY" kovelyx-engine-source-built.aar kovelyx-engine-source-built.aar.sha256
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kovelyx-source-engine-android-runtime-report
+          path: |
+            .github/native-engine-smoke/build/outputs/androidTest-results/connected/**
+            .github/native-engine-smoke/build/reports/androidTests/connected/**
+          retention-days: 90

@@ -123,10 +123,7 @@ class CatalogRepositoryImpl @Inject constructor(
         skip: Int,
         extraArgs: Map<String, String>
     ): String {
-        val trimmedBase = baseUrl.trimEnd('/')
-        val queryStart = trimmedBase.indexOf('?')
-        val basePath = if (queryStart >= 0) trimmedBase.substring(0, queryStart).trimEnd('/') else trimmedBase
-        val baseQuery = if (queryStart >= 0) trimmedBase.substring(queryStart) else ""
+        val (basePath, baseQuery) = com.kovelyx.cloud.addons.splitConfiguredAddonBaseUrl(baseUrl)
 
         val catalogPath = if (extraArgs.isEmpty()) {
             if (skip > 0) {

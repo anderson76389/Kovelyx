@@ -106,7 +106,10 @@ fun String.isValidAvatarUrl(): Boolean {
         (
             value.startsWith("https://") ||
             value.startsWith("http://") ||
-            (value.startsWith("file:///") && "/kovelyx-profile-media/" in value)
+            (value.startsWith("file:///") &&
+                listOf("/kovelyx-profile-media/", "/kovelyx-cloud-profile-media/").any { it in value } &&
+                !value.contains("/../") && !value.contains("/./") &&
+                !value.contains("%2e", ignoreCase = true))
         )
 }
 

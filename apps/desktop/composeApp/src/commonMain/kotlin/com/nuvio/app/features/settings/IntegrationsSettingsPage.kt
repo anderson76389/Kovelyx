@@ -9,6 +9,9 @@ import nuvio.composeapp.generated.resources.settings_integrations_mdblist_descri
 import nuvio.composeapp.generated.resources.settings_integrations_debrid_description
 import nuvio.composeapp.generated.resources.settings_integrations_section_title
 import nuvio.composeapp.generated.resources.settings_integrations_tmdb_description
+import nuvio.composeapp.generated.resources.settings_org_section_video_services
+import nuvio.composeapp.generated.resources.settings_org_section_metadata
+import nuvio.composeapp.generated.resources.settings_org_debrid_title
 import org.jetbrains.compose.resources.stringResource
 
 internal fun LazyListScope.integrationsContent(
@@ -17,12 +20,27 @@ internal fun LazyListScope.integrationsContent(
     onMdbListClick: () -> Unit,
     onDebridClick: () -> Unit,
 ) {
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_integrations_section_title),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
+        item {
+            SettingsSection(
+                title = stringResource(Res.string.settings_org_section_video_services),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.settings_org_debrid_title),
+                    description = stringResource(Res.string.settings_integrations_debrid_description),
+                    isTablet = isTablet,
+                    onClick = onDebridClick,
+                )
+                }
+            }
+        }
+        item {
+            SettingsSection(
+                title = stringResource(Res.string.settings_org_section_metadata),
+                isTablet = isTablet,
+            ) {
+                SettingsGroup(isTablet = isTablet) {
                 SettingsNavigationRow(
                     title = stringResource(Res.string.compose_settings_page_tmdb_enrichment),
                     description = stringResource(Res.string.settings_integrations_tmdb_description),
@@ -30,7 +48,7 @@ internal fun LazyListScope.integrationsContent(
                     isTablet = isTablet,
                     onClick = onTmdbClick,
                 )
-                SettingsGroupDivider(isTablet = isTablet)
+                    SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
                     title = stringResource(Res.string.compose_settings_page_mdblist_ratings),
                     description = stringResource(Res.string.settings_integrations_mdblist_description),
@@ -38,14 +56,7 @@ internal fun LazyListScope.integrationsContent(
                     isTablet = isTablet,
                     onClick = onMdbListClick,
                 )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_debrid),
-                    description = stringResource(Res.string.settings_integrations_debrid_description),
-                    isTablet = isTablet,
-                    onClick = onDebridClick,
-                )
+                }
             }
         }
-    }
 }

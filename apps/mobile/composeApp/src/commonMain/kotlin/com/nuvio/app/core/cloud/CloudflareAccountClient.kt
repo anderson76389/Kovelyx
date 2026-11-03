@@ -215,15 +215,40 @@ object CloudflareAccountClient {
         return json.parseToJsonElement(response).jsonObject
     }
 
+    suspend fun putCatalogueChunk(profileId: String, kind: String, hash: String, index: Int, text: String) {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId); put("category", "catalogues")
+            put("itemKey", "snapshot:$kind:$hash:${index.toString().padStart(6, '0')}")
+            put("revision", 0); put("deleted", false)
+            put("payload", buildJsonObject { put("index", index); put("text", text) })
+        }
+        request("/v1/catalogue-chunk", body.toString(), active.bearerToken)
+        check(session?.userId == active.userId) { "Compte modifié" }
+    }
+
+    suspend fun publishCatalogueHead(profileId: String, kind: String, head: com.kovelyx.cloud.catalogues.CatalogueHead) {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId); put("kind", kind); put("sha256", head.sha256)
+            put("parts", head.parts); put("utf8Bytes", head.utf8Bytes); put("revision", head.revision)
+        }
+        request("/v1/catalogue-manifest", body.toString(), active.bearerToken)
+        check(session?.userId == active.userId) { "Compte modifié" }
+    }
+
     /** Read all pages, instead of silently truncating the library at 500 entries. */
-    suspend fun synchronizeAll(profileId: String): List<JsonObject> {
+    suspend fun synchronizeAll(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JsonObject> {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        require((snapshotKind == null && snapshotHash == null) ||
+            (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
+        val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
         val all = mutableListOf<JsonObject>()
         var offset = 0
         while (true) {
             val response = httpRequestRaw(
-                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25",
+                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery",
                 headers = mapOf("Authorization" to "Bearer ${active.bearerToken}"),
                 body = "", followRedirects = false, maxResponseBodyBytes = 1048576
             )
@@ -250,5 +275,41 @@ object CloudflareAccountClient {
         )
         check(response.status == 200) { "Kovelyx Cloud : synchronisation indisponible (HTTP ${response.status})" }
         return json.parseToJsonElement(response.body).jsonObject
+    }
+
+    private fun mediaPath(profileId: String, kind: String): String {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")) && kind in setOf("avatar", "background"))
+        return "/v1/profile-media?profileId=$profileId&kind=$kind"
+    }
+
+    suspend fun uploadProfileMedia(profileId: String, kind: String, expected: String?, image: com.kovelyx.cloud.media.ProfileImageBytes): String {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val response = httpRequestRaw("PUT", base() + mediaPath(profileId, kind), mapOf(
+            "Authorization" to "Bearer ${active.bearerToken}", "Origin" to base(),
+            "Content-Type" to image.mime, "If-Match" to (expected ?: "none"), "User-Agent" to "Kovelyx-Client"
+        ), "", followRedirects = false, maxResponseBodyBytes = 4096, bodyBytes = image.bytes)
+        check(response.status in 200..299) { "Le service d’images est indisponible ou doit être mis à jour (HTTP ${response.status})." }
+        check(session?.userId == active.userId) { "Compte modifié" }
+        return json.parseToJsonElement(response.body).jsonObject["version"]!!.jsonPrimitive.content
+    }
+
+    suspend fun downloadProfileMedia(profileId: String, kind: String, version: String): com.kovelyx.cloud.media.ProfileImageBytes {
+        require(version.matches(Regex("[a-f0-9]{64}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val response = httpRequestRaw("GET", base() + mediaPath(profileId, kind) + "&version=$version",
+            mapOf("Authorization" to "Bearer ${active.bearerToken}", "User-Agent" to "Kovelyx-Client"), "",
+            followRedirects = false, maxResponseBodyBytes = com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES)
+        check(response.status == 200 && session?.userId == active.userId) { "Téléchargement d’image non confirmé" }
+        val mime = response.headers.entries.firstOrNull { it.key.equals("Content-Type", true) }?.value?.substringBefore(';').orEmpty()
+        return com.kovelyx.cloud.media.ProfileImageBytes(mime, response.bodyBytes)
+    }
+
+    suspend fun removeProfileMedia(profileId: String, kind: String, expected: String?) {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val response = httpRequestRaw("DELETE", base() + mediaPath(profileId, kind), mapOf(
+            "Authorization" to "Bearer ${active.bearerToken}", "Origin" to base(),
+            "If-Match" to (expected ?: "none"), "User-Agent" to "Kovelyx-Client"
+        ), "", followRedirects = false, maxResponseBodyBytes = 4096)
+        check(response.status in 200..299 && session?.userId == active.userId) { "Suppression d’image non confirmée" }
     }
 }

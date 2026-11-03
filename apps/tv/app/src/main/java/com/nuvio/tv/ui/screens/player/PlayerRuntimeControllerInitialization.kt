@@ -1362,7 +1362,6 @@ internal fun PlayerRuntimeController.initializePlayer(
                             startProgressUpdates()
                             startWatchProgressSaving()
                             scheduleHideControls()
-                            tryShowParentalGuide()
                             emitScrobbleStart()
                         } else {
                             if (userPausedManually) schedulePauseOverlay() else cancelPauseOverlay()

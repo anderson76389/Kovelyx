@@ -1,5 +1,7 @@
 package com.nuvio.tv.ui.screens.profile
 
+import kotlinx.coroutines.flow.collect
+
 import androidx.tv.material3.MaterialTheme
 import com.nuvio.tv.ui.util.contentTextDirection
 import com.nuvio.tv.ui.theme.NuvioMotion
@@ -214,6 +216,12 @@ fun ProfileSelectionScreen(
     viewModel: ProfileSelectionViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    LaunchedEffect(viewModel) {
+        viewModel.mediaErrors.collect { reason ->
+            android.widget.Toast.makeText(context,
+                context.getString(R.string.profile_media_sync_pending, reason), android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
     val profiles by viewModel.profiles.collectAsState()
     val activeProfileId by viewModel.activeProfileId.collectAsState()
     val avatarCatalog by viewModel.avatarCatalog.collectAsState()
@@ -398,7 +406,7 @@ fun ProfileSelectionScreen(
                     isManagementMode = isManagementMode,
                     profiles = profiles,
                     activeProfileId = activeProfileId,
-                    canAddProfile = viewModel.canAddProfile,
+                    canAddProfile = false,
                     profilePinEnabled = profilePinEnabled,
                     avatarImageUrlsById = avatarImageUrlsById,
                     brandWordmarkRes = focusedBrandWordmarkRes,
@@ -586,21 +594,7 @@ fun ProfileSelectionScreen(
         }
 
         // Edit Profile Overlay
-        profileToEdit?.let { profile ->
-            EditProfileOverlay(
-                profile = profile,
-                avatarCatalog = avatarCatalog,
-                profileBackgroundCatalog = profileBackgroundCatalog,
-                hasProfileBackgroundAccess = hasProfileBackgroundAccess,
-                isSaving = isSaving,
-                avatarUrlResolver = { avatarId -> viewModel.getAvatarImageUrl(avatarId) },
-                onDismiss = { profileToEdit = null },
-                onSaveProfile = { updated ->
-                    viewModel.updateProfile(updated)
-                    profileToEdit = null
-                }
-            )
-        }
+
 
         LaunchedEffect(profileActionMessage) {
             if (profileActionMessage != null) {
@@ -651,21 +645,8 @@ fun ProfileSelectionScreen(
                 width = 360.dp,
                 suppressFirstKeyUp = suppressOptionsDialogFirstKeyUp
             ) {
-                Button(
-                    onClick = {
-                        longPressedProfile = null
-                        profileToEdit = profile
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(primaryDialogFocusRequester),
-                    colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
-                    )
-                ) {
-                    Text(stringResource(R.string.profile_edit_label))
-                }
+                Text(stringResource(R.string.profile_custom_avatar_web_panel_note))
+
 
                 if (profiles.size > 1) {
                     Button(
@@ -674,7 +655,7 @@ fun ProfileSelectionScreen(
                             settingsCopyError = null
                             settingsCopyTarget = profile
                         },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().focusRequester(primaryDialogFocusRequester),
                         colors = ButtonDefaults.colors(
                             containerColor = NuvioTheme.colors.BackgroundCard,
                             contentColor = NuvioTheme.colors.TextPrimary

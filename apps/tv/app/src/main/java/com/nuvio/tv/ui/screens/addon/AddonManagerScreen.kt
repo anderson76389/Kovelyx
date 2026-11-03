@@ -3,6 +3,7 @@ package com.nuvio.tv.ui.screens.addon
 import com.nuvio.tv.ui.theme.NuvioTheme
 
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhoneAndroid
@@ -69,6 +71,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -1284,25 +1289,18 @@ private fun AddonCard(
     toggleFocusRequester: FocusRequester? = null
 ) {
     if (isReadOnly) {
-        Surface(
-            onClick = { },
+        Card(
             modifier = modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            colors = ClickableSurfaceDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.BackgroundCard
-            ),
-            border = ClickableSurfaceDefaults.border(
-                focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                    shape = RoundedCornerShape(NuvioTheme.radii.md)
-                )
-            ),
-            shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
-            scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
+            colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
+            shape = RoundedCornerShape(NuvioTheme.radii.md)
         ) {
-            AddonCardContent(addon = addon, isReadOnly = true)
+            AddonCardContent(
+                addon = addon,
+                isReadOnly = true,
+                toggleFocusRequester = toggleFocusRequester
+            )
         }
     } else {
         val internalToggleFocusRequester = remember { FocusRequester() }
@@ -1348,6 +1346,9 @@ private fun AddonCardContent(
     showReorder: Boolean = true,
     toggleFocusRequester: FocusRequester? = null
 ) {
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+    val copiedMessage = stringResource(R.string.addons_link_copied)
     Column(modifier = Modifier.padding(20.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -1380,6 +1381,25 @@ private fun AddonCardContent(
                     }
                 }
             }
+            Button(
+                modifier = if (isReadOnly && toggleFocusRequester != null) {
+                    Modifier.focusRequester(toggleFocusRequester)
+                } else Modifier,
+                onClick = {
+                    clipboard.setText(AnnotatedString(addonManifestLink(addon.baseUrl)))
+                    Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
+                },
+                colors = ButtonDefaults.colors(
+                    containerColor = NuvioTheme.colors.BackgroundCard,
+                    contentColor = NuvioTheme.colors.TextSecondary,
+                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
+                    focusedContentColor = NuvioTheme.colors.Primary
+                ),
+                shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+            ) {
+                Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.addons_copy_link))
+            }
+            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
             if (!isReadOnly) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),

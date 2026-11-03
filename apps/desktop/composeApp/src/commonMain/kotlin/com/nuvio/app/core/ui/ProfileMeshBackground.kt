@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -32,12 +32,10 @@ fun ProfileMeshBackground(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .drawBehind {
+            .drawWithCache {
                 val maxDimension = maxOf(size.width, size.height)
 
-                drawRect(color = baseColor, size = size)
-                drawRect(
-                    brush = Brush.radialGradient(
+                val brush1 = Brush.radialGradient(
                         colorStops = arrayOf(
                             0f to primaryMeshColor.copy(alpha = 0.46f),
                             0.38f to primaryMeshColor.copy(alpha = 0.2f),
@@ -46,11 +44,8 @@ fun ProfileMeshBackground(
                         ),
                         center = Offset(size.width * -0.08f, size.height * -0.02f),
                         radius = maxDimension * 0.7f,
-                    ),
-                    size = size,
-                )
-                drawRect(
-                    brush = Brush.radialGradient(
+                    )
+                val brush2 = Brush.radialGradient(
                         colorStops = arrayOf(
                             0f to animatedProfileColor.copy(alpha = 0.24f),
                             0.44f to animatedProfileColor.copy(alpha = 0.09f),
@@ -59,11 +54,8 @@ fun ProfileMeshBackground(
                         ),
                         center = Offset(size.width * 0.16f, size.height * 0.18f),
                         radius = maxDimension * 0.46f,
-                    ),
-                    size = size,
-                )
-                drawRect(
-                    brush = Brush.radialGradient(
+                    )
+                val brush3 = Brush.radialGradient(
                         colorStops = arrayOf(
                             0f to secondaryMeshColor.copy(alpha = 0.16f),
                             0.5f to secondaryMeshColor.copy(alpha = 0.05f),
@@ -71,11 +63,8 @@ fun ProfileMeshBackground(
                         ),
                         center = Offset(size.width * 0.9f, size.height * 0.12f),
                         radius = maxDimension * 0.36f,
-                    ),
-                    size = size,
-                )
-                drawRect(
-                    brush = Brush.radialGradient(
+                    )
+                val brush4 = Brush.radialGradient(
                         colorStops = arrayOf(
                             0f to tertiaryMeshColor.copy(alpha = 0.08f),
                             0.52f to tertiaryMeshColor.copy(alpha = 0.03f),
@@ -83,9 +72,14 @@ fun ProfileMeshBackground(
                         ),
                         center = Offset(size.width * 0.28f, size.height * 0.4f),
                         radius = maxDimension * 0.28f,
-                    ),
-                    size = size,
-                )
+                    )
+                onDrawBehind {
+                    drawRect(color = baseColor)
+                    drawRect(brush1)
+                    drawRect(brush2)
+                    drawRect(brush3)
+                    drawRect(brush4)
+                }
             },
     )
 }

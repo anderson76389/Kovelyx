@@ -1,3 +1,5 @@
+import {handleProfileMedia,MAX_PROFILE_MEDIA_BYTES} from "./profile-media.mjs";
+import {handleCatalogueManifest,handleCatalogueChunk,catalogueKinds,cataloguePrefix} from "./catalogue-sync.mjs";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validSyncInput, isAllowedOrigin } from "./contract.mjs";
@@ -5,9 +7,9 @@ import { jsonResponse, validProfileName, validProfileId, validSyncOffset, validS
 function corsHeaders(origin) {
   return origin === "https://anderson76389.github.io"
     ? { "access-control-allow-origin": origin,
-        "access-control-allow-headers": "content-type, authorization",
-        "access-control-allow-methods": "GET, POST, OPTIONS",
-        "access-control-expose-headers": "set-auth-token",
+        "access-control-allow-headers": "content-type, authorization, if-match",
+        "access-control-allow-methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+        "access-control-expose-headers": "set-auth-token, x-kovelyx-media-version",
         "vary": "Origin" }
     : {};
 }
@@ -66,11 +68,17 @@ async function handleSync(request, env, user, url) {
     if (!/^(?:[1-9]|1[0-9]|2[0-5])$/.test(requestedLimit))
       return jsonResponse({error:"Limite invalide"},400);
     const limit = Number(requestedLimit);
+    const kind=url.searchParams.get('snapshotKind'),hash=url.searchParams.get('snapshotHash');
+    const filtered=kind!==null || hash!==null;
+    if(filtered && (!catalogueKinds.has(kind)|| !/^[a-f0-9]{64}$/.test(hash||'')))
+      return jsonResponse({error:'Version de catalogue invalide'},400);
+    const condition=filtered ? " AND category='catalogues' AND deleted=0 AND item_key>=? AND item_key<?" :
+      " AND category IN ('addons','favorites','library','plugins','preferences','profile_settings','watch_progress','watched_items')";
     // 25 x 32 KiB fits under the native clients' 1 MiB response ceiling.
     const result = await env.DB.prepare(
       "SELECT category, item_key AS itemKey, payload, revision, deleted, updated_at AS updatedAt "+
-      "FROM kv_sync WHERE owner_id=? AND profile_id=? ORDER BY category, item_key LIMIT ? OFFSET ?"
-    ).bind(user.id, profileId, limit + 1, offset).all();
+      "FROM kv_sync WHERE owner_id=? AND profile_id=?"+condition+" ORDER BY category, item_key LIMIT ? OFFSET ?"
+    ).bind(user.id,profileId,...(filtered?[cataloguePrefix(kind,hash),cataloguePrefix(kind,hash)+'~']:[]),limit+1,offset).all();
     const rows = result.results || [];
     const partial = rows.length > limit;
     return jsonResponse({
@@ -85,6 +93,10 @@ async function handleSync(request, env, user, url) {
   }
   if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
   const body = await readJson(request);
+  if(body?.category==='catalogues' && body.itemKey?.startsWith('snapshot:'))
+    return jsonResponse({error:'Utiliser le transfert de catalogues'},400);
+  if(body?.category==='preferences' && ['catalogue_collections','catalogue_layout'].includes(body.itemKey))
+    return jsonResponse({error:'Utiliser la publication complète du catalogue'},400);
   if (!validSyncInput(body)) return jsonResponse({error:"Données invalides ou trop volumineuses"},400);
   if (!await ownedProfile(env, user.id, body.profileId))
     return jsonResponse({error:"Profil introuvable"},404);
@@ -139,7 +151,7 @@ async function handleProfiles(request,env,user,url) {
       "DELETE FROM kv_profiles WHERE owner_id=? AND id=? "+
       "AND (SELECT count(*) FROM kv_profiles WHERE owner_id=?)>1"
     ).bind(user.id,profileId,user.id).run();
-    if (removed.meta?.changes !== 1)
+    if (Number(removed.meta?.changes || 0) < 1)
       return jsonResponse({error:"Le dernier profil ne peut pas être supprimé"},409);
     return jsonResponse({deleted:true,id:profileId});
   }
@@ -178,9 +190,11 @@ async function productionReadiness(env) {
     ).first();
     if (typeof sync?.sql !== "string" || !sync.sql.includes("'watched_items'"))
       return unavailable();
+    const media = await env.DB.prepare("SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN ('kv_profile_media','kv_profile_media_chunks','kv_profile_media_uploads','kv_profile_media_upload_chunks')").all();
+    if ((media.results || []).length !== 4 || !media.results.some(row => row.name === "kv_profile_media" && row.sql?.includes("18000000")) || !media.results.some(row => row.name === "kv_profile_media_chunks" && row.sql?.includes("0 AND 34"))) return unavailable();
     return jsonResponse({
       service:"Kovelyx Cloud",provider:"Cloudflare D1",
-      status:"ok",schema:"0002_watched_history"
+      status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES,catalogueSnapshotSchema:1
     });
   } catch {
     return unavailable();
@@ -224,7 +238,10 @@ export default {
       if (url.pathname === "/v1/me" && request.method === "GET")
         return respond(jsonResponse({id:user.id,email:user.email,name:user.name}));
       if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user,url));
+      if (url.pathname === "/v1/profile-media") return respond(await handleProfileMedia(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
+      if (url.pathname === "/v1/catalogue-manifest") return respond(await handleCatalogueManifest(request,env,user,await readJson(request)));
+      if (url.pathname === "/v1/catalogue-chunk") return respond(await handleCatalogueChunk(request,env,user,await readJson(request)));
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {
       console.error("Kovelyx Cloud request failed", {path:url.pathname,kind:error?.name || "Error"});

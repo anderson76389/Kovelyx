@@ -24,8 +24,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.json.JSONObject
@@ -40,7 +38,12 @@ class CloudflareTvDataSync @Inject constructor(
     private val profileManager: ProfileManager,
     private val library: LibraryPreferences,
     private val progress: WatchProgressPreferences,
-    private val watched: WatchedItemsPreferences
+    private val watched: WatchedItemsPreferences,
+    private val mutations: WatchStateMutationStore,
+    private val addons: AddonSyncService,
+    private val catalogues: CloudflareTvCatalogueSync,
+    private val preferences: CloudflareTvPreferencesSync,
+    private val profileMedia: CloudflareTvProfileMediaSync
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
@@ -59,9 +62,8 @@ class CloudflareTvDataSync @Inject constructor(
                     progress.observeAllRawProgress(profileId),
                     watched.observeAllItems(profileId)
                 ) { libraryItems, positions, history ->
-                    Triple(libraryItems, positions, history).hashCode()
-                }.distinctUntilChanged()
-                    .debounce(2500L)
+                    Triple(libraryItems, positions, history)
+                }.cloudflareSnapshotUpdates()
                     .collect {
                         if (CloudflareTvAccountClient.account != null) request(profileId)
                     }
@@ -109,6 +111,10 @@ class CloudflareTvDataSync @Inject constructor(
     suspend fun synchronize(profileId: Int) = mutex.withLock {
         if (CloudflareTvAccountClient.account == null ||
             profileManager.activeProfileId.value != profileId) return@withLock
+        var imagesReady = true
+        try { profileMedia.synchronize(reportFailure = true, includeImages = false) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { imagesReady = false; Log.w(TAG, "Profils Cloudflare différés", error) }
         // Never equate the numeric local ID with an ordinal in the cloud list:
         // deleted/reordered profiles would silently mix another person's history.
         val localProfile = profileManager.profiles.value
@@ -134,6 +140,10 @@ class CloudflareTvDataSync @Inject constructor(
                 // created a profile. Create the default only on empty accounts.
                 CloudflareTvAccountClient.createCloudProfile(localProfile.name)
             }
+            matchingProfiles.isEmpty() && remoteProfiles.size < 8 &&
+                profileManager.profiles.value.count { it.name.equals(localProfile.name, true) } == 1 -> {
+                CloudflareTvAccountClient.createCloudProfile(localProfile.name)
+            }
             else -> {
                 Log.w(TAG, "Profil TV ambigu : synchronisation Cloudflare non effectuée")
                 return@withLock
@@ -142,12 +152,52 @@ class CloudflareTvDataSync @Inject constructor(
         if (localProfile.cloudProfileId != uuid) {
             profileManager.linkCloudProfile(profileId, uuid)
         }
-        val remote = CloudflareTvAccountClient.syncRows(uuid).associateBy {
+        val rows = CloudflareTvAccountClient.syncRows(uuid)
+        val remote = rows.associateBy {
             it.optString("category") + "|" + it.optString("itemKey")
         }
+        val deletedKeys = flushCloudflareWatchDeletes(
+            profileId, mutations,
+            remote.filterKeys { it.startsWith("watch_progress|") }.mapKeys {
+                it.key.removePrefix("watch_progress|")
+            }.mapValues { (key, row) -> CloudflareDeleteRow(key, revision(row), deleted(row)) },
+            remote.filterKeys { it.startsWith("watched_items|") }.map { (key, row) ->
+                val data = payload(row)
+                CloudflareDeleteRow(key.removePrefix("watched_items|"), revision(row), deleted(row),
+                    data?.optString("id").orEmpty(),
+                    data?.takeIf { it.has("season") }?.optInt("season"),
+                    data?.takeIf { it.has("episode") }?.optInt("episode"))
+            }
+        ) { category, key, revision ->
+            CloudflareTvAccountClient.writeSync(uuid, category, key,
+                JSONObject().put("removed", true), revision, deleted = true)
+        }
         syncLibrary(profileId, uuid, remote)
-        syncProgress(profileId, uuid, remote)
-        syncWatched(profileId, uuid, remote)
+        syncProgress(profileId, uuid, remote.filterKeys {
+            !it.startsWith("watch_progress|") || it.removePrefix("watch_progress|") !in deletedKeys.progress
+        }, deletedKeys.progress)
+        syncWatched(profileId, uuid, remote.filterKeys {
+            !it.startsWith("watched_items|") || it.removePrefix("watched_items|") !in deletedKeys.watched
+        }, deletedKeys.watched)
+        // Sync watch state before external providers; install addons before applying their layout.
+        var addonsReady = true
+        try { addons.synchronizeCloudAddons(uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { addonsReady = false; Log.w(TAG, "Extensions Cloudflare différées, configuration locale conservée", error) }
+        val catalogueReady = try { catalogues.synchronize(profileId, uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (_: Exception) { false }
+        var preferencesReady = true
+        try { preferencesReady = preferences.synchronize(profileId, uuid, rows) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { preferencesReady = false; Log.w(TAG, "Préférences TV différées", error) }
+        try { profileMedia.synchronize(reportFailure = true) }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (error: Exception) { imagesReady = false; Log.w(TAG, "Images Cloudflare différées", error) }
+        check(preferencesReady) { "Préférences TV en attente" }
+        check(addonsReady) { "Extensions TV en attente" }
+        check(catalogueReady) { "Catalogues TV en attente" }
+        check(imagesReady) { "Images Cloudflare en attente" }
     }
 
     private fun revision(record: JSONObject?): Int = record?.optInt("revision") ?: 0
@@ -175,14 +225,31 @@ class CloudflareTvDataSync @Inject constructor(
                 record.optLong("updatedAt", Long.MAX_VALUE)
             } else payload(record)?.optLong("savedAtEpochMs", Long.MIN_VALUE)
                 ?: Long.MIN_VALUE
-            if (record != null && item.addedAt <= remoteAdded) continue
+            if (record != null && (item.addedAt < remoteAdded ||
+                (deleted(record) && item.addedAt == remoteAdded))) continue
             val itemData = JSONObject()
                 .put("id", item.id).put("type", item.type)
                 .put("name", item.name.take(500)).put("savedAtEpochMs", item.addedAt)
-            item.poster?.takeIf { it.startsWith("https://") }?.let {
-                itemData.put("poster", it.substringBefore('?').substringBefore('#').take(1500))
+            fun text(key: String, value: String?, limit: Int = 8192) {
+                value?.takeIf { it.isNotBlank() && it.length <= limit }?.let { itemData.put(key, it) }
             }
-            CloudflareTvAccountClient.writeSync(uuid, "library", key, itemData, revision(record))
+            text("poster", item.poster)
+            text("banner", item.background)
+            text("logo", item.logo)
+            text("addonBaseUrl", item.addonBaseUrl)
+            text("description", item.description, 8000)
+            text("releaseInfo", item.releaseInfo, 500)
+            text("imdbRating", item.imdbRating?.toString(), 20)
+            itemData.put("genres", org.json.JSONArray(item.genres))
+            itemData.put("posterShape", item.posterShape.name.lowercase().replaceFirstChar { it.titlecase() })
+            val previous = payload(record)
+            val outgoing = if (item.addedAt == remoteAdded && previous != null) {
+                JSONObject(com.kovelyx.cloud.library.enrichLibraryMetadata(
+                    kotlinx.serialization.json.Json.parseToJsonElement(previous.toString()) as kotlinx.serialization.json.JsonObject,
+                    kotlinx.serialization.json.Json.parseToJsonElement(itemData.toString()) as kotlinx.serialization.json.JsonObject).toString())
+            } else itemData
+            if (previous?.toString() == outgoing.toString()) continue
+            CloudflareTvAccountClient.writeSync(uuid, "library", key, outgoing, revision(record))
         }
         library.acknowledgePush(profileId, before.mutationRevision)
         val local = before.items.associateBy { librarySyncIdentity(it.id, it.type) }
@@ -201,13 +268,14 @@ class CloudflareTvDataSync @Inject constructor(
                 type = data.optString("type"),
                 name = data.optString("name"),
                 poster = data.optString("poster").takeIf { it.isNotBlank() },
-                posterShape = PosterShape.POSTER,
-                background = null,
-                description = null,
-                releaseInfo = null,
-                imdbRating = null,
-                genres = emptyList(),
-                addonBaseUrl = null,
+                posterShape = PosterShape.fromString(data.optString("posterShape")),
+                background = data.optString("banner").takeIf { it.isNotBlank() },
+                logo = data.optString("logo").takeIf { it.isNotBlank() },
+                description = data.optString("description").takeIf { it.isNotBlank() },
+                releaseInfo = data.optString("releaseInfo").takeIf { it.isNotBlank() },
+                imdbRating = data.optString("imdbRating").toFloatOrNull(),
+                genres = data.optJSONArray("genres")?.let { values -> (0 until values.length()).map { values.getString(it) } }.orEmpty(),
+                addonBaseUrl = data.optString("addonBaseUrl").takeIf { it.isNotBlank() },
                 addedAt = data.optLong("savedAtEpochMs", 0L)
             )
             if (item.id.isBlank() || item.type.isBlank()) continue
@@ -215,14 +283,22 @@ class CloudflareTvDataSync @Inject constructor(
             if (deleted(record) && current == null) continue
             if (deleted(record) && current != null &&
                 current.addedAt > record.optLong("updatedAt", Long.MAX_VALUE)) continue
-            if (!deleted(record) && current != null && current.addedAt >= item.addedAt) continue
+            if (!deleted(record) && current != null && current.addedAt > item.addedAt) continue
+            val enriched = if (!deleted(record) && current?.addedAt == item.addedAt) current.copy(
+                poster = current.poster ?: item.poster, background = current.background ?: item.background,
+                logo = current.logo ?: item.logo, description = current.description ?: item.description,
+                releaseInfo = current.releaseInfo ?: item.releaseInfo, imdbRating = current.imdbRating ?: item.imdbRating,
+                genres = current.genres.ifEmpty { item.genres }, addonBaseUrl = current.addonBaseUrl ?: item.addonBaseUrl
+            ) else item
+            if (!deleted(record) && enriched == current) continue
             cursor += 1L
-            events += LibraryDeltaEvent(cursor, if (deleted(record)) "delete" else "upsert", item)
+            events += LibraryDeltaEvent(cursor, if (deleted(record)) "delete" else "upsert", enriched)
         }
         if (events.isNotEmpty()) library.applyRemoteDelta(profileId, events)
     }
 
-    private suspend fun syncProgress(profileId: Int, uuid: String, remote: Map<String, JSONObject>) {
+    private suspend fun syncProgress(profileId: Int, uuid: String, remote: Map<String, JSONObject>,
+                                     deletedKeys: Set<String>) {
         val local = progress.getAllRawEntries(profileId)
         for ((key, record) in remote) {
             if (!key.startsWith("watch_progress|")) continue
@@ -256,6 +332,7 @@ class CloudflareTvDataSync @Inject constructor(
             ), profileId)
         }
         for ((key, item) in local) {
+            if (key in deletedKeys) continue
             val cloudKey = key.take(200)
             if (cloudKey.isBlank()) continue
             val record = remote["watch_progress|$cloudKey"]
@@ -278,12 +355,14 @@ class CloudflareTvDataSync @Inject constructor(
             item.episode?.let { data.put("episodeNumber", it) }
             CloudflareTvAccountClient.writeSync(uuid, "watch_progress", cloudKey, data, revision(record))
         }
+        mutations.acknowledgeProgressUpserts(local.filterKeys { it !in deletedKeys }, profileId)
     }
 
     private fun watchedKey(item: WatchedItem): String =
         "${item.contentType.trim()}:${item.contentId.trim()}:${item.season ?: -1}:${item.episode ?: -1}"
 
-    private suspend fun syncWatched(profileId: Int, uuid: String, remote: Map<String, JSONObject>) {
+    private suspend fun syncWatched(profileId: Int, uuid: String, remote: Map<String, JSONObject>,
+                                    deletedKeys: Set<String>) {
         val local = watched.getAllItems(profileId)
         val localByKey = local.associateBy(::watchedKey)
         val additions = mutableListOf<WatchedItem>()
@@ -317,6 +396,7 @@ class CloudflareTvDataSync @Inject constructor(
         }
         for (item in local) {
             val key = watchedKey(item)
+            if (key in deletedKeys) continue
             if (key.length > 200) continue
             val record = remote["watched_items|$key"]
             val remoteTime = if (record != null && deleted(record)) {
@@ -332,6 +412,7 @@ class CloudflareTvDataSync @Inject constructor(
             item.episode?.let { data.put("episode", it) }
             CloudflareTvAccountClient.writeSync(uuid, "watched_items", key, data, revision(record))
         }
+        mutations.acknowledgeWatchedUpserts(local.filter { watchedKey(it) !in deletedKeys }, profileId)
     }
 
     private companion object { const val TAG = "KovelyxTvD1Sync" }

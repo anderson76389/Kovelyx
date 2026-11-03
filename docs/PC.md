@@ -88,7 +88,7 @@ Faire une **copie** de ces données avant un changement important de version. Un
 
 Cet écran concerne les **métadonnées de l'œuvre**, pas automatiquement le serveur de comptes Kovelyx.
 
-La récupération suit cet ordre : **extensions de métadonnées installées → TMDB (si disponible) → Cinemeta (dernier recours pour les identifiants IMDb `tt...`)**. Cette dernière source publique, distincte de Nuvio, ne demande pas de compte ni de clé API ; elle reste toutefois un service tiers susceptible d'être inaccessible. Le résultat de Cinemeta peut être en anglais ; une clé TMDB valide configurée en français est préférable pour les descriptions françaises.
+La récupération utilise les extensions de métadonnées installées, puis TMDB si une configuration valide est disponible. Installez votre extension de métadonnées (par exemple AIO Metadata) pour les fiches ; aucun fournisseur public caché n’est appelé.
 
 Si toutes les fiches échouent :
 1. Vérifier les extensions dans **Paramètres → Extensions** : une extension fournissant la ressource `meta` doit être activée et son manifeste accessible.

@@ -1,5 +1,7 @@
 package com.nuvio.tv.data.repository
 
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
+import com.nuvio.tv.core.sync.CloudflareTvDataSync
 import com.nuvio.tv.core.auth.AuthManager
 import com.nuvio.tv.core.network.NetworkResult
 import com.nuvio.tv.core.sync.WatchProgressSyncService
@@ -142,6 +144,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
     private val trackingHistoryWriters: TrackingHistoryWriterRegistry,
     private val mutationStore: WatchStateMutationStore,
     private val serverWatched: ServerWatched,
+    private val cloudflareSync: CloudflareTvDataSync,
 ) : WatchProgressRepository {
     companion object {
         private const val TAG = "WatchProgressRepo"
@@ -188,6 +191,10 @@ class WatchProgressRepositoryImpl @Inject constructor(
     private val metadataHydrationLimit = 30
 
     private fun triggerRemoteSync(profileId: Int) {
+        if (CloudflareTvAccountClient.enabled) {
+            cloudflareSync.request(profileId)
+            return
+        }
         if (isSyncingFromRemote) return
         if (!hasCompletedInitialPull) return
         if (!authManager.isAuthenticated) return
@@ -211,6 +218,10 @@ class WatchProgressRepositoryImpl @Inject constructor(
     }
 
     private fun triggerWatchedItemsSync(profileId: Int) {
+        if (CloudflareTvAccountClient.enabled) {
+            cloudflareSync.request(profileId)
+            return
+        }
         if (isSyncingFromRemote) return
         if (!hasCompletedInitialWatchedItemsPull) return
         if (!authManager.isAuthenticated) return
@@ -754,7 +765,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
             traktSettingsDataStore.removeDismissedNextUpKeysForContent(progress.contentId, profileId)
         }
         val progressKey = progressKey(progress)
-        val shouldPushRemote = syncRemote &&
+        val shouldPushRemote = !CloudflareTvAccountClient.enabled && syncRemote &&
             authManager.isAuthenticated &&
             remoteProgressWriteDeduplicator.shouldSend(
                 profileId = profileId,
@@ -770,6 +781,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
         }
         watchProgressPreferences.saveProgress(progress, profileId = profileId)
 
+        // Cloudflare observes and samples stored snapshots, rather than sending every player tick.
         if (shouldPushRemote) {
             syncScope.launch(NonCancellable) {
                 watchProgressSyncService.pushSingleToRemote(progressKey, progress, profileId)
@@ -778,7 +790,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
                         triggerRemoteSync(profileId)
                     }
             }
-        } else if (syncRemote && authManager.isAuthenticated) {
+        } else if (!CloudflareTvAccountClient.enabled && syncRemote && authManager.isAuthenticated) {
             triggerRemoteSync(profileId)
         }
 
@@ -849,7 +861,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
             }.forEach { operation -> operation.await() }
         }
         watchProgressPreferences.removeProgress(contentId, season, episode, profileId)
-        if (authManager.isAuthenticated && remoteDeleteKeys.isNotEmpty()) {
+        if (!CloudflareTvAccountClient.enabled && authManager.isAuthenticated && remoteDeleteKeys.isNotEmpty()) {
             watchProgressSyncService.deleteFromRemote(remoteDeleteKeys, profileId)
                 .onFailure { error ->
                     Log.w(TAG, "removeProgress remote delete failed; pending mutation retained", error)
@@ -882,13 +894,13 @@ class WatchProgressRepositoryImpl @Inject constructor(
         )
         watchProgressPreferences.removeProgress(contentId, season, episode, profileId)
         watchedItemsPreferences.unmarkAsWatched(contentId, season, episode, profileId = profileId)
-        if (authManager.isAuthenticated && remoteDeleteKeys.isNotEmpty()) {
+        if (!CloudflareTvAccountClient.enabled && authManager.isAuthenticated && remoteDeleteKeys.isNotEmpty()) {
             watchProgressSyncService.deleteFromRemote(remoteDeleteKeys, profileId)
                 .onFailure { error ->
                     Log.w(TAG, "removeFromHistory remote delete failed; pending mutation retained", error)
                 }
         }
-        if (authManager.isAuthenticated) {
+        if (!CloudflareTvAccountClient.enabled && authManager.isAuthenticated) {
             watchedItemsSyncService.deleteFromRemote(contentId, season, episode, profileId = profileId)
                 .onFailure { error ->
                     Log.w(TAG, "removeFromHistory watched item remote delete failed; pending mutation retained", error)
@@ -938,7 +950,7 @@ class WatchProgressRepositoryImpl @Inject constructor(
             played = false,
             profileId = profileId
         )
-        if (authManager.isAuthenticated) {
+        if (!CloudflareTvAccountClient.enabled && authManager.isAuthenticated) {
             watchProgressSyncService.deleteFromRemote(remoteDeleteKeys.distinct(), profileId)
                 .onFailure { error -> Log.w(TAG, "removeFromHistoryBatch remote delete failed", error) }
             watchedItemsSyncService.deleteFromRemoteBatch(contentId, episodePairs, profileId = profileId)

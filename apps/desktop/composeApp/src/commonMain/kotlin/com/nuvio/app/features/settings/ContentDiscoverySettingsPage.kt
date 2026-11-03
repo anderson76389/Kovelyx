@@ -28,6 +28,44 @@ internal fun LazyListScope.contentDiscoveryContent(
     onMediaServersClick: () -> Unit,
 ) {
     item {
+        SettingsSection(
+            title = stringResource(Res.string.settings_content_discovery_section_sources),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.compose_settings_page_addons),
+                    description = stringResource(
+                        if (AppFeaturePolicy.personalMediaAddonCopyEnabled) {
+                            Res.string.settings_content_discovery_addons_description_appstore
+                        } else {
+                            Res.string.settings_content_discovery_addons_description
+                        },
+                    ),
+                    isTablet = isTablet,
+                    onClick = onAddonsClick,
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.compose_settings_page_media_servers),
+                    description = stringResource(Res.string.settings_content_discovery_media_servers_description),
+                    isTablet = isTablet,
+                    onClick = onMediaServersClick,
+                )
+                if (showPluginsEntry) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.compose_settings_page_plugins),
+                        description = stringResource(Res.string.settings_content_discovery_plugins_description),
+                        isTablet = isTablet,
+                        onClick = onPluginsClick,
+                    )
+                }
+            }
+        }
+    }
+
+    item {
         val recentSearchesEnabled by remember {
             SearchHistoryRepository.ensureLoaded()
             SearchHistoryRepository.enabled
@@ -49,39 +87,4 @@ internal fun LazyListScope.contentDiscoveryContent(
         }
     }
 
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_content_discovery_section_sources),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_addons),
-                    description = stringResource(
-                        if (AppFeaturePolicy.personalMediaAddonCopyEnabled) {
-                            Res.string.settings_content_discovery_addons_description_appstore
-                        } else {
-                            Res.string.settings_content_discovery_addons_description
-                        },
-                    ),
-                    isTablet = isTablet,
-                    onClick = onAddonsClick,
-                )
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_media_servers),
-                    description = stringResource(Res.string.settings_content_discovery_media_servers_description),
-                    isTablet = isTablet,
-                    onClick = onMediaServersClick,
-                )
-                if (showPluginsEntry) {
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_plugins),
-                        description = stringResource(Res.string.settings_content_discovery_plugins_description),
-                        isTablet = isTablet,
-                        onClick = onPluginsClick,
-                    )
-                }
-            }
-        }
-    }
 }

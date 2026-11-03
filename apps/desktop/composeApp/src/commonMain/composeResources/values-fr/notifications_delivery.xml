@@ -1,0 +1,5 @@
+<resources>
+    <string name="notifications_delivery_description">Sur Windows, Kovelyx doit rester ouvert ou réduit. Les réglages de notifications Windows peuvent masquer les alertes.</string>
+    <string name="notifications_test_generic_description">Envoyez une notification pour vérifier la réception sur cet appareil.</string>
+    <string name="notifications_open_system_settings">Paramètres de notifications du système</string>
+</resources>

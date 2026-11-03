@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 /**
  * Local, private Windows images. This does NOT upload photographs to Supabase.
  * The file chooser accepts common raster formats, validates decoded dimensions
- * and stores an optimized copy inside %APPDATA%/Kovelyx/profile-media.
+ * and stores an unchanged copy inside %APPDATA%/Kovelyx/profile-media.
  */
 internal actual object ProfileLocalImages {
     actual val supported: Boolean =
@@ -42,8 +42,8 @@ internal actual object ProfileLocalImages {
                     dialogTitle = if (background) "Choisir un fond de profil" else "Choisir une photo de profil"
                     fileSelectionMode = JFileChooser.FILES_ONLY
                     isMultiSelectionEnabled = false
-                    isAcceptAllFileFilterUsed = false
-                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, GIF, BMP)", "jpg", "jpeg", "png", "gif", "bmp")
+                    isAcceptAllFileFilterUsed = true
+                    fileFilter = FileNameExtensionFilter("Images (JPG, PNG, WebP, GIF)", "jpg", "jpeg", "png", "webp", "gif")
                 }
                 if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
                     selectedPath = chooser.selectedFile?.toPath()
@@ -51,15 +51,22 @@ internal actual object ProfileLocalImages {
             }
 
             val original = selectedPath ?: return@withContext null
-            require(Files.isRegularFile(original) && Files.size(original) in 1..12_000_000L) {
-                "L'image doit être un fichier de 12 Mo maximum."
+            require(Files.isRegularFile(original) && Files.size(original) in 1..com.kovelyx.cloud.media.MAX_PROFILE_SOURCE_BYTES) {
+                "L’image doit être un fichier de 64 Mo maximum avant optimisation."
             }
-            // Conserver les GIF animés tels quels : l'ancien redimensionnement
-            // ImageIO ne gardait que la première image de l'animation.
-            val keepGif = original.fileName.toString().lowercase(Locale.ROOT).endsWith(".gif")
-            if (keepGif) validateImageDimensions(original)
-            val resized = if (keepGif) null else readAndResize(original, background)
-            val outputExtension = if (keepGif) ".gif" else if (background) ".jpg" else ".png"
+            require(Files.size(original) <= com.kovelyx.cloud.media.MAX_PROFILE_MEDIA_BYTES) { "L’image originale dépasse 18 Mo ; aucune compression automatique n’est appliquée." }
+            val mime = Files.newInputStream(original).use {
+                requireNotNull(com.kovelyx.cloud.media.profileOriginalMime(it.readNBytes(12))) {
+                    "Format non pris en charge : choisissez JPEG, PNG, WebP ou GIF."
+                }
+            }
+            validateImageDimensions(original)
+            val outputExtension = when (mime) {
+                "image/jpeg" -> ".jpg"
+                "image/png" -> ".png"
+                "image/webp" -> ".webp"
+                else -> ".gif"
+            }
             val target = imageDir.resolve(
                 (if (background) "background-" else "avatar-") +
                     UUID.randomUUID().toString() + outputExtension
@@ -67,15 +74,7 @@ internal actual object ProfileLocalImages {
             Files.createDirectories(imageDir)
             val pending = Files.createTempFile(imageDir, "kovelyx-import-", ".tmp")
             try {
-                if (keepGif) {
-                    Files.copy(original, pending, StandardCopyOption.REPLACE_EXISTING)
-                } else {
-                    Files.newOutputStream(pending).use { output ->
-                        check(ImageIO.write(requireNotNull(resized), if (background) "jpg" else "png", output)) {
-                            "L'encodeur de l'image n'est pas disponible."
-                        }
-                    }
-                }
+                Files.copy(original, pending, StandardCopyOption.REPLACE_EXISTING)
                 Files.move(pending, target, StandardCopyOption.REPLACE_EXISTING)
             } finally {
                 Files.deleteIfExists(pending)
@@ -84,8 +83,20 @@ internal actual object ProfileLocalImages {
         }
     }
 
-    private fun validateImageDimensions(path: Path) {
-        ImageIO.createImageInputStream(path.toFile()).use { stream ->
+    private fun imageInput(path: Path): javax.imageio.stream.ImageInputStream {
+        val original = requireNotNull(ImageIO.createImageInputStream(path.toFile())) { "Impossible de lire l’image." }
+        if (ImageIO.getImageReaders(original).hasNext()) return original
+        original.close()
+        val bytes = Files.readAllBytes(path)
+        val png = org.jetbrains.skia.Image.makeFromEncoded(bytes).use { image ->
+            require(image.width > 0 && image.height > 0 && image.width.toLong() * image.height <= 32_000_000L) { "Image supérieure à 32 mégapixels." }
+            requireNotNull(image.encodeToData(org.jetbrains.skia.EncodedImageFormat.PNG)).use { it.bytes }
+        }
+        return requireNotNull(ImageIO.createImageInputStream(java.io.ByteArrayInputStream(png))) { "Format d’image non pris en charge." }
+    }
+
+    internal fun validateImageDimensions(path: Path) {
+        imageInput(path).use { stream ->
             requireNotNull(stream) { "Impossible de lire l'image." }
             val readers = ImageIO.getImageReaders(stream)
             require(readers.hasNext()) { "Format d'image non reconnu." }
@@ -103,8 +114,8 @@ internal actual object ProfileLocalImages {
         }
     }
 
-    private fun readAndResize(path: Path, background: Boolean): BufferedImage {
-        ImageIO.createImageInputStream(path.toFile()).use { stream ->
+    internal fun readAndResize(path: Path, background: Boolean): BufferedImage {
+        imageInput(path).use { stream ->
             requireNotNull(stream) { "Impossible de lire l'image." }
             val readers = ImageIO.getImageReaders(stream)
             require(readers.hasNext()) { "Format d'image non reconnu." }
@@ -148,10 +159,12 @@ internal actual object ProfileLocalImages {
     actual fun isManagedUri(url: String): Boolean {
         if (!supported || !url.startsWith("file:", ignoreCase = true)) return false
         return runCatching {
-            val path = Path.of(URI(url)).toAbsolutePath().normalize()
-            path.startsWith(imageDir) && Files.isRegularFile(path) &&
+            val path = Path.of(URI(url)).toRealPath()
+            val cloudDir = DesktopStorage.rootDir.resolve("cloud-profile-media").toAbsolutePath().normalize()
+            (path.startsWith(imageDir) || path.startsWith(cloudDir)) && Files.isRegularFile(path) &&
                 (path.fileName.toString().lowercase(Locale.ROOT).endsWith(".png") ||
                     path.fileName.toString().lowercase(Locale.ROOT).endsWith(".jpg") ||
+                    path.fileName.toString().lowercase(Locale.ROOT).endsWith(".webp") ||
                     path.fileName.toString().lowercase(Locale.ROOT).endsWith(".gif"))
         }.getOrDefault(false)
     }

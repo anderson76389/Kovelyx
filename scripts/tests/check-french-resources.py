@@ -22,13 +22,14 @@ RESOURCE_ROOT = (
     / "composeApp/src/commonMain/composeResources"
 )
 SOURCE_MODULES = (
+    "addon_actions.xml",
     "strings.xml",
     "autosync_strings.xml",
     "autosync_toast_strings.xml",
     "strings_mdblist.xml",
     "strings_servers.xml",
 )
-FORMAT_ARGUMENT = re.compile(r"%(?:[1-9]\d*\$)?[sd]")
+FORMAT_ARGUMENT = re.compile(r"%(?:[1-9]\d*\$)?[-+#0,(]*\d*(?:\.\d+)?[sdfoxXeEgGaAcCbBhHn]")
 
 
 def read_strings(path: Path) -> dict[str, str]:
@@ -90,14 +91,23 @@ def validate_plurals() -> int:
 def main() -> int:
     english: dict[str, str] = {}
     for filename in SOURCE_MODULES:
-        path = RESOURCE_ROOT / "values" / filename
+        if not (RESOURCE_ROOT / "values" / filename).is_file():
+            raise ValueError(f"Missing required source module: {filename}")
+    for path in sorted((RESOURCE_ROOT / "values").glob("*.xml")):
+        filename = path.name
         values = read_strings(path)
         overlap = english.keys() & values.keys()
         if overlap:
             raise ValueError(f"{filename} duplicates source keys: {sorted(overlap)}")
         english.update(values)
 
-    french = read_strings(RESOURCE_ROOT / "values-fr" / "strings.xml")
+    french: dict[str, str] = {}
+    for path in sorted((RESOURCE_ROOT / "values-fr").glob("*.xml")):
+        values = read_strings(path)
+        overlap = french.keys() & values.keys()
+        if overlap:
+            raise ValueError(f"{path.name} duplicates French keys: {sorted(overlap)}")
+        french.update(values)
     missing = sorted(english.keys() - french.keys())
     extra = sorted(french.keys() - english.keys())
     mismatches = []
