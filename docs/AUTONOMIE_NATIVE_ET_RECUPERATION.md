@@ -34,3 +34,7 @@ Les résultats des constructions et tests d'applications sont visibles dans GitH
 ## Sauvegarde privée D1
 
 Le workflow chiffre les exports et les conserve 90 jours ; le calendrier quotidien à 03:40 UTC devient actif sur la branche principale. Le contrôle de restauration reconstruit chaque image/GIF et chaque catalogue publié pour vérifier taille et SHA-256, y compris les caractères Unicode entre blocs. Une validation échouée laisse la copie brute chiffrée disponible, avec un statut explicite d’échec ; elle ne la présente pas comme valide. Le bundle de signature Android est également chiffré avec le même certificat de récupération lorsqu’il est configuré dans GitHub ; le manifeste précise sa présence. Le secret Better Auth existant ne peut pas être exporté depuis Cloudflare et n’est pas présenté comme sauvegardé.
+
+## Sources natives identifiées
+
+La DLL MPV annonce `v0.40.0-465-gf6c116491`. Le commit public correspondant est `f6c116491a82314332f8ded74fc92b2b5cdf7e25`. Son archive source est préservée avec SHA-256, ainsi que Boost 1.86.0, libtorrent et try_signal aux commits épinglés, et OpenSSL 3.5.7. Les licences se trouvent dans ces archives. La version MPV identifie une base de sources, pas tous les patches ni toutes les versions des bibliothèques liées statiquement. Les sources exactes de QuickJS/Nextlib historiques restent non établies ; leur AAR original est préservé.
