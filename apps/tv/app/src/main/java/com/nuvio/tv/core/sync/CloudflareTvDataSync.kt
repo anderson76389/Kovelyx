@@ -225,14 +225,30 @@ class CloudflareTvDataSync @Inject constructor(
                 record.optLong("updatedAt", Long.MAX_VALUE)
             } else payload(record)?.optLong("savedAtEpochMs", Long.MIN_VALUE)
                 ?: Long.MIN_VALUE
-            if (record != null && item.addedAt <= remoteAdded) continue
+            if (record != null && item.addedAt < remoteAdded) continue
             val itemData = JSONObject()
                 .put("id", item.id).put("type", item.type)
                 .put("name", item.name.take(500)).put("savedAtEpochMs", item.addedAt)
-            item.poster?.takeIf { it.startsWith("https://") }?.let {
-                itemData.put("poster", it.substringBefore('?').substringBefore('#').take(1500))
+            fun text(key: String, value: String?, limit: Int = 8192) {
+                value?.takeIf { it.isNotBlank() && it.length <= limit }?.let { itemData.put(key, it) }
             }
-            CloudflareTvAccountClient.writeSync(uuid, "library", key, itemData, revision(record))
+            text("poster", item.poster)
+            text("banner", item.background)
+            text("logo", item.logo)
+            text("addonBaseUrl", item.addonBaseUrl)
+            text("description", item.description, 8000)
+            text("releaseInfo", item.releaseInfo, 500)
+            text("imdbRating", item.imdbRating?.toString(), 20)
+            itemData.put("genres", org.json.JSONArray(item.genres))
+            itemData.put("posterShape", item.posterShape.name.lowercase().replaceFirstChar { it.titlecase() })
+            val previous = payload(record)
+            val outgoing = if (item.addedAt == remoteAdded && previous != null) {
+                JSONObject(com.kovelyx.cloud.library.enrichLibraryMetadata(
+                    kotlinx.serialization.json.Json.parseToJsonElement(previous.toString()) as kotlinx.serialization.json.JsonObject,
+                    kotlinx.serialization.json.Json.parseToJsonElement(itemData.toString()) as kotlinx.serialization.json.JsonObject).toString())
+            } else itemData
+            if (previous?.toString() == outgoing.toString()) continue
+            CloudflareTvAccountClient.writeSync(uuid, "library", key, outgoing, revision(record))
         }
         library.acknowledgePush(profileId, before.mutationRevision)
         val local = before.items.associateBy { librarySyncIdentity(it.id, it.type) }
@@ -251,13 +267,14 @@ class CloudflareTvDataSync @Inject constructor(
                 type = data.optString("type"),
                 name = data.optString("name"),
                 poster = data.optString("poster").takeIf { it.isNotBlank() },
-                posterShape = PosterShape.POSTER,
-                background = null,
-                description = null,
-                releaseInfo = null,
-                imdbRating = null,
-                genres = emptyList(),
-                addonBaseUrl = null,
+                posterShape = PosterShape.fromString(data.optString("posterShape")),
+                background = data.optString("banner").takeIf { it.isNotBlank() },
+                logo = data.optString("logo").takeIf { it.isNotBlank() },
+                description = data.optString("description").takeIf { it.isNotBlank() },
+                releaseInfo = data.optString("releaseInfo").takeIf { it.isNotBlank() },
+                imdbRating = data.optString("imdbRating").toFloatOrNull(),
+                genres = data.optJSONArray("genres")?.let { values -> (0 until values.length()).map { values.getString(it) } }.orEmpty(),
+                addonBaseUrl = data.optString("addonBaseUrl").takeIf { it.isNotBlank() },
                 addedAt = data.optLong("savedAtEpochMs", 0L)
             )
             if (item.id.isBlank() || item.type.isBlank()) continue
@@ -265,9 +282,16 @@ class CloudflareTvDataSync @Inject constructor(
             if (deleted(record) && current == null) continue
             if (deleted(record) && current != null &&
                 current.addedAt > record.optLong("updatedAt", Long.MAX_VALUE)) continue
-            if (!deleted(record) && current != null && current.addedAt >= item.addedAt) continue
+            if (!deleted(record) && current != null && current.addedAt > item.addedAt) continue
+            val enriched = if (!deleted(record) && current?.addedAt == item.addedAt) current.copy(
+                poster = current.poster ?: item.poster, background = current.background ?: item.background,
+                logo = current.logo ?: item.logo, description = current.description ?: item.description,
+                releaseInfo = current.releaseInfo ?: item.releaseInfo, imdbRating = current.imdbRating ?: item.imdbRating,
+                genres = current.genres.ifEmpty { item.genres }, addonBaseUrl = current.addonBaseUrl ?: item.addonBaseUrl
+            ) else item
+            if (!deleted(record) && enriched == current) continue
             cursor += 1L
-            events += LibraryDeltaEvent(cursor, if (deleted(record)) "delete" else "upsert", item)
+            events += LibraryDeltaEvent(cursor, if (deleted(record)) "delete" else "upsert", enriched)
         }
         if (events.isNotEmpty()) library.applyRemoteDelta(profileId, events)
     }

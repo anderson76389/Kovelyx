@@ -30,8 +30,8 @@ class DebridSettingsTest {
 
         val services = DebridProviders.configuredServices(settings)
 
-        assertEquals(listOf(DebridProviders.ALL_DEBRID_ID, DebridProviders.REAL_DEBRID_ID, DebridProviders.TORBOX_ID, DebridProviders.PREMIUMIZE_ID), services.map { it.provider.id })
-        assertEquals(listOf("ad_key", "rd_key", "tb_key", "pm_key"), services.map { it.apiKey })
+        assertEquals(listOf(DebridProviders.ALL_DEBRID_ID, DebridProviders.REAL_DEBRID_ID, DebridProviders.TORBOX_ID), services.map { it.provider.id })
+        assertEquals(listOf("ad_key", "rd_key", "tb_key"), services.map { it.apiKey })
         assertTrue(settings.hasAnyApiKey)
         assertTrue(DebridProviders.isVisible(DebridProviders.REAL_DEBRID_ID))
         assertTrue(DebridProviders.isVisible(DebridProviders.ALL_DEBRID_ID))
@@ -45,11 +45,11 @@ class DebridSettingsTest {
                 DebridProviders.TORBOX_ID to "tb_key",
                 DebridProviders.PREMIUMIZE_ID to "pm_key",
             ),
-            preferredResolverProviderId = DebridProviders.PREMIUMIZE_ID,
+            preferredResolverProviderId = DebridProviders.TORBOX_ID,
         )
         val fallback = preferred.copy(preferredResolverProviderId = DebridProviders.REAL_DEBRID_ID)
 
-        assertEquals(DebridProviders.PREMIUMIZE_ID, preferred.activeResolverProviderId)
+        assertEquals(DebridProviders.TORBOX_ID, preferred.activeResolverProviderId)
         assertEquals(DebridProviders.TORBOX_ID, fallback.activeResolverProviderId)
         assertTrue(preferred.canResolvePlayableLinks)
     }

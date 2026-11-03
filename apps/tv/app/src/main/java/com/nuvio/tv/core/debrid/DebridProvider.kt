@@ -74,7 +74,7 @@ object DebridProviders {
         capabilities = setOf(DebridProviderCapability.ClientResolve, DebridProviderCapability.LocalTorrentResolve),
     )
 
-    private val registered = listOf(AllDebrid, RealDebrid, Torbox, Premiumize)
+    private val registered = listOf(AllDebrid, RealDebrid, Torbox)
 
     fun all(): List<DebridProvider> = registered
 

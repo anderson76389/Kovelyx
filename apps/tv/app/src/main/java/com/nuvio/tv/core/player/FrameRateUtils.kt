@@ -352,14 +352,17 @@ object FrameRateUtils {
     ): DisplayModeSwitchResult? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return null
         if (frameRate <= 0f) return null
-        // The device refresh range owns the window; legacy AFR must not override its bounds.
-        if (com.kovelyx.display.DisplayRefreshSettings.state.value.enabled) return null
 
         val switchPlan = withContext(Dispatchers.Main) {
             val window = activity.window ?: return@withContext null
             val display = window.decorView.display ?: return@withContext null
             val activeMode = display.mode
-            val supportedModes = display.supportedModes.toList()
+            val refresh = com.kovelyx.display.DisplayRefreshSettings.state.value
+            val supportedModes = display.supportedModes.filter { mode ->
+                !refresh.enabled || com.kovelyx.display.nominalRefreshRate(mode.refreshRate)?.let {
+                    it in refresh.minimum..refresh.maximum
+                } == true
+            }
 
             val selected = selectDisplayMode(
                 modes = supportedModes.map { it.toSpec() },
@@ -371,7 +374,6 @@ object FrameRateUtils {
             )
             val modeBest = selected?.let { spec ->
                 supportedModes.firstOrNull { it.modeId == spec.modeId }
-                    ?: activeMode.takeIf { it.modeId == spec.modeId }
             }
             if (modeBest == null) {
                 return@withContext Pair<Display.Mode?, DisplayModeSwitchResult?>(
@@ -379,6 +381,8 @@ object FrameRateUtils {
                     DisplayModeSwitchResult(activeMode)
                 )
             }
+            if (refresh.enabled) com.kovelyx.display.DisplayRefreshSettings.setPlaybackMode(
+                com.kovelyx.display.DisplayModeSpec(modeBest.modeId, modeBest.physicalWidth, modeBest.physicalHeight, modeBest.refreshRate))
             recordOriginalMode(display)
             if (modeBest.modeId == activeMode.modeId) {
                 Log.d(TAG, "Display already at optimal rate ${activeMode.refreshRate}Hz for ${frameRate}fps")
@@ -445,6 +449,7 @@ object FrameRateUtils {
     }
 
     fun clearOriginalDisplayMode() {
+        com.kovelyx.display.DisplayRefreshSettings.setPlaybackMode(null)
         originalModeId = null
     }
 

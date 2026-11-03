@@ -27,7 +27,6 @@ internal object DebridProviderApis {
     private val registered = listOf(
         AllDebridProviderApi(),
         TorboxDebridProviderApi(),
-        PremiumizeDebridProviderApi(),
         RealDebridProviderApi(),
     )
 

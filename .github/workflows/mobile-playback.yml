@@ -35,7 +35,7 @@ jobs:
           ram-size: 3072M
           heap-size: 512M
           disable-animations: true
-          script: chmod +x apps/mobile/gradlew && ./apps/mobile/gradlew -p apps/mobile :androidApp:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class=com.nuvio.android.VideoPlaybackSmokeTest
+          script: chmod +x apps/mobile/gradlew && ./apps/mobile/gradlew -p apps/mobile :androidApp:connectedFullDebugAndroidTest -Pkovelyx.optimizedDistribution=true --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class=com.nuvio.android.VideoPlaybackSmokeTest
       - name: Rapports de lecture et diagnostics Android
         if: always()
         uses: actions/upload-artifact@v4

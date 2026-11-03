@@ -107,7 +107,7 @@ jobs:
               - '.github/workflows/build.yml'
 
   tv:
-    name: Android TV - APK Full Debug
+    name: Android TV - APK optimisé (identité existante)
     needs: changes
     if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.tv == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'tv')) }}
     runs-on: ubuntu-latest
@@ -158,7 +158,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
+          ./gradlew :app:assembleFullDebug -Pkovelyx.optimizedDistribution=true --no-daemon --max-workers=1 --stacktrace -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Tester les liens profonds Kovelyx TV
         working-directory: apps/tv
         shell: bash
@@ -175,7 +175,11 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" | tee /tmp/kv-tv-badging.txt
           grep -F "package: name='com.kovelyx.tv.debug'" /tmp/kv-tv-badging.txt
-          # The launcher label is intentionally clean even for debug builds.
+          if grep -q '^application-debuggable' /tmp/kv-tv-badging.txt; then
+            echo "::error::L’APK public TV ne doit pas être débogable"
+            exit 1
+          fi
+          # Preserve the existing package identity for seamless updates.
           grep -Fx "application-label:'Kovelyx'" /tmp/kv-tv-badging.txt || {
             echo "::error::Android TV doit afficher uniquement Kovelyx, sans suffixe Test/Debug"
             exit 1
@@ -209,7 +213,7 @@ jobs:
           retention-days: 30
 
   mobile:
-    name: Android mobile - APK Full Debug
+    name: Android mobile - APK optimisé (identité existante)
     needs: changes
     if: ${{ ((github.event_name == 'push' || github.event_name == 'pull_request') && needs.changes.outputs.mobile == 'true') || (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'mobile')) }}
     runs-on: ubuntu-latest
@@ -260,7 +264,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./gradlew
-          ./gradlew :androidApp:assembleFullDebug --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
+          ./gradlew :androidApp:assembleFullDebug -Pkovelyx.optimizedDistribution=true --no-daemon --max-workers=2 --stacktrace -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxMetaspaceSize=768m" -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Vérifier l'APK mobile et l'identité Kovelyx
         shell: bash
         run: |
@@ -272,6 +276,10 @@ jobs:
           "$tools/apksigner" verify --verbose "${apks[0]}" >/dev/null
           "$tools/aapt" dump badging "${apks[0]}" > /tmp/kv-android-badging
           grep -F "package: name='com.kovelyx.mobile.debug'" /tmp/kv-android-badging
+          if grep -q '^application-debuggable' /tmp/kv-android-badging; then
+            echo "::error::L’APK public mobile ne doit pas être débogable"
+            exit 1
+          fi
           grep -Fx "application-label:'Kovelyx'" /tmp/kv-android-badging || {
             echo "::error::Android mobile doit afficher uniquement Kovelyx, sans suffixe Test/Debug"
             exit 1

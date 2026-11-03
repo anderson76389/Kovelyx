@@ -59,7 +59,7 @@ object AndroidDisplayRefresh {
             fun android.view.Display.Mode.spec() = DisplayModeSpec(modeId, physicalWidth, physicalHeight, refreshRate)
             val modes = display.supportedModes.map { it.spec() }
             val range = DisplayRefreshSettings.state.value
-            val selected = displayRefreshCandidates(modes, current.spec(), range.minimum, range.maximum).firstOrNull()
+            val selected = displayRefreshCandidates(modes, current.spec(), range.minimum, range.maximum, range.playbackMode).firstOrNull()
             val attributes = activity.window.attributes
             val modeId = selected?.id ?: 0
             val refreshRate = selected?.hertz ?: 0f
@@ -88,7 +88,7 @@ object AndroidDisplayRefresh {
             override fun onDisplayChanged(id: Int) = apply()
         }
         manager.registerDisplayListener(listener, Handler(Looper.getMainLooper()))
-        scope.launch { DisplayRefreshSettings.state.map { it.minimum to it.maximum }.distinctUntilChanged().collect { apply() } }
+        scope.launch { DisplayRefreshSettings.state.map { Triple(it.minimum, it.maximum, it.playbackMode) }.distinctUntilChanged().collect { apply() } }
         activity.window.decorView.post { apply() }
         (activity as? LifecycleOwner)?.lifecycle?.addObserver(LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) apply()

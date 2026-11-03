@@ -7,6 +7,18 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.assertThrows
 
 class DisplayRefreshPolicyTest {
+    @Test fun playbackVoteIsTemporaryAndCannotEscapeUserBounds() {
+        val state = DisplayRefreshController()
+        var writes = 0
+        state.initialize(60, 144, 60) { _, _ -> writes++ }
+        state.setPlaybackMode(mode60)
+        assertEquals(mode60, displayRefreshCandidates(modes, mode60, 60, 144, state.state.value.playbackMode).first())
+        assertEquals(mode144, displayRefreshCandidates(modes, mode60, 90, 144, state.state.value.playbackMode).first())
+        state.setPlaybackMode(null)
+        assertEquals(mode144, displayRefreshCandidates(modes, mode60, 60, 144, state.state.value.playbackMode).first())
+        assertEquals(0, writes)
+    }
+
     @Test fun pickerAdjustsOtherBoundAtomicallyAndRejectsInventedModes() {
         val state = DisplayRefreshController()
         val writes = mutableListOf<Pair<Int, Int>>()

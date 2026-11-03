@@ -27,6 +27,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.booleanOrNull
@@ -226,10 +228,13 @@ object CloudflareDataSync {
                 row["updatedAt"]?.jsonPrimitive?.longOrNull ?: Long.MAX_VALUE
             } else row?.get("payload")?.jsonObject
                 ?.get("savedAtEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
-            if (row != null && item.savedAtEpochMs <= remoteDate) continue
-            CloudflareAccountClient.writeSync(
-                cloudId, "library", key, libraryPayload(item), revision(row)
-            )
+            if (row != null && item.savedAtEpochMs < remoteDate) continue
+            val localPayload = libraryPayload(item)
+            val previous = row?.get("payload") as? JsonObject
+            val outgoing = if (item.savedAtEpochMs == remoteDate && previous != null)
+                com.kovelyx.cloud.library.enrichLibraryMetadata(previous, localPayload) else localPayload
+            if (previous == outgoing) continue
+            CloudflareAccountClient.writeSync(cloudId, "library", key, outgoing, revision(row))
         }
         LibraryRepository.acknowledgeCloudSnapshot(snapshot)
         val pendingUpserts = snapshot.pendingUpsertKeys.mapTo(mutableSetOf()) {
@@ -257,9 +262,15 @@ object CloudflareDataSync {
             val payload = row["payload"]?.jsonObject ?: continue
             val item = runCatching { json.decodeFromJsonElement(LibraryItem.serializer(), payload) }
                 .getOrNull() ?: continue
-            if (current != null && current.savedAtEpochMs >= item.savedAtEpochMs) continue
+            if (current != null && current.savedAtEpochMs > item.savedAtEpochMs) continue
+            val enriched = if (current?.savedAtEpochMs == item.savedAtEpochMs) {
+                val currentPayload = json.encodeToJsonElement(LibraryItem.serializer(), current).jsonObject
+                json.decodeFromJsonElement(LibraryItem.serializer(),
+                    com.kovelyx.cloud.library.enrichLibraryMetadata(currentPayload, payload))
+            } else item
+            if (enriched == current) continue
             eventId += 1L
-            events += LibraryDeltaEvent(eventId, "upsert", item)
+            events += LibraryDeltaEvent(eventId, "upsert", enriched)
         }
         LibraryRepository.applyCloudChanges(profileId, events)
     }
@@ -269,9 +280,18 @@ object CloudflareDataSync {
         put("type", item.type)
         put("name", item.name.take(500))
         put("savedAtEpochMs", item.savedAtEpochMs)
-        item.poster?.takeIf { it.startsWith("https://") }?.let {
-            put("poster", it.substringBefore('?').substringBefore('#').take(1500))
+        fun text(key: String, value: String?, limit: Int = 8192) {
+            value?.takeIf { it.isNotBlank() && it.length <= limit }?.let { put(key, it) }
         }
+        text("poster", item.poster)
+        text("banner", item.banner)
+        text("logo", item.logo)
+        text("addonBaseUrl", item.addonBaseUrl)
+        text("description", item.description, 8000)
+        text("releaseInfo", item.releaseInfo, 500)
+        text("imdbRating", item.imdbRating, 20)
+        put("genres", JsonArray(item.genres.map(::JsonPrimitive)))
+        put("posterShape", item.posterShape.name)
     }
 
     private suspend fun synchronizeProgress(

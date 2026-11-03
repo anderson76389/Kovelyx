@@ -22,11 +22,11 @@ fun validateDisplayRefreshRange(minimum: Int, maximum: Int) {
 }
 
 /** Preserve resolution and request the fastest supported mode within BOTH bounds. */
-fun displayRefreshCandidates(modes: List<DisplayModeSpec>, current: DisplayModeSpec, minimum: Int, maximum: Int): List<DisplayModeSpec> {
+fun displayRefreshCandidates(modes: List<DisplayModeSpec>, current: DisplayModeSpec, minimum: Int, maximum: Int, playbackMode: DisplayModeSpec? = null): List<DisplayModeSpec> {
     validateDisplayRefreshRange(minimum, maximum)
     return modes.filter { mode -> mode.width == current.width && mode.height == current.height &&
         nominalRefreshRate(mode.hertz)?.let { it in minimum..maximum } == true }
-        .sortedByDescending { it.hertz }
+        .sortedWith(compareByDescending<DisplayModeSpec> { it.id == playbackMode?.id }.thenByDescending { it.hertz })
 }
 
 fun restoreDisplayRefreshRange(minimum: Int?, maximum: Int?, legacy: Int): Pair<Int, Int> {
@@ -43,6 +43,7 @@ data class DisplayRefreshState(
     val maximum: Int = 60,
     val available: Set<Int> = emptySet(),
     val actual: Int? = null,
+    val playbackMode: DisplayModeSpec? = null,
 ) {
     val appliedInRange: Boolean get() = actual?.let { it in minimum..maximum } == true
 }
@@ -56,6 +57,10 @@ open class DisplayRefreshController {
         val restored = restoreDisplayRefreshRange(minimum, maximum, legacy)
         save = persist
         mutable.value = mutable.value.copy(enabled = true, minimum = restored.first, maximum = restored.second)
+    }
+    /** Temporary AFR vote; never persisted or synchronized to another device. */
+    fun setPlaybackMode(mode: DisplayModeSpec?) {
+        mutable.value = mutable.value.copy(playbackMode = mode)
     }
     fun selectRange(minimum: Int, maximum: Int) {
         validateDisplayRefreshRange(minimum, maximum)

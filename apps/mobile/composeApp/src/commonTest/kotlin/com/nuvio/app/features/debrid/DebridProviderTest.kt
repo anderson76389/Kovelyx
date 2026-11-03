@@ -5,8 +5,13 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DebridProviderTest {
+    @Test fun premiumizeIsRetiredEvenWithAnOldStoredCredential() {
+        kotlin.test.assertNull(DebridProviders.byId("premiumize"))
+        assertTrue(DebridProviders.configuredServices(DebridSettings(providerApiKeys = mapOf("premiumize" to "old"))).isEmpty())
+    }
+
     @Test fun `provider order starts with AllDebrid and Real Debrid before Torbox`() {
-        kotlin.test.assertEquals(listOf("alldebrid", "realdebrid", "torbox", "premiumize"), DebridProviders.visible().map { it.id })
+        kotlin.test.assertEquals(listOf("alldebrid", "realdebrid", "torbox"), DebridProviders.visible().map { it.id })
         assertTrue(DebridProviders.AllDebrid.supports(DebridProviderCapability.LocalTorrentResolve))
     }
 

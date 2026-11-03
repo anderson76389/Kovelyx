@@ -8,7 +8,7 @@ import org.junit.Test
 
 class DebridProvidersTest {
     @Test fun allDebridIsStoredAndAvailableBeforeRealDebridAndTorbox() {
-        assertEquals(listOf("alldebrid", "realdebrid", "torbox", "premiumize"), DebridProviders.visible().map { it.id })
+        assertEquals(listOf("alldebrid", "realdebrid", "torbox"), DebridProviders.visible().map { it.id })
         val settings = DebridSettings(enabled = true, allDebridApiKey = "ad")
         assertEquals("ad", settings.apiKeyFor("alldebrid"))
         assertEquals("alldebrid", settings.activeResolverProviderId)
