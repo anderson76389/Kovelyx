@@ -16,7 +16,7 @@ Conserver un binaire permet de continuer à le distribuer sans le dépôt d'orig
 
 | Composant | Conservation | Reconstruction exacte de l'ancien binaire |
 |---|---|---|
-| Moteur P2P | Sources et binaires archivés ; AAR reconstruit conservé dans la release technique | Android quatre ABI reconstruit, puis chargement JNI et lecture torrent intégrale/partielle validés sur émulateur ; remplacement en production non effectué. Windows complet compilé, tests en cours après correction de l’arrêt réseau |
+| Moteur P2P | Sources et binaires archivés ; AAR reconstruit conservé dans la release technique | Android quatre ABI reconstruit, puis chargement JNI et lecture torrent intégrale/partielle validés sur émulateur ; remplacement en production non effectué. Windows complet reconstruit avec libtorrent, 97 tests réussis et smoke test C API réussi ; remplacement en production non effectué |
 | MPV Windows | DLL vérifiée dans l'archive durable, SHA-256 et taille imposés | Non certifiée : le binaire historique n'indique pas à lui seul tous ses patches/options |
 | QuickJS Android modifié | AAR existant archivé | Sources exactes du fork historique à établir |
 | Media3 et FFmpeg | AARs, sources et patches présents selon composant | Toute la chaîne de génération des AAR historiques n'est pas certifiée |
@@ -44,3 +44,13 @@ La DLL MPV annonce `v0.40.0-465-gf6c116491`. Le commit public correspondant est 
 Le candidat AAR conservé correspond à la révision source `6d80f0b4c7b09982cba8719683d9e19f760e64b9`, SHA-256 `d4efcc2cffff911e90448a2efa28e7105b8a7bdec784fe3c9444514050a44dec`. Sa compatibilité publique JVM/JNI a été comparée au binaire historique. Les exécutions [41675824970](https://github.com/anderson76389/Kovelyx/actions/runs/41675824970) et [41680600339](https://github.com/anderson76389/Kovelyx/actions/runs/41680600339) ont chargé ce vrai AAR et lu les octets vérifiés d’un torrent, en entier et par intervalle HTTP. Sa copie et son empreinte sont disponibles dans [native-vault-v1](https://github.com/anderson76389/Kovelyx/releases/tag/native-vault-v1).
 
 Ce résultat porte sur ce candidat précis. Il ne prouve pas toute modification ultérieure du moteur, tous les codecs, tous les pairs réseau ou tous les appareils. Les reconstructions suivantes conservent leurs propres rapports et ne remplacent pas automatiquement les bibliothèques en production.
+
+## Preuves Windows et contrôles des applications
+
+Le moteur Windows complet a été reconstruit avec OpenSSL et libtorrent, avec les domaines Nuvio et remotes NuvioMedia bloqués. L’exécution [41683461179, job Windows](https://github.com/anderson76389/Kovelyx/actions/runs/41683461179/job/126082879581) a réussi ses 97 cas et le smoke test C API : zéro échec. L’arrêt d’une requête HTTP incomplète reste borné au lieu d’attendre le délai Winsock de cinq secondes.
+
+Le contrôle [41684771031](https://github.com/anderson76389/Kovelyx/actions/runs/41684771031) a aussi réussi : moteur P2P Linux complet, tests C++ Windows sans P2P et module JVM. Les cas qui soumettent de vrais torrents sont conservés dans les suites P2P ; ils ne sont pas exécutés contre le backend volontairement désactivé.
+
+Sur l’application mobile, [41683896716](https://github.com/anderson76389/Kovelyx/actions/runs/41683896716) a réussi ses quatre essais instrumentés : lecture H264 avec ExoPlayer/libmpv, choix des modes d’affichage et notification effectivement reçue par Android. Cette variante utilise les règles réservées à l’instrumentation décrites plus haut.
+
+Ces preuves natives et mobiles ne remplacent pas les validations de l’application PC complète. Son essai concurrent d’extensions a révélé un résultat JavaScript encore en attente après une évaluation ; le traitement et la régression correspondants doivent passer dans la suite complète avant publication.
