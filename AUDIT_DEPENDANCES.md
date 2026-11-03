@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1363** ; références statiques à Nuvio/NuvioMedia : **6802**.
+Fichiers texte examinés : **1367** ; références statiques à Nuvio/NuvioMedia : **6799**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -121,16 +121,16 @@ Fichiers texte examinés : **1363** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:27`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:28`
 - `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:29`
-- …et 6722 autres correspondances (plafond d'affichage).
+- …et 6719 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia : **53**.
+Fichiers texte examinés : **1406** ; références statiques à Nuvio/NuvioMedia : **62**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 182 |
-| `github.com` | 120 |
+| `example.com` | 184 |
+| `github.com` | 121 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 68 |
 | `schemas.android.com` | 47 |
@@ -138,8 +138,8 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 | `www.imdb.com` | 25 |
 | `.` | 21 |
 | `original.com` | 20 |
+| `mdblist.com` | 17 |
 | `api.trakt.tv` | 16 |
-| `mdblist.com` | 15 |
 | `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
 | `cdn.example.com` | 12 |
@@ -149,14 +149,13 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 | `pm` | 9 |
 | `img` | 9 |
 | `postersplus.example.com` | 9 |
+| `trakt.tv` | 8 |
 | `api.mdblist.com` | 8 |
 | `catalog.example` | 8 |
-| `trakt.tv` | 7 |
 | `www.youtube.com` | 6 |
 | `192.168.1.10` | 5 |
 | `a.com` | 5 |
 | `fake.example` | 4 |
-| `v3-cinemeta.strem.io` | 4 |
 | `opensubtitles.example` | 4 |
 | `image.tmdb.org` | 4 |
 
@@ -171,6 +170,13 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:18`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:19`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:29`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:30`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
@@ -178,6 +184,8 @@ Fichiers texte examinés : **1405** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:109`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
@@ -222,7 +230,7 @@ Fichiers texte examinés : **1781** ; références statiques à Nuvio/NuvioMedia
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 181 |
+| `example.com` | 183 |
 | `github.com` | 136 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 76 |
@@ -231,17 +239,17 @@ Fichiers texte examinés : **1781** ; références statiques à Nuvio/NuvioMedia
 | `www.imdb.com` | 25 |
 | `.` | 21 |
 | `original.com` | 20 |
+| `mdblist.com` | 17 |
 | `simkl.com` | 16 |
 | `api.trakt.tv` | 16 |
-| `mdblist.com` | 15 |
 | `api.ratingposterdb.com` | 14 |
 | `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
 | `example.invalid` | 11 |
+| `trakt.tv` | 10 |
 | `pm` | 9 |
-| `trakt.tv` | 9 |
 | `img` | 9 |
 | `image.tmdb.org` | 9 |
 | `postersplus.example.com` | 9 |
