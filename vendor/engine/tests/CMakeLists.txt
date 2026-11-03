@@ -55,3 +55,12 @@ endif()
 
 # A blocked socket must fail the check rather than consume the whole CI job.
 set_tests_properties(nuvio_engine_tests nuvio_engine_c_api_smoke PROPERTIES TIMEOUT 180)
+
+if(WIN32 AND NUVIO_ENGINE_BUILD_SHARED)
+    # CTest runs the EXEs from tests/, while the shared engine is in its own
+    # target directory. Without this, Windows can show a loader dialog before
+    # main() instead of reporting any test output.
+    set_tests_properties(nuvio_engine_tests nuvio_engine_c_api_smoke PROPERTIES
+        ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:nuvio_engine>"
+    )
+endif()

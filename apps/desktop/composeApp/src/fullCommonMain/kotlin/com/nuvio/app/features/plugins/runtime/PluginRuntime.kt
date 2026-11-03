@@ -109,8 +109,8 @@ internal object PluginRuntime {
 
                         evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                         evaluate<Any?>(wrapPluginModule(code))
-                        evaluateCached({ JsRuntime.settingsCallBytecode(this) }, JsBindings.staticSettingsCallCode)
-                        deferred.await()
+                        val evaluated = evaluateCached({ JsRuntime.settingsCallBytecode(this) }, JsBindings.staticSettingsCallCode)
+                        (evaluated as? String) ?: deferred.await()
                     }
                 } catch (cancelled: CancellationException) {
                     throw cancelled
@@ -160,14 +160,16 @@ internal object PluginRuntime {
         }
 
         try {
-            jsRuntime.use {
+            val rawJson = jsRuntime.use {
                 hostRegistry.registerAll(this)
                 evaluateCached({ JsRuntime.polyfillBytecode(this) }, JsBindings.staticPolyfillCode)
                 evaluate<Any?>(wrapPluginModule(code))
-                evaluateCached({ JsRuntime.callBytecode(this) }, JsBindings.staticCallCode)
-                deferred.await()
+                val evaluated = evaluateCached({ JsRuntime.callBytecode(this) }, JsBindings.staticCallCode)
+                // QuickJS/JVM returns the fulfilled promise value. Keep the
+                // capture fallback for runtimes that don't expose that value.
+                (evaluated as? String) ?: deferred.await()
             }
-            return parseJsonResults(deferred.await())
+            return parseJsonResults(rawJson)
         } finally {
             domBridge.clear()
         }
@@ -184,9 +186,9 @@ internal object PluginRuntime {
     private suspend fun com.dokar.quickjs.QuickJs.evaluateCached(
         bytecode: com.dokar.quickjs.QuickJs.() -> ByteArray,
         source: String,
-    ) {
+    ): Any? {
         val compiled = runCatching { bytecode() }.getOrNull()
-        if (compiled != null) {
+        return if (compiled != null) {
             evaluate<Any?>(compiled)
         } else {
             evaluate<Any?>(source)

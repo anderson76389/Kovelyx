@@ -31,17 +31,20 @@ internal object JsBindings {
                     var getStreams = module.exports.getStreams || globalThis.getStreams;
                     if (!getStreams) {
                         console.error("getStreams function not found on module.exports or globalThis");
-                        __capture_result(JSON.stringify([]));
-                        return;
+                        __capture_result("[]");
+                        return "[]";
                     }
                     var args = JSON.parse(__get_call_args());
                     var season = args.season == null ? undefined : args.season;
                     var episode = args.episode == null ? undefined : args.episode;
                     var result = await getStreams(args.tmdbId, args.mediaType, season, episode);
-                    __capture_result(JSON.stringify(result || []));
+                    var serialized = JSON.stringify(result || []);
+                    __capture_result(serialized);
+                    return serialized;
                 } catch (e) {
                     console.error("getStreams error:", e && e.message ? e.message : e, e && e.stack ? e.stack : "");
-                    __capture_result(JSON.stringify([]));
+                    __capture_result("[]");
+                    return "[]";
                 }
             })();
         """.trimIndent()
@@ -52,13 +55,17 @@ internal object JsBindings {
                     var onSettings = (typeof module !== 'undefined' && module.exports && module.exports.onSettings) || globalThis.onSettings;
                     if (typeof onSettings === 'function') {
                         var layout = await onSettings();
-                        __capture_result(JSON.stringify(layout || []));
+                        var serialized = JSON.stringify(layout || []);
+                        __capture_result(serialized);
+                        return serialized;
                     } else {
                         __capture_result("[]");
+                        return "[]";
                     }
                 } catch (e) {
                     console.error("onSettings error:", e);
                     __capture_result("[]");
+                    return "[]";
                 }
             })();
         """.trimIndent()

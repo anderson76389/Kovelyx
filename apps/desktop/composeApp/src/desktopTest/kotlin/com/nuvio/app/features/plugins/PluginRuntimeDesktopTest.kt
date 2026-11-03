@@ -76,4 +76,27 @@ class PluginRuntimeDesktopTest {
             assertEquals("https://example.test/$index.mp4", streams.single().url)
         }
     }
+
+    @Test
+    fun `desktop runtime returns concurrent async settings layouts`() = runBlocking {
+        val results = coroutineScope {
+            (0 until 3).map { index ->
+                async(Dispatchers.Default) {
+                    PluginRuntime.getPluginSettingsLayout(
+                        code = """
+                            module.exports.onSettings = async function() {
+                                await Promise.resolve();
+                                return [{id: "settings-$index"}];
+                            };
+                        """.trimIndent(),
+                        scraperId = "desktop-settings-$index",
+                    )
+                }
+            }.awaitAll()
+        }
+        results.forEachIndexed { index, result ->
+            assertEquals("[{\"id\":\"settings-$index\"}]", result)
+        }
+    }
+
 }
