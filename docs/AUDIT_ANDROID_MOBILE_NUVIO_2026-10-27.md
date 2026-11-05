@@ -16,7 +16,7 @@
 
 - Android : `applicationId = "com.kovelyx.mobile"` en Release ; identifiant distinct `com.kovelyx.mobile.debug` pour les APK Debug.
 - Noms et icônes de lanceur : **Kovelyx** ; liens d'authentification `kovelyx://`.
-- La configuration CI renseigne un **Worker Cloudflare** pour Kovelyx ; elle génère volontairement des URL / clés Supabase historiques **vides** dans les nouveaux builds.
+- La configuration CI renseigne uniquement l'URL publique du **Worker Cloudflare** pour Kovelyx ; aucun identifiant de base de données ancienne n'est injecté dans les nouveaux builds.
 - Client `CloudflareAccountClient` pour les comptes Better Auth / D1 et `CloudflareDataSync` pour la bibliothèque, la progression et l'historique vu.
 - Recherche de mises à jour via `https://api.github.com/repos/anderson76389/Kovelyx`.
 - Les catalogues historiques d'avatars, fonds et avantages « membres » sont contournés lorsque Cloudflare est activé (PR #65 et #66).
@@ -38,7 +38,7 @@
 | Espaces de noms `com.nuvio.*` / `nuvio.composeapp.generated.resources` | Renommage global Kotlin, Compose Resources et migrations de stockage à réaliser avec prudence | **Non en soi** |
 | `lib-nuvio-engine-android-0.1.4.aar`, `quickjs-kt-android-1.0.5-nuvio.aar` | Binaires conservés dans le dépôt ; provenance et reconstruction complète à vérifier séparément | Ne prouvent pas un appel réseau Nuvio ; **autonomie de compilation binaire non certifiée** |
 | `/.well-known/nuvio` et `service = "nuvio"` | Protocole de découverte des anciens serveurs **personnalisés auto-hébergés** | Compatible avec un serveur tiers ; l'accès aux **domaines Nuvio est désormais refusé** |
-| Bibliothèques Supabase / RPC de connexion héritées | Modes historiques spécifiques et compatibilité ; le chemin Cloudflare ne les utilise pas pour le compte principal | À tester dynamiquement pour exclure toute route inattendue |
+| Ancien fournisseur de comptes et RPC | Retirés du code actif des trois applications depuis le 5 novembre 2026 ; les parcours passent par Cloudflare | Des tests réseau réels restent nécessaires |
 | Simkl, TorBox et autres fournisseurs historiques | Modules tierce partie potentiellement utilisés par des écrans et la lecture ; suppression massive risquée | **Tiers, pas des serveurs Nuvio** |
 | Références de crédits et licences d'origine | Respect des licences de code dérivé GPL et notices tierces | **Aucune dépendance de service** |
 

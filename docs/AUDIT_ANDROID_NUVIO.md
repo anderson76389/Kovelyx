@@ -18,13 +18,11 @@ Le contrôle `scripts/audit-mobile-independence.py` a réussi sur le dépôt Kov
 
 Le test CI échouera désormais si une URL Nuvio non autorisée est ajoutée à du code Kotlin compilé. Il ne fait aucune requête vers Nuvio ; c'est une analyse de fichiers.
 
-## Exception volontaire : comptes Nuvio
+## Comptes après la migration du 5 novembre 2026
 
-La connexion existante (`DeviceLinkAuthRepository.kt`, `nuvio.tv/link`, backend Supabase paramétrable, stockage de session, synchronisation) est **conservée**. C'est une dépendance réseau **réelle, mais autorisée** par la demande actuelle. Elle peut cesser de fonctionner si le service de comptes Nuvio ferme.
+**Ce paragraphe actualise l'audit historique du 15 octobre.** Les clients de comptes du service historique ont été retirés du code de production. Les sessions, profils et bibliothèques sont désormais reliés à **Kovelyx Cloudflare Workers + Better Auth + D1**, à vérifier sur les appareils réels.
 
-La configuration du backend ne constitue **pas** un nouveau serveur de comptes Kovelyx. Les valeurs `NUVIO_SUPABASE_URL`, `NUVIO_SUPABASE_ANON_KEY` et `NUVIO_SUPABASE_FALLBACK_URL` sont des clés historiques de configuration de l'authentification, pas des URL codées en dur. Si l'APK est construit sans ces valeurs, **la connexion au compte distant ne doit pas être présentée comme opérationnelle sans test**. Les autres fonctions locales peuvent être utilisées séparément selon leur propre configuration.
-
-Les fonctionnalités héritées de l'abonnement ou des cosmétiques de compte (`MemberAccessRemoteDataSource.kt`, RPC `get_my_member_access`) utilisent aussi ce backend de compte : **elles restent dépendantes de ce service**, et il n'existe pas encore de remplacement totalement autonome.
+La liaison TV par QR/code n'est pas encore disponible ; une compilation correcte ne certifie pas la synchronisation multiappareils. Les anciennes références `nuvio.tv/link` de l'APK original ne décrivent pas un service actuellement autorisé dans Kovelyx.
 
 ## Dépendances qui ne sont pas des appels à Nuvio
 
@@ -44,4 +42,4 @@ Il serait **inexact** d'affirmer que l'APK est **« 100 % indépendant de Nuvio 
 4. Des tests d'échec du backend des comptes, pour confirmer que les fonctions locales continuent de marcher en mode invité.
 5. Une clé de signature Android stable, privée et maîtrisée par Kovelyx ; les APK Debug CI utilisent une signature de test non garantie identique entre builds.
 
-**Conclusion actuelle :** les appels directs Nuvio non liés aux comptes n'ont pas été trouvés dans **les 858 fichiers Kotlin examinés**, le code de mise à jour utilise Kovelyx, et les composants natifs nécessaires sont stockés dans le dépôt. L'exception des comptes reste active et l'absence de dépendances réseau cachées **n'est pas encore prouvée**.
+**Conclusion de l'audit historique :** les appels directs Nuvio non liés aux comptes n'ont pas été trouvés dans les **858 fichiers Kotlin examinés**. Depuis, le service de comptes a migré vers Cloudflare ; l'absence de dépendances réseau cachées doit encore être vérifiée sur les trois versions effectivement distribuées.
