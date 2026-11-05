@@ -173,6 +173,8 @@ object ServerDiscoveryService {
                         "User-Agent" to "Kovelyx/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
                     ),
                     body = "",
+                    // Never follow 3xx responses into a retired upstream before validation.
+                    followRedirects = false,
                     maxResponseBodyBytes = maxDocumentBytes + 1,
                 )
             }
