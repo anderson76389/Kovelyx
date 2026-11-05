@@ -248,7 +248,7 @@ fun ProfileEditScreen(
             }
         }
 
-        // Le catalogue d'avatars Supabase n'appartient pas à Kovelyx.
+        // Le catalogue d'avatars Legacy n'appartient pas à Kovelyx.
         // Les profils utilisent désormais une photo personnelle ou une URL.
 
         if (!isNew) {

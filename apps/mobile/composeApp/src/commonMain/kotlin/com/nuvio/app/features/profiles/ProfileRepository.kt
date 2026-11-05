@@ -308,7 +308,7 @@ object ProfileRepository {
             // Keep the desired local pictures even if profile metadata is temporarily offline.
             applyPayloadsLocally(profiles, preserveCloudIds = true)
             // Preserve the cloud UUID of every existing profile; never send a
-            // Better Auth user to the legacy Supabase profile RPC.
+            // Better Auth user to the retired profile RPC.
             try {
                 val account = AuthRepository.state.value as? AuthState.Authenticated
                     ?: error("Compte Kovelyx non connecté")
@@ -448,7 +448,7 @@ object ProfileRepository {
     suspend fun deleteProfile(profileIndex: Int) {
         if (CloudflareAccountClient.enabled) {
             // Delete only the specifically selected remote UUID; preserve all
-            // remaining local profiles and never invoke the old Supabase RPC.
+            // remaining local profiles and never invoke the old Legacy RPC.
             try {
                 val selected = _state.value.profiles.firstOrNull {
                     it.profileIndex == profileIndex

@@ -14,7 +14,7 @@ import kotlinx.serialization.json.put
 
 /**
  * API Cloudflare D1 / Better Auth Kovelyx. Ne pas injecter une URL workers.dev
- * dans le client Supabase historique : les protocoles sont incompatibles.
+ * dans le client fournisseur historique : les protocoles sont incompatibles.
  *
  * Sessions sauvegardées uniquement avec les mécanismes sécurisés de l'OS
  * (Android Keystore / Windows DPAPI), vérifiées auprès du Worker à chaque lancement.

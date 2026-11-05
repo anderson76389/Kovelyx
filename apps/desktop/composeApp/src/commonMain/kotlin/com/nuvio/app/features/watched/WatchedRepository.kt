@@ -421,7 +421,7 @@ object WatchedRepository {
                     profileId = profileId,
                 )
             } else {
-                pullSupabaseDeltaFromServer(
+                pullLegacyDeltaFromServer(
                     operation = operation,
                     profileId = profileId,
                 )
@@ -536,7 +536,7 @@ object WatchedRepository {
         return true
     }
 
-    private suspend fun pullSupabaseDeltaFromServer(
+    private suspend fun pullLegacyDeltaFromServer(
         operation: WatchedRefreshOperation,
         profileId: Int,
     ): Boolean {

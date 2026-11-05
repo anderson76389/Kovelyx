@@ -40,7 +40,7 @@ import kotlinx.serialization.json.put
 
 /**
  * Cloudflare-first synchronization of local libraries, playback positions and watched history.
- * Never calls an upstream Supabase RPC. Merges additions and newer playback positions, with
+ * Never calls an upstream Legacy RPC. Merges additions and newer playback positions, with
  * tombstones for local library deletes. Remote writes use the revision read from the server;
  * a 409 leaves the local mutation pending for a fresh pull rather than overwriting blindly.
  */

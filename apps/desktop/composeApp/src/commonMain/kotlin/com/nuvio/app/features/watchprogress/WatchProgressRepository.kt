@@ -550,7 +550,7 @@ object WatchProgressRepository {
                         operationGeneration = operationGeneration,
                     )
                 } else {
-                    pullSupabaseDeltaFromServer(
+                    pullLegacyDeltaFromServer(
                         profileId = profileId,
                         operationGeneration = operationGeneration,
                     )
@@ -593,7 +593,7 @@ object WatchProgressRepository {
         }
     }
 
-    private suspend fun pullSupabaseDeltaFromServer(
+    private suspend fun pullLegacyDeltaFromServer(
         profileId: Int,
         operationGeneration: Long,
     ) {
