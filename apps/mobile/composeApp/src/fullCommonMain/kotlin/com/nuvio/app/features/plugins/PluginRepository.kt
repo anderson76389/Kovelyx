@@ -1,14 +1,10 @@
 package com.nuvio.app.features.plugins
 
 import co.touchlab.kermit.Logger
-import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.features.addons.httpGetText
 import com.nuvio.app.features.profiles.ProfileRepository
 import com.nuvio.app.features.tmdb.TmdbService
 import com.nuvio.app.features.plugins.runtime.PluginRuntime
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Order
-import io.github.jan.supabase.postgrest.rpc
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
@@ -117,64 +113,10 @@ actual object PluginRepository {
     }
 
     actual suspend fun pullFromServer(profileId: Int) {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
-            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId); return
-        }
         val effectiveProfileId = resolveEffectiveProfileId(profileId)
         ensureStateLoadedForProfile(effectiveProfileId)
-        runCatching {
-            val rows = SupabaseProvider.client.postgrest
-                .from("plugins")
-                .select {
-                    filter { eq("profile_id", currentProfileId) }
-                    order("sort_order", Order.ASCENDING)
-                }
-                .decodeList<PluginRow>()
-
-            val urls = dedupeManifestUrls(rows.map { it.url })
-            val existingState = _uiState.value
-            val existingReposByUrl = existingState.repositories.associateBy { it.manifestUrl }
-            val nowEpochMs = currentEpochMillis()
-            val nextRepos = urls.map { url ->
-                val existing = existingReposByUrl[url]
-                if (existing == null) {
-                    PluginRepositoryItem(
-                        manifestUrl = url,
-                        name = url.substringBefore("?").substringAfterLast('/'),
-                        isRefreshing = true,
-                    )
-                } else {
-                    val shouldRefresh = shouldRefreshRepository(
-                        repository = existing,
-                        scrapers = existingState.scrapers,
-                        nowEpochMs = nowEpochMs,
-                    )
-                    existing.copy(
-                        isRefreshing = shouldRefresh,
-                        errorMessage = if (shouldRefresh) null else existing.errorMessage,
-                    )
-                }
-            }
-            val nextScrapers = existingState.scrapers.filter { scraper ->
-                urls.contains(scraper.repositoryUrl)
-            }
-
-            _uiState.value = PluginsUiState(
-                pluginsEnabled = _uiState.value.pluginsEnabled,
-                groupStreamsByRepository = _uiState.value.groupStreamsByRepository,
-                repositories = nextRepos,
-                scrapers = nextScrapers,
-            )
-            persist()
-
-            nextRepos.filter(PluginRepositoryItem::isRefreshing).forEach { repository ->
-                refreshRepository(repository.manifestUrl, pushAfterRefresh = false)
-            }
-
-            initialized = true
-        }.onFailure { error ->
-            log.e(error) { "pullFromServer failed" }
-        }
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled)
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
     }
 
     actual suspend fun addRepository(rawUrl: String): AddPluginRepositoryResult {
@@ -562,27 +504,7 @@ actual object PluginRepository {
     }
 
     private fun pushToServer() {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) { cloudEdited(); return }
-        scope.launch {
-            runCatching {
-                val repos = _uiState.value.repositories.mapIndexed { index, repo ->
-                    PluginPushItem(
-                        url = repo.manifestUrl,
-                        name = repo.name,
-                        enabled = true,
-                        sortOrder = index,
-                    )
-                }
-
-                val params = buildJsonObject {
-                    put("p_profile_id", currentProfileId)
-                    put("p_plugins", json.encodeToJsonElement(repos))
-                }
-                SupabaseProvider.client.postgrest.rpc("sync_push_plugins", params)
-            }.onFailure { error ->
-                log.e(error) { "pushToServer failed" }
-            }
-        }
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) cloudEdited()
     }
 
     private fun persist() {
