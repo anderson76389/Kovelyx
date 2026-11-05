@@ -1,5 +1,35 @@
 # Kovelyx — audit croisé Windows, Android mobile et Android TV
 
+## Actualisation vérifiée — 5 novembre 2026
+
+**Conclusion : autonomie vis-à-vis des domaines et dépôts Nuvio démontrée sur des scénarios limités, indépendance intégrale de toutes les fonctionnalités NON certifiée.**
+
+| Domaine | Évidence vérifiée | Limite restante |
+|---|---|---|
+| Comptes officiels | Les trois compilations CI récentes utilisent le Worker HTTPS `kovelyx-cloud.mailpromahe.workers.dev` ; les paramètres Supabase sont générés vides. Le serveur réel a passé `/ready` (D1 0004), Better Auth et le contrôle d'accès sans token le 3 novembre : [preuve](https://github.com/anderson76389/Kovelyx/actions/runs/41690310246). | Des SDK et RPC Supabase historiques restent compilés ; les parcours spécifiques ou personnalisés doivent être migrés et éprouvés en situation réelle. |
+| Moteur P2P Windows | DLL P2P complète reconstruite avec domaines Nuvio bloqués ; deux suites CTest réussies : [preuve](https://github.com/anderson76389/Kovelyx/actions/runs/41690310376). | Le remplacement et le comportement utilisateur du moteur natif dans les distributions Windows ne sont pas intégralement validés par cette reconstruction. |
+| Moteur Android | AAR reconstruit dans Kovelyx, avec les quatre ABI `armeabi-v7a`, `arm64-v8a`, `x86` et `x86_64` : [même preuve](https://github.com/anderson76389/Kovelyx/actions/runs/41690310376). | Cet AAR de preuve n'a **pas** encore remplacé l'AAR historique dans les APK publics ; lecture P2P/codec à vérifier avec ce remplacement. |
+| Releases et mises à jour | APK, EXE, MSI et ZIP distribués depuis le dépôt Kovelyx ; versions sémantiques unifiées. | Signature Android réellement compatible entre deux APK installés et fonctionnement sur appareils physiques à vérifier. |
+| Serveurs Nuvio | Les vérifications statiques et les tests DNS bloqués existants n'ont pas trouvé de connexion systématique au domaine sur les parcours contrôlés. | Impossible de certifier toutes les requêtes dynamiques, les addons tiers, ni tous les parcours authentifiés. |
+| Serveurs personnalisés Windows / TV | Les garde-fous ajoutés dans la correction issue de cet audit empêchent de réactiver les anciens domaines `nuvio.tv` et `nuvioapp.space` depuis une ancienne préférence, un serveur personnalisé ou un document de découverte. | Validation CI et tests applicatifs nécessaires avant publication ; aucune suppression de données sauvegardées. |
+
+### Dépendances restantes à classer sans les supprimer aveuglément
+
+- **Code / API de service :** modules `SupabaseProvider`, adaptateurs RPC et anciennes fonctions TV encore dans les sources et dépendances de build. Le fonctionnement officiel emprunte Cloudflare lorsque configuré ; le retrait physique de ces SDK nécessite une migration fonctionnelle distincte. La [PR #72](https://github.com/anderson76389/Kovelyx/pull/72) prépare ce retrait mais n'est **pas fusionnée** et signale elle-même un périmètre TV incomplet.
+- **Binaries et provenance :** `lib-nuvio-engine-android-0.1.4.aar`, `nuvio-engine-jvm-0.1.4.jar`, `nuvio_engine.dll` et adaptateurs QuickJS nommés Nuvio restent des fichiers locaux sous contrôle de Kovelyx. Les sources du moteur sont vendoriées et une reconstruction a réussi. Leur nom ne crée pas une connexion réseau ; vérifier les signatures et l'ABI avant toute substitution.
+- **Anciennes mentions UI et compatibilité :** nombreuses traductions de serveur, chemins `com.nuvio.*`, anciens schémas de liens profonds et variables Gradle. Les références GPL/provenance doivent rester. Les noms de répertoires de préférences, ABI JNI et données locales ne doivent pas être renommés sans plan de migration.
+- **Dépendances non Nuvio :** Cloudflare, GitHub, bibliothèques tierces et services choisis par l'utilisateur (TMDB, Trakt, MDBList, addons). Un projet autonome de Nuvio n'est pas un service qui fonctionne sans Internet.
+
+### Vérifications restant indispensables
+
+Tester des **versions effectivement installées** (Windows/Android/TV), sous blocage réseau de `nuvio.tv` et `nuvioapp.space`, avec compte Cloudflare, bibliothèques, reprises, lecteurs, plugins et synchro entre appareils ; capturer la liste des hôtes réellement sollicités. Substituer les binaires reconstruits seulement après tests de lecture, codecs, sous-titres, APK de mise à jour et compatibilité des sauvegardes. Conserver des sauvegardes privées de D1 et des binaires/source hors GitHub. **Aucune de ces limites ne permet d'affirmer « indépendant à 100 % à vie ».**
+
+---
+
+## Archive de l'audit précédent — 17 octobre 2026
+
+Les blocages de reconstruction du moteur relevés à cette date ont depuis été résolus dans la preuve CI du 3 novembre indiquée ci-dessus. Les notes suivantes sont conservées pour retracer l'évolution technique et ne décrivent pas toutes l'état actuel.
+
 **Contrôle du 17 octobre 2026.** Périmètre : indépendance vis-à-vis des services et dépôts **NuvioMedia** à l'exception temporaire des **comptes utilisateurs historiques**, qui seront remplacés ultérieurement. Ne pas confondre cela avec le fonctionnement sans Internet ni avec l'indépendance de fournisseurs légitimes (TMDB, Trakt, MDBList, addons, GitHub Releases, etc.).
 
 ## Conclusion contrôlée

@@ -20,6 +20,37 @@ class KovelyxBackendProbeTest {
     }
 
     @Test
+    fun retiredNuvioHostsAreRejectedWithoutBlockingLookalikeOrSelfHostedDomains() {
+        listOf(
+            "https://nuvio.tv",
+            "https://api.nuvio.tv",
+            "https://sub.api.nuvio.tv:8443/profile",
+            "https://nuvioapp.space",
+            "https://api.nuvioapp.space",
+            "https://API.NUVIO.TV./v1",
+        ).forEach { assertTrue(ServerDiscoveryPolicy.isOfficial(it), it) }
+
+        listOf(
+            "https://example.net",
+            "https://nuvio.tv.example.net",
+            "https://notnuvio.tv",
+            "https://nuvioapp.space.example.net",
+            "http://192.168.1.20:8080",
+        ).forEach { assertFalse(ServerDiscoveryPolicy.isOfficial(it), it) }
+    }
+
+    @Test
+    fun customServerRepositoryRejectsRetiredNuvioAddressBeforePersisting() {
+        val config = ServerConfiguration(
+            backendUrl = "https://api.nuvio.tv",
+            publishableKey = "test-public-key",
+            capabilities = ServerCapabilities(emailPasswordAuth = true, tvLogin = false),
+            isCustom = true,
+        )
+        assertFalse(ServerConfigurationRepository.saveCustom(config))
+    }
+
+    @Test
     fun configuredAccountServerCanStillBeChecked() {
         assertTrue(shouldProbeKovelyxBackend(configuration("https://example.org", "non-empty-key")))
     }

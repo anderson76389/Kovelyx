@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv nuvioapp.space api.nuvioapp.space; do
             echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
             echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
           done
@@ -101,7 +101,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv; do
+          for host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv cdn.nuvio.tv nuvioapp.space api.nuvioapp.space; do
             echo "127.0.0.1 $host" | sudo tee -a /etc/hosts > /dev/null
             echo "::1 $host" | sudo tee -a /etc/hosts > /dev/null
           done
@@ -138,7 +138,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
-          $domains = @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv')
+          $domains = @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'nuvioapp.space', 'api.nuvioapp.space')
           foreach ($domain in $domains) {
             Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $domain"
             Add-Content -LiteralPath $hostsFile -Value "::1 $domain"

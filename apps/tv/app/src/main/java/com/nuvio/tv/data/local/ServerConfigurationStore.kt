@@ -2,6 +2,7 @@ package com.nuvio.tv.data.local
 
 import android.content.Context
 import com.nuvio.tv.BuildConfig
+import com.nuvio.tv.data.remote.ServerDiscoveryPolicy
 import com.nuvio.tv.domain.model.ServerCapabilities
 import com.nuvio.tv.domain.model.ServerConfiguration
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,7 +21,10 @@ class ServerConfigurationStore @Inject constructor(
         val publishableKey = preferences.getString(KEY_PUBLISHABLE_KEY, null)?.trim().orEmpty()
         val emailPasswordAuth = preferences.getBoolean(KEY_EMAIL_PASSWORD_AUTH, false)
         val tvLogin = preferences.getBoolean(KEY_TV_LOGIN, false)
-        if (backendUrl.isBlank() || publishableKey.isBlank() || (!emailPasswordAuth && !tvLogin)) {
+        // Old stored server settings must not reconnect this TV to Nuvio.
+        // Preserve preferences for migration/diagnostics; use Kovelyx instead.
+        if (backendUrl.isBlank() || ServerDiscoveryPolicy.isRetiredUpstream(backendUrl) ||
+            publishableKey.isBlank() || (!emailPasswordAuth && !tvLogin)) {
             return officialConfiguration()
         }
         return ServerConfiguration(
@@ -39,7 +43,8 @@ class ServerConfigurationStore @Inject constructor(
     }
 
     fun saveCustom(configuration: ServerConfiguration): Boolean {
-        if (!BuildConfig.FEATURE_CUSTOM_SERVER_CONNECTIONS_ENABLED) return false
+        if (!BuildConfig.FEATURE_CUSTOM_SERVER_CONNECTIONS_ENABLED ||
+            ServerDiscoveryPolicy.isRetiredUpstream(configuration.backendUrl)) return false
         return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(KEY_CUSTOM_ENABLED, true)

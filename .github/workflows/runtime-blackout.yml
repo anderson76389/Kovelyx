@@ -23,14 +23,12 @@ jobs:
       matrix:
         include:
           - platform: mobile
-            release_prefix: android-preview-
             apk_glob: 'Kovelyx-Android-*.apk'
             api_target: google_apis
             api_arch: x86_64
             device_profile: pixel_6
             emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
           - platform: tv
-            release_prefix: tv-preview-
             apk_glob: 'Kovelyx-TV-*-universal.apk'
             api_target: google-tv
             api_arch: x86
@@ -42,13 +40,28 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_PREFIX: ${{ matrix.release_prefix }}
+          PLATFORM: ${{ matrix.platform }}
           APK_GLOB: ${{ matrix.apk_glob }}
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > /tmp/kovelyx-releases.json
-          tag="$(jq -r --arg prefix "$RELEASE_PREFIX" '[.[] | select(.draft == false and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .tag_name // empty' /tmp/kovelyx-releases.json)"
-          test -n "$tag" || { echo "::error::Aucune Release APK Kovelyx pour $RELEASE_PREFIX"; exit 1; }
+          # Public APKs now ship in unified semantic Releases (v1.1.N), not
+          # the retired android-preview-/tv-preview- tag families.
+          # Require the platform's APK and checksum in the same published Release.
+          tag="$(jq -r --arg platform "$PLATFORM" '
+            [.[] |
+              select(.draft == false and (.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+$"))) |
+              . as $release |
+              (if $platform == "mobile" then
+                "Kovelyx-Android-\($release.tag_name).apk"
+              else
+                "Kovelyx-TV-\($release.tag_name)-universal.apk"
+              end) as $apk |
+              select(([.assets[].name] | index($apk)) != null) |
+              select(([.assets[].name] | index("\($apk).sha256")) != null)
+            ] | sort_by(.published_at) | last | .tag_name // empty
+          ' /tmp/kovelyx-releases.json)"
+          test -n "$tag" || { echo "::error::Aucune Release Kovelyx complète avec APK et SHA-256 pour $PLATFORM"; exit 1; }
           echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
           mkdir -p /tmp/kovelyx-runtime-apk
           gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern "$APK_GLOB" --dir /tmp/kovelyx-runtime-apk
@@ -69,6 +82,8 @@ jobs:
           cache-size=0
           address=/nuvio.tv/0.0.0.0
           address=/nuvio.tv/::
+          address=/nuvioapp.space/0.0.0.0
+          address=/nuvioapp.space/::
           log-queries
           log-facility=/tmp/kovelyx-dns.log
           DNS
@@ -76,8 +91,9 @@ jobs:
           sudo dnsmasq --conf-file=/tmp/kovelyx-dnsmasq.conf --pid-file=/tmp/kovelyx-dnsmasq.pid
           sudo chmod 644 /tmp/kovelyx-dns.log
           dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
+          dig @127.0.0.1 +short api.nuvioapp.space A | grep -Fx '0.0.0.0'
           dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$'
-          initial_nuvio_queries="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
+          initial_nuvio_queries="$(grep -Eci 'api[.](nuvio[.]tv|nuvioapp[.]space)' /tmp/kovelyx-dns.log || true)"
           echo "KOVELYX_DNS_BASELINE=$initial_nuvio_queries" >> "$GITHUB_ENV"
           echo "Resolution locale du DNS de filtrage validee."
       - name: Autoriser l'acceleration materielle KVM
