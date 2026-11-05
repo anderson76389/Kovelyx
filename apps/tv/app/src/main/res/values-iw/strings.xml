@@ -1558,7 +1558,7 @@
     <string name="debug_buffer_logs_subtitle">שליחת אבחוני מאגר נגן תקופתיים ל-logcat (כבוי כברירת מחדל)</string>
     <string name="debug_section_account">חשבון</string>
     <string name="debug_manual_signin_title">כניסה ידנית</string>
-    <string name="debug_manual_signin_subtitle">התחברות עם אימייל וסיסמה (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">התחברות עם אימייל וסיסמה (Kovelyx auth)</string>
     <string name="debug_email_placeholder">אימייל</string>
     <string name="debug_password_placeholder">סיסמה</string>
     <string name="debug_signing_in">מתחבר…</string>

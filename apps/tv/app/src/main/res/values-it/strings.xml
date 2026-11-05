@@ -1409,7 +1409,7 @@
 <string name="debug_buffer_logs_subtitle">Emetti diagnostica periodica del buffer del player su logcat (disattivato per impostazione predefinita)</string>
 <string name="debug_section_account">Account</string>
 <string name="debug_manual_signin_title">Accesso manuale</string>
-<string name="debug_manual_signin_subtitle">Accedi con email e password (autenticazione Supabase)</string>
+<string name="debug_manual_signin_subtitle">Accedi con email e password (autenticazione Kovelyx)</string>
 <string name="debug_email_placeholder">Email</string>
 <string name="debug_password_placeholder">Password</string>
 <string name="debug_signing_in">Accesso in corso\u2026</string>

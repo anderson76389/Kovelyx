@@ -1528,7 +1528,7 @@
     <string name="debug_buffer_logs_subtitle">Periodički ispisuj dijagnostiku međuspremnika playera u logcat (isključeno prema zadanim postavkama)</string>
     <string name="debug_section_account">Račun</string>
     <string name="debug_manual_signin_title">Ručna prijava</string>
-    <string name="debug_manual_signin_subtitle">Prijava e-mailom i lozinkom (Supabase autentifikacija)</string>
+    <string name="debug_manual_signin_subtitle">Prijava e-mailom i lozinkom (Kovelyx autentifikacija)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Lozinka</string>
     <string name="debug_signing_in">Prijava\u2026</string>

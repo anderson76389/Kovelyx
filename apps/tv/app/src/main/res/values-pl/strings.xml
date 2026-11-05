@@ -682,7 +682,7 @@
     <string name="debug_sync_code_subtitle">Pokaż przyciski Generuj/Wprowadź kod synchronizacji w ustawieniach konta</string>
     <string name="debug_section_account">Konto</string>
     <string name="debug_manual_signin_title">Ręczne logowanie</string>
-    <string name="debug_manual_signin_subtitle">Zaloguj się e-mailem i hasłem (uwierzytelnianie Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Zaloguj się e-mailem i hasłem (uwierzytelnianie Kovelyx)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Hasło</string>
     <string name="debug_signing_in">Logowanie\u2026</string>

@@ -587,7 +587,7 @@
     <string name="debug_sync_code_subtitle">अकाउंट सेटिंग्स में Generate/Enter Sync Code बटन दिखाएँ</string>
     <string name="debug_section_account">अकाउंट</string>
     <string name="debug_manual_signin_title">मैन्युअल साइन इन</string>
-    <string name="debug_manual_signin_subtitle">ईमेल और पासवर्ड से साइन इन करें (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">ईमेल और पासवर्ड से साइन इन करें (Kovelyx auth)</string>
     <string name="debug_email_placeholder">ईमेल</string>
     <string name="debug_password_placeholder">पासवर्ड</string>
     <string name="debug_signing_in">साइन इन हो रहा है\u2026</string>
