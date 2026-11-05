@@ -101,6 +101,42 @@ class ServerDiscoveryPolicyTest {
     }
 
     @Test
+    fun retiredNuvioHostsAreBlockedButUnrelatedSelfHostedDomainsAreAllowed() {
+        listOf(
+            "https://nuvio.tv",
+            "https://api.nuvio.tv",
+            "https://tv.api.nuvio.tv:443/backend",
+            "https://nuvioapp.space",
+            "https://api.nuvioapp.space",
+            "https://API.NUVIO.TV./.well-known/nuvio"
+        ).forEach { assertTrue(it, ServerDiscoveryPolicy.isRetiredUpstream(it)) }
+
+        listOf(
+            "https://nuvio.tv.example.org",
+            "https://some-nuvio.tv",
+            "https://nuvioapp.space.example.net",
+            "https://backend.example.org",
+            "http://192.168.1.10:8080"
+        ).forEach { assertFalse(it, ServerDiscoveryPolicy.isRetiredUpstream(it)) }
+    }
+
+    @Test
+    fun discoveryDocumentCannotRedirectUsToRetiredNuvioBackend() {
+        val document = """
+            {
+              "version": 1, "service": "nuvio", "self_hosted": true,
+              "backend_url": "https://api.nuvio.tv",
+              "publishable_key": "test-public-key",
+              "capabilities": {"email_password_auth": true}
+            }
+        """.trimIndent()
+        val error = assertThrows(ServerDiscoveryException::class.java) {
+            ServerDiscoveryPolicy.parse("https://example.org/.well-known/nuvio", document)
+        }
+        assertEquals(ServerDiscoveryFailure.OFFICIAL_SERVER, error.failure)
+    }
+
+    @Test
     fun matchesOfficialBackendByHostAndPort() {
         assertTrue(
             ServerDiscoveryPolicy.matchesBackend(
