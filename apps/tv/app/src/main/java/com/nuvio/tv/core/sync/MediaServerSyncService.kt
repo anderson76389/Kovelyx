@@ -3,6 +3,7 @@ package com.nuvio.tv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.mediaserver.ServerRepository
 import com.nuvio.tv.data.mediaserver.ServerSyncSnapshot
@@ -62,7 +63,7 @@ class MediaServerSyncService @Inject constructor(
     }
 
     fun requestForegroundPull(force: Boolean = false) {
-        if (!authManager.isAuthenticated) return
+        if (CloudflareTvAccountClient.enabled || !authManager.isAuthenticated) return
         val now = SystemClock.elapsedRealtime()
         if (!force && foregroundPullJob?.isActive == true) return
         if (!force && now - lastForegroundPullAtMs < FOREGROUND_MIN_INTERVAL_MS) return
@@ -153,6 +154,7 @@ class MediaServerSyncService @Inject constructor(
     }
 
     private fun canSync(profileId: Int): Boolean =
+        !CloudflareTvAccountClient.enabled &&
         authManager.authState.value is AuthState.FullAccount &&
             profileManager.activeProfileId.value == profileId
 
