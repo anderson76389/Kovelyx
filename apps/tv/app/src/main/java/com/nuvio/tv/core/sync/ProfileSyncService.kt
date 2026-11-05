@@ -2,7 +2,7 @@ package com.nuvio.tv.core.sync
 
 import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.profile.ProfileManager
-import com.nuvio.tv.data.remote.supabase.SupabaseProfilePinVerifyResult
+import com.nuvio.tv.data.remote.cloud.ProfilePinVerifyResult
 import com.nuvio.tv.domain.model.UserProfile
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,10 +61,10 @@ class ProfileSyncService @Inject constructor(
         CloudflareTvAccountClient.clearCloudProfilePin(uuid, currentPin)
     }
 
-    suspend fun verifyProfilePin(profileId: Int, pin: String): Result<SupabaseProfilePinVerifyResult> = runCatching {
+    suspend fun verifyProfilePin(profileId: Int, pin: String): Result<ProfilePinVerifyResult> = runCatching {
         val uuid = profileManager.profiles.value.firstOrNull { it.id == profileId }?.cloudProfileId
             ?: error("Profil Cloudflare non lié")
         val (unlocked, retry) = CloudflareTvAccountClient.verifyCloudProfilePin(uuid, pin)
-        SupabaseProfilePinVerifyResult(unlocked = unlocked, retryAfterSeconds = retry)
+        ProfilePinVerifyResult(unlocked = unlocked, retryAfterSeconds = retry)
     }
 }
