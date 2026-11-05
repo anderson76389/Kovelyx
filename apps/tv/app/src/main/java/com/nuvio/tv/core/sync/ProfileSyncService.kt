@@ -3,6 +3,7 @@ package com.nuvio.tv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.ProfileDataStore
 import com.nuvio.tv.data.remote.supabase.SupabaseProfileLockState
@@ -68,6 +69,8 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun pushToRemote(): Result<Unit> = withContext(Dispatchers.IO) {
+        // CloudflareTvProfileMediaSync publishes profile metadata independently.
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(Unit)
         try {
             val profiles = profileManager.profiles.value
 
@@ -103,6 +106,8 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun pullFromRemote(force: Boolean = false): Result<List<UserProfile>> = withContext(Dispatchers.IO) {
+        // CloudflareTvProfileMediaSync owns the actual D1 profile reconciliation.
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(profileManager.profiles.value)
         pullMutex.withLock {
             val userId = (authManager.authState.value as? AuthState.FullAccount)?.userId
             val now = SystemClock.elapsedRealtime()
@@ -153,6 +158,9 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun deleteProfileData(profileId: Int): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
+            UnsupportedOperationException("La suppression Cloudflare doit passer par l'API privée des profils")
+        )
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
@@ -171,6 +179,9 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun pullProfileLockStates(): Result<Map<Int, Boolean>> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
+            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
+        )
         try {
             val response = withJwtRefreshRetry {
                 postgrest.rpc("sync_pull_profile_locks")
@@ -185,6 +196,9 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun setProfilePin(profileId: Int, pin: String, currentPin: String? = null): SetProfilePinResult = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext SetProfilePinResult.Failure(
+            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
+        )
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
@@ -211,6 +225,9 @@ class ProfileSyncService @Inject constructor(
         e.message?.contains("Current PIN is required", ignoreCase = true) == true
 
     suspend fun clearProfilePin(profileId: Int, currentPin: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
+            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
+        )
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
@@ -229,6 +246,9 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun verifyProfilePin(profileId: Int, pin: String): Result<SupabaseProfilePinVerifyResult> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
+            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
+        )
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
