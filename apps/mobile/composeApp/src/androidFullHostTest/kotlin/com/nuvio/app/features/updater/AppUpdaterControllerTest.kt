@@ -45,6 +45,53 @@ class AppUpdaterControllerTest {
     }
 
     @Test
+    fun optimizedDebugPackageDetectsUnifiedStableReleaseWithoutDebuggableFlag() {
+        // Official unified builds disable Android's debuggable flag for production,
+        // but keep the .debug package ID for backwards-compatible upgrades.
+        assertTrue(AndroidAppUpdaterPlatform.isDebugBuildIdentity("com.kovelyx.mobile.debug", false))
+        assertTrue(AndroidAppUpdaterPlatform.isDebugBuildIdentity("com.kovelyx.mobile.debug", true))
+
+        val release = """[
+            {"tag_name":"v1.1.858","name":"Kovelyx 1.1.858","assets":[
+                {"name":"Kovelyx-Android-v1.1.858.apk",
+                 "browser_download_url":"https://github.com/anderson76389/Kovelyx/releases/download/v1.1.858/Kovelyx-Android-v1.1.858.apk"}
+            ]}
+        ]"""
+        val selected = AppUpdaterRepository.selectUpdate(
+            release,
+            UpdateChannel.STABLE,
+            listOf("arm64-v8a"),
+            family = AndroidApkReleaseFamily.DEBUG,
+        )
+        assertEquals("v1.1.858", selected?.tag)
+        assertEquals("Kovelyx-Android-v1.1.858.apk", selected?.assetName)
+        assertTrue(VersionUtils.isRemoteNewer(selected?.tag, "1.1.846"))
+        assertFalse(VersionUtils.isRemoteNewer(selected?.tag, "1.1.858"))
+    }
+
+    @Test
+    fun permanentSignedPackageNeverSelectsDebugReleaseFamily() {
+        // The permanent signing track has a DIFFERENT Android applicationId.
+        // A development debuggable flag must never offer incompatible APKs.
+        assertFalse(AndroidAppUpdaterPlatform.isDebugBuildIdentity("com.kovelyx.mobile", true))
+        assertFalse(AndroidAppUpdaterPlatform.isDebugBuildIdentity("com.kovelyx.mobile", false))
+        val release = """[
+            {"tag_name":"v1.1.858","assets":[
+                {"name":"Kovelyx-Android-v1.1.858.apk",
+                 "browser_download_url":"https://example.com/debug.apk"}
+            ]}
+        ]"""
+        assertNull(
+            AppUpdaterRepository.selectUpdate(
+                release,
+                UpdateChannel.STABLE,
+                listOf("arm64-v8a"),
+                family = AndroidApkReleaseFamily.SIGNED,
+            ),
+        )
+    }
+
+    @Test
     fun forcedChecksDoNotOfferEqualOrOlderVersions() {
         listOf(AppVersionConfig.VERSION_NAME, "0.0.0").forEach { tag ->
             val controller = controller { Result.success(update(tag)) }

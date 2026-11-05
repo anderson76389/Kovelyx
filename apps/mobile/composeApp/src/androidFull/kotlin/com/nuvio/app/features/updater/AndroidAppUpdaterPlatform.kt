@@ -46,10 +46,26 @@ object AndroidAppUpdaterPlatform {
 
     fun getSupportedAbis(): List<String> = Build.SUPPORTED_ABIS?.toList().orEmpty()
 
+    /**
+     * Public unified APKs are compiled from the optimized Debug variant:
+     * their package is com.kovelyx.mobile.debug but FLAG_DEBUGGABLE is false.
+     * Release selection must follow the installed package identity, not this flag,
+     * otherwise the updater searches android-v... assets and misses v... releases.
+     */
     fun isDebugBuild(): Boolean {
         val context = appContext ?: return false
-        return context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        return isDebugBuildIdentity(
+            packageName = context.packageName,
+            isDebuggable = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0,
+        )
     }
+
+    internal fun isDebugBuildIdentity(packageName: String, isDebuggable: Boolean): Boolean =
+        when (packageName) {
+            "com.kovelyx.mobile.debug" -> true
+            "com.kovelyx.mobile" -> false
+            else -> isDebuggable
+        }
 
     fun getIgnoredTag(): String? =
         preferences().getString(ignoredTagKey, null)
