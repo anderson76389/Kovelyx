@@ -31,7 +31,7 @@ class ProviderCredentialModelsTest {
     fun `remote TMDB override can be replaced and cleared`() {
         val local = credentialSnapshot(TmdbSettings(apiKey = "local-key"))
         val remote = listOf(
-            SupabaseProviderCredential("tmdb", buildJsonObject { put("api_key", "remote-key") }),
+            RemoteProviderCredential("tmdb", buildJsonObject { put("api_key", "remote-key") }),
         )
         val merged = local.mergeRemote(remote)
 
@@ -49,8 +49,8 @@ class ProviderCredentialModelsTest {
             ),
         )
         val rows = listOf(
-            SupabaseProviderCredential("DEBRID:TORBOX", buildJsonObject { put("api_key", "remote") }),
-            SupabaseProviderCredential("animeskip", buildJsonObject { put("client_id", "remote") }),
+            RemoteProviderCredential("DEBRID:TORBOX", buildJsonObject { put("api_key", "remote") }),
+            RemoteProviderCredential("animeskip", buildJsonObject { put("client_id", "remote") }),
         )
 
         assertEquals(listOf("remote", "remote"), snapshot.mergeRemote(rows).values.map { it.value })
@@ -66,7 +66,7 @@ class ProviderCredentialModelsTest {
             ),
         )
         val rows = listOf(
-            SupabaseProviderCredential("debrid:torbox", buildJsonObject { put("api_key", "remote") }),
+            RemoteProviderCredential("debrid:torbox", buildJsonObject { put("api_key", "remote") }),
         )
 
         assertEquals(listOf("remote", ""), snapshot.mergeRemote(rows).values.map { it.value })
@@ -82,11 +82,11 @@ class ProviderCredentialModelsTest {
             ),
         )
         val remote = listOf(
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "debrid:torbox",
                 credentialJson = buildJsonObject { put("api_key", "remote-torbox") },
             ),
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "unsupported",
                 credentialJson = buildJsonObject { put("api_key", "ignored") },
             ),
@@ -118,7 +118,7 @@ class ProviderCredentialModelsTest {
             values = listOf(ProviderCredentialValue("mdblist", "api_key", "local")),
         )
         val remote = listOf(
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "mdblist",
                 credentialJson = buildJsonObject { put("api_key", "") },
             ),
