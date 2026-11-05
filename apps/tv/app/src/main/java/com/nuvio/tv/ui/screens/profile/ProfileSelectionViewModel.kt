@@ -14,7 +14,7 @@ import com.nuvio.tv.data.remote.cloudflare.AvatarCatalogItem
 import com.nuvio.tv.data.remote.cloudflare.AvatarRepository
 import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundCatalogItem
 import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundRepository
-import com.nuvio.tv.data.remote.supabase.SupabaseProfilePinVerifyResult
+import com.nuvio.tv.data.remote.cloud.ProfilePinVerifyResult
 import com.nuvio.tv.data.repository.MemberAccessRepository
 import com.nuvio.tv.domain.model.CosmeticEntitlement
 import com.nuvio.tv.domain.model.UserProfile
@@ -362,7 +362,7 @@ class ProfileSelectionViewModel @Inject constructor(
         }
     }
 
-    fun verifyProfilePin(profileId: Int, pin: String, onComplete: (Result<SupabaseProfilePinVerifyResult>) -> Unit) {
+    fun verifyProfilePin(profileId: Int, pin: String, onComplete: (Result<ProfilePinVerifyResult>) -> Unit) {
         if (_isPinOperationInProgress.value) return
         viewModelScope.launch {
             _isPinOperationInProgress.value = true
