@@ -29,15 +29,6 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
     abstract val appVersionCode: Property<Int>
 
     @get:Input
-    abstract val supabaseUrl: Property<String>
-
-    @get:Input
-    abstract val supabaseAnonKey: Property<String>
-
-    @get:Input
-    abstract val supabaseFallbackUrl: Property<String>
-
-    @get:Input
     abstract val cloudflareUrl: Property<String>
 
     @get:Input
@@ -55,22 +46,6 @@ abstract class GenerateRuntimeConfigsTask : DefaultTask() {
         localPropertiesFile.asFile.orNull?.takeIf { it.exists() }?.inputStream()?.use { props.load(it) }
 
         val outDir = outputDir.get().asFile
-        outDir.resolve("com/nuvio/app/core/network").apply {
-            mkdirs()
-            resolve("SupabaseConfig.kt").writeText(
-                """
-                |package com.nuvio.app.core.network
-                |
-                |object SupabaseConfig {
-                |    const val URL = "${supabaseUrl.get()}"
-                |    const val ANON_KEY = "${supabaseAnonKey.get()}"
-                |    const val FALLBACK_URL = "${supabaseFallbackUrl.get()}"
-                |}
-                """.trimMargin()
-            )
-        }
-
-        // URL publique du vrai Worker D1, séparée du SDK Supabase hérité.
         outDir.resolve("com/nuvio/app/core/cloud").apply {
             mkdirs()
             resolve("CloudflareConfig.kt").writeText(
@@ -248,7 +223,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
 }
 
-val supabaseProps = Properties().apply {
+val localOverrideProps = Properties().apply {
     val propsFile = rootProject.file("local.properties")
     if (propsFile.exists()) propsFile.inputStream().use { load(it) }
 }
@@ -268,7 +243,7 @@ val releaseAppVersionCode = providers.gradleProperty("kovelyx.app.versionCode").
 val iosDistribution = (
     providers.gradleProperty("nuvio.ios.distribution").orNull
         ?: System.getenv("NUVIO_IOS_DISTRIBUTION")
-        ?: supabaseProps.getProperty("NUVIO_IOS_DISTRIBUTION")
+        ?: localOverrideProps.getProperty("NUVIO_IOS_DISTRIBUTION")
         ?: "appstore"
     ).trim().lowercase()
 require(iosDistribution == "appstore" || iosDistribution == "full") {
@@ -297,7 +272,7 @@ require(requestedAndroidDistributions.size <= 1) {
     "Build Android full and playstore distributions separately, or set -Pnuvio.android.distribution=full|playstore."
 }
 val configuredAndroidDistribution = providers.gradleProperty("nuvio.android.distribution").orNull
-    ?: supabaseProps.getProperty("NUVIO_ANDROID_DISTRIBUTION")
+    ?: localOverrideProps.getProperty("NUVIO_ANDROID_DISTRIBUTION")
 val isAmbiguousAndroidPackageTask = requestedGradleTasks.any { taskName ->
     taskName == "build" ||
         taskName.startsWith("assemble") ||
@@ -345,11 +320,7 @@ val generateRuntimeConfigs = tasks.register<GenerateRuntimeConfigsTask>("generat
     }
     appVersionName.set(releaseAppVersionName)
     appVersionCode.set(releaseAppVersionCode)
-    // Do not embed any historical Nuvio/Supabase credentials in Kovelyx builds.
     // Better Auth + Cloudflare is configured independently via KOVELYX_CLOUD_URL.
-    supabaseUrl.set("")
-    supabaseAnonKey.set("")
-    supabaseFallbackUrl.set("")
     cloudflareUrl.set(runtimeConfigValue("KOVELYX_CLOUD_URL"))
     sentryDsn.set(runtimeConfigValue("SENTRY_DSN"))
     tmdbApiKey.set(runtimeConfigValue("TMDB_API_KEY"))
@@ -545,10 +516,6 @@ kotlin {
             implementation(libs.kmpalette.core)
             implementation(libs.androidx.navigation3.ui)
             implementation(libs.kermit)
-            implementation(libs.supabase.postgrest)
-            implementation(libs.supabase.auth)
-            implementation(libs.supabase.functions)
-            implementation(libs.supabase.storage)
             implementation(libs.reorderable)
         }
         commonTest.dependencies {
