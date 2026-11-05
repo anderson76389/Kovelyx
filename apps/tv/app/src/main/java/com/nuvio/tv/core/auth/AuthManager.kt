@@ -111,6 +111,9 @@ class AuthManager @Inject constructor(
 
     init {
         if (CloudflareTvAccountClient.enabled) {
+            // The user can tap Sign in before the async session restore starts.
+            // Prepare the Keystore-backed preferences first so the fresh token is persisted.
+            CloudflareTvAccountClient.initialize(context)
             // Restaurer la session chiffrée seulement après validation du serveur.
             // Ne jamais relancer l'ancien observateur de session Supabase.
             scope.launch {
