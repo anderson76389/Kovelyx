@@ -528,6 +528,12 @@ object WatchProgressRepository {
         operationGeneration: Long,
         force: Boolean,
     ): Boolean {
+        if (CloudflareAccountClient.enabled) {
+            hasLoadedNuvioRemoteProgress = true
+            publish()
+            CloudflareDataSync.request(profileId)
+            return true
+        }
         val authState = AuthRepository.state.value
         if (authState !is AuthState.Authenticated || authState.isAnonymous) {
             // There is no upstream source for this account, so local state is authoritative.
