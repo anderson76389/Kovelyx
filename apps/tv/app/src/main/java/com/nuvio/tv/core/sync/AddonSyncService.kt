@@ -36,13 +36,16 @@ private const val TAG = "AddonSyncService"
 
 @Singleton
 class AddonSyncService @Inject constructor(
-    private val postgrest: Postgrest,
+    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val authManager: AuthManager,
     private val addonPreferences: AddonPreferences,
     private val profileManager: ProfileManager,
     @ApplicationContext context: Context,
     private val syncClientIdentity: SyncClientIdentity
 ) {
+    // Better Auth / D1 accounts never instantiate the retired Supabase HTTP client.
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
+
     private val cloudMutex = Mutex()
     private val localOutboxLock = Any()
     private val cloudJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
