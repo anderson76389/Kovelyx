@@ -300,7 +300,7 @@ class ProfileSettingsPluginSyncTest {
             PostgrestResult(response, Headers.Empty, postgrest)
         }
         val service = ProfileSettingsSyncService(
-            authManager, postgrest, profileManager, factory, identity,
+            authManager, dagger.Lazy { postgrest }, profileManager, factory, identity,
             mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true), mockk(relaxed = true)
         )
         services += service
