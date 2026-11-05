@@ -13,7 +13,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[2]
 APP = ROOT / "apps/tv/app/src"
 ACTIVE = [APP / "main/java", APP / "full/java"]
-OLD_SERVICE = re.compile(r"https?://(?:[a-z0-9-]+\.)*nuvio\.tv(?:/|\b)", re.I)
+OLD_SERVICE = re.compile(r"https?://(?:[a-z0-9-]+\.)*(?:nuvio\.tv|nuvioapp\.space)(?:/|\b)", re.I)
 OLD_RELEASE = re.compile(r"https?://(?:www\.)?github\.com/NuvioMedia(?:/|\b)", re.I)
 LEGAL_FILES = ("license", "licence", "attribution", "provenance")
 violations: list[str] = []
