@@ -78,6 +78,7 @@ try {
   assert.equal(ready.data?.schema,"0004_profile_media_gifs");
   assert.equal(ready.data?.maxProfileMediaBytes,18_000_000);
   assert.equal(ready.data?.catalogueSnapshotSchema,1);
+  assert.equal(ready.data?.profilePinSchema,1,"Profile PIN migration must be present");
 
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
@@ -120,6 +121,48 @@ try {
   assert.equal(tvMe.data?.id,alice.userId,"Deuxième appareil lié au même utilisateur");
   const tvProfiles=await req("/v1/profiles","GET",null,tvToken);
   assert.equal(tvProfiles.data?.profiles?.[0]?.id,profileId,"Profil commun visible sur TV");
+
+  // PINs are account-scoped, not part of kv_sync; validate using two independent sessions.
+  const initialPins=await req("/v1/profile-pins","GET",null,alice.token);
+  assert.equal(initialPins.status,200);
+  assert.deepEqual(initialPins.data.profiles,[]);
+  const setPin=await req("/v1/profile-pin","POST",{profileId,pin:"0427"},alice.token);
+  assert.equal(setPin.status,201,"Set profile PIN in private D1 table");
+  const tvPins=await req("/v1/profile-pins","GET",null,tvToken);
+  assert.equal(tvPins.status,200);
+  assert.equal(tvPins.data.profiles.length,1,"TV receives PIN-enabled state");
+  assert.equal(tvPins.data.profiles[0].pinEnabled,true);
+  const tvProfileLocks=await req("/v1/profiles","GET",null,tvToken);
+  assert.equal(tvProfileLocks.data.profiles[0].pinEnabled,true);
+  const wrongPin=await req("/v1/profile-pin/verify","POST",{profileId,pin:"0000"},tvToken);
+  assert.equal(wrongPin.status,200);
+  assert.equal(wrongPin.data.unlocked,false);
+  const correctPin=await req("/v1/profile-pin/verify","POST",{profileId,pin:"0427"},tvToken);
+  assert.equal(correctPin.status,200);
+  assert.equal(correctPin.data.unlocked,true);
+  const missingOld=await req("/v1/profile-pin","POST",{profileId,pin:"1234"},alice.token);
+  assert.equal(missingOld.status,409,"Change needs current PIN");
+  const changedPin=await req("/v1/profile-pin","POST",{profileId,pin:"1234",currentPin:"0427"},alice.token);
+  assert.equal(changedPin.status,200,"Change PIN from desktop");
+  assert.equal((await req("/v1/profile-pin/verify","POST",{profileId,pin:"0427"},tvToken)).data.unlocked,false);
+  assert.equal((await req("/v1/profile-pin/verify","POST",{profileId,pin:"1234"},tvToken)).data.unlocked,true);
+  assert.equal((await req("/v1/profile-pin","DELETE",{profileId,currentPin:"1234"},alice.token)).status,200);
+  assert.deepEqual((await req("/v1/profile-pins","GET",null,tvToken)).data.profiles,[],
+    "Delete PIN is propagated across devices");
+  assert.equal((await req("/v1/profiles","GET",null,tvToken)).data.profiles[0].pinEnabled,false);
+  assert.equal((await req("/v1/profile-pin","POST",{profileId,pin:"1234"},alice.token)).status,201);
+  for(let attempt=0;attempt<5;attempt++){
+    const invalid=await req("/v1/profile-pin/verify","POST",{profileId,pin:"0000"},tvToken);
+    assert.equal(invalid.data?.unlocked,false);
+  }
+  const blocked=await req("/v1/profile-pin/verify","POST",{profileId,pin:"1234"},tvToken);
+  assert.equal(blocked.status,200);
+  assert.equal(blocked.data.unlocked,false);
+  assert.ok(blocked.data.retryAfterSeconds>0,"Five failed attempts must lock PIN verification");
+  assert.equal((await req("/v1/profile-pin/verify","POST",{profileId,pin:"1234"},bob.token)).status,404,
+    "Another user must not verify foreign profile PINs");
+  assert.deepEqual((await req("/v1/profile-pins","GET",null,bob.token)).data.profiles,[],
+    "Another account must not read PIN states");
 
   const otherUser=await req("/v1/sync?profileId="+profileId,"GET",null,bob.token);
   assert.equal(otherUser.status,404,"Foreign account must not read D1 profile");
