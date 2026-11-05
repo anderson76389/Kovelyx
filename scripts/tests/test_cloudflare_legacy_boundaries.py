@@ -83,7 +83,8 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
         settings = (
             ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/ProfileSettingsSyncService.kt"
         ).read_text(encoding="utf-8")
-        self.assertIn("if (CloudflareTvAccountClient.enabled) return@collect", settings)
+        self.assertIn("CloudflareTvPreferencesSync", settings)
+        self.assertNotIn(".rpc(", settings)
 
     def test_tv_cloud_profile_deletion_requires_remote_ack_before_local_erase(self):
         client = (
