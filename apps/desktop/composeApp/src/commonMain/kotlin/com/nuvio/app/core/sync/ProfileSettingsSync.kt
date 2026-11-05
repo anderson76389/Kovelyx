@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import com.nuvio.app.isDesktop
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
-import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.features.collection.CollectionMobileSettingsRepository
 import com.nuvio.app.features.collection.CollectionMobileSettingsStorage
 import com.nuvio.app.features.debrid.DebridSettingsRepository
@@ -36,8 +35,6 @@ import com.nuvio.app.features.trakt.TraktSettingsStorage
 import com.nuvio.app.features.tracking.TrackingSettingsRepository
 import com.nuvio.app.features.watchprogress.ContinueWatchingPreferencesStorage
 import com.nuvio.app.features.watchprogress.ContinueWatchingPreferencesRepository
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.rpc
 import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -113,83 +110,15 @@ object ProfileSettingsSync {
     }
 
     suspend fun pull(profileId: Int): Boolean {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
-            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId); return false
-        }
-        ensureRepositoriesLoaded()
-        return syncMutex.withLock {
-            if (ProfileRepository.activeProfileId != profileId) {
-                log.d { "pull(profileId=$profileId) — skipped because profile is no longer active" }
-                return@withLock false
-            }
-            isServerSyncInFlight = true
-            try {
-                val localBlob = exportSettingsBlob()
-                if (ProfileRepository.activeProfileId != profileId) return@withLock false
-                val localSignature = buildSignature(localBlob)
-
-                val params = buildJsonObject {
-                    put("p_profile_id", profileId)
-                    put("p_platform", profileSettingsPlatform)
-                }
-                val result = SupabaseProvider.client.postgrest.rpc("sync_pull_profile_settings_blob", params)
-                if (ProfileRepository.activeProfileId != profileId) return@withLock false
-                val response = result.decodeList<SettingsBlobResponse>().firstOrNull()
-                val remoteJson = response?.settingsJson
-
-                if (remoteJson == null) {
-                    log.i { "pull(profileId=$profileId) — no remote settings blob found" }
-                    return@withLock false
-                }
-
-                isApplyingRemoteBlob = true
-                try {
-                    val remoteBlob = runCatching {
-                        json.decodeFromJsonElement(MobileProfileSettingsBlob.serializer(), remoteJson)
-                    }.getOrElse { error ->
-                        log.e(error) { "pull(profileId=$profileId) — failed to decode remote settings blob" }
-                        return@withLock false
-                    }
-                    val remoteSignature = buildSignature(remoteBlob)
-                    if (remoteSignature == localSignature) {
-                        log.d { "pull(profileId=$profileId) — remote matches local" }
-                        return@withLock false
-                    }
-
-                    if (ProfileRepository.activeProfileId != profileId) return@withLock false
-                    applyRemoteBlob(remoteBlob)
-                    skipNextPushSignature = currentObservedStateSignature()
-                } finally {
-                    isApplyingRemoteBlob = false
-                }
-
-                log.i { "pull(profileId=$profileId) — applied remote settings blob" }
-                true
-            } catch (error: Exception) {
-                log.e(error) { "pull(profileId=$profileId) — FAILED" }
-                false
-            } finally {
-                isServerSyncInFlight = false
-            }
-        }
+        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled)
+            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
+        return false
     }
 
     suspend fun pushCurrentProfileToRemote(): Boolean {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
-            com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.edited(); return true
-        }
-        ensureRepositoriesLoaded()
-        return syncMutex.withLock {
-            runCatching {
-                val profileId = ProfileRepository.activeProfileId
-                val blob = exportSettingsBlob()
-                if (ProfileRepository.activeProfileId != profileId) return@runCatching false
-                pushToRemoteLocked(profileId, blob)
-                true
-            }.onFailure { error ->
-                log.e(error) { "pushCurrentProfileToRemote() — FAILED" }
-            }.getOrDefault(false)
-        }
+        if (!com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) return false
+        com.nuvio.app.core.cloud.CloudflareVisualSettingsSync.edited()
+        return true
     }
 
     @OptIn(FlowPreview::class)
@@ -239,16 +168,6 @@ object ProfileSettingsSync {
         }
     }
 
-    private suspend fun pushToRemoteLocked(profileId: Int, blob: MobileProfileSettingsBlob) {
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-            put("p_platform", profileSettingsPlatform)
-            put("p_settings_json", json.encodeToJsonElement(MobileProfileSettingsBlob.serializer(), blob))
-            putSyncOriginClientId()
-        }
-        SupabaseProvider.client.postgrest.rpc("sync_push_profile_settings_blob", params)
-        log.d { "pushToRemoteLocked(profileId=$profileId) — success" }
-    }
 
     private fun exportSettingsBlob(): MobileProfileSettingsBlob {
         ensureRepositoriesLoaded()
