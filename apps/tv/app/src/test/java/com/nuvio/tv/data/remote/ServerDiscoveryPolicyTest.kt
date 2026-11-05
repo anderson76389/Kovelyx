@@ -101,6 +101,48 @@ class ServerDiscoveryPolicyTest {
     }
 
     @Test
+    fun blocksRetiredNuvioAndSubdomainsWithoutMatchingIndependentHosts() {
+        for (url in listOf(
+            "https://nuvio.tv",
+            "https://api.nuvio.tv",
+            "https://api.nuvio.tv.",
+            "https://a.b.nuvio.tv:8443/",
+            "https://nuvioapp.space",
+            "https://api.nuvioapp.space",
+        )) {
+            assertTrue(url, ServerDiscoveryPolicy.isFormerNuvioService(url))
+        }
+        for (url in listOf(
+            "https://cloud.example.org",
+            "https://nuvio.tv.example.org",
+            "https://anothernuvio.tv",
+        )) {
+            assertFalse(url, ServerDiscoveryPolicy.isFormerNuvioService(url))
+        }
+    }
+
+    @Test
+    fun rejectsDiscoveryManifestRedirectingToFormerNuvioAccountService() {
+        val json = """
+            {
+              "version": 1,
+              "service": "nuvio",
+              "self_hosted": true,
+              "backend_url": "https://api.nuvioapp.space",
+              "publishable_key": "test-key",
+              "capabilities": {"email_password_auth": true}
+            }
+        """.trimIndent()
+        val error = assertThrows(ServerDiscoveryException::class.java) {
+            ServerDiscoveryPolicy.parse(
+                discoveryUrl = "https://independent.example/.well-known/nuvio",
+                document = json,
+            )
+        }
+        assertEquals(ServerDiscoveryFailure.OFFICIAL_SERVER, error.failure)
+    }
+
+    @Test
     fun matchesOfficialBackendByHostAndPort() {
         assertTrue(
             ServerDiscoveryPolicy.matchesBackend(
