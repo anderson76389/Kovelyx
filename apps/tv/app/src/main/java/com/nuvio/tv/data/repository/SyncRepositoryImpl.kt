@@ -2,6 +2,7 @@ package com.nuvio.tv.data.repository
 
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.data.remote.supabase.ClaimSyncResult
 import com.nuvio.tv.data.remote.supabase.SupabaseLinkedDevice
 import com.nuvio.tv.data.remote.supabase.SyncCodeResult
@@ -23,6 +24,9 @@ class SyncRepositoryImpl @Inject constructor(
 
 
     override suspend fun generateSyncCode(pin: String): Result<String> {
+        if (CloudflareTvAccountClient.enabled) return Result.failure(
+            UnsupportedOperationException("La liaison par code n'est pas encore disponible sur Kovelyx Cloudflare.")
+        )
         return try {
             val params = buildJsonObject { put("p_pin", pin) }
             val response = postgrest.rpc("generate_sync_code", params)
@@ -37,6 +41,9 @@ class SyncRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getSyncCode(pin: String): Result<String> {
+        if (CloudflareTvAccountClient.enabled) return Result.failure(
+            UnsupportedOperationException("La liaison par code n'est pas encore disponible sur Kovelyx Cloudflare.")
+        )
         return try {
             val params = buildJsonObject { put("p_pin", pin) }
             val response = postgrest.rpc("get_sync_code", params)
@@ -55,6 +62,9 @@ class SyncRepositoryImpl @Inject constructor(
         pin: String,
         deviceName: String?
     ): Result<ClaimSyncResult> {
+        if (CloudflareTvAccountClient.enabled) return Result.failure(
+            UnsupportedOperationException("La liaison par code n'est pas encore disponible sur Kovelyx Cloudflare.")
+        )
         return try {
             val params = buildJsonObject {
                 put("p_code", code)
@@ -76,6 +86,9 @@ class SyncRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unlinkDevice(deviceUserId: String): Result<Unit> {
+        if (CloudflareTvAccountClient.enabled) return Result.failure(
+            UnsupportedOperationException("La liaison par code n'est pas encore disponible sur Kovelyx Cloudflare.")
+        )
         return try {
             val params = buildJsonObject { put("p_device_user_id", deviceUserId) }
             postgrest.rpc("unlink_device", params)
@@ -88,6 +101,9 @@ class SyncRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getLinkedDevices(): Result<List<SupabaseLinkedDevice>> {
+        if (CloudflareTvAccountClient.enabled) return Result.failure(
+            UnsupportedOperationException("La liaison par code n'est pas encore disponible sur Kovelyx Cloudflare.")
+        )
         return try {
             val userId = authManager.getEffectiveUserId()
                 ?: return Result.failure(Exception("Not authenticated"))
