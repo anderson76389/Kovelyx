@@ -528,6 +528,14 @@ object WatchProgressRepository {
         operationGeneration: Long,
         force: Boolean,
     ): Boolean {
+        // The local source syncs through Kovelyx D1 when Cloudflare is enabled.
+        // A signed-in legacy Supabase session must never override its progress.
+        if (CloudflareAccountClient.enabled) {
+            hasLoadedNuvioRemoteProgress = true
+            publish()
+            CloudflareDataSync.request(profileId)
+            return true
+        }
         val authState = AuthRepository.state.value
         if (authState !is AuthState.Authenticated || authState.isAnonymous) {
             // There is no upstream source for this account, so local state is authoritative.
