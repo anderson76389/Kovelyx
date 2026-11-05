@@ -196,6 +196,46 @@ object CloudflareAccountClient {
         request("/v1/profiles?profileId=$profileId", "{}", active.bearerToken, "DELETE")
     }
 
+    /** PINs are private D1 rows, never part of the downloadable kv_sync payload. */
+    suspend fun cloudProfilePins(): JsonObject {
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val (body, _) = request("/v1/profile-pins", "", active.bearerToken, "GET")
+        check(session?.bearerToken == active.bearerToken) { "Compte modifié" }
+        return json.parseToJsonElement(body).jsonObject
+    }
+
+    suspend fun verifyCloudProfilePin(profileId: String, pin: String): JsonObject {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject { put("profileId", profileId); put("pin", pin) }.toString()
+        val (response, _) = request("/v1/profile-pin/verify", body, active.bearerToken)
+        check(session?.bearerToken == active.bearerToken) { "Compte modifié" }
+        return json.parseToJsonElement(response).jsonObject
+    }
+
+    suspend fun setCloudProfilePin(profileId: String, pin: String, currentPin: String? = null) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            put("pin", pin)
+            currentPin?.let { put("currentPin", it) }
+        }.toString()
+        request("/v1/profile-pin", body, active.bearerToken)
+        check(session?.bearerToken == active.bearerToken) { "Compte modifié" }
+    }
+
+    suspend fun clearCloudProfilePin(profileId: String, currentPin: String?) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        val body = buildJsonObject {
+            put("profileId", profileId)
+            currentPin?.let { put("currentPin", it) }
+        }.toString()
+        request("/v1/profile-pin", body, active.bearerToken, "DELETE")
+        check(session?.bearerToken == active.bearerToken) { "Compte modifié" }
+    }
+
     /** Optimistic, revision-aware write; HTTP 409 is intentionally returned as an error. */
     suspend fun writeSync(
         profileId: String, category: String, itemKey: String,
