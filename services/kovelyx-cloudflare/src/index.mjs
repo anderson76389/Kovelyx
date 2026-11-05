@@ -1,4 +1,5 @@
 import {handleProfileMedia,MAX_PROFILE_MEDIA_BYTES} from "./profile-media.mjs";
+import {handleProfilePin} from "./profile-pin.mjs";
 import {handleCatalogueManifest,handleCatalogueChunk,catalogueKinds,cataloguePrefix} from "./catalogue-sync.mjs";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
@@ -192,9 +193,11 @@ async function productionReadiness(env) {
       return unavailable();
     const media = await env.DB.prepare("SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN ('kv_profile_media','kv_profile_media_chunks','kv_profile_media_uploads','kv_profile_media_upload_chunks')").all();
     if ((media.results || []).length !== 4 || !media.results.some(row => row.name === "kv_profile_media" && row.sql?.includes("18000000")) || !media.results.some(row => row.name === "kv_profile_media_chunks" && row.sql?.includes("0 AND 34"))) return unavailable();
+    const pins=await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='kv_profile_pins'").first();
+    if(!pins)return unavailable();
     return jsonResponse({
       service:"Kovelyx Cloud",provider:"Cloudflare D1",
-      status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES,catalogueSnapshotSchema:1
+      status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES,catalogueSnapshotSchema:1,profilePinSchema:1
     });
   } catch {
     return unavailable();
@@ -238,6 +241,8 @@ export default {
       if (url.pathname === "/v1/me" && request.method === "GET")
         return respond(jsonResponse({id:user.id,email:user.email,name:user.name}));
       if (url.pathname === "/v1/profiles") return respond(await handleProfiles(request,env,user,url));
+      if (url.pathname === "/v1/profile-pin" || url.pathname === "/v1/profile-pin/verify" || url.pathname === "/v1/profile-pins")
+        return respond(await handleProfilePin(request,env,user,url,readJson));
       if (url.pathname === "/v1/profile-media") return respond(await handleProfileMedia(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
       if (url.pathname === "/v1/catalogue-manifest") return respond(await handleCatalogueManifest(request,env,user,await readJson(request)));
