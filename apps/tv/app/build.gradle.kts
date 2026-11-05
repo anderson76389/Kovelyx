@@ -171,7 +171,7 @@ android {
             buildConfigField("boolean", "FEATURE_IN_APP_TRAILERS_ENABLED", "true")
             buildConfigField("boolean", "FEATURE_EXTERNAL_TRAILERS_ENABLED", "true")
             buildConfigField("boolean", "FEATURE_EXTERNAL_PLAYBACK_KEEP_ALIVE_ENABLED", "true")
-            // Retired Supabase-compatible custom backends are not exposed in Kovelyx Cloud builds.
+            // Retired outdated custom backends are not exposed in Kovelyx Cloud builds.
             buildConfigField("boolean", "FEATURE_CUSTOM_SERVER_CONNECTIONS_ENABLED", "false")
         }
         create("playstore") {
@@ -218,11 +218,8 @@ android {
             buildConfigField("boolean", "IS_DEBUG_BUILD", (!optimizedDistribution).toString())
             buildConfigField("String", "SENTRY_ENVIRONMENT", buildConfigString("debug"))
 
-            // Better Auth / D1 uses KOVELYX_CLOUD_URL. Never ship old Supabase credentials.
+            // Better Auth / D1 uses KOVELYX_CLOUD_URL. No third-party database credentials are included.
             // Dev environment (from local.dev.properties)
-            buildConfigField("String", "SUPABASE_URL", buildConfigString(""))
-            buildConfigField("String", "SUPABASE_ANON_KEY", buildConfigString(""))
-            buildConfigField("String", "SUPABASE_FALLBACK_URL", buildConfigString(""))
             buildConfigField("String", "TV_LOGIN_WEB_BASE_URL", "\"${devProperties.getProperty("TV_LOGIN_WEB_BASE_URL", "")}\"")
             buildConfigField("String", "DEVICE_LOGIN_WEB_BASE_URL", "\"${devProperties.getProperty("DEVICE_LOGIN_WEB_BASE_URL", "")}\"")
             buildConfigField("String", "PARENTAL_GUIDE_API_URL", "\"${devProperties.getProperty("PARENTAL_GUIDE_API_URL", "")}\"")
@@ -585,11 +582,6 @@ dependencies {
     implementation(libs.zxing.core)
 
 
-    // Supabase
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.auth)
-    implementation(libs.supabase.postgrest)
-    implementation(libs.supabase.storage)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.sentry.android)
 
