@@ -141,7 +141,7 @@ jobs:
           print('Worker Cloudflare accessible. Le test multi-appareils reste distinct.')
           PY
           echo '✅ Worker joignable. Contrôle D1 en cours…' >> "$GITHUB_STEP_SUMMARY"
-      - name: Certifier la migration D1 0004 sur le vrai Worker
+      - name: Certifier les migrations D1 0004 et 0005 sur le vrai Worker
         if: steps.credentials.outputs.ready == 'true'
         shell: bash
         run: |
@@ -159,6 +159,7 @@ jobs:
               data=json.load(file)
           assert data.get('status') == 'ok', 'Worker non prêt'
           assert data.get('schema') == '0004_profile_media_gifs', 'D1 0004 absent'
-          print('Vrai serveur Kovelyx Cloudflare prêt : schéma D1 0003 vérifié.')
+          assert data.get('profilePinSchema') == 1, 'D1 0005 (verrous PIN) absente'
+          print('Vrai serveur Kovelyx Cloudflare prêt : D1 0004 et profils PIN D1 0005 vérifiés.')
           PY
-          echo '✅ Worker réellement déployé : comptes Better Auth et schéma D1 0003 vérifiés. Synchronisation multi-appareils à tester séparément.' >> "$GITHUB_STEP_SUMMARY"
+          echo '✅ Worker réellement déployé : comptes Better Auth, D1 0004 et verrous PIN D1 0005 vérifiés. Synchronisation multi-appareils à tester séparément.' >> "$GITHUB_STEP_SUMMARY"
