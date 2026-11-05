@@ -147,9 +147,9 @@ object AuthRepository {
     suspend fun signOutIfSessionInvalid(error: Throwable, source: String): Boolean = false
 
     /** Never pretend a cloud account is deleted until a dedicated API confirms it. */
-    suspend fun deleteAccount(): Result<Unit> = Result.failure(
+    suspend fun deleteAccount(): Result<Unit> = Result.failure<Unit>(
         UnsupportedOperationException("Suppression du compte Cloudflare indisponible : aucune donnée supprimée.")
-    ).also { _error.value = it.exceptionOrNull()?.message }
+    ).also { outcome -> _error.value = outcome.exceptionOrNull()?.message }
 
     fun clearError() {
         _error.value = null

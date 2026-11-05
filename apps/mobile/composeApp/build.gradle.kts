@@ -441,6 +441,7 @@ kotlin {
                 implementation(libs.compose.uiToolingPreview)
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activity.compose)
+                implementation("androidx.lifecycle:lifecycle-process:2.10.0")
                 implementation(libs.androidx.core.splashscreen)
                 implementation(libs.androidx.work.runtime)
                 implementation(libs.coil.gif)

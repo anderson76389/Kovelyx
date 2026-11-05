@@ -158,19 +158,6 @@ object NetworkStatusRepository {
             return NetworkCondition.Online
         }
 
-        val endpoints = SupabaseEndpointConfig.restEndpointUrls()
-        // Guest builds have no account backend to contact.
-        if (endpoints.isEmpty()) return NetworkCondition.Online
-        val supabaseReachable = endpoints.any { url ->
-            probeReachable(
-                url = url,
-                headers = mapOf("apikey" to configuration.publishableKey),
-            )
-        }
-        if (!supabaseReachable) {
-            return NetworkCondition.ServersUnreachable
-        }
-
         return NetworkCondition.Online
     }
 
