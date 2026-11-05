@@ -1,6 +1,8 @@
 package com.nuvio.app.features.addons
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -468,12 +470,19 @@ private fun InstalledAddonCard(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        FlowRow(
+        // Keep the destructive action visible on narrow screens. Other actions scroll
+        // horizontally instead of wrapping the delete icon onto a second line.
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            onMoveUpClick?.let { onMoveUp ->
+            Row(
+                modifier = Modifier.weight(1f).horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                onMoveUpClick?.let { onMoveUp ->
                 NuvioIconActionButton(
                     icon = Icons.Rounded.ArrowUpward,
                     contentDescription = stringResource(Res.string.addons_move_up),
@@ -512,6 +521,7 @@ private fun InstalledAddonCard(
                     NuvioToastController.show(copiedMessage)
                 },
             )
+            }
             NuvioIconActionButton(
                 icon = Icons.Rounded.Delete,
                 contentDescription = stringResource(Res.string.addons_delete),
