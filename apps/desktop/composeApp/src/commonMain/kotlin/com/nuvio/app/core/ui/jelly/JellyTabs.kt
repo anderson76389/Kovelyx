@@ -1,6 +1,7 @@
 package com.nuvio.app.core.ui.jelly
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -174,16 +176,37 @@ private fun JellyTabContent(
         ) { icon() }
     }
     val labelContent: @Composable () -> Unit = {
-        Text(
-            text = label,
-            color = color,
-            style = labelStyle,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.alpha(labelFraction)
-                .then(if (horizontal) Modifier else Modifier.fillMaxWidth().padding(horizontal = 4.dp)),
-        )
+        if (horizontal) {
+            Text(
+                text = label,
+                color = color,
+                style = labelStyle,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.alpha(labelFraction),
+            )
+        } else {
+            BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                val fontScale = LocalDensity.current.fontScale
+                val baseSize = if (compactSize) 12f else 13f
+                val fittedSize = ((maxWidth.value - 2f).coerceAtLeast(1f) /
+                    (label.length.coerceAtLeast(1) * 0.60f * fontScale))
+                    .coerceIn(8.5f, baseSize)
+                Text(
+                    text = label,
+                    color = color,
+                    style = labelStyle.copy(
+                        fontSize = fittedSize.sp,
+                        lineHeight = (fittedSize + 2f).sp,
+                    ),
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth().alpha(labelFraction),
+                )
+            }
+        }
     }
     if (horizontal) {
         Layout(
