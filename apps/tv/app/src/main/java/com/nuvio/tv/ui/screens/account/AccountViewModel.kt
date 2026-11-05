@@ -79,12 +79,15 @@ class AccountViewModel @Inject constructor(
     private val libraryPreferences: LibraryPreferences,
     private val watchedItemsPreferences: WatchedItemsPreferences,
     private val traktAuthDataStore: TraktAuthDataStore,
-    private val postgrest: Postgrest,
+    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val profileManager: ProfileManager,
     private val authDiagnosticReportRepository: AuthDiagnosticReportRepository,
     private val serverConfiguration: ServerConfiguration,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    // Account screen must not instantiate Supabase while Cloudflare is active.
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
 
     private val _uiState = MutableStateFlow(AccountUiState())
     val uiState: StateFlow<AccountUiState> = _uiState.asStateFlow()
