@@ -3,6 +3,7 @@ package com.nuvio.tv.core.sync
 import android.os.SystemClock
 import android.util.Log
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.debrid.DebridProviders
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.AnimeSkipSettingsDataStore
@@ -86,6 +87,8 @@ class ProviderCredentialSyncService @Inject constructor(
     suspend fun syncFromRemote(
         profileId: Int = profileManager.activeProfileId.value
     ): Result<Boolean> = withContext(Dispatchers.IO) {
+        // External provider secrets are local-only with Better Auth / D1.
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(false)
         syncMutex.withLock {
             try {
                 val credentialScope = currentScope(profileId) ?: return@withLock Result.success(false)
@@ -136,7 +139,7 @@ class ProviderCredentialSyncService @Inject constructor(
     }
 
     fun requestForegroundPull(force: Boolean = false) {
-        if (!authManager.isAuthenticated) return
+        if (CloudflareTvAccountClient.enabled || !authManager.isAuthenticated) return
         val now = SystemClock.elapsedRealtime()
         if (!force && foregroundPullJob?.isActive == true) return
         if (!force && now - lastForegroundPullAtMs < PROVIDER_CREDENTIAL_FOREGROUND_MIN_INTERVAL_MS) return
@@ -306,6 +309,7 @@ class ProviderCredentialSyncService @Inject constructor(
     }
 
     private suspend fun handleLocalSnapshot(snapshot: ProviderCredentialSnapshot) {
+        if (CloudflareTvAccountClient.enabled) return
         syncMutex.withLock {
             val previous = synchronized(stateLock) {
                 observedSnapshots.put(snapshot.profileId, snapshot)
