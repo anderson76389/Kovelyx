@@ -1,6 +1,7 @@
 package com.nuvio.app.core.ui.jelly
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +29,8 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,7 +60,8 @@ internal fun JellyTabRow(
     val palette = MaterialTheme.themePalette
     val color = if (active) tokens.colors.accent else tokens.colors.textMuted
     val iconSize = if (compactSize) 24.dp else 28.dp
-    val labelHeight = if (compactSize) 14.dp else 16.dp
+    val labelHeight = (if (compactSize) 18.dp else 20.dp) * LocalDensity.current.fontScale
+    val textMeasurer = rememberTextMeasurer()
     val iconModifier = Modifier.size(iconSize)
         .then(if (active) Modifier.gradientMask(palette.accentBrush()) else Modifier)
     val iconTint = if (active) Color.White else color
@@ -81,19 +85,23 @@ internal fun JellyTabRow(
                             item.drawable != null -> Icon(painterResource(item.drawable), null, iconModifier, tint = iconTint)
                         }
                     }
-                    Box(Modifier.height(labelHeight * labelFraction).fillMaxWidth().clipToBounds().alpha(labelFraction)) {
+                    BoxWithConstraints(Modifier.height(labelHeight * labelFraction).fillMaxWidth().padding(horizontal = 2.dp).clipToBounds().alpha(labelFraction)) {
+                        val labelStyle = TextStyle(
+                            fontSize = if (compactSize) 12.sp else 13.sp,
+                            fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
+                            textAlign = TextAlign.Center,
+                        )
+                        val measuredWidth = textMeasurer.measure(item.label, labelStyle, maxLines = 1, softWrap = false).size.width
+                        val widthPx = with(LocalDensity.current) { maxWidth.toPx() }
+                        val fit = (widthPx / measuredWidth.coerceAtLeast(1)).coerceIn(0.5f, 1f)
                         Text(
                             text = item.label,
                             color = color,
-                            style = TextStyle(
-                                fontSize = if (compactSize) 12.sp else 13.sp,
-                                lineHeight = if (compactSize) 14.sp else 16.sp,
-                                fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
-                                textAlign = TextAlign.Center,
-                            ),
+                            style = labelStyle.copy(fontSize = labelStyle.fontSize * fit),
+                            softWrap = false,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
@@ -153,7 +161,7 @@ internal fun JellyTabTargets(
                         ) {
                             item.content(onClick)
                         }
-                        Spacer(Modifier.height((if (compactSize) 14.dp else 16.dp) * labelFraction))
+                        Spacer(Modifier.height((if (compactSize) 18.dp else 20.dp) * LocalDensity.current.fontScale * labelFraction))
                     }
                 }
             }

@@ -81,8 +81,19 @@ class DesktopJellyNavigationTest {
         }
     }
 
-    private fun setContent(withProfile: Boolean = false) {
-        val labels = listOf("Home", "Search", "Library", "Settings")
+    @Test
+    fun frenchLibraryAndSearchHaveRoomInExpandedBar() {
+        setContent(french = true)
+        compose.waitForIdle()
+        val search = compose.onNodeWithContentDescription("Recherche").fetchSemanticsNode().boundsInRoot
+        val library = compose.onNodeWithContentDescription("Bibliothèque").fetchSemanticsNode().boundsInRoot
+        assertTrue(library.width > 110f, "Long French labels need enough room beside the icon")
+        assertTrue(search.right <= library.left + 1f, "Adjacent tabs must not overlap")
+        savePreview("expanded-fr")
+    }
+
+    private fun setContent(withProfile: Boolean = false, french: Boolean = false) {
+        val labels = if (french) listOf("Accueil", "Recherche", "Bibliothèque", "Réglages") else listOf("Home", "Search", "Library", "Settings")
         val icons = listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.VideoLibrary, Icons.Default.Settings)
         compose.setContent {
             NuvioTheme {
@@ -113,7 +124,7 @@ class DesktopJellyNavigationTest {
                                 } else null,
                             )
                         },
-                        isHeroEnabled = true,
+                        isHeroEnabled = !french,
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
                 }

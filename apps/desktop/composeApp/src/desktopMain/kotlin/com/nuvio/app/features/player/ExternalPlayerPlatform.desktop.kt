@@ -12,20 +12,37 @@ private data class DesktopExternalPlayerIntent(
 internal actual object ExternalPlayerPlatform {
     private const val systemPlayerId = "system"
 
-    actual fun defaultPlayerId(): String? = systemPlayerId
+    actual fun defaultPlayerId(): String? = installedDesktopPlayers().firstOrNull()?.id ?: systemPlayerId
 
     actual fun availablePlayers(): List<ExternalPlayerApp> =
-        listOf(ExternalPlayerApp(systemPlayerId, "System default"))
+        installedDesktopPlayers().map { ExternalPlayerApp(it.id, it.name) } +
+            ExternalPlayerApp(systemPlayerId, "Application par défaut (fichiers locaux)")
 
     actual fun open(
         request: ExternalPlayerPlaybackRequest,
         playerId: String?,
-    ): ExternalPlayerOpenResult =
-        if (openUri(request.sourceUrl)) {
-            ExternalPlayerOpenResult.Opened
+    ): ExternalPlayerOpenResult {
+        val installed = installedDesktopPlayers()
+        val player = if (playerId == null || playerId == systemPlayerId) {
+            installed.firstOrNull { desktopExternalPlayerCommand(it, request) != null }
         } else {
-            ExternalPlayerOpenResult.Failed
+            installed.firstOrNull { it.id == playerId }
+                ?: return ExternalPlayerOpenResult.NoPlayerAvailable
         }
+        if (player != null) {
+            val command = desktopExternalPlayerCommand(player, request)
+                ?: return ExternalPlayerOpenResult.Failed
+            return if (runCatching {
+                ProcessBuilder(command).redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                    .redirectError(ProcessBuilder.Redirect.DISCARD).start()
+            }.isSuccess) ExternalPlayerOpenResult.Opened else ExternalPlayerOpenResult.Failed
+        }
+        // HTTP associations launch a browser, not a video player. Never report that as playback.
+        val uri = runCatching { URI(request.sourceUrl) }.getOrNull()
+            ?: return ExternalPlayerOpenResult.Failed
+        if (!uri.scheme.equals("file", ignoreCase = true)) return ExternalPlayerOpenResult.NoPlayerAvailable
+        return if (openUri(request.sourceUrl)) ExternalPlayerOpenResult.Opened else ExternalPlayerOpenResult.Failed
+    }
 
     actual fun buildIntent(
         request: ExternalPlayerPlaybackRequest,

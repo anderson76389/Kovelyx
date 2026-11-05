@@ -385,6 +385,14 @@ object WatchedRepository {
                 "sourceGeneration=$sourceGeneration"
         }
         if (effectiveSource.providerId == null) {
+            // Avoid legacy account polling when local watched state belongs to Kovelyx D1.
+            if (CloudflareAccountClient.enabled) {
+                nuvioHasLoaded = true
+                nuvioHasLoadedRemote = true
+                publish()
+                CloudflareDataSync.request(profileId)
+                return true
+            }
             val authState = AuthRepository.state.value
             if (authState !is AuthState.Authenticated || authState.isAnonymous) {
                 // Local watched state is authoritative when this account has no Nuvio upstream.

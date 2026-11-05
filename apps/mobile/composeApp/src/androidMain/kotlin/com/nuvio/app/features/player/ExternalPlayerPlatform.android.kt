@@ -84,6 +84,7 @@ internal actual object ExternalPlayerPlatform {
         // Resume position extras
         if (request.resumePositionMs > 0L) {
             putExtra("position", request.resumePositionMs.toInt())   // MX Player / Just Player / mpv
+            putExtra("extra_position", request.resumePositionMs)    // VLC (Long ms)
             putExtra("startfrom", request.resumePositionMs.toInt()) // Vimu Player
             putExtra("forceresume", true)                           // Vimu: enable resume for network streams
             putExtra("from_start", false)                           // VLC: don't force start from beginning
