@@ -3,11 +3,11 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4634
+Fichiers inspectés : 4632
 
 ## Inventaire des références à traiter
 
-### Connexions et services (107 correspondances)
+### Connexions et services (105 correspondances)
 
 - apps/tv/app/src/main/java/com/nuvio/tv/data/remote/ServerDiscovery.kt:120 : return listOf("nuvio.tv", "nuvioapp.space").any { domain ->
 - apps/tv/app/src/main/res/values-ar/strings.xml:2642 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
@@ -89,7 +89,7 @@ Fichiers inspectés : 4634
 - apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1985 : <string name="server_error_official_available">api.nuvio.tv je oficiální server. Zavřete toto okno a volbou Použít oficiální server se přepněte zpět.</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:183 : <string name="server_error_official_active">Το api.nuvio.tv είναι ο επίσημος διακομιστής και είναι ήδη επιλεγμένο.</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:184 : <string name="server_error_official_available">Το api.nuvio.tv είναι ο επίσημος διακομιστής. Κλείστε αυτό το παράθυρο διαλόγου και επιλέξτε «Χρήση επίσημου διακομιστή» για να 
-- Autres correspondances non détaillées : 27
+- Autres correspondances non détaillées : 25
 
 ### Mises à jour et releases (0 correspondances)
 
@@ -149,7 +149,7 @@ Fichiers inspectés : 4634
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:132 : "https://anothernuvio.tv"
 - apps/desktop/scripts/linux/test-linux-deb-tools.sh:30 : Maintainer: Nuvio Media <contact@nuvio.tv>
 
-### Configuration générale (59 correspondances)
+### Configuration générale (61 correspondances)
 
 - apps/tv/app/build.gradle.kts:540 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
@@ -210,6 +210,8 @@ Fichiers inspectés : 4634
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:99 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:115 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:133 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
+- apps/desktop/scripts/linux/configure-desktop-runtime.sh:25 : NUVIO_SUPABASE_URL
+- apps/desktop/scripts/linux/configure-desktop-runtime.sh:26 : NUVIO_SUPABASE_ANON_KEY
 
 ## Binaires hérités
 
@@ -226,7 +228,7 @@ Fichiers inspectés : 4634
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6684 lignes.
+- apps/tv : 6682 lignes.
 - apps/mobile : 7049 lignes.
 - apps/desktop : 7979 lignes.
 
@@ -276,7 +278,7 @@ Fichiers inspectés : 4634
 ## Limites et vérifications indispensables
 
 - Tester les trois applications en surveillant les appels réseau réels et sans accès aux domaines Nuvio.
-- Tester les fonctions de comptes Better Auth et de synchronisation Cloudflare D1 sur les trois appareils.
+- Vérifier les parcours de comptes Better Auth et de synchronisation Cloudflare D1 sur les trois appareils.
 - Conserver les sources et licences des bibliothèques MPV, libass et moteurs livrés sous forme binaire.
 - Migrer les URL de support et connexion sans inventer de faux services.
 - Tester la signature, les identifiants d'application, les mises à jour et la conservation des données.

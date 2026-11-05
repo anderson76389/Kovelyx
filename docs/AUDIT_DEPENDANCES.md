@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1387** ; références statiques à Nuvio/NuvioMedia : **6738**.
+Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia : **6736**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -121,7 +121,7 @@ Fichiers texte examinés : **1387** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:3`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:4`
-- …et 6658 autres correspondances (plafond d'affichage).
+- …et 6656 autres correspondances (plafond d'affichage).
 
 ## Android
 
