@@ -274,10 +274,9 @@ class ProfileSettingsSyncService @Inject constructor(
         try {
             syncedFeatures.forEach { feature ->
                 val featureJson = featuresJson[feature]?.jsonObject ?: return@forEach
-                if (feature == PluginDataStore.FEATURE) {
-                    importPluginSettings(profileId, featureJson)
-                    return@forEach
-                }
+                // The only roaming plugin setting is GROUP_STREAMS_BY_REPOSITORY.
+                // Generic typed preference decoding below already imports that key.
+                // Everything else remains local via the exclusion policy.
                 profileDataStoreFactory.get(profileId, feature).edit { mutablePrefs ->
                     val preservedEntries = captureLocalOnlyPreferenceEntries(feature, mutablePrefs)
                     val priorDiscoverLocation = if (feature == "layout_settings") {
