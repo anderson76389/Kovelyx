@@ -1,6 +1,5 @@
 package com.nuvio.tv.core.sync
 
-import com.nuvio.tv.data.remote.supabase.SupabaseProviderCredential
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
@@ -19,11 +18,11 @@ class ProviderCredentialModelsTest {
             )
         )
         val rows = listOf(
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "DEBRID:TORBOX",
                 credentialJson = buildJsonObject { put("api_key", "remote") }
             ),
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "animeskip",
                 credentialJson = buildJsonObject { put("client_id", "remote") }
             )
@@ -42,7 +41,7 @@ class ProviderCredentialModelsTest {
             )
         )
         val rows = listOf(
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "debrid:torbox",
                 credentialJson = buildJsonObject { put("api_key", "remote") }
             )
@@ -61,11 +60,11 @@ class ProviderCredentialModelsTest {
             )
         )
         val remote = listOf(
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "debrid:torbox",
                 credentialJson = buildJsonObject { put("api_key", "remote-torbox") }
             ),
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "tmdb",
                 credentialJson = buildJsonObject { put("api_key", "remote-tmdb") }
             )
@@ -84,7 +83,7 @@ class ProviderCredentialModelsTest {
             values = listOf(ProviderCredentialValue("mdblist", "api_key", "local"))
         )
         val remote = listOf(
-            SupabaseProviderCredential(
+            RemoteProviderCredential(
                 provider = "mdblist",
                 credentialJson = buildJsonObject { put("api_key", "") }
             )
