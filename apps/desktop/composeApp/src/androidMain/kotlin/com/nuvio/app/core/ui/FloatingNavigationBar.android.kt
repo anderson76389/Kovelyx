@@ -43,7 +43,8 @@ internal actual fun FloatingNavigationBar(
         label = "jelly_labels",
     )
     val trackHeight = 48.dp + (if (compactSize) 8.dp else 16.dp) * labelFraction
-    val horizontalPadding = 58.dp - 30.dp * labelFraction
+    // Give long translated labels (Recherche / Bibliothèque) room when expanded.
+    val horizontalPadding = 58.dp - 46.dp * labelFraction
 
     Box(
         modifier = modifier
@@ -57,7 +58,7 @@ internal actual fun FloatingNavigationBar(
             labelFraction = labelFraction,
             compactSize = compactSize,
             glowStrength = glowStrength,
-            modifier = Modifier.widthIn(max = 400.dp).fillMaxWidth().height(trackHeight),
+            modifier = Modifier.widthIn(max = 460.dp).fillMaxWidth().height(trackHeight),
         ) {
             GlassBarSurface(hazeState, Modifier.matchParentSize(), glowStrength)
         }
