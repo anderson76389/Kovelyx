@@ -1,6 +1,7 @@
 package com.nuvio.app.core.ui.jelly
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,19 +83,31 @@ internal fun JellyTabRow(
                             item.drawable != null -> Icon(painterResource(item.drawable), null, iconModifier, tint = iconTint)
                         }
                     }
-                    Box(Modifier.height(labelHeight * labelFraction).fillMaxWidth().clipToBounds().alpha(labelFraction)) {
+                    BoxWithConstraints(
+                        modifier = Modifier.height(labelHeight * labelFraction)
+                            .fillMaxWidth().clipToBounds().alpha(labelFraction),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        // Scale labels to their actual tab width rather than truncating
+                        // translated names such as "Bibliothèque" on smaller phones.
+                        val fontScale = LocalDensity.current.fontScale
+                        val baseSize = if (compactSize) 12f else 13f
+                        val fittedSize = ((maxWidth.value - 2f).coerceAtLeast(1f) /
+                            (item.label.length.coerceAtLeast(1) * 0.60f * fontScale))
+                            .coerceIn(8.5f, baseSize)
                         Text(
                             text = item.label,
                             color = color,
                             style = TextStyle(
-                                fontSize = if (compactSize) 12.sp else 13.sp,
-                                lineHeight = if (compactSize) 14.sp else 16.sp,
+                                fontSize = fittedSize.sp,
+                                lineHeight = (fittedSize + 2f).sp,
                                 fontWeight = if (active) FontWeight.Bold else FontWeight.Normal,
                                 textAlign = TextAlign.Center,
                             ),
                             maxLines = 1,
+                            softWrap = false,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 }
