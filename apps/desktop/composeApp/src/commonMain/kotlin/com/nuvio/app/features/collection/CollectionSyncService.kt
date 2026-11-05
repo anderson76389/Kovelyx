@@ -34,6 +34,22 @@ object CollectionSyncService {
             CloudflareDataSync.request(profileId)
     }
 
+    /**
+     * Imports require a confirmed remote pull. A queued asynchronous refresh
+     * is not enough: a failed D1 fetch must not erase existing collections.
+     */
+    suspend fun pullFromServerChecked(profileId: Int): Boolean {
+        if (!CloudflareAccountClient.enabled ||
+            ProfileRepository.activeProfileId != profileId) return false
+        val account = AuthRepository.state.value as? AuthState.Authenticated ?: return false
+        if (account.isAnonymous || CloudflareAccountClient.currentSession?.userId != account.userId)
+            return false
+        return runCatching {
+            CloudflareDataSync.synchronize(profileId)
+            true
+        }.getOrDefault(false)
+    }
+
     fun triggerPush() {
         if (isSyncingFromRemote || !CloudflareAccountClient.enabled) return
         val account = AuthRepository.state.value as? AuthState.Authenticated ?: return
