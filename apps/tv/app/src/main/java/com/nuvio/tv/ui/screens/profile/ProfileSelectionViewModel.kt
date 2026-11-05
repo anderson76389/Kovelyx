@@ -256,6 +256,24 @@ class ProfileSelectionViewModel @Inject constructor(
 
     fun deleteProfile(id: Int) {
         viewModelScope.launch {
+            if (id == 1) return@launch // Never delete the principal profile.
+            if (CloudflareTvAccountClient.enabled) {
+                val target = profileManager.profiles.value.firstOrNull { it.id == id } ?: return@launch
+                // The TV must not remove local data unless D1 confirmed removal:
+                // otherwise the profile would reappear at the next cloud pull.
+                target.cloudProfileId?.let { uuid ->
+                    try {
+                        CloudflareTvAccountClient.deleteCloudProfile(uuid)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Log.e("ProfileSelectionVM", "Cloudflare profile deletion refused; local data preserved", error)
+                        return@launch
+                    }
+                }
+                profileManager.deleteProfile(id)
+                return@launch
+            }
             profileManager.deleteProfile(id)
             profileSyncService.deleteProfileData(id)
             profileSyncService.pushToRemote()
