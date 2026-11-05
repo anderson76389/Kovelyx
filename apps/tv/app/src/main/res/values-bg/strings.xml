@@ -1194,7 +1194,7 @@
     <string name="debug_buffer_logs_subtitle">Излъчвай периодични диагностики на плейър буфера към logcat (изключено по подразбиране)</string>
     <string name="debug_section_account">Акаунт</string>
     <string name="debug_manual_signin_title">Ръчно вписване</string>
-    <string name="debug_manual_signin_subtitle">Впиши се с имейл и парола (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Впиши се с имейл и парола (Kovelyx auth)</string>
     <string name="debug_email_placeholder">Имейл</string>
     <string name="debug_password_placeholder">Парола</string>
     <string name="debug_signing_in">Вписване…</string>

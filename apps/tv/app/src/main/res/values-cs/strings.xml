@@ -1280,7 +1280,7 @@
     <string name="debug_buffer_logs_subtitle">Odesílat pravidelnou diagnostiku bufferu přehrávače do logcatu (ve výchozím stavu vypnuto)</string>
     <string name="debug_section_account">Účet</string>
     <string name="debug_manual_signin_title">Ruční přihlášení</string>
-    <string name="debug_manual_signin_subtitle">Přihlásit se e-mailem a heslem (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Přihlásit se e-mailem a heslem (Kovelyx auth)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Heslo</string>
     <string name="debug_signing_in">Přihlašování…</string>

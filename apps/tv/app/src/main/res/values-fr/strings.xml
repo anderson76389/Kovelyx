@@ -943,7 +943,7 @@
     <string name="debug_buffer_logs_subtitle">Émettre périodiquement les diagnostics du buffer du lecteur dans logcat (désactivé par défaut)</string>
     <string name="debug_section_account">Compte</string>
     <string name="debug_manual_signin_title">Connexion manuelle</string>
-    <string name="debug_manual_signin_subtitle">Se connecter avec un e-mail et un mot de passe (auth Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Se connecter avec un e-mail et un mot de passe (auth Kovelyx)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Mot de passe</string>
     <string name="debug_signing_in">Connexion en cours\u2026</string>

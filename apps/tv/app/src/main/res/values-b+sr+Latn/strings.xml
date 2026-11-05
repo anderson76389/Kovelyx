@@ -1440,7 +1440,7 @@
     <string name="debug_buffer_logs_subtitle">Emituj povremenu dijagnostiku bafera plejera u logcat (onemogućeno po podrazumevanoj vrednosti)</string>
     <string name="debug_section_account">Nalog</string>
     <string name="debug_manual_signin_title">Ručna prijava</string>
-    <string name="debug_manual_signin_subtitle">Prijavite se putem email-a i lozinke (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Prijavite se putem email-a i lozinke (Kovelyx auth)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Lozinka</string>
     <string name="debug_signing_in">Prijavljivanje\u2026</string>

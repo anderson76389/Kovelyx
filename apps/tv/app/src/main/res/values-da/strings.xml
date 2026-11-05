@@ -1202,7 +1202,7 @@
     <string name="debug_buffer_logs_subtitle">Udsend periodiske buffer-diagnostik til logcat (deaktiveret som standard)</string>
     <string name="debug_section_account">Konto</string>
     <string name="debug_manual_signin_title">Manuel log ind</string>
-    <string name="debug_manual_signin_subtitle">Log ind med e-mail og adgangskode (Supabase-godkendelse)</string>
+    <string name="debug_manual_signin_subtitle">Log ind med e-mail og adgangskode (Kovelyx-godkendelse)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Adgangskode</string>
     <string name="debug_signing_in">Logger ind\u2026</string>

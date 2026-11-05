@@ -1197,7 +1197,7 @@
     <string name="debug_buffer_logs_subtitle">إرسال تقارير دورية لتشخيص ذاكرة تخزين المشغل إلى logcat (معطل افتراضياً)</string>
     <string name="debug_section_account">الحساب</string>
     <string name="debug_manual_signin_title">تسجيل دخول يدوي</string>
-    <string name="debug_manual_signin_subtitle">تسجيل الدخول بالبريد وكلمة السر (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">تسجيل الدخول بالبريد وكلمة السر (Kovelyx auth)</string>
     <string name="debug_email_placeholder">البريد الإلكتروني</string>
     <string name="debug_password_placeholder">كلمة المرور</string>
     <string name="debug_signing_in">جاري تسجيل الدخول\u2026</string>

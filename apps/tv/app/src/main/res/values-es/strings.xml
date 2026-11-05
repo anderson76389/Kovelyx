@@ -1493,7 +1493,7 @@
     <string name="debug_buffer_logs_subtitle">Emite diagnósticos periódicos del búfer del reproductor en logcat (deshabilitado por defecto)</string>
     <string name="debug_section_account">Cuenta</string>
     <string name="debug_manual_signin_title">Iniciar sesión manual</string>
-    <string name="debug_manual_signin_subtitle">Inicia sesión con correo electrónico y contraseña (autenticación Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Inicia sesión con correo electrónico y contraseña (autenticación Kovelyx)</string>
     <string name="debug_email_placeholder">Correo electrónico</string>
     <string name="debug_password_placeholder">Contraseña</string>
     <string name="debug_signing_in">Iniciando sesión\u2026</string>
