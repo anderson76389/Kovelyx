@@ -42,6 +42,7 @@ jobs:
           python3 scripts/tests/audit-tv-nuvio-urls.py
           python3 scripts/tests/audit-retired-provider-residuals.py --strict
           python3 scripts/tests/test_native_asset_names.py
+          python3 scripts/tests/audit-packaged-binaries.py
       - name: Consigner la limite de la preuve
         run: |
           {
