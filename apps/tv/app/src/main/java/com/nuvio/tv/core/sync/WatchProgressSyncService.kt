@@ -41,7 +41,7 @@ data class WatchProgressRemoteSyncResult(
 @Singleton
 class WatchProgressSyncService @Inject constructor(
     private val authManager: AuthManager,
-    private val postgrest: Postgrest,
+    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val watchProgressPreferences: WatchProgressPreferences,
     private val trackingProviderRegistry: TrackingProgressProviderRegistry,
     private val traktSettingsDataStore: TraktSettingsDataStore,
@@ -49,6 +49,9 @@ class WatchProgressSyncService @Inject constructor(
     private val syncClientIdentity: SyncClientIdentity,
     private val mutationStore: WatchStateMutationStore
 ) {
+    // Better Auth / D1 accounts never instantiate the retired Supabase HTTP client.
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
+
     private val deltaSyncMutex = Mutex()
     private val outboundSyncMutexes = ConcurrentHashMap<Int, Mutex>()
 
