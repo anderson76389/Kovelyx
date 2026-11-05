@@ -82,6 +82,8 @@ jobs:
           cache-size=0
           address=/nuvio.tv/0.0.0.0
           address=/nuvio.tv/::
+          address=/nuvioapp.space/0.0.0.0
+          address=/nuvioapp.space/::
           log-queries
           log-facility=/tmp/kovelyx-dns.log
           DNS
@@ -89,8 +91,9 @@ jobs:
           sudo dnsmasq --conf-file=/tmp/kovelyx-dnsmasq.conf --pid-file=/tmp/kovelyx-dnsmasq.pid
           sudo chmod 644 /tmp/kovelyx-dns.log
           dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
+          dig @127.0.0.1 +short api.nuvioapp.space A | grep -Fx '0.0.0.0'
           dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$'
-          initial_nuvio_queries="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
+          initial_nuvio_queries="$(grep -Eci 'api[.](nuvio[.]tv|nuvioapp[.]space)' /tmp/kovelyx-dns.log || true)"
           echo "KOVELYX_DNS_BASELINE=$initial_nuvio_queries" >> "$GITHUB_ENV"
           echo "Resolution locale du DNS de filtrage validee."
       - name: Autoriser l'acceleration materielle KVM
