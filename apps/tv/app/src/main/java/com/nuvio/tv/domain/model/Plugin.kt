@@ -11,7 +11,7 @@ enum class RepositoryType {
 }
 
 /**
- * Plugin info returned from Supabase sync, with optional type hint.
+ * Plugin info returned from Legacy sync, with optional type hint.
  */
 data class RemotePluginInfo(
     val url: String,

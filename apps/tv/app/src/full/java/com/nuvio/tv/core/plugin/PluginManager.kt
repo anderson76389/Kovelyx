@@ -340,7 +340,7 @@ class PluginManager @Inject constructor(
     }
 
     /**
-     * Add a repository with a type hint from Supabase sync.
+     * Add a repository with a type hint from Legacy sync.
      * Skips wrong detection paths when the type is already known,
      * making reconciliation faster and more resilient to network issues.
      */
@@ -476,7 +476,7 @@ class PluginManager @Inject constructor(
 
     
     /**
-     * Reconcile local plugin repos with the remote list from Supabase.
+     * Reconcile local plugin repos with the remote list from Legacy.
      * @param remotePlugins list of remote plugin info (URL + optional type hint)
      * @param removeMissingLocal if true, remove local repos not in the remote list
      */

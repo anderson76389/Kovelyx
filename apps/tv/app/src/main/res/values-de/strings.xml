@@ -1006,7 +1006,7 @@
     <string name="debug_sync_code_subtitle">Schaltflächen „Synchronisierungscode generieren/eingeben“ in den Kontoeinstellungen anzeigen</string>
     <string name="debug_section_account">Konto</string>
     <string name="debug_manual_signin_title">Manuelle Anmeldung</string>
-    <string name="debug_manual_signin_subtitle">Mit E-Mail-Adresse und Passwort anmelden (Supabase-Authentifizierung)</string>
+    <string name="debug_manual_signin_subtitle">Mit E-Mail-Adresse und Passwort anmelden (Kovelyx-Authentifizierung)</string>
     <string name="debug_email_placeholder">E-Mail</string>
     <string name="debug_password_placeholder">Passwort</string>
     <string name="debug_signing_in">Anmelden\u2026</string>

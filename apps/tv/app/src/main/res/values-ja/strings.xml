@@ -1206,7 +1206,7 @@
     <string name="debug_buffer_logs_subtitle">プレーヤーバッファ診断をlogcatに定期的に出力します（デフォルト無効）</string>
     <string name="debug_section_account">アカウント</string>
     <string name="debug_manual_signin_title">手動サインイン</string>
-    <string name="debug_manual_signin_subtitle">メールとパスワードでサインイン（Supabase認証）</string>
+    <string name="debug_manual_signin_subtitle">メールとパスワードでサインイン（Kovelyx認証）</string>
     <string name="debug_email_placeholder">メール</string>
     <string name="debug_password_placeholder">パスワード</string>
     <string name="debug_signing_in">サインイン中\u2026</string>

@@ -9,7 +9,7 @@ on:
       - '.github/workflows/prove-upstream-independence.yml'
       - 'scripts/tests/verify-upstream-independence.py'
       - 'scripts/tests/test_cloudflare_legacy_boundaries.py'
-      - 'scripts/tests/audit-supabase-residuals.py'
+      - 'scripts/tests/audit-retired-provider-residuals.py'
       - 'apps/**'
   pull_request:
     branches: [main]
@@ -17,7 +17,7 @@ on:
       - '.github/workflows/prove-upstream-independence.yml'
       - 'scripts/tests/verify-upstream-independence.py'
       - 'scripts/tests/test_cloudflare_legacy_boundaries.py'
-      - 'scripts/tests/audit-supabase-residuals.py'
+      - 'scripts/tests/audit-retired-provider-residuals.py'
       - 'apps/**'
   workflow_dispatch:
 
@@ -40,7 +40,7 @@ jobs:
           python3 -m unittest discover -s scripts/tests -p 'test_cloudflare_legacy_boundaries.py'
           python3 scripts/audit-mobile-independence.py
           python3 scripts/tests/audit-tv-nuvio-urls.py
-          python3 scripts/tests/audit-supabase-residuals.py --strict
+          python3 scripts/tests/audit-retired-provider-residuals.py --strict
       - name: Consigner la limite de la preuve
         run: |
           {

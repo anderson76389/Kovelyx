@@ -341,7 +341,7 @@ object SyncManager {
     }
 
     fun requestForegroundPull(profileId: Int, force: Boolean = false) {
-        // Les RPC historiques Supabase ne sont pas compatibles avec Cloudflare D1.
+        // Les RPC historiques Legacy ne sont pas compatibles avec Cloudflare D1.
         // Ne jamais les lancer avant qu'un adaptateur natif D1 ait été testé.
         if (CloudflareAccountClient.enabled) {
             CloudflareDataSync.request(profileId)

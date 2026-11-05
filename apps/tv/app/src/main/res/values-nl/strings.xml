@@ -1415,7 +1415,7 @@
     <string name="debug_buffer_logs_subtitle">Stuur periodiek bufferdiagnostiek van de speler naar logcat (standaard uitgeschakeld)</string>
     <string name="debug_section_account">Account</string>
     <string name="debug_manual_signin_title">Handmatig aanmelden</string>
-    <string name="debug_manual_signin_subtitle">Aanmelden met e-mailadres en wachtwoord (Supabase-auth)</string>
+    <string name="debug_manual_signin_subtitle">Aanmelden met e-mailadres en wachtwoord (Kovelyx-auth)</string>
     <string name="debug_email_placeholder">E-mailadres</string>
     <string name="debug_password_placeholder">Wachtwoord</string>
     <string name="debug_signing_in">Aanmelden\u2026</string>

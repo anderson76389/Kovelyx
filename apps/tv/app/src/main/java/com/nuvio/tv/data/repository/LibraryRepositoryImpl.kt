@@ -75,7 +75,7 @@ class LibraryRepositoryImpl @Inject constructor(
 
     private fun triggerRemoteSync(profileId: Int) {
         // CloudflareTvDataSync observes local library mutations directly and
-        // handles uploads. Never call the retired Supabase RPC adapter.
+        // handles uploads. Never call the retired Legacy RPC adapter.
         if (com.nuvio.tv.core.auth.CloudflareTvAccountClient.enabled) return
         if (!hasCompletedInitialPull) return
         if (!authManager.isAuthenticated) return

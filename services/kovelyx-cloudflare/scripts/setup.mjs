@@ -121,9 +121,9 @@ const expectedUrl = rawCloudUrl.endsWith("/") ? rawCloudUrl.slice(0, -1) : rawCl
 try {
   const ready = await fetch(expectedUrl + "/ready", { headers: { accept: "application/json" }, signal: AbortSignal.timeout(20000) });
   const body = await ready.json().catch(() => ({}));
-  if (!ready.ok || body.status !== "ok" || body.schema !== "0004_profile_media_gifs")
-    throw new Error("HTTP " + ready.status + ", schema=" + String(body.schema || "absent"));
-  console.log("✅ Production prête : /ready indique comptes Better Auth et D1 0003 (images privées).");
+  if (!ready.ok || body.status !== "ok" || body.schema !== "0004_profile_media_gifs" || body.profilePinSchema !== 1)
+    throw new Error("HTTP " + ready.status + ", schema=" + String(body.schema || "absent") + ", profilePinSchema=" + String(body.profilePinSchema ?? "absent"));
+  console.log("✅ Production prête : /ready confirme Better Auth, les images privées D1 0004 et les verrous PIN D1 0005.");
 } catch (error) {
   console.error("❌ La production n'est pas encore vérifiée : " + error.message);
   console.error("Contrôlez l'URL KOVELYX_CLOUDFLARE_URL et le Worker après déploiement.");

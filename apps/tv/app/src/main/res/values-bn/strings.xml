@@ -1488,7 +1488,7 @@
     <string name="debug_buffer_logs_subtitle">লগক্যাটে পিরিয়ডিক প্লেয়ার বাফার ডায়াগনস্টিকস এমিট করুন (ডিফল্টভাবে বন্ধ থাকে)</string>
     <string name="debug_section_account">অ্যাকাউন্ট</string>
     <string name="debug_manual_signin_title">ম্যানুয়াল সাইন ইন</string>
-    <string name="debug_manual_signin_subtitle">ইমেইল এবং পাসওয়ার্ড দিয়ে সাইন ইন করুন (Supabase অথেন্টিকেশন)</string>
+    <string name="debug_manual_signin_subtitle">ইমেইল এবং পাসওয়ার্ড দিয়ে সাইন ইন করুন (Kovelyx অথেন্টিকেশন)</string>
     <string name="debug_email_placeholder">ইমেইল</string>
     <string name="debug_password_placeholder">পাসওয়ার্ড</string>
     <string name="debug_signing_in">সাইন ইন করা হচ্ছে…</string>

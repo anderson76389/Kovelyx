@@ -1413,7 +1413,7 @@
   <string name="debug_member_tier_two">Υποστηρικτής+</string>
   <string name="debug_section_account">Λογαριασμός</string>
   <string name="debug_manual_signin_title">Χειροκίνητη σύνδεση</string>
-  <string name="debug_manual_signin_subtitle">Σύνδεση με email και κωδικό πρόσβασης (Supabase auth)</string>
+  <string name="debug_manual_signin_subtitle">Σύνδεση με email και κωδικό πρόσβασης (Kovelyx auth)</string>
   <string name="debug_email_placeholder">Ηλεκτρονικό ταχυδρομείο</string>
   <string name="debug_password_placeholder">Κωδικός πρόσβασης</string>
   <string name="debug_signing_in">Σύνδεση…</string>

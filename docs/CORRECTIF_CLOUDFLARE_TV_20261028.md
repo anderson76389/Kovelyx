@@ -5,7 +5,7 @@ Base : `ffee04a13aab160ce7db48d4fc1e61d178e75060`.
 
 ## Comportement corrigé
 
-- Mobile et Windows : vérifier le Worker configuré avec `/ready` avant les sondes publiques, sans tester l'ancien Supabase en mode Cloudflare. Un HTTP en erreur du Worker reste un échec. En mode invité sans serveur configuré, ne pas afficher de panne de serveur inexistante.
+- Mobile et Windows : vérifier le Worker configuré avec `/ready` avant les sondes publiques, sans tester un ancien backend en mode Cloudflare. Un HTTP en erreur du Worker reste un échec. En mode invité sans serveur configuré, ne pas afficher de panne de serveur inexistante.
 - Mobile et Windows : envoyer les demandes de synchronisation complète à la file Cloudflare existante, au lieu de quitter immédiatement.
 - TV : appliquer les mêmes en-têtes JSON et client aux requêtes Cloudflare et une origine du Worker aux mutations, y compris les écritures de synchronisation.
 - TV : ne plus instancier le ViewModel SIMKL depuis l'écran de suivi ni ouvrir son parcours de connexion. Retirer SIMKL du sélecteur de recommandations.

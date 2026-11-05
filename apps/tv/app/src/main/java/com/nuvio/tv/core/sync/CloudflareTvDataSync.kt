@@ -30,7 +30,7 @@ import org.json.JSONObject
 
 /**
  * Android TV Cloudflare synchronization. Shares the mobile/desktop JSON contract
- * and never makes a Supabase RPC. Only active, authenticated profiles are synced.
+ * and never makes a Legacy RPC. Only active, authenticated profiles are synced.
  * Pending library writes are pushed before remote reconciliation.
  */
 @Singleton

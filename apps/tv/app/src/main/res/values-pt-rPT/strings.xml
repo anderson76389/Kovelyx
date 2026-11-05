@@ -1173,7 +1173,7 @@
     <string name="debug_buffer_logs_subtitle">Emite diagnósticos periódicos do buffer do leitor para o logcat (desativado por predefinição).</string>
     <string name="debug_section_account">Conta</string>
     <string name="debug_manual_signin_title">Início de Sessão Manual</string>
-    <string name="debug_manual_signin_subtitle">Iniciar sessão com e-mail e palavra-passe (autenticação Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Iniciar sessão com e-mail e palavra-passe (autenticação Kovelyx)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Palavra-passe</string>
     <string name="debug_signing_in">A iniciar sessão\u2026</string>

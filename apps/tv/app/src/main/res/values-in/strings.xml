@@ -1136,7 +1136,7 @@
     <string name="debug_sync_code_subtitle">Tampilkan tombol Buat/Masukkan Kode Sinkronisasi di pengaturan Akun</string>
     <string name="debug_section_account">Akun</string>
     <string name="debug_manual_signin_title">Masuk Manual</string>
-    <string name="debug_manual_signin_subtitle">Masuk dengan email dan kata sandi (autentikasi Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Masuk dengan email dan kata sandi (autentikasi Kovelyx)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Kata Sandi</string>
     <string name="debug_signing_in">Sedang masuk\u2026</string>

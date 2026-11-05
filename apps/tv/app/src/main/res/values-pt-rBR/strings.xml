@@ -1442,7 +1442,7 @@
     <string name="debug_buffer_logs_subtitle">Envia relatórios periódicos de carregamento do vídeo para o sistema (logcat). Desativado por padrão.</string>
     <string name="debug_section_account">Conta</string>
     <string name="debug_manual_signin_title">Login Manual</string>
-    <string name="debug_manual_signin_subtitle">Entre com e-mail e senha (Supabase).</string>
+    <string name="debug_manual_signin_subtitle">Entre com e-mail e senha (Kovelyx).</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Senha</string>
     <string name="debug_signing_in">Entrando\u2026</string>

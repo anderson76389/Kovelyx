@@ -586,7 +586,7 @@
     <string name="debug_sync_code_subtitle">Rodyti „Generuoti/Įvesti sinchronizavimo kodą“ mygtukus paskyros nustatymuose</string>
     <string name="debug_section_account">Paskyra</string>
     <string name="debug_manual_signin_title">Rankinis prisijungimas</string>
-    <string name="debug_manual_signin_subtitle">Prisijungti su el. paštu ir slaptažodžiu („Supabase auth“)</string>
+    <string name="debug_manual_signin_subtitle">Prisijungti su el. paštu ir slaptažodžiu („Kovelyx auth“)</string>
     <string name="debug_email_placeholder">El. paštas</string>
     <string name="debug_password_placeholder">Slaptažodis</string>
     <string name="debug_signing_in">Prisijungiama…</string>
@@ -839,7 +839,7 @@ Klaida: Bandomoji simuliuojama klaida — tai nėra tikras gedimas. Šaltinis gr
     <string name="account_sync_description">Jūsų paskyra sinchronizuojama per „Nuvio Sync“.</string>
     <string name="account_sync_restart_note">Pakeitimų įsigaliojimui gali reikėti paleisti programą iš naujo.</string>
     <string name="account_signin_qr_title">Prisijungti</string>
-    <string name="account_signin_qr_subtitle">„Nuvio“ naudoja „Supabase“ sinchronizavimui</string>
+    <string name="account_signin_qr_subtitle">„Kovelyx“ sinchronizavimui naudoja „Cloudflare“</string>
     <string name="account_signed_in_label">Prisijungta kaip</string>
     <string name="account_total_label">Iš viso</string>
     <string name="account_loading_sync">Sinchronizuojama…</string>

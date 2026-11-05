@@ -1565,7 +1565,7 @@
     <string name="debug_buffer_logs_subtitle">A lejátszópuffer diagnosztikai adatainak rendszeres küldése a logcatbe (alapértelmezés szerint kikapcsolva)</string>
     <string name="debug_section_account">Fiók</string>
     <string name="debug_manual_signin_title">Kézi bejelentkezés</string>
-    <string name="debug_manual_signin_subtitle">Bejelentkezés e-maillel és jelszóval (Supabase hitelesítés)</string>
+    <string name="debug_manual_signin_subtitle">Bejelentkezés e-maillel és jelszóval (Kovelyx hitelesítés)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Jelszó</string>
     <string name="debug_signing_in">Bejelentkezés\u2026</string>

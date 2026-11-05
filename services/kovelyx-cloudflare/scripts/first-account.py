@@ -84,7 +84,7 @@ def main():
     confirmation = getpass.getpass("Confirmer le mot de passe (masqué) : ")
     if len(password) < 12 or len(password) > 128 or password != confirmation:
         raise ValueError("Les mots de passe ne correspondent pas, ou longueur invalide.")
-    print("Inscription sur votre serveur, sans envoyer de données à Nuvio/Supabase.")
+    print("Inscription sur votre Worker Kovelyx Cloudflare.")
 
     opened = False
     try:

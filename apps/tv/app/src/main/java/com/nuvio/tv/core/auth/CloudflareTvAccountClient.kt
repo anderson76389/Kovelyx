@@ -14,7 +14,7 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 /**
- * Client indépendant Workers / Better Auth : PAS de jeton Supabase.
+ * Client indépendant Workers / Better Auth : PAS de jeton Legacy.
  * La session native est conservée chiffrée par Android Keystore, puis
  * vérifiée avec /v1/me avant d'être rétablie après un redémarrage.
  */

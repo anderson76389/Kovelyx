@@ -185,7 +185,7 @@ class AccountViewModel @Inject constructor(
                         }
                         loadConnectedStats()
                     }
-                    // Le compte Cloudflare reste connecté sans lancer de RPC Supabase
+                    // Le compte Cloudflare reste connecté sans utiliser d'ancien protocole RPC
                     // ni écraser les bibliothèques locales avant la migration D1.
                     _uiState.update { it.copy(isLoading = false) }
                 },
@@ -320,14 +320,14 @@ class AccountViewModel @Inject constructor(
                     "deviceModel" to Build.MODEL,
                     "redirectBaseUrl" to serverConfiguration.deviceLoginWebBaseUrl,
                     "legacyRedirectBaseUrl" to serverConfiguration.tvLoginWebBaseUrl,
-                    "supabaseUrl" to serverConfiguration.backendUrl,
+                    "historicalBackendUrl" to serverConfiguration.backendUrl,
                     "anonKeyConfigured" to serverConfiguration.publishableKey.isNotBlank().toString(),
                     "nonce" to nonce
                 )
             )
             Log.d(
                 TAG,
-                "QR_LOGIN[$traceId] start requested auth=${_uiState.value.authState.nameForLog()} model=${Build.MODEL.bodySnippetForLog()} redirect=${serverConfiguration.deviceLoginWebBaseUrl.urlForLog()} legacyRedirect=${serverConfiguration.tvLoginWebBaseUrl.urlForLog()} supabase=${serverConfiguration.backendUrl.urlForLog()} anonKeyConfigured=${serverConfiguration.publishableKey.isNotBlank()} nonce=${nonce.rawForLog()}"
+                "QR_LOGIN[$traceId] start requested auth=${_uiState.value.authState.nameForLog()} model=${Build.MODEL.bodySnippetForLog()} redirect=${serverConfiguration.deviceLoginWebBaseUrl.urlForLog()} legacyRedirect=${serverConfiguration.tvLoginWebBaseUrl.urlForLog()} ancienBackend=${serverConfiguration.backendUrl.urlForLog()} anonKeyConfigured=${serverConfiguration.publishableKey.isNotBlank()} nonce=${nonce.rawForLog()}"
             )
             _uiState.update {
                 it.copy(
@@ -634,7 +634,7 @@ class AccountViewModel @Inject constructor(
             // Auth state
             message.contains("not authenticated") -> R.string.account_error_not_authenticated
 
-            // Supabase HTTP errors (e.g. 404 for missing RPC, 400 for bad params)
+            // HTTP errors (404 for unavailable resources, 400 for invalid requests)
             message.contains("404") || message.contains("could not find") -> R.string.account_error_service_unavailable
             message.contains("400") || message.contains("bad request") -> R.string.account_error_invalid_request
 

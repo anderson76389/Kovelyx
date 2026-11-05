@@ -19,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Local, private Windows images. This does NOT upload photographs to Supabase.
+ * Local, private Windows images. This does NOT upload photographs to Legacy.
  * The file chooser accepts common raster formats, validates decoded dimensions
  * and stores an unchanged copy inside %APPDATA%/Kovelyx/profile-media.
  */

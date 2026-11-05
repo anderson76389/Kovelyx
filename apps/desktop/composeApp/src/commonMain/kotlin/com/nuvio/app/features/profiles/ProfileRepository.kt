@@ -332,7 +332,7 @@ object ProfileRepository {
             // Keep the desired local pictures even if profile metadata is temporarily offline.
             applyPayloadsLocally(profiles, preserveCloudIds = true)
             // Preserve the cloud UUID of every existing profile; never send a
-            // Better Auth user to the legacy Supabase profile RPC.
+            // Better Auth user to the retired profile RPC.
             try {
                 val account = AuthRepository.state.value as? AuthState.Authenticated
                     ?: error("Compte Kovelyx non connecté")
@@ -388,7 +388,7 @@ object ProfileRepository {
             return
         }
 
-        // Do not send private file URIs or machine-specific paths to Supabase.
+        // Do not send private file URIs or machine-specific paths to Legacy.
         val syncPayloads = profiles.map { item ->
             item.copy(
                 avatarUrl = item.avatarUrl?.takeUnless(ProfileLocalImages::isManagedUri),
@@ -481,7 +481,7 @@ object ProfileRepository {
         val owner = (AuthRepository.state.value as? AuthState.Authenticated)?.userId.orEmpty()
         if (CloudflareAccountClient.enabled) {
             // Delete only the specifically selected remote UUID; preserve all
-            // remaining local profiles and never invoke the old Supabase RPC.
+            // remaining local profiles and never invoke the old Legacy RPC.
             try {
                 val selected = _state.value.profiles.firstOrNull {
                     it.profileIndex == profileIndex

@@ -1142,7 +1142,7 @@
     <string name="debug_sync_code_subtitle">Zobraziť tlačidlá Generovať/Zadať Sync kód v nastaveniach účtu</string>
     <string name="debug_section_account">Účet</string>
     <string name="debug_manual_signin_title">Manuálne prihlásenie</string>
-    <string name="debug_manual_signin_subtitle">Prihlásiť sa e-mailom a heslom (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Prihlásiť sa e-mailom a heslom (Kovelyx auth)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Heslo</string>
     <string name="debug_signing_in">Prihlasovanie…</string>

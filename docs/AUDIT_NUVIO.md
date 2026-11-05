@@ -276,7 +276,7 @@ Fichiers inspectés : 4634
 ## Limites et vérifications indispensables
 
 - Tester les trois applications en surveillant les appels réseau réels et sans accès aux domaines Nuvio.
-- Migrer ou rendre facultatives les fonctions Supabase (compte, authentification, synchronisation).
+- Tester les fonctions de comptes Better Auth et de synchronisation Cloudflare D1 sur les trois appareils.
 - Conserver les sources et licences des bibliothèques MPV, libass et moteurs livrés sous forme binaire.
 - Migrer les URL de support et connexion sans inventer de faux services.
 - Tester la signature, les identifiants d'application, les mises à jour et la conservation des données.

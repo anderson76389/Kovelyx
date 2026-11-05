@@ -732,7 +732,7 @@
     <string name="debug_sync_code_subtitle">Prikaži dugmad za Generiši/Unesi Sync Code u postavkama Računa</string>
     <string name="debug_section_account">Račun</string>
     <string name="debug_manual_signin_title">Ručna Prijava</string>
-    <string name="debug_manual_signin_subtitle">Prijavi se sa emailom i lozinkom (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Prijavi se sa emailom i lozinkom (Kovelyx auth)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Lozinka</string>
     <string name="debug_signing_in">Prijavljivanje…</string>

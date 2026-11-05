@@ -207,8 +207,8 @@ class AuthDiagnosticsSession(
                     supportedAbis = Build.SUPPORTED_ABIS.orEmpty().toList()
                 ),
                 environment = AuthDiagnosticEnvironmentDto(
-                    supabaseUrl = serverConfiguration.backendUrl,
-                    supabaseHost = serverConfiguration.backendUrl.hostOrNull(),
+                    backendUrl = serverConfiguration.backendUrl,
+                    backendHost = serverConfiguration.backendUrl.hostOrNull(),
                     tvLoginWebBaseUrl = serverConfiguration.tvLoginWebBaseUrl.orEmpty(),
                     tvLoginHost = serverConfiguration.tvLoginWebBaseUrl.orEmpty().hostOrNull(),
                     tvLoginWebHost = serverConfiguration.tvLoginWebBaseUrl.orEmpty().hostOrNull(),

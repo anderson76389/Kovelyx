@@ -35,7 +35,7 @@ object MemberAccessRepository {
 
     fun ensureStarted() {
         if (CloudflareAccountClient.enabled) {
-            // Kovelyx D1 does not offer the old Supabase supporter RPC.
+            // Kovelyx D1 does not offer the old Legacy supporter RPC.
             // Do not hydrate or display the legacy Nuvio member cache.
             _access.value = MemberAccess.None
             return

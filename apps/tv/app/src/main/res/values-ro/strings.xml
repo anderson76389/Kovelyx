@@ -466,7 +466,7 @@
     <string name="debug_sync_code_subtitle">Afișează butoanele Generare/Introducere Cod de sincronizare în setările contului</string>
     <string name="debug_section_account">Cont</string>
     <string name="debug_manual_signin_title">Autentificare manuală</string>
-    <string name="debug_manual_signin_subtitle">Autentifică-te cu email și parolă (autentificare Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Autentifică-te cu email și parolă (autentificare Kovelyx)</string>
     <string name="debug_email_placeholder">E-mail</string>
     <string name="debug_password_placeholder">Parolă</string>
     <string name="debug_signing_in">Se autentifică\u2026</string>
