@@ -2,8 +2,8 @@
 """Préparer les builds Kovelyx pour un Worker Cloudflare déjà déployé.
 
 Configuration publique : KOVELYX_CLOUDFLARE_URL (GitHub Actions Variable).
-NE JAMAIS brancher le Worker Cloudflare dans Supabase SDK : protocole différent.
-Les anciennes valeurs Supabase de CI sont ignorées, afin de conserver le mode invité.
+Le build contient uniquement l'URL publique du Worker Cloudflare.
+Les propriétés historiques de comptes sont retirées si elles sont encore présentes.
 """
 import argparse
 import ipaddress
@@ -48,12 +48,7 @@ for platform in TARGETS if args.platform == "all" else (args.platform,):
             "SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_FALLBACK_URL",
         }
         lines = [line for line in lines if line.split("=",1)[0].strip() not in disabled]
-        lines += [
-            "KOVELYX_CLOUD_URL=" + url,
-            "NUVIO_SUPABASE_URL=",
-            "NUVIO_SUPABASE_ANON_KEY=",
-            "NUVIO_SUPABASE_FALLBACK_URL=",
-        ]
+        lines.append("KOVELYX_CLOUD_URL=" + url)
         dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
         os.chmod(dest, 0o600)
     print("Worker Cloudflare configuré pour " + platform + " : " + host)

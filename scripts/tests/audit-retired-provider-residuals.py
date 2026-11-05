@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inventory remaining Supabase dependencies on all Kovelyx clients.
+"""Inventory retired account-provider dependencies on all Kovelyx clients.
 
 This is a whole-tree source inventory, not a certificate of runtime behavior.
 The default Cloudflare path is separately validated by the upstream boundary tests.
@@ -56,10 +56,10 @@ def scan(platform: str) -> tuple[int, list[tuple[str, int]]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--strict", action="store_true",
-                        help="Fail until all Supabase source/dependency references disappear")
+                        help="Fail when a retired account provider is reintroduced")
     args = parser.parse_args()
     remaining = 0
-    print("Audit Supabase résiduel (sources de production + dépendances Gradle) :")
+    print("Audit des fournisseurs de compte retirés (production + Gradle) :")
     for platform in SOURCES:
         occurrences, files = scan(platform)
         remaining += occurrences
@@ -71,7 +71,7 @@ def main() -> None:
     print(f"\nTotal: {remaining} référence(s). La présence de code hérité ne signifie pas")
     print("que le mode Cloudflare l'exécute. Test sur appareils et trafic requis.")
     if args.strict and remaining:
-        raise SystemExit("Suppression totale Supabase non terminée")
+        raise SystemExit("Un ancien fournisseur de compte reste référencé")
 
 
 if __name__ == "__main__":

@@ -18,8 +18,8 @@ def group(path, line):
         return "Archives et tests"
     if "update" in p or "release" in p or "github" in line.lower():
         return "Mises à jour et releases"
-    if any(s in p for s in ("/auth/","login","server","supabase","support")) or any(
-        s in line.lower() for s in ("tv-login","api.nuvio","supabase","supporters")):
+    if any(s in p for s in ("/auth/","login","server","support")) or any(
+        s in line.lower() for s in ("tv-login","api.nuvio","supporters")):
         return "Connexions et services"
     if "https:" in line or "http:" in line or "nuvio://" in line:
         return "Liens annexes"
@@ -81,7 +81,7 @@ def main():
     report += ["- " + k + " : " + str(v) for k,v in vars.most_common(40)]
     report += ["", "## Limites et vérifications indispensables", "",
         "- Tester les trois applications en surveillant les appels réseau réels et sans accès aux domaines Nuvio.",
-        "- Migrer ou rendre facultatives les fonctions Supabase (compte, authentification, synchronisation).",
+        "- Vérifier les parcours de comptes Better Auth et de synchronisation Cloudflare D1 sur les trois appareils.",
         "- Conserver les sources et licences des bibliothèques MPV, libass et moteurs livrés sous forme binaire.",
         "- Migrer les URL de support et connexion sans inventer de faux services.",
         "- Tester la signature, les identifiants d'application, les mises à jour et la conservation des données.",
