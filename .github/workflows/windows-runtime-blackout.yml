@@ -41,13 +41,15 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
-          foreach ($domain in @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv')) {
+          foreach ($domain in @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'nuvioapp.space', 'api.nuvioapp.space')) {
             Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $domain"
             Add-Content -LiteralPath $hostsFile -Value "::1 $domain"
           }
           ipconfig /flushdns | Out-Null
           $nuvio = @([System.Net.Dns]::GetHostAddresses('api.nuvio.tv') | ForEach-Object { $_.ToString() })
           if (@($nuvio | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -ne 0) { throw "Blocage Nuvio non applique : $nuvio" }
+          $legacy = @([System.Net.Dns]::GetHostAddresses('api.nuvioapp.space') | ForEach-Object { $_.ToString() })
+          if (@($legacy | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -ne 0) { throw "Blocage du second domaine Nuvio non applique : $legacy" }
           $github = @([System.Net.Dns]::GetHostAddresses('api.github.com') | ForEach-Object { $_.ToString() })
           if (@($github | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -lt 1) { throw 'GitHub inaccessible ou bloque.' }
           'Blocage de api.nuvio.tv effectif, resolution DNS GitHub disponible.' >> $env:GITHUB_STEP_SUMMARY
