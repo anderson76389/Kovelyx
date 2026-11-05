@@ -19,6 +19,8 @@ class SyncRepositoryImpl @Inject constructor(
     private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val authManager: AuthManager
 ) : SyncRepository {
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
+
 
     override suspend fun generateSyncCode(pin: String): Result<String> {
         return try {
@@ -28,9 +30,7 @@ class SyncRepositoryImpl @Inject constructor(
             val result = results.firstOrNull()
                 ?: return Result.failure(Exception("Empty response from generate_sync_code"))
             Result.success(result.code)
-        } cat
-    private val postgrest: Postgrest get() = legacyPostgrest.get()
-ch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to generate sync code", e)
             Result.failure(e)
         }
