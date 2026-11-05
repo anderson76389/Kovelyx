@@ -299,9 +299,14 @@ class ProfileSelectionViewModel @Inject constructor(
     }
 
     fun refreshProfilePinStates() {
-        // Cloudflare has no legacy PIN RPC; retain the locally stored lock state.
-        if (CloudflareTvAccountClient.enabled) return
         viewModelScope.launch {
+            if (CloudflareTvAccountClient.enabled) {
+                // A failed D1 request must NOT clear the cached lock state.
+                profileSyncService.pullProfileLockStates()
+                    .onSuccess { profileLockStateDataStore.replaceAll(it) }
+                    .onFailure { Log.w("ProfileSelectionVM", "PIN Cloudflare différés, état local conservé", it) }
+                return@launch
+            }
             var attempt = 0
             while (attempt < 4) {
                 val result = profileSyncService.pullProfileLockStates()
