@@ -161,8 +161,7 @@ class ServerDiscoveryService @Inject constructor() {
     suspend fun discover(input: String): Result<ServerConfiguration> = withContext(Dispatchers.IO) {
         runCatching {
             val discoveryUrl = ServerDiscoveryPolicy.discoveryUrl(input)
-            if (ServerDiscoveryPolicy.isRetiredUpstream(discoveryUrl) ||
-                ServerDiscoveryPolicy.matchesBackend(discoveryUrl, BuildConfig.SUPABASE_URL)) {
+            if (ServerDiscoveryPolicy.isRetiredUpstream(discoveryUrl)) {
                 throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
             }
             val request = Request.Builder()
