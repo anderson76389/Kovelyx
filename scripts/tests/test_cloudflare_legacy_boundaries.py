@@ -61,34 +61,29 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
                 self.assertRegex(source, r'"User-Agent"\s+to\s+"Kovelyx')
 
 
-    def test_tv_cloudflare_does_not_push_secrets_or_media_servers_to_retired_rpc(self):
+    def test_tv_private_tokens_cannot_be_sent_to_obsolete_database(self):
         for relative in (
             "core/sync/ProviderCredentialSyncService.kt",
             "core/sync/MediaServerSyncService.kt",
         ):
             with self.subTest(service=relative):
-                source = (
-                    ROOT / "apps/tv/app/src/main/java/com/nuvio/tv" / relative
-                ).read_text(encoding="utf-8")
-                self.assertIn("CloudflareTvAccountClient.enabled", source)
-                self.assertIn("legacyPostgrest: dagger.Lazy<Postgrest>", source)
-        credentials = (ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/ProviderCredentialSyncService.kt").read_text(encoding="utf-8")
-        self.assertIn("if (CloudflareTvAccountClient.enabled) return@withContext Result.success(false)", credentials)
-        self.assertIn("if (CloudflareTvAccountClient.enabled) return", credentials)
-        media = (ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/MediaServerSyncService.kt").read_text(encoding="utf-8")
-        self.assertIn("!CloudflareTvAccountClient.enabled &&", media)
+                source = (ROOT / "apps/tv/app/src/main/java/com/nuvio/tv" / relative).read_text(encoding="utf-8")
+                self.assertNotIn("Postgrest", source)
+                self.assertNotIn(".rpc(", source)
+                self.assertIn("Result.success(false)", source)
 
-    def test_tv_cloudflare_profile_edits_do_not_invoke_retired_rpc(self):
-        source = (
+    def test_tv_profile_pin_and_identity_use_cloudflare_only(self):
+        profile = (
             ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/ProfileSyncService.kt"
         ).read_text(encoding="utf-8")
-        self.assertIn("if (CloudflareTvAccountClient.enabled) return@withContext Result.success(Unit)", source)
-        self.assertIn("CloudflareTvAccountClient.enabled", source)
+        self.assertNotIn("Postgrest", profile)
+        self.assertNotIn(".rpc(", profile)
+        for feature in ("cloudProfilePinStates", "setCloudProfilePin", "clearCloudProfilePin", "verifyCloudProfilePin"):
+            self.assertIn("CloudflareTvAccountClient." + feature, profile)
         settings = (
             ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/ProfileSettingsSyncService.kt"
         ).read_text(encoding="utf-8")
         self.assertIn("if (CloudflareTvAccountClient.enabled) return@collect", settings)
-        self.assertIn("authManager.isAuthenticated && !CloudflareTvAccountClient.enabled", settings)
 
     def test_tv_cloud_profile_deletion_requires_remote_ack_before_local_erase(self):
         client = (

@@ -35,7 +35,6 @@ import com.nuvio.tv.data.repository.WatchProgressRepositoryImpl
 import com.nuvio.tv.domain.model.AuthState
 import com.nuvio.tv.domain.model.ServerConfiguration
 import com.nuvio.tv.domain.repository.SyncRepository
-import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -79,15 +78,13 @@ class AccountViewModel @Inject constructor(
     private val libraryPreferences: LibraryPreferences,
     private val watchedItemsPreferences: WatchedItemsPreferences,
     private val traktAuthDataStore: TraktAuthDataStore,
-    private val legacyPostgrest: dagger.Lazy<Postgrest>,
+    private val cloudSync: com.nuvio.tv.core.sync.CloudflareTvDataSync,
     private val profileManager: ProfileManager,
     private val authDiagnosticReportRepository: AuthDiagnosticReportRepository,
     private val serverConfiguration: ServerConfiguration,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    // Account screen must not instantiate Supabase while Cloudflare is active.
-    private val postgrest: Postgrest get() = legacyPostgrest.get()
 
     private val _uiState = MutableStateFlow(AccountUiState())
     val uiState: StateFlow<AccountUiState> = _uiState.asStateFlow()
@@ -550,53 +547,44 @@ class AccountViewModel @Inject constructor(
     fun loadSyncOverview() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSyncOverviewLoading = true) }
-
             val overview = runCatching {
-                val response = postgrest.rpc("get_sync_overview")
-                    .decodeAs<SyncOverviewResponse>()
-
-                val allProfileIds = (response.addons.keys + response.plugins.keys +
-                    response.libraryItems.keys + response.watchProgress.keys +
-                    response.watchedItems.keys + response.profiles.keys)
-                    .mapNotNull { it.toIntOrNull() }
-                    .distinct()
-                    .sorted()
-
-                val localProfiles = profileManager.profiles.value
-                val perProfile = allProfileIds.map { pid ->
-                    val pidStr = pid.toString()
-                    val local = localProfiles.firstOrNull { it.id == pid }
-                    val remote = response.profiles[pidStr]
+                val remoteProfiles = CloudflareTvAccountClient.cloudProfiles()
+                val local = profileManager.profiles.value
+                val stats = remoteProfiles.mapNotNull { (uuid, name) ->
+                    val profile = local.firstOrNull { it.cloudProfileId == uuid } ?: return@mapNotNull null
+                    val rows = CloudflareTvAccountClient.syncRows(uuid)
+                    fun count(category: String) = rows.count {
+                        it.optString("category") == category && !it.optBoolean("deleted")
+                    }
+                    val addons = rows.firstOrNull {
+                        it.optString("category") == "addons" && it.optString("itemKey") == "installed"
+                    }?.optJSONObject("payload")?.optJSONArray("items")?.length() ?: 0
+                    val plugins = rows.firstOrNull {
+                        it.optString("category") == "profile_settings" &&
+                            it.optString("itemKey") == "plugin_repositories_v1"
+                    }?.optJSONObject("payload")?.optJSONArray("repositories")?.length() ?: 0
                     ProfileSyncStats(
-                        profileId = pid,
-                        profileName = local?.name ?: remote?.name
-                            ?: context.getString(com.nuvio.tv.R.string.profile_default_name, pid),
-                        avatarColorHex = local?.avatarColorHex ?: remote?.color ?: "#1E88E5",
-                        addons = response.addons[pidStr] ?: 0,
-                        plugins = response.plugins[pidStr] ?: 0,
-                        library = response.libraryItems[pidStr] ?: 0,
-                        watchProgress = response.watchProgress[pidStr] ?: 0,
-                        watchedItems = response.watchedItems[pidStr] ?: 0
+                        profileId = profile.id,
+                        profileName = name,
+                        avatarColorHex = profile.avatarColorHex,
+                        addons = addons,
+                        plugins = plugins,
+                        library = count("library"),
+                        watchProgress = count("watch_progress"),
+                        watchedItems = count("watched_items")
                     )
                 }
-
                 SyncOverview(
-                    profileCount = response.profiles.size,
-                    totalAddons = response.addons.values.sum(),
-                    totalPlugins = response.plugins.values.sum(),
-                    totalLibrary = response.libraryItems.values.sum(),
-                    totalWatchProgress = response.watchProgress.values.sum(),
-                    totalWatchedItems = response.watchedItems.values.sum(),
-                    perProfile = perProfile
+                    profileCount = remoteProfiles.size,
+                    totalAddons = stats.sumOf { it.addons },
+                    totalPlugins = stats.sumOf { it.plugins },
+                    totalLibrary = stats.sumOf { it.library },
+                    totalWatchProgress = stats.sumOf { it.watchProgress },
+                    totalWatchedItems = stats.sumOf { it.watchedItems },
+                    perProfile = stats
                 )
             }.getOrNull()
-
-            _uiState.update {
-                it.copy(
-                    syncOverview = overview ?: it.syncOverview,
-                    isSyncOverviewLoading = false
-                )
-            }
+            _uiState.update { it.copy(syncOverview = overview ?: it.syncOverview, isSyncOverviewLoading = false) }
         }
     }
 
@@ -740,103 +728,13 @@ class AccountViewModel @Inject constructor(
     }
 
     private suspend fun pushLocalDataToRemote() {
-        val profileId = profileManager.activeProfileId.value
-        profileSettingsSyncService.pushCurrentProfileToRemote()
-        providerCredentialSyncService.syncFromRemote(profileId)
-        pluginSyncService.pushToRemote()
-        addonSyncService.pushToRemote()
-        watchProgressSyncService.pushToRemote(profileId)
-        librarySyncService.pushToRemote(profileId)
-        watchedItemsSyncService.pushToRemote(profileId)
+        if (CloudflareTvAccountClient.account != null)
+            cloudSync.synchronize(profileManager.activeProfileId.value)
     }
 
-    private suspend fun pullRemoteData(): Result<Unit> {
-        try {
-            // Capture profile ID once to prevent cross-profile data leaks
-            // if the user switches profiles during this long-running operation.
-            val profileId = profileManager.activeProfileId.value
-            profileSettingsSyncService.pullCurrentProfileFromRemote()
-            providerCredentialSyncService.syncFromRemote(profileId).getOrElse { throw it }
-            pluginManager.isSyncingFromRemote = true
-            val remotePlugins = pluginSyncService.getRemoteRepoUrls().getOrElse { throw it }
-            pluginManager.reconcileWithRemoteRepoUrls(
-                remotePlugins = remotePlugins,
-                removeMissingLocal = true
-            )
-            pluginManager.isSyncingFromRemote = false
-            pluginManager.flushPendingSync()
-
-            addonRepository.isSyncingFromRemote = true
-            val remoteAddonUrls = addonSyncService.getRemoteAddonUrls().getOrElse { throw it }
-            addonRepository.reconcileWithRemoteAddonUrls(
-                remoteUrls = remoteAddonUrls,
-                removeMissingLocal = true
-            )
-            addonRepository.isSyncingFromRemote = false
-
-            val isTraktConnected = traktAuthDataStore.isEffectivelyAuthenticated.first()
-            val shouldUseSupabaseWatchProgressSync = watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)
-            Log.d(
-                "AccountViewModel",
-                "pullRemoteData: isTraktConnected=$isTraktConnected shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"
-            )
-            if (!isTraktConnected) {
-                watchProgressRepository.isSyncingFromRemote = true
-                val progressResult = watchProgressSyncService.syncDeltaFromRemote(profileId).getOrElse { throw it }
-                watchProgressRepository.hasCompletedInitialPull = true
-                Log.d("AccountViewModel", "pullRemoteData: watch progress sync applied ${progressResult.upsertedEntries} upserts and ${progressResult.deletedEntries} deletes (snapshot=${progressResult.usedSnapshot})")
-                if (progressResult.preservedLocalItems) {
-                    Log.d("AccountViewModel", "pullRemoteData: detected unsynced watch progress, pushing")
-                    watchProgressSyncService.pushToRemote(profileId)
-                }
-                watchProgressRepository.isSyncingFromRemote = false
-
-                libraryRepository.isSyncingFromRemote = true
-                librarySyncService.syncFromRemote(profileId).fold(
-                    onSuccess = { result ->
-                        Log.d(
-                            "AccountViewModel",
-                            "pullRemoteData: library sync snapshot=${result.usedSnapshot} " +
-                                "upserts=${result.appliedUpserts} deletes=${result.appliedDeletes}"
-                        )
-                    },
-                    onFailure = { e ->
-                        Log.e("AccountViewModel", "pullRemoteData: failed to pull library items", e)
-                    }
-                )
-                libraryRepository.hasCompletedInitialPull = true
-                libraryRepository.isSyncingFromRemote = false
-
-                val watchedItemsResult = watchedItemsSyncService.syncDeltaFromRemote(profileId).getOrElse { throw it }
-                watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
-                Log.d("AccountViewModel", "pullRemoteData: watched items sync applied ${watchedItemsResult.upsertedItems} upserts and ${watchedItemsResult.deletedItems} deletes (snapshot=${watchedItemsResult.usedSnapshot})")
-                if (watchedItemsResult.preservedLocalItems) {
-                    Log.d("AccountViewModel", "pullRemoteData: detected unsynced watched items, pushing")
-                    watchedItemsSyncService.pushToRemote(profileId)
-                }
-            } else if (shouldUseSupabaseWatchProgressSync) {
-                watchProgressRepository.isSyncingFromRemote = true
-                val progressResult = watchProgressSyncService.syncDeltaFromRemote(profileId).getOrElse { throw it }
-                watchProgressRepository.hasCompletedInitialPull = true
-                Log.d("AccountViewModel", "pullRemoteData: watch progress sync applied ${progressResult.upsertedEntries} upserts and ${progressResult.deletedEntries} deletes in Trakt mode (snapshot=${progressResult.usedSnapshot})")
-                watchProgressRepository.isSyncingFromRemote = false
-
-                val watchedItemsResult = watchedItemsSyncService.syncDeltaFromRemote(profileId).getOrElse { throw it }
-                watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
-                Log.d("AccountViewModel", "pullRemoteData: watched items sync applied ${watchedItemsResult.upsertedItems} upserts and ${watchedItemsResult.deletedItems} deletes in Trakt mode (snapshot=${watchedItemsResult.usedSnapshot})")
-                if (watchedItemsResult.preservedLocalItems) {
-                    Log.d("AccountViewModel", "pullRemoteData: detected unsynced watched items in Trakt mode, pushing")
-                    watchedItemsSyncService.pushToRemote(profileId)
-                }
-            }
-            return Result.success(Unit)
-        } catch (e: Exception) {
-            pluginManager.isSyncingFromRemote = false
-            addonRepository.isSyncingFromRemote = false
-            watchProgressRepository.isSyncingFromRemote = false
-            libraryRepository.isSyncingFromRemote = false
-            return Result.failure(e)
-        }
+    private suspend fun pullRemoteData(): Result<Unit> = runCatching {
+        check(CloudflareTvAccountClient.account != null) { "Compte Cloudflare non connecté" }
+        cloudSync.synchronize(profileManager.activeProfileId.value)
     }
 
     override fun onCleared() {

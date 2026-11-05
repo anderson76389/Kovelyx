@@ -21,11 +21,8 @@ import com.nuvio.tv.data.local.PluginDataStore
 import com.nuvio.tv.data.local.ProfileDataStoreFactory
 import com.nuvio.tv.data.local.StreamBadgeSettingsDataStore
 import com.nuvio.tv.data.local.TmdbSettingsDataStore
-import com.nuvio.tv.data.remote.supabase.SupabaseProfileSetupCopyResult
-import com.nuvio.tv.data.remote.supabase.SupabaseProfileSettingsBlob
 import com.nuvio.tv.domain.model.DiscoverLocation
 import com.nuvio.tv.domain.repository.MetaRepository
-import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -175,249 +172,53 @@ internal fun shouldExcludePreferenceFromProfileSettingsSync(feature: String, key
 
 @Singleton
 class ProfileSettingsSyncService @Inject constructor(
-    private val authManager: AuthManager,
-    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val profileManager: ProfileManager,
     private val profileDataStoreFactory: ProfileDataStoreFactory,
-    private val syncClientIdentity: SyncClientIdentity,
-    private val providerCredentialSyncService: ProviderCredentialSyncService,
-    private val mediaServerSyncService: MediaServerSyncService,
     private val tmdbSettingsDataStore: TmdbSettingsDataStore,
     private val metaRepository: MetaRepository,
-    private val cwEnrichmentCache: ContinueWatchingEnrichmentCache
+    private val cwEnrichmentCache: ContinueWatchingEnrichmentCache,
+    private val cloudPreferences: CloudflareTvPreferencesSync
 ) {
-    // Better Auth / D1 accounts never instantiate the retired Supabase HTTP client.
-    private val postgrest: Postgrest get() = legacyPostgrest.get()
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val syncMutex = Mutex()
-
-    @Volatile
-    private var applyingRemoteBlob: Boolean = false
-
-    @Volatile
-    private var skipNextPushSignature: String? = null
-    private var foregroundPullJob: Job? = null
-    private var lastForegroundPullAtMs: Long = 0L
+    @Volatile private var applyingRemoteBlob = false
+    @Volatile private var skipNextPushSignature: String? = null
 
     private val syncedFeatures = listOf(
-        "theme_settings",
-        "layout_settings",
-        ExperienceModeDataStore.FEATURE,
-        PLAYER_SETTINGS_FEATURE,
-        StreamBadgeSettingsDataStore.FEATURE,
-        PluginDataStore.FEATURE,
-        "trailer_settings",
-        "tmdb_settings",
-        "mdblist_settings",
-        "trakt_settings",
-        "debrid_settings",
-        "animeskip_settings",
-        "track_preference"
+        "theme_settings", "layout_settings", ExperienceModeDataStore.FEATURE,
+        PLAYER_SETTINGS_FEATURE, StreamBadgeSettingsDataStore.FEATURE,
+        PluginDataStore.FEATURE, "trailer_settings", "tmdb_settings",
+        "mdblist_settings", "trakt_settings", "debrid_settings",
+        "animeskip_settings", "track_preference"
     )
 
-    init {
-        observeLocalSettingsChangesAndSync()
+    suspend fun pushCurrentProfileToRemote(): Result<Unit> = runCatching {
+        cloudPreferences.edited("visual_theme_v1")
     }
 
-    private suspend fun <T> withJwtRefreshRetry(block: suspend () -> T): T {
-        return try {
-            block()
-        } catch (e: Exception) {
-            if (!authManager.refreshSessionIfJwtExpired(e)) throw e
-            block()
-        }
-    }
-
-    suspend fun pushCurrentProfileToRemote(): Result<Unit> = withContext(Dispatchers.IO) {
-        // CloudflareTvDataSync owns the D1 visual-settings snapshot.
-        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(Unit)
-        syncMutex.withLock {
-            try {
-                val profileId = profileManager.activeProfileId.value
-                pushProfileToRemote(profileId)
-                Log.d(TAG, "Pushed profile settings blob for profile $profileId")
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to push profile settings blob", e)
-                Result.failure(e)
-            }
-        }
-    }
-
-    suspend fun pullCurrentProfileFromRemote(): Result<Boolean> = withContext(Dispatchers.IO) {
-        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(false)
-        syncMutex.withLock {
-            try {
-                val profileId = profileManager.activeProfileId.value
-                val inheritedPluginSettingsApplied = pullInheritedPluginSettings(profileId)
-                val blob = pullProfileFromRemote(profileId)
-                lastForegroundPullAtMs = SystemClock.elapsedRealtime()
-                if (blob == null) {
-                    Log.d(TAG, "No remote profile settings blob for profile $profileId; keeping local settings")
-                    return@withLock Result.success(inheritedPluginSettingsApplied)
-                }
-
-                val featuresJson = blob["features"]?.jsonObject
-                    ?: return@withLock Result.success(inheritedPluginSettingsApplied)
-                val remoteSignature = buildSettingsSignature(featuresJson)
-                val localSignature = buildSettingsSignature(profileId)
-                if (remoteSignature == localSignature) {
-                    Log.d(TAG, "Remote profile settings already match local for profile $profileId")
-                    return@withLock Result.success(inheritedPluginSettingsApplied)
-                }
-
-                applySettingsBlob(profileId, featuresJson, remoteSignature)
-                Log.d(TAG, "Applied remote profile settings blob for profile $profileId")
-                Result.success(true)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to pull profile settings blob", e)
-                Result.failure(e)
-            }
-        }
+    suspend fun pullCurrentProfileFromRemote(): Result<Boolean> = runCatching {
+        cloudPreferences.synchronize(profileManager.activeProfileId.value)
     }
 
     suspend fun copyProfileSetup(
         sourceProfileId: Int,
         targetProfileId: Int,
         copyProviderCredentials: Boolean = false
-    ): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            syncMutex.withLock {
-                try {
-                    require(sourceProfileId != targetProfileId)
-                    require(profileManager.profiles.value.any { it.id == sourceProfileId })
-                    require(profileManager.profiles.value.any { it.id == targetProfileId })
-
-                    val targetFeatures = if (authManager.isAuthenticated && !CloudflareTvAccountClient.enabled) {
-                        if (
-                            copyProviderCredentials &&
-                            profileManager.activeProfileId.value in setOf(sourceProfileId, targetProfileId)
-                        ) {
-                            providerCredentialSyncService.syncFromRemote().getOrThrow()
-                        }
-                        val sourceBlob = if (sourceProfileId == profileManager.activeProfileId.value) {
-                            exportSettingsBlob(sourceProfileId).also { blob ->
-                                pushProfileToRemote(sourceProfileId, blob)
-                            }
-                        } else {
-                            pullProfileFromRemote(sourceProfileId)
-                                ?: exportSettingsBlob(sourceProfileId).also { blob ->
-                                    pushProfileToRemote(sourceProfileId, blob)
-                                }
-                        }
-                        require(sourceBlob["features"] is JsonObject)
-
-                        val params = buildJsonObject {
-                            put("p_source_profile_id", sourceProfileId)
-                            put("p_target_profile_id", targetProfileId)
-                            put("p_copy_tv", true)
-                            put("p_copy_mobile", false)
-                            put("p_copy_desktop", false)
-                            put("p_copy_provider_credentials", copyProviderCredentials)
-                            put("p_replace_provider_credentials", false)
-                            putSyncOriginClientId(syncClientIdentity)
-                        }
-                        val response = withJwtRefreshRetry {
-                            postgrest.rpc("sync_copy_profile_setup", params)
-                        }
-                        val copyResult = response.decodeList<SupabaseProfileSetupCopyResult>().firstOrNull()
-                            ?: error("Profile settings copy returned no result")
-                        check(copyResult.sourceProfileId == sourceProfileId)
-                        check(copyResult.targetProfileId == targetProfileId)
-                        check(copyResult.tvStatus == "copied" || copyResult.tvStatus == "unchanged")
-                        if (copyProviderCredentials) {
-                            check(
-                                copyResult.providerCredentialsStatus in setOf(
-                                    "copied",
-                                    "copied_partial",
-                                    "kept_existing",
-                                    "unchanged",
-                                    "source_missing"
-                                )
-                            )
-                        }
-                        pullProfileFromRemote(targetProfileId)
-                            ?.get("features")
-                            ?.jsonObject
-                            ?: error("Copied TV settings are unavailable")
-                    } else {
-                        exportSettingsBlob(sourceProfileId)["features"]?.jsonObject
-                            ?: error("Source TV settings are unavailable")
-                    }
-
-                    applySettingsBlob(
-                        profileId = targetProfileId,
-                        featuresJson = targetFeatures,
-                        signature = buildSettingsSignature(targetFeatures)
-                    )
-                    if (copyProviderCredentials) {
-                        if (authManager.isAuthenticated && !CloudflareTvAccountClient.enabled) {
-                            if (profileManager.activeProfileId.value == targetProfileId) {
-                                providerCredentialSyncService.syncFromRemote(targetProfileId).getOrThrow()
-                            }
-                        } else {
-                            copyProviderCredentialsLocally(sourceProfileId, targetProfileId)
-                        }
-                    }
-                    Log.d(TAG, "Copied profile setup from $sourceProfileId to $targetProfileId")
-                    Result.success(Unit)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to copy profile setup from $sourceProfileId to $targetProfileId", e)
-                    Result.failure(e)
-                }
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        syncMutex.withLock {
+            runCatching {
+                require(sourceProfileId != targetProfileId)
+                require(profileManager.profiles.value.any { it.id == sourceProfileId })
+                require(profileManager.profiles.value.any { it.id == targetProfileId })
+                val features = exportSettingsBlob(sourceProfileId)["features"]?.jsonObject
+                    ?: error("Source TV settings not available")
+                applySettingsBlob(targetProfileId, features, buildSettingsSignature(features))
+                if (copyProviderCredentials) copyProviderCredentialsLocally(sourceProfileId, targetProfileId)
             }
         }
-
-    fun requestForegroundPull(force: Boolean = false) {
-        if (CloudflareTvAccountClient.enabled) return
-        providerCredentialSyncService.requestForegroundPull(force)
-        mediaServerSyncService.requestForegroundPull(force)
-        if (!authManager.isAuthenticated) return
-
-        val now = SystemClock.elapsedRealtime()
-        if (!force && foregroundPullJob?.isActive == true) return
-        if (!force && now - lastForegroundPullAtMs < FOREGROUND_PULL_MIN_INTERVAL_MS) return
-
-        foregroundPullJob = scope.launch {
-            if (!force) {
-                delay(FOREGROUND_PULL_DELAY_MS)
-            }
-            if (!authManager.isAuthenticated) return@launch
-
-            lastForegroundPullAtMs = SystemClock.elapsedRealtime()
-            pullCurrentProfileFromRemote()
-        }
     }
 
-    private suspend fun pushProfileToRemote(
-        profileId: Int,
-        settingsJson: JsonObject? = null
-    ) {
-        val resolvedSettingsJson = settingsJson ?: exportSettingsBlob(profileId)
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-            put("p_settings_json", resolvedSettingsJson)
-            put("p_platform", SETTINGS_SYNC_PLATFORM)
-            putSyncOriginClientId(syncClientIdentity)
-        }
-        withJwtRefreshRetry {
-            postgrest.rpc("sync_push_profile_settings_blob", params)
-        }
-    }
-
-    private suspend fun pullProfileFromRemote(profileId: Int): JsonObject? {
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-            put("p_platform", SETTINGS_SYNC_PLATFORM)
-        }
-        val response = withJwtRefreshRetry {
-            postgrest.rpc("sync_pull_profile_settings_blob", params)
-        }
-        return response.decodeList<SupabaseProfileSettingsBlob>().firstOrNull()?.settingsJson
-    }
+    fun requestForegroundPull(force: Boolean = false) = Unit
 
     private suspend fun applySettingsBlob(
         profileId: Int,
@@ -429,29 +230,6 @@ class ProfileSettingsSyncService @Inject constructor(
         if (isActiveProfile) {
             skipNextPushSignature = signature
         }
-    }
-
-    private suspend fun pullInheritedPluginSettings(profileId: Int): Boolean {
-        val profile = profileManager.profiles.value.firstOrNull { it.id == profileId }
-        if (profileId == 1 || profile?.usesPrimaryPlugins != true) return false
-        val features = pullProfileFromRemote(1)?.get("features") as? JsonObject ?: return false
-        val pluginSettings = features[PluginDataStore.FEATURE] as? JsonObject ?: return false
-        return importPluginSettings(1, pluginSettings)
-    }
-
-    private suspend fun importPluginSettings(profileId: Int, featureJson: JsonObject): Boolean {
-        val keyName = PluginDataStore.GROUP_STREAMS_BY_REPOSITORY
-        val encoded = featureJson[keyName] as? JsonObject ?: return false
-        if ((encoded["type"] as? JsonPrimitive)?.contentOrNull != "boolean") return false
-        val enabled = (encoded["value"] as? JsonPrimitive)?.contentOrNull?.toBooleanStrictOrNull()
-            ?: return false
-        var changed = false
-        profileDataStoreFactory.get(profileId, PluginDataStore.FEATURE).edit { prefs ->
-            val key = booleanPreferencesKey(keyName)
-            changed = prefs[key] != enabled
-            prefs[key] = enabled
-        }
-        return changed
     }
 
     private suspend fun copyProviderCredentialsLocally(sourceProfileId: Int, targetProfileId: Int) {
@@ -564,42 +342,6 @@ class ProfileSettingsSyncService @Inject constructor(
             }
         } finally {
             applyingRemoteBlob = false
-        }
-    }
-
-    private fun observeLocalSettingsChangesAndSync() {
-        scope.launch {
-            profileManager.activeProfileId
-                .flatMapLatest { profileId ->
-                    val featureFlows = syncedFeatures.map { feature ->
-                        profileDataStoreFactory.get(profileId, feature).data
-                            .map { prefs ->
-                                "$feature={${buildFeatureSignature(prefs, feature)}}"
-                            }
-                    }
-                    combine(featureFlows) { signatures ->
-                        signatures.joinToString(separator = "||")
-                    }
-                }
-                .distinctUntilChanged()
-                .drop(1)
-                .debounce(SETTINGS_PUSH_DEBOUNCE_MS)
-                .collect { signature ->
-                    if (CloudflareTvAccountClient.enabled) return@collect
-                    if (!authManager.isAuthenticated) return@collect
-                    if (applyingRemoteBlob) return@collect
-                    if (profileDataStoreFactory.corruptedFileNames.isNotEmpty()) {
-                        Log.w(TAG, "DataStore corruption detected (${profileDataStoreFactory.corruptedFileNames}) — pulling from remote instead of pushing")
-                        profileDataStoreFactory.corruptedFileNames.clear()
-                        pullCurrentProfileFromRemote()
-                        return@collect
-                    }
-                    if (signature == skipNextPushSignature) {
-                        skipNextPushSignature = null
-                        return@collect
-                    }
-                    pushCurrentProfileToRemote()
-                }
         }
     }
 
