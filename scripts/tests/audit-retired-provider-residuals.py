@@ -39,7 +39,7 @@ def scan(platform: str) -> tuple[int, list[tuple[str, int]]]:
     found: list[tuple[str, int]] = []
     source = SOURCES[platform]
     for file in source.rglob("*"):
-        if not file.is_file() or file.suffix not in (".kt", ".java"):
+        if not file.is_file() or file.suffix not in (".kt", ".java", ".xml", ".properties", ".json", ".kts"):
             continue
         if any(part in SKIP_COMPONENTS for part in file.relative_to(source).parts):
             continue
