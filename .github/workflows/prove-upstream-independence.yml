@@ -40,7 +40,7 @@ jobs:
           python3 -m unittest discover -s scripts/tests -p 'test_cloudflare_legacy_boundaries.py'
           python3 scripts/audit-mobile-independence.py
           python3 scripts/tests/audit-tv-nuvio-urls.py
-          python3 scripts/tests/audit-supabase-residuals.py
+          python3 scripts/tests/audit-supabase-residuals.py --strict
       - name: Consigner la limite de la preuve
         run: |
           {
