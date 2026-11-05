@@ -14,7 +14,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[2]
 PATTERN = re.compile(
-    r"(?:io\.github\.jan\.supabase|libs\.supabase\.|SupabaseProvider|"
+    r"(?:supabase|io\.github\.jan\.supabase|libs\.supabase\.|SupabaseProvider|"
     r"SupabaseClient|\bPostgrest\b|\bSupabaseConfig\b|"
     r"\bSUPABASE_URL\b|\bSUPABASE_KEY\b|\bsupabase\.co\b|"
     r"\.rpc\(\s*[\"'](?:sync_|generate_sync_code|claim_sync_code|"
