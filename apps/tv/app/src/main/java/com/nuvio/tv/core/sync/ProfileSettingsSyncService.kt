@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.local.ContinueWatchingEnrichmentCache
 import com.nuvio.tv.data.local.ExperienceModeDataStore
@@ -229,6 +230,8 @@ class ProfileSettingsSyncService @Inject constructor(
     }
 
     suspend fun pushCurrentProfileToRemote(): Result<Unit> = withContext(Dispatchers.IO) {
+        // CloudflareTvDataSync owns the D1 visual-settings snapshot.
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(Unit)
         syncMutex.withLock {
             try {
                 val profileId = profileManager.activeProfileId.value
@@ -243,6 +246,7 @@ class ProfileSettingsSyncService @Inject constructor(
     }
 
     suspend fun pullCurrentProfileFromRemote(): Result<Boolean> = withContext(Dispatchers.IO) {
+        if (CloudflareTvAccountClient.enabled) return@withContext Result.success(false)
         syncMutex.withLock {
             try {
                 val profileId = profileManager.activeProfileId.value
@@ -285,7 +289,7 @@ class ProfileSettingsSyncService @Inject constructor(
                     require(profileManager.profiles.value.any { it.id == sourceProfileId })
                     require(profileManager.profiles.value.any { it.id == targetProfileId })
 
-                    val targetFeatures = if (authManager.isAuthenticated) {
+                    val targetFeatures = if (authManager.isAuthenticated && !CloudflareTvAccountClient.enabled) {
                         if (
                             copyProviderCredentials &&
                             profileManager.activeProfileId.value in setOf(sourceProfileId, targetProfileId)
@@ -348,7 +352,7 @@ class ProfileSettingsSyncService @Inject constructor(
                         signature = buildSettingsSignature(targetFeatures)
                     )
                     if (copyProviderCredentials) {
-                        if (authManager.isAuthenticated) {
+                        if (authManager.isAuthenticated && !CloudflareTvAccountClient.enabled) {
                             if (profileManager.activeProfileId.value == targetProfileId) {
                                 providerCredentialSyncService.syncFromRemote(targetProfileId).getOrThrow()
                             }
@@ -368,6 +372,7 @@ class ProfileSettingsSyncService @Inject constructor(
         }
 
     fun requestForegroundPull(force: Boolean = false) {
+        if (CloudflareTvAccountClient.enabled) return
         providerCredentialSyncService.requestForegroundPull(force)
         mediaServerSyncService.requestForegroundPull(force)
         if (!authManager.isAuthenticated) return
@@ -580,6 +585,7 @@ class ProfileSettingsSyncService @Inject constructor(
                 .drop(1)
                 .debounce(SETTINGS_PUSH_DEBOUNCE_MS)
                 .collect { signature ->
+                    if (CloudflareTvAccountClient.enabled) return@collect
                     if (!authManager.isAuthenticated) return@collect
                     if (applyingRemoteBlob) return@collect
                     if (profileDataStoreFactory.corruptedFileNames.isNotEmpty()) {
