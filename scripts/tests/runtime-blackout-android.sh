@@ -65,7 +65,7 @@ if [[ "$BLOCKING_PROVED" != true ]]; then
 fi
 # Memoire du trafic Nuvio avant le lancement de Kovelyx : la demande
 # envoyee par le test de blocage doit etre exclue du comptage final.
-APP_DNS_BEFORE="$(grep -Eci 'query\[[A-Z0-9]+\].*nuvio[.]tv' /tmp/kovelyx-dns.log || true)"
+APP_DNS_BEFORE="$(grep -Eci 'query\[[A-Z0-9]+\].*(nuvio[.]tv|nuvioapp[.]space)' /tmp/kovelyx-dns.log || true)"
 APK="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)"
 test -s "$APK"
 sha256sum "$APK" | tee "/tmp/kovelyx-blackout-proof/$MODE.apk.sha256"
@@ -99,12 +99,12 @@ if grep -A 22 -E 'FATAL EXCEPTION|Fatal signal|Process: com\.kovelyx\.' "/tmp/ko
  echo "::error::Crash de Kovelyx détecté dans les logs Android"
  exit 1
 fi
-APP_DNS_AFTER="$(grep -Eci 'query\[[A-Z0-9]+\].*nuvio[.]tv' /tmp/kovelyx-dns.log || true)"
+APP_DNS_AFTER="$(grep -Eci 'query\[[A-Z0-9]+\].*(nuvio[.]tv|nuvioapp[.]space)' /tmp/kovelyx-dns.log || true)"
 if (( APP_DNS_AFTER > APP_DNS_BEFORE )); then
  echo "::error::L'APK a demande un domaine Nuvio durant la navigation sans compte."
- grep -Ei 'nuvio[.]tv' /tmp/kovelyx-dns.log | tail -n 25
+ grep -Ei '(nuvio[.]tv|nuvioapp[.]space)' /tmp/kovelyx-dns.log | tail -n 25
  exit 1
 fi
-echo "Aucun DNS Nuvio pendant la navigation de Kovelyx sur les deux émulateurs."
+echo "Aucun DNS nuvio.tv ou nuvioapp.space pendant la navigation de Kovelyx."
 echo "PASS : Nuvio DNS bloqué, DNS GitHub disponible, APK installé, navigation de base sans crash."
 echo "LIMITES : tests P2P, addons et API avec clés réelles toujours distincts."
