@@ -43,12 +43,19 @@ internal object CloudflareTvAccountClient {
     private var sessionRevision = 0L
     private var sessionStore: CloudflareTvSessionStore? = null
 
+    /** Prepare private encrypted persistence synchronously before a fast user sign-in. */
+    fun initialize(context: Context) {
+        synchronized(sessionLock) {
+            if (sessionStore == null) sessionStore = CloudflareTvSessionStore(context)
+        }
+    }
+
     /** Called from AuthManager at process startup; never assumes a valid remote session. */
     suspend fun restoreSession(context: Context): Account? = withContext(Dispatchers.IO) {
         // Sign-out may happen while /v1/me is still in flight: a stale
         // verification must never resurrect a deleted local session.
         val startingRevision = synchronized(sessionLock) { sessionRevision }
-        sessionStore = CloudflareTvSessionStore(context)
+        initialize(context)
         val saved = sessionStore?.load(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
             ?: return@withContext null
         if (!enabled) return@withContext null
