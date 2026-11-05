@@ -204,7 +204,24 @@ class ProfileSelectionViewModel @Inject constructor(
                     avatarId = avatarId
                 )
                 if (profile != null) {
-                    profileSyncService.pushToRemote()
+                    var createdProfile = profile
+                    if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+                        // Link a new TV profile to a stable D1 UUID immediately, even if
+                        // another profile remains active. Offline failure keeps the
+                        // local profile so its data can be synchronized later.
+                        try {
+                            val uuid = CloudflareTvAccountClient.createCloudProfile(profile.name)
+                            if (profileManager.linkCloudProfile(profile.id, uuid)) {
+                                createdProfile = profile.copy(cloudProfileId = uuid)
+                            }
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (error: Exception) {
+                            Log.w("ProfileSelectionVM", "Profil Cloudflare en attente ; profil TV local conservé", error)
+                        }
+                    } else if (!CloudflareTvAccountClient.enabled) {
+                        profileSyncService.pushToRemote()
+                    }
                     val copyResult = copyFromProfileId?.let { sourceProfileId ->
                         profileSettingsSyncService.copyProfileSetup(
                             sourceProfileId = sourceProfileId,
@@ -213,7 +230,7 @@ class ProfileSelectionViewModel @Inject constructor(
                         )
                     }
                     refreshProfilePinStates()
-                    CreateProfileResult.Created(profile, copyResult)
+                    CreateProfileResult.Created(createdProfile, copyResult)
                 } else {
                     CreateProfileResult.Failed
                 }
