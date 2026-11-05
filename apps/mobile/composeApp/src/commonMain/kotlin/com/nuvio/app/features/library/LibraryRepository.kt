@@ -222,6 +222,13 @@ object LibraryRepository {
             return
         }
 
+        // Cloudflare D1 is the Kovelyx backend. Do not pull from the legacy
+        // Supabase library adapter when Kovelyx accounts are enabled.
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
+
         nuvioSyncMutex.withLock {
             val serializedToken = activeOperationToken(profileId) ?: return@withLock
             val pullSnapshot = localState.markPullStarted(serializedToken) ?: return@withLock
