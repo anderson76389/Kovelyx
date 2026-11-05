@@ -83,7 +83,8 @@ internal actual fun FloatingNavigationBar(
     val currentIsRtl by rememberUpdatedState(isRtl)
     val density = LocalDensity.current
     val trackHeight = 48.dp + (if (compactSize) 8.dp else 16.dp) * labelFraction
-    val horizontalPadding = 58.dp - 30.dp * labelFraction
+    // Give long translated labels (Recherche / Bibliothèque) room when expanded.
+    val horizontalPadding = 58.dp - 46.dp * labelFraction
 
     LaunchedEffect(visualSelectedIndex, items.size) {
         motion.select(visualSelectedIndex)
@@ -108,7 +109,7 @@ internal actual fun FloatingNavigationBar(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 400.dp)
+                .widthIn(max = 460.dp)
                 .fillMaxWidth()
                 .height(trackHeight)
                 .onSizeChanged {
