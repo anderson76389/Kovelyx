@@ -276,7 +276,7 @@ private fun AccountInfoCard(label: String, value: String) {
 
 @Composable
 private fun LinkedDevicesSection(
-    devices: List<com.nuvio.tv.data.remote.supabase.SupabaseLinkedDevice>,
+    devices: List<com.nuvio.tv.data.remote.cloud.LinkedDevice>,
     onUnlink: (String) -> Unit
 ) {
     Column {
