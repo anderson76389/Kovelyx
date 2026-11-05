@@ -179,9 +179,12 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun pullProfileLockStates(): Result<Map<Int, Boolean>> = withContext(Dispatchers.IO) {
-        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
-            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
-        )
+        if (CloudflareTvAccountClient.enabled) return@withContext runCatching {
+            val pins = CloudflareTvAccountClient.cloudProfilePinStates()
+            profileManager.profiles.value.associate { profile ->
+                profile.id to (pins[profile.cloudProfileId] == true)
+            }
+        }
         try {
             val response = withJwtRefreshRetry {
                 postgrest.rpc("sync_pull_profile_locks")
@@ -196,9 +199,15 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun setProfilePin(profileId: Int, pin: String, currentPin: String? = null): SetProfilePinResult = withContext(Dispatchers.IO) {
-        if (CloudflareTvAccountClient.enabled) return@withContext SetProfilePinResult.Failure(
-            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
-        )
+        if (CloudflareTvAccountClient.enabled) return@withContext try {
+            val uuid = profileManager.profiles.value.firstOrNull { it.id == profileId }?.cloudProfileId
+                ?: error("Profil Cloudflare non lié")
+            if (CloudflareTvAccountClient.setCloudProfilePin(uuid, pin, currentPin))
+                SetProfilePinResult.Success
+            else SetProfilePinResult.CurrentPinRequired
+        } catch (error: Exception) {
+            SetProfilePinResult.Failure(error)
+        }
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
@@ -225,9 +234,11 @@ class ProfileSyncService @Inject constructor(
         e.message?.contains("Current PIN is required", ignoreCase = true) == true
 
     suspend fun clearProfilePin(profileId: Int, currentPin: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
-        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
-            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
-        )
+        if (CloudflareTvAccountClient.enabled) return@withContext runCatching {
+            val uuid = profileManager.profiles.value.firstOrNull { it.id == profileId }?.cloudProfileId
+                ?: error("Profil Cloudflare non lié")
+            CloudflareTvAccountClient.clearCloudProfilePin(uuid, currentPin)
+        }
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
@@ -246,9 +257,12 @@ class ProfileSyncService @Inject constructor(
     }
 
     suspend fun verifyProfilePin(profileId: Int, pin: String): Result<SupabaseProfilePinVerifyResult> = withContext(Dispatchers.IO) {
-        if (CloudflareTvAccountClient.enabled) return@withContext Result.failure(
-            UnsupportedOperationException("Ancienne API de PIN non disponible sur Cloudflare")
-        )
+        if (CloudflareTvAccountClient.enabled) return@withContext runCatching {
+            val uuid = profileManager.profiles.value.firstOrNull { it.id == profileId }?.cloudProfileId
+                ?: error("Profil Cloudflare non lié")
+            val (unlocked, retry) = CloudflareTvAccountClient.verifyCloudProfilePin(uuid, pin)
+            SupabaseProfilePinVerifyResult(unlocked = unlocked, retryAfterSeconds = retry)
+        }
         try {
             val params = buildJsonObject {
                 put("p_profile_id", profileId)
