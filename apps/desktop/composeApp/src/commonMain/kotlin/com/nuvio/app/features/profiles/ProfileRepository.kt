@@ -249,6 +249,14 @@ object ProfileRepository {
         }
     }
 
+    /** Switch the complete local workspace before Cloudflare synchronization. */
+    suspend fun switchToProfile(profileIndex: Int) = profileSwitchMutex.withLock {
+        require(_state.value.profiles.any { it.profileIndex == profileIndex }) {
+            "Profil Kovelyx introuvable"
+        }
+        if (activeProfileIndex != profileIndex) selectProfile(profileIndex)
+    }
+
     private fun selectProfile(profileIndex: Int) {
         activeProfileIndex = profileIndex
         CustomPosterUrlRepository.onProfileChanged()
