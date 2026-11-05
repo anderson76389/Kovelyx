@@ -1152,7 +1152,7 @@ kotlin {
                 implementation(libs.mpv.android.lib)
                 implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("lib-*.aar"))))
                 if (androidDistribution == "full") {
-                    implementation(files("libs/quickjs-kt-android-1.0.5-nuvio.aar"))
+                    implementation(files("libs/quickjs-kt-android-1.0.5-kovelyx.aar"))
                     implementation(libs.ksoup)
                 }
             }
@@ -1181,7 +1181,7 @@ kotlin {
                 implementation(libs.sentry.jvm)
                 implementation(libs.jna)
                 implementation("net.java.dev.jna:jna-platform:5.19.1")
-                implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
+                implementation(files("libs/kovelyx-engine-jvm-0.1.4.jar"))
             }
         }
         val androidHostTest by getting {
@@ -1285,7 +1285,7 @@ compose.desktop {
             )
             macOS {
                 bundleID = "com.nuvio.media.desktop"
-                iconFile.set(project.file("src/desktopMain/resources/icons/nuvio-app-icon-transparent.icns"))
+                iconFile.set(project.file("src/desktopMain/resources/icons/kovelyx-app-icon-transparent.icns"))
                 infoPlist {
                     extraKeysRawXml = """
                         <key>CFBundleURLTypes</key>
