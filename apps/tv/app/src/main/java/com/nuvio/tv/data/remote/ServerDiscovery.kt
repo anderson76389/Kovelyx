@@ -89,6 +89,9 @@ internal object ServerDiscoveryPolicy {
         }
         if (!payload.selfHosted) throw ServerDiscoveryException(ServerDiscoveryFailure.NOT_SELF_HOSTED)
         val backendUrl = normalizeBackendUrl(payload.backendUrl)
+        if (isRetiredUpstream(backendUrl)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
+        }
         val publishableKey = payload.publishableKey.trim()
         if (publishableKey.isBlank()) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.MISSING_CONFIGURATION)
@@ -109,6 +112,14 @@ internal object ServerDiscoveryPolicy {
             deviceLoginWebBaseUrl = "$backendUrl/link",
             avatarPublicBaseUrl = "$backendUrl/storage/v1/object/public/avatars"
         )
+    }
+
+    /** Only legacy Nuvio's own DNS zones are forbidden; self-hosted services remain usable. */
+    fun isRetiredUpstream(candidateUrl: String): Boolean {
+        val host = candidateUrl.toHttpUrlOrNull()?.host?.trimEnd('.')?.lowercase() ?: return false
+        return listOf("nuvio.tv", "nuvioapp.space").any {
+            host == it || host.endsWith(".$it")
+        }
     }
 
     fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {
@@ -142,12 +153,16 @@ class ServerDiscoveryService @Inject constructor() {
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
         .callTimeout(15, TimeUnit.SECONDS)
+        // Discovery must never follow an apparently harmless host to Nuvio.
+        .followRedirects(false)
+        .followSslRedirects(false)
         .build()
 
     suspend fun discover(input: String): Result<ServerConfiguration> = withContext(Dispatchers.IO) {
         runCatching {
             val discoveryUrl = ServerDiscoveryPolicy.discoveryUrl(input)
-            if (ServerDiscoveryPolicy.matchesBackend(discoveryUrl, BuildConfig.SUPABASE_URL)) {
+            if (ServerDiscoveryPolicy.isRetiredUpstream(discoveryUrl) ||
+                ServerDiscoveryPolicy.matchesBackend(discoveryUrl, BuildConfig.SUPABASE_URL)) {
                 throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
             }
             val request = Request.Builder()
@@ -167,6 +182,9 @@ class ServerDiscoveryService @Inject constructor() {
                         failure = ServerDiscoveryFailure.HTTP_ERROR,
                         statusCode = it.code
                     )
+                }
+                if (ServerDiscoveryPolicy.isRetiredUpstream(it.request.url.toString())) {
+                    throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
                 }
                 if (
                     discoveryUrl.startsWith("https://", ignoreCase = true) &&
