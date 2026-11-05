@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4642
+Fichiers inspectés : 4644
 
 ## Inventaire des références à traiter
 
@@ -222,8 +222,8 @@ Fichiers inspectés : 4642
 ## Références de packages Kotlin historiques
 
 - apps/tv : 6796 lignes.
-- apps/mobile : 7111 lignes.
-- apps/desktop : 8040 lignes.
+- apps/mobile : 7115 lignes.
+- apps/desktop : 8046 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 
