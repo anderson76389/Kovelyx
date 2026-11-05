@@ -14,5 +14,6 @@ actual object AppFeaturePolicy {
     actual val imdbRatingLogoEnabled: Boolean = true
     actual val mediaPlaybackForegroundServiceEnabled: Boolean = true
     actual val downloadForegroundServiceEnabled: Boolean = true
-    actual val customServerConnectionsEnabled: Boolean = true
+    // Account settings use the independent Cloudflare Worker, not a legacy Supabase endpoint.
+    actual val customServerConnectionsEnabled: Boolean = false
 }
