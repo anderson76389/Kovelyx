@@ -1495,7 +1495,7 @@
     <string name="debug_buffer_logs_subtitle">将周期性播放器缓冲诊断输出到 logcat (默认禁用)</string>
     <string name="debug_section_account">账户</string>
     <string name="debug_manual_signin_title">手动登录</string>
-    <string name="debug_manual_signin_subtitle">使用电子邮件和密码登录 (Supabase 验证)</string>
+    <string name="debug_manual_signin_subtitle">使用电子邮件和密码登录 (Kovelyx 验证)</string>
     <string name="debug_email_placeholder">电子邮件</string>
     <string name="debug_password_placeholder">密码</string>
     <string name="debug_signing_in">登录中…</string>

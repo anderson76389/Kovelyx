@@ -1196,7 +1196,7 @@
     <string name="debug_buffer_logs_subtitle">Періодично виводити діагностику буфера плеєра в logcat (за замовчуванням вимкнено)</string>
     <string name="debug_section_account">Акаунт</string>
     <string name="debug_manual_signin_title">Ручний вхід</string>
-    <string name="debug_manual_signin_subtitle">Вхід з Email та паролем (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Вхід з Email та паролем (Kovelyx auth)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Пароль</string>
     <string name="debug_signing_in">Вхід до системи\u2026</string>

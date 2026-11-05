@@ -881,7 +881,7 @@
     <string name="debug_member_tier_two">Спонсор+</string>
     <string name="debug_section_account">Аккаунт</string>
     <string name="debug_manual_signin_title">Ручной вход</string>
-    <string name="debug_manual_signin_subtitle">Вход с Email и паролем (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Вход с Email и паролем (Kovelyx auth)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Пароль</string>
     <string name="debug_signing_in">Вход в систему\u2026</string>

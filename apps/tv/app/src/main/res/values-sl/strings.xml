@@ -965,7 +965,7 @@
     <string name="debug_sync_code_subtitle">Prikaži gumbe za generiranje/vnos kode za sinhronizacijo v nastavitvah računa</string>
     <string name="debug_section_account">Račun</string>
     <string name="debug_manual_signin_title">Ročna prijava</string>
-    <string name="debug_manual_signin_subtitle">Prijava z e-pošto in geslom (Supabase auth)</string>
+    <string name="debug_manual_signin_subtitle">Prijava z e-pošto in geslom (Kovelyx auth)</string>
     <string name="debug_email_placeholder">E-pošta</string>
     <string name="debug_password_placeholder">Geslo</string>
     <string name="debug_signing_in">Prijava\u2026</string>

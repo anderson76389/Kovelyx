@@ -1573,7 +1573,7 @@
     <string name="debug_buffer_logs_subtitle">Oynatıcı arabellek tanılamalarını düzenli olarak logcat\'e yazar (varsayılan olarak kapalıdır)</string>
     <string name="debug_section_account">Hesap</string>
     <string name="debug_manual_signin_title">Manuel Giriş Yap</string>
-    <string name="debug_manual_signin_subtitle">E-posta ve parola ile giriş yapın (Supabase yetkilendirmesi)</string>
+    <string name="debug_manual_signin_subtitle">E-posta ve parola ile giriş yapın (Kovelyx yetkilendirmesi)</string>
     <string name="debug_email_placeholder">E-Posta</string>
     <string name="debug_password_placeholder">Şifre</string>
     <string name="debug_signing_in">Giriş yapılıyor\u2026</string>

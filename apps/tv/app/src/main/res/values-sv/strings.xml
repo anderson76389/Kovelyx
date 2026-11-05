@@ -597,7 +597,7 @@
     <string name="debug_sync_code_subtitle">Visa Generera/Ange synkkod-knappar i kontoinställningar</string>
     <string name="debug_section_account">Konto</string>
     <string name="debug_manual_signin_title">Manuell inloggning</string>
-    <string name="debug_manual_signin_subtitle">Logga in med e-post och lösenord (Supabase-autentisering)</string>
+    <string name="debug_manual_signin_subtitle">Logga in med e-post och lösenord (Kovelyx-autentisering)</string>
     <string name="debug_email_placeholder">E-post</string>
     <string name="debug_password_placeholder">Lösenord</string>
     <string name="debug_signing_in">Loggar in\u2026</string>

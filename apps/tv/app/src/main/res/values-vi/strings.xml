@@ -1572,7 +1572,7 @@
     <string name="debug_buffer_logs_subtitle">Ghi định kỳ thông tin chẩn đoán bộ đệm của trình phát vào logcat (đã tắt theo mặc định)</string>
     <string name="debug_section_account">Tài khoản</string>
     <string name="debug_manual_signin_title">Đăng nhập thủ công</string>
-    <string name="debug_manual_signin_subtitle">Đăng nhập bằng email và mật khẩu (Xác thực Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Đăng nhập bằng email và mật khẩu (Xác thực Kovelyx)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Mật khẩu</string>
     <string name="debug_signing_in">Đang đăng nhập\u2026</string>

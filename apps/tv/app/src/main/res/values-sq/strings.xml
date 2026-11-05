@@ -1317,7 +1317,7 @@
     <string name="debug_buffer_logs_subtitle">Shkruaj periodikisht diagnostikime të buffer-it të luajtësit në logcat (çaktivizuar si parazgjedhje)</string>
     <string name="debug_section_account">Llogaria</string>
     <string name="debug_manual_signin_title">Hyrje manuale</string>
-    <string name="debug_manual_signin_subtitle">Hyr me email dhe fjalëkalim (autentifikim Supabase)</string>
+    <string name="debug_manual_signin_subtitle">Hyr me email dhe fjalëkalim (autentifikim Kovelyx)</string>
     <string name="debug_email_placeholder">Email</string>
     <string name="debug_password_placeholder">Fjalëkalimi</string>
     <string name="debug_signing_in">Duke u kyçur\u2026</string>

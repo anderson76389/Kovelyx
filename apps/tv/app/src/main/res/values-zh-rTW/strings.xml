@@ -1495,7 +1495,7 @@
     <string name="debug_buffer_logs_subtitle">將週期性播放器緩衝診斷輸出到 logcat (預設為停用)</string>
     <string name="debug_section_account">帳戶</string>
     <string name="debug_manual_signin_title">手動登入</string>
-    <string name="debug_manual_signin_subtitle">使用電子郵件和密碼登入 (Supabase 驗證)</string>
+    <string name="debug_manual_signin_subtitle">使用電子郵件和密碼登入 (Kovelyx 驗證)</string>
     <string name="debug_email_placeholder">電子郵件</string>
     <string name="debug_password_placeholder">密碼</string>
     <string name="debug_signing_in">登入中…</string>
