@@ -1,7 +1,7 @@
 package com.nuvio.tv.data.repository
 
-import com.nuvio.tv.data.remote.supabase.ClaimSyncResult
-import com.nuvio.tv.data.remote.supabase.SupabaseLinkedDevice
+import com.nuvio.tv.data.remote.cloud.ClaimSyncResult
+import com.nuvio.tv.data.remote.cloud.LinkedDevice
 import com.nuvio.tv.domain.repository.SyncRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,6 +21,6 @@ class SyncRepositoryImpl @Inject constructor() : SyncRepository {
         code: String, pin: String, deviceName: String?
     ): Result<ClaimSyncResult> = Result.failure(unavailable())
     override suspend fun unlinkDevice(deviceUserId: String): Result<Unit> = Result.failure(unavailable())
-    override suspend fun getLinkedDevices(): Result<List<SupabaseLinkedDevice>> =
+    override suspend fun getLinkedDevices(): Result<List<LinkedDevice>> =
         Result.failure(unavailable())
 }
