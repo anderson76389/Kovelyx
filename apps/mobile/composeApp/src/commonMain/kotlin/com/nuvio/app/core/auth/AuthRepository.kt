@@ -141,6 +141,7 @@ object AuthRepository {
             CloudflareAccountClient.signUp(email, password)
             return@runCatching Unit
         }
+        check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
         SupabaseProvider.client.auth.signUpWith(Email) {
             this.email = email
             this.password = password
@@ -162,6 +163,7 @@ object AuthRepository {
             )
             return@runCatching Unit
         }
+        check(hasConfiguredBackend()) { "Serveur de comptes Kovelyx non configuré" }
         SupabaseProvider.client.auth.signInWith(Email) {
             this.email = email
             this.password = password
@@ -198,13 +200,13 @@ object AuthRepository {
         val wasAnonymous = anonymousRead.getOrNull() != null
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
         validatedRemoteUserId = null
-        val remoteSignOut = if (wasAnonymous) {
+        val remoteSignOut = if (wasAnonymous || !hasConfiguredBackend()) {
             Result.success(Unit)
         } else {
             runCatching { SupabaseProvider.client.auth.signOut() }
         }
 
-        val fallbackSessionClear = if (remoteSignOut.isFailure) {
+        val fallbackSessionClear = if (remoteSignOut.isFailure && hasConfiguredBackend()) {
             runCatching { SupabaseProvider.client.auth.clearSession() }
                 .onFailure { error -> log.w(error) { "Failed to clear Supabase session after sign-out failure" } }
         } else {
@@ -242,13 +244,19 @@ object AuthRepository {
         }
         val anonymousClear = runCatching { AuthStorage.clearAnonymousUserId() }
         validatedRemoteUserId = null
-        val sessionClear = runCatching { SupabaseProvider.client.auth.clearSession() }
+        val sessionClear = if (!hasConfiguredBackend()) Result.success(Unit)
+            else runCatching { SupabaseProvider.client.auth.clearSession() }
         _state.value = AuthState.Unauthenticated
         val failure = anonymousClear.exceptionOrNull() ?: sessionClear.exceptionOrNull()
         val cancellation = sessionClear.exceptionOrNull() as? CancellationException
         if (cancellation != null) throw cancellation
         return if (failure == null) Result.success(Unit) else Result.failure(failure)
     }
+
+    private fun hasConfiguredBackend(): Boolean = CloudflareAccountClient.enabled ||
+        ServerConfigurationRepository.active.value.let { config ->
+            config.backendUrl.isNotBlank() && config.publishableKey.isNotBlank()
+        }
 
     fun reinitialize() {
         sessionStatusJob?.cancel()
