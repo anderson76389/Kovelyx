@@ -34,12 +34,15 @@ import kotlinx.serialization.json.put
 
 @Singleton
 class MediaServerSyncService @Inject constructor(
-    private val postgrest: Postgrest,
+    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val authManager: AuthManager,
     private val profileManager: ProfileManager,
     private val repository: ServerRepository,
     private val syncClientIdentity: SyncClientIdentity
 ) {
+    // Better Auth / D1 accounts never instantiate the retired Supabase HTTP client.
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val syncMutex = Mutex()
     private var foregroundPullJob: Job? = null
