@@ -92,6 +92,58 @@ class AppUpdaterControllerTest {
     }
 
     @Test
+    fun everyPublishedNewerVersionAutomaticallyDisplaysTheTopBanner() {
+        // The existing app may be one or many releases behind; all can upgrade.
+        for (installed in listOf("1.1.821", "1.1.846", "1.1.858")) {
+            val controller = AppUpdaterController(
+                scope = scope,
+                preferences = preferences,
+                fetchUpdate = { Result.success(update("v1.1.900")) },
+                installedVersion = installed,
+            )
+
+            controller.ensureAutoCheckStarted()
+
+            assertTrue(controller.uiState.value.isUpdateAvailable, installed)
+            assertTrue(controller.uiState.value.showDialog, installed)
+            assertEquals("v1.1.900", controller.uiState.value.update?.tag)
+        }
+    }
+
+    @Test
+    fun automaticBannerWorksForNewReleaseEvenWhenPreviousReleaseWasIgnored() {
+        AppUpdaterPlatform.setIgnoredTag("v1.1.858")
+        val controller = AppUpdaterController(
+            scope = scope,
+            preferences = preferences,
+            fetchUpdate = { Result.success(update("v1.1.900")) },
+            installedVersion = "1.1.858",
+        )
+
+        controller.ensureAutoCheckStarted()
+
+        assertTrue(controller.uiState.value.isUpdateAvailable)
+        assertTrue(controller.uiState.value.showDialog)
+    }
+
+    @Test
+    fun automaticBannerDoesNotOfferTheSameOrAnOlderRelease() {
+        for (installed in listOf("1.1.900", "1.1.901")) {
+            val controller = AppUpdaterController(
+                scope = scope,
+                preferences = preferences,
+                fetchUpdate = { Result.success(update("v1.1.900")) },
+                installedVersion = installed,
+            )
+
+            controller.ensureAutoCheckStarted()
+
+            assertFalse(controller.uiState.value.isUpdateAvailable, installed)
+            assertFalse(controller.uiState.value.showDialog, installed)
+        }
+    }
+
+    @Test
     fun forcedChecksDoNotOfferEqualOrOlderVersions() {
         listOf(AppVersionConfig.VERSION_NAME, "0.0.0").forEach { tag ->
             val controller = controller { Result.success(update(tag)) }

@@ -176,6 +176,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import com.nuvio.app.features.servers.ServerMatcher
 import com.nuvio.app.features.servers.ServerRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -633,6 +634,23 @@ internal fun MainAppContent(
                     navController.navigate(DownloadsRoute(downloadsTitle)) {
                         launchSingleTop = true
                     }
+                }
+            }
+        }
+    }
+
+    // Also check for newly published compatible releases while the app stays open.
+    // The existing foreground check handles app launch/resume; collectLatest cancels
+    // this 15-minute polling loop as soon as the app moves to the background.
+    LaunchedEffect(appUpdaterController, ownsAppRuntime) {
+        if (!ownsAppRuntime || !AppFeaturePolicy.inAppUpdaterEnabled || !AppUpdaterPlatform.isSupported) {
+            return@LaunchedEffect
+        }
+        AppForegroundMonitor.events().collectLatest { visibility ->
+            if (visibility == AppVisibility.Foreground) {
+                while (true) {
+                    delay(15 * 60 * 1000L)
+                    appUpdaterController.requestForegroundCheck()
                 }
             }
         }
