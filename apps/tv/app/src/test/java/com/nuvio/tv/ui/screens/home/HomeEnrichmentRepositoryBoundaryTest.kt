@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
@@ -65,7 +66,8 @@ class HomeEnrichmentRepositoryBoundaryTest {
         val reachable = AtomicBoolean(false)
         val api = mockk<AddonApi>()
         coEvery { api.getMeta(any()) } coAnswers {
-            metaCalls.incrementAndGet()
+            // The intervening focus on otherId also requests metadata: count only this item.
+            if (firstArg<String>().contains(itemId)) metaCalls.incrementAndGet()
             if (!reachable.get()) throw IOException("offline")
             Response.success(
                 MetaResponseDto(meta = MetaDto(id = itemId, type = "series", name = "Test Meta"))
@@ -76,6 +78,13 @@ class HomeEnrichmentRepositoryBoundaryTest {
 
         viewModel.onItemFocusPipeline(item(itemId))
         awaitAtLeast(metaCalls, 1)
+        // Let the original transport failure finish before moving focus away.
+        // The old test could cancel it while the first in-flight request was resolving.
+        withTimeout(10_000) {
+            while (itemId !in viewModel.enrichedPreviews.value ||
+                itemId in viewModel.externalMetaPrefetchInFlightIds) delay(25)
+        }
+        assertFalse("a transport failure must remain retryable", itemId in viewModel.prefetchedExternalMetaIds)
 
         reachable.set(true)
         focusAndSettle(viewModel, item(otherId))
