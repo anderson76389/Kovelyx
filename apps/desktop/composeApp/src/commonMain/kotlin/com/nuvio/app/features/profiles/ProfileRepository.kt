@@ -144,6 +144,13 @@ object ProfileRepository {
         try {
             val data = CloudflareAccountClient.accountProfiles()
             check((AuthRepository.state.value as? AuthState.Authenticated)?.userId == account.userId) { "Compte modifié" }
+            val pinFlags = data["profiles"]?.jsonArray.orEmpty().mapNotNull { element ->
+                val record = element.jsonObject
+                val id = record["id"]?.jsonPrimitive?.content ?: return@mapNotNull null
+                val enabled = record["pinEnabled"]?.jsonPrimitive?.content
+                    ?.toBooleanStrictOrNull() ?: return@mapNotNull null
+                id to enabled
+            }.toMap()
             val remote = data["profiles"]?.jsonArray.orEmpty()
                 .take(MAX_PROFILES)
                 .mapIndexedNotNull { index, item ->
@@ -155,6 +162,7 @@ object ProfileRepository {
                         userId = account.userId,
                         profileIndex = index + 1,
                         name = name,
+                        pinEnabled = pinFlags[id] ?: false,
                     )
                 }
             if (_state.value.profiles.isNotEmpty()) {
@@ -169,7 +177,8 @@ object ProfileRepository {
                         }
                     if (matchIndex >= 0) {
                         original[matchIndex] = original[matchIndex].copy(
-                            id = incoming.id, userId = account.userId, name = incoming.name
+                            id = incoming.id, userId = account.userId, name = incoming.name,
+                            pinEnabled = pinFlags[incoming.id] ?: original[matchIndex].pinEnabled
                         )
                     } else if (original.none { it.profileIndex == incoming.profileIndex }) {
                         original += incoming
