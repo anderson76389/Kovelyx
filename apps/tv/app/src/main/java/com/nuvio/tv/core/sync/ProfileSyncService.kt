@@ -46,11 +46,14 @@ sealed class SetProfilePinResult {
 @Singleton
 class ProfileSyncService @Inject constructor(
     private val authManager: AuthManager,
-    private val postgrest: Postgrest,
+    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val profileDataStore: ProfileDataStore,
     private val profileManager: ProfileManager,
     private val syncClientIdentity: SyncClientIdentity
 ) {
+    // Better Auth / D1 accounts never instantiate the retired Supabase HTTP client.
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
+
     private val pullMutex = Mutex()
     private var pullFreshness = ProfilePullFreshness()
     private var lastPulledProfiles = emptyList<UserProfile>()
