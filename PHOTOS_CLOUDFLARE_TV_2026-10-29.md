@@ -41,7 +41,7 @@ Le 31 octobre, après configuration des accès par le propriétaire et récupér
 
 ## Addons et charge réseau TV
 
-Les dépôts d’addons Windows/mobile et le service TV envoyaient encore leurs changements aux RPC Supabase. Le parcours Cloudflare les ignorait. Ils utilisent désormais la catégorie D1 existante `addons`, clé `installed` : liste ordonnée des URL de manifeste complètes, nom personnel et activation. Les URL configurées restent dans les données privées du compte ; elles ne sont pas publiées dans les logs ajoutés ni dans une Release. Aucun mot de passe de fournisseur n’est extrait ou transféré séparément.
+Les anciens parcours RPC d'addons Windows/mobile et TV n'étaient pas compatibles avec les nouvelles synchronisations Cloudflare. Ils utilisent désormais la catégorie D1 existante `addons`, clé `installed` : liste ordonnée des URL de manifeste complètes, nom personnel et activation. Les URL configurées restent dans les données privées du compte ; elles ne sont pas publiées dans les logs ajoutés ni dans une Release. Aucun mot de passe de fournisseur n’est extrait ou transféré séparément.
 
 Un checkpoint durable est isolé par propriétaire et UUID de profil. Une liste vide représente aussi une suppression. Les changements locaux depuis le dernier état confirmé sont envoyés avec la révision lue ; une panne ou un conflit laisse la modification en attente. Une réponse ne remplace pas une édition ou un compte changé pendant HTTP. Le choix « addons du profil principal » est résolu vers l’UUID de ce profil. Les clients ayant déjà un état cloud l’importent à leur première connexion ; ensuite les modifications locales sont reconnues même après redémarrage. Ce contrat d’addons ne demande pas de nouvelle migration D1.
 

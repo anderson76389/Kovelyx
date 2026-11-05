@@ -4,62 +4,101 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1367** ; références statiques à Nuvio/NuvioMedia : **6799**.
+Fichiers texte examinés : **1387** ; références statiques à Nuvio/NuvioMedia : **6738**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `example.com` | 227 |
 | `www.themoviedb.org` | 131 |
+| `media.example.com` | 48 |
 | `trakt.tv` | 39 |
-| `media.example.com` | 37 |
+| `cdn.example` | 36 |
 | `h` | 34 |
-| `cdn.example` | 32 |
 | `www.imdb.com` | 31 |
 | `cdn.example.com` | 28 |
-| `backend.example.com` | 26 |
 | `...` | 26 |
+| `backend.example.com` | 26 |
+| `addon.example` | 26 |
 | `www.youtube.com` | 24 |
-| `addon.example` | 22 |
 | `.` | 20 |
 | `www.apache.org` | 19 |
 | `127.0.0.1` | 16 |
-| `video.example.com` | 16 |
-| `x` | 16 |
 | `cdn` | 16 |
+| `x` | 16 |
+| `video.example.com` | 16 |
+| `example.test` | 16 |
 | `schemas.android.com` | 15 |
-| `image` | 14 |
 | `media.trakt.tv` | 14 |
-| `github.com` | 13 |
+| `image` | 14 |
 | `simkl.com` | 13 |
 | `api.aioratings.com` | 13 |
-| `example.test` | 12 |
-| `localhost` | 10 |
+| `github.com` | 11 |
 | `image.tmdb.org` | 10 |
+| `localhost` | 10 |
 | `mdblist.com` | 9 |
 | `192.168.1.10` | 9 |
-| `postersplus.example.com` | 9 |
+| `plugins.example` | 9 |
 
 ### Références à vérifier en priorité
 
 - `apps/tv/app/build.gradle.kts:109`
-- `apps/tv/app/build.gradle.kts:418`
-- `apps/tv/app/build.gradle.kts:450`
+- `apps/tv/app/build.gradle.kts:419`
+- `apps/tv/app/build.gradle.kts:451`
 - `apps/tv/baselineprofile/build.gradle.kts:8`
 - `apps/tv/scripts/perf_baseline.sh:22`
 - `apps/tv/scripts/perf_baseline.sh:27`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/di/PluginModule.kt:1`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/di/PluginModule.kt:3`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/updater/UpdateViewModel.kt:1`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/core/plugin/PluginManager.kt:1`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/core/plugin/PluginManager.kt:3`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/core/plugin/PluginManager.kt:4`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/core/plugin/PluginManager.kt:5`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/core/plugin/PluginManager.kt:6`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:1`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/updater/ui/UpdateBannerHost.kt:1`
-- `apps/tv/app/src/playstore/java/com/nuvio/tv/updater/ui/UpdateBannerHost.kt:4`
 - `apps/tv/app/src/testFull/java/com/nuvio/tv/core/plugin/FetchResponseHeadersTest.kt:1`
 - `apps/tv/app/src/testFull/java/com/nuvio/tv/core/plugin/cloudstream/HomeViewModelCompatStubTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/core/profile/ProtectedProfilePreferencesTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/player/Media3VideoDecodeSmokeTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/player/PlayerProgressFillTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:15`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:16`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:17`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:18`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:19`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:20`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:20`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:21`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:22`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:23`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:24`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:25`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:18`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:19`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:20`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:21`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:22`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:17`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:18`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:19`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:32`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:33`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:34`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:35`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:36`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:37`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:38`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:39`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:40`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:41`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:5`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:8`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:9`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:10`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:11`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:5`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:6`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListTimestampTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveAccountTest.kt:1`
+- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveAccountTest.kt:5`
 - `apps/tv/app/src/full/java/com/lagradost/cloudstream3/ui/home/HomeViewModel.kt:11`
 - `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:3`
@@ -70,106 +109,65 @@ Fichiers texte examinés : **1367** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:8`
 - `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:9`
 - `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:10`
+- `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:1`
+- `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:4`
+- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:1`
+- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:11`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:6`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:7`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:8`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdatePreferences.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdatePreferences.kt:11`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:11`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:4`
+- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkDownloader.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:3`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:4`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:5`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkDownloader.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:4`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:5`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:6`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:7`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:8`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:9`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:10`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:11`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:12`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:13`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:14`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:15`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:16`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:17`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:66`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:67`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:79`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginManager.kt:421`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/FetchResponseHeaders.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:9`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:10`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:11`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/PluginRuntime.kt:50`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:10`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/runtime/PluginRuntimeHooks.kt:53`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/TvTypeExtensions.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:24`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:25`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:26`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:27`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:28`
-- `apps/tv/app/src/full/java/com/nuvio/tv/core/plugin/cloudstream/ExternalExtensionRunner.kt:29`
-- …et 6719 autres correspondances (plafond d'affichage).
+- …et 6658 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1406** ; références statiques à Nuvio/NuvioMedia : **62**.
+Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia : **60**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 184 |
-| `github.com` | 121 |
+| `example.com` | 185 |
+| `github.com` | 117 |
 | `www.themoviedb.org` | 110 |
-| `example.test` | 68 |
+| `example.test` | 67 |
 | `schemas.android.com` | 47 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
 | `.` | 21 |
 | `original.com` | 20 |
-| `mdblist.com` | 17 |
+| `mdblist.com` | 18 |
 | `api.trakt.tv` | 16 |
 | `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
-| `cdn.example.com` | 12 |
-| `media.trakt.tv` | 12 |
-| `simkl.com` | 12 |
+| `plugins.example` | 12 |
 | `api.ratingposterdb.com` | 12 |
-| `pm` | 9 |
-| `img` | 9 |
+| `cdn.example.com` | 12 |
+| `simkl.com` | 12 |
+| `media.trakt.tv` | 12 |
 | `postersplus.example.com` | 9 |
-| `trakt.tv` | 8 |
+| `img` | 9 |
+| `pm` | 9 |
 | `api.mdblist.com` | 8 |
+| `trakt.tv` | 8 |
 | `catalog.example` | 8 |
+| `addon.example` | 7 |
+| `cdn.example` | 6 |
 | `www.youtube.com` | 6 |
-| `192.168.1.10` | 5 |
 | `a.com` | 5 |
-| `fake.example` | 4 |
-| `opensubtitles.example` | 4 |
-| `image.tmdb.org` | 4 |
+| `media.example.test` | 5 |
+| `192.168.1.10` | 5 |
 
 ### Références à vérifier en priorité
 
-- `apps/mobile/scripts/prepare-ios-dependencies.sh:25`
-- `apps/mobile/MPVKit/Package.swift:304`
-- `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15`
@@ -177,149 +175,154 @@ Fichiers texte examinés : **1406** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:19`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:29`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:30`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:109`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1951`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1983`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2185`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2217`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2218`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:352`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:357`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:400`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2042`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2074`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2075`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:511`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:355`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:398`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:399`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:357`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-el/strings.xml:142`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-el/strings.xml:183`
 - `apps/mobile/composeApp/src/commonMain/composeResources/values-el/strings.xml:184`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2040`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2072`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2073`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:357`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2183`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2215`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2216`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:355`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:398`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:399`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:352`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:511`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273`
+- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274`
+- `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 
 ## Windows
 
-Fichiers texte examinés : **1781** ; références statiques à Nuvio/NuvioMedia : **57**.
+Fichiers texte examinés : **1832** ; références statiques à Nuvio/NuvioMedia : **61**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `example.com` | 183 |
-| `github.com` | 136 |
+| `github.com` | 132 |
 | `www.themoviedb.org` | 110 |
-| `example.test` | 76 |
+| `example.test` | 80 |
 | `schemas.android.com` | 49 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
 | `.` | 21 |
 | `original.com` | 20 |
-| `mdblist.com` | 17 |
+| `mdblist.com` | 18 |
 | `simkl.com` | 16 |
 | `api.trakt.tv` | 16 |
 | `api.ratingposterdb.com` | 14 |
 | `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
+| `plugins.example` | 12 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
 | `example.invalid` | 11 |
 | `trakt.tv` | 10 |
-| `pm` | 9 |
+| `postersplus.example.com` | 9 |
 | `img` | 9 |
 | `image.tmdb.org` | 9 |
-| `postersplus.example.com` | 9 |
+| `pm` | 9 |
+| `example.org` | 8 |
 | `api.mdblist.com` | 8 |
 | `catalog.example` | 8 |
-| `example.org` | 8 |
+| `addon.example` | 7 |
 | `media.w3.org` | 7 |
-| `anderson76389.github.io` | 7 |
-| `developer.apple.com` | 6 |
-| `www.youtube.com` | 6 |
+| `anderson76389.github.io` | 6 |
 
 ### Références à vérifier en priorité
 
-- `apps/desktop/scripts/prepare-ios-dependencies.sh:25`
-- `apps/desktop/MPVKit/Package.swift:304`
-- `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
-- `apps/desktop/scripts/linux/test-linux-deb-tools.sh:30`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
+- `apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:236`
+- `apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:384`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:17`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:25`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:27`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:50`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
+- `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:106`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1952`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1985`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2186`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2218`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2219`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:352`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-ur/strings.xml:357`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-ur/strings.xml:400`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2045`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2077`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2078`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:511`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:355`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:398`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:399`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:357`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:142`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:183`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:184`
-- `apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:229`
-- `apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:350`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2043`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2075`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2076`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:357`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2184`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2216`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2217`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:355`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:398`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:399`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:352`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:511`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273`
+- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274`
+- `apps/desktop/scripts/linux/test-linux-deb-tools.sh:30`
+- `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 
 ## Dépendances natives manquantes
 

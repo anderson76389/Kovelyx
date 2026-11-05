@@ -60,7 +60,7 @@ cd apps/desktop
 ## Ce qui empêche toujours d'affirmer « 100 % indépendant »
 
 1. **Lecture et P2P :** le code source GPL du moteur C++/JVM est archivé dans `vendor/engine`, mais il faut construire et comparer ses bibliothèques à celles actuellement intégrées. La compilation C++ sans libtorrent ne fournit pas la fonctionnalité P2P complète. Les sources exactes du moteur MPV, de FFmpeg et de leurs dépendances doivent être conservées elles aussi.
-2. **Comptes et synchronisation :** certains écrans ou services utilisent encore l'infrastructure Supabase héritée ; la connexion facultative, le mode sans compte et le stockage local doivent être validés.
+2. **Comptes et synchronisation :** le code actuel passe par Cloudflare Better Auth + D1 ; confirmer la connexion facultative, le mode sans compte et la conservation du stockage local sur une installation réelle.
 3. **OAuth et liens internes :** les protocoles `nuvio://` et les identifiants historiques de certaines intégrations doivent être remplacés après vérification des callbacks configurés chez leurs fournisseurs.
 4. **Actualisation :** les mises à jour doivent être publiées depuis les Releases Kovelyx, avec leur signature et tests d'intégrité.
 5. **Tests réels :** une compilation Gradle réussie ne prouve pas qu'un lecteur vidéo démarre, que le moteur P2P fonctionne ou que tous les addons fonctionnent.
