@@ -33,7 +33,7 @@ class ServerDiscoveryPolicyTest {
         val payload = """
             {
               "version": 1,
-              "service": "nuvio",
+              "service": "kovelyx",
               "self_hosted": true,
               "backend_url": "https://api-two.nuvioapp.space",
               "publishable_key": "local-test-key",
@@ -42,7 +42,7 @@ class ServerDiscoveryPolicyTest {
         """.trimIndent()
         val error = assertFailsWith<ServerDiscoveryException> {
             ServerDiscoveryPolicy.parse(
-                "https://independent.example/.well-known/nuvio",
+                "https://independent.example/.well-known/kovelyx",
                 payload
             )
         }
