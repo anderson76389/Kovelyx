@@ -385,6 +385,15 @@ object WatchedRepository {
                 "sourceGeneration=$sourceGeneration"
         }
         if (effectiveSource.providerId == null) {
+            // Local watched history stays owned by Kovelyx; Cloudflare performs
+            // its own D1 sync instead of touching the legacy Supabase adapter.
+            if (CloudflareAccountClient.enabled) {
+                nuvioHasLoaded = true
+                nuvioHasLoadedRemote = true
+                publish()
+                CloudflareDataSync.request(profileId)
+                return true
+            }
             val authState = AuthRepository.state.value
             if (authState !is AuthState.Authenticated || authState.isAnonymous) {
                 // Local watched state is authoritative when this account has no Nuvio upstream.
