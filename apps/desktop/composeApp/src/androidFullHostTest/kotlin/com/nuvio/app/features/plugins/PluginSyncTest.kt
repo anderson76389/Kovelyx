@@ -2,7 +2,6 @@ package com.nuvio.app.features.plugins
 
 import com.nuvio.app.features.addons.AddonRepository
 import com.nuvio.app.features.addons.AddonStorage
-import com.russhwolf.settings.SettingsInitializer
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -30,7 +29,6 @@ class PluginSyncTest {
 
     @Before fun setUp() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsInitializer().create(context)
         PluginStorage.initialize(context)
         AddonStorage.initialize(context)
         PluginRepository.clearLocalState()

@@ -41,6 +41,14 @@ jobs:
           ./apps/mobile/gradlew -p apps/mobile :composeApp:testAndroidHostTest \
             --no-daemon --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process \
             -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Exécuter aussi les tests Android Host du variant Full
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./apps/mobile/gradlew -p apps/mobile :composeApp:testAndroidHostTest \
+            -Pnuvio.android.distribution=full --no-daemon --max-workers=2 \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
       - name: Conserver le rapport, même quand un test échoue
         if: always()
         uses: actions/upload-artifact@v4
