@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'services/kovelyx-cloud/**'
+      - 'services/kovelyx-cloudflare/**'
       - '.github/workflows/cloud-schema-check.yml'
   pull_request:
     paths:
-      - 'services/kovelyx-cloud/**'
+      - 'services/kovelyx-cloudflare/**'
       - '.github/workflows/cloud-schema-check.yml'
   workflow_dispatch:
 
@@ -17,14 +17,14 @@ permissions:
 
 jobs:
   contract:
-    name: Garde-fous SQL et script de sauvegarde
+    name: Schéma Cloudflare D1, isolation et intégrité
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
-      - name: Vérifier les politiques RLS et le modèle de données
-        run: python3 services/kovelyx-cloud/tests/check_contract.py
-      - name: Vérifier la syntaxe du script de sauvegarde
-        run: bash -n services/kovelyx-cloud/scripts/backup-database.sh
-      - name: Signaler les tests restants avant la mise en service
-        run: echo 'Contrôles statiques réussis. Aucun serveur déployé et aucun test runtime RLS effectué.'
+      - name: Tester toutes les migrations D1 et les profils
+        run: python3 services/kovelyx-cloudflare/tests/check-d1-schema.py
+      - name: Documenter le niveau de vérification
+        run: |
+          echo 'Schéma SQLite D1 : migrations, propriété des profils, cascade et conflits de révision vérifiés.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'La validation réseau des comptes Better Auth est effectuée dans le workflow Cloudflare dédié.' >> "$GITHUB_STEP_SUMMARY"
