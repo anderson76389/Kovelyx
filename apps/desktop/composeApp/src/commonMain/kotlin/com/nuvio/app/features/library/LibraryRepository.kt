@@ -220,6 +220,13 @@ object LibraryRepository {
             return
         }
 
+        // Cloudflare is Kovelyx's own sync backend. Never fall back to the
+        // historical Supabase library adapter while it is configured.
+        if (CloudflareAccountClient.enabled) {
+            CloudflareDataSync.request(profileId)
+            return
+        }
+
         nuvioSyncMutex.withLock {
             val serializedToken = activeOperationToken(profileId) ?: return@withLock
             val pullSnapshot = localState.markPullStarted(serializedToken) ?: return@withLock
