@@ -1,6 +1,7 @@
 package com.nuvio.tv.core.sync
 
 import com.nuvio.tv.core.auth.AuthManager
+import com.nuvio.tv.core.auth.CloudflareTvAccountClient
 import com.nuvio.tv.core.profile.ProfileManager
 import com.nuvio.tv.data.mediaserver.FakeServerProvider
 import com.nuvio.tv.data.mediaserver.MemoryServerPersistence
@@ -18,6 +19,8 @@ import io.ktor.http.Headers
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,8 +41,21 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.Before
+import org.junit.After
 
 class MediaServerSyncServiceTest {
+    // These tests intentionally exercise the retired RPC adapter, not the
+    // default D1 account path configured in CI.
+    @Before fun useLegacyTestBackend() {
+        mockkObject(CloudflareTvAccountClient)
+        every { CloudflareTvAccountClient.enabled } returns false
+    }
+
+    @After fun restoreCloudflareMode() {
+        unmockkObject(CloudflareTvAccountClient)
+    }
+
     private var remote: List<SyncedServer>? = null
     private val calls = mutableListOf<String>()
     private val authState = MutableStateFlow<AuthState>(AuthState.FullAccount("user", "user@example.com"))
