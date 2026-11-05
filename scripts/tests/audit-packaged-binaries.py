@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Détecter les domaines Nuvio en clair dans les DLL, JAR et AAR embarqués.
+"""Détecter les anciens hôtes Nuvio et Supabase en clair dans les DLL, JAR et AAR embarqués.
 
 Un résultat négatif ne prouve PAS que le binaire ne peut pas calculer une URL
 dynamiquement ; un résultat positif doit être attribué à du code de compte
@@ -24,7 +24,8 @@ SCOPES = [
 # binaires et le constant pool JVM ; la détection n'inclut pas le UTF-16.
 UPSTREAM = re.compile(
     rb"(?:[a-z0-9-]+\.)*nuvio\.tv|"
-    rb"(?:api\.github\.com/repos|github\.com|raw\.githubusercontent\.com)/NuvioMedia",
+    rb"(?:api\.github\.com/repos|github\.com|raw\.githubusercontent\.com)/NuvioMedia|"
+    rb"(?:[a-z0-9-]+\.)?supabase\.co",
     re.I,
 )
 MAX_MEMBER_BYTES = 160 * 1024 * 1024
@@ -70,7 +71,7 @@ def main() -> int:
             count_files += 1
             inspect_buffer(path.read_bytes(), path.relative_to(ROOT).as_posix())
     print(f"Archives natives examinées : {count_files} ; composants internes : {scanned_count}")
-    print(f"Occurrences de domaines NuvioMedia / nuvio.tv en clair : {len(hits)}")
+    print(f"Occurrences des anciens domaines Nuvio / Supabase en clair : {len(hits)}")
     for location, value in hits[:80]:
         print(f"  A EXAMINER : {location} : {value}")
     for value in errors:
