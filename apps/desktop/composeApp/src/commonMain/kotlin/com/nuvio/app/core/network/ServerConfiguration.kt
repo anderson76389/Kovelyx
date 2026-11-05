@@ -32,6 +32,7 @@ object ServerConfigurationRepository {
 
     fun saveCustom(configuration: ServerConfiguration): Boolean {
         if (!AppFeaturePolicy.customServerConnectionsEnabled) return false
+        if (ServerDiscoveryPolicy.isOfficial(configuration.backendUrl)) return false
         if (!ServerConfigurationStorage.saveCustom(configuration)) return false
         _active.value = configuration
         return true
@@ -45,7 +46,10 @@ object ServerConfigurationRepository {
 
     private fun loadActiveConfiguration(): ServerConfiguration {
         if (!AppFeaturePolicy.customServerConnectionsEnabled) return officialConfiguration()
-        return ServerConfigurationStorage.loadCustom() ?: officialConfiguration()
+        // Keep local data intact but never restore an old Nuvio backend.
+        return ServerConfigurationStorage.loadCustom()
+            ?.takeUnless { ServerDiscoveryPolicy.isOfficial(it.backendUrl) }
+            ?: officialConfiguration()
     }
 }
 
