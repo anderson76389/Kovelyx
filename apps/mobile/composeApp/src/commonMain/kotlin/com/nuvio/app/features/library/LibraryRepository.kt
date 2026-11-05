@@ -49,6 +49,8 @@ import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.library_local_tab_title
 import nuvio.composeapp.generated.resources.library_server_title_unsupported
 import nuvio.composeapp.generated.resources.library_other
+import nuvio.composeapp.generated.resources.media_movies
+import nuvio.composeapp.generated.resources.media_series
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 
@@ -786,6 +788,15 @@ internal fun libraryMembershipWithRemovedList(
 internal fun String.toLibraryDisplayTitle(): String {
     val normalized = trim()
     if (normalized.isBlank()) return localizedLibraryOtherTitle()
+
+    // Keep the stored content type ("movie"/"series") untouched for addon and
+    // tracking compatibility; only translate the visible library section header.
+    when (normalized.lowercase()) {
+        "movie", "movies", "film", "films" ->
+            return localizedStringOrDefault(Res.string.media_movies, "Movies")
+        "series", "serie", "série", "show", "shows", "tv" ->
+            return localizedStringOrDefault(Res.string.media_series, "Series")
+    }
 
     return normalized
         .split('-', '_', ' ')
