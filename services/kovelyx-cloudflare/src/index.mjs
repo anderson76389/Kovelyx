@@ -127,11 +127,14 @@ async function handleSync(request, env, user, url) {
 async function handleProfiles(request,env,user,url) {
   if (request.method === "GET") {
     const result = await env.DB.prepare(
-      "SELECT id,display_name AS displayName,avatar_path AS avatarPath,"+
-      "background_path AS backgroundPath,created_at AS createdAt,updated_at AS updatedAt "+
-      "FROM kv_profiles WHERE owner_id=? ORDER BY created_at ASC LIMIT 8"
+      "SELECT p.id,p.display_name AS displayName,p.avatar_path AS avatarPath,"+
+      "p.background_path AS backgroundPath,p.created_at AS createdAt,p.updated_at AS updatedAt,"+
+      "EXISTS(SELECT 1 FROM kv_profile_pins pin WHERE pin.owner_id=p.owner_id AND pin.profile_id=p.id) AS pinEnabled "+
+      "FROM kv_profiles p WHERE p.owner_id=? ORDER BY p.created_at ASC LIMIT 8"
     ).bind(user.id).all();
-    return jsonResponse({profiles:result.results || []});
+    return jsonResponse({profiles:(result.results || []).map(row => ({
+      ...row,pinEnabled:row.pinEnabled===1
+    }))});
   }
   if (request.method === "PATCH" || request.method === "DELETE") {
     const profileId = url.searchParams.get("profileId");
