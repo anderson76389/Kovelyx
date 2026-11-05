@@ -78,6 +78,11 @@ internal object ServerDiscoveryPolicy {
             throw ServerDiscoveryException(ServerDiscoveryFailure.NotSelfHosted)
         }
         val backendUrl = normalizeBackendUrl(payload.backendUrl)
+        // A self-hosted discovery document must never route the user back to
+        // the retired Nuvio infrastructure, even if discovery began elsewhere.
+        if (isOfficial(backendUrl)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OfficialServer)
+        }
         val key = payload.publishableKey.trim()
         if (key.isBlank()) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.MissingConfiguration)
@@ -97,9 +102,17 @@ internal object ServerDiscoveryPolicy {
         )
     }
 
-    fun isOfficial(candidateUrl: String): Boolean =
-        matchesBackend(candidateUrl, SupabaseConfig.URL) ||
+    fun isOfficial(candidateUrl: String): Boolean {
+        val host = runCatching { Url(candidateUrl).host.trimEnd('.').lowercase() }.getOrNull()
+            ?: return false
+        // Compare DNS label boundaries, not substrings of unrelated hosts.
+        val retiredUpstream = listOf("nuvio.tv", "nuvioapp.space").any {
+            host == it || host.endsWith(".$it")
+        }
+        return retiredUpstream ||
+            matchesBackend(candidateUrl, SupabaseConfig.URL) ||
             matchesBackend(candidateUrl, canonicalOfficialBackend)
+    }
 
     private fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {
         val candidate = runCatching { Url(candidateUrl) }.getOrNull() ?: return false
@@ -161,6 +174,8 @@ object ServerDiscoveryService {
                         "User-Agent" to "Kovelyx/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
                     ),
                     body = "",
+                    // Do not let a third-party discovery URL redirect to Nuvio.
+                    followRedirects = false,
                     maxResponseBodyBytes = maxDocumentBytes + 1,
                 )
             }
@@ -180,6 +195,9 @@ object ServerDiscoveryService {
             !response.url.startsWith("https://", ignoreCase = true)
         ) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.ConnectionFailed)
+        }
+        if (ServerDiscoveryPolicy.isOfficial(response.url)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OfficialServer)
         }
         if (response.body.encodeToByteArray().size > maxDocumentBytes) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.ResponseTooLarge)
