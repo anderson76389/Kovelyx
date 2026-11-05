@@ -1,5 +1,34 @@
 # Kovelyx — audit croisé Windows, Android mobile et Android TV
 
+## Contrôle complémentaire du 5 novembre 2026 — état du code principal
+
+**Verdict : indépendance réseau partielle et prouvée sur des scénarios limités, pas 100 % certifiée.** La distinction entre une *dépendance à un service Nuvio encore en ligne* et une *bibliothèque GPL héritée copiée et conservée chez Kovelyx* est indispensable.
+
+### Points établis dans les sources actuelles
+
+| Périmètre | Constat vérifiable | Qualification |
+| --- | --- | --- |
+| Configuration Android mobile et Windows | Les tâches Gradle génèrent `SupabaseConfig` avec URL, clé anonyme et fallback **vides** ; le Worker Kovelyx possède un `CloudflareConfig.URL` indépendant, injecté par `scripts/configure-cloud-build.py`. | Aucun compte Nuvio par défaut dans ces builds, mais le fonctionnement complet de Cloudflare sur appareils reste à tester. |
+| Android TV | `apps/tv/app/build.gradle.kts` fixe les champs `SUPABASE_URL` et `SUPABASE_ANON_KEY` à des chaînes vides et expose `KOVELYX_CLOUD_URL` séparément. `CloudflareTvAccountClient` utilise Better Auth/Workers. | Auth Cloudflare présente, avec compatibilité RPC Supabase encore compilée. |
+| Bibliothèque/progression | `CloudflareDataSync` (Android/Windows) et `CloudflareTvDataSync` (TV) ont des chemins de synchronisation D1 ; sur TV, `RetiredLibrarySyncRemoteDataSource` interdit l'ancien RPC bibliothèque. | Les implémentations RPC historiques de suivi, profils et abonnement existent encore dans le code ; il faut contrôler tous leurs appelants en situation réelle. |
+| Serveurs personnalisés | Android mobile rejette les domaines historiques ; le contrôle complémentaire étend le refus à Windows/TV, y compris les réglages sauvegardés et la découverte. Les serveurs auto-hébergés indépendants sont conservés. | Correction préventive ciblée, distincte du service Cloudflare officiel. |
+| Lecture native | `lib-nuvio-engine-android-0.1.4.aar`, `nuvio_engine.dll`, `nuvio-engine-jvm-0.1.4.jar` et des fichiers natifs subsistent localement, avec sources dans `vendor/engine`. | **Pas** une preuve d'appel réseau vers Nuvio, mais reproductibilité de tous les binaires/ABI sans anciens artefacts non certifiée. |
+| Compilations et mises à jour | Versions et APK/EXE hébergés dans `anderson76389/Kovelyx`. La CI bloque les domaines Nuvio connus et les clones de `NuvioMedia` pour certains scénarios. | Tests statiques/compilations concluants sur les exécutions indiquées dans Actions, pas une preuve de toutes les requêtes à l'exécution. |
+
+### Risques encore ouverts avant toute déclaration « 100 % indépendant »
+
+1. **Code de compatibilité Supabase toujours compilé :** `SupabaseProvider` sur Android/Windows, `SupabaseModule` et les anciens services RPC sur TV, ainsi que des modules de profils, progression ou abonnement. Les identifiants absents rendent le serveur historique inutilisable dans la configuration officielle, mais n'établissent pas que tous les parcours sont déjà migrés vers D1.
+2. **Binaire natif non intégralement reproductible :** vérifier que les AAR Android/TV de toutes ABI, la DLL du moteur Windows et les runtimes MPV peuvent être reconstruits depuis les sources et patches archivés **sans accès ni téléchargements NuvioMedia**. Ne pas supprimer les copies qui permettent actuellement l'application de fonctionner.
+3. **Données migrées et configurations enregistrées :** tester les anciennes préférences et sessions sous blocage réseau, la conservation après mise à jour, la bibliothèque, l'historique et le compte Cloudflare sur appareils réels.
+4. **URLs non littérales et SDK natifs :** capturer le trafic DNS, HTTP(S) et les redirections de l'application *distribuée* sur chaque plateforme pendant lecture, addons, connexion, profil, sous-titres et synchronisation. Les tests actuels n'observent pas toutes ces requêtes.
+5. **Autres dépendances distinctes :** GitHub/Kovelyx pour la distribution, Cloudflare/D1 pour les comptes, TMDB/Trakt/MDBList, addons et hébergeurs selon les fonctions. Il ne s'agit pas de Nuvio, mais « indépendant à vie de tout fournisseur » nécessiterait aussi des sauvegardes et solutions de remplacement.
+
+**À conserver par compatibilité légale et technique :** les notices GPL, la provenance de Nuvio, les namespaces `com.nuvio.*` et les anciens schémas de données/liens jusqu'à une migration validée. Les renommer en masse ne supprime aucune dépendance réseau et peut casser les données utilisateurs.
+
+**Validation :** scripts `scripts/tests/verify-upstream-independence.py`, `scripts/tests/test_cloudflare_legacy_boundaries.py`, workflows `prove-upstream-independence.yml`, `dependency-audit.yml`, compilations des trois plateformes et tests de TV/Windows sur GitHub Actions. Ils ne suffisent pas à eux seuls pour certifier l'indépendance de toute la surface réseau.
+
+---
+
 **Contrôle du 17 octobre 2026.** Périmètre : indépendance vis-à-vis des services et dépôts **NuvioMedia** à l'exception temporaire des **comptes utilisateurs historiques**, qui seront remplacés ultérieurement. Ne pas confondre cela avec le fonctionnement sans Internet ni avec l'indépendance de fournisseurs légitimes (TMDB, Trakt, MDBList, addons, GitHub Releases, etc.).
 
 ## Conclusion contrôlée
