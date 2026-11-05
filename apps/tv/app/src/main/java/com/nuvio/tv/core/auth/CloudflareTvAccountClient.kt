@@ -345,6 +345,21 @@ internal object CloudflareTvAccountClient {
             (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }
         }
     }
+    /** Delete the owned remote profile before removing the local TV copy. */
+    suspend fun deleteCloudProfile(profileId: String) = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles?profileId=$profileId")
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .delete().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
+                "Suppression du profil Cloudflare non confirmée (HTTP ${response.code})"
+            }
+        }
+    }
+
     suspend fun renameCloudProfile(profileId: String, name: String) = withContext(Dispatchers.IO) {
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
         val active = checkNotNull(account)
