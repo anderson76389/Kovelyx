@@ -248,7 +248,7 @@ class StartupSyncService @Inject constructor(
                     )
                 }
                 "watched_items" -> {
-                    if (watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)) {
+                    if (false /* D1 handles progress and watched state */) {
                         pullWatchedItemsDelta(profileId = profileId, pushUnsynced = false)
                     } else {
                         watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
@@ -345,7 +345,7 @@ class StartupSyncService @Inject constructor(
         if (authManager.authState.value !is AuthState.FullAccount) return false
 
         val profileId = profileManager.activeProfileId.value
-        val shouldUseSupabaseWatchProgressSync = watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)
+        val shouldUseSupabaseWatchProgressSync = false /* D1 handles progress and watched state */
         Log.d(
             TAG,
             "Periodic watch state pull: profile=$profileId shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"
@@ -489,7 +489,7 @@ class StartupSyncService @Inject constructor(
             Log.d(TAG, "Pulling remote data for profile $profileId")
             pullBroadRemoteData(profileId, includeProfileSettings)
 
-            val shouldUseSupabaseWatchProgressSync = watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)
+            val shouldUseSupabaseWatchProgressSync = false /* D1 handles progress and watched state */
             Log.d(
                 TAG,
                 "Watch progress sync: shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"
@@ -531,7 +531,7 @@ class StartupSyncService @Inject constructor(
         try {
             Log.d(TAG, "Running warm remote sync for profile $profileId")
             pullBroadRemoteData(profileId, includeProfileSettings)
-            val shouldUseSupabaseWatchProgressSync = watchProgressSyncService.shouldUseSupabaseWatchProgressSync(profileId)
+            val shouldUseSupabaseWatchProgressSync = false /* D1 handles progress and watched state */
             Log.d(
                 TAG,
                 "Warm watch progress sync: shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"

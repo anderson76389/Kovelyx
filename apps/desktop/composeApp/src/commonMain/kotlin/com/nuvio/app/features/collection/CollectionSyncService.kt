@@ -1,160 +1,58 @@
 package com.nuvio.app.features.collection
 
-import co.touchlab.kermit.Logger
 import com.nuvio.app.core.auth.AuthRepository
 import com.nuvio.app.core.auth.AuthState
-import com.nuvio.app.core.network.SupabaseProvider
-import com.nuvio.app.core.sync.putSyncOriginClientId
+import com.nuvio.app.core.cloud.CloudflareAccountClient
+import com.nuvio.app.core.cloud.CloudflareDataSync
 import com.nuvio.app.features.profiles.ProfileRepository
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.rpc
-import kotlin.concurrent.Volatile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 
+/** Collections use only the independent Cloudflare catalogue synchronizer. */
 object CollectionSyncService {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-    private val log = Logger.withTag("CollectionSyncService")
-    private val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-
-    private const val PUSH_DEBOUNCE_MS = 1500L
-
-    @Volatile
+    private var observeJob: Job? = null
     var isSyncingFromRemote: Boolean = false
 
-    private var pushJob: Job? = null
-    private var observeJob: Job? = null
-
+    @OptIn(FlowPreview::class)
     fun startObserving() {
         if (observeJob?.isActive == true) return
-        observeLocalChangesAndPush()
+        observeJob = scope.launch {
+            CollectionRepository.localChangeEvents.debounce(1500L).collect {
+                if (!isSyncingFromRemote) triggerPush()
+            }
+        }
     }
 
     suspend fun pullFromServer(profileId: Int) {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
-            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
-            return
-        }
-        pullFromServerChecked(profileId)
+        if (CloudflareAccountClient.enabled && ProfileRepository.activeProfileId == profileId)
+            CloudflareDataSync.request(profileId)
     }
 
-    /** Un import destructif ne doit jamais continuer si le chargement du compte a échoué. */
+    /**
+     * Imports require a confirmed remote pull. A queued asynchronous refresh
+     * is not enough: a failed D1 fetch must not erase existing collections.
+     */
     suspend fun pullFromServerChecked(profileId: Int): Boolean {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
-            return try {
-                com.nuvio.app.core.cloud.CloudflareCatalogueSync.synchronizeNow(profileId)
-            } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
-            catch (error: Exception) {
-                log.w(error) { "Import différé : le catalogue Cloudflare doit être reçu avant sa modification" }
-                false
-            }
-        }
-        if (ProfileRepository.activeProfileId != profileId) return false
+        if (!CloudflareAccountClient.enabled ||
+            ProfileRepository.activeProfileId != profileId) return false
+        val account = AuthRepository.state.value as? AuthState.Authenticated ?: return false
+        if (account.isAnonymous || CloudflareAccountClient.currentSession?.userId != account.userId)
+            return false
         return runCatching {
-            val params = buildJsonObject { put("p_profile_id", profileId) }
-            val result = SupabaseProvider.client.postgrest.rpc("sync_pull_collections", params)
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching false
-            val blob = result.decodeList<SupabaseCollectionBlob>().firstOrNull()
-            if (blob == null) {
-                log.i { "pullFromServer — no remote collections found" }
-                return@runCatching true
-            }
-            val remoteCollectionsJson = if (blob.collectionsJson == JsonNull)
-                JsonArray(emptyList()) else blob.collectionsJson
-            val remoteJson = remoteCollectionsJson.toString()
-            val localJson = CollectionRepository.exportToJson()
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching false
-            if (remoteJson == localJson) {
-                log.d { "pullFromServer — remote matches local" }
-                return@runCatching true
-            }
-            val remoteCollections = runCatching {
-                json.decodeFromString<List<Collection>>(remoteJson)
-            }.getOrNull()
-            if (remoteCollections == null) {
-                log.w { "pullFromServer — failed to parse remote collections JSON" }
-                return@runCatching false
-            }
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching false
-            isSyncingFromRemote = true
-            try {
-                CollectionRepository.applyFromRemote(remoteCollections, remoteCollectionsJson)
-            } finally {
-                isSyncingFromRemote = false
-            }
-            log.i { "pullFromServer — applied " + remoteCollections.size + " collections from remote" }
+            CloudflareDataSync.synchronize(profileId)
             true
-        }.getOrElse { error ->
-            isSyncingFromRemote = false
-            log.e(error) { "pullFromServer — FAILED" }
-            false
-        }
+        }.getOrDefault(false)
     }
 
     fun triggerPush() {
-        pushJob?.cancel()
-        pushJob = scope.launch {
-            val profileId = ProfileRepository.activeProfileId
-            delay(500)
-            if (ProfileRepository.activeProfileId != profileId) return@launch
-            if (isSyncingFromRemote) return@launch
-            val authState = AuthRepository.state.value
-            if (authState !is AuthState.Authenticated || authState.isAnonymous) return@launch
-            pushToRemote(profileId)
-        }
-    }
-
-    private suspend fun pushToRemote(profileId: Int) {
-        if (com.nuvio.app.core.cloud.CloudflareAccountClient.enabled) {
-            com.nuvio.app.core.cloud.CloudflareDataSync.request(profileId)
-            return
-        }
-        runCatching {
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching
-            val collectionsJson = CollectionRepository.exportToJson()
-            if (ProfileRepository.activeProfileId != profileId) return@runCatching
-            val jsonElement = runCatching {
-                json.parseToJsonElement(collectionsJson)
-            }.getOrDefault(JsonArray(emptyList()))
-
-            val params = buildJsonObject {
-                put("p_profile_id", profileId)
-                put("p_collections_json", jsonElement)
-                putSyncOriginClientId()
-            }
-            SupabaseProvider.client.postgrest.rpc("sync_push_collections", params)
-            log.d { "pushToRemote — success" }
-        }.onFailure { e ->
-            log.e(e) { "pushToRemote — FAILED" }
-        }
-    }
-
-    @OptIn(FlowPreview::class)
-    private fun observeLocalChangesAndPush() {
-        observeJob = scope.launch {
-            CollectionRepository.localChangeEvents
-                .debounce(PUSH_DEBOUNCE_MS)
-                .collect {
-                    val profileId = ProfileRepository.activeProfileId
-                    if (isSyncingFromRemote) return@collect
-                    val authState = AuthRepository.state.value
-                    if (authState !is AuthState.Authenticated || authState.isAnonymous) return@collect
-                    pushToRemote(profileId)
-                }
-        }
+        if (isSyncingFromRemote || !CloudflareAccountClient.enabled) return
+        val account = AuthRepository.state.value as? AuthState.Authenticated ?: return
+        if (!account.isAnonymous) CloudflareDataSync.request(ProfileRepository.activeProfileId)
     }
 }

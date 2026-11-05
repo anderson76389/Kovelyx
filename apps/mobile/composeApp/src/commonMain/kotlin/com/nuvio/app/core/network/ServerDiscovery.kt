@@ -46,7 +46,7 @@ private data class DiscoveryCapabilities(
 )
 
 internal object ServerDiscoveryPolicy {
-    private const val discoveryPath = "/.well-known/nuvio"
+    private const val discoveryPath = "/.well-known/kovelyx"
     private const val canonicalOfficialBackend = ""
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -71,7 +71,7 @@ internal object ServerDiscoveryPolicy {
         if (payload.version != 1) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.UnsupportedVersion)
         }
-        if (!payload.service.equals("nuvio", ignoreCase = true)) {
+        if (!payload.service.equals("kovelyx", ignoreCase = true)) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.WrongService)
         }
         if (!payload.selfHosted) {
@@ -111,7 +111,7 @@ internal object ServerDiscoveryPolicy {
             host == it || host.endsWith(".$it")
         }
         return formerService ||
-            matchesBackend(candidateUrl, SupabaseConfig.URL) ||
+            matchesBackend(candidateUrl, com.nuvio.app.core.cloud.CloudflareConfig.URL) ||
             matchesBackend(candidateUrl, canonicalOfficialBackend)
     }
 

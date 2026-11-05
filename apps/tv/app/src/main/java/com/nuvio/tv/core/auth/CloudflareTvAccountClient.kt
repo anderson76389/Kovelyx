@@ -43,12 +43,19 @@ internal object CloudflareTvAccountClient {
     private var sessionRevision = 0L
     private var sessionStore: CloudflareTvSessionStore? = null
 
+    /** Prepare private encrypted persistence synchronously before a fast user sign-in. */
+    fun initialize(context: Context) {
+        synchronized(sessionLock) {
+            if (sessionStore == null) sessionStore = CloudflareTvSessionStore(context)
+        }
+    }
+
     /** Called from AuthManager at process startup; never assumes a valid remote session. */
     suspend fun restoreSession(context: Context): Account? = withContext(Dispatchers.IO) {
         // Sign-out may happen while /v1/me is still in flight: a stale
         // verification must never resurrect a deleted local session.
         val startingRevision = synchronized(sessionLock) { sessionRevision }
-        sessionStore = CloudflareTvSessionStore(context)
+        initialize(context)
         val saved = sessionStore?.load(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/'))
             ?: return@withContext null
         if (!enabled) return@withContext null
@@ -255,7 +262,9 @@ internal object CloudflareTvAccountClient {
                 .header("Authorization", "Bearer ${active.bearerToken}")
                 .get().build()
             val next = client.newCall(request).execute().use { response ->
-                check(response.isSuccessful) { "Cloudflare sync HTTP ${response.code}" }
+                check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
+                    "Cloudflare sync HTTP ${response.code} ou compte modifié"
+                }
                 val page = JSONObject(response.body?.string().orEmpty())
                 val values = page.optJSONArray("items") ?: org.json.JSONArray()
                 for (i in 0 until values.length()) {
@@ -264,11 +273,13 @@ internal object CloudflareTvAccountClient {
                 if (page.isNull("nextOffset")) -1 else page.optInt("nextOffset", -1)
             }
             if (next == -1) break
+            check(account?.bearerToken == active.bearerToken) { "Compte modifié pendant la pagination" }
             check(next == offset + 25 && rows.size <= 100000) {
                 "Pagination Cloudflare invalide"
             }
             offset = next
         } while (true)
+        check(account?.bearerToken == active.bearerToken) { "Compte modifié pendant la synchronisation" }
         rows
     }
 
@@ -311,7 +322,9 @@ internal object CloudflareTvAccountClient {
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
         client.newCall(request).execute().use { response ->
-            check(response.isSuccessful) { "Cloudflare sync HTTP ${response.code}" }
+            check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
+                "Cloudflare sync HTTP ${response.code} ou compte modifié"
+            }
         }
     }
 
@@ -332,6 +345,82 @@ internal object CloudflareTvAccountClient {
             (0 until rows.length()).mapNotNull { rows.optJSONObject(it) }
         }
     }
+    /** Delete the owned remote profile before removing the local TV copy. */
+    suspend fun deleteCloudProfile(profileId: String) = withContext(Dispatchers.IO) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val request = Request.Builder()
+            .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/profiles?profileId=$profileId")
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .delete().build()
+        client.newCall(request).execute().use { response ->
+            check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
+                "Suppression du profil Cloudflare non confirmée (HTTP ${response.code})"
+            }
+        }
+    }
+
+    private suspend fun profilePinRequest(
+        path: String, method: String, payload: JSONObject? = null
+    ): Pair<Int, JSONObject> = withContext(Dispatchers.IO) {
+        val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+        val root = BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/')
+        val builder = Request.Builder().url(root + path)
+            .header("Authorization", "Bearer ${active.bearerToken}")
+            .header("Origin", root)
+        val body = (payload ?: JSONObject()).toString().toRequestBody("application/json".toMediaType())
+        when (method) {
+            "GET" -> builder.get()
+            "POST" -> builder.post(body)
+            "DELETE" -> builder.delete(body)
+            else -> error("Méthode PIN non valide")
+        }
+        client.newCall(builder.build()).execute().use { response ->
+            check(account?.bearerToken == active.bearerToken) { "Compte changé pendant la validation du PIN" }
+            response.code to JSONObject(response.body?.string().orEmpty())
+        }
+    }
+
+    /** These PIN endpoints are owned by Better Auth and isolated from kv_sync. */
+    suspend fun cloudProfilePinStates(): Map<String, Boolean> {
+        val (status, data) = profilePinRequest("/v1/profile-pins", "GET")
+        check(status == 200) { "État PIN Cloudflare indisponible (HTTP $status)" }
+        val values = data.optJSONArray("profiles") ?: return emptyMap()
+        return (0 until values.length()).mapNotNull { i ->
+            val row = values.optJSONObject(i) ?: return@mapNotNull null
+            val id = row.optString("profileId")
+            if (id.matches(Regex("[a-fA-F0-9-]{36}")))
+                id to row.optBoolean("pinEnabled", false) else null
+        }.toMap()
+    }
+
+    /** Returns false only when the old PIN is required by the server. */
+    suspend fun setCloudProfilePin(profileId: String, pin: String, currentPin: String?): Boolean {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val payload = JSONObject().put("profileId", profileId).put("pin", pin)
+        currentPin?.let { payload.put("currentPin", it) }
+        val (status, data) = profilePinRequest("/v1/profile-pin", "POST", payload)
+        if (status == 409 && data.optString("code") == "PIN_REQUIRED") return false
+        check(status in 200..299) { "Code PIN Cloudflare refusé (HTTP $status)" }
+        return true
+    }
+
+    suspend fun clearCloudProfilePin(profileId: String, currentPin: String?) {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val payload = JSONObject().put("profileId", profileId)
+        currentPin?.let { payload.put("currentPin", it) }
+        val (status, _) = profilePinRequest("/v1/profile-pin", "DELETE", payload)
+        check(status == 200) { "Suppression PIN Cloudflare refusée (HTTP $status)" }
+    }
+
+    suspend fun verifyCloudProfilePin(profileId: String, pin: String): Pair<Boolean, Int> {
+        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+        val (status, data) = profilePinRequest("/v1/profile-pin/verify", "POST",
+            JSONObject().put("profileId", profileId).put("pin", pin))
+        check(status == 200) { "Vérification PIN Cloudflare indisponible (HTTP $status)" }
+        return data.optBoolean("unlocked", false) to data.optInt("retryAfterSeconds", 0)
+    }
+
     suspend fun renameCloudProfile(profileId: String, name: String) = withContext(Dispatchers.IO) {
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
         val active = checkNotNull(account)

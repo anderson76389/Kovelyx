@@ -1,10 +1,17 @@
 package com.nuvio.tv.core.sync
 
-import com.nuvio.tv.data.remote.supabase.SupabaseProviderCredential
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
+
+/** Local credential representation. Keys must never use obsolete RPC services. */
+internal data class RemoteProviderCredential(
+    val provider: String,
+    val credentialJson: JsonObject,
+    val updatedAt: String? = null
+)
 
 internal object ProviderCredentialIds {
     const val MDBLIST = "mdblist"
@@ -31,7 +38,7 @@ internal data class ProviderCredentialSnapshot(
         require(values.map(ProviderCredentialValue::provider).distinct().size == values.size)
     }
 
-    fun mergeRemote(rows: List<SupabaseProviderCredential>): ProviderCredentialSnapshot {
+    fun mergeRemote(rows: List<RemoteProviderCredential>): ProviderCredentialSnapshot {
         val remoteByProvider = rows.associateBy { it.provider.lowercase() }
         return copy(
             values = values.map { local ->
@@ -48,7 +55,7 @@ internal data class ProviderCredentialSnapshot(
 
 internal fun shouldSeedProviderCredentials(
     snapshot: ProviderCredentialSnapshot,
-    rows: List<SupabaseProviderCredential>
+    rows: List<RemoteProviderCredential>
 ): Boolean {
     val remoteProviders = rows.mapTo(mutableSetOf()) { row -> row.provider.lowercase() }
     return snapshot.values.any { credential -> credential.provider.lowercase() !in remoteProviders }

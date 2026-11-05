@@ -89,6 +89,9 @@ internal object ServerDiscoveryPolicy {
         }
         if (!payload.selfHosted) throw ServerDiscoveryException(ServerDiscoveryFailure.NOT_SELF_HOSTED)
         val backendUrl = normalizeBackendUrl(payload.backendUrl)
+        if (isRetiredUpstream(backendUrl)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
+        }
         val publishableKey = payload.publishableKey.trim()
         if (publishableKey.isBlank()) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.MISSING_CONFIGURATION)
@@ -109,6 +112,14 @@ internal object ServerDiscoveryPolicy {
             deviceLoginWebBaseUrl = "$backendUrl/link",
             avatarPublicBaseUrl = "$backendUrl/storage/v1/object/public/avatars"
         )
+    }
+
+    /** Exact DNS-label matching: never contact retired Nuvio account hosts. */
+    fun isRetiredUpstream(candidateUrl: String): Boolean {
+        val host = candidateUrl.toHttpUrlOrNull()?.host?.trimEnd('.')?.lowercase() ?: return false
+        return listOf("nuvio.tv", "nuvioapp.space").any { domain ->
+            host == domain || host.endsWith(".$domain")
+        }
     }
 
     fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {
@@ -142,12 +153,15 @@ class ServerDiscoveryService @Inject constructor() {
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
         .callTimeout(15, TimeUnit.SECONDS)
+        // A discovery URL must not redirect to an upstream Nuvio account host.
+        .followRedirects(false)
+        .followSslRedirects(false)
         .build()
 
     suspend fun discover(input: String): Result<ServerConfiguration> = withContext(Dispatchers.IO) {
         runCatching {
             val discoveryUrl = ServerDiscoveryPolicy.discoveryUrl(input)
-            if (ServerDiscoveryPolicy.matchesBackend(discoveryUrl, BuildConfig.SUPABASE_URL)) {
+            if (ServerDiscoveryPolicy.isRetiredUpstream(discoveryUrl)) {
                 throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
             }
             val request = Request.Builder()
@@ -162,6 +176,9 @@ class ServerDiscoveryService @Inject constructor() {
                 throw ServerDiscoveryException(ServerDiscoveryFailure.CONNECTION_FAILED, cause = error)
             }
             response.use {
+                if (ServerDiscoveryPolicy.isRetiredUpstream(it.request.url.toString())) {
+                    throw ServerDiscoveryException(ServerDiscoveryFailure.OFFICIAL_SERVER)
+                }
                 if (!it.isSuccessful) {
                     throw ServerDiscoveryException(
                         failure = ServerDiscoveryFailure.HTTP_ERROR,

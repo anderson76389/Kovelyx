@@ -46,7 +46,7 @@ private data class DiscoveryCapabilities(
 )
 
 internal object ServerDiscoveryPolicy {
-    private const val discoveryPath = "/.well-known/nuvio"
+    private const val discoveryPath = "/.well-known/kovelyx"
     private const val canonicalOfficialBackend = "https://api.nuvio.tv"
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -71,13 +71,16 @@ internal object ServerDiscoveryPolicy {
         if (payload.version != 1) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.UnsupportedVersion)
         }
-        if (!payload.service.equals("nuvio", ignoreCase = true)) {
+        if (!payload.service.equals("kovelyx", ignoreCase = true)) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.WrongService)
         }
         if (!payload.selfHosted) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.NotSelfHosted)
         }
         val backendUrl = normalizeBackendUrl(payload.backendUrl)
+        if (isOfficial(backendUrl)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OfficialServer)
+        }
         val key = payload.publishableKey.trim()
         if (key.isBlank()) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.MissingConfiguration)
@@ -97,9 +100,16 @@ internal object ServerDiscoveryPolicy {
         )
     }
 
-    fun isOfficial(candidateUrl: String): Boolean =
-        matchesBackend(candidateUrl, SupabaseConfig.URL) ||
+    fun isOfficial(candidateUrl: String): Boolean {
+        val host = runCatching { Url(candidateUrl).host.trimEnd('.').lowercase() }.getOrNull()
+            ?: return false
+        val retired = listOf("nuvio.tv", "nuvioapp.space").any { domain ->
+            host == domain || host.endsWith(".$domain")
+        }
+        return retired ||
+            matchesBackend(candidateUrl, com.nuvio.app.core.cloud.CloudflareConfig.URL) ||
             matchesBackend(candidateUrl, canonicalOfficialBackend)
+    }
 
     private fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {
         val candidate = runCatching { Url(candidateUrl) }.getOrNull() ?: return false
@@ -161,6 +171,8 @@ object ServerDiscoveryService {
                         "User-Agent" to "Kovelyx/${AppVersionConfig.VERSION_NAME.ifBlank { "dev" }}",
                     ),
                     body = "",
+                    // An independent server must not redirect discovery onto an old Nuvio endpoint.
+                    followRedirects = false,
                     maxResponseBodyBytes = maxDocumentBytes + 1,
                 )
             }
@@ -168,6 +180,9 @@ object ServerDiscoveryService {
             throw error
         } catch (error: Throwable) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.ConnectionFailed, cause = error)
+        }
+        if (ServerDiscoveryPolicy.isOfficial(response.url)) {
+            throw ServerDiscoveryException(ServerDiscoveryFailure.OfficialServer)
         }
         if (response.status !in 200..299) {
             throw ServerDiscoveryException(

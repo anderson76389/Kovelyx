@@ -2,7 +2,6 @@ package com.nuvio.app.features.debrid
 
 import com.nuvio.app.features.streams.StreamItem
 import com.nuvio.app.features.streams.StreamClientResolve
-import com.russhwolf.settings.SettingsInitializer
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -18,7 +17,6 @@ import java.util.concurrent.TimeUnit
 @Config(sdk = [34], manifest = Config.NONE)
 class AllDebridHttpTest {
     @Test fun validatesBearerKeyAndResolvesTheRequestedEpisodeThroughRealHttpRequests() = runBlocking {
-        SettingsInitializer().create(RuntimeEnvironment.getApplication())
         val server = MockWebServer()
         server.start()
         try {

@@ -14,7 +14,7 @@ import com.nuvio.tv.data.remote.cloudflare.AvatarCatalogItem
 import com.nuvio.tv.data.remote.cloudflare.AvatarRepository
 import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundCatalogItem
 import com.nuvio.tv.data.remote.cloudflare.ProfileBackgroundRepository
-import com.nuvio.tv.data.remote.supabase.SupabaseProfilePinVerifyResult
+import com.nuvio.tv.data.remote.cloud.ProfilePinVerifyResult
 import com.nuvio.tv.data.repository.MemberAccessRepository
 import com.nuvio.tv.domain.model.CosmeticEntitlement
 import com.nuvio.tv.domain.model.UserProfile
@@ -204,7 +204,24 @@ class ProfileSelectionViewModel @Inject constructor(
                     avatarId = avatarId
                 )
                 if (profile != null) {
-                    profileSyncService.pushToRemote()
+                    var createdProfile = profile
+                    if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+                        // Link a new TV profile to a stable D1 UUID immediately, even if
+                        // another profile remains active. Offline failure keeps the
+                        // local profile so its data can be synchronized later.
+                        try {
+                            val uuid = CloudflareTvAccountClient.createCloudProfile(profile.name)
+                            if (profileManager.linkCloudProfile(profile.id, uuid)) {
+                                createdProfile = profile.copy(cloudProfileId = uuid)
+                            }
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (error: Exception) {
+                            Log.w("ProfileSelectionVM", "Profil Cloudflare en attente ; profil TV local conservé", error)
+                        }
+                    } else if (!CloudflareTvAccountClient.enabled) {
+                        profileSyncService.pushToRemote()
+                    }
                     val copyResult = copyFromProfileId?.let { sourceProfileId ->
                         profileSettingsSyncService.copyProfileSetup(
                             sourceProfileId = sourceProfileId,
@@ -213,7 +230,7 @@ class ProfileSelectionViewModel @Inject constructor(
                         )
                     }
                     refreshProfilePinStates()
-                    CreateProfileResult.Created(profile, copyResult)
+                    CreateProfileResult.Created(createdProfile, copyResult)
                 } else {
                     CreateProfileResult.Failed
                 }
@@ -256,6 +273,24 @@ class ProfileSelectionViewModel @Inject constructor(
 
     fun deleteProfile(id: Int) {
         viewModelScope.launch {
+            if (id == 1) return@launch // Never delete the principal profile.
+            if (CloudflareTvAccountClient.enabled) {
+                val target = profileManager.profiles.value.firstOrNull { it.id == id } ?: return@launch
+                // The TV must not remove local data unless D1 confirmed removal:
+                // otherwise the profile would reappear at the next cloud pull.
+                target.cloudProfileId?.let { uuid ->
+                    try {
+                        CloudflareTvAccountClient.deleteCloudProfile(uuid)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Log.e("ProfileSelectionVM", "Cloudflare profile deletion refused; local data preserved", error)
+                        return@launch
+                    }
+                }
+                profileManager.deleteProfile(id)
+                return@launch
+            }
             profileManager.deleteProfile(id)
             profileSyncService.deleteProfileData(id)
             profileSyncService.pushToRemote()
@@ -264,9 +299,14 @@ class ProfileSelectionViewModel @Inject constructor(
     }
 
     fun refreshProfilePinStates() {
-        // Cloudflare has no legacy PIN RPC; retain the locally stored lock state.
-        if (CloudflareTvAccountClient.enabled) return
         viewModelScope.launch {
+            if (CloudflareTvAccountClient.enabled) {
+                // A failed D1 request must NOT clear the cached lock state.
+                profileSyncService.pullProfileLockStates()
+                    .onSuccess { profileLockStateDataStore.replaceAll(it) }
+                    .onFailure { Log.w("ProfileSelectionVM", "PIN Cloudflare différés, état local conservé", it) }
+                return@launch
+            }
             var attempt = 0
             while (attempt < 4) {
                 val result = profileSyncService.pullProfileLockStates()
@@ -322,7 +362,7 @@ class ProfileSelectionViewModel @Inject constructor(
         }
     }
 
-    fun verifyProfilePin(profileId: Int, pin: String, onComplete: (Result<SupabaseProfilePinVerifyResult>) -> Unit) {
+    fun verifyProfilePin(profileId: Int, pin: String, onComplete: (Result<ProfilePinVerifyResult>) -> Unit) {
         if (_isPinOperationInProgress.value) return
         viewModelScope.launch {
             _isPinOperationInProgress.value = true

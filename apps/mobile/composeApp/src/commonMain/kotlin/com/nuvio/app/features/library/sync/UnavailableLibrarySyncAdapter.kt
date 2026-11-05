@@ -1,98 +1,18 @@
 package com.nuvio.app.features.library.sync
 
-import com.nuvio.app.core.network.SupabaseProvider
-import com.nuvio.app.core.sync.putSyncOriginClientId
 import com.nuvio.app.features.home.PosterShape
 import com.nuvio.app.features.library.LibraryItem
-import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.rpc
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.encodeToJsonElement
-import kotlinx.serialization.json.put
 
-object SupabaseLibrarySyncAdapter : LibrarySyncAdapter {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
-
-    override suspend fun pullSnapshot(
-        profileId: Int,
-        pageSize: Int,
-    ): List<LibraryItem> =
-        collectOffsetPages(pageSize) { limit, offset ->
-            val params = buildJsonObject {
-                put("p_profile_id", profileId)
-                put("p_limit", limit)
-                put("p_offset", offset)
-            }
-            SupabaseProvider.client.postgrest
-                .rpc("sync_pull_library", params)
-                .decodeList<LibrarySyncItem>()
-                .map(LibrarySyncItem::toLibraryItem)
-        }
-
-    override suspend fun getDeltaCursor(profileId: Int): Long {
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-        }
-        return SupabaseProvider.client.postgrest
-            .rpc("sync_get_library_delta_cursor", params)
-            .decodeAs<Long>()
-    }
-
-    override suspend fun pullDelta(
-        profileId: Int,
-        sinceEventId: Long,
-        limit: Int,
-    ): List<LibraryDeltaEvent> {
-        val params = buildJsonObject {
-            put("p_profile_id", profileId)
-            put("p_since_event_id", sinceEventId)
-            put("p_limit", limit)
-        }
-        return SupabaseProvider.client.postgrest
-            .rpc("sync_pull_library_delta", params)
-            .decodeList<LibraryDeltaSyncItem>()
-            .map { event ->
-                LibraryDeltaEvent(
-                    eventId = event.eventId,
-                    operation = event.operation,
-                    item = event.toLibraryItem(),
-                )
-            }
-    }
-
-    override suspend fun pushItems(
-        profileId: Int,
-        items: Collection<LibraryItem>,
-    ) {
-        forEachMutationBatch(items, libraryMutationBatchSize) { batch ->
-            val params = buildJsonObject {
-                put("p_profile_id", profileId)
-                put("p_items", json.encodeToJsonElement(batch.map(LibraryItem::toSyncItem)))
-                putSyncOriginClientId()
-            }
-            SupabaseProvider.client.postgrest.rpc("sync_push_library_items", params)
-        }
-    }
-
-    override suspend fun deleteItems(
-        profileId: Int,
-        keys: Collection<LibrarySyncKey>,
-    ) {
-        forEachMutationBatch(keys, libraryMutationBatchSize) { batch ->
-            val params = buildJsonObject {
-                put("p_profile_id", profileId)
-                put("p_keys", json.encodeToJsonElement(batch))
-                putSyncOriginClientId()
-            }
-            SupabaseProvider.client.postgrest.rpc("sync_delete_library_items", params)
-        }
-    }
+/** Cloudflare uses CloudflareDataSync; this adapter fails closed when the cloud is absent. */
+object UnavailableLibrarySyncAdapter : LibrarySyncAdapter {
+    private fun noCloud(): Nothing = error("Serveur Kovelyx Cloudflare non configuré")
+    override suspend fun pullSnapshot(profileId: Int, pageSize: Int): List<LibraryItem> = noCloud()
+    override suspend fun getDeltaCursor(profileId: Int): Long = noCloud()
+    override suspend fun pullDelta(profileId: Int, sinceEventId: Long, limit: Int): List<LibraryDeltaEvent> = noCloud()
+    override suspend fun pushItems(profileId: Int, items: Collection<LibraryItem>) { noCloud() }
+    override suspend fun deleteItems(profileId: Int, keys: Collection<LibrarySyncKey>) { noCloud() }
 }
 
 @Serializable

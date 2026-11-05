@@ -12,7 +12,7 @@ class ServerDiscoveryPolicyTest {
         val addresses = listOf(
             "https://nuvio.tv",
             "https://api.nuvio.tv",
-            "https://nuvio.tv:443/.well-known/nuvio",
+            "https://nuvio.tv:443/.well-known/kovelyx",
             "https://api-two.nuvioapp.space",
             "https://nuvioapp.space",
             "https://api.nuvio.tv.",
@@ -37,7 +37,7 @@ class ServerDiscoveryPolicyTest {
     private fun document(url: String) = """
         {
           "version": 1,
-          "service": "nuvio",
+          "service": "kovelyx",
           "self_hosted": true,
           "backend_url": "$url",
           "publishable_key": "local-test-key",
@@ -49,7 +49,7 @@ class ServerDiscoveryPolicyTest {
     fun `malicious discovery document cannot return old Nuvio infrastructure`() {
         val error = assertFailsWith<ServerDiscoveryException> {
             ServerDiscoveryPolicy.parse(
-                "https://selfhosted.example/.well-known/nuvio",
+                "https://selfhosted.example/.well-known/kovelyx",
                 document("https://api-two.nuvioapp.space"),
             )
         }
@@ -59,7 +59,7 @@ class ServerDiscoveryPolicyTest {
     @Test
     fun `independent legacy compatible discovery document remains supported`() {
         val config = ServerDiscoveryPolicy.parse(
-            "https://selfhosted.example/.well-known/nuvio",
+            "https://selfhosted.example/.well-known/kovelyx",
             document("https://my-own-server.example"),
         )
         assertTrue(config.isCustom)

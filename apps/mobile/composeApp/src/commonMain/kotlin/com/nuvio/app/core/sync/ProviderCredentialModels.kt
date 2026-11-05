@@ -38,7 +38,7 @@ internal data class ProviderCredentialSnapshot(
         require(values.map(ProviderCredentialValue::provider).distinct().size == values.size)
     }
 
-    fun mergeRemote(rows: List<SupabaseProviderCredential>): ProviderCredentialSnapshot {
+    fun mergeRemote(rows: List<RemoteProviderCredential>): ProviderCredentialSnapshot {
         val remoteByProvider = rows.associateBy { it.provider.lowercase() }
         return copy(
             values = values.map { local ->
@@ -54,7 +54,7 @@ internal data class ProviderCredentialSnapshot(
 }
 
 @Serializable
-internal data class SupabaseProviderCredential(
+internal data class RemoteProviderCredential(
     val provider: String,
     @SerialName("credential_json") val credentialJson: JsonObject,
     @SerialName("updated_at") val updatedAt: String? = null,

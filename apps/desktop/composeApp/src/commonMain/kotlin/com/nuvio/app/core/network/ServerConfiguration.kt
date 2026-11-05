@@ -32,6 +32,7 @@ object ServerConfigurationRepository {
 
     fun saveCustom(configuration: ServerConfiguration): Boolean {
         if (!AppFeaturePolicy.customServerConnectionsEnabled) return false
+        if (ServerDiscoveryPolicy.isOfficial(configuration.backendUrl)) return false
         if (!ServerConfigurationStorage.saveCustom(configuration)) return false
         _active.value = configuration
         return true
@@ -45,21 +46,23 @@ object ServerConfigurationRepository {
 
     private fun loadActiveConfiguration(): ServerConfiguration {
         if (!AppFeaturePolicy.customServerConnectionsEnabled) return officialConfiguration()
-        return ServerConfigurationStorage.loadCustom() ?: officialConfiguration()
+        // Keep local data intact but never restore an old Nuvio backend.
+        return ServerConfigurationStorage.loadCustom()
+            ?.takeUnless { ServerDiscoveryPolicy.isOfficial(it.backendUrl) }
+            ?: officialConfiguration()
     }
 }
 
 internal fun officialConfiguration() = ServerConfiguration(
-    backendUrl = SupabaseConfig.URL.trim().trimEnd('/'),
-    publishableKey = SupabaseConfig.ANON_KEY.trim(),
+    backendUrl = CloudflareConfig.URL.trim().trimEnd('/'),
+    publishableKey = "",
     capabilities = ServerCapabilities(
         // No default Kovelyx backend exists. Advertise remote auth only if configured.
-        emailPasswordAuth = CloudflareConfig.URL.isNotBlank() ||
-            (SupabaseConfig.URL.isNotBlank() && SupabaseConfig.ANON_KEY.isNotBlank()),
+        emailPasswordAuth = CloudflareConfig.URL.isNotBlank(),
         tvLogin = false,
     ),
     isCustom = false,
-    fallbackBackendUrl = SupabaseConfig.FALLBACK_URL.trim().trimEnd('/').takeIf { it.isNotBlank() },
+    fallbackBackendUrl = null,
 )
 
 internal fun isPublicServerHost(url: String): Boolean {

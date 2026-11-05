@@ -7,7 +7,6 @@ import com.nuvio.app.core.network.ServerConfigurationRepository
 import com.nuvio.app.core.network.ServerDiscoveryException
 import com.nuvio.app.core.network.ServerDiscoveryFailure
 import com.nuvio.app.core.network.ServerDiscoveryService
-import com.nuvio.app.core.network.SupabaseProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -112,7 +111,6 @@ object ServerConnectionController {
                     _state.update { it.copy(isSwitching = false, switchFailure = ServerSwitchFailure.Save) }
                     return@launch
                 }
-                SupabaseProvider.reset()
                 AuthRepository.reinitialize()
                 NetworkStatusRepository.requestRefresh(force = true)
                 _state.value = ServerConnectionUiState(

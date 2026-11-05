@@ -1,7 +1,7 @@
 package com.nuvio.tv.ui.screens.account
 
 import android.graphics.Bitmap
-import com.nuvio.tv.data.remote.supabase.SupabaseLinkedDevice
+import com.nuvio.tv.data.remote.cloud.LinkedDevice
 import com.nuvio.tv.domain.model.AuthState
 
 data class AccountConnectedStats(
@@ -39,7 +39,7 @@ data class AccountUiState(
     val error: String? = null,
     val generatedSyncCode: String? = null,
     val syncClaimSuccess: Boolean = false,
-    val linkedDevices: List<SupabaseLinkedDevice> = emptyList(),
+    val linkedDevices: List<LinkedDevice> = emptyList(),
     // Liste distante uniquement : aucun profil local remplacé automatiquement.
     val cloudProfileNames: List<String> = emptyList(),
     val effectiveOwnerId: String? = null,
