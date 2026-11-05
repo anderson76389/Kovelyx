@@ -23,7 +23,7 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
                 self.assertNotIn(".rpc(", source)
                 self.assertNotIn("downloadAuthenticated", source)
                 for function in ("ensureLoaded", "loadSelectedAndPreload", "preloadLandscapeImages", "invalidate"):
-                    self.assertRegex(source, rf"fun {function}\\(")
+                    self.assertIn("fun " + function, source)
 
     def test_legacy_membership_rpc_is_not_used_for_cloudflare_accounts(self):
         for platform in PLATFORMS:
