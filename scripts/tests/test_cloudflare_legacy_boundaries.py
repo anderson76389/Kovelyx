@@ -12,26 +12,18 @@ PLATFORMS = ("desktop", "mobile")
 
 
 class CloudflareLegacyBoundaryTests(unittest.TestCase):
-    def test_member_background_catalog_is_never_started_in_cloudflare_mode(self):
+    def test_retired_background_catalog_is_deleted_from_both_clients(self):
         for platform in PLATFORMS:
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
                     "com/nuvio/app/features/membership/ProfileBackgroundRepository.kt"
                 ).read_text(encoding="utf-8")
-                self.assertIn("import com.nuvio.app.core.cloud.CloudflareAccountClient", source)
-                self.assertRegex(
-                    source,
-                    r"fun ensureLoaded\(\)\s*\{[\s\S]{0,280}"
-                    r"if \(CloudflareAccountClient\.enabled\)\s*\{\s*invalidate\(\)",
-                )
-                for function in ("loadSelectedAndPreload", "preloadLandscapeImages"):
-                    match = re.search(
-                        rf"fun {function}\([^)]*\)\s*\{{([\s\S]{{0,160}})",
-                        source,
-                    )
-                    self.assertIsNotNone(match, f"{platform}: {function} missing")
-                    self.assertIn("if (CloudflareAccountClient.enabled) return", match.group(1))
+                self.assertNotIn("Supabase", source)
+                self.assertNotIn(".rpc(", source)
+                self.assertNotIn("downloadAuthenticated", source)
+                for function in ("ensureLoaded", "loadSelectedAndPreload", "preloadLandscapeImages", "invalidate"):
+                    self.assertRegex(source, rf"fun {function}\\(")
 
     def test_legacy_membership_rpc_is_not_used_for_cloudflare_accounts(self):
         for platform in PLATFORMS:
