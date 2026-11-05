@@ -255,7 +255,9 @@ internal object CloudflareTvAccountClient {
                 .header("Authorization", "Bearer ${active.bearerToken}")
                 .get().build()
             val next = client.newCall(request).execute().use { response ->
-                check(response.isSuccessful) { "Cloudflare sync HTTP ${response.code}" }
+                check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
+                    "Cloudflare sync HTTP ${response.code} ou compte modifié"
+                }
                 val page = JSONObject(response.body?.string().orEmpty())
                 val values = page.optJSONArray("items") ?: org.json.JSONArray()
                 for (i in 0 until values.length()) {
@@ -264,11 +266,13 @@ internal object CloudflareTvAccountClient {
                 if (page.isNull("nextOffset")) -1 else page.optInt("nextOffset", -1)
             }
             if (next == -1) break
+            check(account?.bearerToken == active.bearerToken) { "Compte modifié pendant la pagination" }
             check(next == offset + 25 && rows.size <= 100000) {
                 "Pagination Cloudflare invalide"
             }
             offset = next
         } while (true)
+        check(account?.bearerToken == active.bearerToken) { "Compte modifié pendant la synchronisation" }
         rows
     }
 
@@ -311,7 +315,9 @@ internal object CloudflareTvAccountClient {
             .post(body.toString().toRequestBody("application/json".toMediaType()))
             .build()
         client.newCall(request).execute().use { response ->
-            check(response.isSuccessful) { "Cloudflare sync HTTP ${response.code}" }
+            check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
+                "Cloudflare sync HTTP ${response.code} ou compte modifié"
+            }
         }
     }
 
