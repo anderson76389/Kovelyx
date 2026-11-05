@@ -3,9 +3,9 @@ package com.nuvio.tv.core.auth
 import android.content.Context
 import android.util.Log
 import com.nuvio.tv.core.auth.diagnostics.AuthDiagnosticsSession
-import com.nuvio.tv.data.remote.supabase.DeviceLoginStartResult
-import com.nuvio.tv.data.remote.supabase.TvLoginPollResult
-import com.nuvio.tv.data.remote.supabase.TvLoginStartResult
+import com.nuvio.tv.data.remote.cloud.DeviceLoginStartResult
+import com.nuvio.tv.data.remote.cloud.TvLoginPollResult
+import com.nuvio.tv.data.remote.cloud.TvLoginStartResult
 import com.nuvio.tv.domain.model.AuthState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
