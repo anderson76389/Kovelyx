@@ -30,7 +30,7 @@ class CloudflareDatabase(unittest.TestCase):
         tables = {x[0] for x in self.db.execute(
             "SELECT name FROM sqlite_master WHERE type='table'")}
         self.assertTrue({"user","session","account","verification",
-                         "rateLimit","kv_profiles","kv_sync"} <= tables)
+                         "rateLimit","kv_profiles","kv_sync","kv_profile_pins"} <= tables)
 
     def test_gif_upgrade_preserves_existing_images_bytes_and_foreign_keys(self):
         with sqlite3.connect(":memory:") as db:
@@ -119,6 +119,26 @@ class CloudflareDatabase(unittest.TestCase):
             self.db.execute(
                 "SELECT revision FROM kv_sync WHERE owner_id='alice' AND category='library'"
             ).fetchone()[0], 4
+        )
+
+    def test_private_pin_table_is_owned_and_cascades(self):
+        self.db.execute(
+            "INSERT INTO kv_profile_pins(owner_id,profile_id,salt,pin_hash,updated_at) "
+            "VALUES (?,?,?,?,?)",
+            ("alice","alice-profile","a"*32,"b"*64,1),
+        )
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute(
+                "INSERT INTO kv_profile_pins(owner_id,profile_id,salt,pin_hash,updated_at) "
+                "VALUES (?,?,?,?,?)",
+                ("bob","alice-profile","a"*32,"b"*64,1),
+            )
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM kv_profile_pins").fetchone()[0], 1
+        )
+        self.db.execute("DELETE FROM kv_profiles WHERE owner_id='alice'")
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM kv_profile_pins").fetchone()[0], 0
         )
 
     def test_no_credentials_category(self):
