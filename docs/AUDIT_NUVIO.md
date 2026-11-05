@@ -3,12 +3,13 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4644
+Fichiers inspectés : 4634
 
 ## Inventaire des références à traiter
 
-### Connexions et services (100 correspondances)
+### Connexions et services (107 correspondances)
 
+- apps/tv/app/src/main/java/com/nuvio/tv/data/remote/ServerDiscovery.kt:120 : return listOf("nuvio.tv", "nuvioapp.space").any { domain ->
 - apps/tv/app/src/main/res/values-ar/strings.xml:2642 : <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
 - apps/tv/app/src/main/res/values-ar/strings.xml:2643 : <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
 - apps/tv/app/src/main/res/values-b+es+419/strings.xml:2202 : <string name="custom_server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
@@ -77,7 +78,7 @@ Fichiers inspectés : 4644
 - apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110 : val formerService = listOf("nuvio.tv", "nuvioapp.space").any {
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13 : "https://nuvio.tv",
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14 : "https://api.nuvio.tv",
-- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15 : "https://nuvio.tv:443/.well-known/nuvio",
+- apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15 : "https://nuvio.tv:443/.well-known/kovelyx",
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:18 : "https://api.nuvio.tv.",
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:19 : "https://A.B.API.NUVIO.TV:8443/link",
 - apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:29 : "https://nuvio.tv.example.net",
@@ -88,8 +89,7 @@ Fichiers inspectés : 4644
 - apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1985 : <string name="server_error_official_available">api.nuvio.tv je oficiální server. Zavřete toto okno a volbou Použít oficiální server se přepněte zpět.</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:183 : <string name="server_error_official_active">Το api.nuvio.tv είναι ο επίσημος διακομιστής και είναι ήδη επιλεγμένο.</string>
 - apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:184 : <string name="server_error_official_available">Το api.nuvio.tv είναι ο επίσημος διακομιστής. Κλείστε αυτό το παράθυρο διαλόγου και επιλέξτε «Χρήση επίσημου διακομιστή» για να 
-- apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:398 : <string name="server_error_official_active">api.nuvio.tv es el servidor oficial y ya está seleccionado.</string>
-- Autres correspondances non détaillées : 20
+- Autres correspondances non détaillées : 27
 
 ### Mises à jour et releases (0 correspondances)
 
@@ -127,7 +127,7 @@ Fichiers inspectés : 4644
 - apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
-### Archives et tests (14 correspondances)
+### Archives et tests (19 correspondances)
 
 - apps/tv/app/src/test/java/com/nuvio/tv/core/deeplink/DeepLinkParserTest.kt:29 : DeepLinkParser.parse("nuvio://meta
 - apps/tv/app/src/test/java/com/nuvio/tv/core/deeplink/DeepLinkParserTest.kt:37 : DeepLinkParser.parse("nuvio://free.nebulapro.xyz/sports/i/free/manifest.json")
@@ -142,11 +142,16 @@ Fichiers inspectés : 4644
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:108 : "https://api.nuvio.tv"
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:113 : "https://api.nuvio.tv.example.com/.well-known/nuvio",
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:114 : "https://api.nuvio.tv"
+- apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:121 : "https://nuvio.tv",
+- apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:122 : "https://api.nuvio.tv",
+- apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:125 : "https://A.B.API.NUVIO.TV:8443/link"
+- apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:130 : "https://nuvio.tv.example.org",
+- apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:132 : "https://anothernuvio.tv"
 - apps/desktop/scripts/linux/test-linux-deb-tools.sh:30 : Maintainer: Nuvio Media <contact@nuvio.tv>
 
 ### Configuration générale (59 correspondances)
 
-- apps/tv/app/build.gradle.kts:545 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
+- apps/tv/app/build.gradle.kts:540 : implementation(files("libs/lib-nuvio-engine-android-0.1.4.aar"))
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Color.kt:55 : data class NuvioMediaColors(
@@ -157,7 +162,7 @@ Fichiers inspectés : 4644
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Theme.kt:174 : val media: NuvioMediaTokens
 - apps/tv/app/src/main/java/com/nuvio/tv/ui/theme/Theme.kt:175 : get() = NuvioMedia.tokens
 - apps/tv/app/src/main/res/values-nl/strings.xml:1529 : <string name="profile_pin_overlay_forgot_hint">Pincode vergeten
-- apps/mobile/composeApp/build.gradle.kts:283 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
+- apps/mobile/composeApp/build.gradle.kts:258 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/mobile/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -176,8 +181,8 @@ Fichiers inspectés : 4644
 - apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2183 : <string name="compose_auth_link_open">Otvorte nuvio.tv/link</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:357 : <string name="compose_auth_link_open">nuvio.tv/link کھولیں</string>
 - apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357 : <string name="compose_auth_link_open">Mở nuvio.tv/link</string>
-- apps/desktop/composeApp/build.gradle.kts:514 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
-- apps/desktop/composeApp/build.gradle.kts:1213 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
+- apps/desktop/composeApp/build.gradle.kts:489 : val nuvioEngineAppleFramework = rootProject.file("../nuvio-engine/platform/apple/NuvioEngine.xcframework")
+- apps/desktop/composeApp/build.gradle.kts:1184 : implementation(files("libs/nuvio-engine-jvm-0.1.4.jar"))
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:147 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:163 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/androidHostTest/kotlin/com/nuvio/app/features/p2p/P2pStreamingEngineAndroidTest.kt:181 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -221,9 +226,9 @@ Fichiers inspectés : 4644
 
 ## Références de packages Kotlin historiques
 
-- apps/tv : 6796 lignes.
-- apps/mobile : 7115 lignes.
-- apps/desktop : 8046 lignes.
+- apps/tv : 6684 lignes.
+- apps/mobile : 7049 lignes.
+- apps/desktop : 7979 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 

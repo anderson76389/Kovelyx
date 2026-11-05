@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1394** ; références statiques à Nuvio/NuvioMedia : **6844**.
+Fichiers texte examinés : **1387** ; références statiques à Nuvio/NuvioMedia : **6738**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -42,8 +42,8 @@ Fichiers texte examinés : **1394** ; références statiques à Nuvio/NuvioMedia
 ### Références à vérifier en priorité
 
 - `apps/tv/app/build.gradle.kts:109`
-- `apps/tv/app/build.gradle.kts:424`
-- `apps/tv/app/build.gradle.kts:456`
+- `apps/tv/app/build.gradle.kts:419`
+- `apps/tv/app/build.gradle.kts:451`
 - `apps/tv/baselineprofile/build.gradle.kts:8`
 - `apps/tv/scripts/perf_baseline.sh:22`
 - `apps/tv/scripts/perf_baseline.sh:27`
@@ -121,11 +121,11 @@ Fichiers texte examinés : **1394** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:3`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:4`
-- …et 6764 autres correspondances (plafond d'affichage).
+- …et 6658 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1448** ; références statiques à Nuvio/NuvioMedia : **60**.
+Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia : **60**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -225,7 +225,7 @@ Fichiers texte examinés : **1448** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1833** ; références statiques à Nuvio/NuvioMedia : **55**.
+Fichiers texte examinés : **1832** ; références statiques à Nuvio/NuvioMedia : **61**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -270,6 +270,11 @@ Fichiers texte examinés : **1833** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:17`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:25`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:27`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
@@ -278,6 +283,7 @@ Fichiers texte examinés : **1833** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:50`
+- `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:106`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1952`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984`
 - `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1985`
