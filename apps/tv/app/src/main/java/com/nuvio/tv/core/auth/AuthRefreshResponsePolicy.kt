@@ -3,7 +3,7 @@ package com.nuvio.tv.core.auth
 import java.io.IOException
 
 internal class TransientAuthRefreshException(statusCode: Int) :
-    IOException("Transient Supabase auth refresh response: HTTP $statusCode")
+    IOException("Transient Legacy auth refresh response: HTTP $statusCode")
 
 internal fun shouldRetryAuthRefreshResponse(
     statusCode: Int,

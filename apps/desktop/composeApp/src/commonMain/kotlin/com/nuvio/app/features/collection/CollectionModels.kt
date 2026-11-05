@@ -258,7 +258,7 @@ data class AvailableCatalog(
 )
 
 @Serializable
-data class SupabaseCollectionBlob(
+data class LegacyCollectionBlob(
     @SerialName("profile_id") val profileId: Int = 1,
     @SerialName("collections_json") val collectionsJson: kotlinx.serialization.json.JsonElement = kotlinx.serialization.json.JsonArray(emptyList()),
     @SerialName("updated_at") val updatedAt: String? = null,

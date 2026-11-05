@@ -151,7 +151,7 @@ object NetworkStatusRepository {
             return NetworkCondition.NoInternet
         }
 
-        // Kovelyx peut fonctionner sans compte ni serveur Supabase :
+        // Kovelyx peut fonctionner sans compte ni serveur Legacy :
         // l'absence de serveur ne doit pas faire croire que TMDB/addons sont hors ligne.
         val configuration = ServerConfigurationRepository.active.value
         if (!shouldProbeKovelyxBackend(configuration)) {

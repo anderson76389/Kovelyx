@@ -72,7 +72,7 @@ class StartupSyncService @Inject constructor(
     private val cloudflareSync: CloudflareTvDataSync
 ) {
     // The Cloudflare account path needs CloudflareTvDataSync, not the retired RPC services.
-    // Construct legacy services only on an explicit legacy operation, avoiding Supabase
+    // Construct legacy services only on an explicit legacy operation, avoiding Legacy
     // client initialization and related memory work during normal TV startup.
     private val pluginSyncService: PluginSyncService get() = legacyPluginSyncServiceProvider.get()
     private val addonSyncService: AddonSyncService get() = legacyAddonSyncServiceProvider.get()
@@ -345,13 +345,13 @@ class StartupSyncService @Inject constructor(
         if (authManager.authState.value !is AuthState.FullAccount) return false
 
         val profileId = profileManager.activeProfileId.value
-        val shouldUseSupabaseWatchProgressSync = false /* D1 handles progress and watched state */
+        val shouldUseLegacyWatchProgressSync = false /* D1 handles progress and watched state */
         Log.d(
             TAG,
-            "Periodic watch state pull: profile=$profileId shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"
+            "Periodic watch state pull: profile=$profileId shouldUseLegacyWatchProgressSync=$shouldUseLegacyWatchProgressSync"
         )
 
-        if (shouldUseSupabaseWatchProgressSync) {
+        if (shouldUseLegacyWatchProgressSync) {
             val watchedItemsSucceeded = pullWatchedItemsDelta(profileId)
             val watchProgressSucceeded = syncWatchProgressDelta(
                 profileId = profileId,
@@ -362,7 +362,7 @@ class StartupSyncService @Inject constructor(
         } else {
             watchProgressRepository.hasCompletedInitialPull = true
             watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
-            Log.d(TAG, "Skipping periodic Supabase watch state pull for profile $profileId because a tracking provider is active")
+            Log.d(TAG, "Skipping periodic Legacy watch state pull for profile $profileId because a tracking provider is active")
             return true
         }
     }
@@ -489,12 +489,12 @@ class StartupSyncService @Inject constructor(
             Log.d(TAG, "Pulling remote data for profile $profileId")
             pullBroadRemoteData(profileId, includeProfileSettings)
 
-            val shouldUseSupabaseWatchProgressSync = false /* D1 handles progress and watched state */
+            val shouldUseLegacyWatchProgressSync = false /* D1 handles progress and watched state */
             Log.d(
                 TAG,
-                "Watch progress sync: shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"
+                "Watch progress sync: shouldUseLegacyWatchProgressSync=$shouldUseLegacyWatchProgressSync"
             )
-            if (shouldUseSupabaseWatchProgressSync) {
+            if (shouldUseLegacyWatchProgressSync) {
                 pullWatchedItemsSnapshot(profileId)
                 syncWatchProgressSnapshot(
                     profileId = profileId,
@@ -505,7 +505,7 @@ class StartupSyncService @Inject constructor(
                 libraryRepository.hasCompletedInitialPull = true
                 watchProgressRepository.hasCompletedInitialPull = true
                 watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
-                Log.d(TAG, "Skipping Supabase watched items and watch progress for profile $profileId because a tracking provider is active")
+                Log.d(TAG, "Skipping Legacy watched items and watch progress for profile $profileId because a tracking provider is active")
             }
             startupSyncPreferences.markFullPull(
                 profileId = profileId,
@@ -531,12 +531,12 @@ class StartupSyncService @Inject constructor(
         try {
             Log.d(TAG, "Running warm remote sync for profile $profileId")
             pullBroadRemoteData(profileId, includeProfileSettings)
-            val shouldUseSupabaseWatchProgressSync = false /* D1 handles progress and watched state */
+            val shouldUseLegacyWatchProgressSync = false /* D1 handles progress and watched state */
             Log.d(
                 TAG,
-                "Warm watch progress sync: shouldUseSupabaseWatchProgressSync=$shouldUseSupabaseWatchProgressSync"
+                "Warm watch progress sync: shouldUseLegacyWatchProgressSync=$shouldUseLegacyWatchProgressSync"
             )
-            if (shouldUseSupabaseWatchProgressSync) {
+            if (shouldUseLegacyWatchProgressSync) {
                 pullWatchedItemsDelta(profileId)
                 syncWatchProgressDelta(
                     profileId = profileId,
@@ -546,7 +546,7 @@ class StartupSyncService @Inject constructor(
             } else {
                 watchProgressRepository.hasCompletedInitialPull = true
                 watchProgressRepository.hasCompletedInitialWatchedItemsPull = true
-                Log.d(TAG, "Skipping warm Supabase watch progress sync for profile $profileId because a tracking provider is active")
+                Log.d(TAG, "Skipping warm Legacy watch progress sync for profile $profileId because a tracking provider is active")
             }
             startupSyncPreferences.markFullPull(
                 profileId = profileId,

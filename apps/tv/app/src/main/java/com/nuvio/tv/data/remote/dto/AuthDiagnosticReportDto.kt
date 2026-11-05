@@ -40,8 +40,8 @@ data class AuthDiagnosticDeviceDto(
 
 @JsonClass(generateAdapter = true)
 data class AuthDiagnosticEnvironmentDto(
-    @Json(name = "supabaseUrl") val supabaseUrl: String,
-    @Json(name = "supabaseHost") val supabaseHost: String?,
+    @Json(name = "backendUrl") val backendUrl: String,
+    @Json(name = "backendHost") val backendHost: String?,
     @Json(name = "tvLoginWebBaseUrl") val tvLoginWebBaseUrl: String,
     @Json(name = "tvLoginHost") val tvLoginHost: String?,
     @Json(name = "tvLoginWebHost") val tvLoginWebHost: String?,

@@ -223,7 +223,7 @@ object LibraryRepository {
         }
 
         // Cloudflare D1 is the Kovelyx backend. Do not pull from the legacy
-        // Supabase library adapter when Kovelyx accounts are enabled.
+        // Legacy library adapter when Kovelyx accounts are enabled.
         if (CloudflareAccountClient.enabled) {
             CloudflareDataSync.request(profileId)
             return
