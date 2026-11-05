@@ -26,13 +26,16 @@ private const val TAG = "CollectionSyncService"
 
 @Singleton
 class CollectionSyncService @Inject constructor(
-    private val postgrest: Postgrest,
+    private val legacyPostgrest: dagger.Lazy<Postgrest>,
     private val authManager: AuthManager,
     private val collectionsDataStore: CollectionsDataStore,
     private val profileManager: ProfileManager,
     private val catalogues: Lazy<CloudflareTvCatalogueSync>,
     private val syncClientIdentity: SyncClientIdentity
 ) {
+    // Better Auth / D1 accounts never instantiate the retired Supabase HTTP client.
+    private val postgrest: Postgrest get() = legacyPostgrest.get()
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Volatile
