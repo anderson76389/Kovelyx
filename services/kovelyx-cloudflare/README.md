@@ -1,6 +1,6 @@
 # Kovelyx Cloud — comptes et synchronisation Cloudflare
 
-**Objectif :** ne plus utiliser les serveurs de comptes Nuvio ni un hébergement Supabase. Ce dossier contient un Worker Cloudflare, une base D1, les tables Better Auth et des endpoints de profils et synchronisation.
+**Objectif :** proposer des comptes Kovelyx autonomes sur Cloudflare Workers + D1 + Better Auth, sans aucun serveur de comptes historique. Ce dossier contient un Worker Cloudflare, une base D1, les tables Better Auth et des endpoints de profils et synchronisation.
 
 ## Mise en production réelle (comptes existants préservés)
 
@@ -12,18 +12,18 @@ cd /workspaces/Kovelyx && git pull --ff-only && cd services/kovelyx-cloudflare &
 
 Le script protège les comptes existants : avant chaque migration sur une base existante, il **exporte la totalité de D1 en SQL** dans `~/Kovelyx-sauvegardes-D1/` (hors du dépôt et des artefacts GitHub), vérifie que le fichier n'est pas vide, puis applique les migrations D1 restantes et publie le Worker. Il conserve le secret Better Auth s'il existe déjà ; il **ne supprime aucun utilisateur**. Un échec de sauvegarde **arrête** la migration. Téléchargez et protégez la sauvegarde avant toute suppression de Codespaces ; elle contient des informations privées.
 
-La dernière étape vérifie la **vraie URL HTTPS** du Worker par `/ready`, qui doit renvoyer `status: ok` et `schema: 0004_profile_media_gifs`. Si votre Worker possède un sous-domaine différent, exportez d'abord `KOVELYX_CLOUDFLARE_URL=https://VOTRE-SOUS-DOMAINE.workers.dev` dans le terminal. **Ne publiez aucun token, mot de passe ou export D1.**
+La dernière étape vérifie la **vraie URL HTTPS** du Worker par `/ready`, qui doit renvoyer `status: ok`, `schema: 0004_profile_media_gifs` et `profilePinSchema: 1` (migration D1 0005). Si votre Worker possède un sous-domaine différent, exportez d'abord `KOVELYX_CLOUDFLARE_URL=https://VOTRE-SOUS-DOMAINE.workers.dev` dans le terminal. **Ne publiez aucun token, mot de passe ou export D1.**
 
 Ce contrôle atteste du Worker, de Better Auth et de la migration D1 nécessaires à la synchronisation ; il ne prouve pas qu'une vidéo lancée sur Windows reprend sur Android/TV. Ce dernier test nécessite le même compte, le même profil et une version Kovelyx intégrant les clients Cloudflare sur chaque appareil.
 
 
-**Vérification du serveur réellement déployé :** `/health` indique seulement que le Worker répond ; `/ready` (après publication de la nouvelle version) contrôle sans écrire de données la présence de D1, du secret Better Auth et du schéma `0004_profile_media_gifs`. Le workflow manuel [Diagnostic Cloudflare en production](../../.github/workflows/cloudflare-readiness.yml) effectue ce contrôle en lecture seule. Un résultat positif ne remplace pas un test de connexion et de synchronisation sur les trois appareils. Pour appliquer la migration sur la base réelle, utiliser uniquement le déploiement protégé avec sauvegarde D1 préalable. Aucun secret ni compte ne doit être envoyé à GitHub pour ce diagnostic.
+**Vérification du serveur réellement déployé :** `/health` indique seulement que le Worker répond ; `/ready` (après publication de la nouvelle version) contrôle sans écrire de données la présence de D1, du secret Better Auth, du schéma `0004_profile_media_gifs` et de la migration de PIN `profilePinSchema: 1`. Le workflow manuel [Diagnostic Cloudflare en production](../../.github/workflows/cloudflare-readiness.yml) effectue ce contrôle en lecture seule. Un résultat positif ne remplace pas un test de connexion et de synchronisation sur les trois appareils. Pour appliquer la migration sur la base réelle, utiliser uniquement le déploiement protégé avec sauvegarde D1 préalable. Aucun secret ni compte ne doit être envoyé à GitHub pour ce diagnostic.
 
-**État réel au 19 octobre 2026 : Worker Cloudflare et D1 déployés et accessibles ; la création, la connexion, la lecture de l'identité et la création du profil « Principal » ont réussi depuis Codespaces sur le vrai serveur.** La connexion a passé ce test technique, mais les anciennes fonctions de synchronisation des applications ne sont pas encore toutes migrées. [Tests publics automatiques](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-live-check.yml). Les nouvelles applis disposent de premiers adaptateurs pour le formulaire e-mail. Les écrans, caches, profils, lecteurs et anciennes RPC Supabase **ne sont pas encore tous migrés**. Le mode invité reste disponible. Les sessions Cloudflare des premières versions sont en mémoire seulement : il faut se reconnecter après avoir fermé l'application. Les flux QR/code TV et la récupération de mot de passe ne sont pas prêts.
+**État des sources au 5 novembre 2026 :** les trois applications Android mobile, Windows et Android TV ont migré leur code de comptes, profils, bibliothèques, progression, éléments vus et préférences vers Cloudflare Workers + Better Auth + D1. Les tests automatisés de compilation et de schéma sont distincts d'un déploiement de production : vérifier le Worker et exécuter les migrations restantes après sauvegarde. La synchronisation multiappareils reste à valider sur appareils réels. La liaison TV par QR/code et la récupération de mot de passe ne sont pas encore disponibles.
 
 ## Un hébergement gratuit sans pause 7 jours ?
 
-Oui, Cloudflare Workers Free + D1 n'a pas la règle Supabase de suspension du projet après 7 jours d'inactivité. Mais **gratuit pour toujours n'est pas garanti** et le forfait a des limites :
+Oui, Cloudflare Workers Free + D1 n'a pas de mise en pause automatique après sept jours d'inactivité comparable aux anciens hébergements. Mais **gratuit pour toujours n'est pas garanti** et le forfait a des limites :
 
 - **Workers Free** : jusqu'à 100 000 requêtes/jour, 10 ms de CPU par requête (attention aux opérations de hachage des mots de passe).
 - **D1 Free** : 5 Go au total, 500 Mo maximum par base, 5 millions de lignes lues/jour, 100 000 lignes écrites/jour.
@@ -115,7 +115,7 @@ Ouvrez [Settings → Secrets and variables → Actions → Variables](https://gi
 
 Ce n'est **pas un secret** : il s'agit de l'URL publique du serveur.
 
-Les deux anciens secrets `KOVELYX_CLOUD_URL` et `KOVELYX_CLOUD_PUBLISHABLE_KEY` du tutoriel Supabase ne sont **plus utilisés par les nouveaux workflows**. Vous pouvez les supprimer de GitHub Actions lorsqu'aucun autre workflow ne les utilise. Ne les confondez surtout pas avec le secret `KOVELYX_ANDROID_SIGNING_BUNDLE` : **gardez votre signature APK**.
+Les deux anciens réglages GitHub Actions `KOVELYX_CLOUD_URL` et `KOVELYX_CLOUD_PUBLISHABLE_KEY` ne sont **plus utilisés par les nouveaux workflows**. Vous pouvez les supprimer de GitHub Actions lorsqu'aucun autre workflow ne les utilise. Ne les confondez surtout pas avec le secret `KOVELYX_ANDROID_SIGNING_BUNDLE` : **gardez votre signature APK**.
 
 ### 7. Recompiler les applications
 
@@ -190,6 +190,6 @@ Les données **restent chez Cloudflare, pas sur GitHub Pages**. Exportez réguli
 
 L'authentification s'appuie sur [Better Auth](https://better-auth.com/docs/) et ses schémas D1. Les données de synchronisation sont **scopées par ID du compte et du profil dans chaque requête**, avec une clé étrangère composite et une limite de taille. Une révision est exigée pour les modifications concurrentes et retourne HTTP 409 en cas de conflit. **La base D1 n'a pas le RLS de PostgreSQL/Supabase** : l'isolation est implémentée par les requêtes du Worker, à tester en live avec deux comptes avant ouverture.
 
-Ne pas synchroniser mots de passe, clés API de débrideurs, secrets OAuth, tokens d'accès ou fichiers personnels bruts. Les profils et données historiques de Nuvio et Supabase ne sont pas automatiquement transférés.
+Ne pas synchroniser mots de passe, clés API de débrideurs, secrets OAuth, tokens d'accès ou fichiers personnels bruts. Les profils et données d'anciens services de comptes ne sont pas automatiquement transférés.
 
 **État d'avancement :** le serveur et les premiers clients de connexion sont versionnés dans le dépôt. Pas de garantie de synchronisation intégrale, de session conservée après redémarrage, de déploiement Cloudflare effectif, de sécurité production ni de compatibilité sur tous les appareils avant tests.

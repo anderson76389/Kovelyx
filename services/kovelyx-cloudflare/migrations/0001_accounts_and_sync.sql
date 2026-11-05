@@ -1,4 +1,4 @@
--- Kovelyx Cloudflare v1. Independent of Supabase and Nuvio.
+-- Kovelyx Cloudflare v1. Comptes et synchronisation autonomes.
 -- Better Auth core SQL tables: Better Auth is responsible for password hashing and sessions.
 -- All Kovelyx data is isolated with authenticated user IDs in every query.
 CREATE TABLE IF NOT EXISTS "user" (

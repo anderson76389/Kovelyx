@@ -63,7 +63,7 @@ class ServerConfigurationStore @Inject constructor(
 
     private fun officialConfiguration() = ServerConfiguration(
         // Le serveur officiel Kovelyx est uniquement le Worker Cloudflare.
-        // Une clé Supabase n'est ni nécessaire ni compatible avec Better Auth.
+        // Better Auth n'utilise pas de clé publique de base de données.
         backendUrl = BuildConfig.KOVELYX_CLOUD_URL.trim().trimEnd('/'),
         publishableKey = "",
         capabilities = ServerCapabilities(
