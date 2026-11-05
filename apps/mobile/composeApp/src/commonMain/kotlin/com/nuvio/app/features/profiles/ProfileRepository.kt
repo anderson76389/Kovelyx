@@ -530,7 +530,34 @@ object ProfileRepository {
         }
     }
 
+    /** Keep profile locks correct immediately after an authenticated Cloudflare operation. */
+    private fun updateCloudPinFlag(profileIndex: Int, enabled: Boolean) {
+        val updated = _state.value.profiles.map { profile ->
+            if (profile.profileIndex == profileIndex) profile.copy(pinEnabled = enabled) else profile
+        }
+        _state.value = _state.value.copy(
+            profiles = updated,
+            activeProfile = updated.firstOrNull { it.profileIndex == activeProfileIndex }
+        )
+        persist()
+    }
+
     suspend fun verifyPin(profileIndex: Int, pin: String): PinVerifyResult {
+        if (CloudflareAccountClient.enabled) {
+            val uuid = _state.value.profiles.firstOrNull { it.profileIndex == profileIndex }?.id.orEmpty()
+            if (CloudflareAccountClient.currentSession == null || uuid.length != 36)
+                return verifyPinLocally(profileIndex, pin)
+            return runCatching {
+                val response = CloudflareAccountClient.verifyCloudProfilePin(uuid, pin)
+                val unlocked = response["unlocked"]?.jsonPrimitive?.content == "true"
+                val retry = response["retryAfterSeconds"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
+                if (unlocked) rememberVerifiedPin(profileIndex = profileIndex, pin = pin)
+                PinVerifyResult(unlocked = unlocked, retryAfterSeconds = retry)
+            }.getOrElse { error ->
+                log.w(error) { "Vérification PIN Cloudflare différée, cache local utilisé" }
+                verifyPinLocally(profileIndex, pin)
+            }
+        }
         if (AuthRepository.state.value !is AuthState.Authenticated) {
             return verifyPinLocally(profileIndex, pin)
         }
@@ -554,6 +581,20 @@ object ProfileRepository {
     }
 
     suspend fun setPin(profileIndex: Int, pin: String, currentPin: String? = null): PinVerifyResult {
+        if (CloudflareAccountClient.enabled) {
+            val uuid = _state.value.profiles.firstOrNull { it.profileIndex == profileIndex }?.id.orEmpty()
+            if (uuid.length != 36 || CloudflareAccountClient.currentSession == null)
+                return PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_set_requires_internet))
+            return runCatching {
+                CloudflareAccountClient.setCloudProfilePin(uuid, pin, currentPin)
+                rememberVerifiedPin(profileIndex = profileIndex, pin = pin)
+                updateCloudPinFlag(profileIndex, true)
+                PinVerifyResult(unlocked = true)
+            }.getOrElse { error ->
+                log.e(error) { "Création PIN Cloudflare refusée" }
+                PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_set_failed))
+            }
+        }
         if (AuthRepository.state.value !is AuthState.Authenticated) {
             return PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_set_requires_internet))
         }
@@ -576,6 +617,20 @@ object ProfileRepository {
     }
 
     suspend fun clearPin(profileIndex: Int, currentPin: String? = null): PinVerifyResult {
+        if (CloudflareAccountClient.enabled) {
+            val uuid = _state.value.profiles.firstOrNull { it.profileIndex == profileIndex }?.id.orEmpty()
+            if (uuid.length != 36 || CloudflareAccountClient.currentSession == null)
+                return PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_clear_requires_internet))
+            return runCatching {
+                CloudflareAccountClient.clearCloudProfilePin(uuid, currentPin)
+                ProfilePinCacheStorage.removePayload(profileIndex)
+                updateCloudPinFlag(profileIndex, false)
+                PinVerifyResult(unlocked = true)
+            }.getOrElse { error ->
+                log.e(error) { "Suppression PIN Cloudflare refusée" }
+                PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_clear_failed))
+            }
+        }
         if (AuthRepository.state.value !is AuthState.Authenticated) {
             return PinVerifyResult(unlocked = false, message = getString(Res.string.profile_pin_clear_requires_internet))
         }
@@ -597,6 +652,9 @@ object ProfileRepository {
     }
 
     suspend fun clearPinWithPassword(profileIndex: Int, accountPassword: String) {
+        check(!CloudflareAccountClient.enabled) {
+            "La réinitialisation du PIN avec mot de passe n'est pas encore disponible sur Cloudflare"
+        }
         runCatching {
             val params = buildJsonObject {
                 put("p_account_password", accountPassword)
@@ -611,6 +669,23 @@ object ProfileRepository {
     }
 
     suspend fun pullProfileLocks(): List<ProfileLockState> {
+        if (CloudflareAccountClient.enabled) {
+            return runCatching {
+                val status = CloudflareAccountClient.cloudProfilePins()
+                val enabled = status["profiles"]?.jsonArray.orEmpty()
+                    .mapNotNull { it.jsonObject["profileId"]?.jsonPrimitive?.content }.toSet()
+                _state.value.profiles.map { profile ->
+                    ProfileLockState(profileIndex = profile.profileIndex, pinEnabled = profile.id in enabled)
+                }.also { states ->
+                    states.forEach { updateCloudPinFlag(it.profileIndex, it.pinEnabled) }
+                }
+            }.getOrElse { error ->
+                log.w(error) { "État PIN Cloudflare indisponible, cache local conservé" }
+                _state.value.profiles.map {
+                    ProfileLockState(profileIndex = it.profileIndex, pinEnabled = it.pinEnabled)
+                }
+            }
+        }
         return runCatching {
             val result = SupabaseProvider.client.postgrest.rpc("sync_pull_profile_locks")
             result.decodeList<ProfileLockState>()
