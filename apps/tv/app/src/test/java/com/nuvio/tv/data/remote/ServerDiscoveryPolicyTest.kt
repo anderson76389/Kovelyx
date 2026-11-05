@@ -115,4 +115,42 @@ class ServerDiscoveryPolicyTest {
             )
         )
     }
+    @Test
+    fun retiredNuvioHostsAreBlockedByWholeDnsLabel() {
+        listOf(
+            "https://nuvio.tv",
+            "https://api.nuvio.tv",
+            "https://api-two.nuvioapp.space",
+            "http://nuvioapp.space:8080/.well-known/nuvio",
+            "https://A.B.API.NUVIO.TV:8443/link"
+        ).forEach { assertTrue(it, ServerDiscoveryPolicy.isRetiredUpstream(it)) }
+
+        listOf(
+            "https://my-cloudflare-worker.workers.dev",
+            "https://nuvio.tv.example.org",
+            "https://nuvioapp.space.example.net",
+            "https://anothernuvio.tv"
+        ).forEach { assertFalse(it, ServerDiscoveryPolicy.isRetiredUpstream(it)) }
+    }
+
+    @Test
+    fun discoveryCannotSwitchAnIndependentServerToRetiredNuvioBackend() {
+        val error = assertThrows(ServerDiscoveryException::class.java) {
+            ServerDiscoveryPolicy.parse(
+                "https://my-own-host.example/.well-known/nuvio",
+                """
+                    {
+                      "version": 1,
+                      "service": "nuvio",
+                      "self_hosted": true,
+                      "backend_url": "https://api-two.nuvioapp.space",
+                      "publishable_key": "public-test-key",
+                      "capabilities": { "email_password_auth": true }
+                    }
+                """.trimIndent()
+            )
+        }
+        assertEquals(ServerDiscoveryFailure.OFFICIAL_SERVER, error.failure)
+    }
+
 }
