@@ -23,7 +23,7 @@ SCOPES = [
 # La plus grande partie des URL est conservée en ASCII ou UTF-8 dans les données
 # binaires et le constant pool JVM ; la détection n'inclut pas le UTF-16.
 UPSTREAM = re.compile(
-    rb"(?:[a-z0-9-]+\.)*nuvio\.tv|"
+    rb"(?:[a-z0-9-]+\.)*(?:nuvio\.tv|nuvioapp\.space)|"
     rb"(?:api\.github\.com/repos|github\.com|raw\.githubusercontent\.com)/NuvioMedia",
     re.I,
 )
@@ -70,7 +70,7 @@ def main() -> int:
             count_files += 1
             inspect_buffer(path.read_bytes(), path.relative_to(ROOT).as_posix())
     print(f"Archives natives examinées : {count_files} ; composants internes : {scanned_count}")
-    print(f"Occurrences de domaines NuvioMedia / nuvio.tv en clair : {len(hits)}")
+    print(f"Occurrences de domaines NuvioMedia / nuvio.tv / nuvioapp.space en clair : {len(hits)}")
     for location, value in hits[:80]:
         print(f"  A EXAMINER : {location} : {value}")
     for value in errors:
