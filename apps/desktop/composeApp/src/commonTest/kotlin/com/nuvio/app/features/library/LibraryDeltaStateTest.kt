@@ -11,6 +11,47 @@ import kotlin.test.assertTrue
 class LibraryDeltaStateTest {
 
     @Test
+    fun `multiple films and series survive local serialization and reload`() {
+        val state = loadedState(emptyList())
+        state.upsert(libraryItem("film-a"))
+        state.upsert(libraryItem("film-b"))
+        state.upsert(
+            LibraryItem(id = "series-a", type = "series", name = "Une série", savedAtEpochMs = 2L),
+        )
+
+        val stored = LibraryStoragePayloadCodec.decode(
+            LibraryStoragePayloadCodec.encode(state.snapshot()),
+        )
+        val restored = loadedState(stored.items)
+        assertEquals(setOf("film-a", "film-b", "series-a"), restored.snapshot().items.mapTo(mutableSetOf()) { it.id })
+        assertEquals(setOf("movie", "series"), restored.snapshot().items.mapTo(mutableSetOf()) { it.type })
+    }
+
+    @Test
+    fun `removing one saved title does not remove other titles`() {
+        val state = loadedState(emptyList())
+        state.upsert(libraryItem("film-a"))
+        state.upsert(libraryItem("film-b"))
+        state.upsert(
+            LibraryItem(id = "series-a", type = "series", name = "Une série", savedAtEpochMs = 2L),
+        )
+
+        state.remove(id = "film-a", type = "movie")
+        assertEquals(setOf("film-b", "series-a"), state.snapshot().items.mapTo(mutableSetOf()) { it.id })
+    }
+
+    @Test
+    fun `local library does not carry items over to a different profile`() {
+        val state = loadedState(listOf(libraryItem("private-film")))
+        val newProfile = state.beginProfileLoad(profileId = 2).snapshot.token
+        val secondProfile = assertNotNull(
+            state.completeProfileLoad(token = newProfile, activeProfileId = 2, items = emptyList()),
+        )
+
+        assertTrue(secondProfile.items.isEmpty())
+    }
+
+    @Test
     fun `removing final item records an explicit delete mutation`() {
         val state = loadedState(listOf(libraryItem("item")))
 
