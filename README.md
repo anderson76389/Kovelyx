@@ -128,7 +128,7 @@ Le projet rassemble les sources de ses trois applications, l'infrastructure de c
 
 Le code peut être compilé avec les anciens domaines Nuvio bloqués dans les scénarios testés. En revanche, **une compilation réussie ne prouve pas que chaque bouton, addon, lecteur ou connexion externe fonctionne en situation réelle**. La suite Android TV complète présente encore des échecs à corriger dans la branche de développement.
 
-**[Audit d'indépendance](./docs/AUDIT_INDEPENDANCE_3_VERSIONS.md) · [État technique](./docs/ETAT_TECHNIQUE.md) · [Tests manuels PC](./docs/TESTS_PC.md) · [Suivi GitHub Actions](https://github.com/anderson76389/Kovelyx/actions)**
+**[Audit d'indépendance](./docs/CONTROLES_INDEPENDANCE.md) · [État technique](./docs/ETAT_TECHNIQUE.md) · [Tests manuels PC](./docs/TESTS_PC.md) · [Suivi GitHub Actions](https://github.com/anderson76389/Kovelyx/actions)**
 
 ## 🧭 Feuille de route
 
@@ -149,7 +149,7 @@ Le code peut être compilé avec les anciens domaines Nuvio bloqués dans les sc
 
 Kovelyx dérive de logiciels sous **GNU GPLv3**. Les notices, crédits d'auteurs et obligations de licences sont conservés conformément aux licences applicables ; les supprimer ne renforcerait pas l'indépendance technique.
 
-[**Provenance et licences**](./docs/PROVENANCE.md) · [**Confidentialité**](https://anderson76389.github.io/Kovelyx/confidentialite.html) · [**Conditions d'utilisation**](https://anderson76389.github.io/Kovelyx/conditions.html) · [**Audit Nuvio**](./docs/AUDIT_NUVIO.md)
+[**Provenance et licences**](./docs/PROVENANCE.md) · [**Confidentialité**](https://anderson76389.github.io/Kovelyx/confidentialite.html) · [**Conditions d'utilisation**](https://anderson76389.github.io/Kovelyx/conditions.html) · [**Contrôles d'indépendance**](./docs/CONTROLES_INDEPENDANCE.md)
 
 ---
 

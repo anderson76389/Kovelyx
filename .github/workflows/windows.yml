@@ -97,7 +97,7 @@ jobs:
           & apps/desktop/gradlew.bat -p vendor/engine/platform/jvm jar --no-daemon --stacktrace
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $newJar = 'vendor/engine/platform/jvm/build/libs/nuvio-engine-jvm-0.1.4.jar'
-          $oldJar = 'apps/desktop/composeApp/libs/nuvio-engine-jvm-0.1.4.jar'
+          $oldJar = 'apps/desktop/composeApp/libs/kovelyx-engine-jvm-0.1.4.jar'
           if (-not (Test-Path $newJar) -or -not (Test-Path $oldJar)) { throw 'JAR du moteur manquant' }
           $oldClasses = @( & jar tf $oldJar | Where-Object { $_ -match '[.]class$' } )
           $newClasses = @( & jar tf $newJar | Where-Object { $_ -match '[.]class$' } )

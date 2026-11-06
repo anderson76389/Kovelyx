@@ -38,7 +38,7 @@ for file in sorted(SOURCES.rglob("*.kt")):
                 violations.append(relative + " : " + url)
 
 required = {
-    "moteur Android embarqué": MOBILE / "composeApp/libs/lib-nuvio-engine-android-0.1.4.aar",
+    "moteur Android embarqué": MOBILE / "composeApp/libs/lib-kovelyx-engine-android-0.1.4.aar",
     "sources de sauvegarde moteur": ROOT / "vendor/engine",
     "métadonnées APK Android": MOBILE / "androidApp/build.gradle.kts",
 }
