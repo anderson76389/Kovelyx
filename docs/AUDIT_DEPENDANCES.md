@@ -125,7 +125,7 @@ Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia : **60**.
+Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia : **60**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -225,7 +225,7 @@ Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1832** ; références statiques à Nuvio/NuvioMedia : **61**.
+Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia : **61**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
