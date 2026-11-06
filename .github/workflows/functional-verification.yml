@@ -12,6 +12,12 @@ on:
       - '.github/workflows/functional-verification.yml'
       - 'apps/mobile/composeApp/src/**'
       - 'apps/tv/app/src/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/tv/**'
+      - 'apps/mobile/**'
+      - '.github/workflows/functional-verification.yml'
   workflow_dispatch:
 
 permissions:
