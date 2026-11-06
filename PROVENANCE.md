@@ -27,11 +27,13 @@ Les arbres des commits d'origine signalent des `gitlink` sans URL exploitable da
 
 L'archive Git peut transporter des *pointeurs LFS* plutôt que le contenu binaire : c'est notamment pertinent pour les bibliothèques natives MPV de la version Desktop. Un pointeur LFS ne représente **pas** une sauvegarde autonome du fichier. Les objets requis devront être transférés vers un stockage contrôlé par Kovelyx, puis leur intégrité vérifiée.
 
-## Infrastructure de comptes indépendante en préparation
+## Infrastructure de comptes actuelle
 
-Le code client Windows, Android, Android TV, Linux et iOS doit converger vers **un compte Kovelyx facultatif et une synchronisation indépendante**. Les sources actuelles du backend historique ne sont pas fournies ici. Le [plan détaillé](./COMPTE_UNIQUE.md) et la [première migration SQL](../services/kovelyx-cloud/supabase/migrations/202610150001_kovelyx_accounts_and_sync.sql) sont disponibles, **sans serveur encore déployé et sans synchronisation Kovelyx opérationnelle**.
+Les trois applications distribuées (Windows, Android et Android TV) utilisent désormais le backend Kovelyx : Cloudflare Workers, D1 et le système d'authentification propre au projet. Les migrations SQL actives figurent dans [`services/kovelyx-cloudflare/migrations/`](../services/kovelyx-cloudflare/migrations/).
 
-Le dépôt `self-host` ancien a été retiré du périmètre initial à la demande du propriétaire ; son code demeure dans l'historique Git. Un **nouveau** service `services/kovelyx-cloud/` constitue un développement distinct. Les services tiers de catalogues et de métadonnées peuvent toujours nécessiter Internet.
+La synchronisation de la bibliothèque et de la progression peut dépendre du service Kovelyx ; un fonctionnement sur appareils réels et une inspection des connexions restent nécessaires avant de certifier tous les parcours. Les applications utilisent aussi des APIs et addons tiers choisis par l'utilisateur.
+
+Les liens vers les dépôts d'origine dans le tableau ci-dessus servent uniquement à la provenance des sources et au respect des licences. Les anciens dépôts et serveurs ne sont pas une condition de compilation des trois applications, d'après [les contrôles de la CI](./CONTROLES_INDEPENDANCE.md).
 
 ## Marques et licences
 
