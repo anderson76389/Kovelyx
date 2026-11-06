@@ -149,7 +149,7 @@ Fichiers inspectés : 4632
 - apps/tv/app/src/test/java/com/nuvio/tv/data/remote/ServerDiscoveryPolicyTest.kt:132 : "https://anothernuvio.tv"
 - apps/desktop/scripts/linux/test-linux-deb-tools.sh:30 : Maintainer: Nuvio Media <contact@nuvio.tv>
 
-### Configuration générale (59 correspondances)
+### Configuration générale (57 correspondances)
 
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/nuvio/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
@@ -208,8 +208,6 @@ Fichiers inspectés : 4632
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:99 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:115 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/p2p/DesktopEngineTest.kt:133 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
-- apps/desktop/scripts/linux/configure-desktop-runtime.sh:25 : NUVIO_SUPABASE_URL
-- apps/desktop/scripts/linux/configure-desktop-runtime.sh:26 : NUVIO_SUPABASE_ANON_KEY
 
 ## Binaires hérités
 
