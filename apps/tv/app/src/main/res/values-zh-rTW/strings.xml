@@ -2128,8 +2128,6 @@
     <string name="official_server_description">您將登出自訂伺服器，應用程式將重新啟動並連線到官方服務。</string>
     <string name="official_server_action">使用官方伺服器</string>
     <string name="custom_server_error_invalid_url">請輸入有效的 HTTP 或 HTTPS 後端網址。</string>
-    <string name="custom_server_error_official_active">api.nuvio.tv 是官方伺服器，且已被選取。</string>
-    <string name="custom_server_error_official_available">api.nuvio.tv 是官方伺服器。關閉此對話框並選擇「使用官方伺服器」以切換回去。</string>
     <string name="custom_server_error_connection">無法存取探索端點。請檢查網址和伺服器可用性。</string>
     <string name="custom_server_error_http">探索端點回傳 HTTP %1$d。</string>
     <string name="custom_server_error_response_too_large">探索文件超出允許的大小。</string>
