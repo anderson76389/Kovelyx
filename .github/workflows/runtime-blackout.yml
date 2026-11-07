@@ -9,6 +9,8 @@ on:
       - '.github/workflows/runtime-blackout.yml'
       - 'scripts/tests/runtime-blackout-android.sh'
   workflow_dispatch:
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -16,6 +18,7 @@ permissions:
 jobs:
   emulator-blackout:
     name: DNS Nuvio bloque sur emulateur - ${{ matrix.platform }}
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v1.') }}
     runs-on: ubuntu-latest
     timeout-minutes: 65
     strategy:
@@ -23,14 +26,14 @@ jobs:
       matrix:
         include:
           - platform: mobile
-            release_prefix: android-preview-
+            release_prefix: v1.
             apk_glob: 'Kovelyx-Android-*.apk'
             api_target: google_apis
             api_arch: x86_64
             device_profile: pixel_6
             emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
           - platform: tv
-            release_prefix: tv-preview-
+            release_prefix: v1.
             apk_glob: 'Kovelyx-TV-*-universal.apk'
             api_target: google-tv
             api_arch: x86
@@ -47,7 +50,19 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > /tmp/kovelyx-releases.json
-          tag="$(jq -r --arg prefix "$RELEASE_PREFIX" '[.[] | select(.draft == false and (.tag_name | startswith($prefix)))] | sort_by(.published_at) | last | .tag_name // empty' /tmp/kovelyx-releases.json)"
+          # Always select a COMPLETE unified Kovelyx Release with both Android APKs
+          # and the Windows portable bundle. On a release event, test that exact tag.
+          requested=""
+          if [[ "$GITHUB_EVENT_NAME" == "release" ]]; then requested="$GITHUB_REF_NAME"; fi
+          tag="$(jq -r --arg prefix "$RELEASE_PREFIX" --arg requested "$requested" '
+            [.[] | select(.draft == false
+              and (.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+$"))
+              and (.tag_name | startswith($prefix))
+              and ($requested == "" or .tag_name == $requested)
+              and ([.assets[]?.name | select(startswith("Kovelyx-Android-") and endswith(".apk"))] | length > 0)
+              and ([.assets[]?.name | select(startswith("Kovelyx-TV-") and endswith("-universal.apk"))] | length > 0)
+              and ([.assets[]?.name | select(startswith("Kovelyx-Windows-Portable-") and endswith(".zip"))] | length > 0)
+            )] | sort_by(.published_at) | last | .tag_name // empty' /tmp/kovelyx-releases.json)"
           test -n "$tag" || { echo "::error::Aucune Release APK Kovelyx pour $RELEASE_PREFIX"; exit 1; }
           echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
           mkdir -p /tmp/kovelyx-runtime-apk
@@ -56,7 +71,7 @@ jobs:
           [[ "$count" == 1 ]] || { echo "::error::Un seul APK attendu : $count"; exit 1; }
           unzip -tq "$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)" >/dev/null
           echo "Version testee : $tag" >> "$GITHUB_STEP_SUMMARY"
-      - name: Installer un DNS local qui bloque uniquement nuvio.tv
+      - name: Installer un DNS local qui bloque les anciens domaines Nuvio
         shell: bash
         run: |
           set -euo pipefail
@@ -69,6 +84,8 @@ jobs:
           cache-size=0
           address=/nuvio.tv/0.0.0.0
           address=/nuvio.tv/::
+          address=/nuvioapp.space/0.0.0.0
+          address=/nuvioapp.space/::
           log-queries
           log-facility=/tmp/kovelyx-dns.log
           DNS
@@ -76,6 +93,7 @@ jobs:
           sudo dnsmasq --conf-file=/tmp/kovelyx-dnsmasq.conf --pid-file=/tmp/kovelyx-dnsmasq.pid
           sudo chmod 644 /tmp/kovelyx-dns.log
           dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
+          dig @127.0.0.1 +short api-two.nuvioapp.space A | grep -Fx '0.0.0.0'
           dig @127.0.0.1 +short api.github.com A | grep -E '^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$'
           initial_nuvio_queries="$(grep -ci 'api.nuvio.tv' /tmp/kovelyx-dns.log || true)"
           echo "KOVELYX_DNS_BASELINE=$initial_nuvio_queries" >> "$GITHUB_ENV"

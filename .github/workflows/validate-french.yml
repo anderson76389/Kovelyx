@@ -9,6 +9,7 @@ on:
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'apps/tv/app/src/main/res/values/**'
       - 'apps/tv/app/src/main/res/values-fr/**'
+      - 'scripts/tests/test_legacy_account_texts.py'
       - 'scripts/tests/check-french-resources.py'
       - 'scripts/tests/check-tv-french-resources.py'
       - 'scripts/tests/test_centered_brand.py'
@@ -63,3 +64,4 @@ jobs:
           python3 scripts/tests/check-french-resources.py
           python3 scripts/tests/check-french-resources.py --mobile
           python3 scripts/tests/check-tv-french-resources.py
+          python3 -m unittest discover -s scripts/tests -p 'test_legacy_account_texts.py'
