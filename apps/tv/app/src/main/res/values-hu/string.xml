@@ -2223,8 +2223,6 @@
     <string name="official_server_description">Kijelentkezel az egyéni szerverről, és az alkalmazás a hivatalos szolgáltatással indul újra.</string>
     <string name="official_server_action">Hivatalos szerver használata</string>
     <string name="custom_server_error_invalid_url">Adj meg egy érvényes HTTP vagy HTTPS Backend URL-t.</string>
-    <string name="custom_server_error_official_active">Az api.nuvio.tv a hivatalos szerver, és már ez van kiválasztva.</string>
-    <string name="custom_server_error_official_available">Az api.nuvio.tv a hivatalos szerver. Zárd be ezt a párbeszédpanelt, és válaszd a Hivatalos szerver használata lehetőséget a visszaváltáshoz.</string>
     <string name="custom_server_error_connection">Nem sikerült elérni a felderítési végpontot. Ellenőrizd az URL-t és a szerver elérhetőségét.</string>
     <string name="custom_server_error_http">A felderítési végpont HTTP %1$d hibát adott vissza.</string>
     <string name="custom_server_error_response_too_large">A felderítési dokumentum nagyobb a megengedettnél.</string>

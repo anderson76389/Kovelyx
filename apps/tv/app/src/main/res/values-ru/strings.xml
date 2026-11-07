@@ -1368,8 +1368,6 @@
     <string name="official_server_description">Вы выйдете со своего сервера, и приложение перезапустится с официальным сервисом.</string>
     <string name="official_server_action">Использовать официальный сервер</string>
     <string name="custom_server_error_invalid_url">Введите корректный URL-адрес backend по HTTP или HTTPS.</string>
-    <string name="custom_server_error_official_active">api.nuvio.tv — официальный сервер, он уже выбран.</string>
-    <string name="custom_server_error_official_available">api.nuvio.tv — официальный сервер. Закройте это окно и выберите «Использовать официальный сервер», чтобы вернуться к нему.</string>
     <string name="custom_server_error_connection">Не удалось связаться с эндпоинтом обнаружения. Проверьте URL и доступность сервера.</string>
     <string name="custom_server_error_http">Эндпоинт обнаружения вернул HTTP %1$d.</string>
     <string name="custom_server_error_response_too_large">Документ обнаружения превышает допустимый размер.</string>

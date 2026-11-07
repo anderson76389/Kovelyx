@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/windows-runtime-blackout.yml'
   workflow_dispatch:
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -13,6 +15,7 @@ permissions:
 jobs:
   windows-exe-smoke:
     name: Windows - installer portable, demarrer et verifier la survie sans Nuvio
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v1.') }}
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -24,7 +27,16 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $r = & gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=80" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0) { throw 'Impossible de lire les Releases Kovelyx.' }
-          $release = $r | Where-Object { @($_.assets | Where-Object { $_.name -match '^Kovelyx-Windows-Portable-.+[.]zip$' }).Count -gt 0 } | Sort-Object { [datetime]$_.published_at } -Descending | Select-Object -First 1
+          # On publication, test that exact Release; otherwise the latest complete one.
+          $requested = if ($env:GITHUB_EVENT_NAME -eq 'release') { $env:GITHUB_REF_NAME } else { '' }
+          $release = $r | Where-Object {
+            $tagName = $_.tag_name
+            $_.draft -eq $false -and $tagName -match '^v[0-9]+[.][0-9]+[.][0-9]+$' -and
+            (-not $requested -or $tagName -eq $requested) -and
+            @($_.assets | Where-Object { $_.name -eq "Kovelyx-Windows-Portable-$tagName.zip" }).Count -eq 1 -and
+            @($_.assets | Where-Object { $_.name -eq "Kovelyx-Android-$tagName.apk" }).Count -eq 1 -and
+            @($_.assets | Where-Object { $_.name -eq "Kovelyx-TV-$tagName-universal.apk" }).Count -eq 1
+          } | Sort-Object { [datetime]$_.published_at } -Descending | Select-Object -First 1
           if (-not $release) { throw 'Release Windows portable Kovelyx introuvable.' }
           "KOVELYX_RELEASE_TAG=$($release.tag_name)" >> $env:GITHUB_ENV
           $dest = Join-Path $env:RUNNER_TEMP 'kovelyx-portable-apk-independent'
@@ -41,13 +53,15 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
-          foreach ($domain in @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv')) {
+          foreach ($domain in @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'nuvioapp.space', 'api-two.nuvioapp.space')) {
             Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $domain"
             Add-Content -LiteralPath $hostsFile -Value "::1 $domain"
           }
           ipconfig /flushdns | Out-Null
           $nuvio = @([System.Net.Dns]::GetHostAddresses('api.nuvio.tv') | ForEach-Object { $_.ToString() })
           if (@($nuvio | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -ne 0) { throw "Blocage Nuvio non applique : $nuvio" }
+          $legacySpace = @([System.Net.Dns]::GetHostAddresses('api-two.nuvioapp.space') | ForEach-Object { $_.ToString() })
+          if (@($legacySpace | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -ne 0) { throw "Blocage nuvioapp.space non applique : $legacySpace" }
           $github = @([System.Net.Dns]::GetHostAddresses('api.github.com') | ForEach-Object { $_.ToString() })
           if (@($github | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -lt 1) { throw 'GitHub inaccessible ou bloque.' }
           'Blocage de api.nuvio.tv effectif, resolution DNS GitHub disponible.' >> $env:GITHUB_STEP_SUMMARY

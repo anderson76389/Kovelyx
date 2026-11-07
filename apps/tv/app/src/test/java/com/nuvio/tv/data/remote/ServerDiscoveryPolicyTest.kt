@@ -11,7 +11,7 @@ class ServerDiscoveryPolicyTest {
     @Test
     fun discoveryUrlAddsSchemeAndKnownPath() {
         assertEquals(
-            "https://backend.example.com/.well-known/nuvio",
+            "https://backend.example.com/.well-known/kovelyx",
             ServerDiscoveryPolicy.discoveryUrl("backend.example.com")
         )
     }
@@ -19,19 +19,47 @@ class ServerDiscoveryPolicyTest {
     @Test
     fun discoveryUrlPreservesBackendPathAndIsIdempotent() {
         assertEquals(
-            "https://example.com/backend/.well-known/nuvio",
+            "https://example.com/backend/.well-known/kovelyx",
+            ServerDiscoveryPolicy.discoveryUrl("https://example.com/backend/.well-known/kovelyx")
+        )
+    }
+
+    @Test
+    fun discoveryUrlUpgradesPastedLegacyPathWithoutContactingIt() {
+        assertEquals(
+            "https://example.com/backend/.well-known/kovelyx",
             ServerDiscoveryPolicy.discoveryUrl("https://example.com/backend/.well-known/nuvio")
         )
     }
 
     @Test
+    fun parseRejectsLegacyNuvioServiceEvenOnAnIndependentHost() {
+        val error = assertThrows(ServerDiscoveryException::class.java) {
+            ServerDiscoveryPolicy.parse(
+                "https://example.com/.well-known/kovelyx",
+                """
+                    {
+                      "version": 1,
+                      "service": "nuvio",
+                      "self_hosted": true,
+                      "backend_url": "https://backend.example.com",
+                      "publishable_key": "public-key",
+                      "capabilities": { "email_password_auth": true }
+                    }
+                """.trimIndent()
+            )
+        }
+        assertEquals(ServerDiscoveryFailure.WRONG_SERVICE, error.failure)
+    }
+
+    @Test
     fun parseAcceptsVersionOneDocument() {
         val configuration = ServerDiscoveryPolicy.parse(
-            discoveryUrl = "https://example.com/.well-known/nuvio",
+            discoveryUrl = "https://example.com/.well-known/kovelyx",
             document = """
                 {
                   "version": 1,
-                  "service": "nuvio",
+                  "service": "kovelyx",
                   "self_hosted": true,
                   "backend_url": "https://backend.example.com/",
                   "publishable_key": "public-key",
@@ -54,11 +82,11 @@ class ServerDiscoveryPolicyTest {
     fun parseRejectsUnsupportedVersion() {
         val error = assertThrows(ServerDiscoveryException::class.java) {
             ServerDiscoveryPolicy.parse(
-                discoveryUrl = "https://example.com/.well-known/nuvio",
+                discoveryUrl = "https://example.com/.well-known/kovelyx",
                 document = """
                     {
                       "version": 2,
-                      "service": "nuvio",
+                      "service": "kovelyx",
                       "self_hosted": true,
                       "backend_url": "https://backend.example.com",
                       "publishable_key": "public-key",
@@ -75,11 +103,11 @@ class ServerDiscoveryPolicyTest {
     fun parseRejectsDocumentWithoutSupportedAuthentication() {
         val error = assertThrows(ServerDiscoveryException::class.java) {
             ServerDiscoveryPolicy.parse(
-                discoveryUrl = "https://example.com/.well-known/nuvio",
+                discoveryUrl = "https://example.com/.well-known/kovelyx",
                 document = """
                     {
                       "version": 1,
-                      "service": "nuvio",
+                      "service": "kovelyx",
                       "self_hosted": true,
                       "backend_url": "https://backend.example.com",
                       "publishable_key": "public-key",
@@ -104,13 +132,13 @@ class ServerDiscoveryPolicyTest {
     fun matchesOfficialBackendByHostAndPort() {
         assertTrue(
             ServerDiscoveryPolicy.matchesBackend(
-                "https://api.nuvio.tv/.well-known/nuvio",
+                "https://api.nuvio.tv/.well-known/kovelyx",
                 "https://api.nuvio.tv"
             )
         )
         assertFalse(
             ServerDiscoveryPolicy.matchesBackend(
-                "https://api.nuvio.tv.example.com/.well-known/nuvio",
+                "https://api.nuvio.tv.example.com/.well-known/kovelyx",
                 "https://api.nuvio.tv"
             )
         )
@@ -121,7 +149,7 @@ class ServerDiscoveryPolicyTest {
             "https://nuvio.tv",
             "https://api.nuvio.tv",
             "https://api-two.nuvioapp.space",
-            "http://nuvioapp.space:8080/.well-known/nuvio",
+            "http://nuvioapp.space:8080/.well-known/kovelyx",
             "https://A.B.API.NUVIO.TV:8443/link"
         ).forEach { assertTrue(it, ServerDiscoveryPolicy.isRetiredUpstream(it)) }
 
@@ -137,11 +165,11 @@ class ServerDiscoveryPolicyTest {
     fun discoveryCannotSwitchAnIndependentServerToRetiredNuvioBackend() {
         val error = assertThrows(ServerDiscoveryException::class.java) {
             ServerDiscoveryPolicy.parse(
-                "https://my-own-host.example/.well-known/nuvio",
+                "https://my-own-host.example/.well-known/kovelyx",
                 """
                     {
                       "version": 1,
-                      "service": "nuvio",
+                      "service": "kovelyx",
                       "self_hosted": true,
                       "backend_url": "https://api-two.nuvioapp.space",
                       "publishable_key": "public-test-key",

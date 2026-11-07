@@ -2639,8 +2639,6 @@
     <string name="custom_server_error_missing_configuration">ينقص مستند الاكتشاف رابط خلفية صالح أو مفتاحًا قابلًا للنشر.</string>
     <string name="custom_server_error_no_auth">الخادم لا يعلن عن طريقة تسجيل دخول مدعومة.</string>
     <string name="custom_server_error_not_self_hosted">مستند الاكتشاف لا يحدد خادمًا مستضافًا ذاتيًا.</string>
-    <string name="custom_server_error_official_active">‏api.nuvio.tv هو الخادم الرسمي وهو محدد بالفعل.</string>
-    <string name="custom_server_error_official_available">‏api.nuvio.tv هو الخادم الرسمي. أغلق هذه النافذة واختر "استخدام الخادم الرسمي" للعودة إليه.</string>
     <string name="custom_server_error_response_too_large">مستند الاكتشاف أكبر من الحجم المسموح.</string>
     <string name="custom_server_error_service">مستند الاكتشاف ليس لهذا التطبيق.</string>
     <string name="custom_server_error_version">هذه النسخة من مستند الاكتشاف غير مدعومة.</string>
