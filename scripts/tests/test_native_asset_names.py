@@ -62,6 +62,9 @@ def assert_native_assets() -> None:
 
 
 def assert_no_retired_sources() -> None:
+    # Le préparateur Linux ne doit pas réclamer de compte retiré par le backend Cloudflare.
+    linux_setup = (ROOT / "apps/desktop/scripts/linux/configure-desktop-runtime.sh").read_text(encoding="utf-8")
+    assert "supabase" not in linux_setup.lower(), "Script Linux lie encore une ancienne base de comptes"
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT)
     paths = [Path(p.decode("utf-8")) for p in tracked.split(b"\0") if p]
     # The old account-provider name may remain in history, but not in current file paths.
