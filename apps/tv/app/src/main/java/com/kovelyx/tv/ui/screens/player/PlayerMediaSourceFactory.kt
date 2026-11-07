@@ -27,7 +27,7 @@ import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.text.SubtitleParser
-import com.kovelyx.tv.NuvioApplication
+import com.kovelyx.tv.KovelyxApplication
 import com.kovelyx.tv.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -130,7 +130,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
     private val playbackHttpClient by lazy {
         PlayerPlaybackNetworking.playbackHttpClient.newBuilder()
             .socketFactory(NoDelaySocketFactory)
-            .cookieJar(NuvioApplication.extensionCookieJar)
+            .cookieJar(KovelyxApplication.extensionCookieJar)
             .let { NuvioExoPlayerPerformanceHelper.applyNetworkOptimizations(it) }
             .build()
     }
