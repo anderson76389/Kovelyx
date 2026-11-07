@@ -81,6 +81,13 @@ def main() -> None:
             if worker not in factory_source:
                 errors.append(f"Queued worker compatibility missing in {factory_path}: {worker}")
 
+    # TV plugin hooks and playback sources must not reference the old Hilt
+    # Application class after it is renamed in the Android manifest.
+    for source in files:
+        if source.startswith("apps/tv/app/src/") and source.endswith((".kt", ".java")):
+            if "NuvioApplication" in (ROOT / source).read_text(encoding="utf-8"):
+                errors.append(f"Old TV Application class referenced: {source}")
+
     tv_manifest = (ROOT / "apps/tv/app/src/main/AndroidManifest.xml").read_text()
     if 'android:name=".KovelyxApplication"' not in tv_manifest:
         errors.append("Renamed Android TV Application class missing in manifest")
