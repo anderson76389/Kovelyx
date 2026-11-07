@@ -1,0 +1,374 @@
+package com.kovelyx.tv.ui.screens.profile
+
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.kovelyx.tv.core.auth.CloudflareTvAccountClient
+import com.kovelyx.tv.core.sync.CloudflareTvProfileMediaSync
+import com.kovelyx.tv.core.profile.ProfileManager
+import com.kovelyx.tv.core.sync.ProfileSettingsSyncService
+import com.kovelyx.tv.core.sync.ProfileSyncService
+import com.kovelyx.tv.core.sync.SetProfilePinResult
+import com.kovelyx.tv.data.local.ProfileLockStateDataStore
+import com.kovelyx.tv.data.remote.cloudflare.AvatarCatalogItem
+import com.kovelyx.tv.data.remote.cloudflare.AvatarRepository
+import com.kovelyx.tv.data.remote.cloudflare.ProfileBackgroundCatalogItem
+import com.kovelyx.tv.data.remote.cloudflare.ProfileBackgroundRepository
+import com.kovelyx.tv.data.remote.cloud.ProfilePinVerifyResult
+import com.kovelyx.tv.data.repository.MemberAccessRepository
+import com.kovelyx.tv.domain.model.CosmeticEntitlement
+import com.kovelyx.tv.domain.model.UserProfile
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+sealed interface CreateProfileResult {
+    data class Created(
+        val profile: UserProfile,
+        val settingsCopyResult: Result<Unit>?
+    ) : CreateProfileResult
+
+    data object Failed : CreateProfileResult
+}
+
+@HiltViewModel
+class ProfileSelectionViewModel @Inject constructor(
+    private val profileManager: ProfileManager,
+    private val profileSyncService: ProfileSyncService,
+    private val profileSettingsSyncService: ProfileSettingsSyncService,
+    private val avatarRepository: AvatarRepository,
+    private val profileBackgroundRepository: ProfileBackgroundRepository,
+    memberAccessRepository: MemberAccessRepository,
+    private val profileLockStateDataStore: ProfileLockStateDataStore,
+    private val themeDataStore: com.kovelyx.tv.data.local.ThemeDataStore,
+    private val cloudProfileMedia: CloudflareTvProfileMediaSync
+) : ViewModel() {
+    val activeProfileId: StateFlow<Int> = profileManager.activeProfileId
+    val profiles: StateFlow<List<UserProfile>> = profileManager.profiles
+
+    val canAddProfile: Boolean
+        get() = profileManager.canCreateProfile
+
+    private val _avatarCatalog = MutableStateFlow<List<AvatarCatalogItem>>(emptyList())
+    val avatarCatalog: StateFlow<List<AvatarCatalogItem>> = _avatarCatalog.asStateFlow()
+
+    val hasProfileAvatarAccess: StateFlow<Boolean> = memberAccessRepository.access
+        .map { access -> access.entitlements.includes(CosmeticEntitlement.PROFILE_AVATARS) }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val hasProfileBackgroundAccess: StateFlow<Boolean> = memberAccessRepository.access
+        .map { access -> access.entitlements.includes(CosmeticEntitlement.PROFILE_BACKGROUNDS) }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val profileBackgroundCatalog: StateFlow<List<ProfileBackgroundCatalogItem>> = combine(
+        profileBackgroundRepository.catalog,
+        hasProfileBackgroundAccess
+    ) { catalog, hasAccess -> if (hasAccess) catalog else emptyList() }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val _isCreating = MutableStateFlow(false)
+    val isCreating: StateFlow<Boolean> = _isCreating.asStateFlow()
+
+    private val _mediaErrors = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val mediaErrors: kotlinx.coroutines.flow.SharedFlow<String> = _mediaErrors
+
+    private val _isSaving = MutableStateFlow(false)
+    val isSaving: StateFlow<Boolean> = _isSaving.asStateFlow()
+
+    private val _isCopyingSettings = MutableStateFlow(false)
+    val isCopyingSettings: StateFlow<Boolean> = _isCopyingSettings.asStateFlow()
+
+    val profilePinEnabled: StateFlow<Map<Int, Boolean>> = profileLockStateDataStore.pinEnabled
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    private val _isPinOperationInProgress = MutableStateFlow(false)
+    val isPinOperationInProgress: StateFlow<Boolean> = _isPinOperationInProgress.asStateFlow()
+
+    init {
+        refreshProfilePinStates()
+        viewModelScope.launch {
+            hasProfileAvatarAccess.collectLatest { hasAccess ->
+                loadAvatarCatalog(hasAccess)
+            }
+        }
+        viewModelScope.launch {
+            hasProfileBackgroundAccess.collectLatest { hasAccess ->
+                if (hasAccess) {
+                    profileBackgroundRepository.ensureLoaded()
+                } else {
+                    profileBackgroundRepository.invalidateCache()
+                }
+            }
+        }
+        viewModelScope.launch {
+            profiles.flatMapLatest { profileList ->
+                if (profileList.isEmpty()) {
+                    flowOf(emptyMap())
+                } else {
+                    combine(
+                        profileList.map { profile ->
+                            themeDataStore.observeThemeForProfile(profile.id)
+                                .map { theme -> profile.id to (theme ?: com.kovelyx.tv.domain.model.AppTheme.WHITE) }
+                        }
+                    ) { entries -> entries.toMap() }
+                }
+            }.collectLatest { themes ->
+                _profileThemes.value = themes
+            }
+        }
+    }
+
+    private val _profileThemes = MutableStateFlow<Map<Int, com.kovelyx.tv.domain.model.AppTheme>>(emptyMap())
+    val profileThemes: StateFlow<Map<Int, com.kovelyx.tv.domain.model.AppTheme>> = _profileThemes.asStateFlow()
+
+    fun loadAvatarCatalog() {
+        viewModelScope.launch {
+            loadAvatarCatalog(hasProfileAvatarAccess.value)
+        }
+    }
+
+    private suspend fun loadAvatarCatalog(hasMemberAccess: Boolean) {
+        try {
+            _avatarCatalog.value = avatarRepository.getAvatarCatalog(hasMemberAccess)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Log.e("ProfileSelectionVM", "Failed to load avatar catalog", error)
+        }
+    }
+
+    fun getAvatarImageUrl(avatarId: String?): String? {
+        if (avatarId == null) return null
+        return avatarRepository.getAvatarImageUrl(avatarId, _avatarCatalog.value)
+    }
+
+    fun loadProfileBackground(id: String) {
+        if (hasProfileBackgroundAccess.value) profileBackgroundRepository.loadSelectedAndPreload(id)
+    }
+
+    fun preloadProfileBackgrounds() {
+        if (hasProfileBackgroundAccess.value) profileBackgroundRepository.preloadImages()
+    }
+
+    var isSelectingProfile = false
+        private set
+
+    fun selectProfile(id: Int, onComplete: () -> Unit, onFailure: () -> Unit) {
+        if (isSelectingProfile) return
+        isSelectingProfile = true
+        viewModelScope.launch {
+            try {
+                profileManager.setActiveProfile(id)
+                onComplete()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e("ProfileSelectionVM", "Failed to select profile", error)
+                onFailure()
+            } finally {
+                isSelectingProfile = false
+            }
+        }
+    }
+
+    fun createProfile(
+        name: String,
+        avatarColorHex: String,
+        avatarId: String? = null,
+        copyFromProfileId: Int? = null,
+        copyProviderCredentials: Boolean = false,
+        onComplete: (CreateProfileResult) -> Unit = {}
+    ) {
+        if (_isCreating.value) return
+        viewModelScope.launch {
+            _isCreating.value = true
+            val result = try {
+                val profile = profileManager.createProfile(
+                    name = name,
+                    avatarColorHex = avatarColorHex,
+                    avatarId = avatarId
+                )
+                if (profile != null) {
+                    var createdProfile = profile
+                    if (CloudflareTvAccountClient.enabled && CloudflareTvAccountClient.account != null) {
+                        // Link a new TV profile to a stable D1 UUID immediately, even if
+                        // another profile remains active. Offline failure keeps the
+                        // local profile so its data can be synchronized later.
+                        try {
+                            val uuid = CloudflareTvAccountClient.createCloudProfile(profile.name)
+                            if (profileManager.linkCloudProfile(profile.id, uuid)) {
+                                createdProfile = profile.copy(cloudProfileId = uuid)
+                            }
+                        } catch (cancelled: CancellationException) {
+                            throw cancelled
+                        } catch (error: Exception) {
+                            Log.w("ProfileSelectionVM", "Profil Cloudflare en attente ; profil TV local conservé", error)
+                        }
+                    } else if (!CloudflareTvAccountClient.enabled) {
+                        profileSyncService.pushToRemote()
+                    }
+                    val copyResult = copyFromProfileId?.let { sourceProfileId ->
+                        profileSettingsSyncService.copyProfileSetup(
+                            sourceProfileId = sourceProfileId,
+                            targetProfileId = profile.id,
+                            copyProviderCredentials = copyProviderCredentials
+                        )
+                    }
+                    refreshProfilePinStates()
+                    CreateProfileResult.Created(createdProfile, copyResult)
+                } else {
+                    CreateProfileResult.Failed
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e("ProfileSelectionVM", "Failed to create profile", error)
+                CreateProfileResult.Failed
+            } finally {
+                _isCreating.value = false
+            }
+            onComplete(result)
+        }
+    }
+
+    fun copyProfileSettings(
+        sourceProfileId: Int,
+        targetProfileId: Int,
+        copyProviderCredentials: Boolean,
+        onComplete: (Result<Unit>) -> Unit
+    ) {
+        if (_isCopyingSettings.value) return
+        viewModelScope.launch {
+            _isCopyingSettings.value = true
+            val result = try {
+                profileSettingsSyncService.copyProfileSetup(
+                    sourceProfileId = sourceProfileId,
+                    targetProfileId = targetProfileId,
+                    copyProviderCredentials = copyProviderCredentials
+                )
+            } finally {
+                _isCopyingSettings.value = false
+            }
+            onComplete(result)
+        }
+    }
+
+    // Profile identity is managed on Android mobile / PC; TV is a receiver.
+    fun updateProfile(profile: UserProfile) = Unit
+
+    fun deleteProfile(id: Int) {
+        viewModelScope.launch {
+            if (id == 1) return@launch // Never delete the principal profile.
+            if (CloudflareTvAccountClient.enabled) {
+                val target = profileManager.profiles.value.firstOrNull { it.id == id } ?: return@launch
+                // The TV must not remove local data unless D1 confirmed removal:
+                // otherwise the profile would reappear at the next cloud pull.
+                target.cloudProfileId?.let { uuid ->
+                    try {
+                        CloudflareTvAccountClient.deleteCloudProfile(uuid)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
+                    } catch (error: Exception) {
+                        Log.e("ProfileSelectionVM", "Cloudflare profile deletion refused; local data preserved", error)
+                        return@launch
+                    }
+                }
+                profileManager.deleteProfile(id)
+                return@launch
+            }
+            profileManager.deleteProfile(id)
+            profileSyncService.deleteProfileData(id)
+            profileSyncService.pushToRemote()
+            refreshProfilePinStates()
+        }
+    }
+
+    fun refreshProfilePinStates() {
+        viewModelScope.launch {
+            if (CloudflareTvAccountClient.enabled) {
+                // A failed D1 request must NOT clear the cached lock state.
+                profileSyncService.pullProfileLockStates()
+                    .onSuccess { profileLockStateDataStore.replaceAll(it) }
+                    .onFailure { Log.w("ProfileSelectionVM", "PIN Cloudflare différés, état local conservé", it) }
+                return@launch
+            }
+            var attempt = 0
+            while (attempt < 4) {
+                val result = profileSyncService.pullProfileLockStates()
+                if (result.isSuccess) {
+                    profileLockStateDataStore.replaceAll(result.getOrNull().orEmpty())
+                    return@launch
+                }
+                Log.e(
+                    "ProfileSelectionVM",
+                    "Failed to refresh profile PIN states (attempt=$attempt)",
+                    result.exceptionOrNull()
+                )
+                attempt++
+                delay(2000L * attempt)
+            }
+        }
+    }
+
+    fun isProfilePinEnabled(profileId: Int): Boolean {
+        return profilePinEnabled.value[profileId] == true
+    }
+
+    fun setProfilePin(
+        profileId: Int,
+        pin: String,
+        currentPin: String? = null,
+        onComplete: (SetProfilePinResult) -> Unit
+    ) {
+        if (_isPinOperationInProgress.value) return
+        viewModelScope.launch {
+            _isPinOperationInProgress.value = true
+            val result = profileSyncService.setProfilePin(profileId, pin, currentPin)
+            // Server reporting CurrentPinRequired means a PIN exists remotely —
+            // reconcile local cache so we never forget it again.
+            if (result is SetProfilePinResult.Success || result is SetProfilePinResult.CurrentPinRequired) {
+                profileLockStateDataStore.setPinEnabled(profileId, true)
+            }
+            _isPinOperationInProgress.value = false
+            onComplete(result)
+        }
+    }
+
+    fun clearProfilePin(profileId: Int, currentPin: String? = null, onComplete: (Boolean) -> Unit) {
+        if (_isPinOperationInProgress.value) return
+        viewModelScope.launch {
+            _isPinOperationInProgress.value = true
+            val success = profileSyncService.clearProfilePin(profileId, currentPin).isSuccess
+            if (success) {
+                profileLockStateDataStore.setPinEnabled(profileId, false)
+            }
+            _isPinOperationInProgress.value = false
+            onComplete(success)
+        }
+    }
+
+    fun verifyProfilePin(profileId: Int, pin: String, onComplete: (Result<ProfilePinVerifyResult>) -> Unit) {
+        if (_isPinOperationInProgress.value) return
+        viewModelScope.launch {
+            _isPinOperationInProgress.value = true
+            val result = profileSyncService.verifyProfilePin(profileId, pin)
+            _isPinOperationInProgress.value = false
+            onComplete(result)
+        }
+    }
+}

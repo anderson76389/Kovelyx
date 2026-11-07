@@ -46,7 +46,7 @@ for name, path in required.items():
     if not path.exists() or (path.is_file() and path.stat().st_size < 1024):
         violations.append("Dépendance locale introuvable : " + name + " (" + str(path) + ")")
 
-updater = (SOURCES / "commonMain/kotlin/com/nuvio/app/features/updater/AppUpdaterRepository.kt")
+updater = (SOURCES / "commonMain/kotlin/com/kovelyx/app/features/updater/AppUpdaterRepository.kt")
 if not updater.is_file() or REPO_URL not in updater.read_text(encoding="utf-8"):
     violations.append("Les mises à jour Android ne pointent pas vers les Releases Kovelyx.")
 

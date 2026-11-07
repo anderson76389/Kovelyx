@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Contrôle préventif : URLs Nuvio codées dans les sources Kotlin actives de l'APK TV.
 
-Les packages com.nuvio.tv et licences historiques ne sont pas des appels
+Les packages com.kovelyx.tv et licences historiques ne sont pas des appels
 réseau. Ne couvre ni code natif ni domaines construits dynamiquement.
 """
 from __future__ import annotations

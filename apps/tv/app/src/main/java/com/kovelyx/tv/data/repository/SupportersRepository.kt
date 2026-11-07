@@ -1,0 +1,56 @@
+package com.kovelyx.tv.data.repository
+
+import com.kovelyx.tv.data.remote.api.SupportersApi
+import com.kovelyx.tv.domain.model.MemberTier
+import javax.inject.Inject
+import javax.inject.Singleton
+
+data class SupporterMember(
+    val key: String,
+    val name: String,
+    val avatarUrl: String?,
+    val membershipLevel: MemberTier,
+    val supporterSince: String?
+)
+
+@Singleton
+class SupportersRepository @Inject constructor(
+    @dagger.hilt.android.qualifiers.ApplicationContext private val appContext: android.content.Context,
+    private val supportersApi: SupportersApi
+) {
+
+    suspend fun getSupporters(): Result<List<SupporterMember>> = runCatching {
+        // No default Nuvio supporters server: skip the request unless an explicit
+        // backend URL has been configured by the app's owner.
+        check(com.kovelyx.tv.BuildConfig.SUPPORTERS_API_BASE_URL.isNotBlank()) {
+            "Le service des soutiens n'est pas configuré pour Kovelyx."
+        }
+        val response = supportersApi.getSupportersWall()
+        if (!response.isSuccessful) {
+            error(appContext.getString(com.kovelyx.tv.R.string.supporters_error_api_http, response.code()))
+        }
+
+        normalizeMembers(response.body()?.top?.members.orEmpty())
+    }
+
+    // Fonction métier vérifiable sans dépendre d'un endpoint Nuvio désactivé.
+    internal fun normalizeMembers(members: List<com.kovelyx.tv.data.remote.dto.SupportersWallMemberDto>): List<SupporterMember> =
+        members.mapNotNull { member ->
+                val name = member.displayName?.trim().orEmpty()
+                val membershipLevel = MemberTier.entries.firstOrNull {
+                    it.name == member.membershipLevel?.trim()
+                }
+                if (name.isBlank() || membershipLevel == null) return@mapNotNull null
+
+                SupporterMember(
+                    key = "$name|${member.supporterSince.orEmpty()}",
+                    name = name,
+                    avatarUrl = member.avatarUrl?.trim()?.takeIf { it.isNotBlank() },
+                    membershipLevel = membershipLevel,
+                    supporterSince = member.supporterSince?.trim()?.takeIf { it.isNotBlank() }
+                )
+            }
+            .mapIndexed { index, supporter ->
+                supporter.copy(key = "${supporter.key}#$index")
+            }
+}

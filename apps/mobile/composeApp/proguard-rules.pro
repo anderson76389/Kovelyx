@@ -21,27 +21,27 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep class com.nuvio.app.features.catalog.CatalogTargetKind { *; }
+-keep class com.kovelyx.app.features.catalog.CatalogTargetKind { *; }
 
 # Avoid R8 merging/optimizing the stream badge chip used in lazy stream rows.
--keep class com.nuvio.app.features.streams.StreamBadgeChipKt { *; }
--keep class com.nuvio.app.features.streams.StreamBadgeChipSize { *; }
--keep class com.nuvio.app.features.streams.StreamBadgeChipDefaults { *; }
+-keep class com.kovelyx.app.features.streams.StreamBadgeChipKt { *; }
+-keep class com.kovelyx.app.features.streams.StreamBadgeChipSize { *; }
+-keep class com.kovelyx.app.features.streams.StreamBadgeChipDefaults { *; }
 
--keep class com.nuvio.app.features.streams.StreamsScreenKt { *; }
--keep class com.nuvio.app.features.streams.StreamsScreenKt$* { *; }
+-keep class com.kovelyx.app.features.streams.StreamsScreenKt { *; }
+-keep class com.kovelyx.app.features.streams.StreamsScreenKt$* { *; }
 
 # Avoid R8 producing verifier-invalid bytecode for the large player composable.
--keep class com.nuvio.app.features.player.PlayerScreenKt { *; }
--keep class com.nuvio.app.features.player.PlayerScreenKt$* { *; }
+-keep class com.kovelyx.app.features.player.PlayerScreenKt { *; }
+-keep class com.kovelyx.app.features.player.PlayerScreenKt$* { *; }
 
 # QuickJS plugin runtime is dynamic; keep runtime and app plugin classes.
 -keep class com.dokar.quickjs.** { *; }
--keep class com.nuvio.app.features.plugins.** { *; }
+-keep class com.kovelyx.app.features.plugins.** { *; }
 
 # P2P runtime and Nuvio Engine JNI bridge. Native libraries are not processed
 # by R8, but their Kotlin/JNI wrapper classes and method names must stay stable.
--keep class com.nuvio.app.features.p2p.** { *; }
+-keep class com.kovelyx.app.features.p2p.** { *; }
 -keep class com.nuvio.engine.** { *; }
 -keep interface com.nuvio.engine.** { *; }
 

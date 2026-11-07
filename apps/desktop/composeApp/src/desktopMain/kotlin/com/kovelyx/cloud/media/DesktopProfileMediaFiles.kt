@@ -1,7 +1,7 @@
 package com.kovelyx.cloud.media
 
-import com.nuvio.app.core.storage.DesktopStorage
-import com.nuvio.app.features.profiles.ProfileLocalImages
+import com.kovelyx.app.core.storage.DesktopStorage
+import com.kovelyx.app.features.profiles.ProfileLocalImages
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path

@@ -17,7 +17,7 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
-                    "com/nuvio/app/features/membership/ProfileBackgroundRepository.kt"
+                    "com/kovelyx/app/features/membership/ProfileBackgroundRepository.kt"
                 ).read_text(encoding="utf-8")
                 self.assertNotIn("Supabase", source)
                 self.assertNotIn(".rpc(", source)
@@ -30,9 +30,9 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
-                    "com/nuvio/app/features/membership/MemberAccessRepository.kt"
+                    "com/kovelyx/app/features/membership/MemberAccessRepository.kt"
                 ).read_text(encoding="utf-8")
-                self.assertIn("import com.nuvio.app.core.cloud.CloudflareAccountClient", source)
+                self.assertIn("import com.kovelyx.app.core.cloud.CloudflareAccountClient", source)
                 for function in ("ensureStarted", "loadAccess", "hydrateCachedAccess"):
                     match = re.search(
                         rf"fun {function}\([^)]*\)\s*\{{([\s\S]{{0,320}})",
@@ -56,7 +56,7 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
             with self.subTest(platform=platform):
                 source = (
                     ROOT / f"apps/{platform}/composeApp/src/commonMain/kotlin/"
-                    "com/nuvio/app/core/network/ServerDiscovery.kt"
+                    "com/kovelyx/app/core/network/ServerDiscovery.kt"
                 ).read_text(encoding="utf-8")
                 self.assertRegex(source, r'"User-Agent"\s+to\s+"Kovelyx')
 
@@ -67,32 +67,32 @@ class CloudflareLegacyBoundaryTests(unittest.TestCase):
             "core/sync/MediaServerSyncService.kt",
         ):
             with self.subTest(service=relative):
-                source = (ROOT / "apps/tv/app/src/main/java/com/nuvio/tv" / relative).read_text(encoding="utf-8")
+                source = (ROOT / "apps/tv/app/src/main/java/com/kovelyx/tv" / relative).read_text(encoding="utf-8")
                 self.assertNotIn("Postgrest", source)
                 self.assertNotIn(".rpc(", source)
                 self.assertIn("Result.success(false)", source)
 
     def test_tv_profile_pin_and_identity_use_cloudflare_only(self):
         profile = (
-            ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/ProfileSyncService.kt"
+            ROOT / "apps/tv/app/src/main/java/com/kovelyx/tv/core/sync/ProfileSyncService.kt"
         ).read_text(encoding="utf-8")
         self.assertNotIn("Postgrest", profile)
         self.assertNotIn(".rpc(", profile)
         for feature in ("cloudProfilePinStates", "setCloudProfilePin", "clearCloudProfilePin", "verifyCloudProfilePin"):
             self.assertIn("CloudflareTvAccountClient." + feature, profile)
         settings = (
-            ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/sync/ProfileSettingsSyncService.kt"
+            ROOT / "apps/tv/app/src/main/java/com/kovelyx/tv/core/sync/ProfileSettingsSyncService.kt"
         ).read_text(encoding="utf-8")
         self.assertIn("CloudflareTvPreferencesSync", settings)
         self.assertNotIn(".rpc(", settings)
 
     def test_tv_cloud_profile_deletion_requires_remote_ack_before_local_erase(self):
         client = (
-            ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/core/auth/CloudflareTvAccountClient.kt"
+            ROOT / "apps/tv/app/src/main/java/com/kovelyx/tv/core/auth/CloudflareTvAccountClient.kt"
         ).read_text(encoding="utf-8")
         self.assertIn("suspend fun deleteCloudProfile(profileId: String)", client)
         vm = (
-            ROOT / "apps/tv/app/src/main/java/com/nuvio/tv/ui/screens/profile/ProfileSelectionViewModel.kt"
+            ROOT / "apps/tv/app/src/main/java/com/kovelyx/tv/ui/screens/profile/ProfileSelectionViewModel.kt"
         ).read_text(encoding="utf-8")
         remote = vm.index("CloudflareTvAccountClient.deleteCloudProfile(uuid)")
         local = vm.index("profileManager.deleteProfile(id)", remote)

@@ -1,6 +1,6 @@
 package com.kovelyx.cloud.media
 
-import com.nuvio.app.core.storage.DesktopStorage
+import com.kovelyx.app.core.storage.DesktopStorage
 import java.awt.image.BufferedImage
 import java.nio.file.Files
 import java.nio.file.Path
@@ -70,7 +70,7 @@ class DesktopProfileMediaFilesTest {
             val cached = Path.of(java.net.URI(downloaded))
             try {
                 assertTrue(cached.startsWith(DesktopStorage.rootDir))
-                assertEquals(downloaded, com.nuvio.app.features.profiles.normalizedAvatarUrl(downloaded), "A downloaded avatar must remain displayable")
+                assertEquals(downloaded, com.kovelyx.app.features.profiles.normalizedAvatarUrl(downloaded), "A downloaded avatar must remain displayable")
                 assertContentEquals(image.bytes, Files.readAllBytes(cached))
                 ImageIO.createImageInputStream(cached.toFile()).use { stream ->
                     val reader = ImageIO.getImageReaders(stream).next()

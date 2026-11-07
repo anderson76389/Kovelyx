@@ -7,7 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
-import com.nuvio.app.features.profiles.normalizedAvatarUrl
+import com.kovelyx.app.features.profiles.normalizedAvatarUrl
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.runBlocking

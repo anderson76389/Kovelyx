@@ -34,9 +34,9 @@ public final class WindowsNativePlaybackSmoke {
             if (hwndMethod == null) throw new AssertionError("Windows HWND unavailable");
             hwndMethod.setAccessible(true);
             long hwnd = ((Number) hwndMethod.invoke(peer)).longValue();
-            type = Class.forName("com.nuvio.app.features.player.desktop.NativePlayerBridge");
+            type = Class.forName("com.kovelyx.app.features.player.desktop.NativePlayerBridge");
             bridge = type.getField("INSTANCE").get(null);
-            Class<?> sinkType = Class.forName("com.nuvio.app.features.player.desktop.NativePlayerEventSink");
+            Class<?> sinkType = Class.forName("com.kovelyx.app.features.player.desktop.NativePlayerEventSink");
             AtomicInteger rtxStatus = new AtomicInteger(-1);
             Object sink = Proxy.newProxyInstance(sinkType.getClassLoader(), new Class<?>[]{sinkType},
                 (proxy, method, values) -> {
