@@ -52,7 +52,7 @@ import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @Composable
 fun MDBListSettingsContent(
@@ -193,7 +193,7 @@ private fun MDBListApiKeyDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.mdblist_dialog_title),
         subtitle = stringResource(R.string.mdblist_ratings_key_override_subtitle),

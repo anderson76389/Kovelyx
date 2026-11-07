@@ -9,19 +9,19 @@ private func retainAndReturn(_ s: String) -> UnsafePointer<CChar>? {
     return ns.utf8String
 }
 
-private func player(_ ptr: UnsafeMutableRawPointer) -> NuvioPlayerWindow {
-    return Unmanaged<NuvioPlayerWindow>.fromOpaque(ptr).takeUnretainedValue()
+private func player(_ ptr: UnsafeMutableRawPointer) -> KovelyxPlayerWindow {
+    return Unmanaged<KovelyxPlayerWindow>.fromOpaque(ptr).takeUnretainedValue()
 }
 
 @_cdecl("nuvio_player_create")
 public func nuvio_player_create() -> UnsafeMutableRawPointer {
-    let p = NuvioPlayerWindow()
+    let p = KovelyxPlayerWindow()
     return Unmanaged.passRetained(p).toOpaque()
 }
 
 @_cdecl("nuvio_player_destroy")
 public func nuvio_player_destroy(_ ptr: UnsafeMutableRawPointer) {
-    let p = Unmanaged<NuvioPlayerWindow>.fromOpaque(ptr).takeRetainedValue()
+    let p = Unmanaged<KovelyxPlayerWindow>.fromOpaque(ptr).takeRetainedValue()
     p.close()
 }
 

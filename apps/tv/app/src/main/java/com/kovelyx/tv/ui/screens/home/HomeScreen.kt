@@ -55,7 +55,7 @@ import com.kovelyx.tv.ui.components.LoadingIndicator
 import com.kovelyx.tv.ui.components.LocalStartupLoadingState
 import com.kovelyx.tv.ui.components.LocalStartupSplashEnabled
 import com.kovelyx.tv.ui.components.shouldShowHomeStartupLoader
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.PosterCardDefaults
 import com.kovelyx.tv.ui.components.PosterCardStyle
 import androidx.compose.ui.res.stringResource
@@ -733,7 +733,7 @@ private fun HomePosterOptionsDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.home_poster_dialog_subtitle)
@@ -813,7 +813,7 @@ private fun HomeLibraryListPickerDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.detail_lists_subtitle),

@@ -42,7 +42,7 @@ import com.kovelyx.tv.domain.model.LibraryListTab
 import com.kovelyx.tv.domain.model.LibraryListPrivacy
 import kotlinx.coroutines.delay
 import com.kovelyx.tv.domain.model.localizedTitle
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
@@ -229,7 +229,7 @@ internal fun ListEditorDialog(
         nameFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onCancel,
         title = if (state.mode == LibraryListEditorState.Mode.CREATE) stringResource(R.string.library_list_create_dialog_title) else stringResource(R.string.library_list_edit_dialog_title),
         width = 560.dp

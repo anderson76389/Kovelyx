@@ -41,7 +41,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.AppIconOption
 import com.kovelyx.tv.launcher.AppIconSettingsState
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
@@ -57,7 +57,7 @@ internal fun AppIconPickerDialog(
         selectedFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.appearance_app_icon_picker_title),
         subtitle = stringResource(
@@ -114,7 +114,7 @@ internal fun AppIconChangeConfirmationDialog(
         confirmFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.appearance_app_icon_confirmation_title),
         subtitle = stringResource(

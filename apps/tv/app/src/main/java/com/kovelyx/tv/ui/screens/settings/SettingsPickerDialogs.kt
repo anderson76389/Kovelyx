@@ -56,7 +56,7 @@ import com.kovelyx.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.kovelyx.tv.data.local.AVAILABLE_TMDB_LANGUAGES
 import com.kovelyx.tv.data.local.AudioLanguageOption
 import com.kovelyx.tv.data.local.displayName
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import kotlin.math.roundToInt
 
@@ -123,7 +123,7 @@ internal fun ColorSelectionDialog(
     var currentChipColor by remember { mutableStateOf(initialChip) }
     var alphaPercent by remember { mutableIntStateOf((selectedColor.alpha * 100f).roundToInt().coerceIn(0, 100)) }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         suppressFirstKeyUp = false

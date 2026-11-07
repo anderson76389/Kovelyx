@@ -36,7 +36,7 @@ import com.kovelyx.app.features.settings.AppBrandWordmark
 import com.kovelyx.app.features.settings.SettingsScreen
 import com.kovelyx.app.features.watchprogress.ContinueWatchingItem
 import com.kovelyx.app.navigation.AppRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import kotlinx.coroutines.flow.Flow
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.app_brand_name
@@ -44,7 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun rememberGuardedPopBackStack(
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     route: AppRoute,
     beforePop: () -> Unit = {},
 ): () -> Unit {

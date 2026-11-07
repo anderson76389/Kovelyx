@@ -1,0 +1,48 @@
+name: Renommer les composants UI internes Kovelyx (branche de test)
+on:
+  push:
+    branches:
+      - cleanup/kovelyx-internal-ui-names
+    paths:
+      - '.github/workflows/prepare-kovelyx-ui-names.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: kovelyx-ui-symbol-rename
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/cleanup/kovelyx-internal-ui-names'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Renommer uniquement les symboles applicatifs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/migrations/rename_kovelyx_owned_ui.py --apply | tee /tmp/kv-ui-renames.json
+          git add -A apps/
+          python3 scripts/migrations/rename_kovelyx_owned_ui.py | tee /tmp/kv-idempotence.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/kv-idempotence.json') as f:
+              second=json.load(f)
+          assert second['changed_files']==0, second
+          with open('/tmp/kv-ui-renames.json') as f:
+              first=json.load(f)
+          assert first['renamed_files']>=10, first
+          print('Renamed',first['renamed_files'],'first-party UI files')
+          PY
+          git diff --cached --stat | tail -30
+      - name: Pousser seulement cette branche
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "kovelyx-migration[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refactor: rename historical first-party UI and Apple symbols"
+          git push origin "HEAD:refs/heads/cleanup/kovelyx-internal-ui-names"

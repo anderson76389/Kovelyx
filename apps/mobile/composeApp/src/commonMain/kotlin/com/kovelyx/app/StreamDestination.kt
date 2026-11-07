@@ -63,7 +63,7 @@ private data class PendingP2pStreamOpen(
 @Composable
 internal fun StreamDestination(
     route: StreamRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     p2pEnabled: Boolean,
     openExternalPlayback: suspend (PlayerLaunch) -> Boolean,
     openExternalStreamUrl: (String) -> Boolean,

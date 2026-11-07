@@ -99,7 +99,7 @@ import com.kovelyx.tv.domain.model.SettingsUiStyle
 import com.kovelyx.tv.ui.components.FocusMarqueeText
 import com.kovelyx.tv.ui.components.BrandWordmark
 import com.kovelyx.tv.ui.util.contentTextDirection
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.NuvioComponents
 import com.kovelyx.tv.ui.theme.NuvioRadii
@@ -940,7 +940,7 @@ internal fun <T> SettingsSingleChoiceDialog(
         focusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = subtitle,
@@ -1043,7 +1043,7 @@ internal fun <T> SettingsMultiChoiceDialog(
         focusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = subtitle,

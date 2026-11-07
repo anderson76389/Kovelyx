@@ -27,7 +27,7 @@ import javax.inject.Singleton
 import com.kovelyx.tv.ui.util.languageCodeToName
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
-import com.kovelyx.tv.ui.screens.player.NuvioExoPlayerPerformanceHelper
+import com.kovelyx.tv.ui.screens.player.KovelyxExoPlayerPerformanceHelper
 import com.kovelyx.tv.ui.screens.settings.MemoryBudget
 
 /**
@@ -743,7 +743,7 @@ class PlayerSettingsDataStore @Inject constructor(
                 if (!allowLargeOff) {
                     if (prefs[allowLargeTargetBufferKey] == true) {
                         val safeLimitMb =
-                            NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+                            KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
                         val storedTarget = prefs[targetBufferSizeMbKey]
                         if (storedTarget == null || storedTarget <= safeLimitMb) {
                             prefs[allowLargeTargetBufferKey] = false
@@ -1627,12 +1627,12 @@ class PlayerSettingsDataStore @Inject constructor(
             prefs[bufferForPlaybackMsKey] = BufferSettings.DEFAULT_BUFFER_FOR_PLAYBACK_MS
             prefs[bufferForPlaybackAfterRebufferMsKey] = BufferSettings.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
             if (nativeEnabled) {
-                val safeLimitMb = NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+                val safeLimitMb = KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
                 prefs[targetBufferSizeMbKey] =
-                    NuvioExoPlayerPerformanceHelper.DEFAULT_NUVIO_TARGET_BUFFER_MB
+                    KovelyxExoPlayerPerformanceHelper.DEFAULT_NUVIO_TARGET_BUFFER_MB
                         .coerceAtMost(safeLimitMb)
                 prefs[backBufferDurationMsKey] =
-                    NuvioExoPlayerPerformanceHelper.DEFAULT_NUVIO_BACK_BUFFER_MS
+                    KovelyxExoPlayerPerformanceHelper.DEFAULT_NUVIO_BACK_BUFFER_MS
                 prefs[allowLargeTargetBufferKey] = false
                 prefs[bufferBudgetManagedKey] = false
             } else {
@@ -1688,7 +1688,7 @@ class PlayerSettingsDataStore @Inject constructor(
             if (!enabled) {
                 val isNativeMemory = isNativeMemoryActive(prefs)
                 val safeLimitMb = if (isNativeMemory) {
-                    NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+                    KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
                 } else {
                     val parallelNetworkEnabled = prefs[parallelNetworkEnabledKey] ?: false
                     val useParallelConnections = prefs[useParallelConnectionsKey] ?: false
@@ -1759,7 +1759,7 @@ class PlayerSettingsDataStore @Inject constructor(
         store().edit { prefs ->
             prefs[nuvioPerformanceModeEnabledKey] = actualEnabled
             if (actualEnabled) {
-                val safeLimitMb = NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+                val safeLimitMb = KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
                 prefs[minBufferMsKey] = BufferSettings.DEFAULT_MIN_BUFFER_MS
                 prefs[maxBufferMsKey] = BufferSettings.DEFAULT_MAX_BUFFER_MS
                 prefs[bufferForPlaybackMsKey] = BufferSettings.DEFAULT_BUFFER_FOR_PLAYBACK_MS
@@ -1767,10 +1767,10 @@ class PlayerSettingsDataStore @Inject constructor(
                 // The tier limit is the ceiling, not the value to start at, so seed the native
                 // default and let it be clamped on devices whose tier sits below it.
                 prefs[targetBufferSizeMbKey] =
-                    NuvioExoPlayerPerformanceHelper.DEFAULT_NUVIO_TARGET_BUFFER_MB
+                    KovelyxExoPlayerPerformanceHelper.DEFAULT_NUVIO_TARGET_BUFFER_MB
                         .coerceAtMost(safeLimitMb)
                 prefs[backBufferDurationMsKey] =
-                    NuvioExoPlayerPerformanceHelper.DEFAULT_NUVIO_BACK_BUFFER_MS
+                    KovelyxExoPlayerPerformanceHelper.DEFAULT_NUVIO_BACK_BUFFER_MS
                 prefs[allowLargeTargetBufferKey] = false
                 prefs[bufferBudgetManagedKey] = false
                 prefs[useParallelConnectionsKey] = PlayerSettings.DEFAULT_USE_PARALLEL_CONNECTIONS

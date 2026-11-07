@@ -130,7 +130,7 @@ import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.domain.model.WatchProgress
 import com.kovelyx.tv.ui.components.ErrorState
 import com.kovelyx.tv.ui.components.MetaDetailsSkeleton
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.PlayManualOverrideDialog
 import com.kovelyx.tv.ui.components.SynopsisOverlay
 import com.kovelyx.tv.ui.components.TrailerPlayer
@@ -3432,7 +3432,7 @@ private fun LibraryListPickerDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.detail_lists_subtitle),

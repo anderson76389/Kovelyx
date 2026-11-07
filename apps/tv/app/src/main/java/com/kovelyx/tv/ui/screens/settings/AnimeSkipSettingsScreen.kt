@@ -50,7 +50,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @Composable
 fun AnimeSkipSettingsContent(
@@ -143,7 +143,7 @@ private fun AnimeSkipClientIdDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.animeskip_dialog_title),
         subtitle = stringResource(R.string.animeskip_dialog_subtitle),

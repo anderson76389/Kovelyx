@@ -89,7 +89,7 @@ import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.domain.model.EpisodeOptionsOverlayStyle
 import com.kovelyx.tv.ui.components.FocusMarqueeText
 import com.kovelyx.tv.ui.components.ImdbRatingSourceLabel
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.WatchedMarker
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import com.kovelyx.tv.domain.model.CardDepthSurface
@@ -1146,7 +1146,7 @@ fun SeasonOptionsDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = if (season == 0) stringResource(R.string.episodes_specials) else stringResource(R.string.episodes_season, season),
         subtitle = stringResource(R.string.episodes_season_actions)

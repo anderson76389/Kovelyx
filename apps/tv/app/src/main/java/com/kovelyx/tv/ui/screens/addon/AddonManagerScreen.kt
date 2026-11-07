@@ -112,7 +112,7 @@ import com.kovelyx.tv.domain.model.Addon
 import com.kovelyx.tv.domain.model.CatalogDescriptor
 import com.kovelyx.tv.domain.model.ExperienceMode
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -540,7 +540,7 @@ fun AddonManagerScreen(
         }
 
         addonUrlPendingDeletion?.let { addonUrl ->
-            NuvioDialog(
+            KovelyxDialog(
                 onDismiss = { addonUrlPendingDeletion = null },
                 title = stringResource(R.string.addon_delete_confirm_title),
                 subtitle = stringResource(R.string.addon_delete_confirm_message),

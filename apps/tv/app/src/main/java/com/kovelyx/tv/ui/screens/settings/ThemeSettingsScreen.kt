@@ -72,7 +72,7 @@ import com.kovelyx.tv.domain.model.AppIconOption
 import com.kovelyx.tv.domain.model.AppTheme
 import com.kovelyx.tv.domain.model.CustomThemeColors
 import com.kovelyx.tv.domain.model.SettingsUiStyle
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.ThemeColors
 import com.kovelyx.tv.ui.theme.accentBrush

@@ -462,16 +462,16 @@ internal fun PlayerRuntimeController.initializePlayer(
             // lowmemorykiller spiral, so for confirmed DV7 on low-RAM we drop the back buffer
             // and shrink the budget at first frame (below).
             val libdoviConversionActive = effectiveDv7Mode == Dv7HandlingMode.DV81_LIBDOVI
-            NuvioExoPlayerPerformanceHelper.updateSettings(playerSettings, context)
-            NuvioExoPlayerPerformanceHelper.enabled = playerSettings.nuvioPerformanceModeEnabled
+            KovelyxExoPlayerPerformanceHelper.updateSettings(playerSettings, context)
+            KovelyxExoPlayerPerformanceHelper.enabled = playerSettings.nuvioPerformanceModeEnabled
             val streamMime = currentStreamMimeType
             val isHls = streamMime != null && (
                 streamMime.equals(MimeTypes.APPLICATION_M3U8, ignoreCase = true) ||
                 streamMime.lowercase().contains("mpegurl") ||
                 streamMime.lowercase().contains("m3u8")
             )
-            val rawBandwidthMeter = if (NuvioExoPlayerPerformanceHelper.enabled) {
-                NuvioExoPlayerPerformanceHelper.buildBandwidthMeter(context)
+            val rawBandwidthMeter = if (KovelyxExoPlayerPerformanceHelper.enabled) {
+                KovelyxExoPlayerPerformanceHelper.buildBandwidthMeter(context)
             } else {
                 DefaultBandwidthMeter.Builder(context)
                     .setInitialBitrateEstimate(ADAPTIVE_INITIAL_BITRATE_ESTIMATE_BPS)
@@ -500,13 +500,13 @@ internal fun PlayerRuntimeController.initializePlayer(
             currentParallelChunkOverheadMb = parallelOverheadMb
 
             val loadControl = if (playerSettings.nuvioPerformanceModeEnabled) {
-                effectiveBackBufferDurationMs = NuvioExoPlayerPerformanceHelper.backBufferMs
+                effectiveBackBufferDurationMs = KovelyxExoPlayerPerformanceHelper.backBufferMs
                 currentBitrateAwareLoadControl = null
                 Log.i(
                     PlayerRuntimeController.TAG,
-                    "BUFFER_GATE: engine=exo-native-perf master=on parallelOverheadMb=$parallelOverheadMb; NuvioExoPlayerPerformanceHelper.buildLoadControl host=${url.safeHost()}"
+                    "BUFFER_GATE: engine=exo-native-perf master=on parallelOverheadMb=$parallelOverheadMb; KovelyxExoPlayerPerformanceHelper.buildLoadControl host=${url.safeHost()}"
                 )
-                NuvioExoPlayerPerformanceHelper.buildLoadControl(context, parallelOverheadMb)
+                KovelyxExoPlayerPerformanceHelper.buildLoadControl(context, parallelOverheadMb)
             } else if (playerSettings.bufferEngineEnabled) {
                 val bufferSettings = playerSettings.bufferSettings
                 // Managed (default) caps the buffer at the device budget; off uses Target Buffer Size.
@@ -546,7 +546,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                     playerSettings.nuvioPerformanceModeEnabled
                 )
                 // Both engines report through the same sampler, so whichever built last owns it.
-                NuvioExoPlayerPerformanceHelper.liveAllocator = allocator
+                KovelyxExoPlayerPerformanceHelper.liveAllocator = allocator
                 BitrateAwareLoadControl(
                     minBufferMs = bufferSettings.minBufferMs,
                     maxBufferMs = bufferSettings.maxBufferMs,
@@ -1155,7 +1155,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                             )
                         _uiState.update {
                             it.copy(
-                                isBuffering = if (NuvioExoPlayerPerformanceHelper.shouldSuppressBufferingUi(
+                                isBuffering = if (KovelyxExoPlayerPerformanceHelper.shouldSuppressBufferingUi(
                                     suppressBufferingUiForSeek, seekBufferingUiDeferred, isBuffering
                                 )) false else isBuffering,
                                 playbackEnded = naturalEnded
@@ -1299,7 +1299,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                             tryApplyPendingResumeProgress(this@apply)
                             _uiState.value.pendingSeekPosition?.let { position ->
                                 seekTo(position)
-                                if (NuvioExoPlayerPerformanceHelper.enabled) {
+                                if (KovelyxExoPlayerPerformanceHelper.enabled) {
                                     seekBufferingUiDeferred = true
                                     seekBufferingUiJob?.cancel()
                                     seekBufferingUiJob = scope.launch {
@@ -1313,7 +1313,7 @@ internal fun PlayerRuntimeController.initializePlayer(
                                 _uiState.update { it.copy(pendingSeekPosition = null) }
                             }
                             tryAutoSelectPreferredSubtitleFromAvailableTracks()
-                            if (!NuvioExoPlayerPerformanceHelper.shouldGuardTrackRebuild() || !hasRenderedFirstFrame) {
+                            if (!KovelyxExoPlayerPerformanceHelper.shouldGuardTrackRebuild() || !hasRenderedFirstFrame) {
                                 trackSelectionParameters = trackSelectionParameters.buildUpon().build()
                             }
                             maybeScheduleFirstFrameWatchdog()

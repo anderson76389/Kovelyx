@@ -30,7 +30,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.UserProfile
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
 @Composable
@@ -59,7 +59,7 @@ internal fun ProfileSettingsSourceDialog(
         runCatching { focusRequester.requestFocus() }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.profile_copy_settings_setup_title),
         subtitle = stringResource(R.string.profile_copy_settings_setup_subtitle),
@@ -171,7 +171,7 @@ internal fun CopyProfileSettingsDialog(
         runCatching { focusRequester.requestFocus() }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = { if (!isCopying) onDismiss() },
         title = stringResource(R.string.profile_copy_settings_title, targetProfile.name),
         subtitle = stringResource(R.string.profile_copy_settings_subtitle),

@@ -96,7 +96,7 @@ import com.kovelyx.app.features.settings.ThemeSettingsRepository
 import com.kovelyx.app.features.watchprogress.ContinueWatchingItem
 import com.kovelyx.app.isDesktop
 import com.kovelyx.app.navigation.AppRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import kotlinx.coroutines.flow.Flow
@@ -126,7 +126,7 @@ private val DesktopSidebarProfileStackNavGap = 12.dp
 
 @Composable
 internal fun rememberGuardedPopBackStack(
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     route: AppRoute,
     beforePop: () -> Unit = {},
 ): () -> Unit {
@@ -194,7 +194,7 @@ internal data class AppTabActions(
 
 @Composable
 internal fun rememberGuardedPlayerPopBackStack(
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     route: AppRoute,
     beforePop: () -> Unit = {},
 ): PlayerBackRequest {

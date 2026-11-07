@@ -23,7 +23,7 @@ import com.kovelyx.tv.domain.model.Meta
 import com.kovelyx.tv.domain.model.RandomEpisodePicker
 import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.domain.model.WatchProgress
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -93,7 +93,7 @@ internal fun EpisodeShuffleDialog(
         return
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.random_episode_title),
         subtitle = stringResource(R.string.shuffle_choose_episodes),

@@ -217,7 +217,7 @@ internal fun MainAppContent(
             }
         }
         val navController = remember(navBackStack, onNavigate, onGoBack, onReplace, posterNavigationEnabled) {
-            NuvioNavigator(
+            KovelyxNavigator(
                 backStack = navBackStack,
                 onExternalNavigate = onNavigate,
                 onExternalBack = onGoBack,

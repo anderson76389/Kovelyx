@@ -62,7 +62,7 @@ import com.kovelyx.tv.data.repository.TraktProgressService
 import com.kovelyx.tv.data.simkl.SIMKL_AUTOMATIC_REFRESH_INTERVAL_MINUTES
 import com.kovelyx.tv.data.simkl.SimklConnectionMode
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioMotion
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import java.util.concurrent.TimeUnit
@@ -108,7 +108,7 @@ internal fun TraktAccountDialog(
             )
         }
     } else {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = onDismiss,
             title = "",
             width = 720.dp,
@@ -234,7 +234,7 @@ internal fun SimklAccountDialog(
             }
         }
     } else {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = onDismiss,
             title = "",
             width = 720.dp,
@@ -448,7 +448,7 @@ internal fun ConnectedTrackingAccountDialog(
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = "",
         width = 720.dp,

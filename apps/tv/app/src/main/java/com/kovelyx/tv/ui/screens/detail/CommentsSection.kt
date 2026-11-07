@@ -83,7 +83,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.TraktCommentReview
 import com.kovelyx.tv.domain.model.Video
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.ui.util.localizeEpisodeTitle
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -658,7 +658,7 @@ private fun EpisodeCommentPickerDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.detail_comments_episode_picker_title),
         subtitle = stringResource(R.string.detail_comments_episode_picker_subtitle),

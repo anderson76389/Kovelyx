@@ -50,7 +50,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.CustomThemeColors
 import com.kovelyx.tv.domain.model.formatHexColor
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.LocalNuvioFocusRingStyle
 import com.kovelyx.tv.ui.theme.NuvioTheme
@@ -69,7 +69,7 @@ internal fun CustomThemeDialog(
     var gradientEnabled by remember(allowGradient) { mutableStateOf(allowGradient && !initialColors.isSolid) }
     val editorFocusRing = remember { createFocusRingStyle(ThemeColors.White) }
     CompositionLocalProvider(LocalNuvioFocusRingStyle provides editorFocusRing) {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = onDismiss,
             title = stringResource(
                 if (gradientEnabled) R.string.custom_theme_title else R.string.custom_theme_solid_title
