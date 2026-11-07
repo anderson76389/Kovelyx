@@ -21,6 +21,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'scripts/tests/test_legacy_account_texts.py'
       - 'apps/**'
       - 'vendor/engine/**'
       - 'scripts/**'
