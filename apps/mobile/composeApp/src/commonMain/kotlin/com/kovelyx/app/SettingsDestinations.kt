@@ -18,13 +18,13 @@ import com.kovelyx.app.navigation.CollectionEditorPageRoute
 import com.kovelyx.app.navigation.CollectionEditorRoute
 import com.kovelyx.app.navigation.CollectionsRoute
 import com.kovelyx.app.navigation.FolderDetailRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import com.kovelyx.app.navigation.SettingsPageRoute
 
 @Composable
 internal fun SettingsDestination(
     route: AppRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     content: @Composable (onBack: () -> Unit) -> Unit,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)
@@ -34,7 +34,7 @@ internal fun SettingsDestination(
 @Composable
 internal fun SettingsRootDestination(
     route: SettingsPageRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     useNativeNavigation: Boolean,
     collectionsTitle: String,
     onCheckForUpdates: (() -> Unit)?,
@@ -61,7 +61,7 @@ internal fun SettingsRootDestination(
 @Composable
 internal fun CollectionsDestination(
     route: CollectionsRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     newCollectionTitle: String,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)
@@ -86,7 +86,7 @@ internal fun CollectionsDestination(
 @Composable
 internal fun CollectionEditorDestination(
     route: CollectionEditorRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     useNativeNavigation: Boolean,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)
@@ -113,7 +113,7 @@ internal fun CollectionEditorDestination(
 @Composable
 internal fun CollectionEditorPageDestination(
     route: CollectionEditorPageRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
 ) {
     val page = remember(route.pageName) {
         runCatching { CollectionEditorPage.valueOf(route.pageName) }.getOrNull()
@@ -143,7 +143,7 @@ internal fun CollectionEditorPageDestination(
 @Composable
 internal fun FolderDestination(
     route: FolderDetailRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     onCatalogClick: (HomeCatalogSection) -> Unit,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)

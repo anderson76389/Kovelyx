@@ -85,7 +85,7 @@ import com.kovelyx.tv.domain.model.TmdbCollectionSort
 import com.kovelyx.tv.domain.model.TmdbCollectionSource
 import com.kovelyx.tv.domain.model.TmdbCollectionSourceType
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.R
 import androidx.compose.ui.res.stringResource
@@ -472,7 +472,7 @@ fun CollectionEditorScreen(
     }
 
     folderToDelete?.let { folder ->
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { folderToDelete = null },
             title = stringResource(R.string.collections_editor_delete_folder_title),
             subtitle = stringResource(R.string.collections_editor_delete_folder_subtitle, folder.title),

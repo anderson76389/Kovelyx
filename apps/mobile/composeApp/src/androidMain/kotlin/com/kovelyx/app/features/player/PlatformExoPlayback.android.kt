@@ -3,7 +3,7 @@ package com.kovelyx.app.features.player
 import android.os.Build
 
 internal actual fun applyExoPlayerNativeMemory(enabled: Boolean) {
-    NuvioExoPlayerPerformanceHelper.enabled = enabled && isExoNativeMemorySupported()
+    KovelyxExoPlayerPerformanceHelper.enabled = enabled && isExoNativeMemorySupported()
 }
 
 internal actual fun isExoNativeMemorySupported(): Boolean =
@@ -13,9 +13,9 @@ internal actual fun exoNativeMemoryInfo(): ExoNativeMemoryInfo? {
     if (!isExoNativeMemorySupported()) return null
     val context = PlayerSettingsStorage.applicationContext() ?: return null
     return ExoNativeMemoryInfo(
-        ramLabel = NuvioExoPlayerPerformanceHelper.getFriendlyRamLabel(context),
-        safeLimitMb = NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context),
-        warningLimitMb = NuvioExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context),
+        ramLabel = KovelyxExoPlayerPerformanceHelper.getFriendlyRamLabel(context),
+        safeLimitMb = KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context),
+        warningLimitMb = KovelyxExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context),
     )
 }
 

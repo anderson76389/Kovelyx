@@ -61,7 +61,7 @@ import com.kovelyx.tv.data.local.PlayerSettings
 import com.kovelyx.tv.data.local.NextEpisodeThresholdMode
 import com.kovelyx.tv.data.local.StreamAutoPlayMode
 import com.kovelyx.tv.data.local.StreamAutoPlaySource
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import kotlin.math.roundToInt
 import java.util.Locale
 
@@ -543,7 +543,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
         focusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = {
             onSelectionSaved(selected)
             onDismiss()
@@ -708,7 +708,7 @@ private fun StreamRegexDialog(
         inputFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.autoplay_regex_title),
         subtitle = stringResource(R.string.autoplay_regex_matches),

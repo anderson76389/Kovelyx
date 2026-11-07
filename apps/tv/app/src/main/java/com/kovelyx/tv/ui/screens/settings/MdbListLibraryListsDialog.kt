@@ -23,7 +23,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mdblist.MdbListLibraryListOption
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
@@ -39,7 +39,7 @@ internal fun MdbListLibraryListsDialog(
         if (hasLists) firstListFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.mdblist_library_lists),
         subtitle = stringResource(R.string.mdblist_library_lists_description),

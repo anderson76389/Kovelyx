@@ -10,7 +10,7 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 
 @UnstableApi
-internal object NuvioExoPlayerPerformanceHelper {
+internal object KovelyxExoPlayerPerformanceHelper {
     const val ALLOCATOR_SEGMENT_SIZE = 64 * 1024
     const val NATIVE_ARENA_CHUNK_SIZE = 64 * 1024
     private const val MIN_BUFFER_MB = 25

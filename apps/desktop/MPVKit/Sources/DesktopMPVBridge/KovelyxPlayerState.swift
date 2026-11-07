@@ -57,7 +57,7 @@ struct NuvioEpisodeInfo: Identifiable {
     let episode: Int?
 }
 
-final class NuvioPlayerState: ObservableObject {
+final class KovelyxPlayerState: ObservableObject {
     @Published var isLoading: Bool = true
     @Published var isPlaying: Bool = false
     @Published var isEnded: Bool = false

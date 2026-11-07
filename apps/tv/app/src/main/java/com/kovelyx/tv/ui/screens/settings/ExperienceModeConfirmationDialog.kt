@@ -18,7 +18,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.ExperienceMode
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @Composable
 internal fun ExperienceModeConfirmationDialog(
@@ -33,7 +33,7 @@ internal fun ExperienceModeConfirmationDialog(
         confirmFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(
             if (isEssential) {

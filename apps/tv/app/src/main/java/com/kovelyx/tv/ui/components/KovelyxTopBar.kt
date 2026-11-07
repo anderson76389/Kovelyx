@@ -21,7 +21,7 @@ import com.kovelyx.tv.R
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NuvioTopBar(
+fun KovelyxTopBar(
     modifier: Modifier = Modifier
 ) {
     Row(

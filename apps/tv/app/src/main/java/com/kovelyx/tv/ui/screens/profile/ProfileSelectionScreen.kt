@@ -121,7 +121,7 @@ import com.kovelyx.tv.domain.model.UserProfile
 import com.kovelyx.tv.ui.components.AvatarPickerGrid
 import com.kovelyx.tv.ui.components.CustomProfileBackgroundImage
 import com.kovelyx.tv.ui.components.MemberBrandWordmark
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.ProfileBackgroundImage
 import com.kovelyx.tv.ui.components.ProfileBackgroundPicker
 import com.kovelyx.tv.ui.components.ProfileAvatarCircle
@@ -639,7 +639,7 @@ fun ProfileSelectionScreen(
                 repeat(2) { withFrameNanos { } }
                 runCatching { primaryDialogFocusRequester.requestFocus() }
             }
-            NuvioDialog(
+            KovelyxDialog(
                 onDismiss = { longPressedProfile = null },
                 title = stringResource(R.string.profile_selection_options_title),
                 width = 360.dp,
@@ -770,7 +770,7 @@ fun ProfileSelectionScreen(
                 repeat(2) { withFrameNanos { } }
                 runCatching { primaryDialogFocusRequester.requestFocus() }
             }
-            NuvioDialog(
+            KovelyxDialog(
                 onDismiss = { profileToDelete = null },
                 title = stringResource(R.string.profile_delete_confirm_title),
                 subtitle = stringResource(R.string.profile_delete_confirm_subtitle),

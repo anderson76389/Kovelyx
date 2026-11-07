@@ -26,7 +26,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.core.trakt.KovelyxTvTraktCredentials
 import com.kovelyx.tv.core.trakt.KovelyxTvMdbListCredentials
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
 /** Edition locale des clés Trakt avec le clavier de la TV. */
@@ -40,7 +40,7 @@ internal fun TvTraktCredentialsDialog(
     var clientSecret by remember(context) { mutableStateOf(KovelyxTvTraktCredentials.savedClientSecret(context)) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = "Clés Trakt personnelles",
         subtitle = "Créer une application sur trakt.tv/oauth/applications puis saisir ses identifiants.",
@@ -129,7 +129,7 @@ internal fun TvMdbListCredentialsDialog(
         mutableStateOf(KovelyxTvMdbListCredentials.savedClientId(context))
     }
     var error by remember { mutableStateOf<String?>(null) }
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = "identifiant client OAuth MDBList",
         subtitle = "Créez une application Device Code sur mdblist.com/developer/, puis saisissez son identifiant client. La clé API des notes est différente.",

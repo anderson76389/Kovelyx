@@ -66,7 +66,7 @@ import com.kovelyx.tv.domain.model.DEFAULT_CARD_DEPTH_SHEEN_STRENGTH
 import com.kovelyx.tv.domain.model.FocusedPosterTrailerPlaybackTarget
 import com.kovelyx.tv.domain.model.HomeLayout
 import com.kovelyx.tv.ui.components.CardCwStylePreview
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.PosterCwStylePreview
 import com.kovelyx.tv.ui.components.WideCwStylePreview
 import com.kovelyx.tv.ui.components.cardDepthVisual
@@ -648,7 +648,7 @@ private fun CardDepthFineTuneDialog(
         initialFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.settings_card_depth_fine_tune_title),
         subtitle = stringResource(R.string.settings_card_depth_fine_tune_hint_tv),

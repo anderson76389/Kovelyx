@@ -1,13 +1,13 @@
 import AppKit
 import SwiftUI
 
-final class NuvioPlayerWindow {
-    let state = NuvioPlayerState()
-    var mpvView: NuvioMPVView!
+final class KovelyxPlayerWindow {
+    let state = KovelyxPlayerState()
+    var mpvView: KovelyxMPVView!
     private var containerView: PlayerContainerView?
     private var stateTimer: Timer?
     private var hideTimer: Timer?
-    private var hostingView: NSHostingView<NuvioControlsView>!
+    private var hostingView: NSHostingView<KovelyxControlsView>!
     private var keyMonitor: Any?
     private var mouseMonitor: Any?
     private var gestureDismissWork: DispatchWorkItem?
@@ -31,7 +31,7 @@ final class NuvioPlayerWindow {
                 containerView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor),
             ])
 
-            mpvView = NuvioMPVView(frame: containerView.bounds)
+            mpvView = KovelyxMPVView(frame: containerView.bounds)
             mpvView.translatesAutoresizingMaskIntoConstraints = false
             containerView.addSubview(mpvView)
             NSLayoutConstraint.activate([
@@ -45,7 +45,7 @@ final class NuvioPlayerWindow {
                 self?.syncStateFromMPV()
             }
 
-            let controlsView = NuvioControlsView(
+            let controlsView = KovelyxControlsView(
                 state: state,
                 onPlay: { [weak self] in self?.mpvView.playPlayback() },
                 onPause: { [weak self] in self?.mpvView.pausePlayback() },
@@ -268,7 +268,7 @@ final class NuvioPlayerWindow {
 }
 
 final class PlayerContainerView: NSView {
-    weak var playerWindow: NuvioPlayerWindow?
+    weak var playerWindow: KovelyxPlayerWindow?
 
     override var acceptsFirstResponder: Bool { true }
 

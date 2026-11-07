@@ -65,7 +65,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.data.local.ValidationResult
 import com.kovelyx.tv.domain.model.Collection
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.R
 import androidx.compose.ui.res.stringResource
@@ -288,7 +288,7 @@ fun CollectionManagementScreen(
     }
 
     collectionToDelete?.let { collection ->
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { collectionToDelete = null },
             title = stringResource(R.string.collections_delete_confirm_title),
             subtitle = stringResource(R.string.collections_delete_confirm_subtitle, collection.title),

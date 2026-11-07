@@ -47,8 +47,8 @@ struct ControlMetrics {
     }
 }
 
-struct NuvioControlsView: View {
-    @ObservedObject var state: NuvioPlayerState
+struct KovelyxControlsView: View {
+    @ObservedObject var state: KovelyxPlayerState
 
     var onPlay: () -> Void
     var onPause: () -> Void
@@ -144,14 +144,14 @@ struct NuvioControlsView: View {
                 }
 
                 if state.showSourcesPanel {
-                    NuvioSourcesPanel(state: state) {
+                    KovelyxSourcesPanel(state: state) {
                         state.showSourcesPanel = false
                         state.controlsVisible = true
                     }
                 }
 
                 if state.showEpisodesPanel {
-                    NuvioEpisodesPanel(state: state) {
+                    KovelyxEpisodesPanel(state: state) {
                         state.showEpisodesPanel = false
                         state.showEpisodeStreams = false
                         state.controlsVisible = true

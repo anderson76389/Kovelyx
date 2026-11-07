@@ -1143,7 +1143,7 @@ fun ContinueWatchingOptionsDialog(
         detailsFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.cw_dialog_subtitle)

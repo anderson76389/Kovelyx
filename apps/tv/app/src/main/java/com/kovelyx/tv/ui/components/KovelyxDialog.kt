@@ -40,7 +40,7 @@ import androidx.tv.material3.Text
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NuvioDialog(
+fun KovelyxDialog(
     onDismiss: () -> Unit,
     title: String,
     subtitle: String? = null,

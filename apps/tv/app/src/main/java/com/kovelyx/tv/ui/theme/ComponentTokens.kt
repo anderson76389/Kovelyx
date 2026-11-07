@@ -37,7 +37,7 @@ data class NuvioSidebarComponentTokens(
 )
 
 @Immutable
-data class NuvioDialogComponentTokens(
+data class KovelyxDialogComponentTokens(
     val maxWidth: Dp,
     val contentPadding: Dp,
     val cornerRadius: Dp,
@@ -72,8 +72,8 @@ data class NuvioComponentTokens(
     val episodeCard: NuvioCardComponentTokens,
     val row: NuvioRowComponentTokens,
     val sidebar: NuvioSidebarComponentTokens,
-    val dialog: NuvioDialogComponentTokens,
-    val sidePanel: NuvioDialogComponentTokens,
+    val dialog: KovelyxDialogComponentTokens,
+    val sidePanel: KovelyxDialogComponentTokens,
     val settings: NuvioSettingsComponentTokens,
     val player: NuvioPlayerComponentTokens,
     val buttonHeight: Dp,
@@ -142,13 +142,13 @@ object NuvioComponents {
             panelRadius = 30.dp,
             contentGap = 14.dp
         ),
-        dialog = NuvioDialogComponentTokens(
+        dialog = KovelyxDialogComponentTokens(
             maxWidth = 720.dp,
             contentPadding = 24.dp,
             cornerRadius = 16.dp,
             actionSpacing = 12.dp
         ),
-        sidePanel = NuvioDialogComponentTokens(
+        sidePanel = KovelyxDialogComponentTokens(
             maxWidth = 420.dp,
             contentPadding = 20.dp,
             cornerRadius = 20.dp,

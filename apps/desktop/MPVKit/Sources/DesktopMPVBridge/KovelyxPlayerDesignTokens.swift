@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum NuvioPlayerDesignTokens {
+enum KovelyxPlayerDesignTokens {
     enum ColorToken {
         static let appBackground = Color(red: 0.051, green: 0.051, blue: 0.051)
         static let panelScrim = Color.black.opacity(0.52)

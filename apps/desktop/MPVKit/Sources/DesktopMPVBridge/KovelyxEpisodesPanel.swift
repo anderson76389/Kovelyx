@@ -1,12 +1,12 @@
 import SwiftUI
 
-struct NuvioEpisodesPanel: View {
-    @ObservedObject var state: NuvioPlayerState
+struct KovelyxEpisodesPanel: View {
+    @ObservedObject var state: KovelyxPlayerState
     var onDismiss: () -> Void
 
     var body: some View {
         ZStack {
-            NuvioPlayerDesignTokens.ColorToken.panelScrim
+            KovelyxPlayerDesignTokens.ColorToken.panelScrim
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: 0) {
@@ -16,13 +16,13 @@ struct NuvioEpisodesPanel: View {
                     episodesListSubView
                 }
             }
-            .frame(maxWidth: NuvioPlayerDesignTokens.Size.panelMaxWidth)
-            .frame(maxHeight: NuvioPlayerDesignTokens.Size.episodesPanelMaxHeight)
-            .background(NuvioPlayerDesignTokens.ColorToken.panelSurface)
-            .clipShape(RoundedRectangle(cornerRadius: NuvioPlayerDesignTokens.Radius.xxl))
+            .frame(maxWidth: KovelyxPlayerDesignTokens.Size.panelMaxWidth)
+            .frame(maxHeight: KovelyxPlayerDesignTokens.Size.episodesPanelMaxHeight)
+            .background(KovelyxPlayerDesignTokens.ColorToken.panelSurface)
+            .clipShape(RoundedRectangle(cornerRadius: KovelyxPlayerDesignTokens.Radius.xxl))
             .overlay(
-                RoundedRectangle(cornerRadius: NuvioPlayerDesignTokens.Radius.xxl)
-                    .stroke(NuvioPlayerDesignTokens.ColorToken.borderSubtle, lineWidth: 1)
+                RoundedRectangle(cornerRadius: KovelyxPlayerDesignTokens.Radius.xxl)
+                    .stroke(KovelyxPlayerDesignTokens.ColorToken.borderSubtle, lineWidth: 1)
             )
         }
     }

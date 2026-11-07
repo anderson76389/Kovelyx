@@ -27,7 +27,7 @@ import com.kovelyx.tv.ui.screens.settings.MemoryBudget
  * When [enabled] is `false`, stock ExoPlayer defaults are used everywhere.
  */
 @androidx.media3.common.util.UnstableApi
-object NuvioExoPlayerPerformanceHelper {
+object KovelyxExoPlayerPerformanceHelper {
 
     /** Whether Nuvio performance enhancements are active. Set from [PlayerSettingsDataStore]. */
     @Volatile

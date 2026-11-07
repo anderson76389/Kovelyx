@@ -15,7 +15,7 @@ import com.kovelyx.app.features.tmdb.TmdbEntityKind
 import com.kovelyx.app.features.tmdb.TmdbService
 import com.kovelyx.app.navigation.DetailRoute
 import com.kovelyx.app.navigation.EntityBrowseRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import com.kovelyx.app.navigation.PersonDetailRoute
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -42,7 +42,7 @@ internal typealias ContentPlayAction = (
 ) -> Unit
 
 @Composable
-internal fun rememberOpenMeta(navController: NuvioNavigator): (MetaPreview) -> Unit {
+internal fun rememberOpenMeta(navController: KovelyxNavigator): (MetaPreview) -> Unit {
     val scope = rememberCoroutineScope()
     return { preview ->
         scope.launch {
@@ -67,7 +67,7 @@ internal fun rememberOpenMeta(navController: NuvioNavigator): (MetaPreview) -> U
 @Composable
 internal fun DetailsDestination(
     route: DetailRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     onPlay: ContentPlayAction,
     onPlayManually: ContentPlayAction,
     sharedTransitionScope: SharedTransitionScope,
@@ -129,7 +129,7 @@ internal fun DetailsDestination(
 @Composable
 internal fun PersonDestination(
     route: PersonDetailRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
@@ -151,7 +151,7 @@ internal fun PersonDestination(
 @Composable
 internal fun EntityDestination(
     route: EntityBrowseRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)
     TmdbEntityBrowseScreen(

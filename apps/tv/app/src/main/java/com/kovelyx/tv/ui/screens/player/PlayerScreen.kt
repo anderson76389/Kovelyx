@@ -1758,7 +1758,7 @@ private fun MpvPlayerSurface(
     val context = LocalContext.current
     val latestAspectMode by rememberUpdatedState(aspectMode)
     val mpvView = remember(context) {
-        NuvioMpvSurfaceView(context).apply {
+        KovelyxMpvSurfaceView(context).apply {
             isFocusable = false
             isFocusableInTouchMode = false
         }

@@ -46,7 +46,7 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import com.kovelyx.tv.updater.model.AppUpdate
@@ -68,7 +68,7 @@ internal fun UpdateReleaseNotesDialog(
         notesFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.update_release_notes),
         subtitle = update.title,
@@ -151,7 +151,7 @@ internal fun UpdateUnknownSourcesDialog(
         settingsFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.update_title),
         subtitle = stringResource(R.string.update_unknown_sources),

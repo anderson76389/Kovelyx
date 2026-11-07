@@ -33,7 +33,7 @@ import com.kovelyx.tv.core.tracking.supportsMembershipFor
 import com.kovelyx.tv.domain.model.LibraryListTab
 import com.kovelyx.tv.domain.model.localizedMembershipTitle
 import com.kovelyx.tv.domain.model.LibrarySourceMode
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -57,7 +57,7 @@ fun PosterOptionsDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.home_poster_dialog_subtitle)
@@ -137,7 +137,7 @@ fun PosterListPickerDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.detail_lists_subtitle),
@@ -299,7 +299,7 @@ fun TrackingRemovalConfirmationDialog(
             stringResource(R.string.tracking_removal_impact_rating)
         else -> stringResource(R.string.tracking_removal_impact_history_rating)
     }
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.tracking_removal_title, providers),
         subtitle = stringResource(R.string.tracking_removal_message, itemTitle, providers, impact),

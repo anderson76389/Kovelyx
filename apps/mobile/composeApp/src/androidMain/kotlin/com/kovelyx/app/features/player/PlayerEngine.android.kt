@@ -427,7 +427,7 @@ private fun ExoPlayerSurface(
             setParameters(parameters)
         }
 
-        val loadControl = NuvioExoPlayerPerformanceHelper.buildLoadControl(
+        val loadControl = KovelyxExoPlayerPerformanceHelper.buildLoadControl(
             context,
             PlaybackBufferSettings(
                 enabled = playerSettings.bufferEngineEnabled,

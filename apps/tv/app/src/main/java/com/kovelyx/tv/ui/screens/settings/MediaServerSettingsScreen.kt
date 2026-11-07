@@ -38,7 +38,7 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mediaserver.ServerCapability
 import com.kovelyx.tv.data.mediaserver.messageRes
 import com.kovelyx.tv.data.mediaserver.supports
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
 @Composable
@@ -186,7 +186,7 @@ internal fun MediaServerSettingsContent(
     }
 
     if (confirmRemove) {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { confirmRemove = false },
             title = stringResource(R.string.servers_remove_confirm_title),
             subtitle = stringResource(R.string.servers_remove_confirm_message, connection.name)

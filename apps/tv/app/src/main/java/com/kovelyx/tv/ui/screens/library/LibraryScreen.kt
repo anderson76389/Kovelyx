@@ -100,7 +100,7 @@ import kotlinx.coroutines.launch
 import com.kovelyx.tv.ui.components.PosterCardDefaults
 import com.kovelyx.tv.domain.model.localizedTitle
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import com.kovelyx.tv.ui.util.localizedContentType
 import com.kovelyx.tv.ui.util.localizedGenreLabel
@@ -1085,7 +1085,7 @@ private fun CloudFilePickerDialog(
     onPlay: (CloudLibraryFile) -> Unit,
     onDismiss: () -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.cloud_library_file_picker_title),
         subtitle = item.name,
@@ -1537,7 +1537,7 @@ private fun ConfirmDeleteDialog(
     onConfirm: () -> Unit,
     onCancel: () -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onCancel,
         title = stringResource(R.string.library_delete_title),
         subtitle = stringResource(R.string.library_delete_subtitle),

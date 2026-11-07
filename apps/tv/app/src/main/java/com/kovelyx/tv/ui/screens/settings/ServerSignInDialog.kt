@@ -24,7 +24,7 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mediaserver.ServerConnection
 import com.kovelyx.tv.data.mediaserver.ServerFailure
 import com.kovelyx.tv.data.mediaserver.ServerProvider
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.account.InputField
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
@@ -58,7 +58,7 @@ internal fun ServerSignInDialog(
 
     LaunchedEffect(Unit) { viewModel.resetSignIn() }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = { if (!state.connecting) onDismiss() },
         title = stringResource(R.string.servers_sign_in_title, provider.displayName),
         subtitle = stringResource(R.string.servers_sign_in_subtitle, provider.displayName),

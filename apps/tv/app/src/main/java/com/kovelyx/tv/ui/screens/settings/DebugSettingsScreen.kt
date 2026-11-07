@@ -43,7 +43,7 @@ import androidx.tv.material3.Switch
 import androidx.tv.material3.SwitchDefaults
 import androidx.tv.material3.Text
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.account.InputField
 
 @Composable
@@ -211,7 +211,7 @@ fun DebugSettingsContent(
     }
 
     if (showErrorDialog) {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { showErrorDialog = false },
             title = stringResource(R.string.debug_error_dialog_title),
             subtitle = stringResource(R.string.debug_error_dialog_subtitle)

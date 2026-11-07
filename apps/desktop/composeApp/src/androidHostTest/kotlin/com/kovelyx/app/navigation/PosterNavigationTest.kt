@@ -46,7 +46,7 @@ class PosterNavigationTest {
     @get:Rule
     val compose = createComposeRule()
     private val motion = PosterNavigationState()
-    private lateinit var navigator: NuvioNavigator
+    private lateinit var navigator: KovelyxNavigator
     private lateinit var backDispatcher: OnBackPressedDispatcher
     private lateinit var view: View
     private var shelfMounted = false
@@ -63,7 +63,7 @@ class PosterNavigationTest {
             }
             val stack = remember { NavBackStack<NavKey>(TabsRoute) }
             navigator = remember {
-                NuvioNavigator(
+                KovelyxNavigator(
                     stack,
                     onLocalNavigate = { from, to ->
                         motion.navigate(from, to)

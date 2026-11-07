@@ -8,18 +8,18 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
-class NuvioExoPlayerPerformanceHelperTest {
+class KovelyxExoPlayerPerformanceHelperTest {
 
     private val gb = 1024L * 1024L * 1024L
 
     @Before
     fun setUp() {
-        NuvioExoPlayerPerformanceHelper.clearCache()
+        KovelyxExoPlayerPerformanceHelper.clearCache()
     }
 
     @Test
     fun `test default fallback values when RAM is zero or unknown`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         every { helperSpy.getDevicePhysicalRamBytes(any()) } returns 0L
@@ -30,7 +30,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 1 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 1GB physical RAM (reports ~900MB)
@@ -42,7 +42,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 1_5 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 1.5GB physical RAM (reports ~1.3GB)
@@ -54,7 +54,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 2 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 2GB physical RAM (reports ~1.7GB)
@@ -67,7 +67,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 3 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 3GB physical RAM (reports ~2.6GB)
@@ -79,7 +79,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 4 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 4GB physical RAM (reports ~3.6GB)
@@ -91,7 +91,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 6 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 6GB physical RAM (reports ~5.4GB)
@@ -103,7 +103,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 8 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 8GB physical RAM (reports ~7.4GB)
@@ -115,7 +115,7 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 12 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 12GB physical RAM (reports ~11.0GB)
@@ -127,14 +127,14 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test 16 GB RAM tier classification`() {
-        val helperSpy = spyk(NuvioExoPlayerPerformanceHelper)
+        val helperSpy = spyk(KovelyxExoPlayerPerformanceHelper)
         val context = mockk<Context>()
 
         // 16GB physical RAM (reports ~14.8GB)
         every { helperSpy.getDevicePhysicalRamBytes(any()) } returns (14.8 * gb).toLong()
 
         assertEquals("16 GB", helperSpy.getFriendlyRamLabel(context))
-        assertEquals(2000, helperSpy.getSafeNativeMemoryLimitMb(context)) // Adjusted to 2000 (was 2048 in original code but our update resolved it, wait! Let's check original code. Original code was 2000, wait, our test was 2048, let's look: assertEquals(2048, ...). Let's keep 2048 or whatever was there. Wait! In NuvioExoPlayerPerformanceHelper.kt line 196: 'else -> 2000'. Wait, in our modified helper, we have 'else -> 2000'. Let's check if the test fails if we use 2048. Yes, let's verify.)
+        assertEquals(2000, helperSpy.getSafeNativeMemoryLimitMb(context)) // Adjusted to 2000 (was 2048 in original code but our update resolved it, wait! Let's check original code. Original code was 2000, wait, our test was 2048, let's look: assertEquals(2048, ...). Let's keep 2048 or whatever was there. Wait! In KovelyxExoPlayerPerformanceHelper.kt line 196: 'else -> 2000'. Wait, in our modified helper, we have 'else -> 2000'. Let's check if the test fails if we use 2048. Yes, let's verify.)
     }
 
     @Test
@@ -148,7 +148,7 @@ class NuvioExoPlayerPerformanceHelperTest {
             memInfo.totalMem = 4 * gb
         }
 
-        val field = NuvioExoPlayerPerformanceHelper::class.java.getDeclaredField("cachedDevicePhysicalRamBytes")
+        val field = KovelyxExoPlayerPerformanceHelper::class.java.getDeclaredField("cachedDevicePhysicalRamBytes")
         field.isAccessible = true
         
         val iterations = 50_000
@@ -156,18 +156,18 @@ class NuvioExoPlayerPerformanceHelperTest {
         // 1. Uncached Benchmark (force bypass cache)
         val startTimeUncached = System.nanoTime()
         for (i in 0 until iterations) {
-            field.set(NuvioExoPlayerPerformanceHelper, 0L) // Reset cache
-            NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context)
+            field.set(KovelyxExoPlayerPerformanceHelper, 0L) // Reset cache
+            KovelyxExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context)
         }
         val durationUncached = System.nanoTime() - startTimeUncached
 
         // 2. Cached Benchmark (cache active)
-        field.set(NuvioExoPlayerPerformanceHelper, 0L)
-        NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context) // Populate cache
+        field.set(KovelyxExoPlayerPerformanceHelper, 0L)
+        KovelyxExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context) // Populate cache
         
         val startTimeCached = System.nanoTime()
         for (i in 0 until iterations) {
-            NuvioExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context)
+            KovelyxExoPlayerPerformanceHelper.getDevicePhysicalRamBytes(context)
         }
         val durationCached = System.nanoTime() - startTimeCached
 
@@ -183,13 +183,13 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test buildLoadControl deducts chunkOverheadMb from targetBufferSizeMb`() {
-        val enabledField = NuvioExoPlayerPerformanceHelper::class.java.getDeclaredField("enabled")
+        val enabledField = KovelyxExoPlayerPerformanceHelper::class.java.getDeclaredField("enabled")
         enabledField.isAccessible = true
-        enabledField.setBoolean(NuvioExoPlayerPerformanceHelper, true)
-        NuvioExoPlayerPerformanceHelper.targetBufferSizeMb = 250
+        enabledField.setBoolean(KovelyxExoPlayerPerformanceHelper, true)
+        KovelyxExoPlayerPerformanceHelper.targetBufferSizeMb = 250
 
         // Overhead = 96 MB -> target should be 250 - 96 = 154 MB
-        val loadControl = NuvioExoPlayerPerformanceHelper.buildLoadControl(chunkOverheadMb = 96)
+        val loadControl = KovelyxExoPlayerPerformanceHelper.buildLoadControl(chunkOverheadMb = 96)
         val targetBufferBytesField = androidx.media3.exoplayer.DefaultLoadControl::class.java.getDeclaredField("targetBufferBytesOverwrite")
         targetBufferBytesField.isAccessible = true
         val targetBytes = targetBufferBytesField.getInt(loadControl)
@@ -199,13 +199,13 @@ class NuvioExoPlayerPerformanceHelperTest {
 
     @Test
     fun `test buildLoadControl respects MIN_BUFFER_MB floor`() {
-        val enabledField = NuvioExoPlayerPerformanceHelper::class.java.getDeclaredField("enabled")
+        val enabledField = KovelyxExoPlayerPerformanceHelper::class.java.getDeclaredField("enabled")
         enabledField.isAccessible = true
-        enabledField.setBoolean(NuvioExoPlayerPerformanceHelper, true)
-        NuvioExoPlayerPerformanceHelper.targetBufferSizeMb = 50
+        enabledField.setBoolean(KovelyxExoPlayerPerformanceHelper, true)
+        KovelyxExoPlayerPerformanceHelper.targetBufferSizeMb = 50
 
         // Overhead = 100 MB -> 50 - 100 = -50 -> coerceAtLeast MIN_BUFFER_MB (25 MB)
-        val loadControl = NuvioExoPlayerPerformanceHelper.buildLoadControl(chunkOverheadMb = 100)
+        val loadControl = KovelyxExoPlayerPerformanceHelper.buildLoadControl(chunkOverheadMb = 100)
         val targetBufferBytesField = androidx.media3.exoplayer.DefaultLoadControl::class.java.getDeclaredField("targetBufferBytesOverwrite")
         targetBufferBytesField.isAccessible = true
         val targetBytes = targetBufferBytesField.getInt(loadControl)

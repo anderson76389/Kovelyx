@@ -12,7 +12,7 @@ import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
-class NuvioMpvSurfaceView @JvmOverloads constructor(
+class KovelyxMpvSurfaceView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : BaseMPVView(context, attrs) {
@@ -778,7 +778,7 @@ class NuvioMpvSurfaceView @JvmOverloads constructor(
     }
 
     companion object {
-        private const val TAG = "NuvioMpvSurfaceView"
+        private const val TAG = "KovelyxMpvSurfaceView"
         private const val MPV_VIDEO_OUTPUT_GPU = "gpu"
         private const val MPV_VIDEO_OUTPUT_GPU_NEXT = "gpu-next"
         private const val MPV_HWDEC_DISABLED = "no"

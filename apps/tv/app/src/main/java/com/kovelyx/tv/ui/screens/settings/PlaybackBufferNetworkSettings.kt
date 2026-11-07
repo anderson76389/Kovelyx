@@ -24,7 +24,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.local.PlayerSettings
 import com.kovelyx.tv.data.local.VodCacheSizeMode
-import com.kovelyx.tv.ui.screens.player.NuvioExoPlayerPerformanceHelper
+import com.kovelyx.tv.ui.screens.player.KovelyxExoPlayerPerformanceHelper
 import kotlin.math.min
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -63,8 +63,8 @@ internal fun PlaybackBufferNetworkSection(
         SettingsNote(
             text = stringResource(
                 R.string.playback_net_device_memory_info,
-                NuvioExoPlayerPerformanceHelper.getFriendlyRamLabel(context),
-                NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+                KovelyxExoPlayerPerformanceHelper.getFriendlyRamLabel(context),
+                KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
             )
         )
     }
@@ -202,12 +202,12 @@ private fun CustomBufferControls(
         0
     }
     val safeMaxMb = if (settings.nuvioPerformanceModeEnabled) {
-        NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+        KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
     } else {
         MemoryBudget.maxBufferMb(parallelOverheadMb)
     }
     val warningMaxMb = if (settings.nuvioPerformanceModeEnabled) {
-        NuvioExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context)
+        KovelyxExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context)
     } else {
         (((MemoryBudget.budgetMb * 1.25f).toInt() - parallelOverheadMb) / MemoryBudget.BUFFER_STEP_MB * MemoryBudget.BUFFER_STEP_MB)
             .coerceIn(MemoryBudget.MIN_BUFFER_MB, MemoryBudget.MAX_BUFFER_MB)
@@ -409,7 +409,7 @@ internal fun PlaybackMemoryUsageCard(settings: PlayerSettings) {
             if (settings.bufferEngineEnabled && !settings.bufferBudgetManaged) {
                 MemoryBudget.effectiveBufferMb(settings.bufferSettings.targetBufferSizeMb)
             } else {
-                NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+                KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
             }
         }
         settings.bufferEngineEnabled -> {
@@ -431,12 +431,12 @@ internal fun PlaybackMemoryUsageCard(settings: PlayerSettings) {
         MemoryBudget.totalUsageMb(effectiveBufferMb, settings.parallelConnectionCount, chunkMb, parallelActive)
     }
     val safeLimitMb = if (settings.nuvioPerformanceModeEnabled) {
-        NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+        KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
     } else {
         MemoryBudget.budgetMb
     }
     val warningLimitMb = if (settings.nuvioPerformanceModeEnabled) {
-        NuvioExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context)
+        KovelyxExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(context)
     } else {
         (MemoryBudget.budgetMb * 1.25f).toInt()
     }

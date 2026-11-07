@@ -61,7 +61,7 @@ import com.kovelyx.tv.ui.screens.tmdb.TmdbEntityBrowseScreen
 import com.kovelyx.tv.ui.screens.home.HeroBackdropState
 
 @Composable
-fun NuvioNavHost(
+fun KovelyxNavHost(
     navController: NavHostController,
     startDestination: String = Screen.Home.route,
     hideBuiltInHeaders: Boolean = false

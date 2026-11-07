@@ -36,7 +36,7 @@ import com.kovelyx.tv.data.local.WatchProgressSource
 import com.kovelyx.tv.data.simkl.SimklAnimeIdPreference
 import com.kovelyx.tv.data.simkl.SimklConnectionMode
 import com.kovelyx.tv.domain.model.LibrarySourceMode
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 import kotlinx.coroutines.delay
 
@@ -289,7 +289,7 @@ fun TrackingSettingsContent(
     }
 
     disconnectProvider?.let { provider ->
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = {
                 disconnectProvider = null
                 activeProvider = provider

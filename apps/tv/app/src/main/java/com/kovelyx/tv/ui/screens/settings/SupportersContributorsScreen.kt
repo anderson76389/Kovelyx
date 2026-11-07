@@ -77,7 +77,7 @@ import com.kovelyx.tv.data.repository.DevelopmentSponsor
 import com.kovelyx.tv.data.repository.GitHubContributor
 import com.kovelyx.tv.data.repository.SupporterMember
 import com.kovelyx.tv.domain.model.MemberTier
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import java.time.Instant
 import java.time.ZoneId
@@ -1013,7 +1013,7 @@ private fun SponsorDetailsDialog(
         primaryFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = sponsor.name,
         subtitle = sponsor.channelUrl ?: stringResource(R.string.sponsors_channel_unavailable),
@@ -1096,7 +1096,7 @@ private fun SupporterDetailsDialog(
         primaryFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = supporter.name,
         subtitle = supporterTierLabel(supporter.membershipLevel),
@@ -1177,7 +1177,7 @@ private fun ContributorDetailsDialog(
         primaryFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = contributor.name,
         width = 560.dp,

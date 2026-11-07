@@ -32,7 +32,7 @@ fun PlayManualOverrideDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = subtitle

@@ -18,7 +18,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
 @Composable
@@ -32,7 +32,7 @@ internal fun AccountSignOutConfirmationDialog(
         cancelFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.account_sign_out_confirm_title),
         subtitle = stringResource(R.string.account_sign_out_confirm_subtitle),

@@ -23,7 +23,7 @@ import java.util.zip.DataFormatException
 import java.util.zip.Inflater
 
 @OptIn(UnstableApi::class)
-internal class NuvioAssMatroskaExtractor(
+internal class KovelyxAssMatroskaExtractor(
     subtitleParserFactory: SubtitleParser.Factory,
     private val assHandler: AssHandler,
     flags: Int = 0,
@@ -156,7 +156,7 @@ internal class NuvioAssMatroskaExtractor(
 private class NuvioAssSubtitleExtractorOutput(
     private val delegate: ExtractorOutput,
     private val assHandler: AssHandler,
-    private val extractor: NuvioAssMatroskaExtractor
+    private val extractor: KovelyxAssMatroskaExtractor
 ) : ExtractorOutput by delegate {
     override fun track(id: Int, type: Int): TrackOutput {
         return if (type == C.TRACK_TYPE_TEXT) {
@@ -171,7 +171,7 @@ private class NuvioAssSubtitleExtractorOutput(
 private class NuvioAssTrackOutput(
     private val delegate: TrackOutput,
     private val assHandler: AssHandler,
-    private val extractor: NuvioAssMatroskaExtractor
+    private val extractor: KovelyxAssMatroskaExtractor
 ) : TrackOutput by delegate {
 
     private var isAss = false

@@ -4,7 +4,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlin.reflect.KClass
 
-internal class NuvioNavigator(
+internal class KovelyxNavigator(
     private val backStack: NavBackStack<NavKey>,
     private val onExternalNavigate: ((AppRoute, launchSingleTop: Boolean) -> Unit)? = null,
     private val onExternalBack: (() -> Unit)? = null,
@@ -50,6 +50,11 @@ internal class NuvioNavigator(
             onLocalNavigate?.invoke(currentRoute, route)
             backStack.add(route)
         }
+    }
+
+    fun canPopBackStack(expectedRoute: AppRoute? = null): Boolean {
+        if (expectedRoute != null && currentRoute != expectedRoute) return false
+        return backStack.size > 1 || onExternalBack != null
     }
 
     fun popBackStack(expectedRoute: AppRoute? = null): Boolean {

@@ -13,13 +13,13 @@ import com.kovelyx.app.features.player.PlayerLaunch
 import com.kovelyx.app.features.player.PlayerLaunchStore
 import com.kovelyx.app.features.player.PlayerScreen
 import com.kovelyx.app.features.watchprogress.ResumePromptRepository
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import com.kovelyx.app.navigation.PlayerRoute
 
 @Composable
 internal fun PlayerDestination(
     route: PlayerRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     externalPlayerId: String?,
     externalPlayerNotConfiguredText: String,
     externalPlayerFailedText: String,

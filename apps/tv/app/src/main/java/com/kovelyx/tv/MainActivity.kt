@@ -175,13 +175,13 @@ import com.kovelyx.tv.domain.model.resolveAppTheme
 import com.kovelyx.tv.domain.model.resolveCustomThemeColors
 import com.kovelyx.tv.domain.deeplink.AppDeepLink
 import com.kovelyx.tv.domain.repository.AddonRepository
-import com.kovelyx.tv.ui.components.NuvioScrollDefaults
+import com.kovelyx.tv.ui.components.KovelyxScrollDefaults
 import com.kovelyx.tv.ui.components.BrandWordmark
 import com.kovelyx.tv.ui.components.LocalCardDepthStyle
 import com.kovelyx.tv.ui.components.LocalLandscapePosterMode
 import com.kovelyx.tv.ui.components.LocalAlwaysBackdropWithLogo
 import com.kovelyx.tv.ui.components.ProfileAvatarCircle
-import com.kovelyx.tv.ui.navigation.NuvioNavHost
+import com.kovelyx.tv.ui.navigation.KovelyxNavHost
 import com.kovelyx.tv.ui.navigation.Screen
 import com.kovelyx.tv.ui.membership.LocalMemberAccess
 import com.kovelyx.tv.ui.screens.account.AuthQrSignInScreen
@@ -607,7 +607,7 @@ open class MainActivity : ComponentActivity() {
             ) {
                 val defaultBringIntoViewSpec = LocalBringIntoViewSpec.current
                 val bringIntoViewSpec = if (mainUiPrefs.smoothBringIntoViewEnabled) {
-                    NuvioScrollDefaults.smoothScrollSpec
+                    KovelyxScrollDefaults.smoothScrollSpec
                 } else {
                     defaultBringIntoViewSpec
                 }
@@ -1677,7 +1677,7 @@ private fun LegacySidebarScaffold(
                 LocalSidebarExpanded provides (drawerState.currentValue == DrawerValue.Open),
                 LocalContentFocusRequester provides contentFocusRequester
             ) {
-                NuvioNavHost(
+                KovelyxNavHost(
                     navController = navController,
                     startDestination = startDestination,
                     hideBuiltInHeaders = hideBuiltInHeaders
@@ -2079,7 +2079,7 @@ private fun ModernSidebarScaffold(
                 LocalSidebarExpanded provides isSidebarExpanded,
                 LocalContentFocusRequester provides contentFocusRequester
             ) {
-                NuvioNavHost(
+                KovelyxNavHost(
                     navController = navController,
                     startDestination = startDestination,
                     hideBuiltInHeaders = hideBuiltInHeaders

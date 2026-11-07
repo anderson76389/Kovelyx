@@ -14,7 +14,7 @@ This spec is based on the current app structure in:
 
 - `app/src/main/java/com/kovelyx/tv/MainActivity.kt`
 - `app/src/main/java/com/kovelyx/tv/ui/navigation/Screen.kt`
-- `app/src/main/java/com/kovelyx/tv/ui/navigation/NuvioNavHost.kt`
+- `app/src/main/java/com/kovelyx/tv/ui/navigation/KovelyxNavHost.kt`
 - `app/src/main/java/com/kovelyx/tv/ui/screens/settings/SettingsScreen.kt`
 - `app/src/main/java/com/kovelyx/tv/ui/screens/addon/AddonManagerScreen.kt`
 - `app/src/main/java/com/kovelyx/tv/ui/screens/plugin/PluginScreen.kt`
@@ -642,7 +642,7 @@ Keep root drawer items stable in both modes:
 - Add-ons
 - Settings
 
-Do not remove root routes from `NuvioNavHost`; mode should control screen content, not break navigation.
+Do not remove root routes from `KovelyxNavHost`; mode should control screen content, not break navigation.
 
 ### 6. Add Essential Settings Screen
 

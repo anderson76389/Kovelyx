@@ -33,7 +33,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.formatHexColor
 import com.kovelyx.tv.domain.model.parseHexColor
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.NuvioTheme
 
@@ -43,7 +43,7 @@ internal fun HexColorDialog(
     onConfirm: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.custom_theme_hex_title),
         subtitle = stringResource(R.string.custom_theme_hex_hint),

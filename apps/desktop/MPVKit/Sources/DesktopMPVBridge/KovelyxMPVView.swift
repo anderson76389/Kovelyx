@@ -3,7 +3,7 @@ import OpenGL.GL
 import OpenGL.GL3
 import Libmpv
 
-final class NuvioMPVView: NSOpenGLView {
+final class KovelyxMPVView: NSOpenGLView {
     private(set) var mpv: OpaquePointer!
     private var mpvGL: OpaquePointer!
     private var defaultFBO: GLint = -1
@@ -67,7 +67,7 @@ final class NuvioMPVView: NSOpenGLView {
         let api = UnsafeMutableRawPointer(mutating: (MPV_RENDER_API_TYPE_OPENGL as NSString).utf8String)
         var initParams = mpv_opengl_init_params(
             get_proc_address: { (ctx, name) in
-                return NuvioMPVView.getProcAddress(ctx, name)
+                return KovelyxMPVView.getProcAddress(ctx, name)
             },
             get_proc_address_ctx: nil
         )
@@ -84,7 +84,7 @@ final class NuvioMPVView: NSOpenGLView {
             mpv_render_context_set_update_callback(
                 mpvGL,
                 { ctx in
-                    let view = unsafeBitCast(ctx, to: NuvioMPVView.self)
+                    let view = unsafeBitCast(ctx, to: KovelyxMPVView.self)
                     view.scheduleRender()
                 },
                 UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
@@ -99,7 +99,7 @@ final class NuvioMPVView: NSOpenGLView {
         mpv_observe_property(mpv, 0, "track-list/count", MPV_FORMAT_INT64)
 
         mpv_set_wakeup_callback(mpv, { ctx in
-            let view = unsafeBitCast(ctx, to: NuvioMPVView.self)
+            let view = unsafeBitCast(ctx, to: KovelyxMPVView.self)
             view.readEvents()
         }, UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()))
     }

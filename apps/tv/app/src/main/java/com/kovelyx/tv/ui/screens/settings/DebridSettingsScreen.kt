@@ -81,7 +81,7 @@ import com.kovelyx.tv.domain.model.DebridStreamSortCriterion
 import com.kovelyx.tv.domain.model.DebridStreamSortDirection
 import com.kovelyx.tv.domain.model.DebridStreamSortKey
 import com.kovelyx.tv.domain.model.DebridStreamVisualTag
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.addon.QrCodeOverlay
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -904,7 +904,7 @@ private fun DebridTextListDialog(
         inputFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.debrid_stream_release_groups_input_subtitle),
@@ -1303,7 +1303,7 @@ private fun DebridDeviceAuthDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(
             if (isConnected) R.string.debrid_disconnect_provider else R.string.debrid_connect_provider,
@@ -1493,7 +1493,7 @@ private fun DebridApiKeyDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = subtitle,

@@ -8,7 +8,7 @@ import com.kovelyx.tv.ui.theme.NuvioFocus
 import com.kovelyx.tv.ui.theme.NuvioMotion
 
 @OptIn(ExperimentalFoundationApi::class)
-object NuvioScrollDefaults {
+object KovelyxScrollDefaults {
     val smoothScrollSpec = object : BringIntoViewSpec {
         @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
         override val scrollAnimationSpec: AnimationSpec<Float> = spring(

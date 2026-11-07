@@ -1,12 +1,12 @@
 import SwiftUI
 
-struct NuvioSourcesPanel: View {
-    @ObservedObject var state: NuvioPlayerState
+struct KovelyxSourcesPanel: View {
+    @ObservedObject var state: KovelyxPlayerState
     var onDismiss: () -> Void
 
     var body: some View {
         ZStack {
-            NuvioPlayerDesignTokens.ColorToken.panelScrim
+            KovelyxPlayerDesignTokens.ColorToken.panelScrim
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: 0) {
@@ -90,13 +90,13 @@ struct NuvioSourcesPanel: View {
                     }
                 }
             }
-            .frame(maxWidth: NuvioPlayerDesignTokens.Size.panelMaxWidth)
-            .frame(maxHeight: NuvioPlayerDesignTokens.Size.sourcesPanelMaxHeight)
-            .background(NuvioPlayerDesignTokens.ColorToken.panelSurface)
-            .clipShape(RoundedRectangle(cornerRadius: NuvioPlayerDesignTokens.Radius.xxl))
+            .frame(maxWidth: KovelyxPlayerDesignTokens.Size.panelMaxWidth)
+            .frame(maxHeight: KovelyxPlayerDesignTokens.Size.sourcesPanelMaxHeight)
+            .background(KovelyxPlayerDesignTokens.ColorToken.panelSurface)
+            .clipShape(RoundedRectangle(cornerRadius: KovelyxPlayerDesignTokens.Radius.xxl))
             .overlay(
-                RoundedRectangle(cornerRadius: NuvioPlayerDesignTokens.Radius.xxl)
-                    .stroke(NuvioPlayerDesignTokens.ColorToken.borderSubtle, lineWidth: 1)
+                RoundedRectangle(cornerRadius: KovelyxPlayerDesignTokens.Radius.xxl)
+                    .stroke(KovelyxPlayerDesignTokens.ColorToken.borderSubtle, lineWidth: 1)
             )
         }
     }
