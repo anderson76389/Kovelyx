@@ -409,6 +409,146 @@ try {
   assert.equal(tombstone?.deleted,true,"Unmark tombstone visible to first session");
   assert.equal(afterUnmark.filter(row=>row.category==="watched_items" && row.payload?.id==="tt-batch" && !row.deleted).length,30);
 
+  // Trois clients natifs SIMULÉS : sessions Better Auth indépendantes sur D1 jetable.
+  // Le test couvre les routes et le contrat de synchronisation, PAS les vrais écrans APK.
+  const mobileLogin=await req("/api/auth/sign-in/email","POST",{
+    email:alice.email,password:accountPassword
+  });
+  assert.equal(mobileLogin.status,200,"Android mobile opens its own session");
+  const mobileToken=mobileLogin.headers.get("set-auth-token")||mobileLogin.data?.token;
+  assert.ok(mobileToken?.length>=16,"Android mobile has a bearer token");
+  assert.notEqual(mobileToken,alice.token);
+  assert.notEqual(mobileToken,tvToken);
+  assert.equal((await req("/v1/me","GET",null,mobileToken)).data?.id,alice.userId,
+    "Three device sessions must identify the same account");
+  const mobileProfiles=await req("/v1/profiles","GET",null,mobileToken);
+  assert.equal(mobileProfiles.data?.profiles?.[0]?.id,profileId,
+    "Android mobile sees the same cloud profile as Windows and TV");
+
+  async function threeWayRows(token,requestedProfile=profileId) {
+    const rows=[];
+    let next=0;
+    do {
+      const page=await req("/v1/sync?profileId="+requestedProfile+"&offset="+next+"&limit=25",
+        "GET",null,token);
+      assert.equal(page.status,200,"Cloud library pages must be readable on every device");
+      rows.push(...page.data.items);
+      next=page.data.nextOffset;
+    } while(next!==null);
+    return rows;
+  }
+  const threeWayRow=async (token,category,key,requestedProfile=profileId)=>
+    (await threeWayRows(token,requestedProfile)).find(row=>
+      row.category===category && row.itemKey===key);
+  const threeWayWrite=(token,category,key,revision,payload,deleted=false,requestedProfile=profileId)=>
+    req("/v1/sync","POST",{profileId:requestedProfile,category,itemKey:key,
+      revision,deleted,payload},token);
+
+  const filmKey="movie:tt-three-devices-film";
+  const seriesKey="series:tt-three-devices-series";
+  const keepKey="movie:tt-three-devices-keep";
+  const savedAt=Date.now()-60000;
+  const filmData={id:"tt-three-devices-film",type:"movie",name:"Film synchronisé",savedAtEpochMs:savedAt};
+  const seriesData={id:"tt-three-devices-series",type:"series",name:"Série synchronisée",savedAtEpochMs:savedAt};
+  const keepData={id:"tt-three-devices-keep",type:"movie",name:"Film conservé",savedAtEpochMs:savedAt};
+  assert.equal((await threeWayWrite(alice.token,"library",filmKey,0,filmData)).status,201,
+    "Windows adds one film");
+  assert.equal((await threeWayWrite(mobileToken,"library",seriesKey,0,seriesData)).status,201,
+    "Android adds one series");
+  assert.equal((await threeWayWrite(mobileToken,"library",keepKey,0,keepData)).status,201,
+    "Android adds a second film");
+  for(const token of [alice.token,tvToken,mobileToken]){
+    const items=await threeWayRows(token);
+    for(const key of [filmKey,seriesKey,keepKey]){
+      assert.equal(items.find(row=>row.category==="library"&&row.itemKey===key)?.deleted,false,
+        "Windows, TV and Android all see each added work: "+key);
+    }
+  }
+
+  // TV deletes one title, Android/Windows pull the tombstone. An offline stale
+  // writer must not resurrect it. Only a newer explicit save can restore it.
+  assert.equal((await threeWayWrite(tvToken,"library",filmKey,1,
+    {id:filmData.id,type:filmData.type},true)).status,200,"TV removes saved film");
+  for(const token of [alice.token,mobileToken]){
+    assert.equal((await threeWayRow(token,"library",filmKey))?.deleted,true,
+      "Deleting from TV must remove this film on Windows and Android");
+    assert.equal((await threeWayRow(token,"library",keepKey))?.deleted,false,
+      "Deleting one title must preserve the other saved film");
+  }
+  assert.equal((await threeWayWrite(alice.token,"library",filmKey,0,filmData)).status,409,
+    "Offline Windows cannot restore the film using a stale revision");
+  const newFilm={...filmData,savedAtEpochMs:Date.now()+1000};
+  assert.equal((await threeWayWrite(mobileToken,"library",filmKey,2,newFilm)).status,200,
+    "A newer intentional Android save restores the deleted film");
+  assert.equal((await threeWayRow(tvToken,"library",filmKey))?.deleted,false,
+    "TV sees the intentional re-addition");
+  assert.equal((await threeWayWrite(alice.token,"library",filmKey,3,
+    {id:filmData.id,type:filmData.type},true)).status,200,
+    "Windows can delete the restored film");
+  assert.equal((await threeWayRow(mobileToken,"library",filmKey))?.deleted,true);
+  assert.equal((await threeWayRow(tvToken,"library",filmKey))?.deleted,true);
+  assert.equal((await threeWayWrite(alice.token,"library",seriesKey,1,
+    {id:seriesData.id,type:seriesData.type},true)).status,200,
+    "Windows removes series without touching remaining film");
+  assert.equal((await threeWayRow(tvToken,"library",seriesKey))?.deleted,true);
+  assert.equal((await threeWayRow(mobileToken,"library",keepKey))?.deleted,false);
+
+  // Watched / unwatched state is independent of library membership.
+  const watchedKey="movie:tt-three-devices-film:-1:-1";
+  const watchedData={id:filmData.id,type:"movie",name:filmData.name,
+    markedAtEpochMs:Date.now()};
+  assert.equal((await threeWayWrite(alice.token,"watched_items",watchedKey,0,watchedData)).status,201,
+    "Windows marks the removed film watched");
+  assert.equal((await threeWayRow(tvToken,"watched_items",watchedKey))?.deleted,false);
+  assert.equal((await threeWayRow(mobileToken,"watched_items",watchedKey))?.deleted,false);
+  assert.equal((await threeWayWrite(tvToken,"watched_items",watchedKey,1,
+    {removed:true},true)).status,200,"TV unmarks watched");
+  assert.equal((await threeWayRow(alice.token,"watched_items",watchedKey))?.deleted,true);
+  assert.equal((await threeWayRow(mobileToken,"watched_items",watchedKey))?.deleted,true);
+  assert.equal((await threeWayWrite(alice.token,"watched_items",watchedKey,0,watchedData)).status,409,
+    "Stale watched flag cannot resurrect after unmark");
+  assert.equal((await threeWayWrite(mobileToken,"watched_items",watchedKey,2,
+    {...watchedData,markedAtEpochMs:Date.now()+1000})).status,200,
+    "Android can explicitly mark watched again");
+  assert.equal((await threeWayRow(tvToken,"watched_items",watchedKey))?.deleted,false);
+  assert.equal((await threeWayRow(alice.token,"library",filmKey))?.deleted,true,
+    "Watching a film must not silently re-add it to the library");
+
+  // Resume position passes Windows -> TV -> Android -> Windows, using CAS revisions.
+  const progressKey="movie:tt-three-devices-film";
+  const progressData={parentMetaId:filmData.id,parentMetaType:"movie",contentType:"movie",
+    videoId:filmData.id,title:filmData.name,lastPositionMs:10000,durationMs:120000,
+    lastUpdatedEpochMs:Date.now(),isCompleted:false};
+  assert.equal((await threeWayWrite(alice.token,"watch_progress",progressKey,0,progressData)).status,201);
+  assert.equal((await threeWayRow(tvToken,"watch_progress",progressKey))?.payload?.lastPositionMs,10000);
+  assert.equal((await threeWayWrite(tvToken,"watch_progress",progressKey,1,
+    {...progressData,lastPositionMs:25000,lastUpdatedEpochMs:Date.now()+1000})).status,200);
+  assert.equal((await threeWayRow(mobileToken,"watch_progress",progressKey))?.payload?.lastPositionMs,25000);
+  assert.equal((await threeWayWrite(mobileToken,"watch_progress",progressKey,2,
+    {...progressData,lastPositionMs:45000,lastUpdatedEpochMs:Date.now()+2000})).status,200);
+  assert.equal((await threeWayRow(alice.token,"watch_progress",progressKey))?.payload?.lastPositionMs,45000);
+  assert.equal((await threeWayWrite(alice.token,"watch_progress",progressKey,0,progressData)).status,409,
+    "Old Windows playback progress cannot overwrite Android's newer position");
+
+  // Another profile under the same account must not share library or watched state.
+  const isolated=await req("/v1/profiles","POST",{displayName:"Profil test secondaire"},mobileToken);
+  assert.equal(isolated.status,201);
+  const isolatedId=isolated.data?.profile?.id;
+  assert.match(isolatedId||"",/^[a-f0-9-]{36}$/i);
+  const isolatedKey="movie:tt-secondary-private";
+  assert.equal((await threeWayWrite(mobileToken,"library",isolatedKey,0,
+    {id:"tt-secondary-private",type:"movie",name:"Second profil",savedAtEpochMs:Date.now()},
+    false,isolatedId)).status,201);
+  assert.equal((await threeWayRow(tvToken,"library",isolatedKey,isolatedId))?.deleted,false,
+    "TV can access the secondary profile after switching to it");
+  assert.equal(await threeWayRow(alice.token,"library",isolatedKey),undefined,
+    "The primary profile never contains the secondary profile's items");
+  assert.equal((await req("/v1/sync?profileId="+isolatedId,"GET",null,bob.token)).status,404,
+    "A foreign account must not read the secondary profile");
+  assert.equal((await req("/v1/profiles?profileId="+isolatedId,"DELETE",{},mobileToken)).status,200,
+    "Delete only the disposable secondary test profile");
+  console.log("PASS: 3 sessions Windows/Android/TV, films et séries, suppressions bidirectionnelles, anti-résurrection, vues, progression et isolation des profils");
+
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);
   assert.equal(renamed.status,200,"Rename profile from second device");
@@ -423,11 +563,18 @@ try {
     "Sign-out revokes the bearer token");
   assert.equal((await req("/v1/me","GET",null,tvToken)).status,200,
     "La déconnexion Windows ne doit pas invalider la session Android TV");
+  assert.equal((await req("/v1/me","GET",null,mobileToken)).status,200,
+    "La déconnexion Windows ne doit pas invalider Android mobile");
   const tvSignedOut=await req("/api/auth/sign-out","POST",{},tvToken);
   assert.ok(tvSignedOut.status>=200&&tvSignedOut.status<300);
   assert.equal((await req("/v1/me","GET",null,tvToken)).status,401,
     "La TV doit pouvoir déconnecter sa propre session");
-  console.log("PASS: deux appareils et sessions indépendantes sur un même compte, Worker+D1 locaux, bibliothèque, lecture reprise, œuvres vues, déconnexion isolée, CAS, migrations et séparation des comptes");
+  assert.equal((await req("/v1/me","GET",null,mobileToken)).status,200,
+    "La déconnexion TV ne doit pas invalider la session Android mobile");
+  assert.ok((await req("/api/auth/sign-out","POST",{},mobileToken)).status<300);
+  assert.equal((await req("/v1/me","GET",null,mobileToken)).status,401,
+    "Android mobile doit révoquer sa propre session");
+  console.log("PASS: trois appareils simulés et sessions indépendantes, Worker+D1 locaux, bibliothèque, lecture reprise, œuvres vues, suppressions, déconnexion isolée et profils");
 } finally {
   if (worker?.pid) {
     // Sous Linux, -pid désigne notre groupe dédié, jamais celui du runner.
