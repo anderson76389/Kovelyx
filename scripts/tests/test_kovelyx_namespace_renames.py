@@ -36,6 +36,22 @@ def main() -> None:
             if old in text:
                 errors.append(f"Historical Java/Kotlin package reference: {path}: {old}")
 
+    # These first-party Kotlin files live under a directory called "build",
+    # which Git would silently ignore at a NEW package path without git add -f.
+    required = (
+        "apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.kt",
+        "apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/KovelyxIntegrationCredentials.kt",
+        "apps/mobile/composeApp/src/androidPlaystore/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.android.kt",
+        "apps/mobile/composeApp/src/androidFull/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.android.kt",
+        "apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.kt",
+        "apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/AppVersionPolicy.kt",
+        "apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/KovelyxIntegrationCredentials.kt",
+        "apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.desktop.kt",
+    )
+    for required_path in required:
+        if required_path not in files or not (ROOT / required_path).is_file():
+            errors.append(f"Missing essential versioned Kotlin policy source: {required_path}")
+
     mobile = (ROOT / "apps/mobile/androidApp/build.gradle.kts").read_text()
     tv = (ROOT / "apps/tv/app/build.gradle.kts").read_text()
     if 'applicationId = "com.kovelyx.mobile"' not in mobile:
