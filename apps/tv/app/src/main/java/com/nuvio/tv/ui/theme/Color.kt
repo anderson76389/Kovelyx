@@ -52,7 +52,7 @@ data class NuvioSelectionColors(
 )
 
 @Immutable
-data class NuvioMediaColors(
+data class KovelyxMediaColors(
     val heroScrim: Color,
     val imageScrim: Color,
     val posterFallback: Color,
@@ -206,7 +206,7 @@ class NuvioColorScheme(
         mutedForeground = TextPrimary
     )
 
-    val media = NuvioMediaColors(
+    val media = KovelyxMediaColors(
         heroScrim = Scrim,
         imageScrim = ImageScrim,
         posterFallback = PosterFallback,

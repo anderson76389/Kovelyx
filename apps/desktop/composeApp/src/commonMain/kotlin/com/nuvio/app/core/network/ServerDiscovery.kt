@@ -47,7 +47,6 @@ private data class DiscoveryCapabilities(
 
 internal object ServerDiscoveryPolicy {
     private const val discoveryPath = "/.well-known/kovelyx"
-    private const val canonicalOfficialBackend = "https://api.nuvio.tv"
     private val json = Json { ignoreUnknownKeys = true }
 
     fun discoveryUrl(input: String): String {
@@ -106,9 +105,7 @@ internal object ServerDiscoveryPolicy {
         val retired = listOf("nuvio.tv", "nuvioapp.space").any { domain ->
             host == domain || host.endsWith(".$domain")
         }
-        return retired ||
-            matchesBackend(candidateUrl, com.nuvio.app.core.cloud.CloudflareConfig.URL) ||
-            matchesBackend(candidateUrl, canonicalOfficialBackend)
+        return retired || matchesBackend(candidateUrl, com.nuvio.app.core.cloud.CloudflareConfig.URL)
     }
 
     private fun matchesBackend(candidateUrl: String, backendUrl: String): Boolean {

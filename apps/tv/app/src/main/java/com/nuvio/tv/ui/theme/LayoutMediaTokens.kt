@@ -17,7 +17,7 @@ data class NuvioLayoutTokens(
 )
 
 @Immutable
-data class NuvioMediaTokens(
+data class KovelyxMediaTokens(
     val posterAspectRatio: Float,
     val backdropAspectRatio: Float,
     val heroAspectRatio: Float,
@@ -41,8 +41,8 @@ object NuvioLayout {
     )
 }
 
-object NuvioMedia {
-    val tokens = NuvioMediaTokens(
+object KovelyxMedia {
+    val tokens = KovelyxMediaTokens(
         posterAspectRatio = 2f / 3f,
         backdropAspectRatio = 16f / 9f,
         heroAspectRatio = 16f / 9f,

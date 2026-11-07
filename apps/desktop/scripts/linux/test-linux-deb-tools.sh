@@ -15,28 +15,28 @@ for command in dpkg-deb truncate; do
     fi
 done
 
-work_dir="$(mktemp -d "${TMPDIR:-/tmp}/nuvio-deb-test.XXXXXX")"
+work_dir="$(mktemp -d "${TMPDIR:-/tmp}/kovelyx-deb-test.XXXXXX")"
 cleanup() {
     rm -rf "$work_dir"
 }
 trap cleanup EXIT
 
 package_root="$work_dir/package root"
-mkdir -p "$package_root/DEBIAN" "$package_root/usr/share/nuvio-test"
+mkdir -p "$package_root/DEBIAN" "$package_root/usr/share/kovelyx-test"
 cat > "$package_root/DEBIAN/control" <<'CONTROL'
-Package: nuvio-test
+Package: kovelyx-test
 Version: 1.0-1
 Architecture: all
-Maintainer: Nuvio Media <contact@nuvio.tv>
+Maintainer: Kovelyx Packaging Tests <tests@example.invalid>
 Depends: libmpv2 (>= 0.35),
- libwebkit2gtk-4.1-0 | nuvio-webkit-fallback,
+ libwebkit2gtk-4.1-0 | kovelyx-webkit-fallback,
  libxcomposite1,
  libxext6
 Description: Linux DEB tooling fixture
 CONTROL
-printf 'fixture\n' > "$package_root/usr/share/nuvio-test/data file.txt"
+printf 'fixture\n' > "$package_root/usr/share/kovelyx-test/data file.txt"
 
-fixture="$work_dir/Nuvio fixture package.deb"
+fixture="$work_dir/Kovelyx fixture package.deb"
 dpkg-deb --root-owner-group -b "$package_root" "$fixture" >/dev/null
 
 "$patch_script" "$fixture"

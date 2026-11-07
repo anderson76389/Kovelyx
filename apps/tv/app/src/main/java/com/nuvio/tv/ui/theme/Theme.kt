@@ -171,8 +171,8 @@ object NuvioTheme {
     val layout: NuvioLayoutTokens
         get() = NuvioLayout.tokens
 
-    val media: NuvioMediaTokens
-        get() = NuvioMedia.tokens
+    val media: KovelyxMediaTokens
+        get() = KovelyxMedia.tokens
 
     val components: NuvioComponentTokens
         get() = NuvioComponents.tokens
