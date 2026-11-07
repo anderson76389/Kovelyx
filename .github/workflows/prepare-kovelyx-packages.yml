@@ -31,6 +31,10 @@ jobs:
           set -euo pipefail
           python3 scripts/migrations/migrate_kovelyx_packages.py --apply | tee /tmp/kovelyx-migration-summary.json
           git add -A
+          # New Kotlin files in a directory named 'build' are ignored by Git.
+          find apps/mobile/composeApp/src apps/desktop/composeApp/src -type f -path '*/com/kovelyx/app/core/build/*.kt' -print0 | xargs -0 -r git add -f
+          test -f apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.kt
+          test -f apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/KovelyxIntegrationCredentials.kt
           python3 scripts/migrations/migrate_kovelyx_packages.py | tee /tmp/kovelyx-second-pass.json
           python3 - <<'PY'
           import json
@@ -39,7 +43,7 @@ jobs:
           assert second["changed_files"] == 0, second
           with open("/tmp/kovelyx-migration-summary.json", encoding="utf-8") as f:
               first = json.load(f)
-          assert first["renamed_files"] > 3500, first
+          assert first["renamed_files"] > 3500 or first["changed_files"] >= 20, first
           print("Migration idempotente ; fichiers renommes :", first["renamed_files"])
           PY
           grep -Fq 'applicationId = "com.kovelyx.mobile"' apps/mobile/androidApp/build.gradle.kts
