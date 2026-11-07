@@ -1,4 +1,4 @@
-package com.nuvio.app.core.build
+package com.kovelyx.app.core.build
 
 enum class TrailerPlaybackMode {
     IN_APP,

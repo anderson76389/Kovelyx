@@ -1,4 +1,4 @@
-package com.nuvio.app.core.build
+package com.kovelyx.app.core.build
 
 private val isWindowsDesktop = System.getProperty("os.name")
     ?.startsWith("Windows", ignoreCase = true)

@@ -1,4 +1,4 @@
-package com.nuvio.app.core.build
+package com.kovelyx.app.core.build
 
 actual object AppFeaturePolicy {
     actual val pluginsEnabled: Boolean = false

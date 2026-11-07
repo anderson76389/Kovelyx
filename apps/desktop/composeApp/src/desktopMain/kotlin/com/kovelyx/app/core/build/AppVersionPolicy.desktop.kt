@@ -1,4 +1,4 @@
-package com.nuvio.app.core.build
+package com.kovelyx.app.core.build
 
 actual object AppVersionPolicy {
     actual val displayVersionName: String = AppVersionConfig.DESKTOP_VERSION_NAME
