@@ -34,6 +34,8 @@ class ServerConfigurationStore @Inject constructor(
                 tvLogin = tvLogin
             ),
             isCustom = true,
+            // Preserve stored custom backend credentials while switching discovery to Kovelyx.
+            // Existing sessions and local library data must not be cleared.
             discoveryUrl = preferences.getString(KEY_DISCOVERY_URL, null),
             tvLoginWebBaseUrl = "$backendUrl/tv-login",
             deviceLoginWebBaseUrl = "$backendUrl/link",

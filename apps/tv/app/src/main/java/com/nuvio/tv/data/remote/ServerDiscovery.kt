@@ -70,8 +70,11 @@ internal object ServerDiscoveryPolicy {
         if (parsed.username.isNotEmpty() || parsed.password.isNotEmpty()) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.INVALID_URL)
         }
-        val suffix = "/.well-known/nuvio"
-        val basePath = parsed.encodedPath.removeSuffix(suffix).trimEnd('/')
+        // Always discover independent Kovelyx servers, even when a user pastes an old URL.
+        // Do not issue an HTTP request to the historical discovery endpoint.
+        val suffix = "/.well-known/kovelyx"
+        val legacySuffix = "/.well-known/nuvio"
+        val basePath = parsed.encodedPath.removeSuffix(suffix).removeSuffix(legacySuffix).trimEnd('/')
         return parsed.newBuilder()
             .encodedPath(if (basePath.isBlank()) suffix else "$basePath$suffix")
             .query(null)
@@ -84,7 +87,7 @@ internal object ServerDiscoveryPolicy {
         val payload = runCatching { json.decodeFromString<DiscoveryDocument>(document) }
             .getOrElse { throw ServerDiscoveryException(ServerDiscoveryFailure.INVALID_DOCUMENT, cause = it) }
         if (payload.version != 1) throw ServerDiscoveryException(ServerDiscoveryFailure.UNSUPPORTED_VERSION)
-        if (!payload.service.equals("nuvio", ignoreCase = true)) {
+        if (!payload.service.equals("kovelyx", ignoreCase = true)) {
             throw ServerDiscoveryException(ServerDiscoveryFailure.WRONG_SERVICE)
         }
         if (!payload.selfHosted) throw ServerDiscoveryException(ServerDiscoveryFailure.NOT_SELF_HOSTED)
