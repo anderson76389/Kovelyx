@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia : **6696**.
+Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia : **17**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -41,91 +41,27 @@ Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia
 
 ### Références à vérifier en priorité
 
-- `apps/tv/app/build.gradle.kts:109`
-- `apps/tv/app/build.gradle.kts:419`
-- `apps/tv/app/build.gradle.kts:451`
-- `apps/tv/baselineprofile/build.gradle.kts:8`
-- `apps/tv/scripts/perf_baseline.sh:22`
-- `apps/tv/scripts/perf_baseline.sh:27`
-- `apps/tv/app/src/testFull/java/com/nuvio/tv/core/plugin/FetchResponseHeadersTest.kt:1`
-- `apps/tv/app/src/testFull/java/com/nuvio/tv/core/plugin/cloudstream/HomeViewModelCompatStubTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/core/profile/ProtectedProfilePreferencesTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/player/Media3VideoDecodeSmokeTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/player/PlayerProgressFillTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:15`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:16`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:17`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:18`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:19`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/library/LibraryListDialogsTest.kt:20`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:20`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:21`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:22`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:23`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:24`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/TrackingSettingsOverviewTest.kt:25`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:18`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:19`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:20`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:21`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/PlaybackSettingsOrganizationTest.kt:22`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:17`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:18`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/settings/MdbListAccountDialogTest.kt:19`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:32`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:33`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:34`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:35`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:36`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:37`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:38`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:39`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:40`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/ui/screens/detail/EpisodeShuffleTvTest.kt:41`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:5`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:8`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:9`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:10`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveLibraryTest.kt:11`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:5`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveScrobbleTest.kt:6`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListTimestampTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveAccountTest.kt:1`
-- `apps/tv/app/src/androidTest/java/com/nuvio/tv/data/mdblist/MdbListLiveAccountTest.kt:5`
-- `apps/tv/app/src/full/java/com/lagradost/cloudstream3/ui/home/HomeViewModel.kt:11`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:3`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:4`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:5`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:6`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:7`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:8`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:9`
-- `apps/tv/app/src/full/java/com/nuvio/tv/di/PluginModule.kt:10`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/AbiSelector.kt:4`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkInstaller.kt:11`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:6`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:7`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateViewModel.kt:8`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/ApkDownloader.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:3`
-- `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:4`
-- …et 6616 autres correspondances (plafond d'affichage).
+- `apps/tv/app/src/main/java/com/kovelyx/tv/data/remote/ServerDiscovery.kt:123`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/core/deeplink/DeepLinkParserTest.kt:29`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/core/deeplink/DeepLinkParserTest.kt:37`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/core/deeplink/DeepLinkParserTest.kt:53`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/core/deeplink/DeepLinkParserTest.kt:61`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/core/deeplink/DeepLinkParserTest.kt:69`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/core/deeplink/DeepLinkParserTest.kt:75`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:135`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:136`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:141`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:142`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:149`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:150`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:153`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:158`
+- `apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:160`
+- `apps/tv/scripts/release_notes/rewrites.py:117`
 
 ## Android
 
-Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia : **23**.
+Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia : **23**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -133,7 +69,7 @@ Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia
 | `github.com` | 117 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 67 |
-| `schemas.android.com` | 47 |
+| `schemas.android.com` | 48 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
 | `.` | 21 |
@@ -162,33 +98,33 @@ Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia
 
 ### Références à vérifier en priorité
 
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:15`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:18`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:19`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:29`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:30`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
-- `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:109`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:25`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:33`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:49`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:57`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:65`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:71`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:13`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:14`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:15`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:18`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:19`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:29`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:30`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:153`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:158`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:46`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:61`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68`
+- `apps/mobile/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:108`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:109`
 - `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 
 ## Windows
 
-Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia : **24**.
+Fichiers texte examinés : **1832** ; références statiques à Nuvio/NuvioMedia : **22**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -196,7 +132,7 @@ Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia
 | `github.com` | 132 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 80 |
-| `schemas.android.com` | 49 |
+| `schemas.android.com` | 50 |
 | `media.example.com` | 37 |
 | `www.imdb.com` | 25 |
 | `.` | 21 |
@@ -225,29 +161,27 @@ Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia
 
 ### Références à vérifier en priorité
 
-- `apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/DesktopCollectionImportBridge.kt:236`
-- `apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/Main.kt:384`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:25`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:33`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:49`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:57`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:65`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/deeplink/AppUrlBridgeTest.kt:71`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:13`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:14`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:17`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:25`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/core/network/ServerDiscoveryPolicyTest.kt:27`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:153`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/player/InfusePlaybackTest.kt:158`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:46`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:61`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:64`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/nuvio/app/features/simkl/SimklPkceTest.kt:68`
-- `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
-- `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:50`
-- `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:106`
-- `apps/desktop/scripts/linux/test-linux-deb-tools.sh:30`
+- `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/DesktopCollectionImportBridge.kt:236`
+- `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:384`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:25`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:33`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:49`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:57`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:65`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:71`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:13`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:14`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:17`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:25`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:27`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:153`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:158`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:46`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:61`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68`
+- `apps/desktop/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106`
+- `apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:105`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 
 ## Dépendances natives manquantes
