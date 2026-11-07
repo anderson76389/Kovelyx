@@ -57,6 +57,34 @@ def main() -> None:
         if required_path not in files or not (ROOT / required_path).is_file():
             errors.append(f"Missing essential versioned Kotlin policy source: {required_path}")
 
+    # Installed WorkManager jobs store historic qualified class names. Keep the
+    # app-specific factory active, or queued downloads/reminders will fail.
+    app_entries = (
+        ("apps/mobile", "apps/mobile/composeApp/src/androidMain/kotlin/com/kovelyx/app/KovelyxApplication.kt"),
+        ("apps/desktop", "apps/desktop/composeApp/src/androidMain/kotlin/com/kovelyx/app/KovelyxApplication.kt"),
+    )
+    for app_root, application in app_entries:
+        app_source = (ROOT / application).read_text()
+        if "Configuration.Provider" not in app_source or "KovelyxUpgradeWorkerFactory()" not in app_source:
+            errors.append(f"Missing custom WorkManager configuration in {application}")
+        if "WorkManager.getInstance(this)" not in app_source:
+            errors.append(f"Missing queued-job recovery at application startup: {application}")
+        manifest = (ROOT / app_root / "androidApp/src/main/AndroidManifest.xml").read_text()
+        if 'android:name="androidx.work.WorkManagerInitializer"' not in manifest or 'tools:node="remove"' not in manifest:
+            errors.append(f"WorkManager auto-init may override custom worker factory: {app_root}")
+        factory_path = ROOT / app_root / "composeApp/src/androidMain/kotlin/com/kovelyx/app/core/compat/KovelyxUpgradeWorkerFactory.kt"
+        factory_source = factory_path.read_text()
+        for worker in (
+            "com.nuvio.app.features.downloads.DownloadsTransferWorker",
+            "com.nuvio.app.features.notifications.EpisodeReleaseNotificationWorker",
+        ):
+            if worker not in factory_source:
+                errors.append(f"Queued worker compatibility missing in {factory_path}: {worker}")
+
+    tv_manifest = (ROOT / "apps/tv/app/src/main/AndroidManifest.xml").read_text()
+    if 'android:name=".KovelyxApplication"' not in tv_manifest:
+        errors.append("Renamed Android TV Application class missing in manifest")
+
     mobile = (ROOT / "apps/mobile/androidApp/build.gradle.kts").read_text()
     tv = (ROOT / "apps/tv/app/build.gradle.kts").read_text()
     if 'applicationId = "com.kovelyx.mobile"' not in mobile:
