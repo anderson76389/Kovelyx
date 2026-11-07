@@ -196,6 +196,7 @@ def main():
             "  Cette fonction nécessite le Worker Cloudflare et la migration D1 0004_profile_media_gifs ; "
             "installer l’application seule ne met pas le serveur à jour.\n"
             "- Synchronisation des addons : URL configurée, ordre, nom et activation ; suppressions et reprise hors ligne.\n"
+            "- Bibliothèque, œuvres vues et progression : scénarios de synchronisation validés entre trois sessions de test indépendantes (Windows, Android et TV) sur Worker + D1 locaux ; essais sur appareils physiques toujours nécessaires.\n"
             "- Regroupement des envois TV, quatre requêtes de manifeste au maximum et reprise des suppressions.\n\n"
             f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
