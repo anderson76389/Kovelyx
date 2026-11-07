@@ -4,11 +4,11 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia : **6736**.
+Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia : **6696**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
-| `example.com` | 227 |
+| `example.com` | 230 |
 | `www.themoviedb.org` | 131 |
 | `media.example.com` | 48 |
 | `trakt.tv` | 39 |
@@ -16,8 +16,8 @@ Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia
 | `h` | 34 |
 | `www.imdb.com` | 31 |
 | `cdn.example.com` | 28 |
+| `backend.example.com` | 27 |
 | `...` | 26 |
-| `backend.example.com` | 26 |
 | `addon.example` | 26 |
 | `www.youtube.com` | 24 |
 | `.` | 20 |
@@ -121,11 +121,11 @@ Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:1`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:3`
 - `apps/tv/app/src/full/java/com/nuvio/tv/updater/UpdateRepository.kt:4`
-- …et 6656 autres correspondances (plafond d'affichage).
+- …et 6616 autres correspondances (plafond d'affichage).
 
 ## Android
 
-Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia : **60**.
+Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia : **23**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -184,48 +184,11 @@ Fichiers texte examinés : **1445** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:109`
 - `apps/mobile/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:110`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1951`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1983`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:357`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:400`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-el/strings.xml:142`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-el/strings.xml:183`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-el/strings.xml:184`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2040`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2072`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2073`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:357`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2183`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2215`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2216`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:355`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:398`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-es/strings.xml:399`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:352`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:511`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273`
-- `apps/mobile/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274`
 - `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 
 ## Windows
 
-Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia : **61**.
+Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia : **24**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -284,43 +247,6 @@ Fichiers texte examinés : **1831** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/iosMain/kotlin/com/nuvio/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 - `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:50`
 - `apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/core/network/ServerDiscovery.kt:106`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1952`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1984`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-cs/strings.xml:1985`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-vi/strings.xml:357`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-vi/strings.xml:400`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-vi/strings.xml:401`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bg/strings.xml:352`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ur/strings.xml:357`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ur/strings.xml:400`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ur/strings.xml:401`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:142`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:183`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-el/strings.xml:184`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2043`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2075`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-pl/strings.xml:2076`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:358`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:401`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-bn/strings.xml:402`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:357`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:400`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-hr/strings.xml:401`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2184`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2216`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-sk/strings.xml:2217`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:355`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:398`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-es/strings.xml:399`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:352`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:395`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-ru/strings.xml:396`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:352`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:395`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nl/strings.xml:396`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:511`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1273`
-- `apps/desktop/composeApp/src/commonMain/composeResources/values-nb/strings.xml:1274`
 - `apps/desktop/scripts/linux/test-linux-deb-tools.sh:30`
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
 
