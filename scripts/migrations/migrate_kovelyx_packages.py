@@ -28,8 +28,8 @@ TEXT_EXTENSIONS = frozenset({
     ".cpp", ".cfg", ".txt", ".sh", ".py", ".yml", ".yaml", ".plist",
     ".def", ".map", ".md", ".html", ".xcconfig", ".js",
 })
-TARGETS = ("apps/mobile/", "apps/desktop/", "apps/tv/", "scripts/", ".github/workflows/")
-SKIP_PREFIX = ("apps/mobile/.gradle/", "apps/desktop/.gradle/", "apps/tv/.gradle/")
+TARGETS = ("apps/mobile/", "apps/desktop/", "apps/tv/", "scripts/")
+SKIP_PREFIX = ("apps/mobile/.gradle/", "apps/desktop/.gradle/", "apps/tv/.gradle/", "scripts/migrations/")
 
 
 def tracked_files(root: Path) -> list[str]:
