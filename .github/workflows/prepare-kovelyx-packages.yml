@@ -29,7 +29,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m py_compile scripts/migrations/migrate_kovelyx_packages.py
           python3 scripts/migrations/migrate_kovelyx_packages.py --apply | tee /tmp/kovelyx-migration-summary.json
           git add -A
           python3 scripts/migrations/migrate_kovelyx_packages.py | tee /tmp/kovelyx-second-pass.json
