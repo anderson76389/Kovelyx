@@ -1,6 +1,8 @@
 package com.kovelyx.app
 
 import android.app.Application
+import androidx.work.Configuration
+import com.kovelyx.app.core.compat.KovelyxUpgradeWorkerFactory
 import android.os.Build
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
@@ -19,7 +21,11 @@ import com.kovelyx.app.core.poster.CustomPosterFallbackInterceptor
  * image request. Without this, Coil's auto-init ContentProvider creates the singleton
  * before MainActivity.onCreate, and interceptors registered later are ignored.
  */
-class NuvioApplication : Application(), SingletonImageLoader.Factory {
+class NuvioApplication : Application(), SingletonImageLoader.Factory, Configuration.Provider {
+    override val workManagerConfiguration: Configuration by lazy {
+        Configuration.Builder().setWorkerFactory(KovelyxUpgradeWorkerFactory()).build()
+    }
+
 
     override fun newImageLoader(context: android.content.Context): ImageLoader {
         return ImageLoader.Builder(context)

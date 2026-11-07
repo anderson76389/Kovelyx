@@ -32,6 +32,11 @@ def main() -> None:
         if b"\0" in payload:
             continue
         text = payload.decode("utf-8", errors="replace")
+        if path.endswith("/KovelyxUpgradeWorkerFactory.kt"):
+            # Persisted WorkManager class strings are essential for in-place upgrades.
+            # Permit only these two exact historical names, not arbitrary old imports.
+            text = text.replace("com.nuvio.app.features.downloads.DownloadsTransferWorker", "")
+            text = text.replace("com.nuvio.app.features.notifications.EpisodeReleaseNotificationWorker", "")
         for old in LEGACY_DOTS + LEGACY_PATHS:
             if old in text:
                 errors.append(f"Historical Java/Kotlin package reference: {path}: {old}")
