@@ -2,6 +2,11 @@ name: Diagnostiquer la synchronisation Cloudflare déployée (lecture seule)
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cloudflare-readiness.yml'
+      - 'services/kovelyx-cloudflare/src/catalogue-sync.mjs'
+      - 'services/kovelyx-cloudflare/src/index.mjs'
 
 permissions:
   contents: read
@@ -14,7 +19,7 @@ jobs:
     env:
       KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
     steps:
-      - name: Vérifier les tables Better Auth et la catégorie œuvres vues
+      - name: Vérifier Cloudflare, catalogues et schémas sans toucher aux comptes
         shell: bash
         run: |
           set -euo pipefail
@@ -32,8 +37,8 @@ jobs:
           assert result.get('service') == 'Kovelyx Cloud', 'Service inattendu'
           assert result.get('provider') == 'Cloudflare D1', 'Mauvais backend'
           assert result.get('status') == 'ok', 'Backend non prêt'
-          assert result.get('schema') == '0004_profile_media_gifs', 'Migration watched non vérifiée'
-          print('OK : Better Auth configuré et schéma D1 0004 détecté.')
+          assert result.get('schema') == '0004_profile_media_gifs', 'Migration images de profil non vérifiée'\n          assert result.get('profilePinSchema') == 1, 'Migration PIN Cloudflare absente'\n          assert result.get('catalogueSnapshotSchema') == 1, ('Le Worker de production est trop ancien pour synchroniser les catalogues ; '\n              'déployer services/kovelyx-cloudflare après sauvegarde D1, sans supprimer les comptes.')
+          print('OK : Better Auth, D1 0004, PIN et protocole de synchronisation des catalogues détectés.')
           print('Ce diagnostic ne prouve pas encore la synchronisation entre appareils physiques.')
           PY
-          echo '✅ Worker et schéma D1 opérationnels. Les connexions réelles multi-appareils doivent encore être testées.' >> "$GITHUB_STEP_SUMMARY"
+          echo '✅ Worker, D1 et protocole catalogues compatibles. Les connexions réelles multi-appareils restent à tester.' >> "$GITHUB_STEP_SUMMARY"
