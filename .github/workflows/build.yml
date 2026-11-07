@@ -164,7 +164,7 @@ jobs:
         working-directory: apps/tv
         shell: bash
         run: |
-          ./gradlew :app:testFullDebugUnitTest --tests 'com.nuvio.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
+          ./gradlew :app:testFullDebugUnitTest --tests 'com.kovelyx.tv.core.deeplink.DeepLinkParserTest' --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Pkovelyx.app.versionName="$KOVELYX_BUILD_VERSION" -Pkovelyx.app.versionCode="$KOVELYX_BUILD_CODE"
       - name: Vérifier l'APK universel et son identité TV
         shell: bash
         run: |

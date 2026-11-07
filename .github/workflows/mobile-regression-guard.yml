@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - 'apps/mobile/**'
-      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/nuvio/app/features/watchprogress/**'
+      - 'apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/features/watchprogress/**'
       - '.github/workflows/mobile-regression-guard.yml'
   push:
     branches: [main]
