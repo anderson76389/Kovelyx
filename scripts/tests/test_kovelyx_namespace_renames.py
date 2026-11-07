@@ -10,8 +10,8 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-LEGACY_DOTS = ("com.kovelyx.app", "com.kovelyx.android", "com.kovelyx.tv")
-LEGACY_PATHS = ("com/kovelyx/app", "com/kovelyx/android", "com/kovelyx/tv")
+LEGACY_DOTS = ("com.nuvio.app", "com.nuvio.android", "com.nuvio.tv")
+LEGACY_PATHS = ("com/nuvio/app", "com/nuvio/android", "com/nuvio/tv")
 SUFFIXES = (".kt", ".kts", ".java", ".xml", ".pro", ".properties", ".gradle")
 APP_ROOTS = ("apps/tv/", "apps/mobile/", "apps/desktop/")
 

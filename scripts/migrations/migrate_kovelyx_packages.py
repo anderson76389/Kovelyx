@@ -29,7 +29,7 @@ TEXT_EXTENSIONS = frozenset({
     ".def", ".map", ".md", ".html", ".xcconfig", ".js",
 })
 TARGETS = ("apps/mobile/", "apps/desktop/", "apps/tv/", "scripts/")
-SKIP_PREFIX = ("apps/mobile/.gradle/", "apps/desktop/.gradle/", "apps/tv/.gradle/", "scripts/migrations/")
+SKIP_PREFIX = ("apps/mobile/.gradle/", "apps/desktop/.gradle/", "apps/tv/.gradle/", "scripts/migrations/", "scripts/tests/test_kovelyx_namespace_renames.py")
 
 
 def tracked_files(root: Path) -> list[str]:
