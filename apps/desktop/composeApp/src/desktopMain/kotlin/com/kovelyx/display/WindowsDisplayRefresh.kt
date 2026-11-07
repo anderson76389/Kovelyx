@@ -1,6 +1,6 @@
 package com.kovelyx.display
 
-import com.nuvio.app.core.storage.DesktopStorage
+import com.kovelyx.app.core.storage.DesktopStorage
 import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer

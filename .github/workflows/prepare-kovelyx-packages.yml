@@ -1,0 +1,73 @@
+name: Preparer migration packages Kovelyx sans changer l'identite APK
+
+on:
+  push:
+    branches:
+      - migration/kovelyx-java-packages
+    paths:
+      - '.github/workflows/prepare-kovelyx-packages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: migrate-kovelyx-java-packages
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    if: github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/migration/kovelyx-java-packages'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Appliquer la migration des packages Kotlin et Java
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/migrations/migrate_kovelyx_packages.py --apply | tee /tmp/kovelyx-migration-summary.json
+          git add -A
+          # New Kotlin files in a directory named 'build' are ignored by Git.
+          find apps/mobile/composeApp/src apps/desktop/composeApp/src -type f -path '*/com/kovelyx/app/core/build/*.kt' -print0 | xargs -0 -r git add -f
+          test -f apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/AppFeaturePolicy.kt
+          test -f apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/build/KovelyxIntegrationCredentials.kt
+          python3 scripts/migrations/migrate_kovelyx_packages.py | tee /tmp/kovelyx-second-pass.json
+          python3 - <<'PY'
+          import json
+          with open("/tmp/kovelyx-second-pass.json", encoding="utf-8") as f:
+              second = json.load(f)
+          assert second["changed_files"] == 0, second
+          with open("/tmp/kovelyx-migration-summary.json", encoding="utf-8") as f:
+              first = json.load(f)
+          assert first["renamed_files"] > 3500 or first["changed_files"] >= 20, first
+          print("Migration idempotente ; fichiers renommes :", first["renamed_files"])
+          PY
+          grep -Fq 'applicationId = "com.kovelyx.mobile"' apps/mobile/androidApp/build.gradle.kts
+          grep -Fq 'applicationId = "com.kovelyx.tv"' apps/tv/app/build.gradle.kts
+          if git grep -n -E '^(package|import) com[.]nuvio[.](app|android|tv)' -- apps/mobile apps/desktop apps/tv; then
+            echo "::error::Des packages ou imports historiques restent actifs"
+            exit 1
+          fi
+          git diff --cached --stat | tail -40
+          git diff --cached --name-only | wc -l
+      - name: Pousser uniquement sur la branche de migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then
+            echo "Aucune migration supplementaire necessaire."
+            exit 0
+          fi
+          git config user.name "kovelyx-migration[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refactor: migrate Kotlin and Java packages to com.kovelyx"
+          git push origin "HEAD:refs/heads/migration/kovelyx-java-packages"
+      - name: Bilan de la migration
+        shell: bash
+        run: |
+          cat /tmp/kovelyx-migration-summary.json >> "$GITHUB_STEP_SUMMARY"
+          echo "Identifiants APK, secrets Cloudflare, cache local, schemas deep link et binaires preserves." >> "$GITHUB_STEP_SUMMARY"

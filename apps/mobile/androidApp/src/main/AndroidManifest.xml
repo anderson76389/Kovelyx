@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -9,7 +10,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
-        android:name="com.nuvio.app.KovelyxApplication"
+        android:name="com.kovelyx.app.KovelyxApplication"
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="false"
         android:icon="@drawable/ic_kovelyx"
@@ -21,13 +22,26 @@
         android:localeConfig="@xml/locale_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.Nuvio">
+        <!-- Use the application's configured WorkerFactory so jobs queued before
+             the source-package rename continue after an in-place APK update. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <meta-data
             android:name="io.sentry.auto-init"
             android:value="false" />
 
         <activity
             android:exported="true"
-            android:name="com.nuvio.app.MainActivity"
+            android:name="com.kovelyx.app.MainActivity"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:supportsPictureInPicture="true"
             android:theme="@style/Theme.Nuvio.Splash">
@@ -72,7 +86,7 @@
         </activity>
 
         <activity
-            android:name="com.nuvio.app.launcher.AppIconDefault"
+            android:name="com.kovelyx.app.launcher.AppIconDefault"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:enabled="true"
             android:exported="true"
@@ -87,7 +101,7 @@
         </activity>
 
         <activity
-            android:name="com.nuvio.app.launcher.AppIconArcticBlue"
+            android:name="com.kovelyx.app.launcher.AppIconArcticBlue"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:enabled="false"
             android:exported="true"
@@ -102,7 +116,7 @@
         </activity>
 
         <activity
-            android:name="com.nuvio.app.launcher.AppIconEmerald"
+            android:name="com.kovelyx.app.launcher.AppIconEmerald"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:enabled="false"
             android:exported="true"
@@ -117,7 +131,7 @@
         </activity>
 
         <activity
-            android:name="com.nuvio.app.launcher.AppIconRoseGold"
+            android:name="com.kovelyx.app.launcher.AppIconRoseGold"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:enabled="false"
             android:exported="true"
@@ -132,7 +146,7 @@
         </activity>
 
         <activity
-            android:name="com.nuvio.app.launcher.AppIconCopper"
+            android:name="com.kovelyx.app.launcher.AppIconCopper"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:enabled="false"
             android:exported="true"
@@ -147,7 +161,7 @@
         </activity>
 
         <activity
-            android:name="com.nuvio.app.launcher.AppIconGraphite"
+            android:name="com.kovelyx.app.launcher.AppIconGraphite"
             android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
             android:enabled="false"
             android:exported="true"
@@ -162,17 +176,17 @@
         </activity>
 
         <service
-            android:name="com.nuvio.app.features.player.PlayerNowPlayingService"
+            android:name="com.kovelyx.app.features.player.PlayerNowPlayingService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback"
             android:stopWithTask="false" />
 
         <receiver
-            android:name="com.nuvio.app.features.player.PlayerNowPlayingActionReceiver"
+            android:name="com.kovelyx.app.features.player.PlayerNowPlayingActionReceiver"
             android:exported="false" />
 
         <receiver
-            android:name="com.nuvio.app.features.downloads.DownloadsNotificationActionReceiver"
+            android:name="com.kovelyx.app.features.downloads.DownloadsNotificationActionReceiver"
             android:exported="false" />
 
         <provider

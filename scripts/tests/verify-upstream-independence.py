@@ -58,7 +58,7 @@ ACCOUNT_ALLOW: set[tuple[str, str]] = set()
 REJECT_ONLY_ALLOW = {
     (
         "apps/desktop/composeApp/src/commonMain/kotlin/"
-        "com/nuvio/app/core/network/ServerDiscovery.kt",
+        "com/kovelyx/app/core/network/ServerDiscovery.kt",
         "https://api.nuvio.tv",
     ),
 }

@@ -28,8 +28,8 @@ class CompleteCatalogueRoundTripTest {
         val raw = json.parseToJsonElement(original.decodeToString()).jsonArray
         assertEquals(18, raw.size)
         assertEquals(756, raw.sumOf { it.jsonObject["folders"]!!.jsonArray.size })
-        val decoded = json.decodeFromJsonElement<List<com.nuvio.app.features.collection.Collection>>(raw)
-        val payload = com.nuvio.app.features.collection.CollectionJsonPreserver.merge(json, raw, decoded).toString()
+        val decoded = json.decodeFromJsonElement<List<com.kovelyx.app.features.collection.Collection>>(raw)
+        val payload = com.kovelyx.app.features.collection.CollectionJsonPreserver.merge(json, raw, decoded).toString()
         assertTrue(payload.encodeToByteArray().size <= CATALOGUE_MAX_BYTES, "Les valeurs par défaut ne doivent pas faire dépasser 4 Mo")
         var head: CatalogueHead? = null
         val chunks = mutableMapOf<String, MutableList<CatalogueChunk>>()

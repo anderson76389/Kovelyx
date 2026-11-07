@@ -2487,7 +2487,7 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_create(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_create(
     JNIEnv *env,
     jobject,
     jlong hostViewPtr,
@@ -2548,23 +2548,23 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_create(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_warmupWebView2(JNIEnv *env, jobject, jstring controlsPageUrl) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_warmupWebView2(JNIEnv *env, jobject, jstring controlsPageUrl) {
     std::string controlsPageUrlText = jstringToUtf8(env, controlsPageUrl);
     return startWebView2Warmup(controlsPageUrlText) ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_shutdownWebView2Warmup(JNIEnv *, jobject) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_shutdownWebView2Warmup(JNIEnv *, jobject) {
     stopWebView2Warmup();
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowsDisplaySleepInhibited(JNIEnv *, jobject, jboolean inhibited) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setWindowsDisplaySleepInhibited(JNIEnv *, jobject, jboolean inhibited) {
     return setDisplaySleepInhibited(inhibited == JNI_TRUE) ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_dispose(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_dispose(JNIEnv *, jobject, jlong handle) {
     if (handle == 0) return;
     auto *holder = reinterpret_cast<std::shared_ptr<WindowsMpvWebPlayer> *>(handle);
     std::shared_ptr<WindowsMpvWebPlayer> player = *holder;
@@ -2573,20 +2573,20 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_dispose(JNIEnv *, 
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_updateControls(JNIEnv *env, jobject, jlong handle, jstring controlsJson) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_updateControls(JNIEnv *env, jobject, jlong handle, jstring controlsJson) {
     auto player = playerFromHandle(handle);
     std::string controlsJsonText = jstringToUtf8(env, controlsJson);
     if (player) player->updateControlsJson(controlsJsonText);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_requestFocus(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_requestFocus(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     if (player) player->requestFocus();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_beginWindowDrag(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_beginWindowDrag(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     if (player) player->beginWindowDrag();
 }
@@ -2809,7 +2809,7 @@ static LRESULT CALLBACK pipWindowSubclassProc(HWND hwnd, UINT message, WPARAM wP
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowResizable(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setWindowResizable(
     JNIEnv *, jobject, jlong windowHwnd, jboolean enabled
 ) {
     HWND window = (HWND)(intptr_t)windowHwnd;
@@ -2850,7 +2850,7 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowResizable
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowAspectRatio(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setWindowAspectRatio(
     JNIEnv *, jobject, jlong windowHwnd, jfloat ratio
 ) {
     HWND window = (HWND)(intptr_t)windowHwnd;
@@ -2861,7 +2861,7 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowAspectRat
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_layoutNativeSubviews(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_layoutNativeSubviews(
     JNIEnv *, jobject, jlong handle
 ) {
     auto player = playerFromHandle(handle);
@@ -2871,7 +2871,7 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_layoutNativeSubvie
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_reparentSurfaceNative(JNIEnv *, jobject, jlong handle, jlong hostViewPtr) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_reparentSurfaceNative(JNIEnv *, jobject, jlong handle, jlong hostViewPtr) {
     auto player = playerFromHandle(handle);
     if (player) {
         HWND host = (HWND)(intptr_t)hostViewPtr;
@@ -2886,139 +2886,139 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_reparentSurfaceNat
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setPaused(JNIEnv *, jobject, jlong handle, jboolean paused) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setPaused(JNIEnv *, jobject, jlong handle, jboolean paused) {
     auto player = playerFromHandle(handle);
     if (player) player->setPaused(paused == JNI_TRUE);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_seekTo(JNIEnv *, jobject, jlong handle, jlong positionMs) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_seekTo(JNIEnv *, jobject, jlong handle, jlong positionMs) {
     auto player = playerFromHandle(handle);
     if (player) player->seekToMilliseconds(positionMs);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_seekBy(JNIEnv *, jobject, jlong handle, jlong offsetMs) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_seekBy(JNIEnv *, jobject, jlong handle, jlong offsetMs) {
     auto player = playerFromHandle(handle);
     if (player) player->seekByMilliseconds(offsetMs);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setSpeed(JNIEnv *, jobject, jlong handle, jfloat speed) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setSpeed(JNIEnv *, jobject, jlong handle, jfloat speed) {
     auto player = playerFromHandle(handle);
     if (player) player->setSpeed(speed);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_adjustVolume(JNIEnv *, jobject, jlong handle, jfloat delta) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_adjustVolume(JNIEnv *, jobject, jlong handle, jfloat delta) {
     auto player = playerFromHandle(handle);
     if (player) player->adjustVolume(delta);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setVolume(JNIEnv *, jobject, jlong handle, jfloat level) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setVolume(JNIEnv *, jobject, jlong handle, jfloat level) {
     auto player = playerFromHandle(handle);
     if (player) player->setVolume(level);
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_durationMs(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_durationMs(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player ? player->durationMs() : 0;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_positionMs(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_positionMs(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player ? player->positionMs() : 0;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_bufferedPositionMs(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_bufferedPositionMs(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player ? player->bufferedPositionMs() : 0;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_isLoading(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_isLoading(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player && player->isLoading() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_isEnded(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_isEnded(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player && player->isEnded() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_isPaused(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_isPaused(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return !player || player->isPaused() ? JNI_TRUE : JNI_FALSE;
 }
 
 extern "C" JNIEXPORT jfloat JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_speed(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_speed(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player ? (jfloat)player->speed() : 1.0f;
 }
 
 extern "C" JNIEXPORT jfloat JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_volume(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_volume(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return player ? (jfloat)player->volume() : 1.0f;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setResizeMode(JNIEnv *, jobject, jlong handle, jint mode) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setResizeMode(JNIEnv *, jobject, jlong handle, jint mode) {
     auto player = playerFromHandle(handle);
     if (player) player->setResizeMode(mode);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_audioTracksJson(JNIEnv *env, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_audioTracksJson(JNIEnv *env, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return newJavaStringUtf8(env, player ? player->audioTracksJson() : "[]");
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_subtitleTracksJson(JNIEnv *env, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_subtitleTracksJson(JNIEnv *env, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     return newJavaStringUtf8(env, player ? player->subtitleTracksJson() : "[]");
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_selectAudioTrack(JNIEnv *, jobject, jlong handle, jint trackId) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_selectAudioTrack(JNIEnv *, jobject, jlong handle, jint trackId) {
     auto player = playerFromHandle(handle);
     if (player) player->selectAudioTrackId(trackId);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_selectSubtitleTrack(JNIEnv *, jobject, jlong handle, jint trackId) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_selectSubtitleTrack(JNIEnv *, jobject, jlong handle, jint trackId) {
     auto player = playerFromHandle(handle);
     if (player) player->selectSubtitleTrackId(trackId);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_addSubtitleUrl(JNIEnv *env, jobject, jlong handle, jstring url) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_addSubtitleUrl(JNIEnv *env, jobject, jlong handle, jstring url) {
     auto player = playerFromHandle(handle);
     if (player) player->addSubtitleUrl(jstringToUtf8(env, url));
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_clearExternalSubtitles(JNIEnv *, jobject, jlong handle) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_clearExternalSubtitles(JNIEnv *, jobject, jlong handle) {
     auto player = playerFromHandle(handle);
     if (player) player->removeExternalSubtitles();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_clearExternalSubtitlesAndSelect(JNIEnv *, jobject, jlong handle, jint trackId) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_clearExternalSubtitlesAndSelect(JNIEnv *, jobject, jlong handle, jint trackId) {
     auto player = playerFromHandle(handle);
     if (player) player->removeExternalSubtitlesAndSelect(trackId);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_applyWindowChrome(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_applyWindowChrome(
     JNIEnv *,
     jobject,
     jlong windowHwnd,
@@ -3045,7 +3045,7 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_applyWindowChrome(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowBorderlessFullscreen(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setWindowBorderlessFullscreen(
     JNIEnv *,
     jobject,
     jlong windowHwnd,
@@ -3066,13 +3066,13 @@ Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setWindowBorderles
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_setSubtitleDelayMs(JNIEnv *, jobject, jlong handle, jint delayMs) {
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setSubtitleDelayMs(JNIEnv *, jobject, jlong handle, jint delayMs) {
     auto player = playerFromHandle(handle);
     if (player) player->setSubtitleDelayMs(delayMs);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_nuvio_app_features_player_desktop_NativePlayerBridge_applySubtitleStyle(
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_applySubtitleStyle(
     JNIEnv *env,
     jobject,
     jlong handle,

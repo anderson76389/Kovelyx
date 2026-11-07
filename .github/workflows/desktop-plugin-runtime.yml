@@ -4,9 +4,9 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
-      - 'apps/desktop/composeApp/src/fullCommonMain/kotlin/com/nuvio/app/features/plugins/**'
-      - 'apps/desktop/composeApp/src/desktopMain/kotlin/com/nuvio/app/features/plugins/**'
-      - 'apps/desktop/composeApp/src/desktopTest/kotlin/com/nuvio/app/features/plugins/**'
+      - 'apps/desktop/composeApp/src/fullCommonMain/kotlin/com/kovelyx/app/features/plugins/**'
+      - 'apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/plugins/**'
+      - 'apps/desktop/composeApp/src/desktopTest/kotlin/com/kovelyx/app/features/plugins/**'
       - '.github/workflows/desktop-plugin-runtime.yml'
 permissions:
   contents: read

@@ -1,0 +1,43 @@
+package com.kovelyx.tv.di
+
+import com.kovelyx.tv.core.auth.AuthManager
+import com.kovelyx.tv.core.plugin.PluginManager
+import com.kovelyx.tv.core.plugin.PluginRuntime
+import com.kovelyx.tv.core.plugin.cloudstream.ExternalExtensionLoader
+import com.kovelyx.tv.core.plugin.cloudstream.ExternalExtensionRunner
+import com.kovelyx.tv.core.plugin.cloudstream.ExternalRepoParser
+import com.kovelyx.tv.core.sync.PluginSyncService
+import com.kovelyx.tv.data.local.PluginDataStore
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+object PluginModule {
+
+    @Provides
+    @Singleton
+    fun providePluginRuntime(): PluginRuntime {
+        return PluginRuntime()
+    }
+
+    @Provides
+    @Singleton
+    fun providePluginManager(
+        dataStore: PluginDataStore,
+        runtime: PluginRuntime,
+        pluginSyncService: PluginSyncService,
+        authManager: AuthManager,
+        externalRepoParser: ExternalRepoParser,
+        externalExtensionLoader: ExternalExtensionLoader,
+        externalExtensionRunner: ExternalExtensionRunner
+    ): PluginManager {
+        return PluginManager(
+            dataStore, runtime, pluginSyncService, authManager,
+            externalRepoParser, externalExtensionLoader, externalExtensionRunner
+        )
+    }
+}
