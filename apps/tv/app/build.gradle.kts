@@ -595,6 +595,11 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
+    // AndroidJUnitRunner.onCreate() references androidx.tracing.Trace on API 34.
+    // Keep the tracing API in the instrumentation APK even when the optimized
+    // debug target strips tracing; otherwise tests crash before running.
+    // androidTest-only: never adds this dependency to release APKs.
+    androidTestImplementation("androidx.tracing:tracing:1.2.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("io.mockk:mockk:1.13.12")
