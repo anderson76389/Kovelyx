@@ -2,6 +2,11 @@ name: Diagnostiquer la synchronisation Cloudflare déployée (lecture seule)
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cloudflare-readiness.yml'
+      - 'services/kovelyx-cloudflare/src/catalogue-sync.mjs'
+      - 'services/kovelyx-cloudflare/src/index.mjs'
 
 permissions:
   contents: read
@@ -14,7 +19,7 @@ jobs:
     env:
       KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
     steps:
-      - name: Vérifier les tables Better Auth et la catégorie œuvres vues
+      - name: Vérifier Cloudflare, médias, PIN et catalogues sans modifier les comptes
         shell: bash
         run: |
           set -euo pipefail
@@ -32,8 +37,10 @@ jobs:
           assert result.get('service') == 'Kovelyx Cloud', 'Service inattendu'
           assert result.get('provider') == 'Cloudflare D1', 'Mauvais backend'
           assert result.get('status') == 'ok', 'Backend non prêt'
-          assert result.get('schema') == '0004_profile_media_gifs', 'Migration watched non vérifiée'
-          print('OK : Better Auth configuré et schéma D1 0004 détecté.')
+          assert result.get('schema') == '0004_profile_media_gifs', 'Migration D1 médias 0004 absente'
+          assert result.get('catalogueSnapshotSchema') == 1, 'Protocole de synchronisation des catalogues absent'
+          assert result.get('profilePinSchema') == 1, 'Migration D1 PIN 0005 absente'
+          print('OK : Better Auth, D1 0004, PIN 0005 et protocole catalogues vérifiés en production.')
           print('Ce diagnostic ne prouve pas encore la synchronisation entre appareils physiques.')
           PY
-          echo '✅ Worker et schéma D1 opérationnels. Les connexions réelles multi-appareils doivent encore être testées.' >> "$GITHUB_STEP_SUMMARY"
+          echo '✅ Production : Worker, D1 0004/0005 et catalogues vérifiés en lecture seule. Tests sur appareils physiques toujours nécessaires.' >> "$GITHUB_STEP_SUMMARY"
