@@ -28,10 +28,28 @@ chmod +x apps/tv/gradlew
   --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process \
   -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
 
-APP_APK="$(find apps/tv/app/build/outputs/apk/full/debug -type f -name '*.apk' -print -quit)"
+# Android TV builds several ABI-split APKs; the first file is often ARM64,
+# while Google's emulator in this job is x86. Installing ARM64 on x86 yields
+# INSTALL_FAILED_NO_MATCHING_ABIS before any test can actually run.
+ABI="$(adb shell getprop ro.product.cpu.abi | tr -d '\r')"
+case "$ABI" in
+  arm64-v8a|armeabi-v7a|x86|x86_64) ;;
+  *) echo "::error::Unknown Android emulator ABI: $ABI"; exit 1 ;;
+esac
+APK_DIR=apps/tv/app/build/outputs/apk/full/debug
+APP_APK="$(find "$APK_DIR" -type f -name "app-full-$ABI-debug.apk" -print -quit)"
+if [[ -z "$APP_APK" ]]; then
+  APP_APK="$(find "$APK_DIR" -type f -name '*universal*debug.apk' -print -quit)"
+fi
 TEST_APK="$(find apps/tv/app/build/outputs/apk/androidTest/full/debug -type f -name '*.apk' -print -quit)"
+if [[ -z "$APP_APK" || -z "$TEST_APK" ]]; then
+  echo "::error::Missing APK for TV emulator ABI=$ABI"
+  find apps/tv/app/build/outputs/apk -type f -name '*.apk' -print || true
+  exit 1
+fi
 test -s "$APP_APK"
 test -s "$TEST_APK"
+echo "Emulator ABI: $ABI"
 echo "Tested app APK: $APP_APK"
 echo "Test runner APK: $TEST_APK"
 sha256sum "$APP_APK" "$TEST_APK" > "$DIR/tested-apks.sha256"
