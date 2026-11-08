@@ -1,6 +1,11 @@
 name: Tester le vrai AAR Android reconstruit depuis les sources
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/source-engine-android-smoke.yml'
+      - '.github/native-engine-smoke/**'
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths: ['.github/workflows/source-engine-android-smoke.yml', '.github/native-engine-smoke/**']
@@ -65,6 +70,7 @@ jobs:
           disable-animations: true
           script: chmod +x vendor/engine/platform/android/gradlew && ./vendor/engine/platform/android/gradlew -p .github/native-engine-smoke connectedDebugAndroidTest --no-daemon --max-workers=2 -Dorg.gradle.jvmargs="-Xmx3g"
       - name: Conserver durablement le candidat seulement après réussite des tests
+        if: github.event_name != 'pull_request'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
