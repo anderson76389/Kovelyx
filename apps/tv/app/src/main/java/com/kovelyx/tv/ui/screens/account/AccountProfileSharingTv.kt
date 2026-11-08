@@ -125,8 +125,7 @@ internal fun AccountProfileSharingTv() {
 @Composable
 private fun ShareTvChoice(text: String, enabled: Boolean, onClick: () -> Unit) {
     Card(
-        onClick = onClick,
-        enabled = enabled,
+        onClick = { if (enabled) onClick() },
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.colors(
             containerColor = NuvioTheme.colors.BackgroundCard,
@@ -134,6 +133,7 @@ private fun ShareTvChoice(text: String, enabled: Boolean, onClick: () -> Unit) {
         )
     ) {
         Text(text, modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.bodyMedium,color = NuvioTheme.colors.TextPrimary)
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (enabled) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextTertiary)
     }
 }
