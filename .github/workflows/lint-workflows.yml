@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.24'
+      - name: Vérifier la correspondance des jobs APK TV et mobile
+        run: python3 scripts/tests/test_android_workflow_job_names.py
       - name: Vérifier la syntaxe et les expressions Actions
         shell: bash
         run: |

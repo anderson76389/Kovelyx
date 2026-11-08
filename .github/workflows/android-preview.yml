@@ -41,7 +41,7 @@ jobs:
           sha="$(jq -r '.head_sha' /tmp/kv-run.json)"
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || exit 1
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs?per_page=100" > /tmp/kv-jobs.json
-          for name in "Android mobile - APK Full Debug" "Android TV - APK Full Debug"; do
+          for name in "Android mobile - APK optimisé (identité existante)" "Android TV - APK optimisé (identité existante)"; do
             jq -e --arg name "$name" '[.jobs[] | select(.name == $name and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || { echo "::error::Compilation non réussie : $name"; exit 1; }
           done
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts?per_page=100" > /tmp/kv-artifacts.json

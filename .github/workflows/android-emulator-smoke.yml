@@ -28,7 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
-          if ! jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null; then
+          if ! jq -e '[.jobs[] | select(.name == "Android mobile - APK optimisé (identité existante)" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null; then
             echo "::notice::Aucun build Android mobile dans cette exécution (changement TV ou Windows uniquement). Test mobile ignoré normalement."
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0

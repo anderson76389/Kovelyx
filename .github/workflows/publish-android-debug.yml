@@ -45,7 +45,7 @@ jobs:
           if [[ -z "$BUILD_ID" ]]; then
             for candidate in $(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?branch=main&status=success&per_page=20" --jq '.workflow_runs[].id'); do
               gh api "repos/$GITHUB_REPOSITORY/actions/runs/$candidate/jobs?per_page=100" > /tmp/kv-candidate-jobs.json
-              if jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-candidate-jobs.json >/dev/null; then
+              if jq -e '[.jobs[] | select(.name == "Android mobile - APK optimisé (identité existante)" and .conclusion == "success")] | length == 1' /tmp/kv-candidate-jobs.json >/dev/null; then
                 BUILD_ID="$candidate"
                 break
               fi
@@ -59,7 +59,7 @@ jobs:
           SOURCE_SHA="$(jq -r '.head_sha' /tmp/kv-run.json)"
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]] || exit 1
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_ID/jobs?per_page=100" > /tmp/kv-jobs.json
-          jq -e '[.jobs[] | select(.name == "Android mobile - APK Full Debug" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || {
+          jq -e '[.jobs[] | select(.name == "Android mobile - APK optimisé (identité existante)" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null || {
             echo "::notice::Aucune compilation mobile réussie dans cette exécution ; publication ignorée (TV uniquement ou build mobile échoué)."
             echo "ready=false" >> "$GITHUB_OUTPUT"
             exit 0
