@@ -6,12 +6,16 @@ on:
       - '.github/workflows/publish-windows-preview.yml'
       - '.github/workflows/check-preview-publishing.yml'
       - 'scripts/publish-windows-preview.sh'
+      - 'scripts/prune-releases.py'
+      - 'scripts/tests/test_release_retention.py'
   push:
     branches: [main]
     paths:
       - '.github/workflows/publish-windows-preview.yml'
       - '.github/workflows/check-preview-publishing.yml'
       - 'scripts/publish-windows-preview.sh'
+      - 'scripts/prune-releases.py'
+      - 'scripts/tests/test_release_retention.py'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +33,9 @@ jobs:
           set -euo pipefail
           bash -n scripts/publish-windows-preview.sh
           shellcheck --severity=warning scripts/publish-windows-preview.sh
+      - name: Tester la conservation des quatre premières et quatre dernières Releases
+        shell: bash
+        run: python3 -m unittest discover -s scripts/tests -p 'test_release_retention.py'
       - name: Gardes-fous de publication
         shell: bash
         run: |
