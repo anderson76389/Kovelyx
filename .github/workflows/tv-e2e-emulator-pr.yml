@@ -1,0 +1,85 @@
+name: Tester la vraie APK Kovelyx TV sur Google TV et télécommande
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/android-tv-smoke.yml'
+      - '.github/workflows/tv-e2e-emulator-pr.yml'
+      - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/sync/CloudflareTvProfileSharingSecurityTest.kt'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: kovelyx-tv-real-smoke-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  emulator:
+    name: Installer APK signée / démarrer / tester DPAD / surveiller crashes
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Récupérer une APK TV qui a réellement passé le build de la branche principale
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?branch=main&status=success&per_page=10" --jq '.workflow_runs[0].id')"
+          [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "::error::Aucune compilation vérifiée"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > /tmp/kv-run.json
+          jq -e --arg repo "$GITHUB_REPOSITORY" '.head_repository.full_name == $repo and .head_branch == "main" and .conclusion == "success"' /tmp/kv-run.json >/dev/null
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100" > /tmp/kv-jobs.json
+          jq -e '[.jobs[] | select(.name == "Android TV - APK optimisé (identité existante)" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null
+          mkdir -p /tmp/kv-tv-apk
+          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-debug --dir /tmp/kv-tv-apk
+          count="$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' | wc -l)"
+          [[ "$count" == 1 ]] || { echo "::error::Un seul APK TV universel est exigé, trouvé : $count"; exit 1; }
+          unzip -tq "$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)"
+          echo "APK TV issue du build main $run_id (vrai artefact)"
+      - name: Donner accès au moteur de virtualisation
+        run: |
+          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+      - name: Démarrage Google TV et utilisation de la télécommande
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google-tv
+          arch: x86
+          profile: tv_1080p
+          cores: 2
+          ram-size: 3072M
+          heap-size: 512M
+          disk-size: 6144M
+          disable-animations: true
+          script: |
+            adb install -r "$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)"
+            adb logcat -c
+            adb shell monkey -p com.kovelyx.tv.debug -c android.intent.category.LEANBACK_LAUNCHER 1
+            sleep 20
+            adb shell pidof com.kovelyx.tv.debug
+            adb shell input keyevent KEYCODE_DPAD_DOWN
+            adb shell input keyevent KEYCODE_DPAD_RIGHT
+            adb shell input keyevent KEYCODE_DPAD_CENTER
+            adb shell input keyevent KEYCODE_DPAD_LEFT
+            adb shell input keyevent KEYCODE_DPAD_UP
+            sleep 3
+            adb shell pidof com.kovelyx.tv.debug
+            adb shell uiautomator dump /sdcard/kv-ui.xml
+            adb pull /sdcard/kv-ui.xml /tmp/kv-ui.xml
+            adb shell screencap -p /sdcard/kv-tv.png
+            adb pull /sdcard/kv-tv.png /tmp/kv-tv.png
+            adb logcat -d -v brief > /tmp/kv-tv-logcat.txt
+            if grep -E 'ANR in com\\.kovelyx\\.tv\\.debug|Process: com\\.kovelyx\\.tv\\.debug.*FATAL' /tmp/kv-tv-logcat.txt; then exit 1; fi
+      - name: Conserver preuves et diagnostics Android TV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tv-google-tv-apk-real-dpad-smoke
+          path: |
+            /tmp/kv-tv.png
+            /tmp/kv-ui.xml
+            /tmp/kv-tv-logcat.txt
+          if-no-files-found: ignore
+          retention-days: 14
