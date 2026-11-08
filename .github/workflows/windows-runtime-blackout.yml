@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/windows-runtime-blackout.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/windows-runtime-blackout.yml'
+      - '.github/workflows/full-repository-independence-audit.yml'
   workflow_dispatch:
   release:
     types: [published]
