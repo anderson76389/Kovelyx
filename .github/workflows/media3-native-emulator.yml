@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/tests/mobile-playback-nuvio-blackout.sh'
+      - 'scripts/tests/tv-media3-native-instrumentation.sh'
       - '.github/workflows/media3-native-emulator.yml'
       - 'apps/tv/**'
       - 'scripts/media3/**'
@@ -21,7 +22,7 @@ jobs:
   native-media3:
     name: Exercices Media3 JNI et allocateur sur Google TV
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -85,10 +86,7 @@ jobs:
           heap-size: 512M
           disk-size: 4096M
           disable-animations: true
-          script: |
-            # Emulator runner starts a separate /bin/sh for EACH command line.
-            # Keep cwd and Gradle invocation in the SAME shell command.
-            chmod +x apps/tv/gradlew && ./apps/tv/gradlew -p apps/tv :app:connectedFullDebugAndroidTest -Pkovelyx.optimizedDistribution=true --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class="androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak,androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle,androidx.media3.exoplayer.source.SampleDataQueueNativeTest,com.kovelyx.tv.ui.screens.player.Media3VideoDecodeSmokeTest"
+          script: bash scripts/tests/tv-media3-native-instrumentation.sh
       - name: Préserver les résultats et diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,5 +95,6 @@ jobs:
           path: |
             apps/tv/app/build/outputs/androidTest-results/connected/**
             apps/tv/app/build/reports/androidTests/connected/**
+            /tmp/kovelyx-tv-media3-diagnostics/**
           if-no-files-found: warn
           retention-days: 30
