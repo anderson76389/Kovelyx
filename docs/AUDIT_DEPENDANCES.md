@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia : **17**.
+Fichiers texte examinés : **1387** ; références statiques à Nuvio/NuvioMedia : **17**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -61,7 +61,7 @@ Fichiers texte examinés : **1385** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia : **23**.
+Fichiers texte examinés : **1449** ; références statiques à Nuvio/NuvioMedia : **23**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -124,7 +124,7 @@ Fichiers texte examinés : **1446** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1832** ; références statiques à Nuvio/NuvioMedia : **22**.
+Fichiers texte examinés : **1835** ; références statiques à Nuvio/NuvioMedia : **22**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
