@@ -42,6 +42,19 @@ jobs:
           if (-not $exe) { throw 'Kovelyx.exe missing' }
           "PLAYBACK_APP_ROOT=$($exe.Directory.FullName)" >> $env:GITHUB_ENV
           "Release exercised: $($release.tag_name)" >> $env:GITHUB_STEP_SUMMARY
+      - name: Bloquer Nuvio avant de lire le MP4 du lecteur Windows publié
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
+          foreach ($hostName in @('nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'www.nuvio.tv', 'nuvioapp.space')) {
+            Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $hostName"
+          }
+          git config --global url.https://blocked-upstream.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/
+          $addresses = @([System.Net.Dns]::GetHostAddresses('api.nuvio.tv') | ForEach-Object { $_.ToString() })
+          if ($addresses.Count -eq 0 -or $addresses | Where-Object { $_ -ne '127.0.0.1' }) {
+            throw 'Le DNS Nuvio n est pas neutralisé sur le runner Windows.'
+          }
       - name: Lire un MP4 avec le lecteur natif réellement livré
         shell: pwsh
         run: ./scripts/player/test-windows-playback.ps1 -AppRoot $env:PLAYBACK_APP_ROOT
