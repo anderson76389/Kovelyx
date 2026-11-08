@@ -8,6 +8,12 @@ on:
     paths:
       - '.github/workflows/runtime-blackout.yml'
       - 'scripts/tests/runtime-blackout-android.sh'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/runtime-blackout.yml'
+      - '.github/workflows/full-repository-independence-audit.yml'
+      - 'scripts/tests/runtime-blackout-android.sh'
   workflow_dispatch:
   release:
     types: [published]
