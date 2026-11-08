@@ -87,21 +87,22 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 
 **Aucun catalogue de contenu protégé ni flux vidéo n'est fourni avec Kovelyx.** Les disponibilités dépendent des sources et fournisseurs configurés par l'utilisateur, ainsi que des droits applicables.
 
-## ☁️ Votre compte Kovelyx — en cours de développement
+## ☁️ Votre compte Kovelyx — état vérifié au 8 novembre 2026
 
-Un backend distinct de Nuvio est en place autour de **Cloudflare Workers, D1 et Better Auth**. Des tests de création de compte, de connexion et d'isolation des profils ont réussi sur le serveur et sur une base de test. Les adaptations des applications progressent.
+L'infrastructure de comptes Kovelyx repose sur **Cloudflare Workers, D1 et Better Auth**, et non sur les serveurs Nuvio ou Supabase.
 
-| Déjà réalisé / testé | Encore expérimental ou incomplet |
+| Vérification | État vérifié |
 |:---|:---|
-| Worker HTTPS et base D1 | Connexion fiable sur les trois appareils réels |
-| Inscription/connexion et profils testés côté serveur | Session conservée après fermeture de l'application |
-| Premiers clients de compte Windows, Android et TV | Synchronisation intégrale de la bibliothèque et de la progression |
-| Premiers adaptateurs de bibliothèque Windows / Android | Synchronisation TV, préférences, addons et conflits complets |
-| Imports locaux de médias de profil dans la branche de travail | Photos/GIF/vidéos synchronisés via R2 et validés sur trois appareils |
+| Comptes, profils et PIN Cloudflare | Migration D1 `0005_profile_pins.sql` appliquée en production après sauvegarde chiffrée et restauration contrôlée ; [workflow réussi](https://github.com/anderson76389/Kovelyx/actions/runs/42438155964). |
+| Médias de profil et catalogues | Endpoint de production `/ready` contrôlé après migration : D1 `0004`, `profilePinSchema: 1`, `catalogueSnapshotSchema: 1`. |
+| Ma Collection → Kovelyx | Publication du JSON français et fusion de dossiers testées sur **Worker + D1 locaux jetables** avec trois sessions indépendantes simulant Windows, Android et TV ([PR nº 95](https://github.com/anderson76389/Kovelyx/pull/95)). |
+| Bibliothèque, œuvres vues et progression | Tests de synchronisation intersessions sur Cloudflare/D1 local. |
+| Partage entre profils | Copie **manuelle** et sélective des extensions et catalogues vers d'autres profils du **même compte**, sans recopier PIN, historique, bibliothèque ou progression ([PR nº 96](https://github.com/anderson76389/Kovelyx/pull/96)). |
+| Applications Windows, Android et TV | Packages communs publiés en [préversion v1.1.1068](https://github.com/anderson76389/Kovelyx/releases/tag/v1.1.1068) ; tests automatisés et émulateurs réalisés. |
 
-La synchronisation universelle **n'est pas encore annoncée comme fonctionnelle**. Les développements en cours sont dans la [PR nº 40](https://github.com/anderson76389/Kovelyx/pull/40), qui n'est pas fusionnée aux Releases publiques.
+**Limites importantes :** ces validations ne certifient pas la synchronisation sur trois appareils physiques, tous les réseaux et tous les comptes existants. La présence d'un APK récent ne met pas à jour automatiquement le Worker. Kaptain Stream utilise nativement l'intégration Nuvio : pour Kovelyx, utiliser l'export/import compatible Ma Collection plutôt que supposer qu'un push Kaptain arrive directement sur le compte Kovelyx.
 
-**[Documentation du serveur Cloudflare](./services/kovelyx-cloudflare/README.md) · [État précis de la synchronisation](https://github.com/anderson76389/Kovelyx/blob/feature/cloudflare-profile-sync-safe-20261019/docs/ETAT_SYNCHRO_CLOUDFLARE.md)**
+**[Documentation Cloudflare](./services/kovelyx-cloudflare/README.md) · [Contrôle de disponibilité en lecture seule](./.github/workflows/cloudflare-readiness.yml) · [Tests GitHub Actions](https://github.com/anderson76389/Kovelyx/actions)**
 
 ---
 
@@ -126,7 +127,7 @@ Le projet rassemble les sources de ses trois applications, l'infrastructure de c
 [![Cloudflare](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-check.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/cloudflare-check.yml)
 [![Tests fonctionnels](https://github.com/anderson76389/Kovelyx/actions/workflows/functional-verification.yml/badge.svg)](https://github.com/anderson76389/Kovelyx/actions/workflows/functional-verification.yml)
 
-Le code peut être compilé avec les anciens domaines Nuvio bloqués dans les scénarios testés. En revanche, **une compilation réussie ne prouve pas que chaque bouton, addon, lecteur ou connexion externe fonctionne en situation réelle**. La suite Android TV complète présente encore des échecs à corriger dans la branche de développement.
+Le code peut être compilé avec les anciens domaines Nuvio bloqués dans les scénarios testés. En revanche, **une compilation réussie ne prouve pas que chaque bouton, addon, lecteur ou connexion externe fonctionne en situation réelle**. Les tests Kotlin Android/TV et plusieurs scénarios d'émulateur récents ont réussi ; ils ne remplacent pas la validation du lecteur, des sources et de la télécommande sur appareils physiques.
 
 **[Audit d'indépendance](./docs/CONTROLES_INDEPENDANCE.md) · [État technique](./docs/ETAT_TECHNIQUE.md) · [Tests manuels PC](./docs/TESTS_PC.md) · [Suivi GitHub Actions](https://github.com/anderson76389/Kovelyx/actions)**
 
@@ -139,7 +140,7 @@ Le code peut être compilé avec les anciens domaines Nuvio bloqués dans les sc
 - [ ] Finaliser et tester les connexions persistantes sur les trois appareils.
 - [ ] Achever la synchronisation des profils, bibliothèques, historiques et préférences, y compris la TV.
 - [ ] Valider partout les photos, GIF animés et vidéos des profils ; activer R2 uniquement si souhaité.
-- [ ] Corriger les tests Android TV restants et vérifier le lecteur, les sources, l'audio et les sous-titres sur appareils physiques.
+- [ ] Confirmer sur appareils physiques Android TV le lecteur, les sources, l'audio, les sous-titres et les mises à jour malgré les tests automatisés réussis.
 - [ ] Garantir signature Android durable, migration sans perte de données et mises à jour installables.
 - [ ] Finaliser les audits de reproductibilité des composants natifs et d'indépendance réseau.
 
