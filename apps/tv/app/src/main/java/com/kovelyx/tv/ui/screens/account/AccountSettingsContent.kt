@@ -166,6 +166,12 @@ private fun SignedInAccountSettingsContent(
                 }
             }
 
+            if (com.kovelyx.tv.core.auth.CloudflareTvAccountClient.enabled) {
+                item(key = "cloud_profile_share") {
+                    AccountProfileSharingTv()
+                }
+            }
+
             val overview = uiState.syncOverview
             if (overview != null) {
                 item(key = "account_sync_overview") { SyncOverviewCard(overview) }
