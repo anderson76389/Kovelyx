@@ -39,6 +39,9 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Protéger le rafraîchissement TV hors ligne (contrat statique)
+        shell: bash
+        run: python3 scripts/tests/test_tv_offline_job_contract.py
       - name: Exécuter tous les tests TV (pas seulement les liens)
         working-directory: apps/tv
         shell: bash
