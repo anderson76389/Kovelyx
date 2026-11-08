@@ -16,16 +16,16 @@ concurrency:
 jobs:
   backup-and-pin:
     name: Sauvegarder D1, vérifier la récupération puis corriger uniquement la migration PIN
-    if: \${{ github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      KOVELYX_D1_DATABASE_ID: \${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
-      KOVELYX_CLOUDFLARE_URL: \${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
-      KOVELYX_ANDROID_SIGNING_BUNDLE: \${{ secrets.KOVELYX_ANDROID_SIGNING_BUNDLE }}
-      BACKUP_OUTPUT_DIR: \${{ runner.temp }}/kovelyx-pin-recovery-encrypted
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
+      KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+      KOVELYX_ANDROID_SIGNING_BUNDLE: ${{ secrets.KOVELYX_ANDROID_SIGNING_BUNDLE }}
+      BACKUP_OUTPUT_DIR: ${{ runner.temp }}/kovelyx-pin-recovery-encrypted
       WRANGLER_SEND_METRICS: 'false'
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          code="$(curl -sS --connect-timeout 10 --max-time 25 -o /tmp/kv-ready-before-pin.json -w '%{http_code}' "\${KOVELYX_CLOUDFLARE_URL%/}/ready")"
+          code="$(curl -sS --connect-timeout 10 --max-time 25 -o /tmp/kv-ready-before-pin.json -w '%{http_code}' "${KOVELYX_CLOUDFLARE_URL%/}/ready")"
           [[ "$code" == "200" ]] || { echo "::error::Le Worker ne répond pas HTTP 200 ; aucune écriture D1."; exit 1; }
           python3 - <<'PY'
           import json
@@ -82,8 +82,8 @@ jobs:
       - name: Conserver la sauvegarde chiffrée AVANT toute écriture D1
         uses: actions/upload-artifact@v4
         with:
-          name: kovelyx-before-pin-migration-\${{ github.run_id }}
-          path: \${{ runner.temp }}/kovelyx-pin-recovery-encrypted/
+          name: kovelyx-before-pin-migration-${{ github.run_id }}
+          path: ${{ runner.temp }}/kovelyx-pin-recovery-encrypted/
           if-no-files-found: error
           retention-days: 90
       - name: Vérifier la migration PIN additive et la cible D1 existante
@@ -100,7 +100,7 @@ jobs:
           assert re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',database)
           sql=Path('migrations/0005_profile_pins.sql').read_text(encoding='utf-8')
           assert 'CREATE TABLE IF NOT EXISTS kv_profile_pins' in sql
-          assert not re.search(r'\b(DROP|TRUNCATE|DELETE|UPDATE|ALTER)\b',sql,re.I)
+          assert not re.search(r'\b(DROP|TRUNCATE|DELETE|UPDATE|ALTER)\b',sql.replace('ON DELETE CASCADE',''),re.I)
           conf=Path('wrangler.toml')
           source=conf.read_text(encoding='utf-8')
           assert source.count('REPLACE_WITH_YOUR_D1_DATABASE_ID')==1
@@ -125,7 +125,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          code="$(curl -sS --retry 3 --retry-delay 3 --connect-timeout 10 --max-time 25 -o /tmp/kv-ready-after-pin.json -w '%{http_code}' "\${KOVELYX_CLOUDFLARE_URL%/}/ready")"
+          code="$(curl -sS --retry 3 --retry-delay 3 --connect-timeout 10 --max-time 25 -o /tmp/kv-ready-after-pin.json -w '%{http_code}' "${KOVELYX_CLOUDFLARE_URL%/}/ready")"
           [[ "$code" == 200 ]] || { echo "::error::Réparation non confirmée : Worker HTTP $code"; exit 1; }
           python3 - <<'PY'
           import json
