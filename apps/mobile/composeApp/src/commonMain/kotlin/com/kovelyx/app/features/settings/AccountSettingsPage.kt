@@ -114,6 +114,11 @@ private fun AccountSettingsBody(
             }
         }
 
+        if ((authState as? AuthState.Authenticated)?.isAnonymous == false &&
+            com.kovelyx.app.core.cloud.CloudflareAccountClient.enabled) {
+            AccountProfileSharingCard()
+        }
+
         // Ne jamais proposer une déconnexion lorsque l'écran indique
         // « Non connecté ». Le mode invité a aussi un état Authenticated.
         if (authState is AuthState.Authenticated) {
