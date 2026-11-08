@@ -25,7 +25,7 @@ jobs:
       KOVELYX_D1_DATABASE_ID: ${{ vars.KOVELYX_D1_DATABASE_ID || secrets.KOVELYX_D1_DATABASE_ID }}
       KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
       KOVELYX_ANDROID_SIGNING_BUNDLE: ${{ secrets.KOVELYX_ANDROID_SIGNING_BUNDLE }}
-      BACKUP_OUTPUT_DIR: ${{ runner.temp }}/kovelyx-pin-recovery-encrypted
+      BACKUP_OUTPUT_DIR: ${{ github.workspace }}/kovelyx-pin-recovery-encrypted
       WRANGLER_SEND_METRICS: 'false'
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-before-pin-migration-${{ github.run_id }}
-          path: ${{ runner.temp }}/kovelyx-pin-recovery-encrypted/
+          path: ${{ github.workspace }}/kovelyx-pin-recovery-encrypted/
           if-no-files-found: error
           retention-days: 90
       - name: Vérifier la migration PIN additive et la cible D1 existante
