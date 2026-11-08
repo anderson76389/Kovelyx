@@ -1,0 +1,33 @@
+name: Tester Ma-Collection publiée avec Kovelyx D1 et 3 sessions
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/kovelyx-cloudflare/tests/local-account-e2e.mjs'
+      - '.github/workflows/ma-collection-site-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Installer les dépendances du Worker local
+        working-directory: services/kovelyx-cloudflare
+        run: npm ci --no-audit --no-fund
+      - name: Tester Ma-Collection en ligne avec D1 jetable et sessions indépendantes
+        timeout-minutes: 6
+        working-directory: services/kovelyx-cloudflare
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: node tests/local-account-e2e.mjs
+      - name: Résultat du test multi-session simulé
+        if: success()
+        run: |
+          echo '✅ Site Ma-Collection publié testé contre Worker + D1 jetables ; 3 sessions et fusion vérifiées.' >> "$GITHUB_STEP_SUMMARY"
+          echo '⚠️ Il reste un test sur les vrais appareils PC, Android mobile et TV du propriétaire.' >> "$GITHUB_STEP_SUMMARY"
