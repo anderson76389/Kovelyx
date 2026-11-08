@@ -81,12 +81,15 @@ class TvChannelRefreshJobService : JobService() {
     companion object {
         fun schedulePeriodic(context: Context) {
             val scheduler = context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-            if (scheduler.allPendingJobs.any { it.id == JOB_ID_PERIODIC }) return
+            // Only local disk snapshots and Android's TV provider are used; waiting for
+            // connectivity prevents offline TVs from refreshing Continue Watching.
+            // Replace an old job once if it still carries the obsolete network constraint.
+            val existing = scheduler.getPendingJob(JOB_ID_PERIODIC)
+            if (existing != null && existing.networkType == JobInfo.NETWORK_TYPE_NONE) return
             val job = JobInfo.Builder(
                 JOB_ID_PERIODIC,
                 ComponentName(context, TvChannelRefreshJobService::class.java)
             )
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setPeriodic(PERIODIC_INTERVAL_MS)
                 .setPersisted(true)
                 .build()
@@ -100,7 +103,7 @@ class TvChannelRefreshJobService : JobService() {
                 JOB_ID_IMMEDIATE,
                 ComponentName(context, TvChannelRefreshJobService::class.java)
             )
-                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                // A local-cache reconciliation also works before Wi-Fi reconnects.
                 .setOverrideDeadline(5_000)
                 .build()
             scheduler.schedule(job)

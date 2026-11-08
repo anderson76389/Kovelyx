@@ -89,7 +89,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 
 ## ☁️ Votre compte Kovelyx — état vérifié au 8 novembre 2026
 
-L'infrastructure de comptes Kovelyx repose sur **Cloudflare Workers, D1 et Better Auth**, et non sur les serveurs Nuvio ou Supabase.
+L'infrastructure de comptes Kovelyx repose sur **Cloudflare Workers, D1 et Better Auth**, sans connexion nécessaire aux anciens fournisseurs de comptes.
 
 | Vérification | État vérifié |
 |:---|:---|
