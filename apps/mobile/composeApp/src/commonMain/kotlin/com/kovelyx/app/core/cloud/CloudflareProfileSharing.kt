@@ -138,11 +138,17 @@ object CloudflareProfileSharing {
                 if (ProfilePinCrypto.sha256Hex(merged) != previous?.first?.sha256)
                     plans.add(Triple(kind, previous?.first, merged))
             }
+            // A deleted addon row is a tombstone with a revision, not a new empty slot.
+            // Only an explicit share may restore it, using the existing revision (CAS).
             val currentAddon = if (extensions && originAddons != null)
-                find(targetRows, "addons", "installed") else null
+                targetRows.firstOrNull { it["category"]?.jsonPrimitive?.content == "addons" &&
+                    it["itemKey"]?.jsonPrimitive?.content == "installed" } else null
+            val deletedAddon = currentAddon?.get("deleted")?.jsonPrimitive?.booleanOrNull == true
+            val previousAddon = if (deletedAddon) null else currentAddon?.get("payload")?.jsonObject
             val updatedAddon = if (originAddons != null)
-                mergeAddons(currentAddon?.get("payload")?.jsonObject, originAddons) else null
-            val addonsChanged = updatedAddon != null && updatedAddon != currentAddon?.get("payload")
+                mergeAddons(previousAddon, originAddons) else null
+            val addonsChanged = updatedAddon != null &&
+                (deletedAddon || updatedAddon != currentAddon?.get("payload"))
             if (plans.isEmpty() && !addonsChanged) continue
             // Publish verified catalogues atomically per kind. No replacement of older snapshots
             // until every chunk is on the server. Then publish addon changes with optimistic CAS.
