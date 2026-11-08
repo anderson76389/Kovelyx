@@ -5,6 +5,9 @@ on:
     paths:
       - 'scripts/player/**'
       - '.github/workflows/verify-playback.yml'
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/verify-playback.yml', 'scripts/player/**']
   workflow_dispatch:
 permissions:
   contents: read
