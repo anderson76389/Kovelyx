@@ -23,8 +23,14 @@ adb shell settings put global transition_animation_scale 0 || true
 adb shell settings put global animator_duration_scale 0 || true
 
 chmod +x apps/tv/gradlew
+# Instrumentation requires the full AndroidJUnitRunner and tracing classes.
+# The optimizedDistribution build deliberately turns R8 on for *debug* and
+# also shrinks the androidTest APK; that stripped androidx.tracing.Trace from
+# AndroidJUnitRunner and made adb instrumentation hang for 180s before tests.
+# Use regular unminified Debug for this isolated native device test; patched
+# Media3 AARs, JNI and H264 decoding remain exactly the same source code.
+# Distribution/production build optimization stays unchanged.
 ./apps/tv/gradlew -p apps/tv :app:assembleFullDebug :app:assembleFullDebugAndroidTest \
-  -Pkovelyx.optimizedDistribution=true \
   --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process \
   -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
 
