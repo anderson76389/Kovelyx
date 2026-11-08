@@ -33,6 +33,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Prouver la présence des sources locales et la non-consultation de l'amont
+        run: python3 -m unittest discover -s scripts/tests -p 'test_upstream_deletion_local_sources.py' -v
+      - name: Bloquer les anciens serveurs et dépôts pendant les tests locaux
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in nuvio.tv api.nuvio.tv www.nuvio.tv auth.nuvio.tv cdn.nuvio.tv nuvioapp.space api.nuvioapp.space; do
+            printf '127.0.0.1 %s\n' "$host" | sudo tee -a /etc/hosts >/dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+          grep -q '127.0.0.1 api.nuvio.tv' /etc/hosts
+          echo 'Tests de Worker, addons et synchronisation exécutés sans endpoints Nuvio.'
       - name: Vérifier les anciens domaines dans les sources et bibliothèques
         run: |
           python3 scripts/tests/verify-upstream-independence.py

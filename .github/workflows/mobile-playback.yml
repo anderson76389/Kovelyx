@@ -5,6 +5,9 @@ on:
     paths:
       - 'apps/mobile/**'
       - '.github/workflows/mobile-playback.yml'
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/mobile-playback.yml', 'apps/mobile/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,6 +38,26 @@ jobs:
           if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
           sudo apt-get update -qq
           sudo apt-get install -y -qq libpulse0 libnss3 libx11-6 libxkbcommon0 libxcb1 libxcomposite1 libxcursor1 libxi6 libxtst6 libxrandr2 libxdamage1 libxfixes3
+      - name: Bloquer les anciens domaines Nuvio dans le DNS de l'émulateur
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends dnsmasq-base dnsutils
+          cat > /tmp/kovelyx-playback-dnsmasq.conf <<'DNS'
+          no-hosts
+          listen-address=127.0.0.1
+          bind-interfaces
+          cache-size=0
+          address=/nuvio.tv/0.0.0.0
+          address=/nuvioapp.space/0.0.0.0
+          log-queries
+          log-facility=/tmp/kv-playback-nuvio-dns.log
+          DNS
+          sudo touch /tmp/kv-playback-nuvio-dns.log
+          sudo dnsmasq --conf-file=/tmp/kovelyx-playback-dnsmasq.conf --pid-file=/tmp/kv-playback-dnsmasq.pid
+          sudo chmod 644 /tmp/kv-playback-nuvio-dns.log
+          dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
       - name: Vérifier la lecture H264 dans les surfaces ExoPlayer et libmpv
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -47,7 +70,8 @@ jobs:
           heap-size: 512M
           disk-size: 4096M
           disable-animations: true
-          script: chmod +x apps/mobile/gradlew && ./apps/mobile/gradlew -p apps/mobile :androidApp:connectedFullDebugAndroidTest -Pkovelyx.optimizedDistribution=true -Pkovelyx.optimizedInstrumentation=true --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class=com.kovelyx.android.VideoPlaybackSmokeTest
+          emulator-options: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
+          script: bash scripts/tests/mobile-playback-nuvio-blackout.sh
       - name: Rapports de lecture et diagnostics Android
         if: always()
         uses: actions/upload-artifact@v4

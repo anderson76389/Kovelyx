@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - 'scripts/tests/test_upstream_deletion_local_sources.py'
       - '.github/workflows/cloudflare-readiness.yml'
       - 'services/kovelyx-cloudflare/src/catalogue-sync.mjs'
       - 'services/kovelyx-cloudflare/src/index.mjs'
