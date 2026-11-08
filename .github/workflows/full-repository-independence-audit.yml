@@ -118,6 +118,30 @@ jobs:
             --release-path "/tmp/kovelyx-released/Kovelyx-TV-$RELEASE_TAG-universal.apk" \
             --release-path "/tmp/kovelyx-released/Kovelyx-Windows-$RELEASE_TAG.msi" \
             --out /tmp/kovelyx-release-audit.json | tee /tmp/kovelyx-release-scan.txt
+          # The scanner reports findings but does not reject them itself:
+          # fail closed on active service/repository/account SDK literals in
+          # shipped packages, not on harmless historical names in archives.
+          python3 - <<'PY'
+          import json
+          report=json.load(open('/tmp/kovelyx-release-audit.json',encoding='utf-8'))
+          packages=report.get('released_artifacts',[])
+          if len(packages) != 3:
+              raise SystemExit('Trois véritables paquets publics distincts sont requis')
+          keys=('legacy_host','upstream_repo','retired_sdk')
+          findings=[(a['name'],key,n) for a in packages for key,n in a.get('legacy',{}).items()
+                    if key in keys and n]
+          findings.extend([('contenu des archives',key,report.get('counts',{}).get(key,0))
+                           for key in ('legacy_host','upstream_repo')
+                           if report.get('counts',{}).get(key,0)])
+          if report.get('unscanned_or_errors'):
+              raise SystemExit('Portions non contrôlées dans les archives publiées')
+          if findings:
+              for package,key,n in findings:
+                  print(f'EXAMEN REQUIS: {package}: {key}: {n}')
+              raise SystemExit('Ancienne adresse potentiellement présente dans les paquets publics')
+          print('OK: 3 paquets réels contrôlés, aucune ancienne URL ni SDK de compte en clair.')
+          print('Limites: les URL construites, trafic sur appareil et dépendances système ne sont pas prouvés.')
+          PY
           python3 - <<'PY'
           import json,os
           data=json.load(open('/tmp/kovelyx-release-audit.json',encoding='utf-8'))
