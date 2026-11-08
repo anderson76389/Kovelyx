@@ -115,8 +115,9 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument("--out",default="/tmp/kovelyx-independent-repo-audit.json")
     p.add_argument("--release-path", action="append",default=[],help="Downloaded release artifacts to inspect as well")
+    p.add_argument("--only-release",action="store_true",help="Inspect distribution artifacts only (source audited in another job)")
     args=p.parse_args()
-    entries=tracked()
+    entries=[] if args.only_release else tracked()
     paths={name for _,name in entries}
     hits=defaultdict(list)
     counts=Counter()
