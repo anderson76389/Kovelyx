@@ -112,9 +112,15 @@ internal object CloudflareTvProfileSharing {
                 }
                 if (sha(merged) == old?.first?.sha256) null else Triple(kind,old?.first,merged)
             }
-            val currentAddon = if (sourceAddons != null) row(rows,"addons","installed") else null
-            val payload = sourceAddons?.let { mergeAddons(currentAddon?.optJSONObject("payload"),it) }
-            val addonChanged = payload != null && payload.toString() != currentAddon?.optJSONObject("payload")?.toString()
+            val currentAddon = if (sourceAddons != null) rows.firstOrNull {
+                it.optString("category") == "addons" && it.optString("itemKey") == "installed"
+            } else null
+            val deletedAddon = currentAddon?.optBoolean("deleted") == true
+            val payload = sourceAddons?.let {
+                mergeAddons(if (deletedAddon) null else currentAddon?.optJSONObject("payload"),it)
+            }
+            val addonChanged = payload != null &&
+                (deletedAddon || payload.toString() != currentAddon?.optJSONObject("payload")?.toString())
             if (plans.isEmpty() && !addonChanged) continue
 
             for ((kind,head,text) in plans) {
