@@ -15,6 +15,7 @@
 **/.gradle/
 **/build/
 **/.kotlin/
+**/hs_err_pid*.log
 **/.idea/
 **/node_modules/
 **/.DS_Store
