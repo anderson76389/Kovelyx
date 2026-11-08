@@ -197,6 +197,9 @@ def main():
             "installer l’application seule ne met pas le serveur à jour.\n"
             "- Synchronisation des addons : URL configurée, ordre, nom et activation ; suppressions et reprise hors ligne.\n"
             "- Bibliothèque, œuvres vues et progression : scénarios de synchronisation validés entre trois sessions de test indépendantes (Windows, Android et TV) sur Worker + D1 locaux ; essais sur appareils physiques toujours nécessaires.\n"
+            "- Partage manuel entre profils du même compte : choisir destinataires, extensions et catalogues, fusion sans effacer les dossiers existants ; aucun historique/PIN partagé.\n"
+            "- Android TV : test réel du mode invité et de la télécommande Google TV ; correction des tests précédemment ignorés.\n"
+            "- Profils protégés par PIN : nécessitent la migration D1 0005 sur le Worker Cloudflare ; un APK seul ne modifie pas la base.\n"
             "- Regroupement des envois TV, quatre requêtes de manifeste au maximum et reprise des suppressions.\n\n"
             f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
