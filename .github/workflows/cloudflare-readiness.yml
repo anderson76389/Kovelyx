@@ -49,5 +49,6 @@ jobs:
               raise AssertionError('Worker Kovelyx de production obsolète : déployer le code actuel après sauvegarde D1 sans supprimer les comptes.')
           print('OK : Better Auth, D1 0004, PIN et protocole de synchronisation des catalogues détectés.')
           print('Ce diagnostic ne prouve pas encore la synchronisation entre appareils physiques.')
+          print('Le controle PIN concerne notamment les profils proteges sur Android TV.')
           PY
           echo '✅ Worker, D1 et protocole catalogues compatibles. Les connexions réelles multi-appareils restent à tester.' >> "$GITHUB_STEP_SUMMARY"
