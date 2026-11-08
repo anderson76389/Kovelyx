@@ -65,6 +65,12 @@ jobs:
             adb shell monkey -p com.kovelyx.mobile.debug -c android.intent.category.LAUNCHER 1
             sleep 20
             adb shell pidof com.kovelyx.mobile.debug
+            adb shell dumpsys meminfo com.kovelyx.mobile.debug > /tmp/kovelyx-mobile-memory-start.txt
+            adb shell dumpsys gfxinfo com.kovelyx.mobile.debug framestats > /tmp/kovelyx-mobile-frames.txt
+            adb shell input keyevent KEYCODE_DPAD_DOWN
+            adb shell input keyevent KEYCODE_DPAD_UP
+            adb shell pidof com.kovelyx.mobile.debug
+            adb shell dumpsys meminfo com.kovelyx.mobile.debug > /tmp/kovelyx-mobile-memory-after.txt
             # Any failure before this step is an emulator environment problem, not proof of app failure.
             adb shell screencap -p /sdcard/kovelyx-launch.png
             adb pull /sdcard/kovelyx-launch.png /tmp/kovelyx-launch.png
@@ -76,3 +82,14 @@ jobs:
           path: /tmp/kovelyx-launch.png
           if-no-files-found: ignore
           retention-days: 7
+      - name: Conserver les mesures RAM Android de l'émulateur
+        if: always() && steps.mobile_apk.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-mobile-emulator-memory
+          path: |
+            /tmp/kovelyx-mobile-memory-start.txt
+            /tmp/kovelyx-mobile-memory-after.txt
+            /tmp/kovelyx-mobile-frames.txt
+          if-no-files-found: warn
+          retention-days: 30

@@ -20,6 +20,8 @@ import coil3.bitmapFactoryMaxParallelism
 
 import okio.Path.Companion.toOkioPath
 import com.kovelyx.tv.core.image.StaleWhileRevalidateCacheStrategy
+import com.kovelyx.tv.core.image.TvImageCacheBudget
+import com.kovelyx.tv.core.network.ExtensionCookieJar
 import com.kovelyx.tv.core.runtime.PluginRuntimeHooks
 import com.kovelyx.tv.core.sync.StartupSyncService
 import com.kovelyx.tv.core.sync.androidtv.AndroidTvChannelSyncService
@@ -30,11 +32,8 @@ import com.kovelyx.tv.data.mediaserver.ServerMatcher
 import com.kovelyx.tv.data.mediaserver.ServerUserStateProjection
 import com.kovelyx.tv.data.simkl.SimklAnimeIdPreferenceHolder
 import dagger.hilt.android.HiltAndroidApp
-import okhttp3.Cookie
 import okhttp3.CookieJar
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -54,28 +53,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
          * Accessible so the player's OkHttpClient can share cookies
          * obtained during scraping (e.g., session tokens needed for playback).
          */
-        val extensionCookieJar: CookieJar = object : CookieJar {
-            private val store = ConcurrentHashMap<String, MutableList<Cookie>>()
-
-            override fun loadForRequest(url: HttpUrl): List<Cookie> {
-                val hostCookies = store[url.host] ?: return emptyList()
-                synchronized(hostCookies) {
-                    return hostCookies.filter { cookie ->
-                        cookie.expiresAt > System.currentTimeMillis()
-                    }
-                }
-            }
-
-            override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-                val hostCookies = store.getOrPut(url.host) { mutableListOf() }
-                synchronized(hostCookies) {
-                    cookies.forEach { newCookie ->
-                        hostCookies.removeAll { it.name == newCookie.name }
-                        hostCookies.add(newCookie)
-                    }
-                }
-            }
-        }
+        val extensionCookieJar: CookieJar = ExtensionCookieJar()
     }
 
     override fun onCreate() {
@@ -151,11 +129,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
             .memoryCache {
                 // MemoryCache.maxSizePercent is a fraction of this app's memory class,
                 // not a fraction of device RAM. Preserve space for catalog state and playback.
-                val cachePercent = when {
-                    constrainedTv -> 0.10
-                    totalRamMb <= 3072 -> 0.20
-                    else -> 0.25
-                }
+                val cachePercent = TvImageCacheBudget.memoryClassFraction(totalRamMb, constrainedTv)
                 MemoryCache.Builder()
                     .maxSizePercent(context, cachePercent)
                     .build()
@@ -163,7 +137,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
             .diskCache {
                 DiskCache.Builder()
                     .directory(cacheDir.resolve("image_cache").toOkioPath())
-                    .maxSizeBytes(200L * 1024 * 1024)
+                    .maxSizeBytes(TvImageCacheBudget.diskBytes(totalRamMb, constrainedTv))
                     .build()
             }
             .crossfade(false)

@@ -86,6 +86,25 @@ jobs:
             throw "Kovelyx ne tourne plus apres le demarrage (code : $($launcher.ExitCode)). Test runtime echoue."
           }
           "Kovelyx portable : processus actif apres 25 secondes avec Nuvio bloque." >> $env:GITHUB_STEP_SUMMARY
+          # Baseline memory samples on the REAL published executable, not a build stub.
+          # No process memory content, command line or private credentials are collected.
+          $memorySamples = @()
+          foreach ($phase in @('startup', 'after-idle')) {
+            foreach ($item in $running) {
+              $proc = Get-Process -Id $item.ProcessId -ErrorAction SilentlyContinue
+              if ($proc) {
+                $memorySamples += [pscustomobject]@{
+                  phase = $phase
+                  process = $proc.ProcessName
+                  workingSetBytes = [long]$proc.WorkingSet64
+                  privateBytes = [long]$proc.PrivateMemorySize64
+                }
+              }
+            }
+            if ($phase -eq 'startup') { Start-Sleep -Seconds 5 }
+          }
+          $memoryFile = Join-Path $env:RUNNER_TEMP 'kovelyx-windows-memory.json'
+          $memorySamples | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $memoryFile -Encoding UTF8
           $log = Join-Path $env:RUNNER_TEMP 'kovelyx-windows-runtime.txt'
           @(
             "Release: $env:KOVELYX_RELEASE_TAG",
@@ -117,5 +136,6 @@ jobs:
           path: |
             ${{ runner.temp }}/kovelyx-windows-runtime.txt
             ${{ runner.temp }}/kovelyx-windows-runtime.png
+            ${{ runner.temp }}/kovelyx-windows-memory.json
           if-no-files-found: ignore
           retention-days: 21

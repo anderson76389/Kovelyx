@@ -54,6 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - uses: actions/checkout@v4
       - name: Vérifier la compilation et récupérer le bon APK TV
         env:
           GH_TOKEN: ${{ github.token }}
@@ -95,7 +96,8 @@ jobs:
           arch: x86
           profile: tv_1080p
           cores: 2
-          ram-size: 3072M
+          # Simule une TV Box à 2 Go pour exercer le budget d'images contraint.
+          ram-size: 2048M
           heap-size: 512M
           disk-size: 6144M
           disable-animations: true
@@ -108,6 +110,7 @@ jobs:
             adb shell input keyevent KEYCODE_DPAD_CENTER
             adb shell screencap -p /sdcard/kovelyx-tv-smoke.png
             adb pull /sdcard/kovelyx-tv-smoke.png /tmp/kovelyx-tv-smoke.png
+            python3 scripts/tests/tv_emulator_memory_probe.py
       - name: Enregistrer la preuve de compilation testée
         if: success()
         uses: actions/upload-artifact@v4
@@ -123,4 +126,12 @@ jobs:
           name: kovelyx-tv-emulator-screenshot
           path: /tmp/kovelyx-tv-smoke.png
           if-no-files-found: ignore
+          retention-days: 30
+      - name: Conserver les mesures de RAM et fluidité de l'émulateur TV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-emulator-memory-pss-gfx
+          path: /tmp/kovelyx-tv-memory/
+          if-no-files-found: warn
           retention-days: 30

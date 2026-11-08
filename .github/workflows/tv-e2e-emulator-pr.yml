@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/android-tv-smoke.yml'
       - '.github/workflows/tv-e2e-emulator-pr.yml'
+      - 'apps/tv/app/src/main/**'
+      - 'apps/tv/app/src/test/**'
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/sync/CloudflareTvProfileSharingSecurityTest.kt'
       - 'scripts/tests/tv_guest_smoke.py'
   workflow_dispatch:
@@ -18,27 +20,66 @@ jobs:
   emulator:
     name: Installer APK signée / démarrer / tester DPAD / surveiller crashes
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
-      - name: Récupérer une APK TV qui a réellement passé le build de la branche principale
+      - name: Télécharger l'APK TV construite depuis le commit à tester
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          EXPECTED_PR_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           set -euo pipefail
-          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?branch=main&status=success&per_page=10" --jq '.workflow_runs[0].id')"
-          [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "::error::Aucune compilation vérifiée"; exit 1; }
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > /tmp/kv-run.json
-          jq -e --arg repo "$GITHUB_REPOSITORY" '.head_repository.full_name == $repo and .head_branch == "main" and .conclusion == "success"' /tmp/kv-run.json >/dev/null
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100" > /tmp/kv-jobs.json
-          jq -e '[.jobs[] | select(.name == "Android TV - APK optimisé (identité existante)" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            # Never test a previously released MAIN APK while claiming PR coverage.
+            [[ "$EXPECTED_PR_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 1
+            [[ "$EXPECTED_PR_NUMBER" =~ ^[0-9]+$ ]] || exit 1
+            run_id=""
+            for attempt in $(seq 1 150); do
+              gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?event=pull_request&per_page=100" > /tmp/kv-runs.json
+              run_id="$(jq -r --arg sha "$EXPECTED_PR_SHA" --arg pr "$EXPECTED_PR_NUMBER" --arg repo "$GITHUB_REPOSITORY" '
+                [.workflow_runs[] | select(.head_sha == $sha
+                  and .event == "pull_request"
+                  and .head_repository.full_name == $repo
+                  and any(.pull_requests[]?; .number == ($pr | tonumber)))] | first | .id // empty
+              ' /tmp/kv-runs.json)"
+              if [[ "$run_id" =~ ^[0-9]+$ ]]; then
+                gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100" > /tmp/kv-jobs.json
+                job_status="$(jq -r '[.jobs[] | select(.name == "Android TV - APK optimisé (identité existante)")] | first | .conclusion // empty' /tmp/kv-jobs.json)"
+                if [[ "$job_status" == "success" ]]; then break; fi
+                if [[ "$job_status" != "" && "$job_status" != "null" ]]; then
+                  echo "::error::Compilation TV de la PR terminée sans succès : $job_status"
+                  exit 1
+                fi
+              fi
+              echo "Compilation de l'APK TV de la PR en cours ($attempt/150)"
+              sleep 10
+            done
+            [[ "$job_status" == "success" ]] || { echo "::error::Compilation TV PR non validée"; exit 1; }
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > /tmp/kv-run.json
+            jq -e --arg sha "$EXPECTED_PR_SHA" --arg repo "$GITHUB_REPOSITORY" '
+              .head_sha == $sha and .event == "pull_request" and .head_repository.full_name == $repo
+            ' /tmp/kv-run.json >/dev/null
+          else
+            # Manual fallback preserves the previously validated main artifact.
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?branch=main&status=success&per_page=10" --jq '.workflow_runs[0].id')"
+            [[ "$run_id" =~ ^[0-9]+$ ]] || exit 1
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > /tmp/kv-run.json
+            jq -e --arg repo "$GITHUB_REPOSITORY" '.head_repository.full_name == $repo and .head_branch == "main" and .conclusion == "success"' /tmp/kv-run.json >/dev/null
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100" > /tmp/kv-jobs.json
+            jq -e '[.jobs[] | select(.name == "Android TV - APK optimisé (identité existante)" and .conclusion == "success")] | length == 1' /tmp/kv-jobs.json >/dev/null
+          fi
           mkdir -p /tmp/kv-tv-apk
           gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name kovelyx-tv-debug --dir /tmp/kv-tv-apk
           count="$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' | wc -l)"
           [[ "$count" == 1 ]] || { echo "::error::Un seul APK TV universel est exigé, trouvé : $count"; exit 1; }
-          unzip -tq "$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)"
-          echo "APK TV issue du build main $run_id (vrai artefact)"
+          apk="$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)"
+          unzip -tq "$apk"
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify --verbose "$apk" >/dev/null
+          "$tools/aapt" dump badging "$apk" | grep -F "package: name='com.kovelyx.tv.debug'"
+          echo "APK TV testée : artefact vérifié du run $run_id ($GITHUB_EVENT_NAME)"
       - name: Donner accès au moteur de virtualisation
         run: |
           if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
@@ -50,7 +91,8 @@ jobs:
           arch: x86
           profile: tv_1080p
           cores: 2
-          ram-size: 3072M
+          # Reproduce constrained 2-GB TV boxes instead of an easier 3-GB configuration.
+          ram-size: 2048M
           heap-size: 512M
           disk-size: 6144M
           disable-animations: true
@@ -68,6 +110,7 @@ jobs:
             adb shell input keyevent KEYCODE_DPAD_UP
             sleep 3
             adb shell pidof com.kovelyx.tv.debug
+            python3 scripts/tests/tv_emulator_memory_probe.py
             adb shell uiautomator dump /sdcard/kv-ui.xml
             adb pull /sdcard/kv-ui.xml /tmp/kv-ui.xml
             adb shell screencap -p /sdcard/kv-tv.png
@@ -86,5 +129,6 @@ jobs:
             /tmp/kovelyx-guest.xml
             /tmp/kv-ui.xml
             /tmp/kv-tv-logcat.txt
+            /tmp/kovelyx-tv-memory/
           if-no-files-found: ignore
           retention-days: 14
