@@ -1,0 +1,138 @@
+name: Auditer tout Kovelyx, les trois versions et les installateurs publics
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/full-repository-independence-audit.yml'
+      - 'scripts/tests/scan_all_independence.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/full-repository-independence-audit.yml'
+      - 'scripts/tests/scan_all_independence.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  tracked-sources-and-archives:
+    name: Vérifier chaque fichier Git, les archives, les trois clients et les dépendances
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inventaire complet du dépôt et examen des archives binaires
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/tests/scan_all_independence.py
+          python3 scripts/tests/scan_all_independence.py \
+            --out /tmp/kovelyx-full-audit.json | tee /tmp/kovelyx-full-audit-summary.txt
+      - name: Contrôles stricts de non-dépendance de Nuvio et Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/tests/verify-upstream-independence.py
+          python3 scripts/tests/audit-retired-provider-residuals.py --strict
+          python3 scripts/tests/audit-tv-nuvio-urls.py
+          python3 scripts/tests/test_native_asset_names.py
+          python3 scripts/tests/test_kovelyx_namespace_renames.py
+          python3 scripts/tests/audit-packaged-binaries.py
+      - name: Résumer les traces sans afficher de secrets
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          path=Path('/tmp/kovelyx-full-audit.json')
+          if not path.exists():
+              raise SystemExit('Le scan n’a pas produit de résultat.')
+          data=json.loads(path.read_text(encoding='utf-8'))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as out:
+              out.write('### Tous les fichiers Git du dépôt Kovelyx\n\n')
+              out.write('Commit : '+data['head']+'\n')
+              out.write('Fichiers suivis : '+str(data['tracked_files'])+'\n')
+              out.write('Fichiers ayant un ancien nom : '+str(data['counts'].get('old_filename',0))+'\n')
+              out.write('Sous-modules distants actifs : '+str(data['counts'].get('submodule_gitlink',0))+'\n')
+              out.write('Dépendances actives suspectes : '+str(len(data['critical_candidates']))+'\n')
+              out.write('Archives avec erreurs : '+str(len(data['unscanned_or_errors']))+'\n\n')
+              for category,count in sorted(data['counts'].items()):
+                  out.write('- '+category+' : '+str(count)+'\n')
+              out.write('\nLimites : URLs construites dynamiquement, contenus chargés depuis Internet et trafic sur appareils physiques.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rapport-independance-tous-fichiers-github
+          path: |
+            /tmp/kovelyx-full-audit.json
+            /tmp/kovelyx-full-audit-summary.txt
+          if-no-files-found: warn
+          retention-days: 60
+
+  released-binaries:
+    name: Inspecter les véritables APK TV, APK Android et installateur MSI Windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Télécharger les trois installateurs et valider leur SHA256
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || { echo "::error::Version officielle absente"; exit 1; }
+          mkdir -p /tmp/kovelyx-released
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir /tmp/kovelyx-released \
+            --pattern 'Kovelyx-Android-*.apk' \
+            --pattern 'Kovelyx-TV-*-universal.apk' \
+            --pattern 'Kovelyx-Windows-v*.msi' \
+            --pattern '*.sha256'
+          cd /tmp/kovelyx-released
+          mapfile -t packages < <(find . -maxdepth 1 -type f \( -name '*.msi' -o -name '*.apk' \))
+          [[ "${#packages[@]}" == 3 ]] || { echo "::error::Les trois installateurs n'existent pas"; exit 1; }
+          for file in "${packages[@]}"; do
+            test -s "$file.sha256"
+            sha256sum --check "$file.sha256"
+          done
+          echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+      - name: Scanner le contenu des paquets signés réellement distribués
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/tests/scan_all_independence.py --only-release \
+            --release-path "/tmp/kovelyx-released/Kovelyx-Android-$RELEASE_TAG.apk" \
+            --release-path "/tmp/kovelyx-released/Kovelyx-TV-$RELEASE_TAG-universal.apk" \
+            --release-path "/tmp/kovelyx-released/Kovelyx-Windows-$RELEASE_TAG.msi" \
+            --out /tmp/kovelyx-release-audit.json | tee /tmp/kovelyx-release-scan.txt
+          python3 - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/kovelyx-release-audit.json',encoding='utf-8'))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as out:
+              out.write('### Installateurs '+os.environ['RELEASE_TAG']+' réellement téléchargés\n\n')
+              for a in data['released_artifacts']:
+                  out.write('- '+a['name']+' : '+str(a['size'])+' octets, anciens services en clair : '+str(a['legacy'])+'\n')
+              out.write('Les noms de classes hérités ne sont pas automatiquement des connexions Nuvio.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rapport-installateurs-android-tv-windows
+          path: |
+            /tmp/kovelyx-release-audit.json
+            /tmp/kovelyx-release-scan.txt
+          if-no-files-found: warn
+          retention-days: 60
