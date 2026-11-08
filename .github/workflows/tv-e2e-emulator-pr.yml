@@ -53,6 +53,7 @@ jobs:
                   exit 1
                 fi
               fi
+              echo "Compilation de l'APK TV de la PR en cours ($attempt/150)"
               sleep 10
             done
             [[ "$job_status" == "success" ]] || { echo "::error::Compilation TV PR non validée"; exit 1; }
