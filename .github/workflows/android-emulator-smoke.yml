@@ -67,8 +67,8 @@ jobs:
             adb shell pidof com.kovelyx.mobile.debug
             adb shell dumpsys meminfo com.kovelyx.mobile.debug > /tmp/kovelyx-mobile-memory-start.txt
             adb shell dumpsys gfxinfo com.kovelyx.mobile.debug framestats > /tmp/kovelyx-mobile-frames.txt
-            adb shell input keyevent KEYCODE_BACK
-            adb shell input keyevent KEYCODE_BACK
+            adb shell input keyevent KEYCODE_DPAD_DOWN
+            adb shell input keyevent KEYCODE_DPAD_UP
             adb shell pidof com.kovelyx.mobile.debug
             adb shell dumpsys meminfo com.kovelyx.mobile.debug > /tmp/kovelyx-mobile-memory-after.txt
             # Any failure before this step is an emulator environment problem, not proof of app failure.
