@@ -5,7 +5,8 @@
  */
 import assert from "node:assert/strict";
 import {spawn,spawnSync} from "node:child_process";
-import {randomUUID,createHash} from "node:crypto";
+import {randomUUID,createHash,webcrypto} from "node:crypto";
+import vm from "node:vm";
 import {mkdtempSync,readFileSync,writeFileSync,rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {resolve,join} from "node:path";
@@ -548,6 +549,132 @@ try {
   assert.equal((await req("/v1/profiles?profileId="+isolatedId,"DELETE",{},mobileToken)).status,200,
     "Delete only the disposable secondary test profile");
   console.log("PASS: 3 sessions Windows/Android/TV, films et séries, suppressions bidirectionnelles, anti-résurrection, vues, progression et isolation des profils");
+
+  // Site Ma-Collection VRAIMENT publié, transféré à un Worker D1 LOCAL jetable.
+  // Aucune requête authentifiée vers les comptes Cloudflare de production.
+  const siteRoot="https://anderson76389.github.io/Ma-Collection";
+  const siteSources=await Promise.all([
+    fetch(siteRoot+"/kovelyx-cloud-push.js?v=1",{signal:AbortSignal.timeout(20000)}),
+    fetch(siteRoot+"/export/nuvio-collection-fr.json",{signal:AbortSignal.timeout(20000)})
+  ]);
+  for(const response of siteSources)assert.equal(response.status,200,
+    "Ma-Collection doit servir son vrai script de Push et son export catalogue public : "+response.url);
+  const livePushSource=await siteSources[0].text();
+  const liveCatalogue=await siteSources[1].json();
+  assert.match(livePushSource,/MaCollectionCloudPush/);
+  assert.ok(Array.isArray(liveCatalogue),"Le catalogue public Ma-Collection doit être un tableau");
+  const liveCategory=liveCatalogue.find(row=>row?.id && Array.isArray(row.folders) &&
+    row.folders.length>=2 && row.folders[0]?.id !== row.folders[1]?.id);
+  assert.ok(liveCategory,"Deux vrais dossiers Ma-Collection nécessaires au test");
+  const websiteProfile=await req("/v1/profiles","POST",{displayName:"Ma-Collection CI jetable"},alice.token);
+  assert.equal(websiteProfile.status,201);
+  const websiteProfileId=websiteProfile.data.profile.id;
+  const origin="https://anderson76389.github.io";
+  const siteNodes=new Map();
+  class FakeElement {
+    constructor(tag="div") { this.tagName=tag;this.children=[];this.value="";this.textContent="";
+      this.disabled=false;this.hidden=true;this.dataset={};this.handlers={}; }
+    setAttribute() {}
+    addEventListener(event,handler) {this.handlers[event]=handler;}
+    focus() {}
+    replaceChildren() {this.children=[];this.value="";}
+    appendChild(child) {
+      this.children.push(child);
+      if(this.tagName==="select" && this.children.length===1)this.value=child.value;
+      return child;
+    }
+  }
+  for(const name of ["account","login","reload","profile","mode","status","cancel","send"])
+    siteNodes.set("mc-kovelyx-cloud-"+name,new FakeElement(
+      ["profile","mode"].includes(name)?"select":"div"));
+  siteNodes.get("mc-kovelyx-cloud-mode").value="merge";
+  const fakeDocument={
+    getElementById:id=>siteNodes.get(id)||null,
+    createElement:tag=>new FakeElement(tag),
+    head:new FakeElement("head"),body:new FakeElement("body"),
+    addEventListener(){}
+  };
+  const websiteApp={
+    MaCollectionAccount:{
+      status:()=>({cloudSignedIn:true,cloudEmail:alice.email}),
+      async cloudFetch(path,options={}){
+        assert.ok(path.startsWith("/v1/"),"Pas d'appel distant hors Kovelyx");
+        return fetch(base+path,{
+          method:options.method||"GET",
+          headers:{Accept:"application/json",Origin:origin,Authorization:"Bearer "+alice.token,
+            ...(options.body===undefined?{}:{"Content-Type":"application/json"})},
+          body:options.body===undefined?undefined:JSON.stringify(options.body),
+          signal:AbortSignal.timeout(15000)
+        });
+      }
+    },
+    MaCollectionBackendConfig:{current:()=>({url:base})},
+    MaCollectionKovelyx:{buildExport:async()=>""},
+    confirm:()=>true
+  };
+  const browserFetch=(url,options={})=>fetch(url,{
+    ...options,headers:{...options.headers,Origin:origin},signal:AbortSignal.timeout(15000)
+  });
+  vm.runInNewContext(livePushSource,{
+    window:websiteApp,document:fakeDocument,fetch:browserFetch,
+    TextEncoder,structuredClone,crypto:webcrypto,console
+  },{timeout:3000,filename:"Ma-Collection-deployed/kovelyx-cloud-push.js"});
+  const sitePush=websiteApp.MaCollectionCloudPush;
+  assert.equal(typeof sitePush?.publish,"function","Vraie fonctionnalité Push publiée sur GitHub Pages");
+  const websiteCategory=(folders)=>[{
+    ...liveCategory, folders:folders.map(folder=>structuredClone(folder))
+  }];
+  async function publishWebsite(folders) {
+    websiteApp.MaCollectionKovelyx.buildExport=async()=>JSON.stringify(websiteCategory(folders));
+    await sitePush.open();
+    siteNodes.get("mc-kovelyx-cloud-profile").value=websiteProfileId;
+    await sitePush.publish();
+    const state=siteNodes.get("mc-kovelyx-cloud-status");
+    assert.equal(state.dataset.error,"false","Site -> Worker D1 local : "+state.textContent);
+    assert.match(state.textContent,/publiés|déjà publiés/,
+      "Une publication doit être confirmée seulement par le Worker : "+state.textContent);
+  }
+  async function readWebsiteSnapshot(token) {
+    const response=await req("/v1/sync?profileId="+websiteProfileId+"&limit=25","GET",null,token);
+    assert.equal(response.status,200);
+    const head=response.data.items.find(row=>row.category==="preferences"&&
+      row.itemKey==="catalogue_collections"&&!row.deleted);
+    assert.ok(head,"Le manifeste doit être visible dans chaque session");
+    const parts=[];
+    let offset=0;
+    do {
+      const page=await req("/v1/sync?profileId="+websiteProfileId+
+        "&snapshotKind=collections&snapshotHash="+head.payload.sha256+
+        "&limit=25&offset="+offset,"GET",null,token);
+      assert.equal(page.status,200);
+      parts.push(...page.data.items.map(item=>item.payload));
+      offset=page.data.nextOffset;
+    } while(offset!==null);
+    parts.sort((a,b)=>a.index-b.index);
+    assert.equal(parts.length,head.payload.parts);
+    const raw=parts.map(part=>part.text).join("");
+    assert.equal(createHash("sha256").update(raw).digest("hex"),head.payload.sha256);
+    assert.equal(Buffer.byteLength(raw),head.payload.utf8Bytes);
+    return JSON.parse(raw);
+  }
+  // PC/website publishes actual Ma-Collection JSON ; TV reads another Bearer.
+  await publishWebsite([liveCategory.folders[0]]);
+  const fromTv=await readWebsiteSnapshot(tvToken);
+  assert.equal(fromTv[0].folders[0].id,liveCategory.folders[0].id);
+  // A second Push in fusion mode MUST preserve the original folder (no data loss).
+  await publishWebsite([liveCategory.folders[1]]);
+  for(const token of [tvToken,mobileToken,alice.token]){
+    const remote=await readWebsiteSnapshot(token);
+    assert.ok(remote.some(category=>category.id===liveCategory.id));
+    const ids=new Set(remote.find(category=>category.id===liveCategory.id).folders.map(x=>x.id));
+    assert.ok(ids.has(liveCategory.folders[0].id),"Le dossier initial reste sur chaque appareil");
+    assert.ok(ids.has(liveCategory.folders[1].id),"Le nouveau dossier arrive sur chaque appareil");
+  }
+  assert.equal((await req("/v1/sync?profileId="+websiteProfileId,"GET",null,bob.token)).status,404,
+    "Un autre utilisateur ne doit pas accéder aux catalogues publiés");
+  assert.equal((await req("/v1/profiles?profileId="+websiteProfileId,"DELETE",{},alice.token)).status,200,
+    "Profil de test isolé effacé de D1 locale uniquement");
+  console.log("PASS: vrai JS GitHub Pages Ma-Collection et vrais catalogues FR -> Worker+D1 locaux -> trois sessions PC/Android/TV ; fusion sans perte, SHA-256, isolation");
 
   const renamed=await req("/v1/profiles?profileId="+profileId,"PATCH",
     {displayName:"Principal TV"},alice.token);
