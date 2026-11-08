@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Run REAL Media3 Android instrumentation, but avoid an unbounded Gradle
+# connectedAndroidTest wait that previously consumed the 90-minute job limit.
+set -Eeuo pipefail
+
+mkdir -p /tmp/kovelyx-tv-media3-diagnostics
+DIR=/tmp/kovelyx-tv-media3-diagnostics
+
+diagnostics() {
+  status=$?
+  adb logcat -d -v threadtime > "$DIR/logcat.txt" 2>&1 || true
+  adb shell dumpsys activity processes > "$DIR/activity-processes.txt" 2>&1 || true
+  adb shell dumpsys meminfo com.kovelyx.tv.debug > "$DIR/meminfo.txt" 2>&1 || true
+  adb shell pm list instrumentation > "$DIR/instrumentation-list.txt" 2>&1 || true
+  echo "Media3 instrumentation exit status: $status"
+}
+trap diagnostics EXIT
+
+adb wait-for-device
+adb shell getprop sys.boot_completed | grep -Fx '1'
+adb shell settings put global window_animation_scale 0 || true
+adb shell settings put global transition_animation_scale 0 || true
+adb shell settings put global animator_duration_scale 0 || true
+
+chmod +x apps/tv/gradlew
+./apps/tv/gradlew -p apps/tv :app:assembleFullDebug :app:assembleFullDebugAndroidTest \
+  -Pkovelyx.optimizedDistribution=true \
+  --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process \
+  -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+
+APP_APK="$(find apps/tv/app/build/outputs/apk/full/debug -type f -name '*.apk' -print -quit)"
+TEST_APK="$(find apps/tv/app/build/outputs/apk/androidTest/full/debug -type f -name '*.apk' -print -quit)"
+test -s "$APP_APK"
+test -s "$TEST_APK"
+echo "Tested app APK: $APP_APK"
+echo "Test runner APK: $TEST_APK"
+sha256sum "$APP_APK" "$TEST_APK" > "$DIR/tested-apks.sha256"
+adb install -r "$APP_APK"
+adb install -r "$TEST_APK"
+
+RUNNER="$(adb shell pm list instrumentation | tr -d '\r' |
+  sed -n 's/^instrumentation:\([^ ]*\) (target=com\.kovelyx\.tv\.debug)$/\1/p' | head -n 1)"
+if [[ -z "$RUNNER" ]]; then
+  echo "::error::Test runner for com.kovelyx.tv.debug is absent after installation"
+  adb shell pm list instrumentation
+  exit 1
+fi
+echo "Android instrumentation runner: $RUNNER"
+
+# Each selected native test must actually run, return OK (1 test), and
+# complete in under 3 minutes. 'No test discovered' is a failure too.
+CASES=(
+  'androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak'
+  'androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle'
+  'androidx.media3.exoplayer.source.SampleDataQueueNativeTest#testCopyFromArray'
+  'androidx.media3.exoplayer.source.SampleDataQueueNativeTest#testCopyToArray'
+  'androidx.media3.exoplayer.source.SampleDataQueueNativeTest#testCopyBetweenDirectBuffers'
+  'com.kovelyx.tv.ui.screens.player.Media3VideoDecodeSmokeTest#h264Mp4ReachesEndWithoutDecoderErrors'
+)
+for i in "${!CASES[@]}"; do
+  case_name="${CASES[$i]}"
+  log="$DIR/instrument-$((i+1)).txt"
+  echo "=== Media3 device case $((i+1))/${#CASES[@]}: $case_name ==="
+  if ! timeout --foreground --signal=TERM --kill-after=15s 180s \
+    adb shell am instrument -w -r -e class "$case_name" "$RUNNER" \
+    > "$log" 2>&1; then
+    echo "::error::Instrumentation exited nonzero or exceeded 180 seconds for $case_name"
+    tail -n 80 "$log" || true
+    exit 1
+  fi
+  cat "$log"
+  if ! grep -Fq 'OK (1 test)' "$log" || ! grep -Fq 'INSTRUMENTATION_CODE: -1' "$log"; then
+    echo "::error::Instrumentation did not confirm one successful native test: $case_name"
+    exit 1
+  fi
+done
+echo "PASS: six real Android TV Media3 instrumentation cases, including H264 frame decoding."
