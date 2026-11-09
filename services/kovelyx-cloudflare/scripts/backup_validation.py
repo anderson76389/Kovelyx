@@ -5,6 +5,8 @@ import sqlite3
 
 BASE_TABLES = ('user', 'session', 'account', 'verification', 'rateLimit', 'kv_profiles', 'kv_sync')
 MEDIA_TABLES = ('kv_profile_media', 'kv_profile_media_chunks', 'kv_profile_media_uploads', 'kv_profile_media_upload_chunks')
+PIN_TABLES = ('kv_profile_pins',)
+REQUIRED_TABLES = BASE_TABLES + MEDIA_TABLES + PIN_TABLES
 
 
 def validate_export(path):
@@ -20,8 +22,23 @@ def validate_export(path):
         if db.execute('PRAGMA integrity_check').fetchone() != ('ok',):
             raise RuntimeError('Intégrité de la sauvegarde non confirmée.')
         tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        if not set(BASE_TABLES + MEDIA_TABLES).issubset(tables):
-            raise RuntimeError('Tables de comptes, synchronisation ou médias manquantes.')
+        if not set(REQUIRED_TABLES).issubset(tables):
+            raise RuntimeError('Tables de comptes, de synchronisation, de médias ou de profils PIN manquantes.')
+        # The private PIN rows must be present, structurally valid and scoped
+        # to a profile in the restored snapshot; we never print a PIN or hash.
+        pin_schema = db.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='kv_profile_pins'"
+        ).fetchone()[0]
+        if 'pin_hash' not in pin_schema or 'blocked_until' not in pin_schema:
+            raise RuntimeError('La migration PIN D1 0005 est absente ou incomplète.')
+        invalid_pin = db.execute(
+            "SELECT 1 FROM kv_profile_pins pin "
+            "LEFT JOIN kv_profiles p ON p.owner_id=pin.owner_id AND p.id=pin.profile_id "
+            "WHERE p.id IS NULL OR length(pin.salt)!=32 OR length(pin.pin_hash)!=64 "
+            "OR pin.failed_attempts<0 LIMIT 1"
+        ).fetchone()
+        if invalid_pin:
+            raise RuntimeError('Verrous de profils PIN incohérents dans la sauvegarde.')
         schema = db.execute("SELECT sql FROM sqlite_master WHERE name='kv_profile_media'").fetchone()[0]
         if '18000000' not in schema:
             raise RuntimeError('Le schéma de médias 0004 attendu est absent.')
@@ -64,6 +81,6 @@ def validate_export(path):
                 raise RuntimeError('Le catalogue reconstitué ne correspond pas à son empreinte.')
             json.loads(data)
             verified_catalogues += 1
-        counts = {table: db.execute('SELECT count(*) FROM "' + table + '"').fetchone()[0] for table in BASE_TABLES + MEDIA_TABLES}
+        counts = {table: db.execute('SELECT count(*) FROM "' + table + '"').fetchone()[0] for table in REQUIRED_TABLES}
         return {'tables': counts, 'verified_media': verified_media, 'verified_catalogues': verified_catalogues,
                 'legacy_inline_catalogues': legacy_catalogues, 'validation': 'isolated-sqlite-and-sha256'}
