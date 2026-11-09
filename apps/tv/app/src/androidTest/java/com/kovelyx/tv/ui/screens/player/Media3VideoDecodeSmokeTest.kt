@@ -36,6 +36,18 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 @RunWith(AndroidJUnit4::class)
 class Media3VideoDecodeSmokeTest {
+    /**
+     * Repeatedly create, play and release a real Media3/MediaCodec decoder.
+     * This catches resource cleanup/reinitialization regressions which a
+     * single short decode cannot reveal; it is not a long-term 4K TV test.
+     */
+    @Test
+    fun h264ReplayAndReleaseSixTimes() {
+        repeat(6) {
+            h264Mp4ReachesEndWithoutDecoderErrors()
+        }
+    }
+
     @Test
     fun h264Mp4ReachesEndWithoutDecoderErrors() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
