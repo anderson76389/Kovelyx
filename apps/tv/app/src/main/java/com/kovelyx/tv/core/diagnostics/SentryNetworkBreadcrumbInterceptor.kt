@@ -59,12 +59,9 @@ class SentryNetworkBreadcrumbInterceptor : Interceptor {
         }
         breadcrumb.setCategory("http.client")
         breadcrumb.setLevel(levelFor(statusCode, error))
-        breadcrumb.setData("host", url.host)
-        breadcrumb.setData("path", url.encodedPath)
         breadcrumb.setData("elapsed_ms", elapsedMs)
         if (error != null) {
             breadcrumb.setData("error_type", error.javaClass.name)
-            error.message?.let { breadcrumb.setData("error_message", it.take(240)) }
         }
         Sentry.addBreadcrumb(breadcrumb)
     }
@@ -79,13 +76,10 @@ class SentryNetworkBreadcrumbInterceptor : Interceptor {
         }
     }
 
-    private fun scrubbedUrl(url: HttpUrl): String {
-        return url.newBuilder()
-            .query(null)
-            .fragment(null)
-            .build()
-            .toString()
-    }
+    // A configured addon or a stream can embed credentials in its PATH or
+    // subdomain as well as query string. Only the protocol is diagnostic-safe.
+    private fun scrubbedUrl(url: HttpUrl): String =
+        "${url.scheme}://redacted.invalid/"
 
     private fun elapsedMs(startedAtNs: Long): Long {
         return (System.nanoTime() - startedAtNs) / 1_000_000L

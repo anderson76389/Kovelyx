@@ -4,7 +4,23 @@ on:
     - cron: '40 3 * * *'
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
-    paths: ['.github/workflows/cloudflare-backup.yml', 'services/kovelyx-cloudflare/scripts/backup-remote.py', 'services/kovelyx-cloudflare/scripts/backup_validation.py']
+    paths: ['.github/workflows/cloudflare-backup.yml', 'services/kovelyx-cloudflare/scripts/backup-remote.py', 'services/kovelyx-cloudflare/scripts/backup_validation.py', 'services/kovelyx-cloudflare/scripts/verify-private-backup.py']
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cloudflare-backup.yml'
+      - 'services/kovelyx-cloudflare/scripts/backup-remote.py'
+      - 'services/kovelyx-cloudflare/scripts/backup_validation.py'
+      - 'services/kovelyx-cloudflare/scripts/verify-private-backup.py'
+      - 'services/kovelyx-cloudflare/tests/test_backup_validation.py'
+      - 'services/kovelyx-cloudflare/tests/test_private_backup_rehearsal.py'
+      - 'scripts/tests/test_private_logging_boundaries.py'
+      - 'scripts/tests/audit_network_surface.py'
+      - 'apps/**/SentryInitializer.kt'
+      - 'apps/**/SentryEventSanitizer.kt'
+      - 'apps/**/SentryNetworkBreadcrumbInterceptor.kt'
+      - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/logging/LogDiagnostics.kt'
+      - 'apps/tv/app/src/main/java/com/kovelyx/tv/ui/screens/player/LoggingDataSource.kt'
   workflow_dispatch:
 permissions:
   contents: read
@@ -12,7 +28,33 @@ concurrency:
   group: kovelyx-encrypted-d1-backup
   cancel-in-progress: false
 jobs:
+  verify:
+    name: Vérifier sauvegarde chiffrée, restauration D1 et confidentialité sans production
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Tester un chiffrement et une restauration avec des clés jetables
+        run: |
+          set -euo pipefail
+          python3 -m py_compile services/kovelyx-cloudflare/scripts/backup_validation.py services/kovelyx-cloudflare/scripts/backup-remote.py services/kovelyx-cloudflare/scripts/verify-private-backup.py
+          python3 services/kovelyx-cloudflare/tests/test_backup_validation.py
+          python3 services/kovelyx-cloudflare/tests/test_private_backup_rehearsal.py
+          python3 scripts/tests/test_private_logging_boundaries.py
+          python3 scripts/tests/audit_network_surface.py > /tmp/kovelyx-network-categories.json
+      - name: Conserver seulement un inventaire des catégories, jamais les URLs ni les jetons
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-network-source-categories
+          path: /tmp/kovelyx-network-categories.json
+          if-no-files-found: error
+          retention-days: 30
   backup:
+    needs: verify
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,7 +79,7 @@ jobs:
           WRANGLER_SEND_METRICS: 'false'
         run: python3 services/kovelyx-cloudflare/scripts/backup-remote.py
       - name: Conserver uniquement la copie chiffrée et les contrôles non privés
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-d1-encrypted-backup-${{ github.run_id }}

@@ -55,6 +55,12 @@ def main():
             sql.chmod(0o600)
             encrypted = out / 'kovelyx-d1.sql.cms'
             run_private(['openssl', 'cms', '-encrypt', '-binary', '-aes-256-gcm', '-in', str(sql), '-out', str(encrypted), '-outform', 'DER', str(certificate)], 'Chiffrement de la sauvegarde')
+            if encrypted.stat().st_size < 512:
+                raise RuntimeError('La sauvegarde chiffrée est incomplète.')
+            # CMS must parse before publishing; no private key is needed to
+            # validate the ciphertext envelope. Never print ASN.1 metadata.
+            run_private(['openssl', 'cms', '-cmsout', '-print', '-inform', 'DER',
+                         '-in', str(encrypted)], 'Validation de la copie CMS')
             signing_bundle = os.environ.get('KOVELYX_ANDROID_SIGNING_BUNDLE', '')
             signing_saved = False
             if signing_bundle:

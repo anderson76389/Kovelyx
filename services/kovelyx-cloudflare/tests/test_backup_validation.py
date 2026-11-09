@@ -52,6 +52,40 @@ class BackupValidation(unittest.TestCase):
         self.assertEqual(result['verified_catalogues'], 1)
         self.assertEqual(result['tables']['user'], 1)
 
+    def test_restored_pins_and_accounts_are_preserved(self):
+        self.db.execute(
+            "INSERT INTO kv_profile_pins(owner_id,profile_id,salt,pin_hash,updated_at) "
+            "VALUES (?,?,?,?,?)",
+            ('test', 'profile', 'a' * 32, 'b' * 64, 2),
+        )
+        self.insert('library', 'movie:1', {'id': '1', 'type': 'movie'})
+        self.insert('watch_progress', 'movie:1', {'lastPositionMs': 45000})
+        self.insert('watched_items', 'movie:1:-1:-1', {'id': '1', 'type': 'movie'})
+        result = self.validate()
+        self.assertEqual(result['tables']['kv_profile_pins'], 1)
+        self.assertEqual(result['tables']['kv_sync'], 6)
+        self.assertEqual(result['verified_media'], 1)
+        self.assertEqual(result['verified_catalogues'], 1)
+
+    def test_missing_profile_pin_table_refuses_restore(self):
+        self.db.execute('DROP TABLE kv_profile_pins')
+        with self.assertRaises(RuntimeError):
+            self.validate()
+
+    def test_invalid_pin_material_refuses_restore(self):
+        # An isolated restore must not accept a damaged PIN row.
+        self.db.execute(
+            "INSERT INTO kv_profile_pins(owner_id,profile_id,salt,pin_hash,updated_at) "
+            "VALUES (?,?,?,?,?)",
+            ('test', 'profile', 'a' * 32, 'b' * 64, 2),
+        )
+        # SQLite already blocks invalid PIN data at the source table level.
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.db.execute(
+                "UPDATE kv_profile_pins SET failed_attempts=-1"
+            )
+        self.assertEqual(self.validate()['tables']['kv_profile_pins'], 1)
+
     def test_missing_image_chunk_refuses_backup(self):
         self.db.execute('DELETE FROM kv_profile_media_chunks WHERE position=1')
         with self.assertRaises(RuntimeError):

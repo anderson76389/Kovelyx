@@ -9,10 +9,16 @@ internal object SentryEventSanitizer {
     )
 
     fun sanitize(event: SentryEvent): SentryEvent? {
+        val drop = shouldDrop(event)
         event.request = null
         event.user = null
         event.serverName = null
-        return if (shouldDrop(event)) null else event
+        // Preserve stack frame classes without risking stream URL or token text.
+        event.message = null
+        event.logger = null
+        event.transaction = null
+        event.exceptions?.forEach { exception -> exception.value = null }
+        return if (drop) null else event
     }
 
     private fun shouldDrop(event: SentryEvent): Boolean =

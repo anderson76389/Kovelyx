@@ -70,9 +70,17 @@ object SentryInitializer {
             options.setReportHistoricalAnrs(false)
             options.setAttachAnrThreadDump(false)
             options.beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
+                val drop = shouldDrop(event)
                 event.request = null
                 event.user = null
-                if (shouldDrop(event)) null else event
+                // Keep stack frames and exception types, never free-text details
+                // which may contain full stream URLs, tokens or account names.
+                event.serverName = null
+                event.message = null
+                event.logger = null
+                event.transaction = null
+                event.exceptions?.forEach { exception -> exception.value = null }
+                if (drop) null else event
             }
         }
 
