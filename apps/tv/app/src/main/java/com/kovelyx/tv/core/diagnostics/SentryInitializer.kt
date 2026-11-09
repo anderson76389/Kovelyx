@@ -73,6 +73,13 @@ object SentryInitializer {
             options.beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
                 event.request = null
                 event.user = null
+                // Keep stack frames and exception types, never free-text details
+                // which may contain full stream URLs, tokens or account names.
+                event.serverName = null
+                event.message = null
+                event.logger = null
+                event.transaction = null
+                event.exceptions?.forEach { exception -> exception.value = null }
                 if (shouldDrop(event)) null else event
             }
         }
