@@ -146,6 +146,14 @@ object AndroidAppUpdaterPlatform {
                     temporary.copyTo(destination, overwrite = true)
                     temporary.delete()
                 }
+                // The APK lives in a disposable updater-only cache, not user data.
+                // Reclaim older verified APKs only AFTER this download was validated.
+                dir.listFiles()?.forEach { old ->
+                    if (old != destination && old.isFile &&
+                        old.name.startsWith("Kovelyx-") &&
+                        old.name.endsWith(".apk", ignoreCase = true)
+                    ) old.delete()
+                }
                 destination.absolutePath
             } finally {
                 temporary.delete()
