@@ -108,7 +108,8 @@ actual object AppUpdaterPlatform {
         onProgress: (downloadedBytes: Long, totalBytes: Long?) -> Unit,
     ): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
-            clearDir(updatesDir())
+            // Do not discard the previous verified installer until the new one
+            // has been fully received and SHA-256 checked.
             val safeName = assetName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
             val destination = File(updatesDir(), safeName)
             val tempFile = File(updatesDir(), "$safeName.part")
@@ -136,13 +137,21 @@ actual object AppUpdaterPlatform {
             try {
                 response.body()?.use { input ->
                     FileOutputStream(tempFile).use { output ->
-                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        val buffer = ByteArray(64 * 1024)
+                        var lastProgressBytes = 0L
+                        val progressStepBytes = maxOf(1024L * 1024L, (totalBytes ?: 0L) / 100L)
                         while (true) {
                             val read = input.read(buffer)
                             if (read <= 0) break
                             output.write(buffer, 0, read)
                             digest.update(buffer, 0, read)
                             downloadedBytes += read.toLong()
+                            if (downloadedBytes - lastProgressBytes >= progressStepBytes) {
+                                lastProgressBytes = downloadedBytes
+                                onProgress(downloadedBytes, totalBytes)
+                            }
+                        }
+                        if (downloadedBytes > lastProgressBytes) {
                             onProgress(downloadedBytes, totalBytes)
                         }
                         output.flush()
@@ -161,6 +170,9 @@ actual object AppUpdaterPlatform {
                     tempFile.copyTo(destination, overwrite = true)
                     tempFile.delete()
                 }
+                // Only verified artifacts are eligible for deletion. Preserve logs,
+                // restore scripts and any in-progress .part downloads.
+                pruneOldVerifiedInstallers(updatesDir(), keep = destination)
                 destination.absolutePath
             } catch (t: Throwable) {
                 if (tempFile.exists()) tempFile.delete()
@@ -209,10 +221,13 @@ actual object AppUpdaterPlatform {
     private fun updatesDir(): File =
         File(DesktopStorage.rootDir.resolve("updates").also { it.createDirectories() }.toUri())
 
-    private fun clearDir(dirPath: File) {
-        if (dirPath.exists() and dirPath.isDirectory) {
-            dirPath.listFiles()?.forEach { file ->
-                file.deleteRecursively()
+    private fun pruneOldVerifiedInstallers(dirPath: File, keep: File) {
+        dirPath.listFiles()?.forEach { file ->
+            if (file != keep && file.isFile &&
+                file.name.startsWith("Kovelyx-") &&
+                file.extension.lowercase() in setOf("msi", "exe", "zip", "apk")
+            ) {
+                file.delete()
             }
         }
     }
