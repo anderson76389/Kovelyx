@@ -24,17 +24,16 @@ class LoggingDataSource(
 
     override fun open(dataSpec: DataSpec): Long {
         val t0 = SystemClock.elapsedRealtime()
-        val uriName = dataSpec.uri.path?.substringAfterLast('/')?.takeIf { it.isNotBlank() } ?: "stream"
         return try {
             val len = upstream.open(dataSpec)
             val elapsed = (SystemClock.elapsedRealtime() - t0).coerceAtLeast(0L)
-            val line = "[$site] file=$uriName pos=${dataSpec.position} reqLen=${dataSpec.length} -> len=$len ms=$elapsed"
+            val line = "[media] pos=${dataSpec.position} reqLen=${dataSpec.length} -> len=$len ms=$elapsed"
             Log.i("DS_OPEN", line)
             recordEvent(line)
             len
         } catch (e: Exception) {
             val elapsed = (SystemClock.elapsedRealtime() - t0).coerceAtLeast(0L)
-            val line = "[$site] file=$uriName pos=${dataSpec.position} FAILED ${e.javaClass.simpleName}: ${e.message} ms=$elapsed"
+            val line = "[media] pos=${dataSpec.position} FAILED ${e.javaClass.simpleName} ms=$elapsed"
             Log.w("DS_OPEN", line)
             recordEvent(line)
             throw e
