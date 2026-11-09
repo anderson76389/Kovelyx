@@ -4,6 +4,9 @@ on:
     branches: [main]
     paths:
       - 'scripts/tests/test_updater_release_contract.py'
+      - 'scripts/tests/test_updater_resource_contract.py'
+      - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/image/**'
+      - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/image/**'
       - '.github/workflows/check-all-updaters.yml'
       - '.github/workflows/publish-signed-android.yml'
       - 'apps/desktop/composeApp/src/**/updater/**'
@@ -13,6 +16,9 @@ on:
     branches: [main]
     paths:
       - 'scripts/tests/test_updater_release_contract.py'
+      - 'scripts/tests/test_updater_resource_contract.py'
+      - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/image/**'
+      - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/image/**'
       - '.github/workflows/check-all-updaters.yml'
       - '.github/workflows/publish-signed-android.yml'
       - 'apps/desktop/composeApp/src/**/updater/**'
@@ -33,6 +39,10 @@ jobs:
           python-version: '3.12'
       - name: Vérifier la syntaxe du vérificateur
         run: python -m py_compile scripts/tests/test_updater_release_contract.py
+      - name: Vérifier les mises à jour et les budgets ressources sans modifier les données
+        run: |
+          python3 -m py_compile scripts/tests/test_updater_resource_contract.py
+          python3 scripts/tests/test_updater_resource_contract.py
       - name: Tester les fichiers publiés réellement sur GitHub
         env:
           GH_TOKEN: ${{ github.token }}
