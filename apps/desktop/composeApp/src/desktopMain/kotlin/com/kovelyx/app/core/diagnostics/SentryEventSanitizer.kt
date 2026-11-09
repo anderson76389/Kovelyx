@@ -12,6 +12,11 @@ internal object SentryEventSanitizer {
         event.request = null
         event.user = null
         event.serverName = null
+        // Preserve stack frame classes without risking stream URL or token text.
+        event.message = null
+        event.logger = null
+        event.transaction = null
+        event.exceptions?.forEach { exception -> exception.value = null }
         return if (shouldDrop(event)) null else event
     }
 
