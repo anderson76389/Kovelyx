@@ -64,6 +64,57 @@ class CloudflareDatabase(unittest.TestCase):
             db.execute("DELETE FROM kv_profiles WHERE id='existing-profile'")
             self.assertEqual(db.execute('SELECT count(*) FROM kv_profile_media_chunks').fetchone()[0], 0)
 
+    def test_pin_upgrade_preserves_existing_account_sync_and_media(self):
+        # Simulate the real 0004 -> 0005 upgrade of an existing account.
+        # This does not touch or authenticate against the production D1.
+        with sqlite3.connect(":memory:") as db:
+            db.execute("PRAGMA foreign_keys=ON")
+            for migration in migrations:
+                if migration.name.startswith("0005_"):
+                    break
+                db.executescript(migration.read_text(encoding="utf-8"))
+            db.execute(
+                'INSERT INTO "user" (id,name,email,emailVerified,createdAt,updatedAt) VALUES (?,?,?,?,?,?)',
+                ("existing", "Owner", "existing@example.invalid", 1, 1, 1),
+            )
+            db.execute(
+                "INSERT INTO kv_profiles (id,owner_id,display_name,created_at,updated_at) VALUES (?,?,?,?,?)",
+                ("existing-profile", "existing", "Principal", 1, 1),
+            )
+            db.execute(
+                "INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,revision,updated_at) "
+                "VALUES (?,?,?,?,?,?,?)",
+                ("existing", "existing-profile", "library", "movie:keep", '{"id":"keep"}', 7, 1),
+            )
+            db.execute(
+                "INSERT INTO kv_profile_media VALUES (?,?,?,?,?,?,?)",
+                ("existing", "existing-profile", "avatar", "v1", "image/png", 3, 1),
+            )
+            db.execute(
+                "INSERT INTO kv_profile_media_chunks VALUES (?,?,?,?,?)",
+                ("existing", "existing-profile", "avatar", 0, b"PNG"),
+            )
+            before = {
+                table: list(db.execute("SELECT * FROM " + table))
+                for table in ("user", "kv_profiles", "kv_sync", "kv_profile_media",
+                              "kv_profile_media_chunks")
+            }
+            db.executescript(
+                next(m for m in migrations if m.name.startswith("0005_"))
+                .read_text(encoding="utf-8")
+            )
+            for table, rows in before.items():
+                self.assertEqual(list(db.execute("SELECT * FROM " + table)), rows,
+                                 "Migration 0005 must not alter " + table)
+            self.assertEqual(list(db.execute("PRAGMA foreign_key_check")), [])
+            db.execute(
+                "INSERT INTO kv_profile_pins(owner_id,profile_id,salt,pin_hash,updated_at) VALUES (?,?,?,?,?)",
+                ("existing", "existing-profile", "a" * 32, "b" * 64, 2),
+            )
+            self.assertEqual(
+                db.execute("SELECT count(*) FROM kv_profile_pins").fetchone()[0], 1
+            )
+
     def test_owner_and_profile_foreign_keys(self):
         with self.assertRaises(sqlite3.IntegrityError):
             self.db.execute(
