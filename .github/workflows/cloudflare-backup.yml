@@ -15,6 +15,9 @@ on:
       - 'services/kovelyx-cloudflare/tests/test_backup_validation.py'
       - 'services/kovelyx-cloudflare/tests/test_private_backup_rehearsal.py'
       - 'scripts/tests/test_private_logging_boundaries.py'
+      - 'scripts/tests/audit_network_surface.py'
+      - 'apps/**/SentryInitializer.kt'
+      - 'apps/**/SentryEventSanitizer.kt'
       - 'apps/**/SentryNetworkBreadcrumbInterceptor.kt'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/logging/LogDiagnostics.kt'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/ui/screens/player/LoggingDataSource.kt'
@@ -41,6 +44,14 @@ jobs:
           python3 services/kovelyx-cloudflare/tests/test_backup_validation.py
           python3 services/kovelyx-cloudflare/tests/test_private_backup_rehearsal.py
           python3 scripts/tests/test_private_logging_boundaries.py
+          python3 scripts/tests/audit_network_surface.py > /tmp/kovelyx-network-categories.json
+      - name: Conserver seulement un inventaire des catégories, jamais les URLs ni les jetons
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-network-source-categories
+          path: /tmp/kovelyx-network-categories.json
+          if-no-files-found: error
+          retention-days: 30
   backup:
     needs: verify
     if: ${{ github.event_name != 'pull_request' }}
