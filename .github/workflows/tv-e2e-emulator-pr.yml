@@ -11,6 +11,7 @@ on:
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/sync/CloudflareTvProfileSharingSecurityTest.kt'
       - 'scripts/tests/tv_guest_smoke.py'
       - 'scripts/tests/tv_long_session_probe.py'
+      - 'scripts/tests/ota_in_place_upgrade.sh'
   workflow_dispatch:
 permissions:
   contents: read
@@ -85,6 +86,34 @@ jobs:
           "$tools/apksigner" verify --verbose "$apk" >/dev/null
           "$tools/aapt" dump badging "$apk" | grep -F "package: name='com.kovelyx.tv.debug'"
           echo "APK TV testée : artefact vérifié du run $run_id ($GITHUB_EVENT_NAME)"
+      - name: Vérifier la signature et la compatibilité de l'upgrade depuis la dernière Release TV stable
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          bash -n scripts/tests/ota_in_place_upgrade.sh
+          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Aucune Release stable numérotée"; exit 1; }
+          mkdir -p /tmp/kv-tv-previous
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir /tmp/kv-tv-previous \
+            --pattern "Kovelyx-TV-$tag-universal.apk" \
+            --pattern "Kovelyx-TV-$tag-universal.apk.sha256"
+          (cd /tmp/kv-tv-previous && sha256sum -c "Kovelyx-TV-$tag-universal.apk.sha256")
+          prior="/tmp/kv-tv-previous/Kovelyx-TV-$tag-universal.apk"
+          candidate="$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)"
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify "$prior" >/dev/null
+          "$tools/apksigner" verify "$candidate" >/dev/null
+          "$tools/aapt" dump badging "$prior" | grep -F "package: name='com.kovelyx.tv.debug'"
+          "$tools/aapt" dump badging "$candidate" | grep -F "package: name='com.kovelyx.tv.debug'"
+          prior_signer="$("$tools/apksigner" verify --print-certs "$prior" | grep -m1 'certificate SHA-256 digest:')"
+          candidate_signer="$("$tools/apksigner" verify --print-certs "$candidate" | grep -m1 'certificate SHA-256 digest:')"
+          [[ -n "$prior_signer" && "$prior_signer" == "$candidate_signer" ]] || {
+            echo "::error::Clé de signature incompatible : impossible d'installer par-dessus sans perdre les données."
+            exit 1
+          }
+          echo "Signature APK TV identique, upgrade in-place autorisé par Android."
       - name: Donner accès au moteur de virtualisation
         run: |
           if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
@@ -102,7 +131,7 @@ jobs:
           disk-size: 6144M
           disable-animations: true
           script: |
-            adb install -r "$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)"
+            bash scripts/tests/ota_in_place_upgrade.sh "$(find /tmp/kv-tv-previous -type f -name '*.apk' -print -quit)" "$(find /tmp/kv-tv-apk -type f -iname '*universal*.apk' -print -quit)" com.kovelyx.tv.debug android.intent.category.LEANBACK_LAUNCHER
             adb logcat -c
             adb shell monkey -p com.kovelyx.tv.debug -c android.intent.category.LEANBACK_LAUNCHER 1
             sleep 20
