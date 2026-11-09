@@ -45,3 +45,40 @@ jobs:
           print('Ce diagnostic ne prouve pas encore la synchronisation entre appareils physiques.')
           PY
           echo '✅ Production : Worker, D1 0004/0005 et catalogues vérifiés en lecture seule. Tests sur appareils physiques toujours nécessaires.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Vérifier l'isolation anonyme, Better Auth et CORS sans aucune écriture
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${KOVELYX_CLOUDFLARE_URL%/}"
+          check_code() {
+            local want="$1" path="$2"
+            local got
+            got="$(curl --silent --show-error --max-time 20 --connect-timeout 10 \
+              -H 'Accept: application/json' -o /dev/null -w '%{http_code}' "$base$path")"
+            [[ "$got" == "$want" ]] || {
+              echo "::error::Route $path: HTTP $got, attendu $want"
+              return 1
+            }
+          }
+          check_code 401 /v1/me
+          check_code 401 /v1/profiles
+          actual="$(curl --silent --show-error --max-time 20 --connect-timeout 10 \
+            -H 'Origin: https://untrusted.example' -H 'Accept: application/json' \
+            -o /dev/null -w '%{http_code}' "$base/v1/me")"
+          [[ "$actual" == 403 ]] || {
+            echo "::error::Origine non autorisée: HTTP $actual, attendu 403"
+            exit 1
+          }
+          curl --fail-with-body --silent --show-error --max-time 20 \
+            -H 'Accept: application/json' \
+            "$base/api/auth/get-session" -o /tmp/kv-anonymous-session.json
+          python3 - <<'PY'
+          import json
+          with open('/tmp/kv-anonymous-session.json', encoding='utf-8') as file:
+              payload=json.load(file)
+          assert payload is None or (isinstance(payload, dict) and payload.get('session') is None), \
+              'GET-session anonyme ne doit pas révéler de session privée'
+          print('OK : endpoints privés refusés sans jeton, origine CORS étrangère bloquée, session anonyme vide.')
+          PY
+          echo '✅ Production : droits anonymes, session Better Auth et origine externe vérifiés sans compte et sans écriture.' >> "$GITHUB_STEP_SUMMARY"
