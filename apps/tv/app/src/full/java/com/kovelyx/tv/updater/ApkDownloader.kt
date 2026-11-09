@@ -69,6 +69,14 @@ class ApkDownloader @Inject constructor(
                 temporary.copyTo(destinationFile, overwrite = true)
                 temporary.delete()
             }
+            // Only remove older, disposable OTA APKs after the new APK's SHA-256
+            // was verified; downloaded films, accounts and profile media are untouched.
+            destinationFile.parentFile?.listFiles()?.forEach { old ->
+                if (old != destinationFile && old.isFile &&
+                    old.name.startsWith("Kovelyx-TV-") &&
+                    old.name.endsWith(".apk", ignoreCase = true)
+                ) old.delete()
+            }
             destinationFile
         } finally {
             temporary.delete()
