@@ -15,12 +15,18 @@ class SentryEventSanitizerTest {
             request = Request().apply { url = "https://example.com/private" }
             user = User().apply { email = "person@example.com" }
             serverName = "private-computer"
+            message = Message().apply { formatted = "https://api.example/token/secret" }
+            logger = "user@example.invalid"
+            transaction = "https://provider.example/private"
         }
 
         assertSame(event, SentryEventSanitizer.sanitize(event))
         assertNull(event.request)
         assertNull(event.user)
         assertNull(event.serverName)
+        assertNull(event.message)
+        assertNull(event.logger)
+        assertNull(event.transaction)
     }
 
     @Test
