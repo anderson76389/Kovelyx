@@ -531,6 +531,38 @@ try {
   assert.equal((await threeWayWrite(alice.token,"watch_progress",progressKey,0,progressData)).status,409,
     "Old Windows playback progress cannot overwrite Android's newer position");
 
+  // Simulate an offline mobile client holding a stale local revision. The TV
+  // advances the real D1 row while mobile is offline; on reconnect the stale
+  // write MUST conflict, then the client can fetch/rebase without losing progress.
+  // These are disposable Better Auth sessions against LOCAL D1, not production.
+  const offlineMobile=await threeWayRow(mobileToken,"watch_progress",progressKey);
+  assert.equal(offlineMobile.revision,3,"Mobile captured the last synced revision");
+  assert.equal(offlineMobile.payload.lastPositionMs,45000);
+  const tvAfterDisconnect={...progressData,lastPositionMs:57000,
+    lastUpdatedEpochMs:Date.now()+3000};
+  assert.equal((await threeWayWrite(tvToken,"watch_progress",progressKey,3,
+    tvAfterDisconnect)).status,200,"TV progresses while mobile is offline");
+  const staleMobile={...progressData,lastPositionMs:40000,
+    lastUpdatedEpochMs:Date.now()+2000};
+  assert.equal((await threeWayWrite(mobileToken,"watch_progress",progressKey,
+    offlineMobile.revision,staleMobile)).status,409,
+    "Disconnected mobile must not overwrite newer TV playback on reconnect");
+  const rebasedMobile=await threeWayRow(mobileToken,"watch_progress",progressKey);
+  assert.equal(rebasedMobile.revision,4,"Mobile fetches latest D1 revision");
+  assert.equal(rebasedMobile.payload.lastPositionMs,57000);
+  assert.equal((await threeWayWrite(mobileToken,"watch_progress",progressKey,4,
+    {...progressData,lastPositionMs:72000,
+      lastUpdatedEpochMs:Date.now()+4000})).status,200,
+    "Mobile may publish newer progress after resolving the conflict");
+  for(const token of [alice.token,tvToken,mobileToken]){
+    const row=await threeWayRow(token,"watch_progress",progressKey);
+    assert.equal(row.revision,5);
+    assert.equal(row.payload.lastPositionMs,72000,
+      "Windows, Android and TV converge after simulated offline reconnection");
+  }
+  assert.equal((await threeWayWrite(alice.token,"watch_progress",progressKey,3,
+    progressData)).status,409,"Third device cannot overwrite new position with stale cached state");
+
   // Another profile under the same account must not share library or watched state.
   const isolated=await req("/v1/profiles","POST",{displayName:"Profil test secondaire"},mobileToken);
   assert.equal(isolated.status,201);

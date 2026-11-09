@@ -7,8 +7,10 @@ on:
       - '.github/workflows/tv-e2e-emulator-pr.yml'
       - 'apps/tv/app/src/main/**'
       - 'apps/tv/app/src/test/**'
+      - 'apps/tv/app/src/androidTest/**'
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/sync/CloudflareTvProfileSharingSecurityTest.kt'
       - 'scripts/tests/tv_guest_smoke.py'
+      - 'scripts/tests/tv_long_session_probe.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +25,9 @@ jobs:
     timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
+      - name: Valider la syntaxe Python avant de démarrer l'émulateur
+        run: |
+          python3 -m py_compile scripts/tests/tv_guest_smoke.py scripts/tests/tv_emulator_memory_probe.py scripts/tests/tv_long_session_probe.py
       - name: Télécharger l'APK TV construite depuis le commit à tester
         shell: bash
         env:
@@ -111,6 +116,7 @@ jobs:
             sleep 3
             adb shell pidof com.kovelyx.tv.debug
             python3 scripts/tests/tv_emulator_memory_probe.py
+            python3 scripts/tests/tv_long_session_probe.py --cycles 96 --pause 1.4
             adb shell uiautomator dump /sdcard/kv-ui.xml
             adb pull /sdcard/kv-ui.xml /tmp/kv-ui.xml
             adb shell screencap -p /sdcard/kv-tv.png
@@ -130,5 +136,6 @@ jobs:
             /tmp/kv-ui.xml
             /tmp/kv-tv-logcat.txt
             /tmp/kovelyx-tv-memory/
+            /tmp/kovelyx-tv-endurance/
           if-no-files-found: ignore
           retention-days: 14

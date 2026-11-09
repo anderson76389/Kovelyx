@@ -80,6 +80,7 @@ CASES=(
   'androidx.media3.exoplayer.source.SampleDataQueueNativeTest#testCopyToArray'
   'androidx.media3.exoplayer.source.SampleDataQueueNativeTest#testCopyBetweenDirectBuffers'
   'com.kovelyx.tv.ui.screens.player.Media3VideoDecodeSmokeTest#h264Mp4ReachesEndWithoutDecoderErrors'
+  'com.kovelyx.tv.ui.screens.player.Media3VideoDecodeSmokeTest#h264ReplayAndReleaseSixTimes'
 )
 for i in "${!CASES[@]}"; do
   case_name="${CASES[$i]}"
@@ -98,4 +99,4 @@ for i in "${!CASES[@]}"; do
     exit 1
   fi
 done
-echo "PASS: six real Android TV Media3 instrumentation cases, including H264 frame decoding."
+echo "PASS: seven real Android TV Media3 instrumentation cases, including repeated H264 decode and release."
