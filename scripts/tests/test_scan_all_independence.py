@@ -83,6 +83,14 @@ class PayloadScanTests(unittest.TestCase):
                 scan.scan_msi(Path('app.msi'), defaultdict(list), errors)
             self.assertTrue(errors)
 
+    def test_public_suffix_registry_is_not_a_server(self):
+        for extra, expected in ((b"", False), (b"https://supabase.co/account\n", True)):
+            hits, errors = defaultdict(list), []
+            scan.scan_zip(archive({'assets/PublicSuffixDatabase.list': b'com\nsupabase.co\nnet\n' + extra}), hits, errors)
+            self.assertFalse(errors)
+            self.assertTrue(hits['public_suffix_registry'])
+            self.assertEqual(expected, bool(hits['legacy_host']))
+
     def test_safe_archive_has_no_legacy_findings(self):
         hits, errors = defaultdict(list), []
         scan.scan_zip(archive({'safe': b'https://api.github.com/repos/anderson76389/Kovelyx'}), hits, errors)

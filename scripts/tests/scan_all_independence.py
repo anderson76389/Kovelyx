@@ -112,6 +112,12 @@ def scan_stream(stream, label, hits):
         if not chunk:
             break
         data = prefix + chunk
+        # Public Suffix List data describes cookie/domain boundaries. The exact
+        # standalone supabase.co registry entry is not a configured server.
+        if label.endswith("!assets/PublicSuffixDatabase.list"):
+            data, count = re.subn(rb"(?m)^supabase[.]co$", b"registry---", data)
+            if count and label not in hits["public_suffix_registry"]:
+                hits["public_suffix_registry"].append(label)
         found.update(content_hits(data))
         # Keep even alignment for UTF-16, including literals crossing chunks.
         prefix = data[-320:]
