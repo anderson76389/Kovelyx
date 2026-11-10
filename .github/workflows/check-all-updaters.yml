@@ -5,6 +5,10 @@ on:
     paths:
       - 'scripts/tests/test_updater_release_contract.py'
       - 'scripts/tests/test_updater_resource_contract.py'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/test_verified_preview.py'
+      - 'scripts/tests/prepare_ota_test_apks.sh'
+      - 'scripts/tests/ota_in_place_upgrade.sh'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/image/**'
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/image/**'
       - '.github/workflows/check-all-updaters.yml'
@@ -17,6 +21,10 @@ on:
     paths:
       - 'scripts/tests/test_updater_release_contract.py'
       - 'scripts/tests/test_updater_resource_contract.py'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/test_verified_preview.py'
+      - 'scripts/tests/prepare_ota_test_apks.sh'
+      - 'scripts/tests/ota_in_place_upgrade.sh'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/image/**'
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/image/**'
       - '.github/workflows/check-all-updaters.yml'
@@ -43,6 +51,8 @@ jobs:
         run: |
           python3 -m py_compile scripts/tests/test_updater_resource_contract.py
           python3 scripts/tests/test_updater_resource_contract.py
+          python3 -m unittest discover -s scripts/tests -p test_verified_preview.py
+          bash -n scripts/tests/prepare_ota_test_apks.sh scripts/tests/ota_in_place_upgrade.sh
       - name: Tester les fichiers publiés réellement sur GitHub
         env:
           GH_TOKEN: ${{ github.token }}
