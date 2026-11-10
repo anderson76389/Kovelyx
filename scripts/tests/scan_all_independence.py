@@ -13,6 +13,7 @@ from fnmatch import fnmatch
 import argparse
 import json
 import io
+import hashlib
 import re
 import subprocess
 import sys
@@ -84,6 +85,14 @@ def find_bytes(file, regexes):
     return dict(matched)
 
 MAX_ARCHIVE_DEPTH = 6
+# Reviewed v1.1.1078 bytecode: isOfficial compares host labels and parse
+# throws OfficialServer before accepting a backend. It performs no HTTP call.
+# Pin the complete class, not just its name: changed bytecode must be reviewed.
+REVIEWED_REJECTION_CLASSES = {
+    "com/kovelyx/app/core/network/ServerDiscoveryPolicy.class": {
+        "4c67aae96272400ccadf4f8b71ecc1dd56b994abd56e7ef79b589975a0197b4b",
+    },
+}
 PATTERNS = {"legacy_host": ACCOUNT, "upstream_repo": OLD_REPO, "retired_sdk": ACCOUNT_SDK}
 
 
@@ -104,7 +113,7 @@ def content_hits(data):
     return found
 
 
-def scan_stream(stream, label, hits):
+def scan_stream(stream, label, hits, rejection_only=False):
     prefix = b""
     found = set()
     while True:
@@ -122,7 +131,10 @@ def scan_stream(stream, label, hits):
         # Keep even alignment for UTF-16, including literals crossing chunks.
         prefix = data[-320:]
     for key in found:
-        hits[key].append(label)
+        if key == "legacy_host" and rejection_only:
+            hits["reviewed_rejection_policy"].append(label)
+        else:
+            hits[key].append(label)
 
 
 def scan_zip(path, hits, errors, depth=0, label=None, budget=None):
@@ -145,8 +157,13 @@ def scan_zip(path, hits, errors, depth=0, label=None, budget=None):
                     hits["old_archive_member"].append(member)
                 suffix = Path(entry.filename).suffix.lower()
                 # Every uncompressed member is scanned, including extensionless files.
+                rejection_only = False
+                if entry.filename in REVIEWED_REJECTION_CLASSES:
+                    with z.open(entry) as stream:
+                        digest = hashlib.file_digest(stream, "sha256").hexdigest()
+                    rejection_only = digest in REVIEWED_REJECTION_CLASSES[entry.filename]
                 with z.open(entry) as stream:
-                    scan_stream(stream, member, hits)
+                    scan_stream(stream, member, hits, rejection_only)
                 if suffix in ARCHIVE_SUFFIXES:
                     with z.open(entry) as stream:
                         nested = io.BytesIO(stream.read())

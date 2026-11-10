@@ -3,6 +3,7 @@
 from collections import defaultdict
 import importlib.util
 import io
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -82,6 +83,22 @@ class PayloadScanTests(unittest.TestCase):
             with patch.object(scan.shutil, 'which', return_value='/usr/bin/msiextract'), patch.object(scan.subprocess, 'run', side_effect=effect):
                 scan.scan_msi(Path('app.msi'), defaultdict(list), errors)
             self.assertTrue(errors)
+
+    def test_reviewed_rejection_policy_requires_exact_class_bytes(self):
+        member = 'com/kovelyx/app/core/network/ServerDiscoveryPolicy.class'
+        reviewed = b'nuvio.tv nuvioapp.space'
+        digest = hashlib.sha256(reviewed).hexdigest()
+        with patch.dict(scan.REVIEWED_REJECTION_CLASSES, {member: {digest}}, clear=True):
+            for name, data, allowed in (
+                (member, reviewed, True),
+                (member, reviewed + b'https://api.nuvio.tv', False),
+                ('other/ServerDiscoveryPolicy.class', reviewed, False),
+            ):
+                hits, errors = defaultdict(list), []
+                scan.scan_zip(archive({name: data}), hits, errors)
+                self.assertFalse(errors)
+                self.assertEqual(allowed, bool(hits['reviewed_rejection_policy']))
+                self.assertEqual(not allowed, bool(hits['legacy_host']))
 
     def test_public_suffix_registry_is_not_a_server(self):
         for extra, expected in ((b"", False), (b"https://supabase.co/account\n", True)):
