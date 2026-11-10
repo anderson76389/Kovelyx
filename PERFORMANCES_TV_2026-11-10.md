@@ -56,3 +56,7 @@ Le parcours Google TV a exercé 96 cycles, 4 retours à l’accueil et 2 veilles
 ## Tri des anciennes PR
 
 Huit anciennes propositions remplacées ont été fermées, leurs branches et commits conservés. Sept autres propositions anciennes restent ouvertes faute de preuve d’équivalence complète ou parce qu’elles portent un travail distinct. [Décisions et preuves par PR](PR_TRIAGE_2026-11-10.md).
+
+## Publication vérifiée
+
+La [Release v1.1.1117](https://github.com/anderson76389/Kovelyx/releases/tag/v1.1.1117) contient les cinq paquets Windows (MSI, EXE, portable), Android mobile et Android TV ainsi que leurs SHA-256. Le [workflow de publication](https://github.com/anderson76389/Kovelyx/actions/runs/42842806637) a réussi sur le commit applicatif fusionné. La comparaison des certificats publics mobile/TV avec v1.1.1090 a réussi avant publication ; aucune rotation de clé de signature n’a été faite.
