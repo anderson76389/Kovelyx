@@ -12,13 +12,16 @@ from pathlib import Path
 from fnmatch import fnmatch
 import argparse
 import json
+import io
 import re
 import subprocess
 import sys
+import shutil
+import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
-ACCOUNT = re.compile(rb"(?i)(?:[a-z0-9-]+\.)*(?:nuvio\.tv|nuvioapp\.space|supabase\.co)")
+ACCOUNT = re.compile(rb"(?i)(?:nuvio\.tv|nuvioapp\.space|supabase\.co)")
 OLD_REPO = re.compile(rb"(?i)(?:github\.com|raw\.githubusercontent\.com|api\.github\.com/repos)/NuvioMedia")
 ACCOUNT_SDK = re.compile(rb"(?i)(?:io\.github\.jan\.supabase|libs\.supabase|SupabaseClient|SupabaseProvider|SUPABASE_URL|SUPABASE_KEY|Postgrest)")
 NAME = re.compile(r"(?i)nuvio|supabase")
@@ -80,36 +83,111 @@ def find_bytes(file, regexes):
             prefix = data[-160:]
     return dict(matched)
 
-def scan_zip(path, hits, errors, depth=0):
-    # Inspect relevant executable/manifest members, never assume APKs are ordinary text.
-    if depth > 1: return
+MAX_ARCHIVE_DEPTH = 6
+PATTERNS = {"legacy_host": ACCOUNT, "upstream_repo": OLD_REPO, "retired_sdk": ACCOUNT_SDK}
+
+
+def content_hits(data):
+    """Include UTF-16 literals used by Windows executables and resources."""
+    found = {key for key, pattern in PATTERNS.items() if pattern.search(data)}
+    for offset in (0, 1):
+        view = data[offset::2]
+        for key, pattern in PATTERNS.items():
+            if key in found:
+                continue
+            for match in pattern.finditer(view):
+                start, end = 2 * match.start() + offset, 2 * match.end() + offset
+                nulls = data[start + 1:end:2] if offset == 0 else data[start - 1:end - 1:2]
+                if nulls and not any(nulls):
+                    found.add(key)
+                    break
+    return found
+
+
+def scan_stream(stream, label, hits):
+    prefix = b""
+    found = set()
+    while True:
+        chunk = stream.read(BUFFER)
+        if not chunk:
+            break
+        data = prefix + chunk
+        found.update(content_hits(data))
+        # Keep even alignment for UTF-16, including literals crossing chunks.
+        prefix = data[-320:]
+    for key in found:
+        hits[key].append(label)
+
+
+def scan_zip(path, hits, errors, depth=0, label=None, budget=None):
+    label = label or str(path)
+    budget = budget if budget is not None else [MAX_ARCHIVE_UNCOMPRESSED]
+    if depth > MAX_ARCHIVE_DEPTH:
+        errors.append(f"Archive depth limit reached: {label}")
+        return
     try:
         with zipfile.ZipFile(path) as z:
-            total = 0
             for entry in z.infolist():
-                if entry.is_dir(): continue
-                total += entry.file_size
-                if entry.file_size > MAX_ARCHIVE_MEMBER or total > MAX_ARCHIVE_UNCOMPRESSED:
-                    errors.append(f"Skipped oversized member: {str(path)}!{entry.filename}")
-                    break
-                if Path(entry.filename).suffix.lower() not in ARCHIVE_SCAN_SUFFIXES:
+                if entry.is_dir():
                     continue
+                member = f"{label}!{entry.filename}"
+                budget[0] -= entry.file_size
+                if entry.file_size > MAX_ARCHIVE_MEMBER or budget[0] < 0:
+                    errors.append(f"Archive scan size limit reached: {member}")
+                    return
                 if NAME.search(entry.filename):
-                    hits["old_archive_member"].append(f"{path}!{entry.filename}"[:250])
-                if entry.file_size > 0:
+                    hits["old_archive_member"].append(member)
+                suffix = Path(entry.filename).suffix.lower()
+                # Every uncompressed member is scanned, including extensionless files.
+                with z.open(entry) as stream:
+                    scan_stream(stream, member, hits)
+                if suffix in ARCHIVE_SUFFIXES:
                     with z.open(entry) as stream:
-                        prefix=b""
-                        while True:
-                            buf=stream.read(BUFFER)
-                            if not buf: break
-                            data=prefix+buf
-                            for key,regex in {"legacy_host":ACCOUNT, "upstream_repo":OLD_REPO}.items():
-                                if regex.search(data):
-                                    hits[key].append(f"{path}!{entry.filename}"[:250])
-                                    break
-                            prefix=data[-160:]
-    except (OSError,zipfile.BadZipFile,RuntimeError,ValueError,NotImplementedError) as exc:
-        errors.append(f"Unreadable archive {path}: {type(exc).__name__}")
+                        nested = io.BytesIO(stream.read())
+                    scan_zip(nested, hits, errors, depth + 1, member, budget)
+    except (OSError, zipfile.BadZipFile, RuntimeError, ValueError, NotImplementedError) as exc:
+        errors.append(f"Unreadable archive {label}: {type(exc).__name__}")
+
+
+def scan_msi(path, hits, errors):
+    """Inspect extracted cabinets; searching compressed MSI bytes is insufficient."""
+    extractor = shutil.which("msiextract")
+    if not extractor:
+        errors.append(f"Cannot inspect MSI payload without msiextract: {path}")
+        return
+    with tempfile.TemporaryDirectory(prefix="kovelyx-msi-audit-") as tmp:
+        try:
+            subprocess.run([extractor, "-C", tmp, str(Path(path).resolve())],
+                           check=True, capture_output=True, timeout=180)
+        except (OSError, subprocess.SubprocessError) as exc:
+            errors.append(f"MSI extraction failed: {type(exc).__name__}")
+            return
+        files = sorted(p for p in Path(tmp).rglob("*") if p.is_file())
+        if not files:
+            errors.append(f"Empty MSI extraction: {path}")
+            return
+        budget = [MAX_ARCHIVE_UNCOMPRESSED]
+        for file in files:
+            label = f"{path}!{file.relative_to(tmp).as_posix()}"
+            if file.is_symlink():
+                errors.append(f"Unexpected MSI symlink: {label}")
+                continue
+            budget[0] -= file.stat().st_size
+            if budget[0] < 0:
+                errors.append(f"MSI payload scan size limit reached: {label}")
+                return
+            with file.open("rb") as stream:
+                scan_stream(stream, label, hits)
+            if file.suffix.lower() in ARCHIVE_SUFFIXES:
+                scan_zip(file, hits, errors, label=label, budget=budget)
+
+
+def scan_payload(path, hits, errors):
+    if path.suffix.lower() in ARCHIVE_SUFFIXES:
+        scan_zip(path, hits, errors)
+    elif path.suffix.lower() == ".msi":
+        scan_msi(path, hits, errors)
+
 
 def main():
     p=argparse.ArgumentParser()
@@ -159,8 +237,7 @@ def main():
                 hits["reject_only_domains"].append(name)
             else:
                 critical.append("Legacy account host in runtime (inspect whether executable): "+name)
-        if file.suffix.lower() in ARCHIVE_SUFFIXES:
-            scan_zip(file,hits,errors)
+        scan_payload(file,hits,errors)
         if file.suffix.lower() in TEXT_SUFFIXES and size < 10_000_000:
             lines=file.read_text(encoding="utf-8",errors="replace").splitlines()
             for i,line in enumerate(lines,1):
@@ -185,7 +262,7 @@ def main():
         record={"name":f.name,"size":f.stat().st_size,
                 "legacy":find_bytes(f,{"legacy_host":ACCOUNT,"upstream_repo":OLD_REPO,"retired_sdk":ACCOUNT_SDK})}
         artifacts.append(record)
-        if f.suffix.lower() in ARCHIVE_SUFFIXES: scan_zip(f,hits,errors)
+        scan_payload(f,hits,errors)
     report={
       "head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),
       "tracked_files":len(entries),"files_by_area":dict(counts),"files_by_zone":dict(by_zone),
@@ -215,3 +292,4 @@ def main():
 
 if __name__=="__main__":
     sys.exit(main())
+
