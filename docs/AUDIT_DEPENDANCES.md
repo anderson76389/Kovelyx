@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1392** ; références statiques à Nuvio/NuvioMedia : **17**.
+Fichiers texte examinés : **1394** ; références statiques à Nuvio/NuvioMedia : **17**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
