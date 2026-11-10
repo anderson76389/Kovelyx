@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/mobile-ota-upgrade-pr.yml'
       - 'scripts/tests/ota_in_place_upgrade.sh'
+      - 'scripts/tests/prepare_ota_test_apks.sh'
       - 'apps/mobile/composeApp/src/**/updater/**'
       - 'apps/mobile/androidApp/**'
       - '.github/workflows/build.yml'
@@ -70,13 +71,11 @@ jobs:
           "$tools/apksigner" verify "$candidate" >/dev/null
           "$tools/aapt" dump badging "$prior" | grep -F "package: name='com.kovelyx.mobile.debug'"
           "$tools/aapt" dump badging "$candidate" | grep -F "package: name='com.kovelyx.mobile.debug'"
-          old_signer="$("$tools/apksigner" verify --print-certs "$prior" | grep -m1 'certificate SHA-256 digest:')"
-          new_signer="$("$tools/apksigner" verify --print-certs "$candidate" | grep -m1 'certificate SHA-256 digest:')"
-          [[ -n "$old_signer" && "$old_signer" == "$new_signer" ]] || {
-            echo "::error::Certificat APK Android mobile incompatible avec l'installation précédente"
-            exit 1
-          }
-          echo "La clé de signature Android mobile est identique : installation en place autorisée."
+          # Public APKs use the permanent signer, but untrusted PR builds MUST NOT.
+          # Resign both fixtures with an ephemeral key only for install-r coverage.
+          # Production certificate continuity is verified BEFORE stable publication.
+          bash scripts/tests/prepare_ota_test_apks.sh "$prior" "$candidate" \
+            /tmp/kv-mobile-test-pair "$tools"
       - name: Activer l'accélération de l'émulateur Android
         run: |
           if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
@@ -93,7 +92,7 @@ jobs:
           disk-size: 4096M
           disable-animations: true
           script: |
-            bash scripts/tests/ota_in_place_upgrade.sh "$(find /tmp/kv-mobile-previous -type f -name '*.apk' -print -quit)" "$(find /tmp/kv-mobile-pr -type f -name '*.apk' -print -quit)" com.kovelyx.mobile.debug android.intent.category.LAUNCHER
+            bash scripts/tests/ota_in_place_upgrade.sh /tmp/kv-mobile-test-pair/previous.apk /tmp/kv-mobile-test-pair/candidate.apk com.kovelyx.mobile.debug android.intent.category.LAUNCHER
             adb shell dumpsys meminfo com.kovelyx.mobile.debug > /tmp/kovelyx-mobile-ota-meminfo.txt
       - name: Préserver uniquement les mesures de test non privées
         if: always()
