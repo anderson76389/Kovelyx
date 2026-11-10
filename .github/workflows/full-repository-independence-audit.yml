@@ -23,6 +23,7 @@ permissions:
 jobs:
   tracked-sources-and-archives:
     name: Vérifier chaque fichier Git, les archives, les trois clients et les dépendances
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v1.') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -88,6 +89,7 @@ jobs:
 
   released-binaries:
     name: Inspecter les véritables APK TV, APK Android et installateur MSI Windows
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v1.') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -103,7 +105,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          if [[ "$GITHUB_EVENT_NAME" == release ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          fi
           [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || { echo "::error::Version officielle absente"; exit 1; }
           mkdir -p /tmp/kovelyx-released
           gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir /tmp/kovelyx-released \
