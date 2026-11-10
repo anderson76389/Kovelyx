@@ -1,3 +1,5 @@
+> **Bilan actualisé du 10 novembre 2026 :** lire [l’audit des sources et des trois applications v1.1.1078](./AUDIT_INDEPENDANCE_2026-11-10.md), validé dans la PR #109. Les constats ci-dessous sont historiques et ne décrivent pas tous l’état actuel.
+
 # Contrôles d'indépendance Kovelyx — Windows, Android et Android TV
 
 ## État vérifiable

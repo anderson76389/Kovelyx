@@ -1,3 +1,5 @@
+> **Bilan actualisé du 10 novembre 2026 :** lire [l’audit des sources et des trois applications v1.1.1078](./AUDIT_INDEPENDANCE_2026-11-10.md), validé dans la PR #109. Les constats ci-dessous sont historiques et ne décrivent pas tous l’état actuel.
+
 # Kovelyx — dossier de preuve d'indépendance vis-à-vis de Nuvio
 
 > **Audit historique du 17 octobre ; évolution au 5 novembre 2026 :** les trois démarrages sans Nuvio sont documentés, mais pas toutes les fonctions. Le code de comptes des trois plateformes a migré vers Cloudflare ; les moteurs natifs, mises à jour publiées et synchronisation réelle restent à vérifier. Lire le [bilan croisé Windows / Android / TV](./CONTROLES_INDEPENDANCE.md) avant toute déclaration « 100 % autonome ».
