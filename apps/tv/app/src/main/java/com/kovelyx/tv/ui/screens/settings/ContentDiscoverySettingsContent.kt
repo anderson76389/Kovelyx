@@ -24,7 +24,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun ContentDiscoverySettingsContent(
@@ -87,7 +87,7 @@ private fun ContentDiscoveryHub(
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         SettingsDetailHeader(
             title = stringResource(R.string.settings_org_sources_title),

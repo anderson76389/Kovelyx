@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -96,7 +96,7 @@ fun CatalogPickerContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = NuvioTheme.spacing.xxxl, start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl)
+            .padding(top = KovelyxTheme.spacing.xxxl, start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -106,17 +106,17 @@ fun CatalogPickerContent(
             Text(
                 text = stringResource(R.string.collections_editor_select_catalogs),
                 style = MaterialTheme.typography.headlineMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
-            NuvioButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_done)) }
+            KovelyxButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_done)) }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.xxxl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            contentPadding = PaddingValues(start = KovelyxTheme.spacing.sm, end = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.xs, bottom = KovelyxTheme.spacing.xxxl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             itemsIndexed(
                 items = catalogs,
@@ -129,26 +129,26 @@ fun CatalogPickerContent(
                     onClick = { onToggle(catalog) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.colors(
-                        containerColor = if (isAdded) NuvioTheme.colors.Secondary.copy(alpha = 0.15f) else NuvioTheme.colors.BackgroundCard,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground
+                        containerColor = if (isAdded) KovelyxTheme.colors.Secondary.copy(alpha = 0.15f) else KovelyxTheme.colors.BackgroundCard,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground
                     ),
                     border = CardDefaults.border(
                         border = if (isAdded) Border(
-                            border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Secondary.copy(alpha = 0.5f)),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Secondary.copy(alpha = 0.5f)),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         ) else Border.None,
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                     ),
-                    shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                    shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                     scale = CardDefaults.scale(focusedScale = 1.01f)
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(NuvioTheme.spacing.lg),
+                            .padding(KovelyxTheme.spacing.lg),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -156,7 +156,7 @@ fun CatalogPickerContent(
                             Text(
                                 text = catalog.catalogName.replaceFirstChar { it.uppercase() },
                                 style = MaterialTheme.typography.titleSmall,
-                                color = NuvioTheme.colors.TextPrimary
+                                color = KovelyxTheme.colors.TextPrimary
                             )
                             val supportingGenreText = when {
                                 catalog.genreRequired -> stringResource(R.string.collections_editor_genre_required)
@@ -166,20 +166,20 @@ fun CatalogPickerContent(
                             Text(
                                 text = listOfNotNull("${catalog.type} - ${catalog.addonName}", supportingGenreText).joinToString(" • "),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = NuvioTheme.colors.TextTertiary
+                                color = KovelyxTheme.colors.TextTertiary
                             )
                         }
                         if (isAdded) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = stringResource(R.string.collection_editor_remove_cd),
-                                tint = NuvioTheme.colors.TextSecondary
+                                tint = KovelyxTheme.colors.TextSecondary
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Default.Add,
                                 contentDescription = stringResource(R.string.cd_add),
-                                tint = NuvioTheme.colors.TextTertiary
+                                tint = KovelyxTheme.colors.TextTertiary
                             )
                         }
                     }

@@ -19,7 +19,7 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.MDBListRatings
 import com.kovelyx.tv.domain.model.MDBListSettings
 import com.kovelyx.tv.domain.model.RottenTomatoesStatus
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 
@@ -29,7 +29,7 @@ fun MDBListRatingsRow(
     modifier: Modifier = Modifier,
     maxItems: Int = Int.MAX_VALUE,
     order: List<String> = MDBListSettings.DEFAULT_RATING_ORDER,
-    iconSize: Dp = NuvioTheme.spacing.xl
+    iconSize: Dp = KovelyxTheme.spacing.xl
 ) {
     val orderedProviders = remember(ratings, maxItems, order) {
         order.filter { provider -> getRatingValue(ratings, provider) != null }
@@ -53,7 +53,7 @@ private fun RatingBadge(
     provider: String,
     rating: Double,
     ratings: MDBListRatings,
-    iconSize: Dp = NuvioTheme.spacing.xl
+    iconSize: Dp = KovelyxTheme.spacing.xl
 ) {
     val squareIconSize = iconSize * 0.75f
 
@@ -114,7 +114,7 @@ private fun RatingBadge(
         Text(
             text = formatMDBListRating(provider, rating),
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.extendedColors.textSecondary
+            color = KovelyxTheme.extendedColors.textSecondary
         )
     }
 }

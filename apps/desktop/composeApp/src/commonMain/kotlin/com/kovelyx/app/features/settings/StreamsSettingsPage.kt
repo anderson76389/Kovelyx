@@ -47,7 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.streams.STREAM_BADGE_IMPORT_LIMIT
 import com.kovelyx.app.features.streams.StreamBadgeChip
@@ -139,7 +139,7 @@ internal fun LazyListScope.streamsSettingsContent(isTablet: Boolean) {
 
         Spacer(
             modifier = Modifier.height(
-                if (isTablet) NuvioTokens.Space.s18 else MaterialTheme.nuvio.spacing.listGap,
+                if (isTablet) KovelyxTokens.Space.s18 else MaterialTheme.nuvio.spacing.listGap,
             ),
         )
 
@@ -478,7 +478,7 @@ private fun BadgeUrlRow(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = NuvioTokens.Space.s12, vertical = NuvioTokens.Space.s10),
+                .padding(horizontal = KovelyxTokens.Space.s12, vertical = KovelyxTokens.Space.s10),
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.controlGap),
         ) {
             Row(
@@ -532,7 +532,7 @@ private fun BadgeUrlRow(
                         contentDescription = null,
                         modifier = Modifier.size(tokens.icons.sm),
                     )
-                    Spacer(modifier = Modifier.width(NuvioTokens.Space.s4))
+                    Spacer(modifier = Modifier.width(KovelyxTokens.Space.s4))
                     Text(text = stringResource(Res.string.settings_fusion_badge_preview_action), maxLines = 1)
                 }
                 IconButton(
@@ -604,8 +604,8 @@ private fun BadgePreviewDialog(
                         )
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s5),
-                            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s5),
+                            horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s5),
+                            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s5),
                         ) {
                             section.filters.forEach { filter ->
                                 StreamBadgeChip(

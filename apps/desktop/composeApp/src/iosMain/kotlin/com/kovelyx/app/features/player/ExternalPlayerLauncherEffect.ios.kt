@@ -5,7 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.external_player_failed
 import org.jetbrains.compose.resources.getString
@@ -23,7 +23,7 @@ actual fun rememberExternalPlayerLauncher(
             if (session != null) {
                 currentOnResult(session.playbackResult())
                 if (session.failed) {
-                    NuvioToastController.show(getString(Res.string.external_player_failed))
+                    KovelyxToastController.show(getString(Res.string.external_player_failed))
                     infusePlaybackCallbacks.consume(session.id)
                 }
             }

@@ -239,7 +239,7 @@ class StartupSyncService @Inject constructor(
             when (surface) {
                 "addons" -> pullRealtimeAddons(profileId)
                 "plugins" -> pullRealtimePlugins(profileId)
-                "library" -> pullNuvioLibrary(profileId)
+                "library" -> pullKovelyxLibrary(profileId)
                 "watch_progress" -> {
                     syncWatchProgressDelta(
                         profileId = profileId,
@@ -372,7 +372,7 @@ class StartupSyncService @Inject constructor(
 
         val profileId = profileManager.activeProfileId.value
         Log.d(TAG, "Periodic library pull requested profile=$profileId")
-        return pullNuvioLibrary(profileId)
+        return pullKovelyxLibrary(profileId)
     }
 
     private fun pullKey(userId: String): String {
@@ -680,7 +680,7 @@ class StartupSyncService @Inject constructor(
         }
     }
 
-    private suspend fun pullNuvioLibrary(profileId: Int): Boolean {
+    private suspend fun pullKovelyxLibrary(profileId: Int): Boolean {
         val isTrackingLibrary = libraryRepository.sourceMode.first() != LibrarySourceMode.LOCAL
         if (isTrackingLibrary) {
             libraryRepository.hasCompletedInitialPull = true

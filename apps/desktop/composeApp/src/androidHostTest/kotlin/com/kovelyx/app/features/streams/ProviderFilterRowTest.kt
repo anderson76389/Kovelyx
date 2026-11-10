@@ -7,7 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.player.PlayerProviderFilterRow
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -50,7 +50,7 @@ class ProviderFilterRowTest {
         )
         var refreshes = 0
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 val onFilterSelected: (String?) -> Unit = { state.value = state.value.copy(selectedFilter = it) }
                 if (inPlayer) {
                     PlayerProviderFilterRow(state.value, onFilterSelected)

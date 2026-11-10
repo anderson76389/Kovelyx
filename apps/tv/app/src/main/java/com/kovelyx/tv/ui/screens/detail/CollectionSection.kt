@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +43,7 @@ fun CollectionSection(
     items: List<MetaPreview>,
     listState: LazyListState,
     title: String? = null,
-    posterCardCornerRadius: Dp = NuvioTheme.spacing.md,
+    posterCardCornerRadius: Dp = KovelyxTheme.spacing.md,
     upFocusRequester: FocusRequester? = null,
     downFocusRequester: FocusRequester? = null,
     sectionFocusRequester: FocusRequester? = null,
@@ -111,7 +111,7 @@ fun CollectionSection(
             width = 260.dp,
             height = 146.dp,
             cornerRadius = posterCardCornerRadius,
-            focusedBorderWidth = NuvioTheme.spacing.xxs,
+            focusedBorderWidth = KovelyxTheme.spacing.xxs,
             focusedScale = 1.02f
         )
     }
@@ -119,15 +119,15 @@ fun CollectionSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = if (title.isNullOrBlank()) NuvioTheme.spacing.sm else 20.dp, bottom = NuvioTheme.spacing.sm)
+            .padding(top = if (title.isNullOrBlank()) KovelyxTheme.spacing.sm else 20.dp, bottom = KovelyxTheme.spacing.sm)
     ) {
         if (!title.isNullOrBlank()) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 modifier = Modifier
-                    .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.sm)
+                    .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.sm)
             )
         }
         LazyRow(
@@ -143,8 +143,8 @@ fun CollectionSection(
                     }
                 }
                 .focusGroup(),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             itemsIndexed(
                 items = items,
@@ -196,12 +196,12 @@ fun CollectionSection(
                         Text(
                             text = year,
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextTertiary,
+                            color = KovelyxTheme.colors.TextTertiary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
                                 .width(landscapeStyle.width)
-                                .padding(start = NuvioTheme.spacing.xxs, end = NuvioTheme.spacing.xxs, top = NuvioTheme.spacing.xxs)
+                                .padding(start = KovelyxTheme.spacing.xxs, end = KovelyxTheme.spacing.xxs, top = KovelyxTheme.spacing.xxs)
                         )
                     }
                 }

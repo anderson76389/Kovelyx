@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.NuvioPosterWatchedOverlay
 import com.kovelyx.app.core.ui.SkeletonPoster
 import com.kovelyx.app.core.ui.nuvioCardDepth
@@ -127,7 +127,7 @@ private fun PosterGridTile(
                 .background(MaterialTheme.colorScheme.surface)
                 .nuvioCardDepth(
                     shape = RoundedCornerShape(cornerRadiusDp.dp),
-                    surface = NuvioCardDepthSurface.Posters,
+                    surface = KovelyxCardDepthSurface.Posters,
                 )
                 .posterCardClickable(
                     onClick = onClick,

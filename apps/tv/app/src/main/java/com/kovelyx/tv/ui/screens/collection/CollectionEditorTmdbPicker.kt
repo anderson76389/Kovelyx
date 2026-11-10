@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -122,7 +122,7 @@ fun TmdbSourcePickerContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = NuvioTheme.spacing.xxxl, start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl)
+            .padding(top = KovelyxTheme.spacing.xxxl, start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -134,19 +134,19 @@ fun TmdbSourcePickerContent(
                     if (isEditing) R.string.collections_editor_edit_tmdb_source else R.string.collections_editor_tmdb_sources
                 ),
                 style = MaterialTheme.typography.headlineMedium.copy(textDirection = TextDirection.Content),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
             )
-            NuvioButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
+            KovelyxButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRestorer(modeFocusRequesters[lastFocusedMode] ?: FocusRequester.Default),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-            contentPadding = PaddingValues(end = NuvioTheme.spacing.lg, top = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.xs)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+            contentPadding = PaddingValues(end = KovelyxTheme.spacing.lg, top = KovelyxTheme.spacing.xs, bottom = KovelyxTheme.spacing.xs)
         ) {
             items(TmdbBuilderMode.values().toList()) { mode ->
                 val selected = uiState.tmdbBuilderMode == mode
@@ -158,12 +158,12 @@ fun TmdbSourcePickerContent(
                             if (it.isFocused) lastFocusedMode = mode
                         },
                     colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.Secondary.copy(alpha = 0.3f) else NuvioTheme.colors.BackgroundCard,
-                        contentColor = if (selected) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = NuvioTheme.colors.Primary
+                        containerColor = if (selected) KovelyxTheme.colors.Secondary.copy(alpha = 0.3f) else KovelyxTheme.colors.BackgroundCard,
+                        contentColor = if (selected) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                        focusedContentColor = KovelyxTheme.colors.Primary
                     ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                    shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                     scale = ButtonDefaults.scale(focusedScale = 1f)
                 ) {
                     Text(tmdbModeLabel(mode))
@@ -171,17 +171,17 @@ fun TmdbSourcePickerContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         uiState.tmdbSearchError?.takeIf { it.isNotBlank() }?.let { error ->
-            Text(error, color = NuvioTheme.colors.Error, style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Text(error, color = KovelyxTheme.colors.Error, style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
         }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 6.dp, bottom = NuvioTheme.spacing.xxxl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(top = 6.dp, bottom = KovelyxTheme.spacing.xxxl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             item {
                 TmdbModeHelp(mode = uiState.tmdbBuilderMode)
@@ -351,7 +351,7 @@ private fun TmdbBasicSourceForm(
     showOriginalSort: Boolean = false,
     showPopularSort: Boolean = true
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
         TmdbLabeledField(
             label = when (uiState.tmdbBuilderMode) {
                 TmdbBuilderMode.LIST -> stringResource(R.string.collections_editor_tmdb_public_list)
@@ -425,7 +425,7 @@ private fun TmdbDiscoverForm(
     actionLabel: String
 ) {
     val filters = uiState.tmdbFilters
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
         TmdbLabeledField(
             label = stringResource(R.string.collections_editor_tmdb_display_title),
             value = uiState.tmdbTitleInput,
@@ -690,15 +690,15 @@ private fun TmdbLabeledField(
     helper: String
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextPrimary)
-        NuvioTextField(
+        Text(label, style = MaterialTheme.typography.labelMedium, color = KovelyxTheme.colors.TextPrimary)
+        KovelyxTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             placeholder = placeholder
         )
         if (helper.isNotBlank()) {
-            Text(helper, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextTertiary)
+            Text(helper, style = MaterialTheme.typography.bodySmall, color = KovelyxTheme.colors.TextTertiary)
         }
     }
 }
@@ -710,17 +710,17 @@ fun TmdbActionButtons(
     onAdd: () -> Unit,
     addLabel: String
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
         onSearch?.let {
             TmdbActionButton(onClick = it, primary = false) {
                 Icon(Icons.Default.Search, contentDescription = null)
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                 Text(stringResource(R.string.collections_editor_tmdb_search))
             }
         }
         TmdbActionButton(onClick = onAdd, primary = true) {
             Icon(Icons.Default.Add, contentDescription = null)
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             Text(addLabel)
         }
     }
@@ -736,22 +736,22 @@ fun TmdbActionButton(
     Button(
         onClick = onClick,
         colors = ButtonDefaults.colors(
-            containerColor = if (primary) NuvioTheme.colors.Secondary else NuvioTheme.colors.BackgroundCard,
-            contentColor = if (primary) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextSecondary,
-            focusedContainerColor = if (primary) NuvioTheme.colors.SecondaryVariant else NuvioTheme.colors.FocusBackground,
-            focusedContentColor = if (primary) NuvioTheme.colors.OnSecondaryVariant else NuvioTheme.colors.Primary
+            containerColor = if (primary) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.BackgroundCard,
+            contentColor = if (primary) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextSecondary,
+            focusedContainerColor = if (primary) KovelyxTheme.colors.SecondaryVariant else KovelyxTheme.colors.FocusBackground,
+            focusedContentColor = if (primary) KovelyxTheme.colors.OnSecondaryVariant else KovelyxTheme.colors.Primary
         ),
         border = ButtonDefaults.border(
             focusedBorder = Border(
                 border = if (primary) {
-                    BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.SecondaryVariant)
+                    BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.SecondaryVariant)
                 } else {
-                    NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
+                    KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs)
                 },
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = ButtonDefaults.scale(focusedScale = 1f)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -772,7 +772,7 @@ private fun TmdbModeHelp(mode: TmdbBuilderMode) {
         TmdbBuilderMode.DIRECTOR -> stringResource(R.string.collections_editor_tmdb_help_director)
         TmdbBuilderMode.DISCOVER -> stringResource(R.string.collections_editor_tmdb_help_discover)
     }
-    Text(text, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextSecondary)
+    Text(text, style = MaterialTheme.typography.bodySmall, color = KovelyxTheme.colors.TextSecondary)
 }
 
 @Composable
@@ -781,12 +781,12 @@ private fun TmdbQuickChips(
     chips: List<Pair<String, String>>,
     onSelect: (String) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextSecondary)
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
+        Text(label, style = MaterialTheme.typography.labelMedium, color = KovelyxTheme.colors.TextSecondary)
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs)
         ) {
             items(chips) { (chipLabel, value) ->
                 TmdbChoiceButton(
@@ -858,7 +858,7 @@ fun TmdbMediaSortControls(
     showOriginalSort: Boolean = false,
     showPopularSort: Boolean = true
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
         if (showMediaControls) {
             TmdbOptionRow(label = stringResource(R.string.library_filter_type)) {
                 TmdbChoiceButton(
@@ -910,13 +910,13 @@ fun TmdbOptionRow(
     label: String,
     content: @Composable () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
             content()
         }
     }
@@ -934,12 +934,12 @@ fun TmdbChoiceButton(
         onClick = onClick,
         enabled = enabled,
         colors = ButtonDefaults.colors(
-            containerColor = if (selected) NuvioTheme.colors.Secondary.copy(alpha = 0.3f) else NuvioTheme.colors.BackgroundCard,
-            contentColor = if (selected) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-            focusedContentColor = NuvioTheme.colors.Primary
+            containerColor = if (selected) KovelyxTheme.colors.Secondary.copy(alpha = 0.3f) else KovelyxTheme.colors.BackgroundCard,
+            contentColor = if (selected) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+            focusedContentColor = KovelyxTheme.colors.Primary
         ),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = ButtonDefaults.scale(focusedScale = 1f)
     ) {
         Text(label)
@@ -953,21 +953,21 @@ fun TmdbPickerCard(title: String, subtitle: String, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = CardDefaults.scale(focusedScale = 1f)
     ) {
-        Column(modifier = Modifier.padding(NuvioTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
-            Text(title, style = MaterialTheme.typography.titleSmall, color = NuvioTheme.colors.TextPrimary)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = NuvioTheme.colors.TextTertiary)
+        Column(modifier = Modifier.padding(KovelyxTheme.spacing.lg), verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = KovelyxTheme.colors.TextPrimary)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = KovelyxTheme.colors.TextTertiary)
         }
     }
 }

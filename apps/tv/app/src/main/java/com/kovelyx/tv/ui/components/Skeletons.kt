@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
@@ -45,9 +45,9 @@ fun StreamsSkeletonList(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(NuvioTheme.spacing.lg),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-        contentPadding = PaddingValues(vertical = NuvioTheme.spacing.sm)
+            .padding(KovelyxTheme.spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+        contentPadding = PaddingValues(vertical = KovelyxTheme.spacing.sm)
     ) {
         items(itemCount) {
             StreamCardSkeleton(showAddonLogo = showAddonLogo, shimmerBrush = rememberShimmerBrush())
@@ -64,24 +64,24 @@ fun StreamCardSkeleton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(NuvioTheme.radii.xl))
-            .background(NuvioTheme.colors.BackgroundElevated)
-            .padding(NuvioTheme.spacing.lg)
+            .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
+            .background(KovelyxTheme.colors.BackgroundElevated)
+            .padding(KovelyxTheme.spacing.lg)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
             ) {
-                SkeletonBar(width = 180.dp, height = NuvioTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
-                SkeletonBar(width = 140.dp, height = NuvioTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
-                Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
-                    SkeletonBar(width = 64.dp, height = NuvioTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
-                    SkeletonBar(width = 52.dp, height = NuvioTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
+                SkeletonBar(width = 180.dp, height = KovelyxTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
+                SkeletonBar(width = 140.dp, height = KovelyxTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
+                Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
+                    SkeletonBar(width = 64.dp, height = KovelyxTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
+                    SkeletonBar(width = 52.dp, height = KovelyxTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
                 }
             }
 
@@ -91,12 +91,12 @@ fun StreamCardSkeleton(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(NuvioTheme.spacing.xxl)
-                            .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+                            .size(KovelyxTheme.spacing.xxl)
+                            .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
                             .background(shimmerBrush)
                     )
                     Spacer(modifier = Modifier.height(6.dp))
-                    SkeletonBar(width = 64.dp, height = 10.dp, brush = shimmerBrush, cornerRadius = NuvioTheme.spacing.sm)
+                    SkeletonBar(width = 64.dp, height = 10.dp, brush = shimmerBrush, cornerRadius = KovelyxTheme.spacing.sm)
                 }
             }
         }
@@ -107,15 +107,15 @@ fun StreamCardSkeleton(
 fun MetaDetailsSkeleton(backdropAware: Boolean = false) {
     val shimmerBrush = rememberShimmerBrush(backdropAware = backdropAware)
     val episodeCardColor = if (backdropAware) {
-        NuvioTheme.colors.BackgroundCard.copy(alpha = 0.40f)
+        KovelyxTheme.colors.BackgroundCard.copy(alpha = 0.40f)
     } else {
-        NuvioTheme.colors.BackgroundCard
+        KovelyxTheme.colors.BackgroundCard
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(if (backdropAware) Color.Transparent else NuvioTheme.colors.Background)
+            .background(if (backdropAware) Color.Transparent else KovelyxTheme.colors.Background)
     ) {
         if (backdropAware) {
             BackdropLoadingScrim()
@@ -156,7 +156,7 @@ fun MetaDetailsSkeleton(backdropAware: Boolean = false) {
 
 @Composable
 private fun BackdropLoadingScrim() {
-    val backgroundColor = NuvioTheme.colors.Background
+    val backgroundColor = KovelyxTheme.colors.Background
 
     Box(
         modifier = Modifier
@@ -220,53 +220,53 @@ private fun MetaHeroSkeleton(shimmerBrush: Brush) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.lg),
+                .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.lg),
             verticalArrangement = Arrangement.Bottom
         ) {
             SkeletonBar(
                 width = 0.4f,
                 height = 100.dp,
                 brush = shimmerBrush,
-                cornerRadius = NuvioTheme.spacing.md
+                cornerRadius = KovelyxTheme.spacing.md
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SkeletonPill(width = 100.dp, height = NuvioTheme.spacing.xxxl, brush = shimmerBrush)
+                SkeletonPill(width = 100.dp, height = KovelyxTheme.spacing.xxxl, brush = shimmerBrush)
                 Box(
                     modifier = Modifier
-                        .size(NuvioTheme.spacing.xxxl)
+                        .size(KovelyxTheme.spacing.xxxl)
                         .clip(CircleShape)
                         .background(shimmerBrush)
                 )
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             SkeletonBar(width = 0.5f, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
             Spacer(modifier = Modifier.height(10.dp))
-            SkeletonBar(width = 0.6f, height = NuvioTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
+            SkeletonBar(width = 0.6f, height = KovelyxTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
             Spacer(modifier = Modifier.height(6.dp))
-            SkeletonBar(width = 0.55f, height = NuvioTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
+            SkeletonBar(width = 0.55f, height = KovelyxTheme.spacing.lg, brush = shimmerBrush, cornerRadius = 10.dp)
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
                 SkeletonBar(width = 96.dp, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
                 SkeletonBar(width = 72.dp, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
                 SkeletonBar(width = 84.dp, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
                 SkeletonBar(width = 64.dp, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
-                SkeletonBar(width = 72.dp, height = NuvioTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
-                SkeletonBar(width = NuvioTheme.spacing.huge, height = NuvioTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
+            Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
+                SkeletonBar(width = 72.dp, height = KovelyxTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
+                SkeletonBar(width = KovelyxTheme.spacing.huge, height = KovelyxTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
             }
         }
     }
@@ -276,8 +276,8 @@ private fun MetaHeroSkeleton(shimmerBrush: Brush) {
 private fun SeasonTabsSkeleton(shimmerBrush: Brush) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         items(5) {
             SkeletonPill(width = 96.dp, height = 36.dp, brush = shimmerBrush)
@@ -292,27 +292,27 @@ private fun EpisodesRowSkeleton(
 ) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.lg),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.lg),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
     ) {
         items(5) {
             Column(
                 modifier = Modifier
                     .width(280.dp)
-                    .clip(RoundedCornerShape(NuvioTheme.radii.md))
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.md))
                     .background(cardColor)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(158.dp)
-                        .clip(RoundedCornerShape(topStart = NuvioTheme.spacing.md, topEnd = NuvioTheme.spacing.md))
+                        .clip(RoundedCornerShape(topStart = KovelyxTheme.spacing.md, topEnd = KovelyxTheme.spacing.md))
                         .background(shimmerBrush)
                 )
-                Column(modifier = Modifier.padding(NuvioTheme.spacing.md)) {
+                Column(modifier = Modifier.padding(KovelyxTheme.spacing.md)) {
                     SkeletonBar(width = 160.dp, height = 14.dp, brush = shimmerBrush, cornerRadius = 10.dp)
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
-                    SkeletonBar(width = 120.dp, height = NuvioTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
+                    SkeletonBar(width = 120.dp, height = KovelyxTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
                 }
             }
         }
@@ -324,18 +324,18 @@ private fun CastSectionSkeleton(shimmerBrush: Brush) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, bottom = NuvioTheme.spacing.sm)
+            .padding(top = 20.dp, bottom = KovelyxTheme.spacing.sm)
     ) {
-        Box(modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl)) {
+        Box(modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl)) {
             SkeletonBar(width = 120.dp, height = 20.dp, brush = shimmerBrush, cornerRadius = 10.dp)
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             items(7) {
                 Column(
@@ -349,7 +349,7 @@ private fun CastSectionSkeleton(shimmerBrush: Brush) {
                             .background(shimmerBrush)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    SkeletonBar(width = 90.dp, height = NuvioTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
+                    SkeletonBar(width = 90.dp, height = KovelyxTheme.spacing.md, brush = shimmerBrush, cornerRadius = 10.dp)
                     Spacer(modifier = Modifier.height(6.dp))
                     SkeletonBar(width = 70.dp, height = 10.dp, brush = shimmerBrush, cornerRadius = 10.dp)
                 }
@@ -366,23 +366,23 @@ private fun CompanyLogosSkeleton(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, bottom = NuvioTheme.spacing.sm)
+            .padding(top = 20.dp, bottom = KovelyxTheme.spacing.sm)
     ) {
-        Box(modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl)) {
+        Box(modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl)) {
             SkeletonBar(width = titleWidth, height = 20.dp, brush = shimmerBrush, cornerRadius = 10.dp)
         }
 
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             items(6) {
                 Box(
                     modifier = Modifier
                         .width(140.dp)
-                        .height(NuvioTheme.spacing.huge)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.md))
+                        .height(KovelyxTheme.spacing.huge)
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.md))
                         .background(shimmerBrush)
                 )
             }
@@ -395,7 +395,7 @@ fun SkeletonBar(
     width: Dp,
     height: Dp,
     brush: Brush,
-    cornerRadius: Dp = NuvioTheme.spacing.sm
+    cornerRadius: Dp = KovelyxTheme.spacing.sm
 ) {
     Box(
         modifier = Modifier
@@ -411,7 +411,7 @@ fun SkeletonBar(
     width: Float,
     height: Dp,
     brush: Brush,
-    cornerRadius: Dp = NuvioTheme.spacing.sm
+    cornerRadius: Dp = KovelyxTheme.spacing.sm
 ) {
     Box(
         modifier = Modifier
@@ -432,7 +432,7 @@ fun SkeletonPill(
         modifier = Modifier
             .width(width)
             .height(height)
-            .clip(RoundedCornerShape(NuvioTheme.spacing.xxl))
+            .clip(RoundedCornerShape(KovelyxTheme.spacing.xxl))
             .background(brush)
     )
 }
@@ -441,15 +441,15 @@ fun SkeletonPill(
 fun rememberShimmerBrush(backdropAware: Boolean = false): Brush {
     val shimmerColors = if (backdropAware) {
         listOf(
-            NuvioTheme.colors.TextPrimary.copy(alpha = 0.08f),
-            NuvioTheme.colors.TextPrimary.copy(alpha = 0.20f),
-            NuvioTheme.colors.TextPrimary.copy(alpha = 0.08f)
+            KovelyxTheme.colors.TextPrimary.copy(alpha = 0.08f),
+            KovelyxTheme.colors.TextPrimary.copy(alpha = 0.20f),
+            KovelyxTheme.colors.TextPrimary.copy(alpha = 0.08f)
         )
     } else {
         listOf(
-            NuvioTheme.colors.SurfaceVariant.copy(alpha = 0.30f),
-            NuvioTheme.colors.SurfaceVariant.copy(alpha = 0.60f),
-            NuvioTheme.colors.SurfaceVariant.copy(alpha = 0.30f)
+            KovelyxTheme.colors.SurfaceVariant.copy(alpha = 0.30f),
+            KovelyxTheme.colors.SurfaceVariant.copy(alpha = 0.60f),
+            KovelyxTheme.colors.SurfaceVariant.copy(alpha = 0.30f)
         )
     }
     val transition = rememberInfiniteTransition(label = "shimmer")

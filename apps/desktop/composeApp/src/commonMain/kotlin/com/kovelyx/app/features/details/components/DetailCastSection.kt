@@ -33,10 +33,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.nuvioHorizontalScrollBleed
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.core.ui.nuvioDesktopDragScroll
@@ -173,7 +173,7 @@ private fun CastItem(
                 )
                 .nuvioCardDepth(
                     shape = CircleShape,
-                    surface = NuvioCardDepthSurface.Cast,
+                    surface = KovelyxCardDepthSurface.Cast,
                 ),
             contentAlignment = Alignment.Center,
         ) {

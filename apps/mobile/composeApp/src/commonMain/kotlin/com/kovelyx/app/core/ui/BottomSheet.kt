@@ -32,11 +32,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 
-private val SheetShape = RoundedCornerShape(NuvioTokens.Space.s28)
+private val SheetShape = RoundedCornerShape(KovelyxTokens.Space.s28)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NuvioModalBottomSheet(
+fun KovelyxModalBottomSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
     modifier: Modifier = Modifier,
@@ -46,8 +46,8 @@ fun NuvioModalBottomSheet(
     fullHeight: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    if (usesNativeNuvioBottomSheet) {
-        NuvioNativeModalBottomSheet(
+    if (usesNativeKovelyxBottomSheet) {
+        KovelyxNativeModalBottomSheet(
             onDismissRequest = onDismissRequest,
             modifier = modifier,
             containerColor = containerColor,
@@ -70,13 +70,13 @@ fun NuvioModalBottomSheet(
             CompositionLocalProvider(LocalBottomInsetsConsumed provides true) {
                 Column(
                     modifier = modifier
-                        .padding(NuvioTokens.Space.s10)
+                        .padding(KovelyxTokens.Space.s10)
                         .clip(SheetShape)
                         .background(containerColor)
                         .border(tokens.borders.thin, SurfaceEdge, SheetShape),
                 ) {
                     if (showDragHandle) {
-                        NuvioBottomSheetDragHandle(Modifier.align(Alignment.CenterHorizontally))
+                        KovelyxBottomSheetDragHandle(Modifier.align(Alignment.CenterHorizontally))
                     }
                     content()
                 }
@@ -86,7 +86,7 @@ fun NuvioModalBottomSheet(
 }
 
 @Composable
-fun NuvioBottomSheetDivider(
+fun KovelyxBottomSheetDivider(
     modifier: Modifier = Modifier,
 ) {
     val tokens = MaterialTheme.nuvio
@@ -98,7 +98,7 @@ fun NuvioBottomSheetDivider(
 }
 
 @Composable
-fun NuvioBottomSheetActionRow(
+fun KovelyxBottomSheetActionRow(
     title: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -110,19 +110,19 @@ fun NuvioBottomSheetActionRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTokens.Space.s8)
-            .heightIn(min = NuvioTokens.Space.s56)
+            .padding(horizontal = KovelyxTokens.Space.s8)
+            .heightIn(min = KovelyxTokens.Space.s56)
             .clip(tokens.shapes.compactCard)
             .background(if (selected) tokens.colors.accent.copy(alpha = tokens.opacity.hover) else Color.Transparent)
             .clickable(onClick = onClick)
-            .padding(NuvioTokens.Space.s8),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s14),
+            .padding(KovelyxTokens.Space.s8),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s14),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
             Box(
                 modifier = Modifier
-                    .size(NuvioTokens.Space.s36)
+                    .size(KovelyxTokens.Space.s36)
                     .clip(tokens.shapes.compactCard)
                     .background(tokens.colors.accent.copy(alpha = tokens.opacity.selected)),
                 contentAlignment = Alignment.Center,
@@ -131,7 +131,7 @@ fun NuvioBottomSheetActionRow(
                     imageVector = icon,
                     contentDescription = null,
                     tint = tokens.colors.accent,
-                    modifier = Modifier.size(NuvioTokens.Icon.md),
+                    modifier = Modifier.size(KovelyxTokens.Icon.md),
                 )
             }
         }
@@ -149,12 +149,12 @@ fun NuvioBottomSheetActionRow(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-suspend fun dismissNuvioBottomSheet(
+suspend fun dismissKovelyxBottomSheet(
     sheetState: SheetState,
     onDismiss: () -> Unit,
 ) {
-    if (usesNativeNuvioBottomSheet) {
-        dismissNativeNuvioBottomSheet()
+    if (usesNativeKovelyxBottomSheet) {
+        dismissNativeKovelyxBottomSheet()
     } else if (sheetState.isVisible) {
         sheetState.hide()
     }
@@ -162,12 +162,12 @@ suspend fun dismissNuvioBottomSheet(
 }
 
 @Composable
-private fun NuvioBottomSheetDragHandle(modifier: Modifier = Modifier) {
+private fun KovelyxBottomSheetDragHandle(modifier: Modifier = Modifier) {
     val tokens = MaterialTheme.nuvio
     Box(
         modifier = modifier
-            .padding(top = NuvioTokens.Space.s10, bottom = NuvioTokens.Space.s4)
-            .size(width = NuvioTokens.Space.s36, height = NuvioTokens.Space.s4)
+            .padding(top = KovelyxTokens.Space.s10, bottom = KovelyxTokens.Space.s4)
+            .size(width = KovelyxTokens.Space.s36, height = KovelyxTokens.Space.s4)
             .clip(tokens.shapes.chip)
             .background(tokens.colors.borderStrong),
     )

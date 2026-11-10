@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.search
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.screens.home.HeroBackdropState
 
 import androidx.compose.foundation.background
@@ -32,7 +32,7 @@ import com.kovelyx.tv.domain.model.DiscoverLocation
 import com.kovelyx.tv.ui.components.EmptyScreenState
 import com.kovelyx.tv.ui.components.PosterCardDefaults
 import com.kovelyx.tv.ui.components.PosterCardStyle
-import com.kovelyx.tv.ui.theme.NuvioColors
+import com.kovelyx.tv.ui.theme.KovelyxColors
 import kotlin.math.roundToInt
 
 @Composable
@@ -82,7 +82,7 @@ fun DiscoverScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(NuvioTheme.colors.Background)
+            .background(KovelyxTheme.colors.Background)
     ) {
         if (uiState.discoverLocation == DiscoverLocation.OFF) {
             EmptyScreenState(
@@ -129,7 +129,7 @@ fun DiscoverScreen(
                 onItemLongPress = { item, addonBaseUrl ->
                     viewModel.posterOptions.show(item, addonBaseUrl)
                 },
-                modifier = Modifier.padding(top = NuvioTheme.spacing.lg)
+                modifier = Modifier.padding(top = KovelyxTheme.spacing.lg)
             )
         }
 

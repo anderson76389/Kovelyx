@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import com.kovelyx.app.core.ui.CustomThemeColors
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.accentBrush
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.toColorPalette
@@ -32,7 +32,7 @@ internal fun CustomThemePreview(colors: CustomThemeColors) {
     Column(
         modifier = Modifier.fillMaxWidth().clip(tokens.shapes.card)
             .background(palette.background).padding(tokens.spacing.cardPadding),
-        verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
     ) {
         Text(
             text = stringResource(Res.string.custom_theme_preview),
@@ -40,14 +40,14 @@ internal fun CustomThemePreview(colors: CustomThemeColors) {
             color = tokens.colors.textSecondary,
         )
         Box(
-            Modifier.fillMaxWidth().height(NuvioTokens.Space.s32)
+            Modifier.fillMaxWidth().height(KovelyxTokens.Space.s32)
                 .clip(tokens.shapes.chip).background(palette.accentBrush()),
         )
         Box(
             modifier = Modifier.fillMaxWidth().clip(tokens.shapes.button)
                 .background(palette.backgroundCard)
                 .border(tokens.borders.medium, palette.accentBrush(), tokens.shapes.button)
-                .padding(NuvioTokens.Space.s12),
+                .padding(KovelyxTokens.Space.s12),
             contentAlignment = Alignment.Center,
         ) {
             Text(

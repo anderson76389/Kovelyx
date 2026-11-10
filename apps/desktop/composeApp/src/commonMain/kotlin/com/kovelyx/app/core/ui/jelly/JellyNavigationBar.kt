@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.ui.FloatingNavigationItem
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.detectJellyTabGestures
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.visualNavIndex
@@ -44,7 +44,7 @@ internal fun JellyNavigationBar(
 ) {
     if (items.isEmpty()) return
     val accentColor = MaterialTheme.nuvio.colors.accent
-    val selectedSurface = accentColor.copy(alpha = NuvioTokens.Opacity.selected)
+    val selectedSurface = accentColor.copy(alpha = KovelyxTokens.Opacity.selected)
     val currentItems by rememberUpdatedState(items)
     val layoutDirection = LocalLayoutDirection.current
     val isRtl = layoutDirection == LayoutDirection.Rtl

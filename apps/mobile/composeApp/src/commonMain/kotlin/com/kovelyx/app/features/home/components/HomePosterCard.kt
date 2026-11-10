@@ -3,8 +3,8 @@ package com.kovelyx.app.features.home.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
-import com.kovelyx.app.core.ui.NuvioPosterCard
-import com.kovelyx.app.core.ui.NuvioPosterShape
+import com.kovelyx.app.core.ui.KovelyxPosterCard
+import com.kovelyx.app.core.ui.KovelyxPosterShape
 import com.kovelyx.app.core.ui.rememberPosterCardStyleUiState
 import com.kovelyx.app.features.home.MetaPreview
 import com.kovelyx.app.features.home.PosterShape
@@ -32,12 +32,12 @@ fun HomePosterCard(
         item.rawPosterUrl
     }
 
-    NuvioPosterCard(
+    KovelyxPosterCard(
         title = item.name,
         imageUrl = imageUrl,
         modifier = modifier,
         fallbackImageUrl = fallbackImageUrl,
-        shape = if (isLandscapeMode) NuvioPosterShape.Landscape else item.posterShape.toNuvioPosterShape(),
+        shape = if (isLandscapeMode) KovelyxPosterShape.Landscape else item.posterShape.toNuvioPosterShape(),
         detailLine = if (isLandscapeMode || posterCardStyle.hideLabelsEnabled) null else item.releaseInfo?.let { formatReleaseDateForDisplay(it) },
         showTitleBelow = !posterCardStyle.hideLabelsEnabled,
         bottomLeftLogoUrl = if (isLandscapeMode && showLandscapeOverlay && effectiveLandscapePoster.isNullOrBlank()) item.logo else null,
@@ -48,9 +48,9 @@ fun HomePosterCard(
     )
 }
 
-private fun PosterShape.toNuvioPosterShape(): NuvioPosterShape =
+private fun PosterShape.toNuvioPosterShape(): KovelyxPosterShape =
     when (this) {
-        PosterShape.Poster -> NuvioPosterShape.Poster
-        PosterShape.Square -> NuvioPosterShape.Square
-        PosterShape.Landscape -> NuvioPosterShape.Landscape
+        PosterShape.Poster -> KovelyxPosterShape.Poster
+        PosterShape.Square -> KovelyxPosterShape.Square
+        PosterShape.Landscape -> KovelyxPosterShape.Landscape
     }

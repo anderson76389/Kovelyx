@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.nuvioHorizontalScrollBleed
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.features.details.MetaPerson
@@ -156,7 +156,7 @@ private fun CastItem(
                 )
                 .nuvioCardDepth(
                     shape = CircleShape,
-                    surface = NuvioCardDepthSurface.Cast,
+                    surface = KovelyxCardDepthSurface.Cast,
                 ),
             contentAlignment = Alignment.Center,
         ) {

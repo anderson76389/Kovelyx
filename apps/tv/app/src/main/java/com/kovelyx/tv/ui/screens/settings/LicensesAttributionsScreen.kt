@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.content.Intent
 import android.net.Uri
@@ -105,7 +105,7 @@ fun LicensesAttributionsScreen(
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = 28.dp),
+            .padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = 28.dp),
         horizontalArrangement = Arrangement.spacedBy(36.dp)
     ) {
         LicensesAttributionsBrandPanel(
@@ -134,15 +134,15 @@ private fun LicensesAttributionsBrandPanel(
         Text(
             text = stringResource(R.string.licenses_attributions_title),
             style = MaterialTheme.typography.headlineLarge,
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
         Text(
             text = stringResource(R.string.licenses_attributions_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
     }
 }
@@ -156,8 +156,8 @@ private fun LicensesAttributionsDetailsPanel(
 
     Column(
         modifier = modifier
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
-            .background(NuvioTheme.colors.BackgroundElevated.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
+            .background(KovelyxTheme.colors.BackgroundElevated.copy(alpha = 0.35f), RoundedCornerShape(18.dp))
             .padding(20.dp)
     ) {
         Box(
@@ -169,7 +169,7 @@ private fun LicensesAttributionsDetailsPanel(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
             ) {
                 AttributionSection(
                     title = stringResource(R.string.licenses_attributions_section_app)
@@ -220,12 +220,12 @@ private fun AttributionSection(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             fontWeight = FontWeight.Bold
         )
         content()
@@ -247,12 +247,12 @@ private fun AttributionDetailRow(
             .fillMaxWidth()
             .heightIn(min = 76.dp),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(SettingsSecondaryCardRadius)
             )
         ),
@@ -272,12 +272,12 @@ private fun AttributionDetailRow(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -285,24 +285,24 @@ private fun AttributionDetailRow(
                 Text(
                     text = item.body,
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
                 Text(
                     text = item.url,
                     style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.colors.Primary,
+                    color = KovelyxTheme.colors.Primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                 contentDescription = null,
-                tint = NuvioTheme.colors.TextTertiary,
+                tint = KovelyxTheme.colors.TextTertiary,
                 modifier = Modifier
-                    .padding(top = NuvioTheme.spacing.xxs)
+                    .padding(top = KovelyxTheme.spacing.xxs)
                     .size(18.dp)
             )
         }
@@ -316,7 +316,7 @@ private fun AttributionLogo(
     Box(
         modifier = Modifier
             .size(52.dp)
-            .clip(RoundedCornerShape(NuvioTheme.radii.md))
+            .clip(RoundedCornerShape(KovelyxTheme.radii.md))
             .background(Color(0xFF24272E)),
         contentAlignment = Alignment.Center
     ) {
@@ -337,7 +337,7 @@ private fun AttributionLogo(
 private fun rememberRawSvgPainter(@RawRes rawIconRes: Int): Painter {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val sizePx = with(density) { NuvioTheme.spacing.xxxl.roundToPx() }
+    val sizePx = with(density) { KovelyxTheme.spacing.xxxl.roundToPx() }
     val request = remember(rawIconRes, context, sizePx) {
         ImageRequest.Builder(context)
             .data(rawIconRes)
@@ -352,7 +352,7 @@ private fun rememberRawSvgPainter(@RawRes rawIconRes: Int): Painter {
 private fun rememberUrlSvgPainter(url: String): Painter {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val sizePx = with(density) { NuvioTheme.spacing.xxxl.roundToPx() }
+    val sizePx = with(density) { KovelyxTheme.spacing.xxxl.roundToPx() }
     val request = remember(url, context, sizePx) {
         ImageRequest.Builder(context)
             .data(url)

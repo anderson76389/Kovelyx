@@ -8,8 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.features.addons.AddonRepository
 import com.kovelyx.app.features.addons.enabledAddons
 import com.kovelyx.app.features.addons.firstEnabledManifestError
@@ -62,11 +62,11 @@ fun HomescreenSettingsScreen(
         HomeCatalogSettingsRepository.syncCollections(collections)
     }
 
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_homescreen),
                 onBack = onBack,
             )
@@ -92,11 +92,11 @@ fun MetaScreenSettingsScreen(
         MetaScreenSettingsRepository.uiState
     }.collectAsStateWithLifecycle()
 
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_meta_screen),
                 onBack = onBack,
             )
@@ -117,11 +117,11 @@ fun ContinueWatchingSettingsScreen(
         ContinueWatchingPreferencesRepository.uiState
     }.collectAsStateWithLifecycle()
 
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_continue_watching),
                 onBack = onBack,
             )
@@ -148,11 +148,11 @@ fun AddonsSettingsScreen(
         AddonRepository.initialize()
     }
 
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_addons),
                 onBack = onBack,
             )
@@ -174,11 +174,11 @@ fun PluginsSettingsScreen(
         PluginRepository.initialize()
     }
 
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_plugins),
                 onBack = onBack,
             )
@@ -191,11 +191,11 @@ fun PluginsSettingsScreen(
 fun AccountSettingsScreen(
     onBack: () -> Unit,
 ) {
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_account),
                 onBack = onBack,
             )

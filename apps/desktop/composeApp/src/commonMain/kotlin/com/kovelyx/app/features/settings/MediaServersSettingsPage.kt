@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.servers.ServerConnection
 import com.kovelyx.app.features.servers.ServerFailure
@@ -76,7 +76,7 @@ internal fun LazyListScope.mediaServersSettingsContent(
             }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTokens.Space.s16))
+        Spacer(modifier = Modifier.height(KovelyxTokens.Space.s16))
         SettingsSection(
             title = stringResource(Res.string.servers_section_add),
             isTablet = isTablet,

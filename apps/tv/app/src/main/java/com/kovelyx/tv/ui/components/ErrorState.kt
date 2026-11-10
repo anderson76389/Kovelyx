@@ -1,7 +1,7 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioPrimitives
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxPrimitives
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,19 +47,19 @@ fun ErrorState(
         CoreText(
             text = displayMessage,
             style = MaterialTheme.typography.bodyLarge,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
         Button(
             onClick = onRetry,
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary,
-                focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                focusedContentColor = NuvioTheme.colors.Primary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary,
+                focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                focusedContentColor = KovelyxTheme.colors.Primary
             ),
-            shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+            shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
         ) {
             Text(stringResource(R.string.action_retry))
         }
@@ -91,7 +91,7 @@ private data class ErrorStatePresentation(
                 addStyle(
                     style = SpanStyle(
                         fontWeight = FontWeight.Bold,
-                        color = NuvioPrimitives.white
+                        color = KovelyxPrimitives.white
                     ),
                     start = range.first,
                     end = range.last + 1

@@ -37,7 +37,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 internal val SettingsRowContentInset = 18.dp
 
@@ -57,7 +57,7 @@ internal fun SettingsCollapsibleSection(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         SettingsActionRow(
             title = title,
@@ -71,7 +71,7 @@ internal fun SettingsCollapsibleSection(
         )
 
         if (expanded) {
-            SettingsGroupCard(modifier = Modifier.padding(start = NuvioTheme.spacing.lg)) {
+            SettingsGroupCard(modifier = Modifier.padding(start = KovelyxTheme.spacing.lg)) {
                 content()
             }
         }
@@ -90,22 +90,22 @@ internal fun SettingsSectionLabel(
             .padding(
                 start = SettingsRowContentInset,
                 end = SettingsRowContentInset,
-                top = NuvioTheme.spacing.md,
-                bottom = NuvioTheme.spacing.xxs
+                top = KovelyxTheme.spacing.md,
+                bottom = KovelyxTheme.spacing.xxs
             ),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
     ) {
         Text(
             text = text.uppercase(),
             style = MaterialTheme.typography.labelMedium,
             letterSpacing = 1.2.sp,
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
         if (!description.isNullOrBlank()) {
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
         }
     }
@@ -121,17 +121,17 @@ internal fun SettingsNote(
         text = text,
         style = MaterialTheme.typography.bodySmall,
         color = when (tone) {
-            SettingsNoteTone.Info -> NuvioTheme.colors.TextSecondary
-            SettingsNoteTone.Warning -> NuvioTheme.colors.Warning
-            SettingsNoteTone.Danger -> NuvioTheme.colors.Error
+            SettingsNoteTone.Info -> KovelyxTheme.colors.TextSecondary
+            SettingsNoteTone.Warning -> KovelyxTheme.colors.Warning
+            SettingsNoteTone.Danger -> KovelyxTheme.colors.Error
         },
         modifier = modifier
             .fillMaxWidth()
             .padding(
                 start = SettingsRowContentInset,
                 end = SettingsRowContentInset,
-                top = NuvioTheme.spacing.xxs,
-                bottom = NuvioTheme.spacing.xs
+                top = KovelyxTheme.spacing.xxs,
+                bottom = KovelyxTheme.spacing.xs
             )
     )
 }
@@ -142,8 +142,8 @@ internal fun SettingsRailDivider() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = SettingsRowContentInset, end = SettingsRowContentInset, bottom = 10.dp)
-            .height(NuvioTheme.spacing.hairline)
-            .background(NuvioTheme.colors.Border)
+            .height(KovelyxTheme.spacing.hairline)
+            .background(KovelyxTheme.colors.Border)
     )
 }
 
@@ -151,10 +151,10 @@ internal fun SettingsRailDivider() {
 internal fun SettingsTopBarDivider() {
     Box(
         modifier = Modifier
-            .padding(end = NuvioTheme.spacing.sm)
-            .width(NuvioTheme.spacing.hairline)
+            .padding(end = KovelyxTheme.spacing.sm)
+            .width(KovelyxTheme.spacing.hairline)
             .height(20.dp)
-            .background(NuvioTheme.colors.Border)
+            .background(KovelyxTheme.colors.Border)
     )
 }
 
@@ -172,15 +172,15 @@ internal fun SettingsResetButton(
         modifier = modifier.onFocusChanged { if (it.isFocused) onFocused() },
         shape = ButtonDefaults.shape(shape = shape),
         colors = ButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = if (flat) settingsFocusFillColor() else NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = if (flat) settingsFocusFillColor() else KovelyxTheme.colors.Background
         ),
         border = if (flat) {
             ButtonDefaults.border(border = Border.None, focusedBorder = Border.None)
         } else {
             ButtonDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = shape
                 )
             )
@@ -191,14 +191,14 @@ internal fun SettingsResetButton(
             Icon(
                 imageVector = Icons.Default.RestartAlt,
                 contentDescription = null,
-                tint = NuvioTheme.colors.TextSecondary,
+                tint = KovelyxTheme.colors.TextSecondary,
                 modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
         }
     }

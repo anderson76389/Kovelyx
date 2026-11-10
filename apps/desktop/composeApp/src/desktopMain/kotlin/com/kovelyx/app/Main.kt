@@ -27,7 +27,7 @@ import com.kovelyx.app.core.build.KovelyxIntegrationCredentials
 import com.kovelyx.app.core.storage.DesktopStorage
 import com.kovelyx.app.core.deeplink.handleAppUrl
 import com.kovelyx.app.core.diagnostics.SentryInitializer
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.core.ui.ProvideDesktopWindowInsets
 import com.kovelyx.app.features.discordrpc.DiscordPresenceManager
 import com.kovelyx.app.features.p2p.P2pStreamingEngine
@@ -306,9 +306,9 @@ fun main(args: Array<String>) {
                     System.getenv("KOVELYX_PLAYBACK_SMOKE_RESULT")?.takeIf { it.isNotBlank() }?.let { java.io.File(it) }
                 }
                 val smokeReported = remember { java.util.concurrent.atomic.AtomicBoolean(false) }
-                // The player surface reads LocalNuvioPlatformDensity, which only
-                // NuvioTheme provides — the bare smoke harness must supply it too.
-                NuvioTheme {
+                // The player surface reads LocalKovelyxPlatformDensity, which only
+                // KovelyxTheme provides — the bare smoke harness must supply it too.
+                KovelyxTheme {
                     PlatformPlayerSurface(
                         sourceUrl = smokePlayerUrl,
                         modifier = Modifier.fillMaxSize(),

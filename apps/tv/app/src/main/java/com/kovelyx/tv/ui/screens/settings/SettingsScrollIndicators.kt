@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -25,8 +25,8 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Icon
 
 private const val INDICATOR_FADE_MS = 150
-private val IndicatorIconSize = NuvioTheme.spacing.xxl
-private val IndicatorEdgeInset = NuvioTheme.spacing.xxs
+private val IndicatorIconSize = KovelyxTheme.spacing.xxl
+private val IndicatorEdgeInset = KovelyxTheme.spacing.xxs
 
 @Composable
 internal fun BoxScope.SettingsVerticalScrollIndicators(
@@ -44,7 +44,7 @@ internal fun BoxScope.SettingsVerticalScrollIndicators(
         Icon(
             imageVector = Icons.Default.KeyboardArrowUp,
             contentDescription = null,
-            tint = NuvioTheme.colors.TextSecondary.copy(alpha = 0.55f),
+            tint = KovelyxTheme.colors.TextSecondary.copy(alpha = 0.55f),
             modifier = Modifier.size(IndicatorIconSize)
         )
     }
@@ -59,7 +59,7 @@ internal fun BoxScope.SettingsVerticalScrollIndicators(
         Icon(
             imageVector = Icons.Default.KeyboardArrowDown,
             contentDescription = null,
-            tint = NuvioTheme.colors.TextSecondary.copy(alpha = 0.55f),
+            tint = KovelyxTheme.colors.TextSecondary.copy(alpha = 0.55f),
             modifier = Modifier.size(IndicatorIconSize)
         )
     }
@@ -81,7 +81,7 @@ internal fun BoxScope.SettingsHorizontalScrollIndicators(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
             contentDescription = null,
-            tint = NuvioTheme.colors.TextSecondary.copy(alpha = 0.55f),
+            tint = KovelyxTheme.colors.TextSecondary.copy(alpha = 0.55f),
             modifier = Modifier.size(IndicatorIconSize)
         )
     }
@@ -96,7 +96,7 @@ internal fun BoxScope.SettingsHorizontalScrollIndicators(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = NuvioTheme.colors.TextSecondary.copy(alpha = 0.55f),
+            tint = KovelyxTheme.colors.TextSecondary.copy(alpha = 0.55f),
             modifier = Modifier.size(IndicatorIconSize)
         )
     }

@@ -32,20 +32,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.launch
 
-data class NuvioDropdownOption(
+data class KovelyxDropdownOption(
     val key: String,
     val label: String,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NuvioDropdownChip(
+fun KovelyxDropdownChip(
     title: String,
     label: String,
     selectedKey: String?,
-    options: List<NuvioDropdownOption>,
+    options: List<KovelyxDropdownOption>,
     enabled: Boolean = true,
-    onSelected: (NuvioDropdownOption) -> Unit,
+    onSelected: (KovelyxDropdownOption) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tokens = MaterialTheme.nuvio
@@ -64,8 +64,8 @@ fun NuvioDropdownChip(
                     Modifier
                 },
             )
-            .padding(horizontal = NuvioTokens.Space.s12, vertical = tokens.components.chipVerticalPadding),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s6),
+            .padding(horizontal = KovelyxTokens.Space.s12, vertical = tokens.components.chipVerticalPadding),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s6),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -78,20 +78,20 @@ fun NuvioDropdownChip(
         Icon(
             imageVector = Icons.Rounded.KeyboardArrowDown,
             contentDescription = null,
-            modifier = Modifier.size(NuvioTokens.Icon.sm + NuvioTokens.Space.s2),
+            modifier = Modifier.size(KovelyxTokens.Icon.sm + KovelyxTokens.Space.s2),
             tint = if (enabled) tokens.colors.textMuted else tokens.colors.borderDefault,
         )
     }
 
     if (isSheetVisible) {
-        NuvioDropdownOptionsSheet(
+        KovelyxDropdownOptionsSheet(
             title = title,
             options = options,
             selectedKey = selectedKey,
             sheetState = sheetState,
             onDismiss = {
                 coroutineScope.launch {
-                    dismissNuvioBottomSheet(
+                    dismissKovelyxBottomSheet(
                         sheetState = sheetState,
                         onDismiss = { isSheetVisible = false },
                     )
@@ -100,7 +100,7 @@ fun NuvioDropdownChip(
             onSelected = { option ->
                 onSelected(option)
                 coroutineScope.launch {
-                    dismissNuvioBottomSheet(
+                    dismissKovelyxBottomSheet(
                         sheetState = sheetState,
                         onDismiss = { isSheetVisible = false },
                     )
@@ -112,16 +112,16 @@ fun NuvioDropdownChip(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NuvioDropdownOptionsSheet(
+private fun KovelyxDropdownOptionsSheet(
     title: String,
-    options: List<NuvioDropdownOption>,
+    options: List<KovelyxDropdownOption>,
     selectedKey: String?,
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    onSelected: (NuvioDropdownOption) -> Unit,
+    onSelected: (KovelyxDropdownOption) -> Unit,
 ) {
     val tokens = MaterialTheme.nuvio
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
     ) {
@@ -132,18 +132,18 @@ private fun NuvioDropdownOptionsSheet(
         ) {
             Text(
                 text = title,
-                modifier = Modifier.padding(horizontal = tokens.spacing.screenHorizontal, vertical = NuvioTokens.Space.s14),
+                modifier = Modifier.padding(horizontal = tokens.spacing.screenHorizontal, vertical = KovelyxTokens.Space.s14),
                 style = MaterialTheme.typography.titleLarge,
                 color = tokens.colors.textPrimary,
             )
-            NuvioBottomSheetDivider()
+            KovelyxBottomSheetDivider()
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = tokens.breakpoints.largePhone),
             ) {
                 items(options) { option ->
-                    NuvioBottomSheetActionRow(
+                    KovelyxBottomSheetActionRow(
                         title = option.label,
                         onClick = { onSelected(option) },
                         selected = option.key == selectedKey,

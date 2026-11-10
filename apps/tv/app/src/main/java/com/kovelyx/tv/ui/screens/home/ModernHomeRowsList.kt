@@ -1,7 +1,7 @@
 package com.kovelyx.tv.ui.screens.home
 
 import com.kovelyx.tv.domain.model.catalogRowLegacyKey
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.BringIntoViewSpec
@@ -364,7 +364,7 @@ internal fun ModernHomeRowsList(
                     },
                 ),
             contentPadding = PaddingValues(bottom = rowsViewportHeight),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xl)
         ) {
             itemsIndexed(
                 items = carouselRows.list,

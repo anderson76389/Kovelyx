@@ -43,10 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.network.NetworkCondition
 import com.kovelyx.app.core.network.NetworkStatusRepository
-import com.kovelyx.app.core.ui.NuvioInputField
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioNetworkOfflineCard
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.KovelyxInputField
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxNetworkOfflineCard
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.core.ui.nuvioConsumePointerEvents
 import com.kovelyx.app.core.ui.withDuplicateSafeLazyKeys
 import com.kovelyx.app.core.ui.ScreenActivityEffect
@@ -243,7 +243,7 @@ fun SearchScreen(
             else -> stringResource(Res.string.compose_nav_search)
         }
 
-        NuvioScreen(
+        KovelyxScreen(
             horizontalPadding = 0.dp,
             listState = listState,
             modifier = Modifier.fillMaxSize(),
@@ -259,13 +259,13 @@ fun SearchScreen(
                 androidx.compose.foundation.layout.Column(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    NuvioScreenHeader(
+                    KovelyxScreenHeader(
                         title = headerTitle,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                     androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(6.dp))
                     androidx.compose.foundation.layout.Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        NuvioInputField(
+                        KovelyxInputField(
                             value = query,
                             onValueChange = { query = it },
                             placeholder = stringResource(Res.string.compose_search_placeholder),
@@ -412,7 +412,7 @@ private fun SearchEmptyStateCard(
         reason == SearchEmptyStateReason.RequestFailed &&
         (networkCondition == NetworkCondition.NoInternet || networkCondition == NetworkCondition.ServersUnreachable)
     ) {
-        NuvioNetworkOfflineCard(
+        KovelyxNetworkOfflineCard(
             condition = networkCondition,
             modifier = modifier,
             onRetry = onRetry,

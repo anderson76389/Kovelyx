@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal expect fun NuvioNativeModalBottomSheet(
+internal expect fun KovelyxNativeModalBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier,
     containerColor: Color,
@@ -18,6 +18,6 @@ internal expect fun NuvioNativeModalBottomSheet(
     content: @Composable ColumnScope.() -> Unit,
 )
 
-internal expect val usesNativeNuvioBottomSheet: Boolean
+internal expect val usesNativeKovelyxBottomSheet: Boolean
 
-internal expect fun dismissNativeNuvioBottomSheet()
+internal expect fun dismissNativeKovelyxBottomSheet()

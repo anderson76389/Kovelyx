@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
@@ -82,8 +82,8 @@ fun PauseOverlay(
         captureKeys = false,
         dismissOnBackgroundClick = true,
         contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            start = NuvioTheme.spacing.huge,
-            end = NuvioTheme.spacing.huge,
+            start = KovelyxTheme.spacing.huge,
+            end = KovelyxTheme.spacing.huge,
             top = 40.dp,
             bottom = 120.dp
         ),
@@ -167,10 +167,10 @@ private fun PauseMetadataView(
             Text(
                 text = stringResource(R.string.pause_you_are_watching),
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
             if (!logo.isNullOrBlank()) {
                 var logoFailed by remember(logo) { mutableStateOf(false) }
@@ -218,8 +218,8 @@ private fun PauseMetadataView(
                 Text(
                     text = "$year$episodeLabel",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = NuvioTheme.colors.TextSecondary,
-                    modifier = Modifier.padding(top = NuvioTheme.spacing.sm)
+                    color = KovelyxTheme.colors.TextSecondary,
+                    modifier = Modifier.padding(top = KovelyxTheme.spacing.sm)
                 )
             }
 
@@ -231,7 +231,7 @@ private fun PauseMetadataView(
                     color = Color.White,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = NuvioTheme.spacing.md)
+                    modifier = Modifier.padding(top = KovelyxTheme.spacing.md)
                 )
             }
 
@@ -241,10 +241,10 @@ private fun PauseMetadataView(
                     style = MaterialTheme.typography.bodyLarge.copy(
                         textDirection = description.contentTextDirection()
                     ),
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = NuvioTheme.spacing.lg)
+                    modifier = Modifier.padding(top = KovelyxTheme.spacing.lg)
                 )
             }
 
@@ -254,10 +254,10 @@ private fun PauseMetadataView(
                 Text(
                     text = stringResource(R.string.pause_cast_label),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -283,7 +283,7 @@ private fun CastChip(
             containerColor = Color.White.copy(alpha = 0.1f),
             focusedContainerColor = Color.White.copy(alpha = 0.18f)
         ),
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md))
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md))
     ) {
         Text(
             text = member.name,
@@ -316,14 +316,14 @@ private fun CastDetailView(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null,
-                tint = NuvioTheme.colors.TextSecondary,
-                modifier = Modifier.size(NuvioTheme.spacing.xl)
+                tint = KovelyxTheme.colors.TextSecondary,
+                modifier = Modifier.size(KovelyxTheme.spacing.xl)
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
             Text(
                 text = stringResource(R.string.pause_back_to_details),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
         }
 
@@ -339,7 +339,7 @@ private fun CastDetailView(
                     contentDescription = member.name,
                     modifier = Modifier
                         .size(width = 160.dp, height = 240.dp)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.xl)),
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.xl)),
                     contentScale = ContentScale.Crop
                 )
 
@@ -360,8 +360,8 @@ private fun CastDetailView(
                     Text(
                         text = stringResource(R.string.pause_as_character, member.character ?: ""),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextSecondary,
-                        modifier = Modifier.padding(top = NuvioTheme.spacing.sm),
+                        color = KovelyxTheme.colors.TextSecondary,
+                        modifier = Modifier.padding(top = KovelyxTheme.spacing.sm),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )

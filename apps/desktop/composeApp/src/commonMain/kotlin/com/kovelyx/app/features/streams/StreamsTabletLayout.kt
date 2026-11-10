@@ -44,7 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.core.ui.DesktopBackdropVerticalBias
 import com.kovelyx.app.core.ui.StandardDesktopViewportAspectRatio
 import com.kovelyx.app.core.ui.StreamResultsWideArtworkAspectRatio
@@ -112,7 +112,7 @@ internal fun TabletStreamsLayout(
     }
 
     val hazeState = rememberHazeState()
-    val opacity = com.kovelyx.app.core.ui.NuvioTokens.Opacity
+    val opacity = com.kovelyx.app.core.ui.KovelyxTokens.Opacity
     val tabletBackdrop = remember(background, poster) {
         background ?: poster
     }

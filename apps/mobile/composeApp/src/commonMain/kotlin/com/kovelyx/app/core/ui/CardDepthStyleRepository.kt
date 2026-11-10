@@ -12,7 +12,7 @@ internal const val DefaultCardDepthEdgeStrength = 28
 internal const val DefaultCardDepthSheenStrength = 10
 internal const val DefaultCardDepthEdgeCoverage = 0
 
-enum class NuvioCardDepthSurface {
+enum class KovelyxCardDepthSurface {
     Posters,
     ContinueWatching,
     EpisodeCards,
@@ -44,16 +44,16 @@ data class CardDepthStyleUiState(
     val castEnabled: Boolean = true,
     val trailersEnabled: Boolean = true,
 ) {
-    fun isEnabledFor(surface: NuvioCardDepthSurface): Boolean =
+    fun isEnabledFor(surface: KovelyxCardDepthSurface): Boolean =
         enabled && isSurfaceEnabled(surface)
 
-    fun isSurfaceEnabled(surface: NuvioCardDepthSurface): Boolean =
+    fun isSurfaceEnabled(surface: KovelyxCardDepthSurface): Boolean =
         when (surface) {
-            NuvioCardDepthSurface.Posters -> postersEnabled
-            NuvioCardDepthSurface.ContinueWatching -> continueWatchingEnabled
-            NuvioCardDepthSurface.EpisodeCards -> episodeCardsEnabled
-            NuvioCardDepthSurface.Cast -> castEnabled
-            NuvioCardDepthSurface.Trailers -> trailersEnabled
+            KovelyxCardDepthSurface.Posters -> postersEnabled
+            KovelyxCardDepthSurface.ContinueWatching -> continueWatchingEnabled
+            KovelyxCardDepthSurface.EpisodeCards -> episodeCardsEnabled
+            KovelyxCardDepthSurface.Cast -> castEnabled
+            KovelyxCardDepthSurface.Trailers -> trailersEnabled
         }
 }
 
@@ -98,14 +98,14 @@ object CardDepthStyleRepository {
         update { it.copy(edgeCoverage = coverage.coerceIn(0, 100)) }
     }
 
-    fun setSurfaceEnabled(surface: NuvioCardDepthSurface, enabled: Boolean) {
+    fun setSurfaceEnabled(surface: KovelyxCardDepthSurface, enabled: Boolean) {
         update {
             when (surface) {
-                NuvioCardDepthSurface.Posters -> it.copy(postersEnabled = enabled)
-                NuvioCardDepthSurface.ContinueWatching -> it.copy(continueWatchingEnabled = enabled)
-                NuvioCardDepthSurface.EpisodeCards -> it.copy(episodeCardsEnabled = enabled)
-                NuvioCardDepthSurface.Cast -> it.copy(castEnabled = enabled)
-                NuvioCardDepthSurface.Trailers -> it.copy(trailersEnabled = enabled)
+                KovelyxCardDepthSurface.Posters -> it.copy(postersEnabled = enabled)
+                KovelyxCardDepthSurface.ContinueWatching -> it.copy(continueWatchingEnabled = enabled)
+                KovelyxCardDepthSurface.EpisodeCards -> it.copy(episodeCardsEnabled = enabled)
+                KovelyxCardDepthSurface.Cast -> it.copy(castEnabled = enabled)
+                KovelyxCardDepthSurface.Trailers -> it.copy(trailersEnabled = enabled)
             }
         }
     }

@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.core.ui.ScreenActivityEffect
 import com.kovelyx.app.features.profiles.ProfileRepository
 import nuvio.composeapp.generated.resources.Res
@@ -30,7 +30,7 @@ internal fun rememberLibraryProviderOrders(
         if (active && orders.failed) {
             val message = getString(Res.string.library_error_sort_failed)
             LibraryDisplaySettingsRepository.setSortOption(LibrarySortOption.DEFAULT)
-            NuvioToastController.show(message)
+            KovelyxToastController.show(message)
         }
     }
     return orders

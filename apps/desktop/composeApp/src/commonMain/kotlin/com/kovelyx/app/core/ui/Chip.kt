@@ -25,7 +25,7 @@ fun Chip(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = RoundedCornerShape(NuvioTokens.Radius.md),
+        shape = RoundedCornerShape(KovelyxTokens.Radius.md),
         color = if (selected) tokens.colors.overlaySelected else Color.Transparent,
         contentColor = when {
             !enabled -> tokens.colors.textDisabled
@@ -44,7 +44,7 @@ fun Chip(
         Text(
             text = label,
             modifier = Modifier.padding(
-                horizontal = NuvioTokens.Space.s12,
+                horizontal = KovelyxTokens.Space.s12,
                 vertical = tokens.components.chipVerticalPadding,
             ),
             style = MaterialTheme.typography.labelLarge,

@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import com.kovelyx.tv.LocalContentFocusRequester
@@ -480,7 +480,7 @@ fun ClassicHomeContent(
     val immersiveBackdropVisible = remember(immersiveBackdropAlpha) {
         derivedStateOf { immersiveBackdropAlpha.value > 0f }
     }
-    val backgroundColor = NuvioTheme.colors.Background
+    val backgroundColor = KovelyxTheme.colors.Background
     CompositionLocalProvider(
         LocalBringIntoViewSpec provides verticalBringIntoViewSpec,
         LocalFastScrollActive provides isFastScrollingState,
@@ -592,8 +592,8 @@ fun ClassicHomeContent(
                     null // Classic uses imperative requestFocus
                 },
             ),
-        contentPadding = PaddingValues(top = if (heroVisible) NuvioTheme.spacing.none else NuvioTheme.spacing.xl, bottom = NuvioTheme.spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxl)
+        contentPadding = PaddingValues(top = if (heroVisible) KovelyxTheme.spacing.none else KovelyxTheme.spacing.xl, bottom = KovelyxTheme.spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxl)
     ) {
         if (heroVisible) {
             item(key = "hero_carousel", contentType = "hero") {

@@ -28,9 +28,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.features.cloud.PremiumizeCloudLibraryPosterUrl
 import com.kovelyx.app.features.cloud.TorboxCloudLibraryPosterUrl
 import com.kovelyx.app.features.cloud.cloudLibraryDisplayArtworkUrl
@@ -74,11 +74,11 @@ internal data class LicenseItem(
 fun LicensesAttributionsSettingsScreen(
     onBack: () -> Unit,
 ) {
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_licenses_attributions),
                 onBack = onBack,
             )

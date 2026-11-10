@@ -44,7 +44,7 @@ import com.kovelyx.tv.data.local.FrameRateMatchingMode
 import com.kovelyx.tv.data.local.MpvHardwareDecodeMode
 import com.kovelyx.tv.data.local.PlayerPreference
 import com.kovelyx.tv.data.local.PlayerSettings
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun PlaybackVideoSection(
@@ -67,7 +67,7 @@ internal fun PlaybackVideoSection(
         subtitle = null,
         value = frameRateMatchingLabel(settings.frameRateMatchingMode),
         titleTrailingIcon = if (showAfrWarning) Icons.Default.Warning else null,
-        titleTrailingIconTint = NuvioTheme.colors.Warning,
+        titleTrailingIconTint = KovelyxTheme.colors.Warning,
         enabled = enabled,
         modifier = Modifier.focusRequester(frameRateFocusRequester),
         onClick = { onOpenDialog(PlaybackDialog.FRAME_RATE_MATCHING) }
@@ -85,7 +85,7 @@ internal fun PlaybackVideoSection(
         } else {
             null
         },
-        titleTrailingIconTint = NuvioTheme.colors.Warning,
+        titleTrailingIconTint = KovelyxTheme.colors.Warning,
         enabled = enabled
     )
     AfrCapabilityWarningCard(
@@ -238,15 +238,15 @@ private fun AfrCapabilityWarningCard(
         afrProblem -> onDisableAfrOnly
         else -> onDisableResolutionOnly
     }
-    val warningTone = NuvioTheme.colors.Warning
+    val warningTone = KovelyxTheme.colors.Warning
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(SettingsSecondaryCardRadius))
-            .background(NuvioTheme.colors.BackgroundCard)
+            .background(KovelyxTheme.colors.BackgroundCard)
             .border(
-                width = NuvioTheme.spacing.hairline,
+                width = KovelyxTheme.spacing.hairline,
                 color = warningTone.copy(alpha = 0.55f),
                 shape = RoundedCornerShape(SettingsSecondaryCardRadius)
             )
@@ -263,7 +263,7 @@ private fun AfrCapabilityWarningCard(
             Text(
                 text = stringResource(R.string.playback_afr_capability_unsupported_title),
                 style = MaterialTheme.typography.titleSmall,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -272,9 +272,9 @@ private fun AfrCapabilityWarningCard(
         Text(
             text = stringResource(bodyRes),
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
         SettingsActionRow(
             title = stringResource(buttonRes),
             subtitle = null,

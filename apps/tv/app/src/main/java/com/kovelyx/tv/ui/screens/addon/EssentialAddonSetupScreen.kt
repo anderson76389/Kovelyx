@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.addon
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
@@ -74,13 +74,13 @@ fun EssentialAddonSetupScreen(
             Text(
                 text = stringResource(R.string.essential_addon_setup_title),
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = stringResource(R.string.essential_addon_setup_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
             Spacer(modifier = Modifier.height(28.dp))
             Row(
@@ -92,8 +92,8 @@ fun EssentialAddonSetupScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(220.dp),
-                    colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
-                    shape = RoundedCornerShape(NuvioTheme.radii.md)
+                    colors = CardDefaults.cardColors(containerColor = KovelyxTheme.colors.BackgroundCard),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.md)
                 ) {
                     Column(
                         modifier = Modifier.padding(22.dp),
@@ -102,14 +102,14 @@ fun EssentialAddonSetupScreen(
                         Text(
                             text = stringResource(R.string.addon_install_title),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                         )
                         BasicTextField(
                             value = uiState.installUrl,
                             onValueChange = viewModel::onInstallUrlChange,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(NuvioTheme.spacing.xxxl),
+                                .height(KovelyxTheme.spacing.xxxl),
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Uri,
@@ -121,20 +121,20 @@ fun EssentialAddonSetupScreen(
                                     keyboardController?.hide()
                                 }
                             ),
-                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
-                            cursorBrush = SolidColor(NuvioTheme.colors.Primary),
+                            cursorBrush = SolidColor(KovelyxTheme.colors.Primary),
                             decorationBox = { innerTextField ->
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.md)
+                                        .padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.md)
                                 ) {
                                     if (uiState.installUrl.isEmpty()) {
                                         Text(
                                             text = stringResource(R.string.addon_install_placeholder),
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = NuvioTheme.colors.TextTertiary
+                                            color = KovelyxTheme.colors.TextTertiary
                                         )
                                     }
                                     innerTextField()
@@ -148,9 +148,9 @@ fun EssentialAddonSetupScreen(
                             },
                             enabled = !uiState.isInstalling,
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.Secondary,
-                                contentColor = NuvioTheme.colors.OnSecondary,
-                                focusedContainerColor = NuvioTheme.colors.SecondaryVariant
+                                containerColor = KovelyxTheme.colors.Secondary,
+                                contentColor = KovelyxTheme.colors.OnSecondary,
+                                focusedContainerColor = KovelyxTheme.colors.SecondaryVariant
                             ),
                             shape = ButtonDefaults.shape(RoundedCornerShape(50))
                         ) {
@@ -166,7 +166,7 @@ fun EssentialAddonSetupScreen(
                             Text(
                                 text = uiState.error.orEmpty(),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = NuvioTheme.colors.Error
+                                color = KovelyxTheme.colors.Error
                             )
                         }
                     }
@@ -175,8 +175,8 @@ fun EssentialAddonSetupScreen(
                     modifier = Modifier
                         .weight(1f)
                         .height(220.dp),
-                    colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
-                    shape = RoundedCornerShape(NuvioTheme.radii.md)
+                    colors = CardDefaults.cardColors(containerColor = KovelyxTheme.colors.BackgroundCard),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.md)
                 ) {
                     Column(
                         modifier = Modifier.padding(22.dp),
@@ -185,25 +185,25 @@ fun EssentialAddonSetupScreen(
                         Icon(
                             imageVector = Icons.Default.PhoneAndroid,
                             contentDescription = null,
-                            tint = NuvioTheme.colors.Primary
+                            tint = KovelyxTheme.colors.Primary
                         )
                         Text(
                             text = stringResource(R.string.addon_manage_from_phone_title),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                         )
                         Text(
                             text = stringResource(R.string.addon_manage_addons_only_from_phone_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                         Button(
                             onClick = { viewModel.startQrMode(AddonWebConfigMode.ADDONS_ONLY) },
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundElevated,
-                                contentColor = NuvioTheme.colors.TextPrimary,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                                focusedContentColor = NuvioTheme.colors.Primary
+                                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                                contentColor = KovelyxTheme.colors.TextPrimary,
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                                focusedContentColor = KovelyxTheme.colors.Primary
                             ),
                             shape = ButtonDefaults.shape(RoundedCornerShape(50))
                         ) {
@@ -213,14 +213,14 @@ fun EssentialAddonSetupScreen(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
             Button(
                 onClick = onSkip,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {

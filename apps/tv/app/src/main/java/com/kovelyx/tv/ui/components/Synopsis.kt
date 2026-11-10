@@ -57,7 +57,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.contentTextDirection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -136,7 +136,7 @@ fun SynopsisDescription(
             style = MaterialTheme.typography.bodyMedium.copy(
                 textDirection = description.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
             onTextLayout = { result ->
@@ -150,9 +150,9 @@ fun SynopsisDescription(
                 text = stringResource(R.string.hero_synopsis_read_more),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (isFocused) {
-                    NuvioTheme.colors.TextPrimary
+                    KovelyxTheme.colors.TextPrimary
                 } else {
-                    NuvioTheme.extendedColors.textSecondary
+                    KovelyxTheme.extendedColors.textSecondary
                 },
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -224,11 +224,11 @@ fun SynopsisOverlay(
                         )
                     )
                 )
-                .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl)
+                .padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.xl)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
             ) {
                 Text(
                     text = title,
@@ -303,7 +303,7 @@ fun SynopsisOverlay(
                         color = Color.White.copy(alpha = 0.92f),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(end = NuvioTheme.spacing.lg)
+                            .padding(end = KovelyxTheme.spacing.lg)
                     )
                 }
 

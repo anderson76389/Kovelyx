@@ -1,6 +1,6 @@
 package com.kovelyx.app.features.profiles
 
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.profile_already_active
 import org.jetbrains.compose.resources.getString
@@ -23,5 +23,5 @@ internal fun routeProfileSelection(
 }
 
 internal suspend fun showAlreadyActiveProfileToast(profile: NuvioProfile) {
-    NuvioToastController.show(getString(Res.string.profile_already_active, profile.name))
+    KovelyxToastController.show(getString(Res.string.profile_already_active, profile.name))
 }

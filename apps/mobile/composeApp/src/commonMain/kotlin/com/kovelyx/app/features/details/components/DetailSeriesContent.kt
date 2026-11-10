@@ -64,9 +64,9 @@ import co.touchlab.kermit.Logger
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
-import com.kovelyx.app.core.ui.NuvioAnimatedWatchedBadge
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
-import com.kovelyx.app.core.ui.NuvioProgressBar
+import com.kovelyx.app.core.ui.KovelyxAnimatedWatchedBadge
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxProgressBar
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.core.ui.nuvioHorizontalScrollBleed
 import com.kovelyx.app.core.ui.posterCardClickable
@@ -814,7 +814,7 @@ private fun EpisodeHorizontalCard(
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
             .nuvioCardDepth(
                 shape = cardShape,
-                surface = NuvioCardDepthSurface.EpisodeCards,
+                surface = KovelyxCardDepthSurface.EpisodeCards,
                 fallbackBorderAlpha = 0.12f,
             )
             .posterCardClickable(
@@ -851,7 +851,7 @@ private fun EpisodeHorizontalCard(
                 ),
         )
 
-        NuvioAnimatedWatchedBadge(
+        KovelyxAnimatedWatchedBadge(
             isVisible = isWatched,
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -942,7 +942,7 @@ private fun EpisodeHorizontalCard(
         }
 
         visibleProgressEntry?.let { entry ->
-            NuvioProgressBar(
+            KovelyxProgressBar(
                 progress = entry.progressFraction,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -1241,7 +1241,7 @@ private fun EpisodeListCard(
                         .padding(start = 8.dp, top = 8.dp),
                 )
 
-                NuvioAnimatedWatchedBadge(
+                KovelyxAnimatedWatchedBadge(
                     isVisible = isWatched,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -1320,7 +1320,7 @@ private fun EpisodeListCard(
         progressEntry
             ?.takeIf { it.durationMs > 0L && !it.isCompleted }
             ?.let { entry ->
-                NuvioProgressBar(
+                KovelyxProgressBar(
                     progress = entry.progressFraction,
                     modifier = Modifier
                         .align(Alignment.BottomStart)

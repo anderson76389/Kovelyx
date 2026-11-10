@@ -19,7 +19,7 @@ import com.kovelyx.app.core.ui.DialogButton
 import com.kovelyx.app.core.ui.DialogButtons
 import com.kovelyx.app.core.ui.DialogButtonStyle
 import com.kovelyx.app.core.ui.DialogSurface
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.profiles.ProfileRepository
 import com.kovelyx.app.features.watchprogress.ContinueWatchingEnrichmentCache
@@ -201,7 +201,7 @@ private fun SentrySettingsDialog(
             color = tokens.colors.textMuted,
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
         ) {
             SentryInfoSection(
                 title = stringResource(Res.string.sentry_help_title),
@@ -252,7 +252,7 @@ private fun SentryInfoSection(
 ) {
     val tokens = MaterialTheme.nuvio
     Column(
-        verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s4),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s4),
     ) {
         Text(
             text = title,

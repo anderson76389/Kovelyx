@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components.posteroptions
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +33,7 @@ import com.kovelyx.tv.core.tracking.supportsMembershipFor
 import com.kovelyx.tv.domain.model.LibraryListTab
 import com.kovelyx.tv.domain.model.localizedMembershipTitle
 import com.kovelyx.tv.domain.model.LibrarySourceMode
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -57,7 +57,7 @@ fun PosterOptionsDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.home_poster_dialog_subtitle)
@@ -68,8 +68,8 @@ fun PosterOptionsDialog(
                 .fillMaxWidth()
                 .focusRequester(primaryFocusRequester),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(stringResource(R.string.cw_action_go_to_details))
@@ -80,8 +80,8 @@ fun PosterOptionsDialog(
             enabled = !isLibraryPending,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(
@@ -103,8 +103,8 @@ fun PosterOptionsDialog(
                 enabled = !isWatchedPending,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -137,7 +137,7 @@ fun PosterListPickerDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.detail_lists_subtitle),
@@ -171,8 +171,8 @@ fun PosterListPickerDialog(
                         Modifier.fillMaxWidth()
                     },
                     colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
+                        containerColor = if (selected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextPrimary
                     )
                 ) {
                     Text(
@@ -184,15 +184,15 @@ fun PosterListPickerDialog(
             }
         }
 
-        Divider(color = NuvioTheme.colors.Border, thickness = NuvioTheme.spacing.hairline)
+        Divider(color = KovelyxTheme.colors.Border, thickness = KovelyxTheme.spacing.hairline)
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
             Button(
                 onClick = onSave,
                 enabled = !isPending,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))
@@ -299,7 +299,7 @@ fun TrackingRemovalConfirmationDialog(
             stringResource(R.string.tracking_removal_impact_rating)
         else -> stringResource(R.string.tracking_removal_impact_history_rating)
     }
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.tracking_removal_title, providers),
         subtitle = stringResource(R.string.tracking_removal_message, itemTitle, providers, impact),
@@ -317,8 +317,8 @@ fun TrackingRemovalConfirmationDialog(
             onClick = onDismiss,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(stringResource(R.string.action_cancel))

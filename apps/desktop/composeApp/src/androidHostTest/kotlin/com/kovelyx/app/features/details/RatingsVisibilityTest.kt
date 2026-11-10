@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.details.components.DetailMetaInfo
 import com.kovelyx.app.features.details.components.DetailSeriesContent
 import com.kovelyx.app.features.details.components.DetailSeriesListEpisode
@@ -30,7 +30,7 @@ class RatingsVisibilityTest {
         val mdbActive = mutableStateOf(false)
         val externalRatings = mutableStateOf(listOf(MetaExternalRating(PROVIDER_TMDB, 65.0)))
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 DetailMetaInfo(
                     meta = MetaDetails("tt1234567", "movie", "Movie", imdbRating = "7.8", externalRatings = externalRatings.value),
                     showOverallRatings = overall.value,
@@ -69,7 +69,7 @@ class RatingsVisibilityTest {
         val episode = MetaVideo(id = "tt1234567:1:1", title = "Episode", season = 1, episode = 1, rating = 6.2)
         val meta = MetaDetails(id = "tt1234567", type = "series", name = "Series", videos = listOf(episode))
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 if (layout.value == 2) {
                     DetailSeriesListEpisode(
                         meta = meta,

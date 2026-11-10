@@ -37,10 +37,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.core.ui.Menu
 import com.kovelyx.app.core.ui.MenuItem
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.core.ui.nuvioDesktopDragScroll
 import com.kovelyx.app.core.ui.nuvioHorizontalScrollBleed
@@ -208,7 +208,7 @@ private fun TrailerCard(
                 .clip(RoundedCornerShape(cornerRadius))
                 .nuvioCardDepth(
                     shape = RoundedCornerShape(cornerRadius),
-                    surface = NuvioCardDepthSurface.Trailers,
+                    surface = KovelyxCardDepthSurface.Trailers,
                 )
                 .clickable(onClick = onClick),
         ) {

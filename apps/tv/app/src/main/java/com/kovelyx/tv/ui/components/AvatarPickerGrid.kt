@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -132,9 +132,9 @@ fun AvatarPickerGrid(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = NuvioTheme.spacing.lg),
+                .padding(bottom = KovelyxTheme.spacing.lg),
             horizontalArrangement = Arrangement.Center,
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             categories.forEach { category ->
                 CategoryTab(
@@ -145,7 +145,7 @@ fun AvatarPickerGrid(
                     onClick = { selectedCategory = category }
                 )
                 if (category != categories.last()) {
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                 }
             }
         }
@@ -156,8 +156,8 @@ fun AvatarPickerGrid(
                 .wrapContentHeight()
         ) {
             val minCellWidth = 88.dp
-            val horizontalSpacing = NuvioTheme.spacing.md
-            val horizontalPadding = NuvioTheme.spacing.lg
+            val horizontalSpacing = KovelyxTheme.spacing.md
+            val horizontalPadding = KovelyxTheme.spacing.lg
             val availableWidth = maxWidth - horizontalPadding
             val columnCount = max(
                 1,
@@ -169,9 +169,9 @@ fun AvatarPickerGrid(
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = minCellWidth),
-                contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+                contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
                 horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 itemsIndexed(filteredAvatars, key = { _, avatar -> avatar.id }) { index, avatar ->
@@ -202,9 +202,9 @@ private fun CategoryTab(
 
     val bgColor by animateColorAsState(
         targetValue = when {
-            isSelected && isFocused -> NuvioTheme.colors.FocusBackground
-            isSelected -> NuvioTheme.colors.Secondary.copy(alpha = 0.22f)
-            isFocused -> NuvioTheme.colors.FocusBackground
+            isSelected && isFocused -> KovelyxTheme.colors.FocusBackground
+            isSelected -> KovelyxTheme.colors.Secondary.copy(alpha = 0.22f)
+            isFocused -> KovelyxTheme.colors.FocusBackground
             else -> Color.White.copy(alpha = 0.06f)
         },
         animationSpec = tween(150),
@@ -212,26 +212,26 @@ private fun CategoryTab(
     )
     val borderColor by animateColorAsState(
         targetValue = when {
-            isSelected && isFocused -> NuvioTheme.colors.FocusRing
-            isFocused -> NuvioTheme.colors.FocusRing
-            isSelected -> NuvioTheme.colors.Secondary
-            else -> NuvioTheme.colors.Border
+            isSelected && isFocused -> KovelyxTheme.colors.FocusRing
+            isFocused -> KovelyxTheme.colors.FocusRing
+            isSelected -> KovelyxTheme.colors.Secondary
+            else -> KovelyxTheme.colors.Border
         },
         animationSpec = tween(150),
         label = "categoryBorder"
     )
     val borderWidth by animateDpAsState(
         targetValue = when {
-            isSelected && isFocused -> NuvioTheme.spacing.xxs
-            isFocused -> NuvioTheme.spacing.xxs
-            isSelected -> NuvioTheme.spacing.hairline
-            else -> NuvioTheme.spacing.hairline
+            isSelected && isFocused -> KovelyxTheme.spacing.xxs
+            isFocused -> KovelyxTheme.spacing.xxs
+            isSelected -> KovelyxTheme.spacing.hairline
+            else -> KovelyxTheme.spacing.hairline
         },
         animationSpec = tween(150),
         label = "categoryBorderWidth"
     )
     val textColor by animateColorAsState(
-        targetValue = if (isSelected || isFocused) Color.White else NuvioTheme.colors.TextSecondary,
+        targetValue = if (isSelected || isFocused) Color.White else KovelyxTheme.colors.TextSecondary,
         animationSpec = tween(150),
         label = "categoryText"
     )
@@ -250,7 +250,7 @@ private fun CategoryTab(
             .background(bgColor)
             .border(
                 border = if (isFocused) {
-                    NuvioTheme.focusRing.border(borderWidth)
+                    KovelyxTheme.focusRing.border(borderWidth)
                 } else {
                     BorderStroke(borderWidth, borderColor)
                 },
@@ -266,7 +266,7 @@ private fun CategoryTab(
                 role = Role.Tab
                 selected = isSelected
             }
-            .padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.sm),
+            .padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.sm),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -298,8 +298,8 @@ private fun AvatarGridItem(
     val borderWidth by animateDpAsState(
         targetValue = when {
             isSelected -> 3.dp
-            isFocused -> NuvioTheme.spacing.xxs
-            else -> NuvioTheme.spacing.none
+            isFocused -> KovelyxTheme.spacing.xxs
+            else -> KovelyxTheme.spacing.none
         },
         animationSpec = tween(120),
         label = "avatarBorder"
@@ -326,7 +326,7 @@ private fun AvatarGridItem(
             .clip(CircleShape)
             .border(
                 border = if (isSelected || isFocused) {
-                    NuvioTheme.focusRing.border(borderWidth)
+                    KovelyxTheme.focusRing.border(borderWidth)
                 } else {
                     BorderStroke(borderWidth, Color.Transparent)
                 },

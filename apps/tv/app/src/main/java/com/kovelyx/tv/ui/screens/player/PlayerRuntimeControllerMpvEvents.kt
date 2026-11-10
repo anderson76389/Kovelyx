@@ -106,7 +106,7 @@ internal class MpvEventRelay(
     override fun eventProperty(property: String, value: MPVNode) = Unit
 }
 
-internal fun PlayerRuntimeController.registerMpvEventRelay(view: NuvioMpvSurfaceView) {
+internal fun PlayerRuntimeController.registerMpvEventRelay(view: KovelyxMpvSurfaceView) {
     unregisterMpvEventRelay()
     mpvEventRelayEpoch += 1
     mpvErrorRecoveryArmed = false
@@ -318,7 +318,7 @@ private fun PlayerRuntimeController.attemptMpvAutoRetry(
     return true
 }
 
-internal fun PlayerRuntimeController.maybeRunMpvStartupWatchdog(view: NuvioMpvSurfaceView) {
+internal fun PlayerRuntimeController.maybeRunMpvStartupWatchdog(view: KovelyxMpvSurfaceView) {
     if (hasRenderedFirstFrame) return
 
     val enabled = _uiState.value.error == null &&

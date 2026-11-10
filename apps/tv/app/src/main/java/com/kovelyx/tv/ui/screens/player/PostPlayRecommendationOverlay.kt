@@ -92,8 +92,8 @@ import com.kovelyx.tv.ui.components.PlayManualOverrideDialog
 import com.kovelyx.tv.ui.components.SynopsisDescription
 import com.kovelyx.tv.ui.components.SynopsisOverlay
 import com.kovelyx.tv.ui.components.TrailerPlayer
-import com.kovelyx.tv.ui.theme.NuvioMotion
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxMotion
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.formatHeroRuntime
 import com.kovelyx.tv.ui.util.localizedGenreLabel
 import com.kovelyx.tv.ui.util.rememberLongPressKeyTracker
@@ -148,7 +148,7 @@ fun PostPlayRecommendationOverlay(
         label = "postPlayRecommendationLogoWidth"
     )
     val actionTopSpacing by animateDpAsState(
-        targetValue = if (state.isTrailerPlaying) NuvioTheme.spacing.md else NuvioTheme.spacing.xl,
+        targetValue = if (state.isTrailerPlaying) KovelyxTheme.spacing.md else KovelyxTheme.spacing.xl,
         animationSpec = tween(600),
         label = "postPlayRecommendationActionSpacing"
     )
@@ -237,8 +237,8 @@ fun PostPlayRecommendationOverlay(
             AnimatedContent(
                 targetState = recommendation,
                 transitionSpec = {
-                    (fadeIn(NuvioMotion.mediumTween()) togetherWith
-                        fadeOut(NuvioMotion.mediumTween())).using(null)
+                    (fadeIn(KovelyxMotion.mediumTween()) togetherWith
+                        fadeOut(KovelyxMotion.mediumTween())).using(null)
                 },
                 contentKey = { it.id },
                 label = "postPlayRecommendationBackdrop",
@@ -282,8 +282,8 @@ fun PostPlayRecommendationOverlay(
                     .align(Alignment.BottomStart)
                     .fillMaxWidth(0.52f)
                     .padding(
-                        start = NuvioTheme.spacing.screen.overscanHorizontal,
-                        bottom = NuvioTheme.spacing.screen.overscanVertical
+                        start = KovelyxTheme.spacing.screen.overscanHorizontal,
+                        bottom = KovelyxTheme.spacing.screen.overscanVertical
                     ),
                 horizontalAlignment = Alignment.Start
             ) {
@@ -304,8 +304,8 @@ fun PostPlayRecommendationOverlay(
                 Spacer(modifier = Modifier.height(actionTopSpacing))
 
                 BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                    val buttonSpacing = NuvioTheme.spacing.md
-                    val navigationButtonSize = NuvioTheme.spacing.xxxl
+                    val buttonSpacing = KovelyxTheme.spacing.md
+                    val navigationButtonSize = KovelyxTheme.spacing.xxxl
                     val showTrailerButton = shouldShowPostPlayTrailerAction(
                         recommendation = recommendation,
                         isTrailerPlaying = state.isTrailerPlaying,
@@ -324,7 +324,7 @@ fun PostPlayRecommendationOverlay(
                     )
                     val buttonWidth by animateDpAsState(
                         targetValue = targetButtonWidth,
-                        animationSpec = NuvioMotion.mediumTween(),
+                        animationSpec = KovelyxMotion.mediumTween(),
                         label = "postPlayRecommendationButtonWidth"
                     )
                     Row(
@@ -361,12 +361,12 @@ fun PostPlayRecommendationOverlay(
 
                         AnimatedVisibility(
                             visible = showTrailerButton,
-                            enter = fadeIn(NuvioMotion.mediumTween()) + expandHorizontally(
-                                animationSpec = NuvioMotion.mediumTween(),
+                            enter = fadeIn(KovelyxMotion.mediumTween()) + expandHorizontally(
+                                animationSpec = KovelyxMotion.mediumTween(),
                                 expandFrom = Alignment.Start
                             ),
-                            exit = fadeOut(NuvioMotion.mediumTween()) + shrinkHorizontally(
-                                animationSpec = NuvioMotion.mediumTween(),
+                            exit = fadeOut(KovelyxMotion.mediumTween()) + shrinkHorizontally(
+                                animationSpec = KovelyxMotion.mediumTween(),
                                 shrinkTowards = Alignment.Start
                             )
                         ) {
@@ -500,19 +500,19 @@ private fun PostPlayRecommendationSummary(
                         stringResource(R.string.player_post_play_because, currentTitle)
                     },
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.extendedColors.textTertiary,
+                    color = KovelyxTheme.extendedColors.textTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
             }
         }
 
         AnimatedContent(
             targetState = recommendation,
             transitionSpec = {
-                (fadeIn(NuvioMotion.mediumTween()) togetherWith
-                    fadeOut(NuvioMotion.mediumTween())).using(null)
+                (fadeIn(KovelyxMotion.mediumTween()) togetherWith
+                    fadeOut(KovelyxMotion.mediumTween())).using(null)
             },
             contentKey = { it.id },
             label = "postPlayRecommendationTitle"
@@ -548,7 +548,7 @@ private fun PostPlayRecommendationSummary(
                         } else {
                             MaterialTheme.typography.displayMedium
                         },
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -564,8 +564,8 @@ private fun PostPlayRecommendationSummary(
             AnimatedContent(
                 targetState = recommendation,
                 transitionSpec = {
-                    (fadeIn(NuvioMotion.mediumTween()) togetherWith
-                        fadeOut(NuvioMotion.mediumTween())).using(null)
+                    (fadeIn(KovelyxMotion.mediumTween()) togetherWith
+                        fadeOut(KovelyxMotion.mediumTween())).using(null)
                 },
                 contentKey = { it.id },
                 label = "postPlayRecommendationDetails"
@@ -578,16 +578,16 @@ private fun PostPlayRecommendationSummary(
 
                 Column {
                     if (metadata.isNotBlank() || imdbRating != null || tmdbRating != null) {
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (metadata.isNotBlank()) {
                                 Text(
                                     text = metadata,
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = NuvioTheme.extendedColors.textSecondary,
+                                    color = KovelyxTheme.extendedColors.textSecondary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f, fill = false)
@@ -597,7 +597,7 @@ private fun PostPlayRecommendationSummary(
                                 Text(
                                     text = "•",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = NuvioTheme.extendedColors.textTertiary
+                                    color = KovelyxTheme.extendedColors.textTertiary
                                 )
                             }
                             if (imdbRating != null || tmdbRating != null) {
@@ -612,12 +612,12 @@ private fun PostPlayRecommendationSummary(
                     displayedRecommendation.mdbListRatings
                         ?.takeUnless { it.isEmpty() }
                         ?.let { ratings ->
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                             MDBListRatingsRow(ratings = ratings, order = mdbListRatingOrder)
                         }
 
                     if (!displayedRecommendation.description.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                         SynopsisDescription(
                             description = displayedRecommendation.description,
                             onShowFullDescription = onShowSynopsis,
@@ -645,26 +645,26 @@ private fun StandardRatingsRow(
     tmdbRating: Float?
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         imdbRating?.let { rating ->
             ImdbRatingSourceLabel(
                 logoModifier = Modifier.size(30.dp),
                 textStyle = MaterialTheme.typography.labelLarge,
-                textColor = NuvioTheme.extendedColors.textSecondary
+                textColor = KovelyxTheme.extendedColors.textSecondary
             )
             Text(
                 text = String.format(Locale.US, "%.1f", rating),
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.extendedColors.textSecondary
+                color = KovelyxTheme.extendedColors.textSecondary
             )
         }
         if (imdbRating != null && tmdbRating != null) {
             Text(
                 text = "•",
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.extendedColors.textTertiary
+                color = KovelyxTheme.extendedColors.textTertiary
             )
         }
         tmdbRating?.let { rating ->
@@ -672,12 +672,12 @@ private fun StandardRatingsRow(
                 model = R.raw.mdblist_tmdb,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
-                modifier = Modifier.size(NuvioTheme.spacing.xl)
+                modifier = Modifier.size(KovelyxTheme.spacing.xl)
             )
             Text(
                 text = (rating * 10).toInt().toString(),
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.extendedColors.textSecondary
+                color = KovelyxTheme.extendedColors.textSecondary
             )
         }
     }
@@ -708,17 +708,17 @@ private fun PostPlayRecommendationNavigationButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier
-            .size(NuvioTheme.spacing.xxxl)
+            .size(KovelyxTheme.spacing.xxxl)
             .focusRequester(focusRequester),
         colors = IconButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.Secondary,
-            contentColor = NuvioTheme.colors.TextPrimary,
-            focusedContentColor = NuvioTheme.colors.OnSecondary
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.Secondary,
+            contentColor = KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = KovelyxTheme.colors.OnSecondary
         ),
         border = IconButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = CircleShape
             )
         ),
@@ -727,7 +727,7 @@ private fun PostPlayRecommendationNavigationButton(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            modifier = Modifier.size(NuvioTheme.spacing.xxl)
+            modifier = Modifier.size(KovelyxTheme.spacing.xxl)
         )
     }
 }
@@ -742,7 +742,7 @@ private fun PostPlayRecommendationButton(
     focusRequester: FocusRequester,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(NuvioTheme.spacing.xxl)
+    val shape = RoundedCornerShape(KovelyxTheme.spacing.xxl)
     var longPressTriggered by remember { mutableStateOf(false) }
     val longPressKeyTracker = rememberLongPressKeyTracker()
     Button(
@@ -786,20 +786,20 @@ private fun PostPlayRecommendationButton(
                 false
             },
         colors = ButtonDefaults.colors(
-            containerColor = if (primary) Color.White else NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = if (primary) Color.White else NuvioTheme.colors.Secondary,
-            contentColor = if (primary) Color.Black else NuvioTheme.colors.TextPrimary,
-            focusedContentColor = if (primary) Color.Black else NuvioTheme.colors.OnSecondary
+            containerColor = if (primary) Color.White else KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = if (primary) Color.White else KovelyxTheme.colors.Secondary,
+            contentColor = if (primary) Color.Black else KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = if (primary) Color.Black else KovelyxTheme.colors.OnSecondary
         ),
         shape = ButtonDefaults.shape(shape = shape),
         border = ButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = shape
             )
         ),
         contentPadding = PaddingValues(
-            horizontal = NuvioTheme.spacing.lg,
+            horizontal = KovelyxTheme.spacing.lg,
             vertical = 14.dp
         )
     ) {
@@ -813,7 +813,7 @@ private fun PostPlayRecommendationButton(
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             AnimatedContent(
                 targetState = label,
                 transitionSpec = {
@@ -835,7 +835,7 @@ private fun PostPlayRecommendationButton(
 private fun rememberPostPlayRecommendationIcon(@RawRes iconRes: Int): Painter {
     val context = LocalContext.current
     val density = LocalDensity.current
-    val sizePx = remember(density) { with(density) { NuvioTheme.spacing.xl.roundToPx() } }
+    val sizePx = remember(density) { with(density) { KovelyxTheme.spacing.xl.roundToPx() } }
     val request = remember(iconRes, context, sizePx) {
         ImageRequest.Builder(context)
             .data(iconRes)

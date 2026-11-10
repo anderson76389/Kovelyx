@@ -38,10 +38,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.i18n.localizedByteUnit
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxToastController
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
 
@@ -77,9 +77,9 @@ fun DownloadsScreen(
         }
     }
 
-    NuvioScreen {
+    KovelyxScreen {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = if (selectedShowId == null) {
                     stringResource(Res.string.compose_settings_root_downloads_title)
                 } else {
@@ -96,7 +96,7 @@ fun DownloadsScreen(
                     IconButton(
                         onClick = {
                             if (!DownloadsPlatformDownloader.openDownloadsDirectory()) {
-                                NuvioToastController.show(openDownloadsDirectoryFailedText)
+                                KovelyxToastController.show(openDownloadsDirectoryFailedText)
                             }
                         },
                     ) {
@@ -130,7 +130,7 @@ fun DownloadsScreen(
 
     val pendingDeletionId = downloadPendingDeletionId
     if (pendingDeletionId != null) {
-        NuvioStatusModal(
+        KovelyxStatusModal(
             title = stringResource(Res.string.action_delete_confirm_title),
             message = stringResource(Res.string.action_delete_confirm_message),
             isVisible = true,

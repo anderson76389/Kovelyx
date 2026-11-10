@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.pm.ActivityInfo
 import androidx.compose.ui.test.junit4.createComposeRule
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.addons.AddonRepository
 import com.kovelyx.app.features.addons.AddonStorage
 import com.kovelyx.app.features.details.MetaDetailsRepository
@@ -197,7 +197,7 @@ class StreamOrientationTest {
     private fun openStreamList(launch: StreamLaunch) {
         val launchId = StreamLaunchStore.put(launch)
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 MainAppContent(
                     initialRoute = StreamRoute(launchId, launch.title),
                     ownsAppRuntime = false,

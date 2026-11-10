@@ -44,7 +44,7 @@ import androidx.compose.material.icons.filled.PlaylistAddCheckCircle
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,7 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import co.touchlab.kermit.Logger
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.core.build.TrailerPlaybackMode
@@ -85,11 +85,11 @@ import com.kovelyx.app.core.format.formatReleaseDateForDisplay
 import com.kovelyx.app.core.network.NetworkCondition
 import com.kovelyx.app.core.network.NetworkStatusRepository
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
-import com.kovelyx.app.core.ui.NuvioBackButton
-import com.kovelyx.app.core.ui.NuvioDesktopVerticalScrollbar
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
-import com.kovelyx.app.core.ui.NuvioPosterZoomActionOverlay
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxBackButton
+import com.kovelyx.app.core.ui.KovelyxDesktopVerticalScrollbar
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxPosterZoomActionOverlay
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.core.ui.PosterZoomAnchor
 import com.kovelyx.app.core.ui.PosterZoomAnchorHolder
 import com.kovelyx.app.core.ui.PosterZoomOverlayAction
@@ -485,7 +485,7 @@ fun MetaDetailsScreen(
         ) {
             when {
             displayedMeta == null && uiState.isLoading -> {
-                NuvioLoadingIndicator(
+                KovelyxLoadingIndicator(
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
@@ -591,7 +591,7 @@ fun MetaDetailsScreen(
                                             retry = toggleMembership,
                                             onApplied = ::showTrackingMembershipRewriteFeedback,
                                             onFailure = { error ->
-                                                NuvioToastController.show(
+                                                KovelyxToastController.show(
                                                     error.message ?: trackingListsUpdateFailedMessage,
                                                 )
                                             },
@@ -601,7 +601,7 @@ fun MetaDetailsScreen(
                                     }
                                 },
                                 onFailure = { error ->
-                                    NuvioToastController.show(
+                                    KovelyxToastController.show(
                                         error.message ?: trackingListsUpdateFailedMessage,
                                     )
                                 },
@@ -1598,7 +1598,7 @@ fun MetaDetailsScreen(
                                 Spacer(modifier = Modifier.height(nuvioSafeBottomPadding(32.dp)))
                             }
                         }
-                        NuvioDesktopVerticalScrollbar(
+                        KovelyxDesktopVerticalScrollbar(
                             state = listState,
                             backgroundColor = extractedDominantColor.takeIf { adaptiveScrollbarColorEnabled },
                             modifier = Modifier
@@ -1635,7 +1635,7 @@ fun MetaDetailsScreen(
                         }
 
                         if (!isDesktop && !useDesktopDetailLayout && showHeroBackButton) {
-                            NuvioBackButton(
+                            KovelyxBackButton(
                                 onClick = onBackFromDetails,
                                 modifier = Modifier.padding(
                                     start = 12.dp,
@@ -1647,7 +1647,7 @@ fun MetaDetailsScreen(
                         }
 
                         if (isDesktop) {
-                            NuvioBackButton(
+                            KovelyxBackButton(
                                 onClick = onBackFromDetails,
                                 modifier = Modifier
                                     .statusBarsPadding()
@@ -1952,7 +1952,7 @@ fun MetaDetailsScreen(
                 } else {
                     8.dp
                 }
-                NuvioBackButton(
+                KovelyxBackButton(
                     onClick = onBack,
                     modifier = Modifier.padding(
                         start = loadingBackButtonStartPadding,
@@ -2012,13 +2012,13 @@ fun MetaDetailsScreen(
             val seasonLabel = selectedEpisode.season?.let {
                 stringResource(Res.string.episodes_season, it)
             } ?: stringResource(Res.string.episodes_specials)
-            NuvioPosterZoomActionOverlay(
+            KovelyxPosterZoomActionOverlay(
                 imageUrl = zoomAnchor.imageUrl ?: selectedEpisode.thumbnail ?: meta.background ?: meta.poster,
                 title = selectedEpisode.title,
                 subtitle = localizedSeasonEpisodeCode(selectedEpisode.season, selectedEpisode.episode) ?: seasonLabel,
                 isWatched = isSelectedEpisodeWatched,
                 blurred = metaScreenSettingsUiState.blurUnwatchedEpisodes && !isSelectedEpisodeWatched,
-                depthSurface = NuvioCardDepthSurface.EpisodeCards,
+                depthSurface = KovelyxCardDepthSurface.EpisodeCards,
                 anchor = zoomAnchor,
                 actions = buildList {
                     add(

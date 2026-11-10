@@ -41,9 +41,9 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.AppIconOption
 import com.kovelyx.tv.launcher.AppIconSettingsState
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun AppIconPickerDialog(
@@ -57,7 +57,7 @@ internal fun AppIconPickerDialog(
         selectedFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.appearance_app_icon_picker_title),
         subtitle = stringResource(
@@ -114,7 +114,7 @@ internal fun AppIconChangeConfirmationDialog(
         confirmFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.appearance_app_icon_confirmation_title),
         subtitle = stringResource(
@@ -125,14 +125,14 @@ internal fun AppIconChangeConfirmationDialog(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.action_cancel))
@@ -143,8 +143,8 @@ internal fun AppIconChangeConfirmationDialog(
                     .weight(1f)
                     .focusRequester(confirmFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(android.R.string.ok))
@@ -166,20 +166,20 @@ private fun AppIconOptionCard(
         onClick = { if (enabled) onClick() },
         modifier = modifier.alpha(if (enabled) 1f else 0.55f),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             border = if (selected) {
                 Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.hairline),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.hairline),
                     shape = shape
                 )
             } else {
                 Border.None
             },
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = shape
             )
         ),
@@ -215,7 +215,7 @@ private fun AppIconOptionCard(
                     text = option.localizedName(),
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -224,7 +224,7 @@ private fun AppIconOptionCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(R.string.cd_selected),
-                        tint = NuvioTheme.colors.Primary,
+                        tint = KovelyxTheme.colors.Primary,
                         modifier = Modifier.size(18.dp)
                     )
                 }

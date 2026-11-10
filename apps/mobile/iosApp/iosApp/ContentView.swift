@@ -258,10 +258,10 @@ enum NuvioAppTab: String, CaseIterable, Hashable {
 
     var iconAssetName: String {
         switch self {
-        case .home: return "NuvioTabHome"
-        case .search: return "NuvioTabSearch"
-        case .library: return "NuvioTabLibrary"
-        case .settings: return "NuvioTabProfile"
+        case .home: return "KovelyxTabHome"
+        case .search: return "KovelyxTabSearch"
+        case .library: return "KovelyxTabLibrary"
+        case .settings: return "KovelyxTabProfile"
         }
     }
 

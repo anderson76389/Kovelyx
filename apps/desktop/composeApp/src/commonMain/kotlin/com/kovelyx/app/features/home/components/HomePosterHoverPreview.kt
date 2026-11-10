@@ -70,9 +70,9 @@ import androidx.compose.ui.window.PopupProperties
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.core.build.TrailerPlaybackMode
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
-import com.kovelyx.app.core.ui.NuvioAsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage
 import com.kovelyx.app.core.ui.NuvioPosterWatchedOverlay
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.PosterZoomOverlayCoordinator
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.rememberPosterCardStyleUiState
@@ -158,8 +158,8 @@ internal fun HomePosterHoverPreview(
     val density = LocalDensity.current
     val positionProvider = remember(density) {
         HomePosterPreviewPositionProvider(
-            edgeMarginPx = with(density) { NuvioTokens.Space.s16.roundToPx() },
-            topOverlapPx = with(density) { NuvioTokens.Space.s24.roundToPx() },
+            edgeMarginPx = with(density) { KovelyxTokens.Space.s16.roundToPx() },
+            topOverlapPx = with(density) { KovelyxTokens.Space.s24.roundToPx() },
         )
     }
 
@@ -251,7 +251,7 @@ internal fun HomePosterHoverPreview(
                     previewIsSaved = LibraryRepository.isSaved(item.id, item.type)
                 }
                 val showFailure: suspend (Throwable) -> Unit = { error ->
-                    com.kovelyx.app.core.ui.NuvioToastController.show(
+                    com.kovelyx.app.core.ui.KovelyxToastController.show(
                         error.message ?: trackingListsUpdateFailedMessage,
                     )
                 }
@@ -290,18 +290,18 @@ internal fun HomePosterHoverPreview(
                     enter = fadeIn(
                         animationSpec = tween(
                             durationMillis = HoverPreviewEnterDurationMillis,
-                            easing = NuvioTokens.Motion.decelerate,
+                            easing = KovelyxTokens.Motion.decelerate,
                         ),
                     ) + scaleIn(
                         animationSpec = tween(
                             durationMillis = HoverPreviewEnterDurationMillis,
-                            easing = NuvioTokens.Motion.emphasized,
+                            easing = KovelyxTokens.Motion.emphasized,
                         ),
                         initialScale = 0.9f,
                     ) + slideInVertically(
                         animationSpec = tween(
                             durationMillis = HoverPreviewEnterDurationMillis,
-                            easing = NuvioTokens.Motion.decelerate,
+                            easing = KovelyxTokens.Motion.decelerate,
                         ),
                         initialOffsetY = { height -> height / 18 },
                     ),
@@ -364,7 +364,7 @@ private fun HomePosterPreviewCard(
     onSaveClick: () -> Unit,
 ) {
     val tokens = MaterialTheme.nuvio
-    val shape = RoundedCornerShape(NuvioTokens.Radius.xl)
+    val shape = RoundedCornerShape(KovelyxTokens.Radius.xl)
     val previewBackground = tokens.colors.background
     val clickInteractionSource = remember { MutableInteractionSource() }
     var logoLoadError by remember(item.type, item.id, item.logo) { mutableStateOf(false) }
@@ -394,7 +394,7 @@ private fun HomePosterPreviewCard(
         ) {
             val artworkUrl = item.banner ?: item.poster
             if (!artworkUrl.isNullOrBlank()) {
-                NuvioAsyncImage(
+                KovelyxAsyncImage(
                     model = artworkUrl,
                     contentDescription = item.name,
                     modifier = Modifier.fillMaxSize(),
@@ -426,12 +426,12 @@ private fun HomePosterPreviewCard(
             )
 
             if (logoUrl != null) {
-                NuvioAsyncImage(
+                KovelyxAsyncImage(
                     model = logoUrl,
                     contentDescription = stringResource(Res.string.poster_logo_content_description, item.name),
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = NuvioTokens.Space.s18, bottom = NuvioTokens.Space.s14)
+                        .padding(start = KovelyxTokens.Space.s18, bottom = KovelyxTokens.Space.s14)
                         .width(180.dp)
                         .height(52.dp),
                     alignment = Alignment.CenterStart,
@@ -444,7 +444,7 @@ private fun HomePosterPreviewCard(
                     text = item.name,
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(horizontal = NuvioTokens.Space.s18, vertical = NuvioTokens.Space.s16),
+                        .padding(horizontal = KovelyxTokens.Space.s18, vertical = KovelyxTokens.Space.s16),
                     style = MaterialTheme.typography.headlineLarge,
                     color = tokens.colors.textPrimary,
                     fontWeight = FontWeight.Bold,
@@ -455,18 +455,18 @@ private fun HomePosterPreviewCard(
 
             NuvioPosterWatchedOverlay(
                 isWatched = isWatched,
-                padding = NuvioTokens.Space.s10,
+                padding = KovelyxTokens.Space.s10,
             )
         }
 
         Column(
             modifier = Modifier.padding(
-                start = NuvioTokens.Space.s18,
-                top = NuvioTokens.Space.s14,
-                end = NuvioTokens.Space.s18,
-                bottom = NuvioTokens.Space.s18,
+                start = KovelyxTokens.Space.s18,
+                top = KovelyxTokens.Space.s14,
+                end = KovelyxTokens.Space.s18,
+                bottom = KovelyxTokens.Space.s18,
             ),
-            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s10),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s10),
         ) {
             Text(
                 text = item.previewMetadataLine(),
@@ -501,16 +501,16 @@ private fun HomePosterPreviewCard(
             }
 
             if (onClick != null) {
-                Spacer(modifier = Modifier.height(NuvioTokens.Space.s2))
+                Spacer(modifier = Modifier.height(KovelyxTokens.Space.s2))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s10),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s10),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Surface(
                         modifier = Modifier
                             .weight(1f)
-                            .height(NuvioTokens.Space.s40),
+                            .height(KovelyxTokens.Space.s40),
                         color = tokens.colors.accent,
                         contentColor = tokens.colors.onAccent,
                         shape = tokens.shapes.button,
@@ -519,7 +519,7 @@ private fun HomePosterPreviewCard(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clickable(onClick = onClick)
-                                .padding(horizontal = NuvioTokens.Space.s16),
+                                .padding(horizontal = KovelyxTokens.Space.s16),
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
@@ -528,11 +528,11 @@ private fun HomePosterPreviewCard(
                                 style = MaterialTheme.typography.labelLarge,
                                 maxLines = 1,
                             )
-                            Spacer(modifier = Modifier.width(NuvioTokens.Space.s8))
+                            Spacer(modifier = Modifier.width(KovelyxTokens.Space.s8))
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                                 contentDescription = null,
-                                modifier = Modifier.size(NuvioTokens.Icon.sm),
+                                modifier = Modifier.size(KovelyxTokens.Icon.sm),
                             )
                         }
                     }
@@ -551,7 +551,7 @@ private fun HomePosterPreviewCard(
                         active = isWatched,
                         progress = 1f,
                         onClick = onWatchedClick,
-                        size = NuvioTokens.Space.s40,
+                        size = KovelyxTokens.Space.s40,
                     )
 
                     DetailIconAction(
@@ -564,7 +564,7 @@ private fun HomePosterPreviewCard(
                         active = isSaved,
                         progress = 1f,
                         onClick = onSaveClick,
-                        size = NuvioTokens.Space.s40,
+                        size = KovelyxTokens.Space.s40,
                     )
                 }
             }

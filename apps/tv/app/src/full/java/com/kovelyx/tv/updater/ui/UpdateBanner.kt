@@ -45,7 +45,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.AppTheme
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.theme.ThemeColors
 import com.kovelyx.tv.ui.theme.accentBrush
 import com.kovelyx.tv.updater.UpdateUiState
@@ -68,11 +68,11 @@ internal fun UpdateBanner(
         animationSpec = tween(durationMillis = 180),
         label = "updateBannerProgress"
     )
-    val containerColor = NuvioTheme.colors.BackgroundElevated
-    val isWhiteTheme = NuvioTheme.currentTheme == AppTheme.WHITE
-    val progressBrush = ThemeColors.getColorPalette(NuvioTheme.currentTheme).accentBrush()
+    val containerColor = KovelyxTheme.colors.BackgroundElevated
+    val isWhiteTheme = KovelyxTheme.currentTheme == AppTheme.WHITE
+    val progressBrush = ThemeColors.getColorPalette(KovelyxTheme.currentTheme).accentBrush()
     val progressAlpha = if (isWhiteTheme) 0.18f else 1f
-    val dividerColor = NuvioTheme.colors.Border
+    val dividerColor = KovelyxTheme.colors.Border
     val subtitle = when {
         state.errorMessage != null -> state.errorMessage
         state.isDownloading && state.downloadProgress != null -> stringResource(
@@ -118,7 +118,7 @@ internal fun UpdateBanner(
             Icon(
                 imageVector = Icons.Default.CloudDownload,
                 contentDescription = null,
-                tint = NuvioTheme.colors.TextPrimary,
+                tint = KovelyxTheme.colors.TextPrimary,
                 modifier = Modifier.size(28.dp)
             )
 
@@ -131,7 +131,7 @@ internal fun UpdateBanner(
                     style = MaterialTheme.typography.titleMedium.copy(
                         textDirection = TextDirection.Ltr
                     ),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -140,10 +140,10 @@ internal fun UpdateBanner(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = when {
-                        state.errorMessage != null -> NuvioTheme.colors.Error
-                        state.isDownloading && isWhiteTheme -> NuvioTheme.colors.TextPrimary
-                        state.isDownloading -> NuvioTheme.colors.OnSecondary
-                        else -> NuvioTheme.colors.TextSecondary
+                        state.errorMessage != null -> KovelyxTheme.colors.Error
+                        state.isDownloading && isWhiteTheme -> KovelyxTheme.colors.TextPrimary
+                        state.isDownloading -> KovelyxTheme.colors.OnSecondary
+                        else -> KovelyxTheme.colors.TextSecondary
                     },
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -169,10 +169,10 @@ internal fun UpdateBanner(
                     state.downloadedApkPath != null ||
                     state.isUpdateAvailable,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50)),
                 contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
@@ -211,14 +211,14 @@ private fun UpdateBannerIconButton(
         enabled = enabled,
         modifier = Modifier.size(44.dp),
         colors = IconButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.Secondary,
-            contentColor = NuvioTheme.colors.TextPrimary,
-            focusedContentColor = NuvioTheme.colors.OnSecondary
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.Secondary,
+            contentColor = KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = KovelyxTheme.colors.OnSecondary
         ),
         border = IconButtonDefaults.border(
             focusedBorder = Border(
-                border = BorderStroke(2.dp, NuvioTheme.colors.FocusRing),
+                border = BorderStroke(2.dp, KovelyxTheme.colors.FocusRing),
                 shape = CircleShape
             )
         ),

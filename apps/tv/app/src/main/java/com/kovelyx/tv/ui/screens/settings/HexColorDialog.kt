@@ -33,9 +33,9 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.formatHexColor
 import com.kovelyx.tv.domain.model.parseHexColor
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun HexColorDialog(
@@ -43,7 +43,7 @@ internal fun HexColorDialog(
     onConfirm: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.custom_theme_hex_title),
         subtitle = stringResource(R.string.custom_theme_hex_hint),
@@ -106,7 +106,7 @@ internal fun HexColorEditor(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(NuvioTheme.colors.Background, RoundedCornerShape(12.dp))
+                .background(KovelyxTheme.colors.Background, RoundedCornerShape(12.dp))
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -119,7 +119,7 @@ internal fun HexColorEditor(
             Text(
                 text = "#" + digits.padEnd(6, '–'),
                 style = MaterialTheme.typography.titleLarge.copy(fontFamily = FontFamily.Monospace),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 modifier = Modifier.background(
                     if (replaceOnInput) Color.White.copy(alpha = 0.14f) else Color.Transparent,
                     RoundedCornerShape(4.dp)

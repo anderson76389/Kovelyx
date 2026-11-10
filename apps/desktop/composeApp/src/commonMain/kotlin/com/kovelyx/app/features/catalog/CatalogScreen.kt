@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,11 +47,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.network.NetworkCondition
 import com.kovelyx.app.core.network.NetworkStatusRepository
-import com.kovelyx.app.core.ui.NuvioNetworkOfflineCard
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxNetworkOfflineCard
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
-import com.kovelyx.app.core.ui.NuvioDesktopVerticalScrollbar
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxDesktopVerticalScrollbar
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.NuvioPosterWatchedOverlay
 import com.kovelyx.app.core.ui.PosterLandscapeAspectRatio
 import com.kovelyx.app.core.ui.catalogPosterBaseWidthDp
@@ -62,7 +62,7 @@ import com.kovelyx.app.core.ui.desktopPosterHoverScale
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.core.ui.posterCardClickable
 import com.kovelyx.app.core.ui.posterGridColumnCountForViewport
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import com.kovelyx.app.core.ui.SkeletonPoster
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.core.ui.posterCardClickable
@@ -287,7 +287,7 @@ fun CatalogScreen(
                     }
                 }
             }
-            NuvioDesktopVerticalScrollbar(
+            KovelyxDesktopVerticalScrollbar(
                 state = gridState,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
@@ -332,7 +332,7 @@ private fun CatalogHeader(
             .padding(horizontal = pageHorizontalPadding)
             .padding(top = if (isDesktop) 32.dp else 52.dp, bottom = 12.dp),
     ) {
-        NuvioBackButton(
+        KovelyxBackButton(
             onClick = onBack,
             modifier = Modifier.size(if (isDesktop) 48.dp else 40.dp),
             containerColor = MaterialTheme.colorScheme.surface,
@@ -391,7 +391,7 @@ private fun CatalogPosterTile(
                     .background(MaterialTheme.colorScheme.surface)
                     .nuvioCardDepth(
                         shape = RoundedCornerShape(cornerRadiusDp.dp),
-                        surface = NuvioCardDepthSurface.Posters,
+                        surface = KovelyxCardDepthSurface.Posters,
                     )
                     .posterCardClickable(
                         onClick = onClick,
@@ -495,7 +495,7 @@ private fun CatalogEmptyState(
         !errorMessage.isNullOrBlank() &&
         (networkCondition == NetworkCondition.NoInternet || networkCondition == NetworkCondition.ServersUnreachable)
     ) {
-        NuvioNetworkOfflineCard(
+        KovelyxNetworkOfflineCard(
             condition = networkCondition,
             onRetry = onRetry,
         )
@@ -521,7 +521,7 @@ private fun CatalogLoadingFooter() {
             .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(22.dp),
         )
     }

@@ -89,9 +89,9 @@ import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.domain.model.EpisodeOptionsOverlayStyle
 import com.kovelyx.tv.ui.components.FocusMarqueeText
 import com.kovelyx.tv.ui.components.ImdbRatingSourceLabel
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.WatchedMarker
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.domain.model.CardDepthSurface
 import com.kovelyx.tv.ui.components.LocalCardDepthStyle
 import com.kovelyx.tv.ui.components.nuvioCardDepth
@@ -134,14 +134,14 @@ fun SeasonTabs(
     val tabShape = remember { RoundedCornerShape(20.dp) }
     val tabBorder = CardDefaults.border(
         focusedBorder = Border(
-            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
             shape = RoundedCornerShape(20.dp)
         )
     )
     val tabScale = CardDefaults.scale(focusedScale = 1.0f)
     val typography = MaterialTheme.typography
     val tabTextStyle = remember(typography) { typography.titleMedium }
-    val textSecondary = NuvioTheme.extendedColors.textSecondary
+    val textSecondary = KovelyxTheme.extendedColors.textSecondary
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val initialSeasonIndex = remember(sortedSeasons, selectedSeason) {
         (sortedSeasons.indexOf(selectedSeason) - (SEASON_EDGE_PIN_COUNT - 1)).coerceAtLeast(0)
@@ -267,8 +267,8 @@ fun SeasonTabs(
             }
             .focusGroup(),
         state = lazyListState,
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.xl),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         items(sortedSeasons, key = { it }) { season ->
             val isSelected = season == selectedSeason
@@ -344,8 +344,8 @@ fun SeasonTabs(
                     },
                 shape = CardDefaults.shape(shape = tabShape),
                 colors = CardDefaults.colors(
-                    containerColor = if (isSelected) NuvioTheme.colors.SurfaceVariant else NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.Secondary
+                    containerColor = if (isSelected) KovelyxTheme.colors.SurfaceVariant else KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.Secondary
                 ),
                 border = tabBorder,
                 scale = tabScale
@@ -354,8 +354,8 @@ fun SeasonTabs(
                     text = if (season == 0) stringResource(R.string.episodes_specials) else stringResource(R.string.episodes_season, season),
                     style = tabTextStyle,
                     color = when {
-                        isFocused -> NuvioTheme.colors.OnSecondary
-                        isSelected -> NuvioTheme.colors.TextPrimary
+                        isFocused -> KovelyxTheme.colors.OnSecondary
+                        isSelected -> KovelyxTheme.colors.TextPrimary
                         else -> textSecondary
                     },
                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 20.dp)
@@ -662,7 +662,7 @@ private fun EpisodeCard(
     val showCompletedBadge = isWatched
     val showNotStartedBadge = remember(showCompletedBadge, progressPercent) { !showCompletedBadge && progressPercent < 0.02f }
     val isUnavailable = remember(episode.available) { episode.available == false }
-    val cardBgColor = NuvioTheme.colors.BackgroundCard
+    val cardBgColor = KovelyxTheme.colors.BackgroundCard
     val isFocusedState = remember { mutableStateOf(false) }
     val cardCornerRadius = remember(cardMetrics.cornerRadius, density) {
         with(density) { cardMetrics.cornerRadius.toPx() }
@@ -720,7 +720,7 @@ private fun EpisodeCard(
             )
         )
     }
-    val textSecondary = NuvioTheme.colors.TextSecondary
+    val textSecondary = KovelyxTheme.colors.TextSecondary
     val metaLabelStyle = remember(typography, textSecondary) {
         typography.labelSmall.copy(color = textSecondary)
     }
@@ -803,9 +803,9 @@ private fun EpisodeCard(
         episode.episode?.let { number -> "$prefix $number" } ?: prefix
     }
 
-    val primaryColor = NuvioTheme.colors.Secondary
-    val textPrimary = NuvioTheme.colors.TextPrimary
-    val focusRingBorder = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
+    val primaryColor = KovelyxTheme.colors.Secondary
+    val textPrimary = KovelyxTheme.colors.TextPrimary
+    val focusRingBorder = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs)
     val cardShape = CardDefaults.shape(shape = shape)
     val cardColors = CardDefaults.colors(
         containerColor = Color.Transparent,
@@ -985,12 +985,12 @@ private fun EpisodeCard(
                 if (runtimeLabel != null || ratingLabel != null || formattedDate.isNotBlank()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         runtimeLabel?.let { runtime ->
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
+                                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
@@ -1009,7 +1009,7 @@ private fun EpisodeCard(
 
                         ratingLabel?.let { rating ->
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
+                                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 ImdbRatingSourceLabel(
@@ -1119,7 +1119,7 @@ private fun EpisodeCard(
                     drawCircle(
                         color = notStartedBadgeColor,
                         style = Stroke(
-                            width = NuvioTheme.spacing.xxs.toPx(),
+                            width = KovelyxTheme.spacing.xxs.toPx(),
                             pathEffect = dashEffect
                         )
                     )
@@ -1146,7 +1146,7 @@ fun SeasonOptionsDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = if (season == 0) stringResource(R.string.episodes_specials) else stringResource(R.string.episodes_season, season),
         subtitle = stringResource(R.string.episodes_season_actions)
@@ -1157,8 +1157,8 @@ fun SeasonOptionsDialog(
                 .fillMaxWidth()
                 .focusRequester(primaryFocusRequester),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(if (isFullyWatched) stringResource(R.string.episodes_mark_season_unwatched) else stringResource(R.string.episodes_mark_season_watched))
@@ -1168,8 +1168,8 @@ fun SeasonOptionsDialog(
             Button(
                 onClick = onMarkPreviousSeasonsWatched,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -1211,28 +1211,28 @@ private fun rememberEpisodeCardMetrics(posterCardCornerRadiusDp: Int = 12): Epis
     return remember(screenWidthDp, userCornerRadius) {
         when {
             screenWidthDp >= 1300 -> EpisodeCardMetrics(
-                rowHorizontalPadding = NuvioTheme.spacing.huge,
+                rowHorizontalPadding = KovelyxTheme.spacing.huge,
                 rowVerticalPadding = 18.dp,
                 itemSpacing = 20.dp,
                 cardWidth = 400.dp,
                 cardHeight = 263.dp,
                 cornerRadius = userCornerRadius,
                 contentPadding = 20.dp,
-                contentBottomPadding = NuvioTheme.spacing.xl,
+                contentBottomPadding = KovelyxTheme.spacing.xl,
                 episodeBadgeHorizontalPadding = 10.dp,
                 episodeBadgeVerticalPadding = 5.dp,
-                episodeBadgeCornerRadius = NuvioTheme.spacing.sm,
+                episodeBadgeCornerRadius = KovelyxTheme.spacing.sm,
                 episodeBadgeLetterSpacing = 1.0.sp,
                 titleLineHeight = 28.sp,
                 descriptionLineHeight = 22.sp,
                 descriptionMaxLines = 4,
-                metadataIconSize = NuvioTheme.spacing.lg,
+                metadataIconSize = KovelyxTheme.spacing.lg,
                 imdbLogoWidth = 28.dp,
                 imdbLogoHeight = 14.dp,
-                progressBarHeight = NuvioTheme.spacing.xs,
-                statusBadgeSize = NuvioTheme.spacing.xxl,
+                progressBarHeight = KovelyxTheme.spacing.xs,
+                statusBadgeSize = KovelyxTheme.spacing.xxl,
                 statusIconSize = 20.dp,
-                statusBadgeInset = NuvioTheme.spacing.lg
+                statusBadgeInset = KovelyxTheme.spacing.lg
             )
 
             screenWidthDp >= 1000 -> EpisodeCardMetrics(
@@ -1245,7 +1245,7 @@ private fun rememberEpisodeCardMetrics(posterCardCornerRadiusDp: Int = 12): Epis
                 contentPadding = 18.dp,
                 contentBottomPadding = 22.dp,
                 episodeBadgeHorizontalPadding = 9.dp,
-                episodeBadgeVerticalPadding = NuvioTheme.spacing.xs,
+                episodeBadgeVerticalPadding = KovelyxTheme.spacing.xs,
                 episodeBadgeCornerRadius = 7.dp,
                 episodeBadgeLetterSpacing = 0.9.sp,
                 titleLineHeight = 25.sp,
@@ -1254,46 +1254,46 @@ private fun rememberEpisodeCardMetrics(posterCardCornerRadiusDp: Int = 12): Epis
                 metadataIconSize = 15.dp,
                 imdbLogoWidth = 26.dp,
                 imdbLogoHeight = 13.dp,
-                progressBarHeight = NuvioTheme.spacing.xs,
+                progressBarHeight = KovelyxTheme.spacing.xs,
                 statusBadgeSize = 28.dp,
                 statusIconSize = 18.dp,
                 statusBadgeInset = 14.dp
             )
 
             screenWidthDp >= 760 -> EpisodeCardMetrics(
-                rowHorizontalPadding = NuvioTheme.spacing.xxxl,
-                rowVerticalPadding = NuvioTheme.spacing.lg,
-                itemSpacing = NuvioTheme.spacing.lg,
+                rowHorizontalPadding = KovelyxTheme.spacing.xxxl,
+                rowVerticalPadding = KovelyxTheme.spacing.lg,
+                itemSpacing = KovelyxTheme.spacing.lg,
                 cardWidth = 320.dp,
                 cardHeight = 207.dp,
                 cornerRadius = userCornerRadius,
-                contentPadding = NuvioTheme.spacing.lg,
+                contentPadding = KovelyxTheme.spacing.lg,
                 contentBottomPadding = 20.dp,
-                episodeBadgeHorizontalPadding = NuvioTheme.spacing.sm,
-                episodeBadgeVerticalPadding = NuvioTheme.spacing.xs,
+                episodeBadgeHorizontalPadding = KovelyxTheme.spacing.sm,
+                episodeBadgeVerticalPadding = KovelyxTheme.spacing.xs,
                 episodeBadgeCornerRadius = 6.dp,
                 episodeBadgeLetterSpacing = 0.9.sp,
                 titleLineHeight = 22.sp,
                 descriptionLineHeight = 18.sp,
                 descriptionMaxLines = 3,
                 metadataIconSize = 14.dp,
-                imdbLogoWidth = NuvioTheme.spacing.xl,
-                imdbLogoHeight = NuvioTheme.spacing.md,
-                progressBarHeight = NuvioTheme.spacing.xs,
-                statusBadgeSize = NuvioTheme.spacing.xl,
-                statusIconSize = NuvioTheme.spacing.lg,
-                statusBadgeInset = NuvioTheme.spacing.md
+                imdbLogoWidth = KovelyxTheme.spacing.xl,
+                imdbLogoHeight = KovelyxTheme.spacing.md,
+                progressBarHeight = KovelyxTheme.spacing.xs,
+                statusBadgeSize = KovelyxTheme.spacing.xl,
+                statusIconSize = KovelyxTheme.spacing.lg,
+                statusBadgeInset = KovelyxTheme.spacing.md
             )
 
             else -> EpisodeCardMetrics(
-                rowHorizontalPadding = NuvioTheme.spacing.xxl,
+                rowHorizontalPadding = KovelyxTheme.spacing.xxl,
                 rowVerticalPadding = 14.dp,
                 itemSpacing = 14.dp,
                 cardWidth = 280.dp,
                 cardHeight = 179.dp,
                 cornerRadius = userCornerRadius,
                 contentPadding = 14.dp,
-                contentBottomPadding = NuvioTheme.spacing.lg,
+                contentBottomPadding = KovelyxTheme.spacing.lg,
                 episodeBadgeHorizontalPadding = 7.dp,
                 episodeBadgeVerticalPadding = 3.dp,
                 episodeBadgeCornerRadius = 5.dp,
@@ -1304,7 +1304,7 @@ private fun rememberEpisodeCardMetrics(posterCardCornerRadiusDp: Int = 12): Epis
                 metadataIconSize = 13.dp,
                 imdbLogoWidth = 22.dp,
                 imdbLogoHeight = 11.dp,
-                progressBarHeight = NuvioTheme.spacing.xs,
+                progressBarHeight = KovelyxTheme.spacing.xs,
                 statusBadgeSize = 22.dp,
                 statusIconSize = 14.dp,
                 statusBadgeInset = 10.dp

@@ -1,7 +1,7 @@
 package com.kovelyx.app.features.servers
 
 import co.touchlab.kermit.Logger
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.watched.WatchedItem
 import com.kovelyx.app.features.watched.WatchedRepository
 import com.kovelyx.app.features.watchprogress.CurrentDateProvider
@@ -137,7 +137,7 @@ internal object ServerWatched {
     private fun WatchedItem.label(): String = "$type ${videoId ?: id}"
 
     private suspend fun reportFailure() {
-        NuvioToastController.show(getString(Res.string.servers_watched_failed))
+        KovelyxToastController.show(getString(Res.string.servers_watched_failed))
     }
 
     private const val WRITE_BATCH = 6

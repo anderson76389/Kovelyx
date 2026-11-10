@@ -45,7 +45,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.formatHexColor
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import kotlin.math.roundToInt
 
 private val colorSwatches = listOf(
@@ -169,8 +169,8 @@ private fun ColorChannelSlider(
                 }
             },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         shape = CardDefaults.shape(shape),
         border = CardDefaults.border(
@@ -183,8 +183,8 @@ private fun ColorChannelSlider(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(title, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextPrimary)
-                Text(valueLabel, style = MaterialTheme.typography.labelSmall, color = NuvioTheme.colors.TextSecondary)
+                Text(title, style = MaterialTheme.typography.labelMedium, color = KovelyxTheme.colors.TextPrimary)
+                Text(valueLabel, style = MaterialTheme.typography.labelSmall, color = KovelyxTheme.colors.TextSecondary)
             }
             Box(
                 Modifier

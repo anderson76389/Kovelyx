@@ -225,13 +225,13 @@ object ProfileRepository {
                 _state.value = _state.value.copy(profiles = merged, activeProfile = merged.firstOrNull { it.profileIndex == activeProfileIndex })
                 persist()
             }
-            if (mediaFailure != null && reportFailure) com.kovelyx.app.core.ui.NuvioToastController.show(
+            if (mediaFailure != null && reportFailure) com.kovelyx.app.core.ui.KovelyxToastController.show(
                 getString(Res.string.profile_media_sync_pending, mediaFailure?.message.orEmpty()), durationMillis = 6000L)
             return mediaFailure == null
         } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
         catch (error: Exception) {
             log.w(error) { "Images Cloudflare différées ; profils locaux conservés" }
-            if (reportFailure) com.kovelyx.app.core.ui.NuvioToastController.show(
+            if (reportFailure) com.kovelyx.app.core.ui.KovelyxToastController.show(
                 getString(Res.string.profile_media_sync_pending, error.message.orEmpty()), durationMillis = 6000L)
             return false
         }

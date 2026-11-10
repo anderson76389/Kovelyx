@@ -42,7 +42,7 @@ class DesktopWindowInsetsTest {
                 ProvideDesktopWindowInsets(isFullscreen = fullscreen.value) {
                     val identity = remember { Any() }
                     SideEffect { contentIdentity = identity }
-                    NuvioTheme(desktopUiScale = uiScale.floatValue) {
+                    KovelyxTheme(desktopUiScale = uiScale.floatValue) {
                         Box(Modifier.fillMaxSize().testTag("backdrop")) {
                             Box(Modifier.statusBarsPadding()) {
                                 Box(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) {

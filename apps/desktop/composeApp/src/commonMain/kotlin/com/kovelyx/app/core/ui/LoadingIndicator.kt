@@ -30,10 +30,10 @@ import androidx.compose.ui.util.lerp
 private val LoadingEasing = CubicBezierEasing(0.333f, 0f, 0.667f, 1f)
 
 @Composable
-fun NuvioLoadingIndicator(
+fun KovelyxLoadingIndicator(
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    size: Dp = NuvioTokens.Space.s40,
+    size: Dp = KovelyxTokens.Space.s40,
     active: Boolean = LocalScreenActive.current,
 ) {
     val brush = if (color == Color.Unspecified) MaterialTheme.themePalette.accentBrush() else SolidColor(color)

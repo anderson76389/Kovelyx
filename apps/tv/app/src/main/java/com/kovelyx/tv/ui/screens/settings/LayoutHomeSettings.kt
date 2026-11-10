@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,7 +56,7 @@ internal fun LayoutHomeLayoutSection(
         modifier = Modifier
             .fillMaxWidth()
             .settingsOptionRow(firstHomeLayoutFocusRequester),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         listOf(HomeLayout.MODERN, HomeLayout.GRID, HomeLayout.CLASSIC).forEachIndexed { index, layout ->
             LayoutCard(
@@ -103,18 +103,18 @@ internal fun LayoutHomeLayoutSection(
             Text(
                 text = stringResource(R.string.layout_hero_catalogs),
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
             Text(
                 text = stringResource(R.string.layout_hero_catalogs_sub),
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
             val firstHeroCatalogFocusRequester = remember { FocusRequester() }
             LazyRow(
                 modifier = Modifier.settingsOptionRow(firstHeroCatalogFocusRequester),
-                contentPadding = PaddingValues(end = NuvioTheme.spacing.sm),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                contentPadding = PaddingValues(end = KovelyxTheme.spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
             ) {
                 itemsIndexed(
                     items = uiState.availableCatalogs,
@@ -248,16 +248,16 @@ private fun LayoutCard(
             }
         },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         border = CardDefaults.border(
             border = if (isSelected) Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.hairline),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.hairline),
                 shape = RoundedCornerShape(SettingsSecondaryCardRadius)
             ) else Border.None,
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(SettingsSecondaryCardRadius)
             )
         ),
@@ -301,9 +301,9 @@ private fun LayoutCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(R.string.cd_selected),
-                        tint = NuvioTheme.colors.FocusRing,
+                        tint = KovelyxTheme.colors.FocusRing,
                         modifier = Modifier
-                            .size(NuvioTheme.spacing.lg)
+                            .size(KovelyxTheme.spacing.lg)
                             .padding(end = 6.dp)
                     )
                 }
@@ -314,7 +314,7 @@ private fun LayoutCard(
                         HomeLayout.MODERN -> stringResource(R.string.layout_modern)
                     },
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected || isFocused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary
+                    color = if (isSelected || isFocused) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary
                 )
             }
         }

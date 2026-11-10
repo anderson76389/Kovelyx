@@ -23,9 +23,9 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mdblist.MdbListLibraryListOption
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun MdbListLibraryListsDialog(
@@ -39,7 +39,7 @@ internal fun MdbListLibraryListsDialog(
         if (hasLists) firstListFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.mdblist_library_lists),
         subtitle = stringResource(R.string.mdblist_library_lists_description),
@@ -51,8 +51,8 @@ internal fun MdbListLibraryListsDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 380.dp),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                contentPadding = PaddingValues(vertical = NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+                contentPadding = PaddingValues(vertical = KovelyxTheme.spacing.xs)
             ) {
                 itemsIndexed(state.lists, key = { _, option -> option.key }) { index, option ->
                     // Taps are ignored while a change is saving; the row stays focusable so focus never jumps.
@@ -66,19 +66,19 @@ internal fun MdbListLibraryListsDialog(
                 }
             }
             state.isLoading -> Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                LoadingIndicator(modifier = Modifier.padding(NuvioTheme.spacing.md).size(28.dp))
+                LoadingIndicator(modifier = Modifier.padding(KovelyxTheme.spacing.md).size(28.dp))
             }
             else -> Text(
                 text = stringResource(R.string.mdblist_library_lists_empty),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
         }
         state.errorMessage?.let { message ->
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.Error
+                color = KovelyxTheme.colors.Error
             )
         }
     }

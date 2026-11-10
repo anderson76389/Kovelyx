@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.content.Intent
 import android.net.Uri
@@ -77,7 +77,7 @@ import com.kovelyx.tv.data.repository.DevelopmentSponsor
 import com.kovelyx.tv.data.repository.GitHubContributor
 import com.kovelyx.tv.data.repository.SupporterMember
 import com.kovelyx.tv.domain.model.MemberTier
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import java.time.Instant
 import java.time.ZoneId
@@ -173,7 +173,7 @@ fun SupportersContributorsScreen(
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xl)
         ) {
             SupporterMembershipPanel(
                 state = uiState.membership,
@@ -264,16 +264,16 @@ private fun SupportersContentPanel(
         modifier = modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(28.dp))
-            .background(NuvioTheme.colors.BackgroundElevated)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, RoundedCornerShape(28.dp))
-            .padding(NuvioTheme.spacing.xl),
+            .background(KovelyxTheme.colors.BackgroundElevated)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, RoundedCornerShape(28.dp))
+            .padding(KovelyxTheme.spacing.xl),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRestorer(selectedTabRequester),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             SupportersTabButton(
                 label = stringResource(R.string.supporters_tab),
@@ -343,9 +343,9 @@ private fun SupportersTabContent(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(NuvioTheme.spacing.xl))
-            .background(NuvioTheme.colors.Background)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, RoundedCornerShape(NuvioTheme.spacing.xl))
+            .clip(RoundedCornerShape(KovelyxTheme.spacing.xl))
+            .background(KovelyxTheme.colors.Background)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, RoundedCornerShape(KovelyxTheme.spacing.xl))
     ) {
         when {
             uiState.isSupportersLoading -> CenterStatusText(
@@ -378,8 +378,8 @@ private fun SupportersTabContent(
                         .fillMaxSize()
                         .padding(14.dp)
                         .focusRestorer(firstRequester),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                    contentPadding = PaddingValues(top = 6.dp, bottom = NuvioTheme.spacing.sm)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+                    contentPadding = PaddingValues(top = 6.dp, bottom = KovelyxTheme.spacing.sm)
                 ) {
                     items(uiState.supporters, key = { it.key }) { supporter ->
                         val requester = remember(supporter.key) {
@@ -414,9 +414,9 @@ private fun SponsorsTabContent(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(NuvioTheme.spacing.xl))
-            .background(NuvioTheme.colors.Background)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, RoundedCornerShape(NuvioTheme.spacing.xl))
+            .clip(RoundedCornerShape(KovelyxTheme.spacing.xl))
+            .background(KovelyxTheme.colors.Background)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, RoundedCornerShape(KovelyxTheme.spacing.xl))
     ) {
         when {
             uiState.isSponsorsLoading -> CenterStatusText(
@@ -449,8 +449,8 @@ private fun SponsorsTabContent(
                         .fillMaxSize()
                         .padding(14.dp)
                         .focusRestorer(firstRequester),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                    contentPadding = PaddingValues(top = 6.dp, bottom = NuvioTheme.spacing.sm)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+                    contentPadding = PaddingValues(top = 6.dp, bottom = KovelyxTheme.spacing.sm)
                 ) {
                     items(uiState.sponsors, key = { it.id }) { sponsor ->
                         val requester = remember(sponsor.id) {
@@ -485,9 +485,9 @@ private fun ContributorsTabContent(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(NuvioTheme.spacing.xl))
-            .background(NuvioTheme.colors.Background)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, RoundedCornerShape(NuvioTheme.spacing.xl))
+            .clip(RoundedCornerShape(KovelyxTheme.spacing.xl))
+            .background(KovelyxTheme.colors.Background)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, RoundedCornerShape(KovelyxTheme.spacing.xl))
     ) {
         when {
             uiState.isContributorsLoading -> CenterStatusText(
@@ -520,8 +520,8 @@ private fun ContributorsTabContent(
                         .fillMaxSize()
                         .padding(14.dp)
                         .focusRestorer(firstRequester),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                    contentPadding = PaddingValues(top = 6.dp, bottom = NuvioTheme.spacing.sm)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+                    contentPadding = PaddingValues(top = 6.dp, bottom = KovelyxTheme.spacing.sm)
                 ) {
                     items(uiState.contributors, key = { it.id }) { contributor ->
                         val requester = remember(contributor.id) {
@@ -555,7 +555,7 @@ private fun CenterStatusText(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             textAlign = TextAlign.Center
         )
     }
@@ -576,7 +576,7 @@ private fun TabErrorState(
     }
 
     Box(
-        modifier = modifier.padding(NuvioTheme.spacing.xl),
+        modifier = modifier.padding(KovelyxTheme.spacing.xl),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -586,13 +586,13 @@ private fun TabErrorState(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center
             )
             Button(
@@ -601,10 +601,10 @@ private fun TabErrorState(
                     .focusRequester(retryFocusRequester)
                     .focusProperties { left = leftFocusRequester },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -635,16 +635,16 @@ private fun SupporterCard(
             }
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                 shape = RoundedCornerShape(22.dp)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(22.dp)
             )
         ),
@@ -654,9 +654,9 @@ private fun SupporterCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.lg),
+                .padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             PersonAvatar(
                 label = supporter.name,
@@ -668,24 +668,24 @@ private fun SupporterCard(
                 Text(
                     text = supporter.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                 Text(
                     text = supporterTierLabel(supporter.membershipLevel),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 formatSupporterDate(supporter.supporterSince)?.let { date ->
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                     Text(
                         text = stringResource(R.string.supporters_since, date),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -695,7 +695,7 @@ private fun SupporterCard(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                 contentDescription = null,
-                tint = if (isFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.TextTertiary,
+                tint = if (isFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.TextTertiary,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -723,16 +723,16 @@ private fun SponsorCard(
             }
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                 shape = RoundedCornerShape(22.dp)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(22.dp)
             )
         ),
@@ -742,9 +742,9 @@ private fun SponsorCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.lg),
+                .padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             NameAvatar(
                 label = sponsor.name,
@@ -755,7 +755,7 @@ private fun SponsorCard(
                 Text(
                     text = sponsor.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -764,7 +764,7 @@ private fun SponsorCard(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                 contentDescription = null,
-                tint = if (isFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.TextTertiary,
+                tint = if (isFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.TextTertiary,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -792,16 +792,16 @@ private fun ContributorCard(
             }
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                 shape = RoundedCornerShape(22.dp)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(22.dp)
             )
         ),
@@ -811,9 +811,9 @@ private fun ContributorCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.lg),
+                .padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             PersonAvatar(
                 label = contributor.name,
@@ -824,12 +824,12 @@ private fun ContributorCard(
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                 ) {
                     Text(
                         text = contributor.name,
                         style = MaterialTheme.typography.titleMedium,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -842,7 +842,7 @@ private fun ContributorCard(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                 contentDescription = null,
-                tint = if (isFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.TextTertiary,
+                tint = if (isFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.TextTertiary,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -853,16 +853,16 @@ private fun ContributorCard(
 private fun ContributorRoleBadge(role: String) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(NuvioTheme.radii.sm))
-            .background(NuvioTheme.colors.Background)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, RoundedCornerShape(NuvioTheme.radii.sm))
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+            .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
+            .background(KovelyxTheme.colors.Background)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, RoundedCornerShape(KovelyxTheme.radii.sm))
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = role,
             style = MaterialTheme.typography.labelSmall,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             fontWeight = FontWeight.Medium
         )
     }
@@ -878,14 +878,14 @@ private fun NameAvatar(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(NuvioTheme.colors.Background)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, CircleShape),
+            .background(KovelyxTheme.colors.Background)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = initial,
             style = MaterialTheme.typography.titleMedium,
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -908,15 +908,15 @@ private fun PersonAvatar(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .background(NuvioTheme.colors.Background)
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, CircleShape),
+            .background(KovelyxTheme.colors.Background)
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, CircleShape),
         contentAlignment = Alignment.Center
     ) {
         if (avatarUrl.isNullOrBlank() || painter.state.collectAsState().value is AsyncImagePainter.State.Error) {
             Text(
                 text = label.take(1).uppercase(),
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.SemiBold
             )
         } else {
@@ -958,20 +958,20 @@ private fun RowScope.SupportersTabButton(
                 if (state.isFocused) onClick()
             },
         colors = CardDefaults.colors(
-            containerColor = if (selected) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = if (selected) KovelyxTheme.colors.BackgroundCard else KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             border = if (selected) {
                 Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.hairline, alpha = 0.8f),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.hairline, alpha = 0.8f),
                     shape = RoundedCornerShape(999.dp)
                 )
             } else {
                 Border.None
             },
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(999.dp)
             )
         ),
@@ -989,9 +989,9 @@ private fun RowScope.SupportersTabButton(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 color = when {
-                    isFocused -> NuvioTheme.colors.TextPrimary
-                    selected -> NuvioTheme.colors.TextPrimary
-                    else -> NuvioTheme.colors.TextSecondary
+                    isFocused -> KovelyxTheme.colors.TextPrimary
+                    selected -> KovelyxTheme.colors.TextPrimary
+                    else -> KovelyxTheme.colors.TextSecondary
                 },
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                 maxLines = 1,
@@ -1013,7 +1013,7 @@ private fun SponsorDetailsDialog(
         primaryFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = sponsor.name,
         subtitle = sponsor.channelUrl ?: stringResource(R.string.sponsors_channel_unavailable),
@@ -1022,7 +1022,7 @@ private fun SponsorDetailsDialog(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             NameAvatar(
                 label = sponsor.name,
@@ -1030,24 +1030,24 @@ private fun SponsorDetailsDialog(
             )
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
             ) {
                 Text(
                     text = stringResource(R.string.sponsors_detail_copy),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
                 sponsor.channelUrl?.let { url ->
                     Text(
                         text = url,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
             Button(
                 onClick = {
                     val channelUrl = sponsor.channelUrl ?: return@Button
@@ -1058,10 +1058,10 @@ private fun SponsorDetailsDialog(
                 enabled = sponsor.channelUrl != null,
                 modifier = Modifier.focusRequester(primaryFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -1071,10 +1071,10 @@ private fun SponsorDetailsDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    contentColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -1096,7 +1096,7 @@ private fun SupporterDetailsDialog(
         primaryFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = supporter.name,
         subtitle = supporterTierLabel(supporter.membershipLevel),
@@ -1105,7 +1105,7 @@ private fun SupporterDetailsDialog(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             PersonAvatar(
                 label = supporter.name,
@@ -1117,12 +1117,12 @@ private fun SupporterDetailsDialog(
                     stringResource(R.string.supporters_since, date)
                 } ?: stringResource(R.string.supporters_since_unknown),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 modifier = Modifier.weight(1f)
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
             Button(
                 onClick = {
                     runCatching {
@@ -1131,10 +1131,10 @@ private fun SupporterDetailsDialog(
                 },
                 modifier = Modifier.focusRequester(primaryFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -1144,10 +1144,10 @@ private fun SupporterDetailsDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    contentColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -1177,7 +1177,7 @@ private fun ContributorDetailsDialog(
         primaryFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = contributor.name,
         width = 560.dp,
@@ -1185,7 +1185,7 @@ private fun ContributorDetailsDialog(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             PersonAvatar(
                 label = contributor.name,
@@ -1194,7 +1194,7 @@ private fun ContributorDetailsDialog(
             )
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
             ) {
                 contributorRoleLabel(contributorSupportKey)?.let { role ->
                     ContributorRoleBadge(role = role)
@@ -1202,13 +1202,13 @@ private fun ContributorDetailsDialog(
                 Text(
                     text = contributor.profileUrl ?: stringResource(R.string.contributors_profile_unavailable),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
                 supportLink?.kofiUrl?.let { url ->
                     Text(
                         text = url,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -1218,7 +1218,7 @@ private fun ContributorDetailsDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = NuvioTheme.spacing.sm),
+                    .padding(top = KovelyxTheme.spacing.sm),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -1231,7 +1231,7 @@ private fun ContributorDetailsDialog(
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
             Button(
                 onClick = {
                     val profileUrl = contributor.profileUrl ?: return@Button
@@ -1244,10 +1244,10 @@ private fun ContributorDetailsDialog(
                 enabled = contributor.profileUrl != null,
                 modifier = Modifier.focusRequester(primaryFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -1258,10 +1258,10 @@ private fun ContributorDetailsDialog(
                 Button(
                     onClick = { showSupportQr = !showSupportQr },
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        contentColor = NuvioTheme.colors.TextPrimary,
-                        focusedContentColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                        contentColor = KovelyxTheme.colors.TextPrimary,
+                        focusedContentColor = KovelyxTheme.colors.Primary
                     ),
                     shape = ButtonDefaults.shape(RoundedCornerShape(50))
                 ) {
@@ -1280,10 +1280,10 @@ private fun ContributorDetailsDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    contentColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {

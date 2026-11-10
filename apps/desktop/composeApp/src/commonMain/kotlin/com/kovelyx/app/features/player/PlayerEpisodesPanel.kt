@@ -41,8 +41,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
-import com.kovelyx.app.core.ui.NuvioAnimatedWatchedBadge
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxAnimatedWatchedBadge
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.details.MetaVideo
 import com.kovelyx.app.features.streams.StreamItem
@@ -373,7 +373,7 @@ private fun EpisodeRow(
                     contentDescription = episode.title,
                     modifier = Modifier
                         .fillMaxSize()
-                        .then(if (shouldBlurArtwork) Modifier.blur(NuvioTokens.Space.s18) else Modifier),
+                        .then(if (shouldBlurArtwork) Modifier.blur(KovelyxTokens.Space.s18) else Modifier),
                     contentScale = ContentScale.Crop,
                 )
             }
@@ -390,7 +390,7 @@ private fun EpisodeRow(
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
-            NuvioAnimatedWatchedBadge(
+            KovelyxAnimatedWatchedBadge(
                 isVisible = isWatched,
                 modifier = Modifier
                     .align(Alignment.TopEnd)

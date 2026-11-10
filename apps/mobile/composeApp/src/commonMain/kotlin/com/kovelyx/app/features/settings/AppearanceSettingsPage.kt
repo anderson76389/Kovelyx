@@ -26,10 +26,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.ui.floatingNavigationGlowSupported
 import com.kovelyx.app.core.ui.AppTheme
 import com.kovelyx.app.isIos
-import com.kovelyx.app.core.ui.NuvioBottomSheetActionRow
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBottomSheetActionRow
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.labelRes
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -198,7 +198,7 @@ internal fun LazyListScope.appearanceSettingsContent(
             )
         }
 
-        NuvioStatusModal(
+        KovelyxStatusModal(
             title = stringResource(Res.string.settings_appearance_app_language_restart_title),
             message = stringResource(Res.string.settings_appearance_app_language_restart_message),
             isVisible = showLanguageRestartDialog,
@@ -320,10 +320,10 @@ private fun AppearanceLanguageBottomSheet(
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -344,13 +344,13 @@ private fun AppearanceLanguageBottomSheet(
             }
 
             items(options) { option ->
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     title = stringResource(option.labelRes),
                     selected = option.language == selectedLanguage,
                     onClick = {
                         onLanguageSelected(option.language)
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                     trailingContent = {

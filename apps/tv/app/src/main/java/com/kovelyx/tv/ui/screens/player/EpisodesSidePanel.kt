@@ -61,7 +61,7 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import com.kovelyx.tv.domain.model.Stream
 import com.kovelyx.tv.domain.model.Video
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.components.LoadingIndicator
 import com.kovelyx.tv.ui.components.SourceChipStatus
 import com.kovelyx.tv.ui.screens.detail.formatReleaseDate
@@ -114,10 +114,10 @@ internal fun EpisodesSidePanel(
         modifier = modifier
             .fillMaxHeight()
             .width(520.dp)
-            .clip(RoundedCornerShape(topStart = NuvioTheme.spacing.lg, bottomStart = NuvioTheme.spacing.lg))
-            .background(NuvioTheme.colors.BackgroundElevated)
+            .clip(RoundedCornerShape(topStart = KovelyxTheme.spacing.lg, bottomStart = KovelyxTheme.spacing.lg))
+            .background(KovelyxTheme.colors.BackgroundElevated)
     ) {
-        Column(modifier = Modifier.padding(NuvioTheme.spacing.xl)) {
+        Column(modifier = Modifier.padding(KovelyxTheme.spacing.xl)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -126,7 +126,7 @@ internal fun EpisodesSidePanel(
                     Text(
                         text = if (uiState.showEpisodeStreams) stringResource(R.string.episodes_panel_streams_title) else stringResource(R.string.episodes_panel_title),
                         style = MaterialTheme.typography.headlineSmall,
-                        color = NuvioTheme.colors.TextPrimary
+                        color = KovelyxTheme.colors.TextPrimary
                     )
 
                     DialogButton(
@@ -136,7 +136,7 @@ internal fun EpisodesSidePanel(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
                 if (uiState.showEpisodeStreams) {
                     EpisodeStreamsView(
@@ -302,7 +302,7 @@ private fun EpisodeStreamsView(
 
     // --- Header ---
     Row(
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         DialogButton(
@@ -336,13 +336,13 @@ private fun EpisodeStreamsView(
                 }
             },
             style = MaterialTheme.typography.bodyLarge,
-            color = NuvioTheme.extendedColors.textSecondary,
+            color = KovelyxTheme.extendedColors.textSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
     }
 
-    Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
     // --- Filter chips ---
     AnimatedVisibility(
@@ -373,7 +373,7 @@ private fun EpisodeStreamsView(
         }
     }
 
-    Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
     // --- Content ---
     when {
@@ -381,7 +381,7 @@ private fun EpisodeStreamsView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = NuvioTheme.spacing.xl),
+                    .padding(vertical = KovelyxTheme.spacing.xl),
                 contentAlignment = Alignment.Center
             ) {
                 LoadingIndicator()
@@ -409,8 +409,8 @@ private fun EpisodeStreamsView(
 
             LazyColumn(
                 state = streamListState,
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                contentPadding = PaddingValues(top = NuvioTheme.spacing.xs),
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+                contentPadding = PaddingValues(top = KovelyxTheme.spacing.xs),
                 modifier = Modifier
                     .fillMaxHeight()
                     .onFocusChanged { listHasFocus = it.hasFocus }
@@ -538,7 +538,7 @@ private fun EpisodesListView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = NuvioTheme.spacing.xl),
+                    .padding(vertical = KovelyxTheme.spacing.xl),
                 contentAlignment = Alignment.Center
             ) {
                 LoadingIndicator()
@@ -577,13 +577,13 @@ private fun EpisodesListView(
                         onSeasonSelected = onSeasonSelected
                     )
 
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                 }
 
                 LazyColumn(
                     state = episodesListState,
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                    contentPadding = PaddingValues(top = NuvioTheme.spacing.xs),
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+                    contentPadding = PaddingValues(top = KovelyxTheme.spacing.xs),
                     modifier = Modifier
                         .fillMaxHeight()
                         .focusProperties { up = seasonTabFocusRequester }
@@ -644,8 +644,8 @@ private fun EpisodesSeasonTabs(
         modifier = Modifier
             .fillMaxWidth()
             .focusRestorer(),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xs, vertical = NuvioTheme.spacing.xs)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xs, vertical = KovelyxTheme.spacing.xs)
     ) {
         items(seasons, key = { it }) { season ->
             val isSelected = selectedSeason == season
@@ -656,19 +656,19 @@ private fun EpisodesSeasonTabs(
                 modifier = Modifier
                     .then(if (isSelected) Modifier.focusRequester(selectedTabFocusRequester) else Modifier)
                     .onFocusChanged { isFocused = it.isFocused },
-                shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.spacing.xl)),
+                shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.spacing.xl)),
                 colors = CardDefaults.colors(
-                    containerColor = if (isSelected) Color(0xFFF5F5F5) else NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = if (isSelected) Color.White else NuvioTheme.colors.Secondary
+                    containerColor = if (isSelected) Color(0xFFF5F5F5) else KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = if (isSelected) Color.White else KovelyxTheme.colors.Secondary
                 ),
                 border = CardDefaults.border(
                     border = Border(
-                        border = BorderStroke(NuvioTheme.spacing.hairline, if (isSelected) Color.Transparent else NuvioTheme.colors.Border),
-                        shape = RoundedCornerShape(NuvioTheme.spacing.xl)
+                        border = BorderStroke(KovelyxTheme.spacing.hairline, if (isSelected) Color.Transparent else KovelyxTheme.colors.Border),
+                        shape = RoundedCornerShape(KovelyxTheme.spacing.xl)
                     ),
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                        shape = RoundedCornerShape(NuvioTheme.spacing.xl)
+                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                        shape = RoundedCornerShape(KovelyxTheme.spacing.xl)
                     )
                 ),
                 scale = CardDefaults.scale(focusedScale = 1.0f)
@@ -678,8 +678,8 @@ private fun EpisodesSeasonTabs(
                     style = MaterialTheme.typography.labelLarge,
                     color = when {
                         isSelected -> Color.Black
-                        isFocused -> NuvioTheme.colors.OnSecondary
-                        else -> NuvioTheme.extendedColors.textSecondary
+                        isFocused -> KovelyxTheme.colors.OnSecondary
+                        else -> KovelyxTheme.extendedColors.textSecondary
                     },
                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 20.dp)
                 )
@@ -763,17 +763,17 @@ private fun EpisodeItem(
                 false
             },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.xl)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.xl)
             )
         ),
         scale = CardDefaults.scale(focusedScale = 1.01f),
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.xl))
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.xl))
     ) {
         Row(
             modifier = Modifier
@@ -787,8 +787,8 @@ private fun EpisodeItem(
                 modifier = Modifier
                     .width(130.dp)
                     .height(90.dp)
-                    .clip(RoundedCornerShape(NuvioTheme.radii.md))
-                    .background(NuvioTheme.colors.SurfaceVariant)
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.md))
+                    .background(KovelyxTheme.colors.SurfaceVariant)
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -809,10 +809,10 @@ private fun EpisodeItem(
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(NuvioTheme.spacing.sm)
+                            .padding(KovelyxTheme.spacing.sm)
                             .clip(RoundedCornerShape(6.dp))
                             .background(Color.Black.copy(alpha = 0.75f))
-                            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs)
+                            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs)
                     ) {
                         Text(
                             text = episodeCode,
@@ -835,7 +835,7 @@ private fun EpisodeItem(
                         Icon(
                             imageVector = Icons.Default.Visibility,
                             contentDescription = stringResource(R.string.cd_current),
-                            tint = NuvioTheme.colors.Primary,
+                            tint = KovelyxTheme.colors.Primary,
                             modifier = Modifier.size(14.dp)
                         )
                     }
@@ -852,7 +852,7 @@ private fun EpisodeItem(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = NuvioTheme.colors.Primary,
+                            tint = KovelyxTheme.colors.Primary,
                             modifier = Modifier.size(14.dp)
                         )
                     }
@@ -862,12 +862,12 @@ private fun EpisodeItem(
             // Episode info
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 Text(
                     text = episodeTitle,
                     style = MaterialTheme.typography.titleMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -876,7 +876,7 @@ private fun EpisodeItem(
                     Text(
                         text = formattedDate,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.extendedColors.textTertiary
+                        color = KovelyxTheme.extendedColors.textTertiary
                     )
                 }
 
@@ -886,7 +886,7 @@ private fun EpisodeItem(
                         style = MaterialTheme.typography.bodySmall.copy(
                             textDirection = it.contentTextDirection()
                         ),
-                        color = NuvioTheme.extendedColors.textSecondary,
+                        color = KovelyxTheme.extendedColors.textSecondary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )

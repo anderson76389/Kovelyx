@@ -64,14 +64,14 @@ fun TrackingListPickerDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(NuvioTokens.Space.s80 + NuvioTokens.Space.s80 + NuvioTokens.Space.s80 + NuvioTokens.Space.s40),
+                    .height(KovelyxTokens.Space.s80 + KovelyxTokens.Space.s80 + KovelyxTokens.Space.s80 + KovelyxTokens.Space.s40),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(tokens.spacing.listGap),
                 ) {
-                    NuvioLoadingIndicator(
+                    KovelyxLoadingIndicator(
                         modifier = Modifier.size(tokens.icons.lg),
                     )
                     Text(
@@ -85,7 +85,7 @@ fun TrackingListPickerDialog(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(NuvioTokens.Space.s80 + NuvioTokens.Space.s80 + NuvioTokens.Space.s80 + NuvioTokens.Space.s40),
+                    .height(KovelyxTokens.Space.s80 + KovelyxTokens.Space.s80 + KovelyxTokens.Space.s80 + KovelyxTokens.Space.s40),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.controlGap),
             ) {
                 items(items = destinations, key = { it.key }) { tab ->

@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.details.components.TrailerPlayerPopup
 import com.kovelyx.app.features.player.AudioTrack
 import com.kovelyx.app.features.player.PlayerEngineController
@@ -87,7 +87,7 @@ class TrailerPlayerTest {
         var retries = 0
         var dismissed = false
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 TrailerPlayerPopup(
                     visible = true,
                     trailerTitle = "Official trailer",
@@ -137,7 +137,7 @@ class TrailerPlayerTest {
 
     private fun showControls(state: TrailerPlaybackState) {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 TrailerPlayerControls(state, canControlPlayback = true, title = "Trailer", onExitFullscreen = {})
             }
         }

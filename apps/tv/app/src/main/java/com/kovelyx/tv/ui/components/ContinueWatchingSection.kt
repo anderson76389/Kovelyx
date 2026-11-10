@@ -71,7 +71,7 @@ import androidx.tv.material3.Button
 import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Text
 import com.kovelyx.tv.ui.screens.home.ContinueWatchingItem
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -94,7 +94,7 @@ import androidx.compose.ui.text.TextStyle
 import com.kovelyx.tv.domain.model.CardDepthStyle
 import kotlinx.coroutines.delay
 
-private val BadgeShape = RoundedCornerShape(NuvioTheme.radii.xs)
+private val BadgeShape = RoundedCornerShape(KovelyxTheme.radii.xs)
 private val CwNewEpisodeBadgeColor = Color(0xFF1D4ED8)
 private val CwNewSeasonBadgeColor = Color(0xFFB45309)
 
@@ -148,7 +148,7 @@ fun ContinueWatchingSection(
     cardWidth: Dp = 288.dp,
     imageHeight: Dp = 162.dp,
     cardStyle: ContinueWatchingCardStyle = ContinueWatchingCardStyle.CARD,
-    cornerRadius: Dp = NuvioTheme.radii.md,
+    cornerRadius: Dp = KovelyxTheme.radii.md,
     posterTitleOverride: TextStyle? = null
 ) {
     if (items.isEmpty()) return
@@ -183,14 +183,14 @@ fun ContinueWatchingSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.lg),
+                .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title ?: stringResource(R.string.continue_watching),
                 style = MaterialTheme.typography.headlineMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
         }
 
@@ -199,7 +199,7 @@ fun ContinueWatchingSection(
         val layoutDirection = LocalLayoutDirection.current
         val isRtl = layoutDirection == LayoutDirection.Rtl
         val horizontalBringIntoViewSpec = remember(density, defaultBringIntoViewSpec, isRtl) {
-            val startPx = with(density) { NuvioTheme.spacing.xxxl.roundToPx() }
+            val startPx = with(density) { KovelyxTheme.spacing.xxxl.roundToPx() }
             @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
             object : BringIntoViewSpec {
                 override val scrollAnimationSpec: AnimationSpec<Float> =
@@ -241,8 +241,8 @@ fun ContinueWatchingSection(
                         ?: FocusRequester.Default
                 }
                 .focusGroup(),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
             state = listState
         ) {
             itemsIndexed(
@@ -445,7 +445,7 @@ fun ContinueWatchingCard(
     useEpisodeThumbnails: Boolean = true,
     cardStyle: ContinueWatchingCardStyle = ContinueWatchingCardStyle.CARD,
     isFocused: Boolean = false,
-    cornerRadius: Dp = NuvioTheme.radii.md,
+    cornerRadius: Dp = KovelyxTheme.radii.md,
     posterTitleOverride: TextStyle? = null
 ) {
     val isPosterStyle = cardStyle == ContinueWatchingCardStyle.POSTER
@@ -610,7 +610,7 @@ fun ContinueWatchingCard(
         builder.build()
     }
 
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
     val badgeBackground = remember(bgColor, nextUp) {
         when {
             nextUp?.isNewSeasonRelease == true -> CwNewSeasonBadgeColor
@@ -619,7 +619,7 @@ fun ContinueWatchingCard(
         }
     }
     
-    val bgCardColor = NuvioTheme.colors.BackgroundCard
+    val bgCardColor = KovelyxTheme.colors.BackgroundCard
     val backgroundPainter = remember(bgCardColor) { androidx.compose.ui.graphics.painter.ColorPainter(bgCardColor) }
 
     Card(
@@ -672,7 +672,7 @@ fun ContinueWatchingCard(
         } else {
             CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = cwCardShape
                 )
             )
@@ -742,7 +742,7 @@ fun ContinueWatchingCard(
                     .then(
                         if (textBelowArtwork && isFocused) {
                             Modifier.border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                                 shape = cwClipShape
                             )
                         } else {
@@ -810,7 +810,7 @@ fun ContinueWatchingCard(
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(NuvioTheme.spacing.md)
+                            .padding(KovelyxTheme.spacing.md)
                     ) {
                         ContinueWatchingCardText(
                             episodeStr = episodeStr,
@@ -828,15 +828,15 @@ fun ContinueWatchingCard(
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(NuvioTheme.spacing.sm)
+                            .padding(KovelyxTheme.spacing.sm)
                             .clip(BadgeShape)
                             .background(badgeBackground)
-                            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs)
+                            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs)
                     ) {
                         Text(
                             text = badgeText,
                             style = MaterialTheme.typography.labelSmall,
-                            color = NuvioTheme.colors.TextPrimary
+                            color = KovelyxTheme.colors.TextPrimary
                         )
                     }
                 }
@@ -844,7 +844,7 @@ fun ContinueWatchingCard(
                 if (progress != null) {
                     // The poster card lifts its bar off the bottom edge and sits it on a pill, matching mobile.
                     val barInset =
-                        if (isPosterStyle) NuvioTheme.spacing.sm else NuvioTheme.spacing.xs
+                        if (isPosterStyle) KovelyxTheme.spacing.sm else KovelyxTheme.spacing.xs
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -854,8 +854,8 @@ fun ContinueWatchingCard(
                                 if (isPosterStyle) {
                                     Modifier
                                         .clip(RoundedCornerShape(999.dp))
-                                        .background(NuvioTheme.colors.Background.copy(alpha = 0.7f))
-                                        .padding(NuvioTheme.spacing.xxs)
+                                        .background(KovelyxTheme.colors.Background.copy(alpha = 0.7f))
+                                        .padding(KovelyxTheme.spacing.xxs)
                                 } else {
                                     Modifier
                                 }
@@ -873,7 +873,7 @@ fun ContinueWatchingCard(
                                     .fillMaxWidth(progressFraction)
                                     .clip(RoundedCornerShape(1.5.dp))
                                     .height(3.dp)
-                                    .background(NuvioTheme.colors.Secondary)
+                                    .background(KovelyxTheme.colors.Secondary)
                             )
                         }
                     }
@@ -888,9 +888,9 @@ fun ContinueWatchingCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            top = NuvioTheme.spacing.xxs,
-                            start = NuvioTheme.spacing.xs,
-                            end = NuvioTheme.spacing.xs
+                            top = KovelyxTheme.spacing.xxs,
+                            start = KovelyxTheme.spacing.xs,
+                            end = KovelyxTheme.spacing.xs
                         )
                         .height(titleBlockHeight),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -900,7 +900,7 @@ fun ContinueWatchingCard(
                         Text(
                             text = titleText,
                             style = titleStyle,
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -908,13 +908,13 @@ fun ContinueWatchingCard(
                     if (episodeStr != null) {
                         Text(
                             text = episodeStr,
-                            modifier = Modifier.padding(start = NuvioTheme.spacing.xs),
+                            modifier = Modifier.padding(start = KovelyxTheme.spacing.xs),
                             style = if (posterTitleOverride != null) {
                                 MaterialTheme.typography.labelMedium
                             } else {
                                 MaterialTheme.typography.labelSmall
                             },
-                            color = NuvioTheme.extendedColors.textSecondary,
+                            color = KovelyxTheme.extendedColors.textSecondary,
                             maxLines = 1
                         )
                     }
@@ -959,7 +959,7 @@ private fun WideCardContent(
                 style = cardDepthStyle
             )
             .clip(cardShape)
-            .background(NuvioTheme.colors.BackgroundCard)
+            .background(KovelyxTheme.colors.BackgroundCard)
     ) {
         Box(
             modifier = Modifier
@@ -990,15 +990,15 @@ private fun WideCardContent(
                 .fillMaxHeight()
                 .weight(1f)
                 .padding(
-                    horizontal = NuvioTheme.spacing.md,
-                    vertical = NuvioTheme.spacing.sm
+                    horizontal = KovelyxTheme.spacing.md,
+                    vertical = KovelyxTheme.spacing.sm
                 ),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
         ) {
             // Text content takes available space; progress bar appears at bottom only when present.
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1010,24 +1010,24 @@ private fun WideCardContent(
                             text = titleText,
                             focused = titleMarqueeActive,
                             style = titleStyle,
-                            color = NuvioTheme.colors.TextPrimary
+                            color = KovelyxTheme.colors.TextPrimary
                         )
                     }
                     if (showBadge) {
                         Box(
                             modifier = Modifier
-                                .padding(start = NuvioTheme.spacing.xs)
+                                .padding(start = KovelyxTheme.spacing.xs)
                                 .clip(BadgeShape)
                                 .background(badgeBackground)
                                 .padding(
-                                    horizontal = NuvioTheme.spacing.sm,
-                                    vertical = NuvioTheme.spacing.xxs
+                                    horizontal = KovelyxTheme.spacing.sm,
+                                    vertical = KovelyxTheme.spacing.xxs
                                 )
                         ) {
                             Text(
                                 text = badgeText,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = NuvioTheme.colors.TextPrimary
+                                color = KovelyxTheme.colors.TextPrimary
                             )
                         }
                     }
@@ -1036,7 +1036,7 @@ private fun WideCardContent(
                 Text(
                     text = episodeStr.orEmpty(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.extendedColors.textSecondary,
+                    color = KovelyxTheme.extendedColors.textSecondary,
                     maxLines = 1,
                     minLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -1046,7 +1046,7 @@ private fun WideCardContent(
                         text = episodeTitle.orEmpty(),
                         focused = titleMarqueeActive,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.extendedColors.textSecondary
+                        color = KovelyxTheme.extendedColors.textSecondary
                     )
                 }
             }
@@ -1054,9 +1054,9 @@ private fun WideCardContent(
             // The bar keeps its space even with no progress so every card lays out identically.
             Column(
                 modifier = Modifier
-                    .padding(top = NuvioTheme.spacing.xxs)
+                    .padding(top = KovelyxTheme.spacing.xxs)
                     .alpha(if (hasProgress) 1f else 0f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
             ) {
                 Box(
                     modifier = Modifier
@@ -1070,13 +1070,13 @@ private fun WideCardContent(
                             .fillMaxWidth(progressFraction)
                             .clip(RoundedCornerShape(1.5.dp))
                             .height(3.dp)
-                            .background(NuvioTheme.colors.Secondary)
+                            .background(KovelyxTheme.colors.Secondary)
                     )
                 }
                 Text(
                     text = badgeText,
                     style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.extendedColors.textSecondary,
+                    color = KovelyxTheme.extendedColors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -1098,7 +1098,7 @@ private fun ContinueWatchingCardText(
         Text(
             text = episodeStr,
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
     }
 
@@ -1106,14 +1106,14 @@ private fun ContinueWatchingCardText(
         text = titleText,
         focused = titleMarqueeActive,
         style = titleStyle,
-        color = NuvioTheme.colors.TextPrimary
+        color = KovelyxTheme.colors.TextPrimary
     )
 
     episodeTitle?.let { title ->
         Text(
             text = title,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.extendedColors.textSecondary,
+            color = KovelyxTheme.extendedColors.textSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1143,7 +1143,7 @@ fun ContinueWatchingOptionsDialog(
         detailsFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.cw_dialog_subtitle)
@@ -1154,8 +1154,8 @@ fun ContinueWatchingOptionsDialog(
                 .fillMaxWidth()
                 .focusRequester(detailsFocusRequester),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(stringResource(R.string.cw_action_go_to_details))
@@ -1165,8 +1165,8 @@ fun ContinueWatchingOptionsDialog(
             Button(
                 onClick = onPlayManually,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -1178,8 +1178,8 @@ fun ContinueWatchingOptionsDialog(
             Button(
                 onClick = onStartFromBeginning,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -1190,8 +1190,8 @@ fun ContinueWatchingOptionsDialog(
         Button(
             onClick = onRemove,
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             ),
             modifier = Modifier.fillMaxWidth()
         ) {

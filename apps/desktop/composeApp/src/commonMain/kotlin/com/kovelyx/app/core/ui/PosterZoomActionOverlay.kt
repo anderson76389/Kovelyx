@@ -69,7 +69,7 @@ import kotlinx.coroutines.launch
 /**
  * Geometry of the shelf card that was long-pressed, captured in root coordinates
  * right before the long-press callback fires. Used as the start frame of the
- * shared-element zoom in [NuvioPosterZoomActionOverlay].
+ * shared-element zoom in [KovelyxPosterZoomActionOverlay].
  */
 data class PosterZoomAnchor(
     val boundsInRoot: Rect,
@@ -159,13 +159,13 @@ private val PosterZoomMenuSpring = spring<Float>(
  * the centred poster away with [DisintegratingContainer] instead of zooming back.
  */
 @Composable
-fun NuvioPosterZoomActionOverlay(
+fun KovelyxPosterZoomActionOverlay(
     imageUrl: String?,
     title: String,
     subtitle: String?,
     isWatched: Boolean = false,
     blurred: Boolean = false,
-    depthSurface: NuvioCardDepthSurface = NuvioCardDepthSurface.Posters,
+    depthSurface: KovelyxCardDepthSurface = KovelyxCardDepthSurface.Posters,
     anchor: PosterZoomAnchor?,
     actions: List<PosterZoomOverlayAction>,
     hazeState: HazeState,
@@ -211,7 +211,7 @@ fun NuvioPosterZoomActionOverlay(
         if (slotBounds == null || phase != PosterZoomPhase.Open) return@LaunchedEffect
         lifted = source?.lift() == true
         showFallback = !lifted
-        launch { scrim.animateTo(1f, tween(durationMillis = 260, easing = NuvioTokens.Motion.standard)) }
+        launch { scrim.animateTo(1f, tween(durationMillis = 260, easing = KovelyxTokens.Motion.standard)) }
         launch { zoom.animateTo(1f, PosterZoomExpandSpring) }
         launch {
             delay(60)
@@ -228,7 +228,7 @@ fun NuvioPosterZoomActionOverlay(
                 launch { menu.animateTo(0f, tween(durationMillis = 140)) }
                 launch {
                     delay(80)
-                    scrim.animateTo(0f, tween(durationMillis = 260, easing = NuvioTokens.Motion.standard))
+                    scrim.animateTo(0f, tween(durationMillis = 260, easing = KovelyxTokens.Motion.standard))
                 }
                 launch { zoom.animateTo(0f, PosterZoomCollapseSpring) }
             }
@@ -273,7 +273,7 @@ fun NuvioPosterZoomActionOverlay(
         val maxPosterWidth = if (aspect >= 1f) maxWidth * 0.8f else maxWidth * 0.6f
         val posterHeight = min(maxPosterWidth / aspect, maxHeight * 0.44f)
         val posterWidth = posterHeight * aspect
-        val menuWidth = min(280.dp, maxWidth - NuvioTokens.Space.s48)
+        val menuWidth = min(280.dp, maxWidth - KovelyxTokens.Space.s48)
         val columnWidth = max(posterWidth, menuWidth)
 
         Box(
@@ -310,7 +310,7 @@ fun NuvioPosterZoomActionOverlay(
                     .onGloballyPositioned { coordinates -> slotBounds = coordinates.boundsInRoot() },
             )
 
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s18))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s18))
 
             Column(
                 modifier = Modifier
@@ -318,7 +318,7 @@ fun NuvioPosterZoomActionOverlay(
                     .graphicsLayer {
                         val progress = menu.value.coerceIn(0f, 1f)
                         alpha = progress
-                        translationY = (1f - progress) * NuvioTokens.Space.s10.toPx()
+                        translationY = (1f - progress) * KovelyxTokens.Space.s10.toPx()
                     },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -330,10 +330,10 @@ fun NuvioPosterZoomActionOverlay(
                     textAlign = TextAlign.Center,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = NuvioTokens.Space.s12),
+                    modifier = Modifier.padding(horizontal = KovelyxTokens.Space.s12),
                 )
                 if (!subtitle.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(NuvioTokens.Space.s4))
+                    Spacer(modifier = Modifier.height(KovelyxTokens.Space.s4))
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodyMedium,
@@ -341,12 +341,12 @@ fun NuvioPosterZoomActionOverlay(
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = NuvioTokens.Space.s12),
+                        modifier = Modifier.padding(horizontal = KovelyxTokens.Space.s12),
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s14))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s14))
 
             Column(
                 modifier = Modifier
@@ -361,7 +361,7 @@ fun NuvioPosterZoomActionOverlay(
                         transformOrigin = TransformOrigin(0.5f, 0f)
                     }
                     .graphicsLayer {
-                        shape = RoundedCornerShape(NuvioTokens.Space.s20.toPx())
+                        shape = RoundedCornerShape(KovelyxTokens.Space.s20.toPx())
                         clip = true
                     }
                     .background(tokens.colors.surfaceElevated),
@@ -371,7 +371,7 @@ fun NuvioPosterZoomActionOverlay(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(NuvioTokens.Space.hairline)
+                                .height(KovelyxTokens.Space.hairline)
                                 .background(tokens.colors.textPrimary.copy(alpha = 0.08f)),
                         )
                     }
@@ -384,7 +384,7 @@ fun NuvioPosterZoomActionOverlay(
                             val progress = ((menu.value.coerceIn(0f, 1f) - stagger) / (1f - stagger))
                                 .coerceIn(0f, 1f)
                             alpha = progress
-                            translationY = (1f - progress) * NuvioTokens.Space.s8.toPx()
+                            translationY = (1f - progress) * KovelyxTokens.Space.s8.toPx()
                         },
                     )
                 }
@@ -425,7 +425,7 @@ fun NuvioPosterZoomActionOverlay(
                         },
                     )
                     clip = false
-                    shadowElevation = NuvioTokens.Space.s24.toPx() * clamped * shadowFade.value
+                    shadowElevation = KovelyxTokens.Space.s24.toPx() * clamped * shadowFade.value
                 },
         ) {
             DisintegratingContainer(
@@ -436,7 +436,7 @@ fun NuvioPosterZoomActionOverlay(
                 },
                 onDisintegrated = {
                     scope.launch {
-                        scrim.animateTo(0f, tween(durationMillis = 300, easing = NuvioTokens.Motion.standard))
+                        scrim.animateTo(0f, tween(durationMillis = 300, easing = KovelyxTokens.Motion.standard))
                         currentOnDismissed()
                     }
                 },
@@ -476,13 +476,13 @@ fun NuvioPosterZoomActionOverlay(
                                 contentDescription = title,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .then(if (blurred) Modifier.blur(NuvioTokens.Space.s18) else Modifier),
+                                    .then(if (blurred) Modifier.blur(KovelyxTokens.Space.s18) else Modifier),
                                 contentScale = ContentScale.Crop,
                             )
                         } else {
                             Text(
                                 text = title,
-                                modifier = Modifier.padding(NuvioTokens.Space.s14),
+                                modifier = Modifier.padding(KovelyxTokens.Space.s14),
                                 style = MaterialTheme.typography.titleMedium,
                                 color = tokens.colors.textMuted,
                                 textAlign = TextAlign.Center,
@@ -526,8 +526,8 @@ private fun PosterZoomMenuRow(
         modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onSelected)
-            .padding(horizontal = NuvioTokens.Space.s18, vertical = NuvioTokens.Space.s16),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+            .padding(horizontal = KovelyxTokens.Space.s18, vertical = KovelyxTokens.Space.s16),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -543,7 +543,7 @@ private fun PosterZoomMenuRow(
             imageVector = action.icon,
             contentDescription = null,
             tint = contentColor,
-            modifier = Modifier.size(NuvioTokens.Icon.md),
+            modifier = Modifier.size(KovelyxTokens.Icon.md),
         )
     }
 }
@@ -577,4 +577,4 @@ private fun androidx.compose.ui.unit.Density.posterCornerRadiusPx(
     return if (scale > 0f) apparent / scale else apparent
 }
 
-private val PosterZoomFinalCornerRadius = NuvioTokens.Space.s18
+private val PosterZoomFinalCornerRadius = KovelyxTokens.Space.s18

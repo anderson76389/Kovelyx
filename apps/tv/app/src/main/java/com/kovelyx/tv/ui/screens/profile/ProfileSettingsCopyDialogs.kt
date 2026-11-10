@@ -30,8 +30,8 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.UserProfile
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun ProfileSettingsSourceDialog(
@@ -59,7 +59,7 @@ internal fun ProfileSettingsSourceDialog(
         runCatching { focusRequester.requestFocus() }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.profile_copy_settings_setup_title),
         subtitle = stringResource(R.string.profile_copy_settings_setup_subtitle),
@@ -69,11 +69,11 @@ internal fun ProfileSettingsSourceDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(
-                    max = NuvioTheme.sizes.buttons.defaultHeight * 2 +
-                        NuvioTheme.spacing.sm
+                    max = KovelyxTheme.sizes.buttons.defaultHeight * 2 +
+                        KovelyxTheme.spacing.sm
                 ),
             state = listState,
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             item(key = "start_fresh") {
                 SourceProfileButton(
@@ -118,13 +118,13 @@ internal fun ProfileSettingsSourceDialog(
         }
         Text(
             text = stringResource(R.string.profile_copy_settings_exclusions),
-            color = NuvioTheme.colors.TextTertiary,
+            color = KovelyxTheme.colors.TextTertiary,
             style = MaterialTheme.typography.bodySmall
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
-                NuvioTheme.components.dialog.actionSpacing
+                KovelyxTheme.components.dialog.actionSpacing
             )
         ) {
             SourceProfileButton(
@@ -171,7 +171,7 @@ internal fun CopyProfileSettingsDialog(
         runCatching { focusRequester.requestFocus() }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = { if (!isCopying) onDismiss() },
         title = stringResource(R.string.profile_copy_settings_title, targetProfile.name),
         subtitle = stringResource(R.string.profile_copy_settings_subtitle),
@@ -179,17 +179,17 @@ internal fun CopyProfileSettingsDialog(
     ) {
         Text(
             text = stringResource(R.string.profile_copy_settings_from),
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             fontWeight = FontWeight.SemiBold
         )
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(
-                    max = NuvioTheme.sizes.buttons.defaultHeight * 2 +
-                        NuvioTheme.spacing.sm
+                    max = KovelyxTheme.sizes.buttons.defaultHeight * 2 +
+                        KovelyxTheme.spacing.sm
                 ),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             items(sourceProfiles, key = UserProfile::id) { profile ->
                 SourceProfileButton(
@@ -217,20 +217,20 @@ internal fun CopyProfileSettingsDialog(
         )
         Text(
             text = stringResource(R.string.profile_copy_settings_details),
-            color = NuvioTheme.colors.TextTertiary,
+            color = KovelyxTheme.colors.TextTertiary,
             style = MaterialTheme.typography.bodySmall
         )
         if (errorMessage != null) {
             Text(
                 text = errorMessage,
-                color = NuvioTheme.colors.Error,
+                color = KovelyxTheme.colors.Error,
                 style = MaterialTheme.typography.bodySmall
             )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
-                NuvioTheme.components.dialog.actionSpacing
+                KovelyxTheme.components.dialog.actionSpacing
             )
         ) {
             SourceProfileButton(
@@ -273,24 +273,24 @@ private fun SourceProfileButton(
         modifier = modifier.fillMaxWidth(),
         colors = ButtonDefaults.colors(
             containerColor = if (selected) {
-                NuvioTheme.colors.Secondary
+                KovelyxTheme.colors.Secondary
             } else {
-                NuvioTheme.colors.BackgroundCard
+                KovelyxTheme.colors.BackgroundCard
             },
             contentColor = if (selected) {
-                NuvioTheme.colors.OnSecondary
+                KovelyxTheme.colors.OnSecondary
             } else {
-                NuvioTheme.colors.TextPrimary
+                KovelyxTheme.colors.TextPrimary
             },
             focusedContainerColor = if (selected) {
-                NuvioTheme.colors.SecondaryVariant
+                KovelyxTheme.colors.SecondaryVariant
             } else {
-                NuvioTheme.colors.FocusBackground
+                KovelyxTheme.colors.FocusBackground
             },
             focusedContentColor = if (selected) {
-                NuvioTheme.colors.OnSecondaryVariant
+                KovelyxTheme.colors.OnSecondaryVariant
             } else {
-                NuvioTheme.colors.FocusContent
+                KovelyxTheme.colors.FocusContent
             }
         )
     ) {

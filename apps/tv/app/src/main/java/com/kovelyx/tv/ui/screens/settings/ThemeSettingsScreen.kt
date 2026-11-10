@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.app.Activity
 import android.content.Context
@@ -72,7 +72,7 @@ import com.kovelyx.tv.domain.model.AppIconOption
 import com.kovelyx.tv.domain.model.AppTheme
 import com.kovelyx.tv.domain.model.CustomThemeColors
 import com.kovelyx.tv.domain.model.SettingsUiStyle
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import com.kovelyx.tv.ui.theme.ThemeColors
 import com.kovelyx.tv.ui.theme.accentBrush
@@ -156,7 +156,7 @@ fun ThemeSettingsContent(
             customThemeFocusRequester.requestFocusAfterFrames()
         }
     }
-    val appliedSettingsUiStyle = NuvioTheme.settingsUiStyle
+    val appliedSettingsUiStyle = KovelyxTheme.settingsUiStyle
     LaunchedEffect(Unit) {
         if (viewModel.consumeStyleFocusRestore()) {
             styleFocusRequesters[appliedSettingsUiStyle]?.requestFocusAfterFrames()
@@ -197,7 +197,7 @@ fun ThemeSettingsContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .settingsOptionRow(firstThemeFocusRequester),
-                        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xs, vertical = NuvioTheme.spacing.xs),
+                        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xs, vertical = KovelyxTheme.spacing.xs),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         itemsIndexed(
@@ -272,7 +272,7 @@ fun ThemeSettingsContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(IntrinsicSize.Min)
-                        .padding(horizontal = NuvioTheme.spacing.xs, vertical = NuvioTheme.spacing.xs)
+                        .padding(horizontal = KovelyxTheme.spacing.xs, vertical = KovelyxTheme.spacing.xs)
                         .settingsOptionRow(styleFocusRequesters.getValue(firstAvailableStyle)),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -446,13 +446,13 @@ private fun ThemeSwatchChip(
                 }
             },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         border = CardDefaults.border(
             border = Border.None,
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = chipShape
             )
         ),
@@ -467,7 +467,7 @@ private fun ThemeSwatchChip(
                     role = Role.RadioButton
                     this.selected = isSelected
                 }
-                .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.md),
+                .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.md),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
@@ -487,12 +487,12 @@ private fun ThemeSwatchChip(
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
             Text(
                 text = theme.localizedName(),
                 style = MaterialTheme.typography.labelMedium,
-                color = if (isFocused || isSelected) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+                color = if (isFocused || isSelected) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary,
                 maxLines = 1
             )
         }
@@ -519,16 +519,16 @@ private fun SettingsStyleOptionCard(
                 }
             },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         border = CardDefaults.border(
             border = if (isSelected) Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.hairline),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.hairline),
                 shape = cardShape
             ) else Border.None,
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = cardShape
             )
         ),
@@ -538,13 +538,13 @@ private fun SettingsStyleOptionCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.md)
+                .padding(KovelyxTheme.spacing.md)
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = style.localizedName(),
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (isFocused || isSelected) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+                    color = if (isFocused || isSelected) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary,
                     maxLines = 1,
                     modifier = Modifier.align(Alignment.CenterStart)
                 )
@@ -552,7 +552,7 @@ private fun SettingsStyleOptionCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(R.string.cd_selected),
-                        tint = NuvioTheme.colors.Secondary,
+                        tint = KovelyxTheme.colors.Secondary,
                         modifier = Modifier
                             .size(16.dp)
                             .align(Alignment.CenterEnd)
@@ -560,12 +560,12 @@ private fun SettingsStyleOptionCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
 
             Text(
                 text = style.localizedDescription(),
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextTertiary,
+                color = KovelyxTheme.colors.TextTertiary,
                 maxLines = 2
             )
         }

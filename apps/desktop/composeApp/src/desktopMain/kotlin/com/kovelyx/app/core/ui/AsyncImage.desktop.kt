@@ -54,7 +54,7 @@ private val IsWindowsDesktop: Boolean =
         ?: false
 
 @Composable
-internal actual fun NuvioAsyncImage(
+internal actual fun KovelyxAsyncImage(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier,
@@ -70,7 +70,7 @@ internal actual fun NuvioAsyncImage(
     colorFilter: ColorFilter?,
     filterQuality: FilterQuality?,
     clipToBounds: Boolean,
-    desktopImageScaling: NuvioDesktopImageScaling,
+    desktopImageScaling: KovelyxDesktopImageScaling,
 ) {
     val gifPath = remember(model) {
         val data = if (model is ImageRequest) model.data else model
@@ -116,10 +116,10 @@ internal actual fun NuvioAsyncImage(
     }
     val context = LocalPlatformContext.current
     val effectiveDesktopImageScaling = remember(desktopImageScaling) {
-        if (IsWindowsDesktop) desktopImageScaling else NuvioDesktopImageScaling.Disabled
+        if (IsWindowsDesktop) desktopImageScaling else KovelyxDesktopImageScaling.Disabled
     }
     val requestModel = remember(context, model, effectiveDesktopImageScaling) {
-        if (effectiveDesktopImageScaling == NuvioDesktopImageScaling.Disabled) {
+        if (effectiveDesktopImageScaling == KovelyxDesktopImageScaling.Disabled) {
             model
         } else {
             model.withDesktopHighQualitySize(context)
@@ -198,8 +198,8 @@ private fun Any?.withDesktopHighQualitySize(context: PlatformContext): Any? {
     }
 }
 
-private fun Image.toScaledBitmapPainter(desktopImageScaling: NuvioDesktopImageScaling): Painter? {
-    if (desktopImageScaling == NuvioDesktopImageScaling.Disabled) return null
+private fun Image.toScaledBitmapPainter(desktopImageScaling: KovelyxDesktopImageScaling): Painter? {
+    if (desktopImageScaling == KovelyxDesktopImageScaling.Disabled) return null
 
     return (this as? BitmapImage)
         ?.bitmap

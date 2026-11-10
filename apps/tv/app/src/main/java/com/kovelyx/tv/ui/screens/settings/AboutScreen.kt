@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.content.Intent
 import android.net.Uri
@@ -117,7 +117,7 @@ fun AboutSettingsContent(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         CompositionLocalProvider(LocalBringIntoViewSpec provides defaultBringIntoViewSpec) {
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
 
                             MemberBrandWordmark(
                                 height = 40.dp,
@@ -127,18 +127,18 @@ fun AboutSettingsContent(
                             Text(
                                 text = stringResource(R.string.about_made_with_love),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = NuvioTheme.colors.TextSecondary,
+                                color = KovelyxTheme.colors.TextSecondary,
                                 textAlign = TextAlign.Center
                             )
 
                             Text(
                                 text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = NuvioTheme.colors.TextSecondary,
+                                color = KovelyxTheme.colors.TextSecondary,
                                 textAlign = TextAlign.Center
                             )
 
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
 
 
 

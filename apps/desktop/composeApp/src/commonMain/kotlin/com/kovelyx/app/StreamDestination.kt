@@ -16,8 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.debrid.DirectDebridPlayableResult
 import com.kovelyx.app.features.debrid.DirectDebridPlaybackResolver
@@ -63,7 +63,7 @@ private data class PendingP2pStreamOpen(
 @Composable
 internal fun StreamDestination(
     route: StreamRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     p2pEnabled: Boolean,
     openExternalPlayback: suspend (PlayerLaunch) -> Boolean,
     openExternalStreamUrl: (String) -> Boolean,
@@ -406,7 +406,7 @@ internal fun StreamDestination(
                 .onFailure { if (it is CancellationException) throw it }
                 .getOrElse { error ->
                     if (!StreamsRepository.skipAutoPlayStream(selectedStream)) {
-                        NuvioToastController.show(error.serverPlaybackMessage())
+                        KovelyxToastController.show(error.serverPlaybackMessage())
                     }
                     return@LaunchedEffect
                 }
@@ -423,7 +423,7 @@ internal fun StreamDestination(
                 else -> {
                     val hasNextCandidate = StreamsRepository.skipAutoPlayStream(selectedStream)
                     if (!hasNextCandidate) {
-                        resolved.toastMessage()?.let { NuvioToastController.show(it) }
+                        resolved.toastMessage()?.let { KovelyxToastController.show(it) }
                     }
                     if (!hasNextCandidate && resolved == DirectDebridPlayableResult.Stale) {
                         StreamsRepository.reload(
@@ -543,7 +543,7 @@ internal fun StreamDestination(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            NuvioLoadingIndicator()
+            KovelyxLoadingIndicator()
         }
         return
     }
@@ -564,7 +564,7 @@ internal fun StreamDestination(
                     .onFailure { if (it is CancellationException) throw it }
                     .getOrElse { error ->
                         preparingServerStream = false
-                        NuvioToastController.show(error.serverPlaybackMessage())
+                        KovelyxToastController.show(error.serverPlaybackMessage())
                         return@launch
                     }
                 val serverResumeMs = serverResumePositionMs(prepared)
@@ -598,7 +598,7 @@ internal fun StreamDestination(
                         forceInternal = forceInternal,
                     )
                     else -> {
-                        resolved.toastMessage()?.let { NuvioToastController.show(it) }
+                        resolved.toastMessage()?.let { KovelyxToastController.show(it) }
                         if (resolved == DirectDebridPlayableResult.Stale) {
                             StreamsRepository.reload(
                                 type = launch.type,
@@ -632,7 +632,7 @@ internal fun StreamDestination(
                 val resolved = YouTubeStreamResolver.Default.resolve(stream)
                 resolvingYouTubeStream = false
                 if (resolved == null) {
-                    NuvioToastController.show(getString(Res.string.youtube_resolution_failed))
+                    KovelyxToastController.show(getString(Res.string.youtube_resolution_failed))
                     return@launch
                 }
                 openSelectedStream(

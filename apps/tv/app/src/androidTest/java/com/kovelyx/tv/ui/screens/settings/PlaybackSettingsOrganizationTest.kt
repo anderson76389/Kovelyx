@@ -19,7 +19,7 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.data.local.InternalPlayerEngine
 import com.kovelyx.tv.data.local.PlayerPreference
 import com.kovelyx.tv.data.local.PlayerSettings
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -126,7 +126,7 @@ class PlaybackSettingsOrganizationTest {
 
     private fun setSections(settings: PlayerSettings = PlayerSettings()) {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 Box(modifier = Modifier.requiredHeight(6000.dp)) {
                     PlaybackSettingsSections(
                         playerSettings = settings,

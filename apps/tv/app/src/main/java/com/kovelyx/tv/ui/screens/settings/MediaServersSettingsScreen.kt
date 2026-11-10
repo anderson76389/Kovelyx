@@ -33,7 +33,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mediaserver.ServerConnection
 import com.kovelyx.tv.data.mediaserver.ServerFailure
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun MediaServersSettingsContent(
@@ -61,7 +61,7 @@ internal fun MediaServersSettingsContent(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = NuvioTheme.spacing.sm),
+                    contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.sm),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(key = "servers_label") { ServerSectionLabel(stringResource(R.string.servers_section_connected)) }
@@ -70,8 +70,8 @@ internal fun MediaServersSettingsContent(
                             Text(
                                 text = stringResource(R.string.servers_empty),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = NuvioTheme.colors.TextSecondary,
-                                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.sm)
+                                color = KovelyxTheme.colors.TextSecondary,
+                                modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.sm)
                             )
                         }
                     }
@@ -121,8 +121,8 @@ internal fun ServerSectionLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleSmall,
-        color = NuvioTheme.colors.TextPrimary,
-        modifier = Modifier.padding(start = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.sm)
+        color = KovelyxTheme.colors.TextPrimary,
+        modifier = Modifier.padding(start = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.sm)
     )
 }
 

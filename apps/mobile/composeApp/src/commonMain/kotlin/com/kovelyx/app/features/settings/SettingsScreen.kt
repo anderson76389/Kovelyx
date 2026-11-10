@@ -50,9 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.ui.LocalScreenActive
 import com.kovelyx.app.core.ui.ScreenActivityEffect
 import com.kovelyx.app.core.ui.AppTheme
-import com.kovelyx.app.core.ui.LocalNuvioBottomNavigationOverlayPadding
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.LocalKovelyxBottomNavigationOverlayPadding
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.core.ui.PlatformBackHandler
 import com.kovelyx.app.core.ui.isLiquidGlassNativeTabBarSupported
 import com.kovelyx.app.features.addons.AddonRepository
@@ -658,14 +658,14 @@ private fun MobileSettingsScreen(
             }
         }
 
-        NuvioScreen(
+        KovelyxScreen(
             modifier = Modifier.nestedScroll(rootSearchRevealConnection),
             listState = listState,
         ) {
             if (showInternalHeader) {
                 stickyHeader {
                     val previousPage = page.previousPage()
-                    NuvioScreenHeader(
+                    KovelyxScreenHeader(
                         title = stringResource(page.titleRes),
                         onBack = previousPage?.let { { onNavigateBack() } },
                     )
@@ -1051,7 +1051,7 @@ private fun TabletSettingsScreen(
             ScreenActivityEffect(listState) { screenActive ->
                 if (!screenActive) listState.stopScroll()
             }
-            val bottomOverlayPadding = LocalNuvioBottomNavigationOverlayPadding.current
+            val bottomOverlayPadding = LocalKovelyxBottomNavigationOverlayPadding.current
             val rootSearchRevealConnection = rememberSettingsRootSearchRevealConnection(
                 page = page,
                 listState = listState,

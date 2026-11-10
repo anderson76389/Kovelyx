@@ -55,11 +55,11 @@ import coil3.request.ImageRequest
 import com.kovelyx.tv.ui.components.AutoResizeText
 import com.kovelyx.tv.ui.components.BrandWordmark
 import com.kovelyx.tv.ui.components.ProfileAvatarCircle
-import com.kovelyx.tv.ui.theme.NuvioComponents
-import com.kovelyx.tv.ui.theme.NuvioMotion
-import com.kovelyx.tv.ui.theme.NuvioRadii
-import com.kovelyx.tv.ui.theme.NuvioStrokes
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxComponents
+import com.kovelyx.tv.ui.theme.KovelyxMotion
+import com.kovelyx.tv.ui.theme.KovelyxRadii
+import com.kovelyx.tv.ui.theme.KovelyxStrokes
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.theme.accentBrush
 import com.kovelyx.tv.ui.util.contentTextDirection
 import androidx.compose.ui.graphics.BlendMode
@@ -69,9 +69,9 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.hazeEffect
 
-private val SidebarLeadingVisualSize = NuvioComponents.tokens.sidebar.leadingVisual
-private val SidebarContentGap = NuvioComponents.tokens.sidebar.contentGap
-private val SidebarProfileContentGap = NuvioComponents.tokens.sidebar.contentGap + NuvioTheme.spacing.xs
+private val SidebarLeadingVisualSize = KovelyxComponents.tokens.sidebar.leadingVisual
+private val SidebarContentGap = KovelyxComponents.tokens.sidebar.contentGap
+private val SidebarProfileContentGap = KovelyxComponents.tokens.sidebar.contentGap + KovelyxTheme.spacing.xs
 
 @Composable
 internal fun ModernSidebarBlurPanel(
@@ -103,14 +103,14 @@ internal fun ModernSidebarBlurPanel(
         delayedBlurProgress > 0f
     val expandedPanelBlurModifier = if (showPanelBlur) {
         Modifier.hazeEffect(state = sidebarHazeState) {
-            blurRadius = NuvioTheme.effects.blurPanel * delayedBlurProgress
+            blurRadius = KovelyxTheme.effects.blurPanel * delayedBlurProgress
             noiseFactor = 0.04f * delayedBlurProgress
             inputScale = HazeInputScale.Fixed(0.66f)
         }
     } else {
         Modifier
     }
-    val colors = NuvioTheme.colors
+    val colors = KovelyxTheme.colors
     val bgElevated = colors.BackgroundElevated
     val bgCard = colors.BackgroundCard
     val borderBase = colors.Border
@@ -147,18 +147,18 @@ internal fun ModernSidebarBlurPanel(
             .background(brush = panelBackgroundBrush, shape = panelShape)
             .then(
                 if (panelBorderColor != Color.Transparent) {
-                    Modifier.border(width = NuvioStrokes.tokens.hairline, color = panelBorderColor, shape = panelShape)
+                    Modifier.border(width = KovelyxStrokes.tokens.hairline, color = panelBorderColor, shape = panelShape)
                 } else {
                     Modifier
                 }
             )
-            .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.lg - NuvioTheme.spacing.xxs)
+            .padding(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.lg - KovelyxTheme.spacing.xxs)
     ) {
         if (showProfileSelector && activeProfileName.isNotEmpty()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .offset(y = NuvioTheme.spacing.md),
+                    .offset(y = KovelyxTheme.spacing.md),
                 contentAlignment = Alignment.Center
             ) {
                 SidebarProfileItem(
@@ -178,7 +178,7 @@ internal fun ModernSidebarBlurPanel(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .offset(y = NuvioTheme.spacing.md),
+                    .offset(y = KovelyxTheme.spacing.md),
                 contentAlignment = Alignment.Center
             ) {
                 BrandWordmark(
@@ -191,7 +191,7 @@ internal fun ModernSidebarBlurPanel(
             }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         Column(
             modifier = Modifier
@@ -202,7 +202,7 @@ internal fun ModernSidebarBlurPanel(
         ) {
             Column(
                 modifier = Modifier.offset(y = (-12).dp),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm - NuvioTheme.spacing.xxs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm - KovelyxTheme.spacing.xxs)
             ) {
                 drawerItems.forEachIndexed { index, item ->
                     key(item.route) {
@@ -245,9 +245,9 @@ private fun SidebarNavigationItem(
     onClick: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val colors = NuvioTheme.colors
-    val shape = RoundedCornerShape(NuvioRadii.tokens.full)
-    val palette = NuvioTheme.palette
+    val colors = KovelyxTheme.colors
+    val shape = RoundedCornerShape(KovelyxRadii.tokens.full)
+    val palette = KovelyxTheme.palette
     val accentColor = palette.secondary
     val backgroundColorTarget = when {
         isFocused && selected -> accentColor.copy(alpha = 0.28f)
@@ -257,7 +257,7 @@ private fun SidebarNavigationItem(
     }
     val animatedBackgroundColor by animateColorAsState(
         targetValue = backgroundColorTarget,
-        animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.fast),
+        animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.fast),
         label = "sidebarItemBackground"
     )
     val backgroundColor = if (selected && !isFocused) backgroundColorTarget else animatedBackgroundColor
@@ -269,7 +269,7 @@ private fun SidebarNavigationItem(
     }
     val animatedContentColor by animateColorAsState(
         targetValue = contentColorTarget,
-        animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.fast),
+        animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.fast),
         label = "sidebarItemContent"
     )
     val contentColor = if (selected && !isFocused) contentColorTarget else animatedContentColor
@@ -282,13 +282,13 @@ private fun SidebarNavigationItem(
     }
     val animatedIconTint by animateColorAsState(
         targetValue = iconTintTarget,
-        animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.fast),
+        animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.fast),
         label = "sidebarItemIconTint"
     )
     val iconTint = if (selected && !isFocused) iconTintTarget else animatedIconTint
     val itemScale by animateFloatAsState(
         targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.fast, easing = NuvioMotion.tokens.easings.standard),
+        animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.fast, easing = KovelyxMotion.tokens.easings.standard),
         label = "sidebarItemScale"
     )
 
@@ -312,7 +312,7 @@ private fun SidebarNavigationItem(
         border = CardDefaults.border(
             border = androidx.tv.material3.Border.None,
             focusedBorder = androidx.tv.material3.Border(
-                border = androidx.compose.foundation.BorderStroke(NuvioStrokes.tokens.thin, Color.Transparent),
+                border = androidx.compose.foundation.BorderStroke(KovelyxStrokes.tokens.thin, Color.Transparent),
                 shape = shape
             )
         ),
@@ -327,7 +327,7 @@ private fun SidebarNavigationItem(
                     this.selected = selected
                 }
                 .fillMaxWidth()
-                .padding(horizontal = NuvioTheme.spacing.lg - NuvioTheme.spacing.xxs, vertical = NuvioTheme.spacing.sm + NuvioTheme.spacing.xxs),
+                .padding(horizontal = KovelyxTheme.spacing.lg - KovelyxTheme.spacing.xxs, vertical = KovelyxTheme.spacing.sm + KovelyxTheme.spacing.xxs),
             verticalAlignment = Alignment.CenterVertically
         ) {
         Box(
@@ -341,7 +341,7 @@ private fun SidebarNavigationItem(
         ) {
             val iconModifier = if (iconBrush != null) {
                 Modifier
-                    .size(NuvioComponents.tokens.sidebar.iconSize)
+                    .size(KovelyxComponents.tokens.sidebar.iconSize)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .drawWithCache {
                         onDrawWithContent {
@@ -350,7 +350,7 @@ private fun SidebarNavigationItem(
                         }
                     }
             } else {
-                Modifier.size(NuvioComponents.tokens.sidebar.iconSize)
+                Modifier.size(KovelyxComponents.tokens.sidebar.iconSize)
             }
             when {
                 icon != null -> Icon(
@@ -392,8 +392,8 @@ private fun SidebarProfileItem(
     onClick: () -> Unit
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val colors = NuvioTheme.colors
-    val shape = RoundedCornerShape(NuvioRadii.tokens.full)
+    val colors = KovelyxTheme.colors
+    val shape = RoundedCornerShape(KovelyxRadii.tokens.full)
     val backgroundColor = if (isFocused) Color.White.copy(alpha = 0.12f) else Color.Transparent
     Card(
         onClick = onClick,
@@ -410,7 +410,7 @@ private fun SidebarProfileItem(
         border = CardDefaults.border(
             border = androidx.tv.material3.Border.None,
             focusedBorder = androidx.tv.material3.Border(
-                border = androidx.compose.foundation.BorderStroke(NuvioStrokes.tokens.thin, Color.Transparent),
+                border = androidx.compose.foundation.BorderStroke(KovelyxStrokes.tokens.thin, Color.Transparent),
                 shape = shape
             )
         ),
@@ -424,7 +424,7 @@ private fun SidebarProfileItem(
                     role = Role.Button
                 }
                 .fillMaxWidth()
-                .padding(horizontal = NuvioTheme.spacing.lg - NuvioTheme.spacing.xxs, vertical = NuvioTheme.spacing.sm + NuvioTheme.spacing.xxs),
+                .padding(horizontal = KovelyxTheme.spacing.lg - KovelyxTheme.spacing.xxs, vertical = KovelyxTheme.spacing.sm + KovelyxTheme.spacing.xxs),
             verticalAlignment = Alignment.CenterVertically
         ) {
         Box(
@@ -458,7 +458,7 @@ private fun SidebarProfileItem(
 @Composable
 private fun rememberRawSvgPainter(rawIconRes: Int): Painter {
     val density = androidx.compose.ui.platform.LocalDensity.current
-    val sizePx = with(density) { NuvioTheme.spacing.xl.roundToPx() }
+    val sizePx = with(density) { KovelyxTheme.spacing.xl.roundToPx() }
     return rememberAsyncImagePainter(
         model = ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
             .data(rawIconRes)

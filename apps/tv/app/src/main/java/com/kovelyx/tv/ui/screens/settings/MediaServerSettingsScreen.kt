@@ -38,8 +38,8 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mediaserver.ServerCapability
 import com.kovelyx.tv.data.mediaserver.messageRes
 import com.kovelyx.tv.data.mediaserver.supports
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun MediaServerSettingsContent(
@@ -77,7 +77,7 @@ internal fun MediaServerSettingsContent(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = NuvioTheme.spacing.sm),
+                    contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.sm),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(key = "server_enabled") {
@@ -112,15 +112,15 @@ internal fun MediaServerSettingsContent(
                         }
                     }
                     item(key = "server_libraries_label") {
-                        Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)) {
                             ServerSectionLabel(stringResource(R.string.servers_libraries))
                             Text(
                                 text = stringResource(
                                     if (connection.libraries.isEmpty()) R.string.servers_no_libraries else R.string.servers_libraries_description
                                 ),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = NuvioTheme.colors.TextSecondary,
-                                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.sm)
+                                color = KovelyxTheme.colors.TextSecondary,
+                                modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.sm)
                             )
                         }
                     }
@@ -186,7 +186,7 @@ internal fun MediaServerSettingsContent(
     }
 
     if (confirmRemove) {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { confirmRemove = false },
             title = stringResource(R.string.servers_remove_confirm_title),
             subtitle = stringResource(R.string.servers_remove_confirm_message, connection.name)

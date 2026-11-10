@@ -1,6 +1,6 @@
 package com.kovelyx.app.features.library
 
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.tracking.TrackingLibraryTab
 import com.kovelyx.app.features.tracking.TrackingMembershipApplyResult
 import com.kovelyx.app.features.tracking.TrackingProviderRegistry
@@ -17,7 +17,7 @@ internal suspend fun showTrackingMembershipRewriteFeedback(result: TrackingMembe
     val tabs = TrackingProviderRegistry.libraryProvider(rewrite.providerId)?.snapshot()?.tabs.orEmpty()
     val requestedTitle = tabs.statusTitle(rewrite.requestedListKey, providerName)
     val resolvedTitle = tabs.statusTitle(rewrite.resolvedListKey, providerName)
-    NuvioToastController.show(
+    KovelyxToastController.show(
         getString(
             Res.string.tracking_list_status_rewritten,
             providerName,

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Icon
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.theme.accentBrush
 
 @Composable
@@ -25,7 +25,7 @@ fun WatchedMarker(
     size: Dp = 21.dp,
     iconSize: Dp = 20.dp
 ) {
-    val palette = NuvioTheme.palette
+    val palette = KovelyxTheme.palette
 
     Box(
         modifier = modifier

@@ -1,0 +1,410 @@
+[
+  {
+    "name": "audit/deep-release-independence-20261110",
+    "sha": "43fed647d3c90de30820a169dfb337a4f5ba0385",
+    "pr": 109,
+    "merge_sha": "2b6a8d911191c56fa386bbcdcc308febbc61b054"
+  },
+  {
+    "name": "audit/final-nuvio-releases-independence-20261108",
+    "sha": "78f45c7ae400a8321f344593c29bc3d52300901c",
+    "pr": 104,
+    "merge_sha": "4ed88973cbb76f003fca9a40568ff2561f1ca11d"
+  },
+  {
+    "name": "audit/full-repository-independence-20261108",
+    "sha": "4c0cff5497679418cb0d370037f8975b6f483c67",
+    "pr": 99,
+    "merge_sha": "3fa836b84c0b8ee45ea37f07b9b72b259caa1f95"
+  },
+  {
+    "name": "cleanup/remove-tracked-legacy-workspace-files-20261107",
+    "sha": "503096b69ef1e8159ab593818dbc7e975bcaea69",
+    "pr": 87,
+    "merge_sha": "1f6a2bc18c4efa9d418b18a4618c374aedd7c0a5"
+  },
+  {
+    "name": "cleanup/remove-upstream-nuvio-pointers-20261023",
+    "sha": "f6dc00cef5e39efeadf2ee6c8250b65ddc9b2e28",
+    "pr": 56,
+    "merge_sha": "4f0a624613d95c6874bffec1a97d1a5291dcb150"
+  },
+  {
+    "name": "cleanup/retire-nuvio-file-names-and-legacy-docs-20261106",
+    "sha": "36165b8f39ae91b105d25634dba4d41196ee27a6",
+    "pr": 86,
+    "merge_sha": "6f4d9a8b81908747293d0ca8ae923c5a69dd8977"
+  },
+  {
+    "name": "cleanup/retire-supabase-docs-and-config-20261105",
+    "sha": "7d723a55c53f6648be79608e1ea0e252ea7eae83",
+    "pr": 83,
+    "merge_sha": "45de170c121f60211e39edd17ce9b9e28b9adec1"
+  },
+  {
+    "name": "docs/pc-download-links-verified-20261014",
+    "sha": "bf1ded4915de778288d2b05dcb3d307ae27bf97f",
+    "pr": 24,
+    "merge_sha": "e896e6ff7a25300f39ae86565fbf24ca699ae0d8"
+  },
+  {
+    "name": "feat/automatic-windows-preview-releases",
+    "sha": "2919c719094a3ed51cd5c8daf1fcee7a55f39593",
+    "pr": 27,
+    "merge_sha": "3dc2b25f18d0b590f16ba243f38a1d251700b627"
+  },
+  {
+    "name": "feat/copy-addons-catalogues-between-profiles-20261108",
+    "sha": "8d779af618cd34645a954cd8028bb6330c82f2b0",
+    "pr": 96,
+    "merge_sha": "044e20a282c231760900c4f848da242d773e83fa"
+  },
+  {
+    "name": "feat/desktop-complete-french-ui",
+    "sha": "9cfad7fae788fa4f2a878027f37c60a9e29125e4",
+    "pr": 28,
+    "merge_sha": "49352aa35c936d6e547ae38b0263d1d88af55736"
+  },
+  {
+    "name": "feat/pc-github-self-updater",
+    "sha": "587d33d459dea122bfbbd4c36a5f97ebe33b13c0",
+    "pr": 30,
+    "merge_sha": "6ef5d8a4f8347137699904f0387fb71372ebc6ef"
+  },
+  {
+    "name": "feat/pc-linux-native-packages",
+    "sha": "ac5b726ba0e0a7ca66a23f1e40264c1f91066a25",
+    "pr": 25,
+    "merge_sha": "3be6618a83e9c57712e5d43a2be25071116ee71d"
+  },
+  {
+    "name": "feat/pc-only-site-linux-20261014",
+    "sha": "3d4583895f02f258f64c87542929f83ca2afa767",
+    "pr": 20,
+    "merge_sha": "e2526b30e8df2b4b23a7dc2cc537db596266eee9"
+  },
+  {
+    "name": "feat/pc-release-windows-linux-20261014",
+    "sha": "51f5e7b6b3659037b7d9ecfad8c03019bb2be652",
+    "pr": 21,
+    "merge_sha": "339ea6454e78a06ba5ed554ac43f8dccd0f2d598"
+  },
+  {
+    "name": "feat/pc-windows-linux-appimage-20261014",
+    "sha": "f21395205da5c7f968b336c0ca3b64d89471d0e7",
+    "pr": 18,
+    "merge_sha": "db370e6b9bc51cf105163eb16baeb7aa88c3580d"
+  },
+  {
+    "name": "feat/site-prioritize-windows-exe-20261014",
+    "sha": "6a7fc0b9dd748f39bb316cdd32780b103d43b149",
+    "pr": 16,
+    "merge_sha": "0de6bd937c220ebbc88aa8b36b9b2eb2fe646eb7"
+  },
+  {
+    "name": "feat/windows-profile-images-setup-exe-20261014",
+    "sha": "8810fe6a9a9d1c1dc6475876c5971c29c9fb2772",
+    "pr": 15,
+    "merge_sha": "3f1001fdd9c05068c0d1b31f36de9bf5687965da"
+  },
+  {
+    "name": "feature/ma-collection-direct-import-20261014",
+    "sha": "7ac603558f6f0594b2ecb5e08b952d15d93691e5",
+    "pr": 32,
+    "merge_sha": "d0002317b0b4aefa430bc0d2ef8d7ba5bb3f6e52"
+  },
+  {
+    "name": "feature/unified-preview-releases-safe-20261021",
+    "sha": "ccce5dc33c0637f4f1868e594fc12525ee4dfbc6",
+    "pr": 42,
+    "merge_sha": "b046f49dcef775d9e0f57747138cdfe624a2f1f6"
+  },
+  {
+    "name": "finish/cloudflare-readiness-docs-20261108",
+    "sha": "55f6eecd43a58c51c18db0e02fc76bfebd8f823f",
+    "pr": 100,
+    "merge_sha": "ca4e325821b3e7122e550b24bdb6e58d54199a2c"
+  },
+  {
+    "name": "fix/android-update-banner-package-family-20261105",
+    "sha": "8799741e9a68dc6f991d7131773560fcc6f16fe7",
+    "pr": 78,
+    "merge_sha": "2233e6ae9922e23137c1fa52675e1324d8e6c7cc"
+  },
+  {
+    "name": "fix/app-labels-kovelyx-no-test-20261027",
+    "sha": "f76dc0896a8e4dcd12d7f1efd08d6a01011e044b",
+    "pr": 67,
+    "merge_sha": "4e9e099f79f15de5a54007bd8c286735e8563e32"
+  },
+  {
+    "name": "fix/avatars-logout-account-screens-20261024",
+    "sha": "00f92a4f8dbe99daa8002fb150d14b73257544e9",
+    "pr": 61,
+    "merge_sha": "29ca5e9041ed5579f363549d647a60047eb529ff"
+  },
+  {
+    "name": "fix/branding-integrations-desktop-20261014",
+    "sha": "2b164c0f5f8cbd01a7a9eac1c153c5a84a78e08c",
+    "pr": 33,
+    "merge_sha": "3409a1b2a2fc6b48140b9417dc866260290fa0d0"
+  },
+  {
+    "name": "fix/cloudflare-native-auth-origin-20261023",
+    "sha": "66b30f7b291e4ae04a84357e69a15ed8a60f1a39",
+    "pr": 54,
+    "merge_sha": "66a67ab88698eacccd1018dd4890cc5177b901c1"
+  },
+  {
+    "name": "fix/cloudflare-offline-tests-settings-init-20261105",
+    "sha": "a4440440e619919cbaa1304dc7cd05064b758057",
+    "pr": 84,
+    "merge_sha": "5d2b8e8ad660ffbbe4df0cc6d338489aa341c75c"
+  },
+  {
+    "name": "fix/cloudflare-prod-readiness-20261024",
+    "sha": "0347a08ba834d7f6ac03210676c490610557f9ba",
+    "pr": 60,
+    "merge_sha": "5e92710feea84919e22a7e684e2945d8eab4ffbb"
+  },
+  {
+    "name": "fix/cloudflare-production-backup-and-readiness-20261024",
+    "sha": "9b772bca2d549530a1df68dcf4474418b617269b",
+    "pr": 63,
+    "merge_sha": "3d48589e634e1296c647d96f049d7974f8691a3c"
+  },
+  {
+    "name": "fix/cloudflare-real-sync-queue-and-e2e-20261024",
+    "sha": "b5355ed870e02439294f2c1a1bd9f93aa1e1c156",
+    "pr": 58,
+    "merge_sha": "5db96b65aaa382b8db4e075d610fc1790383150f"
+  },
+  {
+    "name": "fix/cloudflare-tv-logout-avatar-loading-20261026",
+    "sha": "cae54562f2118f14b60b6df7a78c45447c15555a",
+    "pr": 65,
+    "merge_sha": "859c042fe6465211129234630575a52a1552f072"
+  },
+  {
+    "name": "fix/cloudflare-tv-retired-backend-guard-20261105",
+    "sha": "cce570eb1ec599c4f1b0efe0bb8be01f6bdc97fd",
+    "pr": 82,
+    "merge_sha": "c21a8926a56a579d977454b9bdb5c86e1dee44c8"
+  },
+  {
+    "name": "fix/cross-platform-version-update-detection-20261021",
+    "sha": "d603192373ab9e73a1b64d498d7b847627230f63",
+    "pr": 44,
+    "merge_sha": "01a7d93018fe8f8074e0d5fa2741b7458fd50a75"
+  },
+  {
+    "name": "fix/fr-plural-seasons-coverage",
+    "sha": "2963f18ad84c4f63238b5dd2f1bce0c5e05a7978",
+    "pr": 29,
+    "merge_sha": "3913d18c363bfecf33e40ee49f332a0259aab9bd"
+  },
+  {
+    "name": "fix/french-release-notes-20261024",
+    "sha": "a806354d99cff5af0194e3ce1b06f83c78477e45",
+    "pr": 57,
+    "merge_sha": "37e3a3f06ee8b350708e23f95625c693bb73b2f9"
+  },
+  {
+    "name": "fix/library-external-layout-20261104",
+    "sha": "90fece7d40ceb15b67e486a8fc60955e6709d22d",
+    "pr": 76,
+    "merge_sha": "6e1fea377965e6b961ad5f1d0939c6e15ad80f99"
+  },
+  {
+    "name": "fix/linux-appimage-executable-bit-20261014",
+    "sha": "3577a3d099ba5b58cee26fd9f196056932bec050",
+    "pr": 23,
+    "merge_sha": "9264826992f6bead438df88e4f15c154bb258d0a"
+  },
+  {
+    "name": "fix/linux-gstreamer-ubuntu2404-20261014",
+    "sha": "0a11ab640045eec9c33765fee1547f9dedb49b7e",
+    "pr": 22,
+    "merge_sha": "6e8984827d07c2c594c3d25c896ab415dd89b8cb"
+  },
+  {
+    "name": "fix/linux-runner-minimal-native-packages-20261014",
+    "sha": "4b8ac6f6659c587a3bd4bcd9b6d688f8c353dd65",
+    "pr": 19,
+    "merge_sha": "eb477675677ee1c8f9be79b53028af94e4403175"
+  },
+  {
+    "name": "fix/media3-main-integration-20261021",
+    "sha": "c1fc6ffc458cf489e971f24917aae29ded5ea285",
+    "pr": 43,
+    "merge_sha": "3389cda18afcf6f53d1fc23e21222afece5b9be5"
+  },
+  {
+    "name": "fix/metadata-details-recovery-20261014",
+    "sha": "e56e463facc5606b81db46076f1f2f1f1af72bde",
+    "pr": 38,
+    "merge_sha": "794aea80e21e8e53497ec28f1b98d09c258af9b9"
+  },
+  {
+    "name": "fix/mobile-independent-upstream-guards-20261027",
+    "sha": "f4a1a0afed11495b713fdee18b2e9c82a9c47246",
+    "pr": 68,
+    "merge_sha": "38c16e75a93e3b55b2de1d9f9d8b5c53e977d993"
+  },
+  {
+    "name": "fix/mobile-native-profile-images-20261024",
+    "sha": "17687f7e99d5298ee958b6466c0ce26d4634bbc3",
+    "pr": 62,
+    "merge_sha": "efa39b7e91660807feee5f18b9b070e7ff247dda"
+  },
+  {
+    "name": "fix/mobile-update-banner-every-release-20261105",
+    "sha": "c63f442f5322845f9328fe7dee6572235a55d0b6",
+    "pr": 79,
+    "merge_sha": "0fc09b6aa4e63625cf38a2a44f9c71da8d9db0ba"
+  },
+  {
+    "name": "fix/pc-kovelyx-branding-and-tracking",
+    "sha": "febc7318a89c9eacb3d405ed6469525a4782edd2",
+    "pr": 26,
+    "merge_sha": "0a05e87f1faffa1485a26b67ba44619c4757993a"
+  },
+  {
+    "name": "fix/post-merge-validation-cloudflare-20261023",
+    "sha": "4cb966877d821aaa88c4e203dbbbbde366647771",
+    "pr": 55,
+    "merge_sha": "07dc10460faf377758728c7a8a0bb7db8d4d4c63"
+  },
+  {
+    "name": "fix/release-all-and-safe-cloudflare-pins-20261108",
+    "sha": "c6fbb263848115811f464f5b482492e55fe24103",
+    "pr": 98,
+    "merge_sha": "42346a188afca82c049c7822ae872c04bc3c057f"
+  },
+  {
+    "name": "fix/tv-cloudflare-independence-unified-20261028",
+    "sha": "5876501c14acb7f9cae1d2b23541b9e609004315",
+    "pr": 74,
+    "merge_sha": "4a484dec353838ac54c7fc806700e837173a9657"
+  },
+  {
+    "name": "fix/tv-hardware-decoder-fallback-apk-diagnostic-20261026",
+    "sha": "ac048fefcf8ebacbd9f2de67adbd1f756cb43d0c",
+    "pr": 64,
+    "merge_sha": "cb56ecdebb03d103e872ceeea22dd0653817e04a"
+  },
+  {
+    "name": "fix/tv-home-enrichment-retry-deterministic-20261106",
+    "sha": "a73c5f5d239c75d2950e145dd7d95c5af6191209",
+    "pr": 85,
+    "merge_sha": "29862775d5099986fd765cb79945b0690a857e25"
+  },
+  {
+    "name": "fix/tv-kovelyx-discovery-no-upstream-20261107",
+    "sha": "1d8ec74b2c3c7311b52341efa4607719a318f323",
+    "pr": 90,
+    "merge_sha": "fa0163caa18907502d45efab331ed9b11f882a8d"
+  },
+  {
+    "name": "fix/tv-settings-controls-20261022",
+    "sha": "d2e195dcd7e319347c94504fa0c24d34323a7914",
+    "pr": 48,
+    "merge_sha": "adf8b39a3d5b08b999aa6ced40a61a6b7e4b64fc"
+  },
+  {
+    "name": "fix/updater-install-all-platforms-20261024",
+    "sha": "166678639d7198d88649dd4acf2c56c575b80cc1",
+    "pr": 59,
+    "merge_sha": "7c4823039078e06e606043cd72abba1503d050b8"
+  },
+  {
+    "name": "fix/windows-close-jar-cache-stream-20261014",
+    "sha": "ba22f6e71dd9616d3b6b2c10bbedfd12b0474a9d",
+    "pr": 17,
+    "merge_sha": "255c19269d7db579f498d4c2d137a326dba7519b"
+  },
+  {
+    "name": "fix/windows-kotlin-icon-and-actions-20261014",
+    "sha": "6b7504fb8627c6e05d3c3dccf5bdbbca0db39f2f",
+    "pr": 13,
+    "merge_sha": "d940ff0cb4e52ac804468159cbf2b603d4d8cc9a"
+  },
+  {
+    "name": "fix/windows-legacy-dependencies-cloudflare-20261027",
+    "sha": "0e416ea59b7976e35defb092a9fde18665ffa050",
+    "pr": 66,
+    "merge_sha": "44b4d4840c16823831b0ffb649299725d0332386"
+  },
+  {
+    "name": "fix/windows-native-brand-links-20261014",
+    "sha": "d6dafc79b4297a809b386cba759ef6643e1f33cd",
+    "pr": 11,
+    "merge_sha": "ee004eca9ea6a484a1c9bee1f13e10314b0fb170"
+  },
+  {
+    "name": "fix/windows-offline-guest-20261014",
+    "sha": "333a071291cace3a94f0a310779a2fcb5f87b7ce",
+    "pr": 10,
+    "merge_sha": "d92cb2c8852ee7933b9d870f02a20422469a67bb"
+  },
+  {
+    "name": "fix/windows-one-click-updater-20261014",
+    "sha": "5754ceda46e57f0542b540583fadeda14cd1208f",
+    "pr": 31,
+    "merge_sha": "0378cb4e2d6de719f44abe6c4a85ea558184c8e1"
+  },
+  {
+    "name": "fix/windows-regression-suite-20261014",
+    "sha": "c4d45d565a319241bd526ba66108fb2fcb19f67b",
+    "pr": 14,
+    "merge_sha": "04974e9c345081318e7ce6debf615dee6422cfc1"
+  },
+  {
+    "name": "maintenance/retain-four-oldest-and-latest-releases-20261108",
+    "sha": "93d70351f3293707690f3df2acab52b1e978396e",
+    "pr": 103,
+    "merge_sha": "96845023727872c9058c44f85d7d6142f0f601c7"
+  },
+  {
+    "name": "migration/kovelyx-java-packages",
+    "sha": "5d4ce87a5a276b7a4a1f12f5b0ad7acbe540ff54",
+    "pr": 92,
+    "merge_sha": "fa09f2e96e4a83112972f6664f4111653df7c70d"
+  },
+  {
+    "name": "perf/tv-cache-cookie-privacy-20261108",
+    "sha": "277a2d4af6a8b32276a426a4fa5cf8a579fabcca",
+    "pr": 102,
+    "merge_sha": "b24f85838200924209eb48407628119150cf306f"
+  },
+  {
+    "name": "perf/tv-offline-launcher-refresh-20261108",
+    "sha": "74c0d2297816d1c5abef39d22bfdcb54472f5ee2",
+    "pr": 101,
+    "merge_sha": "33dd26e6ec059ea538be34e174aead0a6ffa7c23"
+  },
+  {
+    "name": "security/d1-restore-privacy-20261109",
+    "sha": "c087b7e357c0d2b57f7d7175495acf819d2af2d8",
+    "pr": 107,
+    "merge_sha": "c61eb2288cea36daac5a99e88596e17e97037bd6"
+  },
+  {
+    "name": "test/cloudflare-three-device-library-watched-e2e-20261107",
+    "sha": "205d3d5fec3e82c012e6176fa0ff6d1d1beec29e",
+    "pr": 88,
+    "merge_sha": "58c7f15b3d2452051d8035f5bbd0157ebe4476e5"
+  },
+  {
+    "name": "test/final-three-nuvio-removal-scenarios-20261108",
+    "sha": "7af993aec39d458957120df5e5506aad502df515",
+    "pr": 105,
+    "merge_sha": "13e3aa429bc8a8e2b264178890f0451b7e3ceff8"
+  },
+  {
+    "name": "test/ma-collection-cloud-live-site-e2e-20261108",
+    "sha": "107a2d5f131b3e722297a91bea6e4782a5c2460d",
+    "pr": 95,
+    "merge_sha": "2ce6f50d577500f823e7122278cd91298abe243d"
+  }
+]

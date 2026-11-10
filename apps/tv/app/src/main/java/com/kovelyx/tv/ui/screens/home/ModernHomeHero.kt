@@ -1,8 +1,8 @@
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioMotion
+import com.kovelyx.tv.ui.theme.KovelyxMotion
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -163,7 +163,7 @@ internal fun ModernHeroMediaLayer(
     Box(modifier = modifier) {
         androidx.compose.animation.Crossfade(
             targetState = imageModel,
-            animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.overlay),
+            animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.overlay),
             label = "heroBackdropCrossfade"
         ) { model ->
             AsyncImage(
@@ -353,9 +353,9 @@ private fun HeroTitleContent(
     val descriptionScale = if (portraitMode) 0.90f else 1f
     val titleScale = if (portraitMode) 0.92f else 1f
     val metaScale = 1f
-    val titleSpacing = NuvioTheme.spacing.sm * titleScale
-    val metaSpacing = NuvioTheme.spacing.sm * metaScale
-    val imdbMetaSpacing = NuvioTheme.spacing.xs * metaScale
+    val titleSpacing = KovelyxTheme.spacing.sm * titleScale
+    val metaSpacing = KovelyxTheme.spacing.sm * metaScale
+    val imdbMetaSpacing = KovelyxTheme.spacing.xs * metaScale
     val context = LocalContext.current
     val density = LocalDensity.current
     val headlineLarge = MaterialTheme.typography.headlineLarge
@@ -414,7 +414,7 @@ private fun HeroTitleContent(
             Text(
                 text = preview.title,
                 style = scaledTitleStyle,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -498,7 +498,7 @@ private fun HeroTitleContent(
                 Text(
                     text = leadingMetaText,
                     style = labelMedium,
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = if (hasTrailingMeta) {
@@ -521,7 +521,7 @@ private fun HeroTitleContent(
                         Text(
                             text = runtimeText,
                             style = labelMedium,
-                            color = NuvioTheme.colors.TextSecondary,
+                            color = KovelyxTheme.colors.TextSecondary,
                             maxLines = 1
                         )
                     }
@@ -532,7 +532,7 @@ private fun HeroTitleContent(
                         Text(
                             text = yearText,
                             style = labelMedium,
-                            color = NuvioTheme.colors.TextSecondary,
+                            color = KovelyxTheme.colors.TextSecondary,
                             maxLines = 1
                         )
                     }
@@ -540,8 +540,8 @@ private fun HeroTitleContent(
                         HeroImdbMeta(
                             imdbText = preview.imdbText.orEmpty(),
                             textStyle = labelMedium,
-                            textColor = NuvioTheme.colors.TextSecondary,
-                            logoSize = NuvioTheme.spacing.xl * metaScale,
+                            textColor = KovelyxTheme.colors.TextSecondary,
+                            logoSize = KovelyxTheme.spacing.xl * metaScale,
                             spacing = imdbMetaSpacing,
                             visible = showImdbInPrimaryWithHighlight
                         )
@@ -563,7 +563,7 @@ private fun HeroTitleContent(
                     Text(
                         text = text,
                         style = semiBoldLabelMedium,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -579,21 +579,21 @@ private fun HeroTitleContent(
                         leftText = ageRatingBadge,
                         rightText = statusBadge,
                         textStyle = labelMedium,
-                        contentColor = NuvioTheme.colors.TextPrimary
+                        contentColor = KovelyxTheme.colors.TextPrimary
                     )
                 } else {
                     ageRatingBadge?.let { badge ->
                         HeroMetaBadge(
                             text = badge,
                             textStyle = labelMedium,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     }
                     statusBadge?.let { badge ->
                         HeroMetaBadge(
                             text = badge,
                             textStyle = labelMedium,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     }
                 }
@@ -607,8 +607,8 @@ private fun HeroTitleContent(
                     HeroImdbMeta(
                         imdbText = preview.imdbText.orEmpty(),
                         textStyle = labelMedium,
-                        textColor = NuvioTheme.colors.TextSecondary,
-                        logoSize = NuvioTheme.spacing.xl * metaScale,
+                        textColor = KovelyxTheme.colors.TextSecondary,
+                        logoSize = KovelyxTheme.spacing.xl * metaScale,
                         spacing = imdbMetaSpacing,
                         visible = showImdbInSecondary
                     )
@@ -623,7 +623,7 @@ private fun HeroTitleContent(
                     Text(
                         text = value,
                         style = labelMedium,
-                        color = NuvioTheme.colors.TextTertiary,
+                        color = KovelyxTheme.colors.TextTertiary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -652,7 +652,7 @@ private fun HeroTitleContent(
             Text(
                 text = description,
                 style = scaledDescriptionStyle.copy(textDirection = description.contentTextDirection()),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = descriptionMaxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.graphicsLayer { alpha = metaAlpha }
@@ -704,12 +704,12 @@ private fun HeroCombinedMetaBadge(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
             .border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, dividerColor),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, dividerColor),
                 shape = RoundedCornerShape(6.dp)
             )
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         val semiBoldStyle = remember(textStyle) { textStyle.copy(fontWeight = FontWeight.SemiBold) }
         Text(
@@ -721,8 +721,8 @@ private fun HeroCombinedMetaBadge(
         )
         Box(
             modifier = Modifier
-                .width(NuvioTheme.spacing.hairline)
-                .height(NuvioTheme.spacing.md)
+                .width(KovelyxTheme.spacing.hairline)
+                .height(KovelyxTheme.spacing.md)
                 .background(dividerColor)
         )
         Text(
@@ -745,10 +745,10 @@ private fun HeroMetaBadge(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
             .border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, contentColor.copy(alpha = 0.55f)),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, contentColor.copy(alpha = 0.55f)),
                 shape = RoundedCornerShape(6.dp)
             )
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -768,9 +768,9 @@ private fun HeroMetaDivider(
 ) {
     Box(
         modifier = Modifier
-            .size((NuvioTheme.spacing.xs * scale).coerceAtLeast(NuvioTheme.spacing.xxs))
+            .size((KovelyxTheme.spacing.xs * scale).coerceAtLeast(KovelyxTheme.spacing.xxs))
             .clip(RoundedCornerShape(percent = 50))
             .graphicsLayer { alpha = if (visible) 1f else 0f }
-            .background(NuvioTheme.colors.TextTertiary.copy(alpha = 0.78f))
+            .background(KovelyxTheme.colors.TextTertiary.copy(alpha = 0.78f))
     )
 }

@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -90,7 +90,7 @@ fun LayoutSettingsContent(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 18.dp),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     items(items = sections, key = { it.name }) { section ->
                         val expanded = section.name in expandedSections

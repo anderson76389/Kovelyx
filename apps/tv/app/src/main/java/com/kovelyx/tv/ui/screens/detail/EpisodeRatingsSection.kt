@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -87,8 +87,8 @@ fun EpisodeRatingsSection(
             .distinctBy { it.season to it.episode }
             .sortedBy { it.episode }
     }
-    val defaultChipColor = NuvioTheme.colors.BackgroundCard
-    val defaultChipTextColor = NuvioTheme.colors.TextSecondary
+    val defaultChipColor = KovelyxTheme.colors.BackgroundCard
+    val defaultChipTextColor = KovelyxTheme.colors.TextSecondary
     val seasonRatings = remember(episodesForSeason, ratings) {
         episodesForSeason.mapNotNull { episode ->
             val season = episode.season ?: return@mapNotNull null
@@ -117,14 +117,14 @@ fun EpisodeRatingsSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = if (hasTitle) 14.dp else 6.dp, bottom = NuvioTheme.spacing.sm)
+            .padding(top = if (hasTitle) 14.dp else 6.dp, bottom = KovelyxTheme.spacing.sm)
     ) {
         if (hasTitle) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary,
-                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl)
+                color = KovelyxTheme.colors.TextPrimary,
+                modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl)
             )
         }
 
@@ -133,24 +133,24 @@ fun EpisodeRatingsSection(
                 Text(
                     text = stringResource(R.string.ratings_loading),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.md)
+                    color = KovelyxTheme.colors.TextSecondary,
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.md)
                 )
             }
             error != null -> {
                 Text(
                     text = error,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.md)
+                    color = KovelyxTheme.colors.TextSecondary,
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.md)
                 )
             }
             seasonNumbers.isEmpty() -> {
                 Text(
                     text = stringResource(R.string.ratings_unavailable),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.md)
+                    color = KovelyxTheme.colors.TextSecondary,
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.md)
                 )
             }
             else -> {
@@ -159,7 +159,7 @@ fun EpisodeRatingsSection(
                         .fillMaxWidth()
                         .focusRestorer { selectedSeasonRequester }
                         .focusGroup(),
-                    contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     items(seasonNumbers, key = { it }) { season ->
@@ -187,15 +187,15 @@ fun EpisodeRatingsSection(
                             shape = CardDefaults.shape(shape = RoundedCornerShape(14.dp)),
                             colors = CardDefaults.colors(
                                 containerColor = if (isSelected) {
-                                    NuvioTheme.colors.FocusBackground
+                                    KovelyxTheme.colors.FocusBackground
                                 } else {
-                                    NuvioTheme.colors.BackgroundCard
+                                    KovelyxTheme.colors.BackgroundCard
                                 },
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground
                             ),
                             border = CardDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                                     shape = RoundedCornerShape(14.dp)
                                 )
                             ),
@@ -204,7 +204,7 @@ fun EpisodeRatingsSection(
                             Text(
                                 text = stringResource(R.string.ratings_season_label, season),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = NuvioTheme.colors.TextPrimary,
+                                color = KovelyxTheme.colors.TextPrimary,
                                 modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp)
                             )
                         }
@@ -214,8 +214,8 @@ fun EpisodeRatingsSection(
                 Text(
                     text = stringResource(R.string.ratings_season_summary, selectedSeason, episodesForSeason.size),
                     style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xxs)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.xxs)
                 )
 
                 LazyRow(
@@ -224,7 +224,7 @@ fun EpisodeRatingsSection(
                         .focusRequester(effectiveRatingsGridFocusRequester)
                         .focusRestorer(firstEpisodeRatingFocusRequester)
                         .focusGroup(),
-                    contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     items(seasonRatings, key = { "${it.seasonNumber}:${it.episodeNumber}" }) { episodeRating ->
@@ -248,7 +248,7 @@ fun EpisodeRatingsSection(
                             ),
                             border = CardDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                                     shape = RoundedCornerShape(14.dp)
                                 )
                             ),
@@ -257,7 +257,7 @@ fun EpisodeRatingsSection(
                             Column(
                                 modifier = Modifier
                                     .size(width = 72.dp, height = 46.dp)
-                                    .padding(horizontal = NuvioTheme.spacing.sm, vertical = 6.dp),
+                                    .padding(horizontal = KovelyxTheme.spacing.sm, vertical = 6.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {

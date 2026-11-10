@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -89,7 +89,7 @@ import androidx.compose.ui.text.TextStyle
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NuvioTextField(
+fun KovelyxTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -112,23 +112,23 @@ fun NuvioTextField(
         onClick = { isEditing = true },
         modifier = modifier.focusRequester(surfaceFocusRequester),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundElevated,
-            focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+            containerColor = KovelyxTheme.colors.BackgroundElevated,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
         ),
         border = ClickableSurfaceDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
     ) {
-        Box(modifier = Modifier.padding(NuvioTheme.spacing.md)) {
+        Box(modifier = Modifier.padding(KovelyxTheme.spacing.md)) {
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
@@ -151,16 +151,16 @@ fun NuvioTextField(
                     }
                 ),
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content
                 ),
-                cursorBrush = SolidColor(if (isEditing) NuvioTheme.colors.Primary else Color.Transparent),
+                cursorBrush = SolidColor(if (isEditing) KovelyxTheme.colors.Primary else Color.Transparent),
                 decorationBox = { innerTextField ->
                     if (value.isEmpty() && placeholder.isNotEmpty()) {
                         Text(
                             text = placeholder,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = NuvioTheme.colors.TextTertiary
+                            color = KovelyxTheme.colors.TextTertiary
                         )
                     }
                     innerTextField()
@@ -172,7 +172,7 @@ fun NuvioTextField(
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NuvioButton(
+fun KovelyxButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -183,18 +183,18 @@ fun NuvioButton(
         modifier = modifier.then(if (!enabled) Modifier.alpha(0.35f) else Modifier),
         enabled = enabled,
         colors = ButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            contentColor = NuvioTheme.colors.TextPrimary,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-            focusedContentColor = NuvioTheme.colors.Primary
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            contentColor = KovelyxTheme.colors.TextPrimary,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+            focusedContentColor = KovelyxTheme.colors.Primary
         ),
         border = ButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         content = { content() }
     )
 }

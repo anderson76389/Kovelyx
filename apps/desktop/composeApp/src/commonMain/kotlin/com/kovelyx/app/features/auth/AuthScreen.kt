@@ -41,7 +41,7 @@ import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -1010,7 +1010,7 @@ internal fun AuthPrimaryButton(
         ),
     ) {
         if (isLoading) {
-            NuvioLoadingIndicator(
+            KovelyxLoadingIndicator(
                 modifier = Modifier.size(20.dp * scale),
                 color = AuthPrimaryButtonText,
             )

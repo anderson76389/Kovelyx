@@ -53,7 +53,7 @@ import com.kovelyx.tv.domain.model.MembershipOverviewState
 import com.kovelyx.tv.ui.components.badgeStyle
 import com.kovelyx.tv.ui.components.rememberMemberBadgeGradientBrush
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -103,8 +103,8 @@ internal fun SupporterMembershipPanel(
             .fillMaxSize()
             .clip(RoundedCornerShape(28.dp))
             .background(MembershipCardColor)
-            .border(NuvioTheme.spacing.hairline, Color.White.copy(alpha = 0.1f), RoundedCornerShape(28.dp))
-            .padding(horizontal = 28.dp, vertical = NuvioTheme.spacing.xxl)
+            .border(KovelyxTheme.spacing.hairline, Color.White.copy(alpha = 0.1f), RoundedCornerShape(28.dp))
+            .padding(horizontal = 28.dp, vertical = KovelyxTheme.spacing.xxl)
     ) {
         MembershipPanelFront(
             state = state,
@@ -380,9 +380,9 @@ private fun MembershipRefreshButton(
             },
         colors = ButtonDefaults.colors(
             containerColor = Color.Transparent,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
             contentColor = MembershipSecondaryText,
-            focusedContentColor = NuvioTheme.colors.Primary
+            focusedContentColor = KovelyxTheme.colors.Primary
         ),
         shape = ButtonDefaults.shape(RoundedCornerShape(50))
     ) {
@@ -394,7 +394,7 @@ private fun MembershipRefreshButton(
                     R.string.supporter_membership_refresh
                 }
             ),
-            modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs),
+            modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs),
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -415,15 +415,15 @@ private fun MembershipPrimaryButton(
             .fillMaxWidth(),
         colors = ButtonDefaults.colors(
             containerColor = MembershipPrimaryText,
-            focusedContainerColor = NuvioTheme.colors.Primary,
+            focusedContainerColor = KovelyxTheme.colors.Primary,
             contentColor = MembershipCardColor,
-            focusedContentColor = NuvioTheme.colors.OnPrimary
+            focusedContentColor = KovelyxTheme.colors.OnPrimary
         ),
         shape = ButtonDefaults.shape(RoundedCornerShape(50))
     ) {
         Text(
             text = label,
-            modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs),
+            modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs),
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -476,7 +476,7 @@ private fun MembershipPanelBack(
                 contentDescription = stringResource(R.string.cd_membership_qr),
                 modifier = Modifier
                     .size(220.dp)
-                    .clip(RoundedCornerShape(NuvioTheme.spacing.xl))
+                    .clip(RoundedCornerShape(KovelyxTheme.spacing.xl))
             )
         }
         Spacer(modifier = Modifier.height(18.dp))
@@ -487,16 +487,16 @@ private fun MembershipPanelBack(
                 .focusProperties { canFocus = isVisible }
                 .fillMaxWidth(),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                contentColor = NuvioTheme.colors.TextPrimary,
-                focusedContentColor = NuvioTheme.colors.Primary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                contentColor = KovelyxTheme.colors.TextPrimary,
+                focusedContentColor = KovelyxTheme.colors.Primary
             ),
             shape = ButtonDefaults.shape(RoundedCornerShape(50))
         ) {
             Text(
                 text = stringResource(R.string.supporters_contributors_back_button),
-                modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs),
+                modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs),
                 fontWeight = FontWeight.Medium
             )
         }

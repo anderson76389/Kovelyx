@@ -30,8 +30,8 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.AppTheme
 import com.kovelyx.tv.domain.model.CustomThemeColors
-import com.kovelyx.tv.ui.theme.LocalNuvioFocusRingStyle
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.LocalKovelyxFocusRingStyle
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.theme.ThemeColors
 import com.kovelyx.tv.ui.theme.createFocusRingStyle
 
@@ -100,26 +100,26 @@ private fun ThemeEditorPreviewFrame(
     width: Dp,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    NuvioTheme(appTheme = AppTheme.ROSE_GOLD) {
-        CompositionLocalProvider(LocalNuvioFocusRingStyle provides createFocusRingStyle(ThemeColors.White)) {
+    KovelyxTheme(appTheme = AppTheme.ROSE_GOLD) {
+        CompositionLocalProvider(LocalKovelyxFocusRingStyle provides createFocusRingStyle(ThemeColors.White)) {
             Box(
-                Modifier.fillMaxSize().background(NuvioTheme.colors.Background),
+                Modifier.fillMaxSize().background(KovelyxTheme.colors.Background),
                 contentAlignment = Alignment.Center
             ) {
-                val shape = RoundedCornerShape(NuvioTheme.radii.xl)
-                val maxDialogHeight = (LocalConfiguration.current.screenHeightDp.dp - NuvioTheme.spacing.xxxl)
+                val shape = RoundedCornerShape(KovelyxTheme.radii.xl)
+                val maxDialogHeight = (LocalConfiguration.current.screenHeightDp.dp - KovelyxTheme.spacing.xxxl)
                     .coerceAtLeast(320.dp)
                 Column(
                     Modifier
                         .width(width)
                         .heightIn(max = maxDialogHeight)
-                        .background(NuvioTheme.colors.BackgroundElevated, shape)
-                        .border(1.dp, NuvioTheme.colors.Border, shape)
+                        .background(KovelyxTheme.colors.BackgroundElevated, shape)
+                        .border(1.dp, KovelyxTheme.colors.Border, shape)
                         .padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(title, style = MaterialTheme.typography.titleLarge, color = NuvioTheme.colors.TextPrimary)
-                    Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = NuvioTheme.colors.TextSecondary)
+                    Text(title, style = MaterialTheme.typography.titleLarge, color = KovelyxTheme.colors.TextPrimary)
+                    Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = KovelyxTheme.colors.TextSecondary)
                     content()
                 }
             }

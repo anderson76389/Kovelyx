@@ -25,7 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import com.kovelyx.app.core.ui.nuvioTypeScale
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.compose_player_close
@@ -115,7 +115,7 @@ internal fun OpeningOverlay(
             )
         }
 
-        NuvioBackButton(
+        KovelyxBackButton(
             onClick = onBack,
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -199,7 +199,7 @@ internal fun OpeningOverlay(
                                 },
                         )
                     } else {
-                        NuvioLoadingIndicator(
+                        KovelyxLoadingIndicator(
                             modifier = Modifier.size(54.dp),
                         )
                     }

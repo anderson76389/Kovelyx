@@ -16,7 +16,7 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.core.tracking.TrackingListManagementCapabilities
 import com.kovelyx.tv.domain.model.LibraryListPrivacy
 import com.kovelyx.tv.domain.model.LibraryListTab
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.components.posteroptions.PosterListPickerDialog
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -38,7 +38,7 @@ class LibraryListDialogsTest {
             LibraryListTab("mdblist:watchlist", "Watchlist", LibraryListTab.Type.WATCHLIST, trackingProviderId = "mdblist")
         )
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 PosterListPickerDialog("Lists", tabs, emptyMap(), false, null, { selected = it }, {}, {})
             }
         }
@@ -54,7 +54,7 @@ class LibraryListDialogsTest {
     @Test
     fun mdbListEditorOnlyOffersSupportedPrivacyAndFields() {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 ListEditorDialog(LibraryListEditorState(LibraryListEditorState.Mode.CREATE), mdblist, false, {}, {}, {}, {}, {})
             }
         }
@@ -69,7 +69,7 @@ class LibraryListDialogsTest {
     @Test
     fun traktEditorRetainsDescriptionAndAllPrivacyChoices() {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 ListEditorDialog(LibraryListEditorState(LibraryListEditorState.Mode.EDIT),
                     TrackingListManagementCapabilities(LibraryListPrivacy.entries, true, true), false, {}, {}, {}, {}, {})
             }
@@ -83,7 +83,7 @@ class LibraryListDialogsTest {
     fun mdbListManagementHidesReorderingAndAcceptsRemoteSelection() {
         var selected: String? = null
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 ManageListsDialog(
                     tabs = listOf(LibraryListTab("mdblist:list:7", "Private favourites", LibraryListTab.Type.PERSONAL)),
                     capabilities = mdblist, selectedKey = "mdblist:list:7", errorMessage = null, pending = false,
@@ -101,7 +101,7 @@ class LibraryListDialogsTest {
     @Test
     fun pendingListOperationDisablesDuplicateManagementActions() {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 ManageListsDialog(emptyList(), mdblist, null, null, true, {}, {}, {}, {}, {}, {}, {})
             }
         }
@@ -114,7 +114,7 @@ class LibraryListDialogsTest {
     fun emptyLibraryAllowsCreatingTheFirstListWithTheRemote() {
         var created = 0
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 ManageListsDialog(emptyList(), mdblist, null, null, false, {}, { created++ }, {}, {}, {}, {}, {})
             }
         }

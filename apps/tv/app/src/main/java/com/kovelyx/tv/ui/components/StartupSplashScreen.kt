@@ -22,7 +22,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 fun StartupSplashScreen(
@@ -104,7 +104,7 @@ fun StartupSplashScreen(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(y = 76.dp)
-                .size(NuvioTheme.spacing.xxxl)
+                .size(KovelyxTheme.spacing.xxxl)
         )
     }
 }

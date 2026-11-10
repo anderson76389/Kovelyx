@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class NuvioStrokeTokens(
+data class KovelyxStrokeTokens(
     val none: Dp,
     val hairline: Dp,
     val thin: Dp,
@@ -17,7 +17,7 @@ data class NuvioStrokeTokens(
 )
 
 @Immutable
-data class NuvioElevationTokens(
+data class KovelyxElevationTokens(
     val none: Dp,
     val card: Dp,
     val focused: Dp,
@@ -27,7 +27,7 @@ data class NuvioElevationTokens(
 )
 
 @Immutable
-data class NuvioEffectTokens(
+data class KovelyxEffectTokens(
     val blurSoft: Dp,
     val blurPanel: Dp,
     val blurStrong: Dp,
@@ -42,8 +42,8 @@ data class NuvioEffectTokens(
     val shimmerHighAlpha: Float
 )
 
-object NuvioStrokes {
-    val tokens = NuvioStrokeTokens(
+object KovelyxStrokes {
+    val tokens = KovelyxStrokeTokens(
         none = 0.dp,
         hairline = 1.dp,
         thin = 1.5.dp,
@@ -55,8 +55,8 @@ object NuvioStrokes {
     )
 }
 
-object NuvioElevations {
-    val tokens = NuvioElevationTokens(
+object KovelyxElevations {
+    val tokens = KovelyxElevationTokens(
         none = 0.dp,
         card = 2.dp,
         focused = 8.dp,
@@ -66,8 +66,8 @@ object NuvioElevations {
     )
 }
 
-object NuvioEffects {
-    val tokens = NuvioEffectTokens(
+object KovelyxEffects {
+    val tokens = KovelyxEffectTokens(
         blurSoft = 12.dp,
         blurPanel = 26.dp,
         blurStrong = 40.dp,

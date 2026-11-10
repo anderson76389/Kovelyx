@@ -6,7 +6,7 @@
 
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.contentTextDirection
 
 import androidx.compose.foundation.BorderStroke
@@ -130,7 +130,7 @@ fun CollectionRowSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.md),
+                .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -139,7 +139,7 @@ fun CollectionRowSection(
                 style = MaterialTheme.typography.headlineMedium.copy(
                     textDirection = collection.title.contentTextDirection()
                 ),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -150,7 +150,7 @@ fun CollectionRowSection(
         val layoutDirection = LocalLayoutDirection.current
         val isRtl = layoutDirection == LayoutDirection.Rtl
         val horizontalBringIntoViewSpec = remember(density, defaultBringIntoViewSpec, isRtl) {
-            val startPx = with(density) { NuvioTheme.spacing.xxxl.roundToPx() }
+            val startPx = with(density) { KovelyxTheme.spacing.xxxl.roundToPx() }
             @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
             object : BringIntoViewSpec {
                 override val scrollAnimationSpec: AnimationSpec<Float> =
@@ -195,8 +195,8 @@ fun CollectionRowSection(
                             ?: FocusRequester.Default
                     }
                     .focusGroup(),
-                contentPadding = PaddingValues(start = NuvioTheme.spacing.xxxl, end = 200.dp),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+                contentPadding = PaddingValues(start = KovelyxTheme.spacing.xxxl, end = 200.dp),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
             ) {
                 itemsIndexed(
                     items = collection.folders,
@@ -279,12 +279,12 @@ private fun FolderCard(
             },
         shape = CardDefaults.shape(shape = shape),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
+                border = KovelyxTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                 shape = shape
             )
         ),
@@ -329,7 +329,7 @@ private fun FolderCard(
                     Text(
                         text = folder.title.take(2).uppercase(),
                         style = MaterialTheme.typography.headlineLarge,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -360,7 +360,7 @@ private fun FolderCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
-                        .padding(NuvioTheme.spacing.sm),
+                        .padding(KovelyxTheme.spacing.sm),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

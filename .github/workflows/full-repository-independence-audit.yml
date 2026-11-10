@@ -5,12 +5,16 @@ on:
     paths:
       - '.github/workflows/full-repository-independence-audit.yml'
       - 'scripts/tests/scan_all_independence.py'
+      - 'scripts/tests/test_scan_all_independence.py'
   pull_request:
     branches: [main]
     paths:
       - '.github/workflows/full-repository-independence-audit.yml'
       - 'scripts/tests/scan_all_independence.py'
+      - 'scripts/tests/test_scan_all_independence.py'
   workflow_dispatch:
+  release:
+    types: [published]
 
 permissions:
   contents: read
@@ -19,6 +23,7 @@ permissions:
 jobs:
   tracked-sources-and-archives:
     name: Vérifier chaque fichier Git, les archives, les trois clients et les dépendances
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v1.') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -28,6 +33,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Installer le lecteur des cabinets MSI
+        run: sudo apt-get update && sudo apt-get install -y msitools
+      - name: Tester les archives imbriquées et les charges utiles Windows
+        run: python3 scripts/tests/test_scan_all_independence.py
       - name: Inventaire complet du dépôt et examen des archives binaires
         shell: bash
         run: |
@@ -80,6 +89,7 @@ jobs:
 
   released-binaries:
     name: Inspecter les véritables APK TV, APK Android et installateur MSI Windows
+    if: ${{ github.event_name != 'release' || startsWith(github.event.release.tag_name, 'v1.') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -87,13 +97,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Installer le lecteur des cabinets MSI
+        run: sudo apt-get update && sudo apt-get install -y msitools
       - name: Télécharger les trois installateurs et valider leur SHA256
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          if [[ "$GITHUB_EVENT_NAME" == release ]]; then
+            tag="$GITHUB_REF_NAME"
+          else
+            tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          fi
           [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]] || { echo "::error::Version officielle absente"; exit 1; }
           mkdir -p /tmp/kovelyx-released
           gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir /tmp/kovelyx-released \
@@ -131,7 +147,7 @@ jobs:
           findings=[(a['name'],key,n) for a in packages for key,n in a.get('legacy',{}).items()
                     if key in keys and n]
           findings.extend([('contenu des archives',key,report.get('counts',{}).get(key,0))
-                           for key in ('legacy_host','upstream_repo')
+                           for key in ('legacy_host','upstream_repo','retired_sdk')
                            if report.get('counts',{}).get(key,0)])
           if report.get('unscanned_or_errors'):
               raise SystemExit('Portions non contrôlées dans les archives publiées')
@@ -160,3 +176,4 @@ jobs:
             /tmp/kovelyx-release-scan.txt
           if-no-files-found: warn
           retention-days: 60
+

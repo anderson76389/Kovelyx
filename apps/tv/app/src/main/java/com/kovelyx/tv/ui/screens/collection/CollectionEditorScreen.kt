@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -85,7 +85,7 @@ import com.kovelyx.tv.domain.model.TmdbCollectionSort
 import com.kovelyx.tv.domain.model.TmdbCollectionSource
 import com.kovelyx.tv.domain.model.TmdbCollectionSourceType
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.R
 import androidx.compose.ui.res.stringResource
@@ -146,59 +146,59 @@ fun CollectionEditorScreen(
         state = listState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = NuvioTheme.spacing.xxxl),
-        contentPadding = PaddingValues(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.xxxl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.none)
+            .padding(top = KovelyxTheme.spacing.xxxl),
+        contentPadding = PaddingValues(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.xxxl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.none)
     ) {
         item(key = "header") {
             Text(
                 text = if (uiState.isNew) stringResource(R.string.collections_new) else stringResource(R.string.collections_editor_edit_collection),
                 style = MaterialTheme.typography.headlineMedium.copy(textDirection = TextDirection.Content),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
         }
 
         item(key = "title") {
             Text(
                 text = stringResource(R.string.collections_editor_row_title),
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                NuvioTextField(
+                KovelyxTextField(
                     value = uiState.title,
                     onValueChange = { viewModel.setTitle(it) },
                     modifier = Modifier.weight(1f),
                     placeholder = stringResource(R.string.collections_editor_placeholder_name)
                 )
                 val canSaveCollection = uiState.title.isNotBlank() && uiState.folders.isNotEmpty()
-                NuvioButton(onClick = { viewModel.save { onBack() } }, enabled = canSaveCollection) {
+                KovelyxButton(onClick = { viewModel.save { onBack() } }, enabled = canSaveCollection) {
                     Text(stringResource(R.string.collections_editor_save))
                 }
             }
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
         }
 
         item(key = "backdrop") {
             Text(
                 text = stringResource(R.string.collections_editor_backdrop),
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
-            NuvioTextField(
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
+            KovelyxTextField(
                 value = uiState.backdropImageUrl,
                 onValueChange = { viewModel.setBackdropImageUrl(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = stringResource(R.string.collections_editor_placeholder_backdrop)
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
         }
 
         item(key = "pin_to_top") {
@@ -206,16 +206,16 @@ fun CollectionEditorScreen(
                 onClick = { viewModel.setPinToTop(!uiState.pinToTop) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground
                 ),
                 border = CardDefaults.border(
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
                 ),
-                shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                 scale = CardDefaults.scale(focusedScale = 1.02f)
             ) {
                 Row(
@@ -229,29 +229,29 @@ fun CollectionEditorScreen(
                         Text(
                             text = stringResource(R.string.collections_editor_pin_above),
                             style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Content),
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                         )
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                         Text(
                             text = stringResource(R.string.collections_editor_pin_above_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
                     Switch(
                         checked = uiState.pinToTop,
                         onCheckedChange = null,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = NuvioTheme.colors.Secondary,
-                            checkedTrackColor = NuvioTheme.colors.Secondary.copy(alpha = 0.3f),
-                            uncheckedThumbColor = NuvioTheme.colors.TextSecondary,
-                            uncheckedTrackColor = NuvioTheme.colors.BackgroundCard
+                            checkedThumbColor = KovelyxTheme.colors.Secondary,
+                            checkedTrackColor = KovelyxTheme.colors.Secondary.copy(alpha = 0.3f),
+                            uncheckedThumbColor = KovelyxTheme.colors.TextSecondary,
+                            uncheckedTrackColor = KovelyxTheme.colors.BackgroundCard
                         )
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
         }
 
         item(key = "focus_glow") {
@@ -259,16 +259,16 @@ fun CollectionEditorScreen(
                 onClick = { viewModel.setFocusGlowEnabled(!uiState.focusGlowEnabled) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground
                 ),
                 border = CardDefaults.border(
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
                 ),
-                shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                 scale = CardDefaults.scale(focusedScale = 1.02f)
             ) {
                 Row(
@@ -282,41 +282,41 @@ fun CollectionEditorScreen(
                         Text(
                             text = stringResource(R.string.collections_editor_focus_glow),
                             style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Content),
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                         )
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                         Text(
                             text = stringResource(R.string.collections_editor_focus_glow_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
                     Switch(
                         checked = uiState.focusGlowEnabled,
                         onCheckedChange = null,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = NuvioTheme.colors.Secondary,
-                            checkedTrackColor = NuvioTheme.colors.Secondary.copy(alpha = 0.3f),
-                            uncheckedThumbColor = NuvioTheme.colors.TextSecondary,
-                            uncheckedTrackColor = NuvioTheme.colors.BackgroundCard
+                            checkedThumbColor = KovelyxTheme.colors.Secondary,
+                            checkedTrackColor = KovelyxTheme.colors.Secondary.copy(alpha = 0.3f),
+                            uncheckedThumbColor = KovelyxTheme.colors.TextSecondary,
+                            uncheckedTrackColor = KovelyxTheme.colors.BackgroundCard
                         )
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
         }
 
         item(key = "view_mode") {
             Text(
                 text = stringResource(R.string.collections_editor_view_mode),
                 style = MaterialTheme.typography.labelLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
             ) {
                 val viewModes = listOf(
                     FolderViewMode.TABBED_GRID to stringResource(R.string.collections_editor_view_mode_tabs),
@@ -328,28 +328,28 @@ fun CollectionEditorScreen(
                     Button(
                         onClick = { viewModel.setViewMode(mode) },
                         colors = ButtonDefaults.colors(
-                            containerColor = if (isSelected) NuvioTheme.colors.Secondary.copy(alpha = 0.3f) else NuvioTheme.colors.BackgroundCard,
-                            contentColor = if (isSelected) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Primary
+                            containerColor = if (isSelected) KovelyxTheme.colors.Secondary.copy(alpha = 0.3f) else KovelyxTheme.colors.BackgroundCard,
+                            contentColor = if (isSelected) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary,
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            focusedContentColor = KovelyxTheme.colors.Primary
                         ),
                         border = ButtonDefaults.border(
                             border = if (isSelected) Border(
-                                border = BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.Secondary),
-                                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                border = BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.Secondary),
+                                shape = RoundedCornerShape(KovelyxTheme.radii.md)
                             ) else Border.None,
                             focusedBorder = Border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                shape = RoundedCornerShape(KovelyxTheme.radii.md)
                             )
                         ),
-                        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                     ) {
                         Text(label)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
         }
 
         if (uiState.viewMode == FolderViewMode.TABBED_GRID) {
@@ -358,16 +358,16 @@ fun CollectionEditorScreen(
                     onClick = { viewModel.setShowAllTab(!uiState.showAllTab) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground
+                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground
                     ),
                     border = CardDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                     ),
-                    shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                    shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                     scale = CardDefaults.scale(focusedScale = 1.02f)
                 ) {
                     Row(
@@ -381,29 +381,29 @@ fun CollectionEditorScreen(
                             Text(
                                 text = stringResource(R.string.collections_editor_show_all_tab),
                                 style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Content),
-                                color = NuvioTheme.colors.TextPrimary,
+                                color = KovelyxTheme.colors.TextPrimary,
                             )
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                             Text(
                                 text = stringResource(R.string.collections_editor_show_all_tab_desc),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = NuvioTheme.colors.TextSecondary
+                                color = KovelyxTheme.colors.TextSecondary
                             )
                         }
-                        Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
                         Switch(
                             checked = uiState.showAllTab,
                             onCheckedChange = null,
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = NuvioTheme.colors.Secondary,
-                                checkedTrackColor = NuvioTheme.colors.Secondary.copy(alpha = 0.3f),
-                                uncheckedThumbColor = NuvioTheme.colors.TextSecondary,
-                                uncheckedTrackColor = NuvioTheme.colors.BackgroundCard
+                                checkedThumbColor = KovelyxTheme.colors.Secondary,
+                                checkedTrackColor = KovelyxTheme.colors.Secondary.copy(alpha = 0.3f),
+                                uncheckedThumbColor = KovelyxTheme.colors.TextSecondary,
+                                uncheckedTrackColor = KovelyxTheme.colors.BackgroundCard
                             )
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
             }
         }
 
@@ -416,7 +416,7 @@ fun CollectionEditorScreen(
                 Text(
                     text = stringResource(R.string.collections_editor_folders),
                     style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Content),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                 )
                 Text(
                     text = stringResource(
@@ -425,10 +425,10 @@ fun CollectionEditorScreen(
                         uiState.folders.size
                     ),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
             }
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
         }
 
         itemsIndexed(
@@ -436,7 +436,7 @@ fun CollectionEditorScreen(
             key = { _, folder -> folder.id }
         ) { index, folder ->
             val editFocusRequester = folderFocusRequesters.getOrPut(folder.id) { FocusRequester() }
-            Box(modifier = Modifier.padding(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.sm)) {
+            Box(modifier = Modifier.padding(start = KovelyxTheme.spacing.sm, end = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.sm)) {
                 FolderListItem(
                     folder = folder,
                     isFirst = index == 0,
@@ -455,8 +455,8 @@ fun CollectionEditorScreen(
 
         item(key = "add_folder") {
             val addFolderFocusRequester = folderFocusRequesters.getOrPut("add_folder") { FocusRequester() }
-            Box(modifier = Modifier.padding(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.xs)) {
-                NuvioButton(
+            Box(modifier = Modifier.padding(start = KovelyxTheme.spacing.sm, end = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.xs)) {
+                KovelyxButton(
                     onClick = {
                         lastFocusedFolderId = "add_folder"
                         viewModel.addFolder()
@@ -464,7 +464,7 @@ fun CollectionEditorScreen(
                     modifier = Modifier.focusRequester(addFolderFocusRequester)
                 ) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(R.string.cd_add))
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                     Text(stringResource(R.string.collections_editor_add_folder))
                 }
             }
@@ -472,7 +472,7 @@ fun CollectionEditorScreen(
     }
 
     folderToDelete?.let { folder ->
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { folderToDelete = null },
             title = stringResource(R.string.collections_editor_delete_folder_title),
             subtitle = stringResource(R.string.collections_editor_delete_folder_subtitle, folder.title),
@@ -480,15 +480,15 @@ fun CollectionEditorScreen(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md, Alignment.End)
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md, Alignment.End)
             ) {
-                NuvioButton(
+                KovelyxButton(
                     onClick = { folderToDelete = null },
                     modifier = Modifier.focusRequester(deleteDialogFocusRequester)
                 ) {
                     Text(stringResource(R.string.collections_cancel))
                 }
-                NuvioButton(
+                KovelyxButton(
                     onClick = {
                         viewModel.removeFolder(folder.id)
                         folderToDelete = null
@@ -514,14 +514,14 @@ private fun FolderListItem(
     onMoveDown: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(NuvioTheme.radii.md),
-        colors = SurfaceDefaults.colors(containerColor = NuvioTheme.colors.BackgroundCard),
+        shape = RoundedCornerShape(KovelyxTheme.radii.md),
+        colors = SurfaceDefaults.colors(containerColor = KovelyxTheme.colors.BackgroundCard),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.md),
+                .padding(KovelyxTheme.spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -531,7 +531,7 @@ private fun FolderListItem(
                     style = MaterialTheme.typography.titleSmall.copy(
                         textDirection = folder.title.contentTextDirection()
                     ),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -545,25 +545,25 @@ private fun FolderListItem(
                 Text(
                     text = "$shapeLabel - ${stringResource(R.string.collections_editor_source_count, folder.sources.size)}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)) {
-                NuvioButton(onClick = onMoveUp) {
-                    Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.cd_move_up), tint = if (!isFirst) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextTertiary)
+            Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)) {
+                KovelyxButton(onClick = onMoveUp) {
+                    Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.cd_move_up), tint = if (!isFirst) KovelyxTheme.colors.TextSecondary else KovelyxTheme.colors.TextTertiary)
                 }
-                NuvioButton(onClick = onMoveDown) {
-                    Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.cd_move_down), tint = if (!isLast) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextTertiary)
+                KovelyxButton(onClick = onMoveDown) {
+                    Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.cd_move_down), tint = if (!isLast) KovelyxTheme.colors.TextSecondary else KovelyxTheme.colors.TextTertiary)
                 }
-                NuvioButton(
+                KovelyxButton(
                     onClick = onEdit,
                     modifier = if (editFocusRequester != null) Modifier.focusRequester(editFocusRequester) else Modifier
                 ) {
-                    Icon(Icons.Default.Edit, stringResource(R.string.cd_edit), tint = NuvioTheme.colors.TextSecondary)
+                    Icon(Icons.Default.Edit, stringResource(R.string.cd_edit), tint = KovelyxTheme.colors.TextSecondary)
                 }
-                NuvioButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, stringResource(R.string.cd_delete), tint = NuvioTheme.colors.TextSecondary)
+                KovelyxButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, stringResource(R.string.cd_delete), tint = KovelyxTheme.colors.TextSecondary)
                 }
             }
         }

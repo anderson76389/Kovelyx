@@ -72,7 +72,7 @@ internal fun Modifier.posterCardClickable(
     onClick: (() -> Unit)?,
     onLongClick: (() -> Unit)?,
     zoomImageUrl: String? = null,
-    zoomCornerRadius: Dp = NuvioTokens.Radius.poster,
+    zoomCornerRadius: Dp = KovelyxTokens.Radius.poster,
     hoverScaleEnabled: Boolean = true,
 ): Modifier {
     val graphicsContext = LocalGraphicsContext.current

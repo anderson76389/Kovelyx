@@ -53,7 +53,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kovelyx.app.core.format.extractReleaseYearForDisplay
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.features.details.MetaDetails
 import com.kovelyx.app.features.details.formatRuntimeForDisplay
 import nuvio.composeapp.generated.resources.Res
@@ -135,16 +135,16 @@ private fun BackdropArtwork(
     onHeroTrailerFinished: () -> Unit = {},
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val opacity = NuvioTokens.Opacity
+    val opacity = KovelyxTokens.Opacity
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val trailerAlpha by animateFloatAsState(
         targetValue = if (heroTrailerReady) 1f else 0f,
-        animationSpec = tween(durationMillis = NuvioTokens.Motion.sheetEnterMillis),
+        animationSpec = tween(durationMillis = KovelyxTokens.Motion.sheetEnterMillis),
         label = "tablet_detail_hero_trailer_alpha",
     )
     val gradientIntensity by animateFloatAsState(
         targetValue = if (heroTrailerReady) 0.3f else 1f,
-        animationSpec = tween(durationMillis = NuvioTokens.Motion.sheetEnterMillis),
+        animationSpec = tween(durationMillis = KovelyxTokens.Motion.sheetEnterMillis),
         label = "tablet_detail_hero_gradient_intensity",
     )
     val artworkModifier = Modifier
@@ -248,10 +248,10 @@ fun TabletDetailHero(
     actions: (@Composable () -> Unit)?,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val space = NuvioTokens.Space
+    val space = KovelyxTokens.Space
     val trailerAlpha by animateFloatAsState(
         targetValue = if (heroTrailerReady) 1f else 0f,
-        animationSpec = tween(durationMillis = NuvioTokens.Motion.sheetEnterMillis),
+        animationSpec = tween(durationMillis = KovelyxTokens.Motion.sheetEnterMillis),
         label = "tablet_detail_hero_controls_alpha",
     )
     var logoLoadError by remember(meta.id, meta.logo) { mutableStateOf(false) }
@@ -289,10 +289,10 @@ fun TabletDetailHero(
                 Text(
                     text = meta.name,
                     style = MaterialTheme.typography.displayLarge.copy(
-                        fontSize = NuvioTokens.Type.displayMd,
-                        lineHeight = NuvioTokens.LineHeight.displayMd,
+                        fontSize = KovelyxTokens.Type.displayMd,
+                        lineHeight = KovelyxTokens.LineHeight.displayMd,
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                     color = colorScheme.onBackground,
                     maxLines = 3,
@@ -315,9 +315,9 @@ fun TabletDetailHero(
                 Text(
                     text = meta.genres.take(4).joinToString(" • "),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = NuvioTokens.Type.bodyMd,
+                        fontSize = KovelyxTokens.Type.bodyMd,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                     color = colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -341,9 +341,9 @@ fun TabletDetailHero(
                     text = synopsis,
                     collapsedMaxLines = 4,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = NuvioTokens.Type.bodyLg,
-                        lineHeight = NuvioTokens.LineHeight.bodyLg,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        fontSize = KovelyxTokens.Type.bodyLg,
+                        lineHeight = KovelyxTokens.LineHeight.bodyLg,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                 )
             }
@@ -396,14 +396,14 @@ private fun TabletHeroMetaRow(meta: MetaDetails, showImdbRating: Boolean) {
         ?.takeIf { showImdbRating }
         ?.takeIf { raw -> raw.toDoubleOrNull()?.let { it > 0.0 } == true }
     val itemStyle = MaterialTheme.typography.titleSmall.copy(
-        fontSize = NuvioTokens.Type.bodyLg,
+        fontSize = KovelyxTokens.Type.bodyLg,
         fontWeight = FontWeight.Bold,
-        letterSpacing = NuvioTokens.LetterSpacing.none,
+        letterSpacing = KovelyxTokens.LetterSpacing.none,
     )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s16),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s16),
     ) {
         metaItems.forEach { item ->
             Text(

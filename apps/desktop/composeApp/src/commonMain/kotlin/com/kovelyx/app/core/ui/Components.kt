@@ -76,7 +76,7 @@ import com.kovelyx.app.navigation.LocalNativeNavigationBarHidden
 import com.kovelyx.app.navigation.LocalUseNativeNavigation
 
 @Composable
-fun NuvioScreen(
+fun KovelyxScreen(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = MaterialTheme.nuvio.spacing.screenHorizontal,
     topPadding: Dp? = null,
@@ -102,7 +102,7 @@ fun NuvioScreen(
             verticalArrangement = Arrangement.spacedBy(tokens.spacing.listGap),
             content = content,
         )
-        NuvioDesktopVerticalScrollbar(
+        KovelyxDesktopVerticalScrollbar(
             state = listState,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -124,7 +124,7 @@ internal fun Modifier.nuvioConsumePointerEvents(): Modifier =
     }
 
 @Composable
-fun NuvioSurfaceCard(
+fun KovelyxSurfaceCard(
     modifier: Modifier = Modifier,
     tonalElevation: Int = 0,
     content: @Composable ColumnScope.() -> Unit,
@@ -145,7 +145,7 @@ fun NuvioSurfaceCard(
 }
 
 @Composable
-fun NuvioScreenHeader(
+fun KovelyxScreenHeader(
     title: String,
     modifier: Modifier = Modifier,
     backgroundColor: Color = MaterialTheme.nuvio.colors.background,
@@ -163,14 +163,14 @@ fun NuvioScreenHeader(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(bottom = NuvioTokens.Space.s4),
+                .padding(bottom = KovelyxTokens.Space.s4),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
             content = actions,
         )
         return
     }
-    val resolvedTopPadding = topPadding ?: if (includeStatusBarPadding) statusBarTop else NuvioTokens.Space.none
+    val resolvedTopPadding = topPadding ?: if (includeStatusBarPadding) statusBarTop else KovelyxTokens.Space.none
     Box(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -183,7 +183,7 @@ fun NuvioScreenHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = resolvedTopPadding, bottom = NuvioTokens.Space.s4),
+                .padding(top = resolvedTopPadding, bottom = KovelyxTokens.Space.s4),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
@@ -213,7 +213,7 @@ fun NuvioScreenHeader(
                 }
             }
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s2),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s2),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 FullscreenActionButton(
@@ -228,7 +228,7 @@ fun NuvioScreenHeader(
 }
 
 @Composable
-fun NuvioSectionLabel(
+fun KovelyxSectionLabel(
     text: String,
     modifier: Modifier = Modifier,
 ) {
@@ -242,7 +242,7 @@ fun NuvioSectionLabel(
 }
 
 @Composable
-fun NuvioActionLabel(
+fun KovelyxActionLabel(
     text: String,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
@@ -262,7 +262,7 @@ fun NuvioActionLabel(
 }
 
 @Composable
-fun NuvioIconActionButton(
+fun KovelyxIconActionButton(
     icon: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier,
@@ -287,15 +287,15 @@ fun NuvioIconActionButton(
 }
 
 @Composable
-fun NuvioBackButton(
+fun KovelyxBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.nuvio.shapes.avatar,
     containerColor: Color = MaterialTheme.nuvio.colors.surface,
     showContainerOnDesktop: Boolean = false,
     contentColor: Color = MaterialTheme.nuvio.colors.textPrimary,
-    buttonSize: Dp = NuvioTokens.Space.s40,
-    iconSize: Dp = NuvioTokens.Icon.md,
+    buttonSize: Dp = KovelyxTokens.Space.s40,
+    iconSize: Dp = KovelyxTokens.Icon.md,
     contentDescription: String = stringResource(Res.string.action_back),
 ) {
     if (LocalUseNativeNavigation.current && !LocalNativeNavigationBarHidden.current) return
@@ -319,7 +319,7 @@ fun NuvioBackButton(
 }
 
 @Composable
-fun NuvioPrimaryButton(
+fun KovelyxPrimaryButton(
     text: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -330,7 +330,7 @@ fun NuvioPrimaryButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(NuvioTokens.Space.s48 + NuvioTokens.Space.s4),
+            .height(KovelyxTokens.Space.s48 + KovelyxTokens.Space.s4),
         enabled = enabled,
         shape = tokens.shapes.button,
         colors = ButtonDefaults.buttonColors(
@@ -355,7 +355,7 @@ fun NuvioPrimaryButton(
 }
 
 @Composable
-fun NuvioInputField(
+fun KovelyxInputField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
@@ -368,7 +368,7 @@ fun NuvioInputField(
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
         singleLine = true,
-        shape = RoundedCornerShape(NuvioTokens.Radius.lg),
+        shape = RoundedCornerShape(KovelyxTokens.Radius.lg),
         placeholder = {
             Text(
                 text = placeholder,
@@ -389,7 +389,7 @@ fun NuvioInputField(
 }
 
 @Composable
-fun NuvioInfoBadge(
+fun KovelyxInfoBadge(
     text: String,
     modifier: Modifier = Modifier,
 ) {
@@ -400,7 +400,7 @@ fun NuvioInfoBadge(
                 color = tokens.colors.surfaceCard,
                 shape = tokens.shapes.chip,
             )
-            .padding(horizontal = NuvioTokens.Space.s10, vertical = NuvioTokens.Space.s6),
+            .padding(horizontal = KovelyxTokens.Space.s10, vertical = KovelyxTokens.Space.s6),
     ) {
         Text(
             text = text,
@@ -413,7 +413,7 @@ fun NuvioInfoBadge(
 }
 
 @Composable
-fun NuvioInlineMetadata(
+fun KovelyxInlineMetadata(
     title: String,
     value: String,
     modifier: Modifier = Modifier,
@@ -427,7 +427,7 @@ fun NuvioInlineMetadata(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.nuvio.colors.textMuted,
         )
-        Spacer(modifier = Modifier.width(NuvioTokens.Space.s6))
+        Spacer(modifier = Modifier.width(KovelyxTokens.Space.s6))
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
@@ -437,7 +437,7 @@ fun NuvioInlineMetadata(
 }
 
 @Composable
-fun NuvioStatusModal(
+fun KovelyxStatusModal(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
@@ -476,14 +476,14 @@ fun NuvioStatusModal(
 }
 
 @Composable
-fun NuvioToastHost(
+fun KovelyxToastHost(
     modifier: Modifier = Modifier,
 ) {
     val tokens = MaterialTheme.nuvio
-    val toast by NuvioToastController.currentToast.collectAsState()
+    val toast by KovelyxToastController.currentToast.collectAsState()
     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val visibilityState = remember { MutableTransitionState(false) }
-    var renderedToast by remember { mutableStateOf<NuvioToastMessage?>(null) }
+    var renderedToast by remember { mutableStateOf<KovelyxToastMessage?>(null) }
 
     LaunchedEffect(toast?.id) {
         val currentToast = toast
@@ -491,7 +491,7 @@ fun NuvioToastHost(
             renderedToast = currentToast
             visibilityState.targetState = true
             delay(currentToast.durationMillis)
-            NuvioToastController.dismiss(currentToast.id)
+            KovelyxToastController.dismiss(currentToast.id)
         } else {
             visibilityState.targetState = false
         }
@@ -522,14 +522,14 @@ fun NuvioToastHost(
             contentAlignment = Alignment.TopCenter,
         ) {
             Surface(
-                shape = RoundedCornerShape(NuvioTokens.Radius.xl),
+                shape = RoundedCornerShape(KovelyxTokens.Radius.xl),
                 color = tokens.colors.surfacePopover,
                 tonalElevation = tokens.elevation.raised,
                 shadowElevation = tokens.elevation.overlay,
             ) {
                 Text(
                     text = currentToast.message,
-                    modifier = Modifier.padding(horizontal = NuvioTokens.Space.s16, vertical = NuvioTokens.Space.s12),
+                    modifier = Modifier.padding(horizontal = KovelyxTokens.Space.s16, vertical = KovelyxTokens.Space.s12),
                     style = MaterialTheme.typography.bodyMedium,
                     color = tokens.colors.textPrimary,
                 )
@@ -538,14 +538,14 @@ fun NuvioToastHost(
     }
 }
 
-data class NuvioToastMessage(
+data class KovelyxToastMessage(
     val id: Long,
     val message: String,
     val durationMillis: Long,
 )
 
-object NuvioToastController {
-    private val _currentToast = MutableStateFlow<NuvioToastMessage?>(null)
+object KovelyxToastController {
+    private val _currentToast = MutableStateFlow<KovelyxToastMessage?>(null)
     val currentToast = _currentToast.asStateFlow()
     private var nextToastId = 0L
 
@@ -554,7 +554,7 @@ object NuvioToastController {
         durationMillis: Long = 2500L,
     ) {
         nextToastId += 1L
-        _currentToast.value = NuvioToastMessage(
+        _currentToast.value = KovelyxToastMessage(
             id = nextToastId,
             message = message,
             durationMillis = durationMillis,

@@ -30,11 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.ui.DialogButton
 import com.kovelyx.app.core.ui.DialogButtons
-import com.kovelyx.app.core.ui.NuvioBottomSheetDivider
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBottomSheetDivider
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
 import com.kovelyx.app.core.ui.SurfaceEdge
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.mdblist.MdbListLibraryListOption
 import com.kovelyx.app.features.mdblist.localizedMdbListMessage
@@ -89,11 +89,11 @@ private fun MdbListLibraryListsBottomSheet(
 
     fun dismiss() {
         scope.launch {
-            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = ::dismiss,
         sheetState = sheetState,
     ) {
@@ -197,7 +197,7 @@ private fun MdbListLibraryListsContent(
             ) {
                 options.forEachIndexed { index, option ->
                     if (index > 0) {
-                        NuvioBottomSheetDivider()
+                        KovelyxBottomSheetDivider()
                     }
                     // Changes save one at a time; the other switches stay usable once it finishes.
                     SettingsSwitchRow(
@@ -215,7 +215,7 @@ private fun MdbListLibraryListsContent(
                     .padding(vertical = 24.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                NuvioLoadingIndicator(modifier = Modifier.size(24.dp))
+                KovelyxLoadingIndicator(modifier = Modifier.size(24.dp))
             }
             else -> Text(
                 text = stringResource(Res.string.settings_mdblist_library_lists_empty),

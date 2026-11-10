@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -172,13 +172,13 @@ internal fun AudioSelectionOverlay(
                 text = stringResource(R.string.audio_dialog_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
-                modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
+                modifier = Modifier.padding(bottom = KovelyxTheme.spacing.sm)
             )
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 verticalAlignment = Alignment.Top,
-                modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
+                modifier = Modifier.padding(bottom = KovelyxTheme.spacing.sm)
             ) {
                 Column(modifier = Modifier.width(444.dp)) {
                     AudioTracksContent(
@@ -244,7 +244,7 @@ private fun AudioTracksContent(
             text = stringResource(R.string.audio_lang_default),
             style = MaterialTheme.typography.bodyLarge,
             color = Color.White.copy(alpha = 0.7f),
-            modifier = Modifier.padding(top = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.md)
+            modifier = Modifier.padding(top = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.md)
         )
         return
     }
@@ -252,7 +252,7 @@ private fun AudioTracksContent(
     LazyColumn(
         state = listState,
         verticalArrangement = Arrangement.spacedBy(6.dp),
-        contentPadding = PaddingValues(top = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.sm),
+        contentPadding = PaddingValues(top = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.sm),
         modifier = Modifier
             .heightIn(max = 620.dp)
             .fillMaxWidth()
@@ -299,44 +299,44 @@ private fun AudioTrackCard(
             .focusProperties { right = rightFocusRequester }
             .onFocusChanged { if (it.isFocused) onFocused() },
         colors = CardDefaults.colors(
-            containerColor = if (isSelected) NuvioTheme.colors.Secondary else Color.Transparent,
-            focusedContainerColor = if (isSelected) NuvioTheme.colors.Secondary else Color.Transparent
+            containerColor = if (isSelected) KovelyxTheme.colors.Secondary else Color.Transparent,
+            focusedContainerColor = if (isSelected) KovelyxTheme.colors.Secondary else Color.Transparent
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.xxs, Color.Transparent),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = BorderStroke(KovelyxTheme.spacing.xxs, Color.Transparent),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
         scale = CardDefaults.scale(focusedScale = 1f, pressedScale = 1f)
     ) {
-        val primaryTextColor = if (isSelected) NuvioTheme.colors.OnSecondary else Color.White
+        val primaryTextColor = if (isSelected) KovelyxTheme.colors.OnSecondary else Color.White
         val secondaryTextColor = if (isSelected) {
-            NuvioTheme.colors.OnSecondary.copy(alpha = 0.82f)
+            KovelyxTheme.colors.OnSecondary.copy(alpha = 0.82f)
         } else {
             Color.White.copy(alpha = 0.72f)
         }
         val metadataTextColor = if (isSelected) {
-            NuvioTheme.colors.OnSecondary.copy(alpha = 0.72f)
+            KovelyxTheme.colors.OnSecondary.copy(alpha = 0.72f)
         } else {
-            NuvioTheme.colors.TextTertiary
+            KovelyxTheme.colors.TextTertiary
         }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm),
+                .padding(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.sm),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 Text(
                     text = track.name,
@@ -363,7 +363,7 @@ private fun AudioTrackCard(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = NuvioTheme.colors.OnSecondary
+                    tint = KovelyxTheme.colors.OnSecondary
                 )
             }
         }
@@ -471,7 +471,7 @@ private fun AudioControlsContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.sm),
+            .padding(top = KovelyxTheme.spacing.xs, bottom = KovelyxTheme.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         AdjustmentSection(
@@ -600,18 +600,18 @@ private fun AudioControlsContent(
                         up = persistUpFocusRequester
                     },
                 colors = CardDefaults.colors(
-                    containerColor = if (persistAmplification) NuvioTheme.colors.Secondary else Color.Transparent,
-                    focusedContainerColor = if (persistAmplification) NuvioTheme.colors.Secondary else Color.Transparent
+                    containerColor = if (persistAmplification) KovelyxTheme.colors.Secondary else Color.Transparent,
+                    focusedContainerColor = if (persistAmplification) KovelyxTheme.colors.Secondary else Color.Transparent
                 ),
-                shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                 border = CardDefaults.border(
                     border = Border(
-                        border = BorderStroke(NuvioTheme.spacing.xxs, Color.Transparent),
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        border = BorderStroke(KovelyxTheme.spacing.xxs, Color.Transparent),
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     ),
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
                 ),
                 scale = CardDefaults.scale(focusedScale = 1f, pressedScale = 1f)
@@ -623,7 +623,7 @@ private fun AudioControlsContent(
                         stringResource(R.string.audio_mix_persist_off)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (persistAmplification) NuvioTheme.colors.OnSecondary else Color.White,
+                    color = if (persistAmplification) KovelyxTheme.colors.OnSecondary else Color.White,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
                 )
             }
@@ -651,7 +651,7 @@ private fun AdjustmentSection(
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
     ) {
         Text(
             text = title,
@@ -748,7 +748,7 @@ private fun StepCard(
         },
         interactionSource = interactionSource,
         modifier = Modifier
-            .width(NuvioTheme.spacing.huge)
+            .width(KovelyxTheme.spacing.huge)
             .focusRequester(focusRequester)
             .focusProperties {
                 canFocus = enabled
@@ -761,18 +761,18 @@ private fun StepCard(
             containerColor = if (enabled) Color.Transparent else Color.White.copy(alpha = 0.06f),
             focusedContainerColor = if (enabled) Color.Transparent else Color.White.copy(alpha = 0.06f)
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.xxs, if (enabled) Color.White.copy(alpha = 0.18f) else Color.Transparent),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = BorderStroke(KovelyxTheme.spacing.xxs, if (enabled) Color.White.copy(alpha = 0.18f) else Color.Transparent),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(
-                    width = NuvioTheme.spacing.xxs,
+                border = KovelyxTheme.focusRing.border(
+                    width = KovelyxTheme.spacing.xxs,
                     alpha = if (enabled) 1f else 0f
                 ),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
         scale = CardDefaults.scale(focusedScale = 1f, pressedScale = 1f)

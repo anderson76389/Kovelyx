@@ -1,7 +1,7 @@
 package com.kovelyx.app.features.player
 
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.features.shuffle.EpisodeShuffleRepository
 import com.kovelyx.app.features.shuffle.ShuffleSurface
@@ -568,7 +568,7 @@ private fun PlayerScreenRuntime.BindPlayerMetadataAndSkipEffects() {
             controller.seekTo(seekPositionMs)
             scheduleProgressSyncAfterSeek()
             skipIntervalDismissed = true
-            notification?.let { NuvioToastController.show(it, AUTO_SKIP_NOTIFICATION_DURATION_MS) }
+            notification?.let { KovelyxToastController.show(it, AUTO_SKIP_NOTIFICATION_DURATION_MS) }
         }
     }
 

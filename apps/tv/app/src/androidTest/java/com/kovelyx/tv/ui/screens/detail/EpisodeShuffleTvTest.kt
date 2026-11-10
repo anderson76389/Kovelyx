@@ -38,7 +38,7 @@ import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.ui.components.ContinueWatchingCard
 import com.kovelyx.tv.ui.screens.home.ContinueWatchingItem
 import com.kovelyx.tv.ui.screens.home.NextUpInfo
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import java.io.File
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Assert.assertEquals
@@ -352,8 +352,8 @@ class EpisodeShuffleTvTest {
 
     private fun setContent(content: @Composable () -> Unit) {
         compose.setContent {
-            NuvioTheme {
-                Box(Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) { content() }
+            KovelyxTheme {
+                Box(Modifier.fillMaxSize().background(KovelyxTheme.colors.Background)) { content() }
             }
         }
     }

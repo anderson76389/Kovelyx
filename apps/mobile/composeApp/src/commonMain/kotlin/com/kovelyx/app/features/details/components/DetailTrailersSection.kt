@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.kovelyx.app.core.ui.Menu
 import com.kovelyx.app.core.ui.MenuItem
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.core.ui.nuvioHorizontalScrollBleed
 import com.kovelyx.app.core.ui.rememberPosterCardStyleUiState
@@ -203,7 +203,7 @@ private fun TrailerCard(
                 .clip(RoundedCornerShape(cornerRadius))
                 .nuvioCardDepth(
                     shape = RoundedCornerShape(cornerRadius),
-                    surface = NuvioCardDepthSurface.Trailers,
+                    surface = KovelyxCardDepthSurface.Trailers,
                 )
                 .clickable(onClick = onClick),
         ) {
