@@ -1,0 +1,66 @@
+{
+  "environment": "Google TV API 34 emulator, simulated 2 GiB RAM",
+  "package": "com.kovelyx.tv.debug",
+  "cycles": 96,
+  "samples": [
+    {
+      "label": "start",
+      "pid": "3292",
+      "pss_kib": 80908,
+      "uptime_s": 0.2
+    },
+    {
+      "label": "cycle-16",
+      "pid": "3292",
+      "pss_kib": 82069,
+      "uptime_s": 23.3
+    },
+    {
+      "label": "cycle-32",
+      "pid": "3292",
+      "pss_kib": 82052,
+      "uptime_s": 50.6
+    },
+    {
+      "label": "cycle-48",
+      "pid": "3292",
+      "pss_kib": 82371,
+      "uptime_s": 85.4
+    },
+    {
+      "label": "cycle-64",
+      "pid": "3292",
+      "pss_kib": 84059,
+      "uptime_s": 108.5
+    },
+    {
+      "label": "cycle-80",
+      "pid": "3292",
+      "pss_kib": 82203,
+      "uptime_s": 135.9
+    },
+    {
+      "label": "cycle-96",
+      "pid": "3292",
+      "pss_kib": 79417,
+      "uptime_s": 170.6
+    },
+    {
+      "label": "finished",
+      "pid": "3292",
+      "pss_kib": 78153,
+      "uptime_s": 170.8
+    }
+  ],
+  "home_resumes": 4,
+  "sleep_wake_resumes": 2,
+  "limitations": [
+    "Emulator is not a physical Android TV device.",
+    "DPAD focus endurance does not test 4K/Dolby playback or external addons.",
+    "PSS trend alone cannot prove or exclude a native memory leak."
+  ],
+  "pss_growth_after_warmup_kib": -3916,
+  "pss_growth_warning": false,
+  "passed": true,
+  "elapsed_s": 170.8
+}
