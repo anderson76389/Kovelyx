@@ -28,7 +28,7 @@ Les quatre workflows finaux de la PR ont réussi. Les deux jobs du scan complet 
 - Six profils d'optimisation Android contiennent encore des noms de classes d'anciens fournisseurs de comptes. Ces indications ne sont pas du code exécuté ni un SDK compilé.
 - Trois fichiers ProGuard conservent également des règles pour des classes retirées. Ces règles ne téléchargent et ne compilent aucun SDK.
 - Des noms de DLL, symboles ABI, ressources et notices d'origine restent présents. Leur présence ne constitue pas une connexion à Nuvio. Les anciennes branches, tags et commits sont conservés.
-- `supabase.co` est une entrée autonome du registre standard `PublicSuffixDatabase.list`, utilisé pour les limites des domaines/cookies. Seule cette ligne exacte est classée comme registre ; une URL reste signalée.
+- Le domaine de l’ancien fournisseur figure comme entrée autonome du registre standard `PublicSuffixDatabase.list`, utilisé pour les limites des domaines/cookies. Seule cette ligne exacte est classée comme registre ; une URL reste signalée.
 - La classe Windows `ServerDiscoveryPolicy.class` contient les domaines qu'elle refuse. Son bytecode a été extrait de la distribution v1.1.1078 et examiné : `isOfficial` compare les noms d'hôtes, `parse` l'appelle puis lève `OfficialServer`. Aucun appel HTTP n'est effectué dans cette classe. L'exception du scan exige son chemin exact et le SHA-256 `4c67aae96272400ccadf4f8b71ecc1dd56b994abd56e7ef79b589975a0197b4b` ; toute modification nécessite un nouvel examen.
 - L'ancien importeur contient des références de provenance NuvioMedia. Le test avec Git bloqué confirme qu'il ne les consulte pas lorsque les trois dossiers de sources, déjà conservés dans Kovelyx, existent.
 
