@@ -47,6 +47,12 @@ Les tests [mobile](https://github.com/anderson76389/Kovelyx/actions/runs/4283772
 
 Limites : aucune mesure sur les appareils physiques de l’utilisateur, aucune mesure CPU/PSS pendant une vraie lecture 4K avec extensions, aucun compte Cloudflare réel utilisé par le benchmark et aucune preuve de conservation de tous les profils réels tirée du seul test de remplacement.
 
+## Endurance TV sur la révision finale
+
+Le parcours Google TV a exercé 96 cycles, 4 retours à l’accueil et 2 veilles/reprises en 170,8 secondes. Le PID est resté identique, sans ANR/crash détecté. PSS initiale 80 908 Kio (79,0 Mio), pic échantillonné 84 059 Kio (82,1 Mio), finale 78 153 Kio (76,3 Mio). La variation après échauffement est de −3 916 Kio et le seuil d’alerte de croissance n’a pas été atteint. Ces 171 secondes ne prouvent pas l’absence de fuite pendant plusieurs heures ou en lecture 4K.
+
+[Données d’endurance conservées](TV_ENDURANCE_2026-11-10.json) et [workflow source](https://github.com/anderson76389/Kovelyx/actions/runs/42837728837).
+
 ## Tri des anciennes PR
 
 Huit anciennes propositions remplacées ont été fermées, leurs branches et commits conservés. Sept autres propositions anciennes restent ouvertes faute de preuve d’équivalence complète ou parce qu’elles portent un travail distinct. [Décisions et preuves par PR](PR_TRIAGE_2026-11-10.md).
