@@ -5,6 +5,8 @@ import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,16 +35,24 @@ class ApkDownloader @Inject constructor(
                 var downloaded = 0L
                 body.byteStream().use { input ->
                     FileOutputStream(temporary).use { output ->
-                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        val buffer = ByteArray(64 * 1024)
+                        var lastProgressBytes = 0L
+                        val progressStepBytes = maxOf(1024L * 1024L, (total ?: 0L) / 100L)
                         while (true) {
+                            currentCoroutineContext().ensureActive()
                             val read = input.read(buffer)
+                            currentCoroutineContext().ensureActive()
                             if (read < 0) break
                             if (read == 0) continue
                             output.write(buffer, 0, read)
                             digest.update(buffer, 0, read)
                             downloaded += read
-                            onProgress(downloaded, total)
+                            if (downloaded - lastProgressBytes >= progressStepBytes) {
+                                lastProgressBytes = downloaded
+                                onProgress(downloaded, total)
+                            }
                         }
+                        if (downloaded > lastProgressBytes) onProgress(downloaded, total)
                         output.flush()
                     }
                 }
@@ -58,6 +68,14 @@ class ApkDownloader @Inject constructor(
             if (!temporary.renameTo(destinationFile)) {
                 temporary.copyTo(destinationFile, overwrite = true)
                 temporary.delete()
+            }
+            // Only remove older, disposable OTA APKs after the new APK's SHA-256
+            // was verified; downloaded films, accounts and profile media are untouched.
+            destinationFile.parentFile?.listFiles()?.forEach { old ->
+                if (old != destinationFile && old.isFile &&
+                    old.name.startsWith("Kovelyx-TV-") &&
+                    old.name.endsWith(".apk", ignoreCase = true)
+                ) old.delete()
             }
             destinationFile
         } finally {

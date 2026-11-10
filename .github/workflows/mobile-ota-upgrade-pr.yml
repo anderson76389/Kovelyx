@@ -1,0 +1,104 @@
+name: Tester la mise à jour en place de Kovelyx Android mobile
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/mobile-ota-upgrade-pr.yml'
+      - 'scripts/tests/ota_in_place_upgrade.sh'
+      - 'scripts/tests/prepare_ota_test_apks.sh'
+      - 'apps/mobile/composeApp/src/**/updater/**'
+      - 'apps/mobile/androidApp/**'
+      - '.github/workflows/build.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: kovelyx-mobile-ota-pr-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  in-place-upgrade:
+    name: Installer v stable puis APK PR avec adb install -r sans effacer les données
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+      - name: Attendre la vraie APK de ce commit PR puis télécharger le dernier paquet stable
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_PR_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          bash -n scripts/tests/ota_in_place_upgrade.sh
+          [[ "$EXPECTED_PR_SHA" =~ ^[0-9a-f]{40}$ && "$EXPECTED_PR_NUMBER" =~ ^[0-9]+$ ]] || exit 1
+          run_id=""
+          for attempt in $(seq 1 150); do
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/build.yml/runs?event=pull_request&per_page=100" > /tmp/kv-runs.json
+            run_id="$(jq -r --arg sha "$EXPECTED_PR_SHA" --arg pr "$EXPECTED_PR_NUMBER" --arg repo "$GITHUB_REPOSITORY" '
+              [.workflow_runs[] | select(.head_sha == $sha and .event == "pull_request"
+                and .head_repository.full_name == $repo
+                and any(.pull_requests[]?; .number == ($pr | tonumber)))] | first | .id // empty
+            ' /tmp/kv-runs.json)"
+            if [[ "$run_id" =~ ^[0-9]+$ ]]; then
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/jobs?per_page=100" > /tmp/kv-jobs.json
+              status="$(jq -r '[.jobs[] | select(.name == "Android mobile - APK optimisé (identité existante)")] | first | .conclusion // empty' /tmp/kv-jobs.json)"
+              if [[ "$status" == success ]]; then break; fi
+              if [[ -n "$status" && "$status" != "null" ]]; then
+                echo "::error::La compilation Android mobile PR a échoué : $status"
+                exit 1
+              fi
+            fi
+            echo "En attente de l'APK Android PR ($attempt/150)"
+            sleep 10
+          done
+          [[ "${status:-}" == success ]] || { echo "::error::Aucune APK mobile validée dans la PR"; exit 1; }
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > /tmp/kv-run.json
+          jq -e --arg sha "$EXPECTED_PR_SHA" '.head_sha == $sha and .event == "pull_request"' /tmp/kv-run.json >/dev/null
+          mkdir -p /tmp/kv-mobile-pr /tmp/kv-mobile-previous
+          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name kovelyx-mobile-debug --dir /tmp/kv-mobile-pr
+          [[ "$(find /tmp/kv-mobile-pr -type f -name '*.apk' | wc -l)" == 1 ]] || exit 1
+          tag="$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName')"
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir /tmp/kv-mobile-previous \
+            --pattern "Kovelyx-Android-$tag.apk" \
+            --pattern "Kovelyx-Android-$tag.apk.sha256"
+          (cd /tmp/kv-mobile-previous && sha256sum -c "Kovelyx-Android-$tag.apk.sha256")
+          prior="/tmp/kv-mobile-previous/Kovelyx-Android-$tag.apk"
+          candidate="$(find /tmp/kv-mobile-pr -type f -name '*.apk' -print -quit)"
+          tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          "$tools/apksigner" verify "$prior" >/dev/null
+          "$tools/apksigner" verify "$candidate" >/dev/null
+          "$tools/aapt" dump badging "$prior" | grep -F "package: name='com.kovelyx.mobile.debug'"
+          "$tools/aapt" dump badging "$candidate" | grep -F "package: name='com.kovelyx.mobile.debug'"
+          # Public APKs use the permanent signer, but untrusted PR builds MUST NOT.
+          # Resign both fixtures with an ephemeral key only for install-r coverage.
+          # Production certificate continuity is verified BEFORE stable publication.
+          bash scripts/tests/prepare_ota_test_apks.sh "$prior" "$candidate" \
+            /tmp/kv-mobile-test-pair "$tools"
+      - name: Activer l'accélération de l'émulateur Android
+        run: |
+          if [ -e /dev/kvm ]; then sudo chmod 666 /dev/kvm; fi
+      - name: Réinstaller par-dessus, démarrer Kovelyx et contrôler l'identité de l'installation
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 3072M
+          heap-size: 512M
+          disk-size: 4096M
+          disable-animations: true
+          script: |
+            bash scripts/tests/ota_in_place_upgrade.sh /tmp/kv-mobile-test-pair/previous.apk /tmp/kv-mobile-test-pair/candidate.apk com.kovelyx.mobile.debug android.intent.category.LAUNCHER
+            adb shell dumpsys meminfo com.kovelyx.mobile.debug > /tmp/kovelyx-mobile-ota-meminfo.txt
+      - name: Préserver uniquement les mesures de test non privées
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-mobile-ota-in-place-proof
+          path: /tmp/kovelyx-mobile-ota-meminfo.txt
+          if-no-files-found: ignore
+          retention-days: 14

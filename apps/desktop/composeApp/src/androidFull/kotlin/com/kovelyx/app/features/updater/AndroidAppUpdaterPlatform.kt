@@ -93,7 +93,10 @@ object AndroidAppUpdaterPlatform {
                     var downloaded = 0L
                     body.byteStream().use { input ->
                         FileOutputStream(temporary).use { output ->
-                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                            // A 64 KiB buffer cuts reads and digest calls by 8x vs the old 8 KiB buffer.
+                            val buffer = ByteArray(64 * 1024)
+                            var lastProgressBytes = 0L
+                            val progressStepBytes = maxOf(1024L * 1024L, (total ?: 0L) / 100L)
                             while (true) {
                                 currentCoroutineContext().ensureActive()
                                 val read = input.read(buffer)
@@ -103,8 +106,12 @@ object AndroidAppUpdaterPlatform {
                                 output.write(buffer, 0, read)
                                 digest.update(buffer, 0, read)
                                 downloaded += read.toLong()
-                                onProgress(downloaded, total)
+                                if (downloaded - lastProgressBytes >= progressStepBytes) {
+                                    lastProgressBytes = downloaded
+                                    onProgress(downloaded, total)
+                                }
                             }
+                            if (downloaded > lastProgressBytes) onProgress(downloaded, total)
                             output.flush()
                         }
                     }
@@ -120,6 +127,14 @@ object AndroidAppUpdaterPlatform {
                 if (!temporary.renameTo(destination)) {
                     temporary.copyTo(destination, overwrite = true)
                     temporary.delete()
+                }
+                // The APK lives in a disposable updater-only cache, not user data.
+                // Reclaim older verified APKs only AFTER this download was validated.
+                dir.listFiles()?.forEach { old ->
+                    if (old != destination && old.isFile &&
+                        old.name.startsWith("Kovelyx-") &&
+                        old.name.endsWith(".apk", ignoreCase = true)
+                    ) old.delete()
                 }
                 destination.absolutePath
             } finally {
@@ -152,8 +167,8 @@ object AndroidAppUpdaterPlatform {
             try {
                 context.packageManager.canRequestPackageInstalls()
             } catch (_: SecurityException) {
-            
-                true
+                // A denied permission check must never be treated as permission granted.
+                false
             }
         } else {
             true

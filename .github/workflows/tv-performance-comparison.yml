@@ -1,0 +1,54 @@
+name: Comparer les performances TV avant et après optimisation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/tv/**'
+      - 'scripts/tests/tv_compare_performance.py'
+      - 'scripts/tests/download_tv_benchmark_apks.py'
+      - '.github/workflows/tv-performance-comparison.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: tv-performance-comparison-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compare:
+    if: github.repository == 'anderson76389/Kovelyx' && github.event.pull_request.number == 108
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Vérifier les scripts de mesure
+        run: python3 -m py_compile scripts/tests/tv_compare_performance.py scripts/tests/download_tv_benchmark_apks.py
+      - name: Récupérer les deux APK exactes et vérifier leur provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/tests/download_tv_benchmark_apks.py
+      - name: Préparer KVM
+        run: sudo chmod 666 /dev/kvm
+      - name: Mesurer les deux versions sur le même émulateur à 2 Go
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google-tv
+          arch: x86
+          profile: tv_1080p
+          cores: 2
+          ram-size: 2048M
+          heap-size: 512M
+          disk-size: 6144M
+          disable-animations: true
+          script: python3 scripts/tests/tv_compare_performance.py --baseline /tmp/kv-benchmark-apks/baseline/app.apk --candidate /tmp/kv-benchmark-apks/candidate/app.apk --output /tmp/kv-tv-comparison
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tv-performance-before-after
+          path: |
+            /tmp/kv-tv-comparison/
+            /tmp/kv-benchmark-apks/provenance.json
+          if-no-files-found: error
+          retention-days: 30

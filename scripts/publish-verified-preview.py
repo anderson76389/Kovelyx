@@ -59,6 +59,74 @@ def windows_package_names(sha, tag):
         yield f"{stem}-{sha}.{extension}", f"{stem}-{tag}.{extension}"
 
 
+def previous_signed_public_release(releases, new_tag):
+    """Newest stable unified Release older than the candidate, with both official APKs."""
+    import re
+    version = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)(?:-(?:alpha|beta|rc))?", new_tag)
+    if not version:
+        raise RuntimeError("Version de publication non reconnue")
+    target = tuple(int(n) for n in version.groups())
+    eligible = []
+    for release in releases:
+        tag = release.get("tag_name", "")
+        match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)", tag)
+        if release.get("draft") or release.get("prerelease") or not match:
+            continue
+        revision = tuple(int(n) for n in match.groups())
+        if revision >= target:
+            continue
+        names = {asset.get("name") for asset in release.get("assets", [])}
+        expected = {f"Kovelyx-Android-{tag}.apk", f"Kovelyx-TV-{tag}-universal.apk"}
+        if expected.issubset(names):
+            eligible.append((revision, release))
+    if not eligible:
+        raise RuntimeError("Aucune Release signée précédente avec mobile et TV : contrôle d'upgrade impossible")
+    return max(eligible, key=lambda pair: pair[0])[1]
+
+
+def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
+    """Never publish APKs that would force users to uninstall their installed copy.
+
+    PR APKs intentionally have a different, untrusted build key. The trusted
+    main publication runner MUST compare the APKs freshly signed with the
+    permanent secret against the previous already-published official APKs.
+    """
+    previous = previous_signed_public_release(api("releases?per_page=100"), new_tag)
+    previous_tag = previous["tag_name"]
+    folder = root / "previous-release-signatures"
+    folder.mkdir()
+    for index, name in enumerate((
+        f"Kovelyx-Android-{previous_tag}.apk",
+        f"Kovelyx-TV-{previous_tag}-universal.apk",
+    )):
+        gh("release", "download", previous_tag, "--repo", REPOSITORY,
+           "--pattern", name, "--pattern", name + ".sha256", "--dir", str(folder))
+        apk = folder / name
+        checksum_file = folder / (name + ".sha256")
+        if not apk.is_file() or not checksum_file.is_file():
+            raise RuntimeError("Ancien APK ou empreinte officielle manquante")
+        lines = checksum_file.read_text(encoding="utf-8").strip().splitlines()
+        if len(lines) != 1:
+            raise RuntimeError("Empreinte SHA-256 historique invalide")
+        import re
+        match = re.fullmatch(r"([0-9a-fA-F]{64})\s+\*?(.+)", lines[0])
+        if not match or match.group(2).removeprefix("./") != name:
+            raise RuntimeError("Empreinte de l'ancienne APK non associée au bon fichier")
+        if digest(apk).lower() != match.group(1).lower():
+            raise RuntimeError("Ancienne APK endommagée : refus de publication")
+        output = subprocess.check_output(
+            [str(tools / "apksigner"), "verify", "--print-certs", str(apk)], text=True)
+        historical = [line for line in output.splitlines()
+                      if "certificate SHA-256 digest:" in line]
+        if not historical or historical != current_signatures[index]:
+            raise RuntimeError(
+                "Signature APK modifiée par rapport à la version installée : "
+                "publication bloquée pour protéger les données de l'utilisateur"
+            )
+    print(f"PASS : certificats mobile et TV identiques à {previous_tag}. "
+          "Mises à jour sans désinstallation autorisées.", flush=True)
+
+
 def ensure_tag(tag, sha):
     # A draft release does not guarantee that the corresponding Git ref exists.
     existing = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/git/ref/tags/{tag}"],
@@ -179,6 +247,9 @@ def main():
             shutil.copyfile(apk, output / name)
         if not certificates[0] or certificates[0] != certificates[1]:
             raise RuntimeError("Les deux APK ne portent pas le même certificat Kovelyx")
+        # GitHub PR builds are signed with an ephemeral key. The actual
+        # production archive must preserve the historical permanent signer.
+        verify_previous_public_signatures(root, tools, tag, certificates)
         for source_name, public_name in windows_package_names(sha, tag):
             shutil.copyfile(unique_file(root / "windows", source_name), output / public_name)
         for path in list(output.iterdir()):

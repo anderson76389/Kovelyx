@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Stale-while-revalidate [CacheStrategy]:
@@ -37,10 +36,11 @@ class StaleWhileRevalidateCacheStrategy(
 
     companion object {
         private const val TAG = "NuvioSWR"
-        private const val REVALIDATION_COOLDOWN_MS = 10L * 60 * 1000 // 10 min
         private const val REVALIDATION_MAX_REQUESTS = 8
-        private val revalidatingUrls = ConcurrentHashMap.newKeySet<String>()
-        private val revalidatedAt = ConcurrentHashMap<String, Long>()
+        private val revalidationBudget = TvRevalidationBudget(
+            maxRememberedUrls = 256,
+            maxConcurrentRequests = REVALIDATION_MAX_REQUESTS,
+        )
     }
 
     private val revalidationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -66,12 +66,7 @@ class StaleWhileRevalidateCacheStrategy(
                 cacheResponse.headers["last-modified"],
             )
         ) {
-            val url = networkRequest.url
-            val lastRevalidated = revalidatedAt[url]
-            val now = System.currentTimeMillis()
-            if (lastRevalidated == null || (now - lastRevalidated) > REVALIDATION_COOLDOWN_MS) {
-                scheduleBackgroundRevalidation(url, cacheResponse)
-            }
+            scheduleBackgroundRevalidation(networkRequest.url, cacheResponse)
         }
         return CacheStrategy.ReadResult(cacheResponse)
     }
@@ -96,7 +91,7 @@ class StaleWhileRevalidateCacheStrategy(
     }
 
     private fun scheduleBackgroundRevalidation(url: String, cachedResponse: NetworkResponse) {
-        if (!revalidatingUrls.add(url)) return
+        if (!revalidationBudget.tryStart(url, System.currentTimeMillis())) return
 
         revalidationScope.launch {
             try {
@@ -126,7 +121,7 @@ class StaleWhileRevalidateCacheStrategy(
                         }
                         StaleRevalidationResult.Unchanged -> {
                             if (response.code != 304 && response.code !in 200..299) {
-                                Log.w(TAG, "Revalidation ${response.code}: ${url.take(80)}")
+                                Log.w(TAG, "Revalidation HTTP ${response.code}")
                             }
                         }
                     }
@@ -135,11 +130,10 @@ class StaleWhileRevalidateCacheStrategy(
                 }
             } catch (e: Exception) {
                 if (e !is kotlinx.coroutines.CancellationException) {
-                    Log.w(TAG, "Revalidation error: ${url.take(80)} - ${e.message}")
+                    Log.w(TAG, "Revalidation error: ${e.javaClass.simpleName}")
                 }
             } finally {
-                revalidatingUrls.remove(url)
-                revalidatedAt[url] = System.currentTimeMillis()
+                revalidationBudget.finish(url, System.currentTimeMillis())
             }
         }
     }
