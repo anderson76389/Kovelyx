@@ -48,6 +48,7 @@ jobs:
                 exit 1
               fi
             fi
+            echo "En attente de l'APK Android PR ($attempt/150)"
             sleep 10
           done
           [[ "${status:-}" == success ]] || { echo "::error::Aucune APK mobile validée dans la PR"; exit 1; }
