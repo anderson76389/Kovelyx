@@ -125,9 +125,9 @@ class VerifiedPreviewTests(unittest.TestCase):
                 (folder / name).write_bytes(payload)
                 (folder / (name + ".sha256")).write_text(
                     hashlib.sha256(payload).hexdigest() + "  " + name + "\n")
-            with patch.object(PREVIEW, "api", return_value=[release]), \\
-                 patch.object(PREVIEW, "gh", side_effect=mock_gh), \\
-                 patch.object(PREVIEW.subprocess, "check_output", return_value=fingerprint + "\n"):
+            with (patch.object(PREVIEW, "api", return_value=[release]),
+                  patch.object(PREVIEW, "gh", side_effect=mock_gh),
+                  patch.object(PREVIEW.subprocess, "check_output", return_value=fingerprint + "\n")):
                 PREVIEW.verify_previous_public_signatures(
                     root, root, "v1.1.1095", [[fingerprint], [fingerprint]])
                 with tempfile.TemporaryDirectory() as other:
