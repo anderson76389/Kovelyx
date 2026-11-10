@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.addon
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -66,27 +66,27 @@ fun CatalogOrderScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xl)
+            .padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.xl)
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = NuvioTheme.spacing.xl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             item {
                 Text(
                     text = stringResource(R.string.catalog_order_title),
                     style = MaterialTheme.typography.headlineLarge,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = stringResource(R.string.catalog_order_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
                 val followAddonsLabel = stringResource(R.string.catalog_order_follow_addons)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -97,12 +97,12 @@ fun CatalogOrderScreen(
                         Text(
                             text = followAddonsLabel,
                             style = MaterialTheme.typography.titleMedium,
-                            color = NuvioTheme.colors.TextPrimary
+                            color = KovelyxTheme.colors.TextPrimary
                         )
                         Text(
                             text = stringResource(R.string.catalog_order_follow_addons_desc),
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                     Switch(
@@ -110,8 +110,8 @@ fun CatalogOrderScreen(
                         onCheckedChange = { viewModel.toggleFollowAddonsOrder(it) },
                         modifier = Modifier.semantics { contentDescription = followAddonsLabel },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = NuvioTheme.colors.Primary,
-                            checkedTrackColor = NuvioTheme.colors.Primary.copy(alpha = 0.5f)
+                            checkedThumbColor = KovelyxTheme.colors.Primary,
+                            checkedTrackColor = KovelyxTheme.colors.Primary.copy(alpha = 0.5f)
                         )
                     )
                 }
@@ -123,7 +123,7 @@ fun CatalogOrderScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = NuvioTheme.spacing.xl),
+                                .padding(vertical = KovelyxTheme.spacing.xl),
                             contentAlignment = Alignment.Center
                         ) {
                             LoadingIndicator()
@@ -136,7 +136,7 @@ fun CatalogOrderScreen(
                         Text(
                             text = stringResource(R.string.catalog_order_empty),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                 }
@@ -180,8 +180,8 @@ private fun CatalogOrderCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
-        shape = RoundedCornerShape(NuvioTheme.radii.md)
+        colors = CardDefaults.cardColors(containerColor = KovelyxTheme.colors.BackgroundCard),
+        shape = RoundedCornerShape(KovelyxTheme.radii.md)
     ) {
         Row(
             modifier = Modifier
@@ -194,44 +194,44 @@ private fun CatalogOrderCard(
                 Text(
                     text = "${item.catalogName} - ${item.typeLabel.toDisplayTypeLabel()}",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (item.isDisabled) NuvioTheme.colors.TextSecondary else NuvioTheme.colors.TextPrimary
+                    color = if (item.isDisabled) KovelyxTheme.colors.TextSecondary else KovelyxTheme.colors.TextPrimary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                 Text(
                     text = item.addonName,
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
                 if (item.isDisabled) {
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                     Text(
                         text = stringResource(R.string.catalog_order_disabled_on_home),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.Error
+                        color = KovelyxTheme.colors.Error
                     )
                 }
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
                     onClick = onMoveUp,
                     enabled = item.canMoveUp,
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextSecondary,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                        focusedContentColor = KovelyxTheme.colors.Primary
                     ),
                     border = ButtonDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                     ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                    shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowUpward,
@@ -243,18 +243,18 @@ private fun CatalogOrderCard(
                     onClick = onMoveDown,
                     enabled = item.canMoveDown,
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextSecondary,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                        focusedContentColor = KovelyxTheme.colors.Primary
                     ),
                     border = ButtonDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                     ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                    shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowDownward,
@@ -265,18 +265,18 @@ private fun CatalogOrderCard(
                 Button(
                     onClick = onToggleEnabled,
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        contentColor = if (item.isDisabled) NuvioTheme.colors.Success else NuvioTheme.colors.TextSecondary,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                        focusedContentColor = if (item.isDisabled) NuvioTheme.colors.Success else NuvioTheme.colors.Error
+                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                        contentColor = if (item.isDisabled) KovelyxTheme.colors.Success else KovelyxTheme.colors.TextSecondary,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                        focusedContentColor = if (item.isDisabled) KovelyxTheme.colors.Success else KovelyxTheme.colors.Error
                     ),
                     border = ButtonDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                     ),
-                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                    shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                 ) {
                     Text(text = if (item.isDisabled) stringResource(R.string.catalog_order_enable) else stringResource(R.string.catalog_order_disable))
                 }

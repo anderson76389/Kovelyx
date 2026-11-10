@@ -62,10 +62,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.ui.DisintegrationRequest
-import com.kovelyx.app.core.ui.LocalNuvioNavBarScrollState
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioNavBarScrollState
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.LocalKovelyxNavBarScrollState
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxNavBarScrollState
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.cloud.CloudLibraryContentType
 import com.kovelyx.app.features.cloud.CloudLibraryFile
@@ -96,7 +96,7 @@ import com.kovelyx.app.features.settings.ThemeSettingsRepository
 import com.kovelyx.app.features.watchprogress.ContinueWatchingItem
 import com.kovelyx.app.isDesktop
 import com.kovelyx.app.navigation.AppRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import kotlinx.coroutines.flow.Flow
@@ -118,7 +118,7 @@ internal val DesktopSidebarExpandedWidth = 192.dp
 private val DesktopSidebarExpandedContentWidth = 156.dp
 private val DesktopSidebarItemHeight = 56.dp
 private val DesktopSidebarIconSlotSize = 38.dp
-private val DesktopSidebarIconSize = NuvioTokens.Icon.lg
+private val DesktopSidebarIconSize = KovelyxTokens.Icon.lg
 private val DesktopSidebarProfileStackRowHeight = 44.dp
 private val DesktopSidebarProfileStackRowGap = 4.dp
 private val DesktopSidebarProfileStackTopGap = 6.dp
@@ -126,7 +126,7 @@ private val DesktopSidebarProfileStackNavGap = 12.dp
 
 @Composable
 internal fun rememberGuardedPopBackStack(
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     route: AppRoute,
     beforePop: () -> Unit = {},
 ): () -> Unit {
@@ -194,7 +194,7 @@ internal data class AppTabActions(
 
 @Composable
 internal fun rememberGuardedPlayerPopBackStack(
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     route: AppRoute,
     beforePop: () -> Unit = {},
 ): PlayerBackRequest {
@@ -320,7 +320,7 @@ internal fun TabletFloatingTopBar(
     navBarStyleSetting: NavBarStyle = NavBarStyle.ADAPTIVE,
     isHeroEnabled: Boolean = true,
     hazeState: HazeState? = null,
-    scrollState: NuvioNavBarScrollState? = null,
+    scrollState: KovelyxNavBarScrollState? = null,
     windowWidth: Dp? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -399,7 +399,7 @@ internal fun TabletFloatingTopBar(
     val navIconSize = when {
         isNarrowWindow -> 16.dp
         isLargeWindow -> 20.dp
-        else -> NuvioTokens.Space.s18
+        else -> KovelyxTokens.Space.s18
     }
     val avatarSize = when {
         isNarrowWindow -> 24
@@ -445,7 +445,7 @@ internal fun TabletFloatingTopBar(
     val baseTopPadding = when {
         isNarrowWindow -> 6.dp
         isLargeWindow -> 14.dp
-        else -> NuvioTokens.Space.s10
+        else -> KovelyxTokens.Space.s10
     }
 
     val labelTextStyle = when {
@@ -501,7 +501,7 @@ internal fun TabletFloatingTopBar(
 
                 Row(
                     modifier = Modifier.padding(
-                        horizontal = if (isNarrowWindow) 8.dp else if (isLargeWindow) 12.dp else NuvioTokens.Space.s10,
+                        horizontal = if (isNarrowWindow) 8.dp else if (isLargeWindow) 12.dp else KovelyxTokens.Space.s10,
                         vertical = if (isNarrowWindow) 4.dp else tokens.spacing.controlGap,
                     ),
                     horizontalArrangement = Arrangement.spacedBy(itemSpacing),
@@ -692,7 +692,7 @@ internal fun AppLoadingContent(
                 .fillMaxWidth(0.48f)
                 .height(44.dp),
         )
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(y = 72.dp),
@@ -706,7 +706,7 @@ internal fun AppLaunchOverlay(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.zIndex(NuvioTokens.Z.dialog),
+        modifier = modifier.zIndex(KovelyxTokens.Z.dialog),
     ) {
         ProfileBackgroundBackdrop(
             profile = profile,
@@ -747,7 +747,7 @@ internal fun DesktopHoverSidebar(
             .width(sidebarWidth)
             .fillMaxHeight()
             .hoverable(hoverSource)
-            .zIndex(NuvioTokens.Z.navigation),
+            .zIndex(KovelyxTokens.Z.navigation),
         color = tokens.colors.background,
         contentColor = tokens.colors.textPrimary,
     ) {
@@ -809,7 +809,7 @@ internal fun DesktopHoverSidebar(
                         .align(Alignment.TopCenter)
                         .padding(top = profileStackTop)
                         .width(DesktopSidebarExpandedContentWidth)
-                        .zIndex(NuvioTokens.Z.sheet),
+                        .zIndex(KovelyxTokens.Z.sheet),
                 )
             }
 

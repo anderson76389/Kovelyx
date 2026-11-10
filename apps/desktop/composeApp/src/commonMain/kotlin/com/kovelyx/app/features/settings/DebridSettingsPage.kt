@@ -21,7 +21,7 @@ import com.kovelyx.app.core.ui.DialogButtons
 import com.kovelyx.app.core.ui.DialogButtonStyle
 import com.kovelyx.app.core.ui.DialogOption
 import com.kovelyx.app.core.ui.DialogSurface
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -1411,7 +1411,7 @@ private fun DebridDeviceAuthDialog(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                NuvioLoadingIndicator(modifier = Modifier.size(18.dp))
+                KovelyxLoadingIndicator(modifier = Modifier.size(18.dp))
                 Text(
                     text = startingMessage,
                     style = MaterialTheme.typography.bodyMedium,
@@ -1459,7 +1459,7 @@ private fun DebridDeviceAuthDialog(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (isPolling) {
-                        NuvioLoadingIndicator(modifier = Modifier.size(16.dp))
+                        KovelyxLoadingIndicator(modifier = Modifier.size(16.dp))
                     }
                     Text(
                         text = message,

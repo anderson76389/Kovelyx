@@ -139,7 +139,7 @@ data class LibraryUiState(
     val selectedWatchedFilter: LibraryWatchedFilter = LibraryWatchedFilter.ALL,
     val watchedMovieIds: Set<String> = emptySet(),
     val watchedSeriesIds: Set<String> = emptySet(),
-    val isNuvioAccount: Boolean = false,
+    val isKovelyxAccount: Boolean = false,
     val isTrackingAuthenticated: Boolean = false,
     val posterCardWidthDp: Int = 126,
     val posterCardCornerRadiusDp: Int = 12,
@@ -706,7 +706,7 @@ class LibraryViewModel @Inject constructor(
                         .takeIf { it in sortOptions }
                         ?: modeDefault
 
-                    val isNuvioAccount = sourceMode == LibrarySourceMode.LOCAL && authState is AuthState.FullAccount
+                    val isKovelyxAccount = sourceMode == LibrarySourceMode.LOCAL && authState is AuthState.FullAccount
 
                     val updated = current.copy(
                         sourceMode = sourceMode,
@@ -718,7 +718,7 @@ class LibraryViewModel @Inject constructor(
                         selectedListKey = nextSelectedList,
                         selectedSortOption = nextSelectedSort,
                         manageSelectedListKey = nextManageSelected,
-                        isNuvioAccount = isNuvioAccount,
+                        isKovelyxAccount = isKovelyxAccount,
                         isTrackingAuthenticated = isTrackingAuthenticated,
                         isSyncing = isSyncing,
                         isLoading = isSyncing && items.isEmpty()

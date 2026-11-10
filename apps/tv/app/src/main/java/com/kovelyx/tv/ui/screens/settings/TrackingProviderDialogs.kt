@@ -62,9 +62,9 @@ import com.kovelyx.tv.data.repository.TraktProgressService
 import com.kovelyx.tv.data.simkl.SIMKL_AUTOMATIC_REFRESH_INTERVAL_MINUTES
 import com.kovelyx.tv.data.simkl.SimklConnectionMode
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioMotion
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxMotion
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.delay
 
@@ -108,7 +108,7 @@ internal fun TraktAccountDialog(
             )
         }
     } else {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = onDismiss,
             title = "",
             width = 720.dp,
@@ -170,7 +170,7 @@ internal fun SimklAccountDialog(
         ) {
             Crossfade(
                 targetState = showSyncInfo,
-                animationSpec = tween(NuvioMotion.tokens.durations.fast),
+                animationSpec = tween(KovelyxMotion.tokens.durations.fast),
                 label = "SimklSyncInfo"
             ) { infoVisible ->
                 Column(
@@ -234,7 +234,7 @@ internal fun SimklAccountDialog(
             }
         }
     } else {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = onDismiss,
             title = "",
             width = 720.dp,
@@ -293,7 +293,7 @@ internal fun TrackingDeviceAuthContent(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(
-                    NuvioTheme.spacing.md,
+                    KovelyxTheme.spacing.md,
                     Alignment.CenterHorizontally
                 ),
                 verticalAlignment = Alignment.CenterVertically
@@ -302,7 +302,7 @@ internal fun TrackingDeviceAuthContent(
                 Text(
                     text = stringResource(R.string.tracking_connecting_provider, providerName),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -322,7 +322,7 @@ internal fun TrackingDeviceAuthContent(
             Text(
                 text = instruction,
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -342,12 +342,12 @@ internal fun TrackingDeviceAuthContent(
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 Text(
                     text = userCode,
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -355,7 +355,7 @@ internal fun TrackingDeviceAuthContent(
                     Text(
                         text = displayUrl,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextTertiary,
+                        color = KovelyxTheme.colors.TextTertiary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -367,7 +367,7 @@ internal fun TrackingDeviceAuthContent(
                             formatTrackingDuration((expiresAt - nowMillis).coerceAtLeast(0L))
                         ),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -383,9 +383,9 @@ internal fun TrackingDeviceAuthContent(
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (errorMessage != null || !credentialsConfigured) {
-                    NuvioTheme.colors.Error
+                    KovelyxTheme.colors.Error
                 } else {
-                    NuvioTheme.colors.TextSecondary
+                    KovelyxTheme.colors.TextSecondary
                 },
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -398,7 +398,7 @@ internal fun TrackingDeviceAuthContent(
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(
-                NuvioTheme.spacing.sm,
+                KovelyxTheme.spacing.sm,
                 Alignment.CenterHorizontally
             ),
             verticalAlignment = Alignment.CenterVertically
@@ -410,9 +410,9 @@ internal fun TrackingDeviceAuthContent(
                 text = visibleStatus,
                 style = MaterialTheme.typography.bodySmall,
                 color = if (errorMessage == null) {
-                    NuvioTheme.colors.TextSecondary
+                    KovelyxTheme.colors.TextSecondary
                 } else {
-                    NuvioTheme.colors.Error
+                    KovelyxTheme.colors.Error
                 },
                 textAlign = TextAlign.Center
             )
@@ -448,7 +448,7 @@ internal fun ConnectedTrackingAccountDialog(
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = "",
         width = 720.dp,
@@ -698,7 +698,7 @@ private fun TrackingBrandPrimaryButton(
             disabledContentColor = Color.White.copy(alpha = 0.7f)
         ),
         scale = ButtonDefaults.scale(focusedScale = 1.02f),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         contentPadding = PaddingValues(0.dp)
     ) {
         Row(
@@ -808,7 +808,7 @@ private fun TrackingProviderWordmark(
             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
         ) {
             Image(painter = logo, contentDescription = null, modifier = Modifier.size(40.dp))
-            Text(label, color = NuvioTheme.colors.TextPrimary, style = MaterialTheme.typography.headlineSmall)
+            Text(label, color = KovelyxTheme.colors.TextPrimary, style = MaterialTheme.typography.headlineSmall)
         }
         return
     }
@@ -868,7 +868,7 @@ private fun TraktConnectedStatsStrip(
             .clip(RoundedCornerShape(8.dp))
             .background(Color.White.copy(alpha = 0.08f))
             .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         Text(
             text = stringResource(R.string.trakt_cached_label),
@@ -878,7 +878,7 @@ private fun TraktConnectedStatsStrip(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTheme.spacing.hairline)
+                .height(KovelyxTheme.spacing.hairline)
                 .background(Color.White.copy(alpha = 0.18f))
         )
         Row(
@@ -896,7 +896,7 @@ private fun TraktConnectedStatsStrip(
                         color = Color.White,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                     Text(
                         text = labels[index],
                         style = MaterialTheme.typography.bodySmall,
@@ -907,7 +907,7 @@ private fun TraktConnectedStatsStrip(
                 if (index != values.lastIndex) {
                     Box(
                         modifier = Modifier
-                            .width(NuvioTheme.spacing.hairline)
+                            .width(KovelyxTheme.spacing.hairline)
                             .height(44.dp)
                             .background(Color.White.copy(alpha = 0.18f))
                     )

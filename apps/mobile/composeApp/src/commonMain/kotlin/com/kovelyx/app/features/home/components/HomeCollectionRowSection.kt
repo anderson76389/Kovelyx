@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.LocalScreenActive
 import com.kovelyx.app.core.ui.NuvioShelfSection
 import com.kovelyx.app.core.ui.PosterLandscapeAspectRatio
@@ -130,7 +130,7 @@ private fun CollectionFolderCard(
                 .aspectRatio(aspectRatio)
                 .nuvioCardDepth(
                     shape = shapeCorner,
-                    surface = NuvioCardDepthSurface.Posters,
+                    surface = KovelyxCardDepthSurface.Posters,
                 ),
             shape = shapeCorner,
             colors = CardDefaults.cardColors(

@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
@@ -125,7 +125,7 @@ fun StreamBadgeChips(
         Row(
             modifier = Modifier.wrapContentWidth(align = Alignment.Start, unbounded = true),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
         ) {
             imageBadges.forEach { badge ->
                 StreamImportedBadgeChip(badge = badge)
@@ -156,7 +156,7 @@ private fun StreamFileSizeBadge(bytes: Long) {
             .height(20.dp)
             .clip(BadgeChipShape)
             .background(Color(0xFF0A0C0C), BadgeChipShape)
-            .border(NuvioTheme.spacing.hairline, Color(0xFF0A0C0C), BadgeChipShape)
+            .border(KovelyxTheme.spacing.hairline, Color(0xFF0A0C0C), BadgeChipShape)
             .padding(horizontal = 6.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -182,7 +182,7 @@ private fun StreamImportedBadgeChip(badge: StreamBadge, crossfade: Boolean = fal
     // Pre-upscale: decode at 2× target pixels so the hardware compositor
     // has enough pixel data for smooth edges inside Card RenderNodes.
     val decodeHeight = remember(density) {
-        with(density) { NuvioTheme.spacing.lg.roundToPx() } * 2
+        with(density) { KovelyxTheme.spacing.lg.roundToPx() } * 2
     }
     // Use a wide max-width to let Coil decode at aspect ratio constrained by height.
     val decodeWidth = remember(density) {
@@ -209,11 +209,11 @@ private fun StreamImportedBadgeChip(badge: StreamBadge, crossfade: Boolean = fal
     val chipModifier = Modifier
         .height(20.dp)
         .then(if (backgroundColor != null) Modifier.background(backgroundColor, BadgeChipShape) else Modifier)
-        .then(if (outlineColor != null) Modifier.border(NuvioTheme.spacing.hairline, outlineColor, BadgeChipShape) else Modifier)
+        .then(if (outlineColor != null) Modifier.border(KovelyxTheme.spacing.hairline, outlineColor, BadgeChipShape) else Modifier)
 
     Box(
         modifier = chipModifier
-            .padding(horizontal = 3.dp, vertical = NuvioTheme.spacing.xxs),
+            .padding(horizontal = 3.dp, vertical = KovelyxTheme.spacing.xxs),
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
@@ -221,7 +221,7 @@ private fun StreamImportedBadgeChip(badge: StreamBadge, crossfade: Boolean = fal
             imageLoader = getBadgeImageLoader(context),
             contentDescription = badge.name,
             modifier = Modifier
-                .height(NuvioTheme.spacing.lg)
+                .height(KovelyxTheme.spacing.lg)
                 .widthIn(min = 34.dp, max = 92.dp)
                 .clip(BadgeChipShape),
             contentScale = ContentScale.Fit

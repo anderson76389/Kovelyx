@@ -15,8 +15,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.i18n.localizedMediaTypeLabel
 import com.kovelyx.app.core.poster.withCustomPosterUrl
-import com.kovelyx.app.core.ui.NuvioDropdownChip
-import com.kovelyx.app.core.ui.NuvioDropdownOption
+import com.kovelyx.app.core.ui.KovelyxDropdownChip
+import com.kovelyx.app.core.ui.KovelyxDropdownOption
 import com.kovelyx.app.features.home.MetaPreview
 import com.kovelyx.app.features.home.components.PosterGridRow
 import com.kovelyx.app.features.home.components.PosterGridSkeletonRow
@@ -55,12 +55,12 @@ internal fun LibrarySavedControls(
         if (layoutMode == LibraryLayoutMode.VERTICAL && sourceMode.isRemoteTrackingSource) {
             val selectedSection = verticalProjection.availableSections
                 .firstOrNull { section -> section.type == verticalProjection.selectedSectionKey }
-            NuvioDropdownChip(
+            KovelyxDropdownChip(
                 title = stringResource(Res.string.library_filter_list),
                 label = selectedSection?.displayTitle.orEmpty(),
                 selectedKey = verticalProjection.selectedSectionKey,
                 options = verticalProjection.availableSections.map { section ->
-                    NuvioDropdownOption(key = section.type, label = section.displayTitle)
+                    KovelyxDropdownOption(key = section.type, label = section.displayTitle)
                 },
                 enabled = verticalProjection.availableSections.size > 1,
                 onSelected = { option -> onSectionSelected(option.key) },
@@ -69,14 +69,14 @@ internal fun LibrarySavedControls(
 
         if (layoutMode == LibraryLayoutMode.VERTICAL) {
             val typeOptions = buildList {
-                add(NuvioDropdownOption(key = "", label = allTypesLabel))
+                add(KovelyxDropdownOption(key = "", label = allTypesLabel))
                 addAll(
                     verticalProjection.availableTypes.map { type ->
-                        NuvioDropdownOption(key = type, label = localizedMediaTypeLabel(type))
+                        KovelyxDropdownOption(key = type, label = localizedMediaTypeLabel(type))
                     },
                 )
             }
-            NuvioDropdownChip(
+            KovelyxDropdownChip(
                 title = stringResource(Res.string.library_filter_type),
                 label = verticalProjection.selectedType
                     ?.let(::localizedMediaTypeLabel)
@@ -88,12 +88,12 @@ internal fun LibrarySavedControls(
             )
         }
 
-        NuvioDropdownChip(
+        KovelyxDropdownChip(
             title = stringResource(Res.string.library_filter_sort),
             label = librarySortOptionLabel(sortOption),
             selectedKey = sortOption.name,
             options = sortOptions.map { option ->
-                NuvioDropdownOption(key = option.name, label = librarySortOptionLabel(option))
+                KovelyxDropdownOption(key = option.name, label = librarySortOptionLabel(option))
             },
             enabled = sortOptions.size > 1,
             onSelected = { option ->

@@ -59,9 +59,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kovelyx.app.core.build.AppFeaturePolicy
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioDesktopImageScaling
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxDesktopImageScaling
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.DesktopBackdropVerticalBias
 import com.kovelyx.app.core.ui.StandardDesktopViewportAspectRatio
 import com.kovelyx.app.core.ui.FullscreenActionButton
@@ -106,15 +106,15 @@ fun DesktopDetailBackdrop(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val sideGradientColor = heroGradientColor ?: colorScheme.background
-    val opacity = NuvioTokens.Opacity
+    val opacity = KovelyxTokens.Opacity
     val trailerAlpha by animateFloatAsState(
         targetValue = if (heroTrailerReady) 1f else 0f,
-        animationSpec = tween(durationMillis = NuvioTokens.Motion.sheetEnterMillis),
+        animationSpec = tween(durationMillis = KovelyxTokens.Motion.sheetEnterMillis),
         label = "desktop_detail_hero_trailer_alpha",
     )
     val gradientIntensity by animateFloatAsState(
         targetValue = if (heroTrailerReady) 0.3f else 1f,
-        animationSpec = tween(durationMillis = NuvioTokens.Motion.sheetEnterMillis),
+        animationSpec = tween(durationMillis = KovelyxTokens.Motion.sheetEnterMillis),
         label = "desktop_detail_hero_gradient_intensity",
     )
     BoxWithConstraints(
@@ -154,7 +154,7 @@ fun DesktopDetailBackdrop(
                 modifier = artworkModifier,
                 alignment = BiasAlignment(0f, DesktopBackdropVerticalBias),
                 contentScale = if (useWideArtworkFrame && !cropSideBackdrop) ContentScale.Fit else ContentScale.Crop,
-                desktopImageScaling = NuvioDesktopImageScaling.Disabled,
+                desktopImageScaling = KovelyxDesktopImageScaling.Disabled,
                 onSuccess = { state -> onBackdropLoaded(state.painter) },
             )
         } else {
@@ -219,10 +219,10 @@ fun DesktopDetailHero(
     onSaveLongClick: (() -> Unit)?,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val space = NuvioTokens.Space
+    val space = KovelyxTokens.Space
     val trailerAlpha by animateFloatAsState(
         targetValue = if (heroTrailerReady) 1f else 0f,
-        animationSpec = tween(durationMillis = NuvioTokens.Motion.sheetEnterMillis),
+        animationSpec = tween(durationMillis = KovelyxTokens.Motion.sheetEnterMillis),
         label = "desktop_detail_hero_controls_alpha",
     )
     var logoLoadError by remember(meta.id, meta.logo) { mutableStateOf(false) }
@@ -262,10 +262,10 @@ fun DesktopDetailHero(
                 Text(
                     text = meta.name,
                     style = MaterialTheme.typography.displayLarge.copy(
-                        fontSize = NuvioTokens.Type.displayMd,
-                        lineHeight = NuvioTokens.LineHeight.displayMd,
+                        fontSize = KovelyxTokens.Type.displayMd,
+                        lineHeight = KovelyxTokens.LineHeight.displayMd,
                         fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                     color = colorScheme.onBackground,
                     maxLines = 3,
@@ -286,9 +286,9 @@ fun DesktopDetailHero(
                 Text(
                     text = meta.genres.take(4).joinToString(" \u2022 "),
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = NuvioTokens.Type.bodyMd,
+                        fontSize = KovelyxTokens.Type.bodyMd,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                     color = colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -301,9 +301,9 @@ fun DesktopDetailHero(
                     text = synopsis,
                     collapsedMaxLines = 4,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = NuvioTokens.Type.bodyLg,
-                        lineHeight = NuvioTokens.LineHeight.bodyLg,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        fontSize = KovelyxTokens.Type.bodyLg,
+                        lineHeight = KovelyxTokens.LineHeight.bodyLg,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                     color = colorScheme.onSurface,
                 )
@@ -412,8 +412,8 @@ fun DesktopDetailHero(
 @Composable
 private fun DesktopHeroMetaRow(meta: MetaDetails, showOverallRatings: Boolean) {
     val colorScheme = MaterialTheme.colorScheme
-    val space = NuvioTokens.Space
-    val opacity = NuvioTokens.Opacity
+    val space = KovelyxTokens.Space
+    val opacity = KovelyxTokens.Opacity
     val metaItems = buildList {
         desktopYearLabel(meta)?.let(::add)
         desktopSeasonCountLabel(meta)?.let(::add)
@@ -429,9 +429,9 @@ private fun DesktopHeroMetaRow(meta: MetaDetails, showOverallRatings: Boolean) {
             Text(
                 text = item,
                 style = MaterialTheme.typography.titleSmall.copy(
-                    fontSize = NuvioTokens.Type.bodyLg,
+                    fontSize = KovelyxTokens.Type.bodyLg,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = NuvioTokens.LetterSpacing.none,
+                    letterSpacing = KovelyxTokens.LetterSpacing.none,
                 ),
                 color = colorScheme.onBackground,
                 maxLines = 1,
@@ -441,18 +441,18 @@ private fun DesktopHeroMetaRow(meta: MetaDetails, showOverallRatings: Boolean) {
             Box(
                 modifier = Modifier
                     .border(
-                        NuvioTokens.Border.thin,
+                        KovelyxTokens.Border.thin,
                         colorScheme.onBackground.copy(alpha = opacity.overlayLight),
-                        RoundedCornerShape(NuvioTokens.Radius.sm),
+                        RoundedCornerShape(KovelyxTokens.Radius.sm),
                     )
                     .padding(horizontal = space.s8, vertical = space.s2),
             ) {
                 Text(
                     text = rating,
                     style = MaterialTheme.typography.labelMedium.copy(
-                        fontSize = NuvioTokens.Type.bodySm,
+                        fontSize = KovelyxTokens.Type.bodySm,
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = NuvioTokens.LetterSpacing.none,
+                        letterSpacing = KovelyxTokens.LetterSpacing.none,
                     ),
                     color = colorScheme.onSurfaceVariant,
                 )

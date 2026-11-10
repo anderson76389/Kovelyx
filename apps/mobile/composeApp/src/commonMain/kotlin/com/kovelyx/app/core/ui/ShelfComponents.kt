@@ -46,13 +46,13 @@ import nuvio.composeapp.generated.resources.home_view_all
 import nuvio.composeapp.generated.resources.poster_logo_content_description
 import org.jetbrains.compose.resources.stringResource
 
-enum class NuvioPosterShape {
+enum class KovelyxPosterShape {
     Poster,
     Square,
     Landscape,
 }
 
-enum class NuvioViewAllPillSize {
+enum class KovelyxViewAllPillSize {
     Default,
     Compact,
 }
@@ -67,7 +67,7 @@ fun <T> NuvioShelfSection(
     rowModifier: Modifier = Modifier,
     itemSpacing: Dp = 10.dp,
     onViewAllClick: (() -> Unit)? = null,
-    viewAllPillSize: NuvioViewAllPillSize = NuvioViewAllPillSize.Default,
+    viewAllPillSize: KovelyxViewAllPillSize = KovelyxViewAllPillSize.Default,
     key: ((T) -> Any)? = null,
     animatePlacement: Boolean = false,
     state: LazyListState = rememberLazyListState(),
@@ -79,10 +79,10 @@ fun <T> NuvioShelfSection(
     }
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(tokens.spacing.controlGap + NuvioTokens.Space.s2),
+        verticalArrangement = Arrangement.spacedBy(tokens.spacing.controlGap + KovelyxTokens.Space.s2),
     ) {
         if (title.isNotBlank()) {
-            NuvioShelfSectionHeader(
+            KovelyxShelfSectionHeader(
                 title = title,
                 modifier = Modifier.padding(horizontal = headerHorizontalPadding),
                 onViewAllClick = onViewAllClick,
@@ -120,12 +120,12 @@ fun <T> NuvioShelfSection(
 }
 
 @Composable
-fun NuvioPosterCard(
+fun KovelyxPosterCard(
     title: String,
     imageUrl: String?,
     modifier: Modifier = Modifier,
     fallbackImageUrl: String? = null,
-    shape: NuvioPosterShape = NuvioPosterShape.Poster,
+    shape: KovelyxPosterShape = KovelyxPosterShape.Poster,
     detailLine: String? = null,
     showTitleBelow: Boolean = true,
     bottomLeftLogoUrl: String? = null,
@@ -146,7 +146,7 @@ fun NuvioPosterCard(
 
     Column(
         modifier = modifier.width(cardWidth),
-        verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s6),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s6),
     ) {
         Box(
             modifier = Modifier
@@ -156,7 +156,7 @@ fun NuvioPosterCard(
                 .background(tokens.colors.surface)
                 .nuvioCardDepth(
                     shape = cardShape,
-                    surface = NuvioCardDepthSurface.Posters,
+                    surface = KovelyxCardDepthSurface.Posters,
                 )
                 .posterCardClickable(
                     onClick = onClick,
@@ -190,7 +190,7 @@ fun NuvioPosterCard(
             } else {
                 Text(
                     text = title,
-                    modifier = Modifier.padding(horizontal = NuvioTokens.Space.s14),
+                    modifier = Modifier.padding(horizontal = KovelyxTokens.Space.s14),
                     style = MaterialTheme.typography.titleMedium,
                     color = tokens.colors.textMuted,
                     textAlign = TextAlign.Center,
@@ -218,7 +218,7 @@ fun NuvioPosterCard(
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(horizontal = NuvioTokens.Space.s10, vertical = NuvioTokens.Space.s10),
+                        .padding(horizontal = KovelyxTokens.Space.s10, vertical = KovelyxTokens.Space.s10),
                 ) {
                     if (!bottomLeftLogoUrl.isNullOrBlank()) {
                         AsyncImage(
@@ -262,20 +262,20 @@ fun NuvioPosterCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             } else {
-                Box(modifier = Modifier.height(NuvioTokens.Space.none))
+                Box(modifier = Modifier.height(KovelyxTokens.Space.none))
             }
         } else {
-            Box(modifier = Modifier.height(NuvioTokens.Space.none))
+            Box(modifier = Modifier.height(KovelyxTokens.Space.none))
         }
     }
 }
 
 @Composable
-private fun NuvioShelfSectionHeader(
+private fun KovelyxShelfSectionHeader(
     title: String,
     modifier: Modifier = Modifier,
     onViewAllClick: (() -> Unit)? = null,
-    viewAllPillSize: NuvioViewAllPillSize = NuvioViewAllPillSize.Default,
+    viewAllPillSize: KovelyxViewAllPillSize = KovelyxViewAllPillSize.Default,
 ) {
     val tokens = MaterialTheme.nuvio
     Column(
@@ -301,7 +301,7 @@ private fun NuvioShelfSectionHeader(
             } else {
                 Modifier
             }
-            NuvioViewAllPill(
+            KovelyxViewAllPill(
                 onClick = onViewAllClick,
                 size = viewAllPillSize,
                 modifier = viewAllPlaceholderModifier,
@@ -311,14 +311,14 @@ private fun NuvioShelfSectionHeader(
 }
 
 @Composable
-private fun NuvioViewAllPill(
+private fun KovelyxViewAllPill(
     onClick: (() -> Unit)?,
-    size: NuvioViewAllPillSize,
+    size: KovelyxViewAllPillSize,
     modifier: Modifier = Modifier,
 ) {
     val tokens = MaterialTheme.nuvio
-    val actionSize = if (size == NuvioViewAllPillSize.Compact) NuvioTokens.Space.s32 else NuvioTokens.Space.s40
-    val iconSize = if (size == NuvioViewAllPillSize.Compact) NuvioTokens.Icon.sm else tokens.icons.md
+    val actionSize = if (size == KovelyxViewAllPillSize.Compact) KovelyxTokens.Space.s32 else KovelyxTokens.Space.s40
+    val iconSize = if (size == KovelyxViewAllPillSize.Compact) KovelyxTokens.Icon.sm else tokens.icons.md
     val viewAllText = stringResource(Res.string.home_view_all)
 
     Box(
@@ -326,7 +326,7 @@ private fun NuvioViewAllPill(
             .size(actionSize)
             .background(
                 color = tokens.colors.surface,
-                shape = RoundedCornerShape(NuvioTokens.Radius.xl),
+                shape = RoundedCornerShape(KovelyxTokens.Radius.xl),
             )
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         contentAlignment = Alignment.Center,
@@ -340,11 +340,11 @@ private fun NuvioViewAllPill(
     }
 }
 
-private val NuvioPosterShape.aspectRatio: Float
+private val KovelyxPosterShape.aspectRatio: Float
     get() = when (this) {
-        NuvioPosterShape.Poster -> 0.675f
-        NuvioPosterShape.Square -> 1f
-        NuvioPosterShape.Landscape -> PosterLandscapeAspectRatio
+        KovelyxPosterShape.Poster -> 0.675f
+        KovelyxPosterShape.Square -> 1f
+        KovelyxPosterShape.Landscape -> PosterLandscapeAspectRatio
     }
 
 private data class CatalogLogoOverlaySize(
@@ -355,9 +355,9 @@ private data class CatalogLogoOverlaySize(
 
 private fun catalogLogoOverlaySize(
     basePosterWidthDp: Int,
-    shape: NuvioPosterShape,
+    shape: KovelyxPosterShape,
 ): CatalogLogoOverlaySize =
-    if (shape == NuvioPosterShape.Landscape) {
+    if (shape == KovelyxPosterShape.Landscape) {
         when {
             basePosterWidthDp <= 108 -> CatalogLogoOverlaySize(width = 92.dp, height = 24.dp, textMaxWidth = 120.dp)
             basePosterWidthDp <= 120 -> CatalogLogoOverlaySize(width = 104.dp, height = 28.dp, textMaxWidth = 132.dp)
@@ -373,9 +373,9 @@ private fun catalogLogoOverlaySize(
         }
     }
 
-private fun NuvioPosterShape.cardWidth(basePosterWidthDp: Int): Dp =
+private fun KovelyxPosterShape.cardWidth(basePosterWidthDp: Int): Dp =
     when (this) {
-        NuvioPosterShape.Poster -> basePosterWidthDp.dp
-        NuvioPosterShape.Square -> basePosterWidthDp.dp
-        NuvioPosterShape.Landscape -> landscapePosterWidth(basePosterWidthDp)
+        KovelyxPosterShape.Poster -> basePosterWidthDp.dp
+        KovelyxPosterShape.Square -> basePosterWidthDp.dp
+        KovelyxPosterShape.Landscape -> landscapePosterWidth(basePosterWidthDp)
     }

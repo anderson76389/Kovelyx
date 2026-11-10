@@ -27,7 +27,7 @@ import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material.icons.rounded.StopCircle
 import com.kovelyx.app.core.ui.DialogSurface
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -220,7 +220,7 @@ fun SubmitIntroDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     if (isSubmitting) {
-                        NuvioLoadingIndicator(
+                        KovelyxLoadingIndicator(
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(24.dp),
                         )

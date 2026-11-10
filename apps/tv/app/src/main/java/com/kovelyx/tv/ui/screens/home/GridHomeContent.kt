@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.State
@@ -228,7 +228,7 @@ fun GridHomeContent(
     val hasHero = remember(gridItems) {
         gridItems.firstOrNull() is GridItem.Hero
     }
-    val topPadding = if (hasHero) NuvioTheme.spacing.none else NuvioTheme.spacing.xl
+    val topPadding = if (hasHero) KovelyxTheme.spacing.none else KovelyxTheme.spacing.xl
 
     // Determine if hero is scrolled past
     val isScrolledPastHeroState = remember(hasHero, gridState) {
@@ -366,13 +366,13 @@ fun GridHomeContent(
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+    Box(modifier = Modifier.fillMaxSize().background(KovelyxTheme.colors.Background)) {
         val contentFocusRequester = LocalContentFocusRequester.current
         BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val gridWidth = maxWidth
         // Calculate actual columns from available width (matching GridCells.Adaptive logic)
-        val horizontalPadding = NuvioTheme.spacing.xxxl + NuvioTheme.spacing.xl
-        val spacing = NuvioTheme.spacing.md
+        val horizontalPadding = KovelyxTheme.spacing.xxxl + KovelyxTheme.spacing.xl
+        val spacing = KovelyxTheme.spacing.md
         val availableWidth = gridWidth - horizontalPadding
         val globalLandscape = LocalLandscapePosterMode.current
         val landscapeGridMinWidth = posterCardStyle.height // portrait height ≈ good landscape card width
@@ -455,13 +455,13 @@ fun GridHomeContent(
                 }
                 .dpadRepeatThrottle(),
             contentPadding = PaddingValues(
-                start = NuvioTheme.spacing.xxxl,
-                end = NuvioTheme.spacing.xl,
+                start = KovelyxTheme.spacing.xxxl,
+                end = KovelyxTheme.spacing.xl,
                 top = topPadding,
-                bottom = NuvioTheme.spacing.xxl
+                bottom = KovelyxTheme.spacing.xxl
             ),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             var firstGridFocusableAssigned = false
 
@@ -886,14 +886,14 @@ private fun SectionDivider(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = NuvioTheme.spacing.xl, bottom = NuvioTheme.spacing.md)
+            .padding(top = KovelyxTheme.spacing.xl, bottom = KovelyxTheme.spacing.md)
     ) {
         Text(
             text = catalogName,
             style = MaterialTheme.typography.headlineMedium.copy(
                 textDirection = catalogName.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
     }
 }
@@ -903,7 +903,7 @@ private fun StickyCategoryHeader(
     sectionName: String,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
     val headerGradient = remember(bgColor) {
         Brush.verticalGradient(
             colorStops = arrayOf(
@@ -918,14 +918,14 @@ private fun StickyCategoryHeader(
         modifier = modifier
             .fillMaxWidth()
             .background(headerGradient)
-            .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.md)
+            .padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.md)
     ) {
         Text(
             text = sectionName,
             style = MaterialTheme.typography.titleLarge.copy(
                 textDirection = sectionName.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
     }
 }
@@ -964,12 +964,12 @@ private fun SeeAllGridCard(
                 shape = seeAllCardShape
             ),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.BackgroundCard
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundCard
             ),
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
+                    border = KovelyxTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                     shape = seeAllCardShape
                 )
             ),
@@ -995,14 +995,14 @@ private fun SeeAllGridCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = label ?: stringResource(R.string.action_see_all),
-                        modifier = Modifier.size(NuvioTheme.spacing.xxl),
-                        tint = NuvioTheme.colors.TextSecondary
+                        modifier = Modifier.size(KovelyxTheme.spacing.xxl),
+                        tint = KovelyxTheme.colors.TextSecondary
                     )
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                     Text(
                         text = label ?: stringResource(R.string.action_see_all),
                         style = MaterialTheme.typography.titleSmall,
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -1012,7 +1012,7 @@ private fun SeeAllGridCard(
         Spacer(
             modifier = Modifier
                 .then(if (globalLandscape) Modifier.fillMaxWidth() else Modifier.width(posterCardStyle.width))
-                .padding(top = NuvioTheme.spacing.sm)
+                .padding(top = KovelyxTheme.spacing.sm)
                 .height(MaterialTheme.typography.titleMedium.lineHeight.value.dp)
         )
     }
@@ -1055,12 +1055,12 @@ private fun GridCollectionFolderCard(
             },
         shape = CardDefaults.shape(shape = cardShape),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
+                border = KovelyxTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                 shape = cardShape
             )
         ),
@@ -1094,7 +1094,7 @@ private fun GridCollectionFolderCard(
                     Text(
                         text = folder.title.take(2).uppercase(),
                         style = MaterialTheme.typography.headlineMedium,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -1130,7 +1130,7 @@ private fun GridCollectionFolderCard(
                                 colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f))
                             )
                         )
-                        .padding(NuvioTheme.spacing.sm),
+                        .padding(KovelyxTheme.spacing.sm),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

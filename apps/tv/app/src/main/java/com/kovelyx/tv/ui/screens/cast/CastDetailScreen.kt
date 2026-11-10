@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.cast
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -124,7 +124,7 @@ fun CastDetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(NuvioTheme.colors.Background)
+            .background(KovelyxTheme.colors.Background)
     ) {
         Crossfade(
             targetState = uiState,
@@ -179,8 +179,8 @@ private fun CastDetailContent(
     posterCardCornerRadiusDp: Int = 12,
     isItemWatched: (MetaPreview) -> Boolean = { false }
 ) {
-    val backgroundColor = NuvioTheme.colors.Background
-    val accentColor = NuvioTheme.colors.Secondary
+    val backgroundColor = KovelyxTheme.colors.Background
+    val accentColor = KovelyxTheme.colors.Secondary
 
     val allCredits = remember(person.movieCredits, person.tvCredits) {
         (person.movieCredits + person.tvCredits)
@@ -337,7 +337,7 @@ private fun HeroSection(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.xxl, bottom = NuvioTheme.spacing.sm),
+            .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.xxl, bottom = KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.Top
     ) {
         // Avatar / Profile Photo
@@ -376,7 +376,7 @@ private fun HeroSection(
                     }
                 },
             shape = CardDefaults.shape(
-                shape = RoundedCornerShape(NuvioTheme.radii.xl)
+                shape = RoundedCornerShape(KovelyxTheme.radii.xl)
             ),
             colors = CardDefaults.colors(
                 containerColor = Color.Transparent,
@@ -384,22 +384,22 @@ private fun HeroSection(
             ),
             border = CardDefaults.border(
                 border = Border(
-                    border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                    shape = RoundedCornerShape(NuvioTheme.radii.xl)
+                    border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.xl)
                 ),
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                    shape = RoundedCornerShape(NuvioTheme.radii.xl)
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.xl)
                 )
             )
         ) {
-            val bgCardColor = NuvioTheme.colors.SurfaceVariant
+            val bgCardColor = KovelyxTheme.colors.SurfaceVariant
             val bgPainter = remember(bgCardColor) { androidx.compose.ui.graphics.painter.ColorPainter(bgCardColor) }
             val photo = person.profilePhoto
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(NuvioTheme.radii.xl))
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
                     .then(if (photo.isNullOrBlank()) Modifier.background(bgCardColor) else Modifier),
                 contentAlignment = Alignment.Center
             ) {
@@ -424,20 +424,20 @@ private fun HeroSection(
                     Text(
                         text = person.name.firstOrNull()?.uppercase() ?: "?",
                         style = MaterialTheme.typography.displayLarge,
-                        color = NuvioTheme.colors.TextTertiary
+                        color = KovelyxTheme.colors.TextTertiary
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.width(NuvioTheme.spacing.xl))
+        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.xl))
 
         // Bio Column
         Column(
             modifier = Modifier
                 .weight(1f)
                 .then(if (isBiographyExpanded) Modifier.fillMaxHeight() else Modifier)
-                .padding(top = NuvioTheme.spacing.xs)
+                .padding(top = KovelyxTheme.spacing.xs)
         ) {
             // Name
             Text(
@@ -447,12 +447,12 @@ private fun HeroSection(
                     letterSpacing = (-0.5).sp,
                     textDirection = person.name.contentTextDirection()
                 ),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -480,13 +480,13 @@ private fun HeroSection(
                     Text(
                         text = info,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                 }
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
             }
 
             // Biography
@@ -504,15 +504,15 @@ private fun HeroSection(
                                 lineHeight = 20.sp,
                                 textDirection = bio.contentTextDirection()
                             ),
-                            color = NuvioTheme.colors.TextSecondary,
-                            modifier = Modifier.padding(end = NuvioTheme.spacing.md)
+                            color = KovelyxTheme.colors.TextSecondary,
+                            modifier = Modifier.padding(end = KovelyxTheme.spacing.md)
                         )
                     }
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                     Text(
                         text = stringResource(R.string.hero_synopsis_dismiss_hint),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextTertiary
+                        color = KovelyxTheme.colors.TextTertiary
                     )
                 } else {
                     Text(
@@ -521,7 +521,7 @@ private fun HeroSection(
                             lineHeight = 20.sp,
                             textDirection = bio.contentTextDirection()
                         ),
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         maxLines = 5,
                         overflow = TextOverflow.Ellipsis,
                         onTextLayout = { result ->
@@ -542,7 +542,7 @@ private fun SectionHeader(title: String, count: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.md, bottom = NuvioTheme.spacing.sm),
+            .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.md, bottom = KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -550,19 +550,19 @@ private fun SectionHeader(title: String, count: Int) {
             style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.SemiBold
             ),
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
-        Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
         Text(
             text = "$count",
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextTertiary,
+            color = KovelyxTheme.colors.TextTertiary,
             modifier = Modifier
                 .background(
-                    color = NuvioTheme.colors.SurfaceVariant,
-                    shape = RoundedCornerShape(NuvioTheme.radii.xs)
+                    color = KovelyxTheme.colors.SurfaceVariant,
+                    shape = RoundedCornerShape(KovelyxTheme.radii.xs)
                 )
-                .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xxs)
+                .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xxs)
         )
     }
 }
@@ -604,8 +604,8 @@ private fun FilmographyRow(
             .fillMaxWidth()
             .focusRestorer { if (restorePending) restoreFocusRequester else firstItemFocusRequester },
         state = lazyListState,
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.xs),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         itemsIndexed(
             items = credits,
@@ -653,8 +653,8 @@ private fun FilmographyRow(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun CastDetailSkeleton(personName: String) {
-    val backgroundColor = NuvioTheme.colors.Background
-    val accentColor = NuvioTheme.colors.Secondary
+    val backgroundColor = KovelyxTheme.colors.Background
+    val accentColor = KovelyxTheme.colors.Secondary
     val shimmerBrush = rememberShimmerBrush()
 
     Box(modifier = Modifier.fillMaxSize().background(backgroundColor)) {
@@ -677,28 +677,28 @@ private fun CastDetailSkeleton(personName: String) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.xxl, bottom = NuvioTheme.spacing.sm),
+                    .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.xxl, bottom = KovelyxTheme.spacing.sm),
                 verticalAlignment = Alignment.Top
             ) {
                 Box(
                     modifier = Modifier
                         .width(160.dp)
                         .height(240.dp)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.xl))
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
                         .background(shimmerBrush)
                 )
 
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.xl))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.xl))
 
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = NuvioTheme.spacing.xs)
+                        .padding(top = KovelyxTheme.spacing.xs)
                 ) {
                     Text(
                         text = personName,
                         style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -710,7 +710,7 @@ private fun CastDetailSkeleton(personName: String) {
                             modifier = Modifier
                                 .fillMaxWidth(if (it == 0) 0.60f else if (it == 1) 0.48f else 0.72f)
                                 .height(14.dp)
-                                .clip(RoundedCornerShape(NuvioTheme.radii.xs))
+                                .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
                                 .background(shimmerBrush)
                         )
                         Spacer(modifier = Modifier.height(10.dp))
@@ -720,7 +720,7 @@ private fun CastDetailSkeleton(personName: String) {
                         modifier = Modifier
                             .fillMaxWidth(0.86f)
                             .height(14.dp)
-                            .clip(RoundedCornerShape(NuvioTheme.radii.xs))
+                            .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
                             .background(shimmerBrush)
                     )
                 }
@@ -730,22 +730,22 @@ private fun CastDetailSkeleton(personName: String) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.md, bottom = NuvioTheme.spacing.sm),
+                    .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.md, bottom = KovelyxTheme.spacing.sm),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
                         .width(140.dp)
                         .height(20.dp)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.xs))
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
                         .background(shimmerBrush)
                 )
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
                 Box(
                     modifier = Modifier
                         .width(36.dp)
                         .height(18.dp)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.xs))
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
                         .background(shimmerBrush)
                 )
             }
@@ -754,8 +754,8 @@ private fun CastDetailSkeleton(personName: String) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.xs),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.xs),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
             ) {
                 repeat(7) {
                     Column(modifier = Modifier.width(112.dp)) {
@@ -766,12 +766,12 @@ private fun CastDetailSkeleton(personName: String) {
                                 .clip(RoundedCornerShape(PosterCardDefaults.Style.cornerRadius))
                                 .background(shimmerBrush)
                         )
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(NuvioTheme.spacing.lg)
-                                .clip(RoundedCornerShape(NuvioTheme.radii.xs))
+                                .height(KovelyxTheme.spacing.lg)
+                                .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
                                 .background(shimmerBrush)
                         )
                     }
@@ -790,29 +790,29 @@ private fun CastDetailError(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(NuvioTheme.colors.Background),
+            .background(KovelyxTheme.colors.Background),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = stringResource(R.string.cast_detail_error),
                 style = MaterialTheme.typography.titleLarge,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
             Button(
                 onClick = onRetry,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 )
             ) {
                 Text(stringResource(R.string.cast_detail_retry))

@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.trakt.TraktCommentReview
 import nuvio.composeapp.generated.resources.*
@@ -65,7 +65,7 @@ fun CommentDetailSheet(
         scrollState.scrollTo(0)
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         contentColor = MaterialTheme.colorScheme.onSurface,

@@ -48,8 +48,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.graphicsLayer
-import com.kovelyx.app.core.ui.NuvioDesktopImageScaling
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxDesktopImageScaling
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.core.ui.desktopPageHorizontalPaddingForWidth
 import com.kovelyx.app.core.ui.heroStretchHeight
 import com.kovelyx.app.core.ui.heroStretchZoom
@@ -141,7 +141,7 @@ fun DetailHero(
                             },
                         alignment = if (isTablet) Alignment.TopCenter else Alignment.Center,
                         contentScale = ContentScale.Crop,
-                        desktopImageScaling = NuvioDesktopImageScaling.Disabled,
+                        desktopImageScaling = KovelyxDesktopImageScaling.Disabled,
                         onSuccess = { state ->
                             onBackdropLoaded(
                                 state.painter,

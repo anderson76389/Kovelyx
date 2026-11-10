@@ -38,8 +38,8 @@ object SupporterThemeColors {
     val Gold = ThemeColorPalette(
         secondary = Color(0xFFE8A91C),
         secondaryVariant = Color(0xFF9A6200),
-        onSecondary = NuvioPrimitives.neutral925,
-        onSecondaryVariant = NuvioPrimitives.white,
+        onSecondary = KovelyxPrimitives.neutral925,
+        onSecondaryVariant = KovelyxPrimitives.white,
         accentGradient = goldGradient,
         focusRing = Color(0xFFFFD45C),
         focusRingGradient = goldGradient,
@@ -58,8 +58,8 @@ object SupporterThemeColors {
     val Jade = ThemeColorPalette(
         secondary = Color(0xFF22D37C),
         secondaryVariant = Color(0xFF0BBF9A),
-        onSecondary = NuvioPrimitives.neutral925,
-        onSecondaryVariant = NuvioPrimitives.neutral925,
+        onSecondary = KovelyxPrimitives.neutral925,
+        onSecondaryVariant = KovelyxPrimitives.neutral925,
         accentGradient = jadeGradient,
         focusRing = Color(0xFF7BF08D),
         focusRingGradient = jadeGradient,
@@ -78,7 +78,7 @@ object SupporterThemeColors {
     val RoseGold = ThemeColorPalette(
         secondary = Color(0xFFEC70A9),
         secondaryVariant = Color(0xFFB75AFF),
-        onSecondary = NuvioPrimitives.neutral925,
+        onSecondary = KovelyxPrimitives.neutral925,
         accentGradient = roseGoldGradient,
         focusRing = Color(0xFFFFB37A),
         focusRingGradient = roseGoldGradient,
@@ -115,7 +115,7 @@ object SupporterThemeColors {
     val Graphite = ThemeColorPalette(
         secondary = Color(0xFFAAB2BE),
         secondaryVariant = Color(0xFF687381),
-        onSecondary = NuvioPrimitives.neutral925,
+        onSecondary = KovelyxPrimitives.neutral925,
         accentGradient = graphiteGradient,
         focusRing = Color(0xFFF3F5F7),
         focusRingGradient = graphiteGradient,

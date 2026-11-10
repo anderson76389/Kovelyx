@@ -19,8 +19,8 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun SentrySettingsDialog(
@@ -39,7 +39,7 @@ internal fun SentrySettingsDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(
             if (enabled) {
@@ -60,7 +60,7 @@ internal fun SentrySettingsDialog(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             SentryInfoSection(
                 title = stringResource(R.string.sentry_help_title),
@@ -76,11 +76,11 @@ internal fun SentrySettingsDialog(
             )
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onDismiss,
@@ -88,8 +88,8 @@ internal fun SentrySettingsDialog(
                     .weight(1f)
                     .focusRequester(cancelFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -111,8 +111,8 @@ internal fun SentrySettingsDialog(
                     .weight(1f)
                     .focusRequester(confirmFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -134,16 +134,16 @@ private fun SentryInfoSection(
     title: String,
     body: String
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
         Text(
             text = body,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
     }
 }

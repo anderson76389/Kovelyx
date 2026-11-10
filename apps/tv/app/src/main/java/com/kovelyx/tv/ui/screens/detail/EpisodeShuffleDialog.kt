@@ -23,8 +23,8 @@ import com.kovelyx.tv.domain.model.Meta
 import com.kovelyx.tv.domain.model.RandomEpisodePicker
 import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.domain.model.WatchProgress
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -93,7 +93,7 @@ internal fun EpisodeShuffleDialog(
         return
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.random_episode_title),
         subtitle = stringResource(R.string.shuffle_choose_episodes),
@@ -121,8 +121,8 @@ internal fun EpisodeShuffleDialog(
                         modifier = Modifier.fillMaxWidth()
                             .then(if (include == focusAll) Modifier.focusRequester(focusRequester) else Modifier),
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) {
                         Text(stringResource(if (include) R.string.random_episode_include_watched else R.string.random_episode_unwatched))

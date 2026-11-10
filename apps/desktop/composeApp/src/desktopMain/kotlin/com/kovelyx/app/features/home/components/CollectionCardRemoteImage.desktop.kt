@@ -20,7 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.kovelyx.app.core.storage.DesktopStorage
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -333,7 +333,7 @@ internal actual fun CollectionCardRemoteImage(
     }
 
     Box(modifier = modifier.hoverable(hoverInteractionSource)) {
-        // Stacked Base Layer: uses NuvioAsyncImage with desktop high-quality anti-aliased scaling
+        // Stacked Base Layer: uses KovelyxAsyncImage with desktop high-quality anti-aliased scaling
         AsyncImage(
             model = request,
             contentDescription = contentDescription,

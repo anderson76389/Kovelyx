@@ -230,7 +230,7 @@ SPECIAL_RULES = [
     ),
     (
         r"ASS\s+subtitle\s+gibberish\s+caused\s+by\s+a\s+zlib\s+false-positive\s+"
-        r"on\s+plain-text\s+ASS\s+samples\s+in\s+NuvioAssMatroskaExtractor",
+        r"on\s+plain-text\s+ASS\s+samples\s+in\s+KovelyxAssMatroskaExtractor",
         "Fixed ASS subtitle gibberish caused by zlib false positives on plain-text samples",
     ),
     (

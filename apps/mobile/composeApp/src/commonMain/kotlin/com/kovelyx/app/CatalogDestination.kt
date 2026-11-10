@@ -12,7 +12,7 @@ import com.kovelyx.app.features.library.toLibraryItem
 import com.kovelyx.app.features.servers.ServerCatalog
 import com.kovelyx.app.navigation.CatalogRoute
 import com.kovelyx.app.navigation.DetailRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 
 internal data class CatalogLaunch(
     val title: String,
@@ -37,7 +37,7 @@ internal object CatalogLaunchStore {
     }
 }
 
-internal fun NuvioNavigator.openPreview(meta: MetaPreview) {
+internal fun KovelyxNavigator.openPreview(meta: MetaPreview) {
     val collection = ServerCatalog.collectionTarget(meta)
     if (collection == null) {
         navigate(DetailRoute(type = meta.type, id = meta.id, title = meta.name))
@@ -51,7 +51,7 @@ internal fun NuvioNavigator.openPreview(meta: MetaPreview) {
 @Composable
 internal fun CatalogDestination(
     route: CatalogRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     onPosterLongClick: (PosterActionTarget) -> Unit,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)

@@ -32,7 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import com.kovelyx.app.features.membership.MemberTier
 import com.kovelyx.app.features.membership.MembershipOverview
 import com.kovelyx.app.features.membership.MembershipOverviewState
@@ -131,7 +131,7 @@ private fun LoadingMembershipContent(isTablet: Boolean) {
             .padding(24.dp),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator()
+        KovelyxLoadingIndicator()
     }
 }
 

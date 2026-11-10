@@ -67,7 +67,7 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.EpisodeOptionsOverlayStyle
 import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.ui.components.ImdbRatingSourceLabel
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.BlurTransformation
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.ui.util.localizeEpisodeTitle
@@ -373,24 +373,24 @@ internal fun EpisodeOptionsOverlay(
                             }
                         ),
                     verticalArrangement = if (isNoneStyle) {
-                        Arrangement.spacedBy(NuvioTheme.spacing.lg)
+                        Arrangement.spacedBy(KovelyxTheme.spacing.lg)
                     } else {
-                        Arrangement.spacedBy(NuvioTheme.spacing.lg, Alignment.CenterVertically)
+                        Arrangement.spacedBy(KovelyxTheme.spacing.lg, Alignment.CenterVertically)
                     }
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xl),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = episodeLabel,
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = NuvioTheme.colors.Primary
+                            color = KovelyxTheme.colors.Primary
                         )
 
                         ratingLabel?.let { rating ->
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
+                                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 ImdbRatingSourceLabel(
@@ -435,7 +435,7 @@ internal fun EpisodeOptionsOverlay(
                     modifier = Modifier
                         .width(actionsWidth)
                         .focusGroup(),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     actions.forEachIndexed { index, action ->
                         Button(
@@ -464,8 +464,8 @@ internal fun EpisodeOptionsOverlay(
                                     }
                                 ),
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextPrimary
+                                containerColor = KovelyxTheme.colors.BackgroundCard,
+                                contentColor = KovelyxTheme.colors.TextPrimary
                             )
                         ) {
                             Text(action.label)

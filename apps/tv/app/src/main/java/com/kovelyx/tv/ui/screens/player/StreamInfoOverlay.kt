@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent
 import androidx.compose.foundation.BorderStroke
@@ -88,7 +88,7 @@ fun StreamInfoOverlay(
             runCatching { hudFocusRequester.requestFocus() }.isSuccess
         },
         dismissOnCenter = !hudButtonShown,
-        contentPadding = PaddingValues(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = 36.dp, bottom = 36.dp)
+        contentPadding = PaddingValues(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = 36.dp, bottom = 36.dp)
     ) {
         // Someone who never turned the overlay on has no use for a control they cannot interpret.
         if (hudButtonShown) {
@@ -118,7 +118,7 @@ private fun StreamInfoContent(data: StreamInfoData) {
     val hasSourceInfo = data.addonName != null || data.streamName != null
     if (hasSourceInfo) {
         SectionLabel(stringResource(R.string.stream_info_section_source))
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (!data.addonLogo.isNullOrBlank()) {
                 AsyncImage(
@@ -129,10 +129,10 @@ private fun StreamInfoContent(data: StreamInfoData) {
                     contentDescription = data.addonName,
                     modifier = Modifier
                         .size(36.dp)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.sm)),
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.sm)),
                     contentScale = ContentScale.Fit
                 )
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
             }
             Column {
                 if (data.addonName != null) {
@@ -149,7 +149,7 @@ private fun StreamInfoContent(data: StreamInfoData) {
                     Text(
                         text = data.streamName.replace("\n", " · "),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -160,14 +160,14 @@ private fun StreamInfoContent(data: StreamInfoData) {
             Text(
                 text = data.streamDescription.replace("\n", " · "),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = NuvioTheme.spacing.xs)
+                modifier = Modifier.padding(top = KovelyxTheme.spacing.xs)
             )
         }
         if (data.playerEngine != null || data.serverPlayback != null) {
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
             Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
                 InfoItem(label = stringResource(R.string.stream_info_player_engine), value = data.playerEngine)
                 InfoItem(
@@ -177,19 +177,19 @@ private fun StreamInfoContent(data: StreamInfoData) {
                 )
             }
         }
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
     }
 
     // FILE section
     val hasFileInfo = data.filename != null || data.fileSize != null
     if (hasFileInfo) {
         SectionLabel(stringResource(R.string.stream_info_section_file))
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
         Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
             InfoItem(label = stringResource(R.string.stream_info_filename), value = data.filename, modifier = Modifier.weight(1f))
             InfoItem(label = stringResource(R.string.stream_info_size), value = data.fileSize?.let { formatFileSize(it) })
         }
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
     }
 
     // VIDEO section
@@ -197,7 +197,7 @@ private fun StreamInfoContent(data: StreamInfoData) {
         data.videoFrameRate != null || data.videoBitrate != null || data.fileBitrate != null
     if (hasVideoInfo) {
         SectionLabel(stringResource(R.string.stream_info_section_video))
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
         Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
             InfoItem(label = stringResource(R.string.stream_info_codec), value = data.videoCodec)
             InfoItem(
@@ -224,14 +224,14 @@ private fun StreamInfoContent(data: StreamInfoData) {
                 )
             }
         }
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
     }
 
     // AUDIO section
     val hasAudioInfo = data.audioCodec != null || data.audioChannels != null || data.audioLanguage != null || data.audioSampleRate != null
     if (hasAudioInfo) {
         SectionLabel(stringResource(R.string.stream_info_section_audio))
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
         Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
             InfoItem(label = stringResource(R.string.stream_info_codec), value = data.audioCodec)
             InfoItem(label = stringResource(R.string.stream_info_channels), value = data.audioChannels)
@@ -244,14 +244,14 @@ private fun StreamInfoContent(data: StreamInfoData) {
                 value = data.audioLanguage?.let { languageCodeToName(it) }
             )
         }
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
     }
 
     // SUBTITLE section
     val hasSubtitleInfo = data.subtitleName != null || data.subtitleCodec != null || data.subtitleLanguage != null
     if (hasSubtitleInfo) {
         SectionLabel(stringResource(R.string.stream_info_section_subtitle))
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
         Row(horizontalArrangement = Arrangement.spacedBy(36.dp)) {
             InfoItem(label = stringResource(R.string.stream_info_name), value = data.subtitleName)
             InfoItem(label = stringResource(R.string.stream_info_codec), value = data.subtitleCodec)
@@ -269,7 +269,7 @@ private fun SectionLabel(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelMedium,
-        color = NuvioTheme.colors.TextTertiary,
+        color = KovelyxTheme.colors.TextTertiary,
         fontWeight = FontWeight.SemiBold
     )
 }
@@ -281,7 +281,7 @@ private fun InfoItem(label: String, value: String?, modifier: Modifier = Modifie
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
         Text(
             text = value,
@@ -354,24 +354,24 @@ private fun StreamInfoHudButton(
             },
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
         colors = ButtonDefaults.colors(
-            containerColor = if (enabled) NuvioTheme.colors.Secondary.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f),
+            containerColor = if (enabled) KovelyxTheme.colors.Secondary.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.08f),
             contentColor = if (enabled) Color.White else Color.White.copy(alpha = 0.7f),
-            focusedContainerColor = if (enabled) NuvioTheme.colors.Secondary else Color.White,
-            focusedContentColor = if (enabled) NuvioTheme.colors.OnSecondary else Color.Black
+            focusedContainerColor = if (enabled) KovelyxTheme.colors.Secondary else Color.White,
+            focusedContentColor = if (enabled) KovelyxTheme.colors.OnSecondary else Color.Black
         ),
-        shape = ButtonDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+        shape = ButtonDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
         scale = ButtonDefaults.scale(focusedScale = 1.05f),
         border = ButtonDefaults.border(
             border = Border(
                 border = BorderStroke(
                     1.dp,
-                    if (enabled) NuvioTheme.colors.Secondary.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.12f)
+                    if (enabled) KovelyxTheme.colors.Secondary.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.12f)
                 ),
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
         )
     ) {
@@ -388,13 +388,13 @@ private fun StreamInfoHudButton(
                 .clip(CircleShape)
                 .background(
                     if (enabled) {
-                        if (isFocused) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.FocusRing
+                        if (isFocused) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.FocusRing
                     } else {
                         if (isFocused) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.4f)
                     }
                 )
         )
-        Spacer(modifier = Modifier.width(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.xs))
         Text(
             text = "$hudLabel: $statusText",
             style = MaterialTheme.typography.labelMedium,

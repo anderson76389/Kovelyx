@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.account
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -76,18 +76,18 @@ fun AccountScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = NuvioTheme.spacing.xxxl),
-        contentPadding = PaddingValues(vertical = NuvioTheme.spacing.xxl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            .padding(horizontal = KovelyxTheme.spacing.xxxl),
+        contentPadding = PaddingValues(vertical = KovelyxTheme.spacing.xxl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
     ) {
         item {
             Text(
                 text = stringResource(R.string.account_title),
                 style = MaterialTheme.typography.headlineMedium,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.SemiBold
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
         }
 
         when (val authState = uiState.authState) {
@@ -100,7 +100,7 @@ fun AccountScreen(
                         Text(
                             text = stringResource(R.string.account_loading),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                 }
@@ -111,7 +111,7 @@ fun AccountScreen(
                     Text(
                         text = stringResource(R.string.account_sign_in_description),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
                 item {
@@ -124,18 +124,18 @@ fun AccountScreen(
                 }
                 if (SHOW_SYNC_CODE_FEATURES) {
                     item {
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         Text(
                             text = stringResource(R.string.account_sync_code_title),
                             style = MaterialTheme.typography.titleLarge,
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                             fontWeight = FontWeight.SemiBold
                         )
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                         Text(
                             text = stringResource(R.string.account_sync_code_description),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                     item {
@@ -209,37 +209,37 @@ private fun AccountActionCard(
     Button(
         onClick = onClick,
         colors = ButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-            contentColor = NuvioTheme.colors.TextPrimary,
-            focusedContentColor = NuvioTheme.colors.TextPrimary
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+            contentColor = KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = KovelyxTheme.colors.TextPrimary
         ),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.lg),
+                .padding(KovelyxTheme.spacing.lg),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(28.dp),
-                tint = NuvioTheme.colors.Secondary
+                tint = KovelyxTheme.colors.Secondary
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.lg))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -252,22 +252,22 @@ private fun AccountInfoCard(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = NuvioTheme.colors.BackgroundCard,
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                color = KovelyxTheme.colors.BackgroundCard,
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
-            .padding(NuvioTheme.spacing.lg)
+            .padding(KovelyxTheme.spacing.lg)
     ) {
         Column {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -285,22 +285,22 @@ private fun LinkedDevicesSection(
                 imageVector = Icons.Default.Devices,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = NuvioTheme.colors.TextSecondary
+                tint = KovelyxTheme.colors.TextSecondary
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             Text(
                 text = stringResource(R.string.account_linked_devices, devices.size),
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.Medium
             )
         }
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
         if (devices.isEmpty()) {
             Text(
                 text = stringResource(R.string.account_no_linked_devices),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
         } else {
             devices.forEach { device ->
@@ -308,17 +308,17 @@ private fun LinkedDevicesSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = NuvioTheme.colors.BackgroundCard,
-                            shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                            color = KovelyxTheme.colors.BackgroundCard,
+                            shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                         )
-                        .padding(NuvioTheme.spacing.md),
+                        .padding(KovelyxTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = device.deviceName ?: stringResource(R.string.account_unknown_device),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         modifier = Modifier.weight(1f)
                     )
                     Button(
@@ -329,18 +329,18 @@ private fun LinkedDevicesSection(
                             contentColor = Color(0xFFF44336),
                             focusedContentColor = Color(0xFFF44336)
                         ),
-                        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.sm))
+                        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.sm))
                     ) {
                         Icon(
                             imageVector = Icons.Default.LinkOff,
                             contentDescription = stringResource(R.string.cd_unlink),
-                            modifier = Modifier.size(NuvioTheme.spacing.lg)
+                            modifier = Modifier.size(KovelyxTheme.spacing.lg)
                         )
-                        Spacer(modifier = Modifier.width(NuvioTheme.spacing.xs))
+                        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.xs))
                         Text(stringResource(R.string.account_unlink), style = MaterialTheme.typography.labelSmall)
                     }
                 }
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
             }
         }
     }
@@ -356,10 +356,10 @@ private fun SignOutButton(onClick: () -> Unit) {
             contentColor = Color(0xFFF44336),
             focusedContentColor = Color(0xFFF44336)
         ),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg, vertical = NuvioTheme.spacing.sm),
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg, vertical = KovelyxTheme.spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -367,7 +367,7 @@ private fun SignOutButton(onClick: () -> Unit) {
                 contentDescription = null,
                 modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             Text(
                 text = stringResource(R.string.account_sign_out),
                 style = MaterialTheme.typography.bodyMedium,

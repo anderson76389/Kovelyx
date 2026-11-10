@@ -57,11 +57,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.ui.AppTheme
-import com.kovelyx.app.core.ui.LocalNuvioBottomNavigationOverlayPadding
-import com.kovelyx.app.core.ui.LocalNuvioNavBarScrollState
-import com.kovelyx.app.core.ui.NuvioDesktopVerticalScrollbar
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.LocalKovelyxBottomNavigationOverlayPadding
+import com.kovelyx.app.core.ui.LocalKovelyxNavBarScrollState
+import com.kovelyx.app.core.ui.KovelyxDesktopVerticalScrollbar
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.core.ui.PlatformBackHandler
 import com.kovelyx.app.core.ui.isLiquidGlassNativeTabBarSupported
 import com.kovelyx.app.features.addons.AddonRepository
@@ -628,7 +628,7 @@ private fun MobileSettingsScreen(
             }
         }
 
-        val navBarScrollState = LocalNuvioNavBarScrollState.current
+        val navBarScrollState = LocalKovelyxNavBarScrollState.current
         LaunchedEffect(Unit) {
             navBarScrollState?.updateScrollOffset(AppScreenTab.Settings, 0f)
         }
@@ -640,7 +640,7 @@ private fun MobileSettingsScreen(
             }
         }
 
-        NuvioScreen(
+        KovelyxScreen(
             modifier = Modifier.nestedScroll(rootSearchRevealConnection),
             topPadding = if (topChromePadding != null) 0.dp else null,
             listState = listState,
@@ -648,7 +648,7 @@ private fun MobileSettingsScreen(
             if (showInternalHeader) {
                 stickyHeader {
                     val previousPage = page.previousPage()
-                    NuvioScreenHeader(
+                    KovelyxScreenHeader(
                         title = stringResource(page.titleRes),
                         topPadding = topChromePadding,
                         onBack = previousPage?.let { { onNavigateBack() } },
@@ -967,7 +967,7 @@ private fun TabletSettingsScreen(
     val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val effectiveTopOffset = topChromePadding ?: (statusBarPadding + 24.dp)
 
-    val navBarScrollState = LocalNuvioNavBarScrollState.current
+    val navBarScrollState = LocalKovelyxNavBarScrollState.current
 
     LaunchedEffect(page) {
         if (page.opensInlineOnTablet) {
@@ -1064,7 +1064,7 @@ private fun TabletSettingsScreen(
                 ScreenActivityEffect(listState) { active ->
                     if (!active) listState.stopScroll()
                 }
-                val bottomOverlayPadding = LocalNuvioBottomNavigationOverlayPadding.current
+                val bottomOverlayPadding = LocalKovelyxBottomNavigationOverlayPadding.current
                 val rootSearchRevealConnection = rememberSettingsRootSearchRevealConnection(
                     page = page,
                     listState = listState,
@@ -1323,7 +1323,7 @@ private fun TabletSettingsScreen(
                             )
                         }
                     }
-                    NuvioDesktopVerticalScrollbar(
+                    KovelyxDesktopVerticalScrollbar(
                         state = listState,
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
@@ -1335,7 +1335,7 @@ private fun TabletSettingsScreen(
             if (page == SettingsPage.Root) {
                 SettingsAttribution(
                     isTablet = true,
-                    modifier = Modifier.padding(bottom = 40.dp + LocalNuvioBottomNavigationOverlayPadding.current),
+                    modifier = Modifier.padding(bottom = 40.dp + LocalKovelyxBottomNavigationOverlayPadding.current),
                 )
             }
         }

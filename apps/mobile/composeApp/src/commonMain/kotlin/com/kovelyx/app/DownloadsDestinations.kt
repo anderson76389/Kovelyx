@@ -5,12 +5,12 @@ import com.kovelyx.app.features.downloads.DownloadItem
 import com.kovelyx.app.features.downloads.DownloadsScreen
 import com.kovelyx.app.navigation.DownloadShowRoute
 import com.kovelyx.app.navigation.DownloadsRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 
 @Composable
 internal fun DownloadsDestination(
     route: DownloadsRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     useNativeNavigation: Boolean,
     onOpenDownload: (DownloadItem) -> Unit,
 ) {
@@ -29,7 +29,7 @@ internal fun DownloadsDestination(
 @Composable
 internal fun DownloadShowDestination(
     route: DownloadShowRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     onOpenDownload: (DownloadItem) -> Unit,
 ) {
     val onBack = rememberGuardedPopBackStack(navController, route)

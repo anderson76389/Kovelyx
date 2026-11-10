@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -122,7 +122,7 @@ fun FolderDetailScreen(
 
     if (folder == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.folder_detail_not_found), color = NuvioTheme.colors.TextSecondary)
+            Text(stringResource(R.string.folder_detail_not_found), color = KovelyxTheme.colors.TextSecondary)
         }
         return
     }
@@ -167,7 +167,7 @@ fun FolderDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = NuvioTheme.spacing.xl)
+                .padding(top = KovelyxTheme.spacing.xl)
         ) {
             when (uiState.viewMode) {
                 FolderViewMode.TABBED_GRID -> TabbedGridContent(
@@ -227,17 +227,17 @@ private fun FolderHeader(folder: com.kovelyx.tv.domain.model.CollectionFolder) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTheme.spacing.xxxl, vertical = NuvioTheme.spacing.sm),
+            .padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
     ) {
         if (!folder.coverImageUrl.isNullOrBlank()) {
             val iconWidth: androidx.compose.ui.unit.Dp
             val iconHeight: androidx.compose.ui.unit.Dp
             when (folder.tileShape) {
-                com.kovelyx.tv.domain.model.PosterShape.POSTER -> { iconWidth = NuvioTheme.spacing.xxl; iconHeight = NuvioTheme.spacing.xxxl }
+                com.kovelyx.tv.domain.model.PosterShape.POSTER -> { iconWidth = KovelyxTheme.spacing.xxl; iconHeight = KovelyxTheme.spacing.xxxl }
                 com.kovelyx.tv.domain.model.PosterShape.LANDSCAPE -> { iconWidth = 64.dp; iconHeight = 36.dp }
-                com.kovelyx.tv.domain.model.PosterShape.SQUARE -> { iconWidth = NuvioTheme.spacing.xxxl; iconHeight = NuvioTheme.spacing.xxxl }
+                com.kovelyx.tv.domain.model.PosterShape.SQUARE -> { iconWidth = KovelyxTheme.spacing.xxxl; iconHeight = KovelyxTheme.spacing.xxxl }
             }
             AsyncImage(
                 model = folder.coverImageUrl,
@@ -245,7 +245,7 @@ private fun FolderHeader(folder: com.kovelyx.tv.domain.model.CollectionFolder) {
                 modifier = Modifier
                     .width(iconWidth)
                     .height(iconHeight)
-                    .clip(RoundedCornerShape(NuvioTheme.radii.sm)),
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.sm)),
                 contentScale = ContentScale.FillBounds
             )
         } else if (!folder.coverEmoji.isNullOrBlank()) {
@@ -259,7 +259,7 @@ private fun FolderHeader(folder: com.kovelyx.tv.domain.model.CollectionFolder) {
             style = MaterialTheme.typography.headlineMedium.copy(
                 textDirection = folder.title.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -291,17 +291,17 @@ private fun TabbedGridContent(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.sm),
+            .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         if (!folder.coverImageUrl.isNullOrBlank()) {
             val iconWidth: androidx.compose.ui.unit.Dp
             val iconHeight: androidx.compose.ui.unit.Dp
             when (folder.tileShape) {
-                com.kovelyx.tv.domain.model.PosterShape.POSTER -> { iconWidth = NuvioTheme.spacing.xxl; iconHeight = NuvioTheme.spacing.xxxl }
+                com.kovelyx.tv.domain.model.PosterShape.POSTER -> { iconWidth = KovelyxTheme.spacing.xxl; iconHeight = KovelyxTheme.spacing.xxxl }
                 com.kovelyx.tv.domain.model.PosterShape.LANDSCAPE -> { iconWidth = 64.dp; iconHeight = 36.dp }
-                com.kovelyx.tv.domain.model.PosterShape.SQUARE -> { iconWidth = NuvioTheme.spacing.xxxl; iconHeight = NuvioTheme.spacing.xxxl }
+                com.kovelyx.tv.domain.model.PosterShape.SQUARE -> { iconWidth = KovelyxTheme.spacing.xxxl; iconHeight = KovelyxTheme.spacing.xxxl }
             }
             AsyncImage(
                 model = folder.coverImageUrl,
@@ -309,7 +309,7 @@ private fun TabbedGridContent(
                 modifier = Modifier
                     .width(iconWidth)
                     .height(iconHeight)
-                    .clip(RoundedCornerShape(NuvioTheme.radii.sm)),
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.sm)),
                 contentScale = ContentScale.FillBounds
             )
         } else if (!folder.coverEmoji.isNullOrBlank()) {
@@ -323,7 +323,7 @@ private fun TabbedGridContent(
             style = MaterialTheme.typography.headlineMedium.copy(
                 textDirection = folder.title.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = 300.dp)
@@ -350,7 +350,7 @@ private fun TabbedGridContent(
                         } else Modifier
                     ) {
                         Column(
-                            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg, vertical = NuvioTheme.spacing.sm),
+                            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg, vertical = KovelyxTheme.spacing.sm),
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(
@@ -367,7 +367,7 @@ private fun TabbedGridContent(
                                 Text(
                                     text = localizedType,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = NuvioTheme.colors.TextTertiary
+                                    color = KovelyxTheme.colors.TextTertiary
                                 )
                             }
                         }
@@ -390,7 +390,7 @@ private fun TabbedGridContent(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = currentTab.error,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -482,13 +482,13 @@ private fun TabbedGridContent(
                     }
                     .dpadRepeatThrottle(),
                 contentPadding = PaddingValues(
-                    start = NuvioTheme.spacing.xxxl,
-                    end = NuvioTheme.spacing.xxxl,
-                    top = NuvioTheme.spacing.lg,
-                    bottom = NuvioTheme.spacing.xxxl
+                    start = KovelyxTheme.spacing.xxxl,
+                    end = KovelyxTheme.spacing.xxxl,
+                    top = KovelyxTheme.spacing.lg,
+                    bottom = KovelyxTheme.spacing.xxxl
                 ),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
             ) {
                 itemsIndexed(
                     items = items,
@@ -540,8 +540,8 @@ private fun TabbedGridContent(
                                     .focusProperties { canFocus = false },
                                 shape = CardDefaults.shape(shape = cardShape),
                                 colors = CardDefaults.colors(
-                                    containerColor = NuvioTheme.colors.BackgroundCard,
-                                    focusedContainerColor = NuvioTheme.colors.BackgroundCard
+                                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                                    focusedContainerColor = KovelyxTheme.colors.BackgroundCard
                                 )
                             ) {
                                 Box(
@@ -562,7 +562,7 @@ private fun TabbedGridContent(
                             Spacer(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = NuvioTheme.spacing.sm)
+                                    .padding(top = KovelyxTheme.spacing.sm)
                                     .height(
                                         MaterialTheme.typography.titleMedium.lineHeight.value.dp +
                                             MaterialTheme.typography.labelMedium.lineHeight.value.dp
@@ -758,8 +758,8 @@ private fun RowsContent(
                     null
                 },
             ),
-        contentPadding = PaddingValues(top = NuvioTheme.spacing.lg, bottom = NuvioTheme.spacing.xxxl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxl)
+        contentPadding = PaddingValues(top = KovelyxTheme.spacing.lg, bottom = KovelyxTheme.spacing.xxxl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxl)
     ) {
         sourceTabs.forEachIndexed { index, tab ->
             // Compute rowKey early so we can use it as item key for focus restoration
@@ -793,8 +793,8 @@ private fun RowsContent(
                             Text(
                                 text = rowTitle,
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = NuvioTheme.colors.TextPrimary,
-                                modifier = Modifier.padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.md)
+                                color = KovelyxTheme.colors.TextPrimary,
+                                modifier = Modifier.padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.md)
                             )
                             Box(
                                 modifier = Modifier
@@ -811,8 +811,8 @@ private fun RowsContent(
                             Text(
                                 text = rowTitle,
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = NuvioTheme.colors.TextPrimary,
-                                modifier = Modifier.padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.md)
+                                color = KovelyxTheme.colors.TextPrimary,
+                                modifier = Modifier.padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.md)
                             )
                             Box(
                                 modifier = Modifier
@@ -820,7 +820,7 @@ private fun RowsContent(
                                     .height(containerHeight),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(text = tab.error, color = NuvioTheme.colors.TextSecondary)
+                                Text(text = tab.error, color = KovelyxTheme.colors.TextSecondary)
                             }
                         }
                     }

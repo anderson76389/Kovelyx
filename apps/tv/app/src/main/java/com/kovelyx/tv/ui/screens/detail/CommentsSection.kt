@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -83,7 +83,7 @@ import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.TraktCommentReview
 import com.kovelyx.tv.domain.model.Video
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.ui.util.localizeEpisodeTitle
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -125,7 +125,7 @@ fun CommentsSection(
     modifier: Modifier = Modifier,
     windowResetKey: String? = null
 ) {
-    val cardShape = RoundedCornerShape(NuvioTheme.radii.xl)
+    val cardShape = RoundedCornerShape(KovelyxTheme.radii.xl)
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val firstItemFocusRequester = remember { FocusRequester() }
     val internalTitleModeFocusRequester = remember { FocusRequester() }
@@ -235,12 +235,12 @@ fun CommentsSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, bottom = NuvioTheme.spacing.sm)
+            .padding(top = 20.dp, bottom = KovelyxTheme.spacing.sm)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl),
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.trakt_logo_wordmark),
@@ -249,28 +249,28 @@ fun CommentsSection(
                     .offset(y = (-1).dp)
                     .width(47.dp)
                     .height(20.dp),
-                colorFilter = ColorFilter.tint(NuvioTheme.colors.TextPrimary)
+                colorFilter = ColorFilter.tint(KovelyxTheme.colors.TextPrimary)
             )
             Text(
                 text = stringResource(R.string.detail_comments_title),
                 style = MaterialTheme.typography.titleLarge,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
         }
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
         Text(
             text = subtitleText,
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.colors.TextSecondary,
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl)
+            color = KovelyxTheme.colors.TextSecondary,
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl)
         )
         if (canToggleEpisodeComments) {
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
             Row(
                 modifier = Modifier
-                    .padding(horizontal = NuvioTheme.spacing.xxxl)
+                    .padding(horizontal = KovelyxTheme.spacing.xxxl)
                     .focusRestorer(controlsFocusRequester),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CommentModeButton(
@@ -318,8 +318,8 @@ fun CommentsSection(
                         .then(
                             commentsTargetFocusRequester?.let { Modifier.focusRestorer(it) } ?: Modifier
                         ),
-                    contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     items(3) { index ->
                         LoadingCommentCard(
@@ -348,15 +348,15 @@ fun CommentsSection(
 
             !error.isNullOrBlank() -> {
                 Column(
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl),
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     Text(
                         text = error,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             textDirection = error.contentTextDirection()
                         ),
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                     Button(
                         onClick = onRetry,
@@ -372,8 +372,8 @@ fun CommentsSection(
                                 }
                             ),
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) {
                         Text(stringResource(R.string.action_retry))
@@ -385,8 +385,8 @@ fun CommentsSection(
                 Text(
                     text = stringResource(R.string.detail_comments_empty),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl)
+                    color = KovelyxTheme.colors.TextSecondary,
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl)
                 )
             }
 
@@ -413,8 +413,8 @@ fun CommentsSection(
                         }
                         .focusGroup(),
                     state = listState,
-                    contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     items(comments, key = { it.id }) { review ->
                         val commentFocusRequester = commentFocusRequesters.getOrPut(review.id) { FocusRequester() }
@@ -502,8 +502,8 @@ private fun CommentModeButton(
                 }
             },
         colors = ButtonDefaults.colors(
-            containerColor = if (selected) NuvioTheme.colors.Secondary else NuvioTheme.colors.BackgroundCard,
-            contentColor = if (selected) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextPrimary
+            containerColor = if (selected) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.BackgroundCard,
+            contentColor = if (selected) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextPrimary
         )
     ) {
         Text(text)
@@ -530,12 +530,12 @@ private fun CommentCard(
             .width(360.dp)
             .height(230.dp),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = shape
             )
         ),
@@ -551,7 +551,7 @@ private fun CommentCard(
             Text(
                 text = review.authorDisplayName,
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -567,28 +567,28 @@ private fun CommentCard(
                     textDirection = bodyText.contentTextDirection()
                 ),
                 color = if (review.hasSpoilerContent) {
-                    NuvioTheme.colors.Warning
+                    KovelyxTheme.colors.Warning
                 } else {
-                    NuvioTheme.colors.TextSecondary
+                    KovelyxTheme.colors.TextSecondary
                 },
                 maxLines = 5,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f, fill = false)
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
                 review.rating?.let { rating ->
                     Text(
                         text = stringResource(R.string.detail_comments_badge_rating, rating),
                         style = MaterialTheme.typography.labelMedium,
-                        color = NuvioTheme.colors.TextTertiary,
+                        color = KovelyxTheme.colors.TextTertiary,
                         maxLines = 1
                     )
                 }
                 Text(
                     text = stringResource(R.string.detail_comments_likes, review.likes),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.TextTertiary,
+                    color = KovelyxTheme.colors.TextTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -603,15 +603,15 @@ private fun CommentChip(text: String) {
     Box(
         modifier = Modifier
             .background(
-                color = NuvioTheme.colors.BackgroundElevated,
+                color = KovelyxTheme.colors.BackgroundElevated,
                 shape = shape
             )
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs)
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             maxLines = 1
         )
     }
@@ -658,7 +658,7 @@ private fun EpisodeCommentPickerDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.detail_comments_episode_picker_title),
         subtitle = stringResource(R.string.detail_comments_episode_picker_subtitle),
@@ -667,14 +667,14 @@ private fun EpisodeCommentPickerDialog(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             if (seasons.isNotEmpty()) {
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
                     state = seasonListState,
-                    contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.xs),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                    contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                 ) {
                     items(sortedSeasons, key = { it }) { seasonNumber ->
                         val seasonModifier = if (seasonNumber == season) {
@@ -687,14 +687,14 @@ private fun EpisodeCommentPickerDialog(
                             modifier = seasonModifier,
                             colors = ButtonDefaults.colors(
                                 containerColor = if (seasonNumber == season) {
-                                    NuvioTheme.colors.Secondary
+                                    KovelyxTheme.colors.Secondary
                                 } else {
-                                    NuvioTheme.colors.BackgroundCard
+                                    KovelyxTheme.colors.BackgroundCard
                                 },
                                 contentColor = if (seasonNumber == season) {
-                                    NuvioTheme.colors.OnSecondary
+                                    KovelyxTheme.colors.OnSecondary
                                 } else {
-                                    NuvioTheme.colors.TextPrimary
+                                    KovelyxTheme.colors.TextPrimary
                                 }
                             )
                         ) {
@@ -732,11 +732,11 @@ private fun EpisodeCommentPickerDialog(
                         modifier = episodeModifier,
                         colors = ButtonDefaults.colors(
                             containerColor = if (episode.id == selectedEpisodeId) {
-                                NuvioTheme.colors.FocusBackground
+                                KovelyxTheme.colors.FocusBackground
                             } else {
-                                NuvioTheme.colors.BackgroundCard
+                                KovelyxTheme.colors.BackgroundCard
                             },
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) {
                         Text(
@@ -808,7 +808,7 @@ fun CommentOverlay(
                         }
                     }
                 }
-                .padding(horizontal = NuvioTheme.spacing.xl, vertical = 10.dp)
+                .padding(horizontal = KovelyxTheme.spacing.xl, vertical = 10.dp)
         ) {
             AnimatedContent(
                 targetState = review,
@@ -844,14 +844,14 @@ fun CommentOverlay(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .width(168.dp)
-                    .padding(top = 6.dp, end = NuvioTheme.spacing.xs)
+                    .padding(top = 6.dp, end = KovelyxTheme.spacing.xs)
                     .focusRequester(primaryFocusRequester)
                     .focusable()
                     .focusProperties {
                         down = mainContentFocusRequester
                     },
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.trakt_logo_wordmark),
@@ -921,7 +921,7 @@ private fun CommentOverlayContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
@@ -1031,7 +1031,7 @@ private fun OverlayMetaRow(labels: List<String>) {
             if (index > 0) {
                 Box(
                     modifier = Modifier
-                        .size(NuvioTheme.spacing.xs)
+                        .size(KovelyxTheme.spacing.xs)
                         .background(Color.White.copy(alpha = 0.42f), CircleShape)
                 )
             }
@@ -1105,7 +1105,7 @@ private fun LoadingCommentCard(
             .width(360.dp)
             .height(230.dp)
             .background(
-                color = NuvioTheme.colors.BackgroundCard,
+                color = KovelyxTheme.colors.BackgroundCard,
                 shape = shape
             )
             .padding(18.dp),
@@ -1115,15 +1115,15 @@ private fun LoadingCommentCard(
             modifier = Modifier
                 .width(160.dp)
                 .height(18.dp)
-                .background(NuvioTheme.colors.BackgroundElevated, shape = shape)
+                .background(KovelyxTheme.colors.BackgroundElevated, shape = shape)
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
             repeat(3) {
                 Box(
                     modifier = Modifier
                         .width(72.dp)
-                        .height(NuvioTheme.spacing.xl)
-                        .background(NuvioTheme.colors.BackgroundElevated, shape = shape)
+                        .height(KovelyxTheme.spacing.xl)
+                        .background(KovelyxTheme.colors.BackgroundElevated, shape = shape)
                 )
             }
         }
@@ -1131,13 +1131,13 @@ private fun LoadingCommentCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
-                .background(NuvioTheme.colors.BackgroundElevated, shape = shape)
+                .background(KovelyxTheme.colors.BackgroundElevated, shape = shape)
         )
         Box(
             modifier = Modifier
                 .width(120.dp)
-                .height(NuvioTheme.spacing.lg)
-                .background(NuvioTheme.colors.BackgroundElevated, shape = shape)
+                .height(KovelyxTheme.spacing.lg)
+                .background(KovelyxTheme.colors.BackgroundElevated, shape = shape)
         )
     }
 }

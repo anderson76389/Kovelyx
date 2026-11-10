@@ -42,12 +42,12 @@ import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
-import com.kovelyx.tv.ui.theme.NuvioComponents
-import com.kovelyx.tv.ui.theme.NuvioStrokes
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxComponents
+import com.kovelyx.tv.ui.theme.KovelyxStrokes
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
-private val NavItemShape = RoundedCornerShape(NuvioComponents.tokens.sidebar.panelRadius / 2)
-private val NavItemIconShape = RoundedCornerShape(NuvioComponents.tokens.sidebar.panelRadius / 3)
+private val NavItemShape = RoundedCornerShape(KovelyxComponents.tokens.sidebar.panelRadius / 2)
+private val NavItemIconShape = RoundedCornerShape(KovelyxComponents.tokens.sidebar.panelRadius / 3)
 
 data class SidebarItem(
     val route: String,
@@ -66,7 +66,7 @@ fun SidebarNavigation(
     onFocusChange: (Boolean) -> Unit,
     onNavigate: (String) -> Unit
 ) {
-    val sidebarWidth = NuvioTheme.sizes.sidebar.expandedWidth
+    val sidebarWidth = KovelyxTheme.sizes.sidebar.expandedWidth
     val sidebarAlpha by animateFloatAsState(
         targetValue = if (isExpanded) 1f else 0f,
         label = "sidebarAlpha"
@@ -77,21 +77,21 @@ fun SidebarNavigation(
             .width(sidebarWidth)
             .fillMaxHeight()
             .graphicsLayer { alpha = sidebarAlpha }
-            .background(NuvioTheme.colors.BackgroundElevated)
-            .padding(vertical = NuvioTheme.spacing.xl, horizontal = NuvioTheme.spacing.lg)
+            .background(KovelyxTheme.colors.BackgroundElevated)
+            .padding(vertical = KovelyxTheme.spacing.xl, horizontal = KovelyxTheme.spacing.lg)
             .onFocusChanged { state ->
                 onFocusChange(state.hasFocus)
                 onExpandedChange(state.hasFocus)
             },
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         Text(
             text = stringResource(R.string.app_name).uppercase(),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = NuvioTheme.colors.Primary
+            color = KovelyxTheme.colors.Primary
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
         items.forEach { item ->
             SidebarNavItem(
@@ -114,11 +114,11 @@ private fun SidebarNavItem(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused || isSelected) NuvioTheme.colors.FocusBackground else Color.Transparent,
+        targetValue = if (isFocused || isSelected) KovelyxTheme.colors.FocusBackground else Color.Transparent,
         label = "navItemBackground"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) NuvioTheme.colors.FocusRing else Color.Transparent,
+        targetValue = if (isFocused) KovelyxTheme.colors.FocusRing else Color.Transparent,
         label = "navItemBorder"
     )
 
@@ -126,7 +126,7 @@ private fun SidebarNavItem(
         onClick = { onNavigate(item.route) },
         modifier = Modifier
             .fillMaxWidth()
-            .height(NuvioTheme.sizes.settings.railItemHeight)
+            .height(KovelyxTheme.sizes.settings.railItemHeight)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .onFocusChanged { state ->
                 isFocused = state.hasFocus
@@ -138,7 +138,7 @@ private fun SidebarNavItem(
         border = CardDefaults.border(
             border = androidx.tv.material3.Border.None,
             focusedBorder = androidx.tv.material3.Border(
-                border = androidx.compose.foundation.BorderStroke(NuvioStrokes.tokens.focus, borderColor),
+                border = androidx.compose.foundation.BorderStroke(KovelyxStrokes.tokens.focus, borderColor),
                 shape = NavItemShape
             )
         ),
@@ -147,30 +147,30 @@ private fun SidebarNavItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTheme.sizes.settings.railItemHeight)
-                .padding(horizontal = NuvioTheme.spacing.md),
+                .height(KovelyxTheme.sizes.settings.railItemHeight)
+                .padding(horizontal = KovelyxTheme.spacing.md),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
         Box(
             modifier = Modifier
-                .size(NuvioTheme.sizes.icons.xl - NuvioTheme.spacing.xs)
+                .size(KovelyxTheme.sizes.icons.xl - KovelyxTheme.spacing.xs)
                 .clip(NavItemIconShape)
-                .background(NuvioTheme.colors.SurfaceVariant),
+                .background(KovelyxTheme.colors.SurfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = item.icon,
                 contentDescription = item.label,
-                tint = NuvioTheme.colors.TextPrimary,
-                modifier = Modifier.size(NuvioTheme.sizes.icons.sm)
+                tint = KovelyxTheme.colors.TextPrimary,
+                modifier = Modifier.size(KovelyxTheme.sizes.icons.sm)
             )
         }
 
         Text(
             text = item.label,
             style = MaterialTheme.typography.titleMedium,
-            color = if (isFocused || isSelected) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary
+            color = if (isFocused || isSelected) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary
         )
     }
     }

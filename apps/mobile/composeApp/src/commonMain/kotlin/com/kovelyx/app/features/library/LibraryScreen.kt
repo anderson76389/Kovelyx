@@ -62,13 +62,13 @@ import com.kovelyx.app.core.i18n.localizedByteUnit
 import com.kovelyx.app.core.network.NetworkCondition
 import com.kovelyx.app.core.network.NetworkStatusRepository
 import com.kovelyx.app.core.ui.DisintegrationRequest
-import com.kovelyx.app.core.ui.NuvioDropdownChip
-import com.kovelyx.app.core.ui.NuvioDropdownOption
-import com.kovelyx.app.core.ui.NuvioNetworkOfflineCard
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.KovelyxDropdownChip
+import com.kovelyx.app.core.ui.KovelyxDropdownOption
+import com.kovelyx.app.core.ui.KovelyxNetworkOfflineCard
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.core.ui.NuvioShelfSection
-import com.kovelyx.app.core.ui.NuvioViewAllPillSize
+import com.kovelyx.app.core.ui.KovelyxViewAllPillSize
 import com.kovelyx.app.core.ui.ScopedDisintegrationTracker
 import com.kovelyx.app.core.ui.SkeletonBlock
 import com.kovelyx.app.core.ui.nuvioConsumePointerEvents
@@ -295,7 +295,7 @@ fun LibraryScreen(
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val gridColumns = remember(maxWidth) { posterGridColumnCountForWidth(maxWidth) }
 
-        NuvioScreen(
+        KovelyxScreen(
             modifier = Modifier.fillMaxSize(),
             horizontalPadding = 0.dp,
             listState = listState,
@@ -311,7 +311,7 @@ fun LibraryScreen(
                     androidx.compose.foundation.layout.Column(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        NuvioScreenHeader(
+                        KovelyxScreenHeader(
                             title = if (sourceMode != LibraryViewMode.Saved) {
                                 stringResource(Res.string.library_title)
                             } else {
@@ -434,7 +434,7 @@ fun LibraryScreen(
                     !uiState.errorMessage.isNullOrBlank() && uiState.sections.isEmpty() -> {
                         item {
                             if (networkStatusUiState.isOfflineLike) {
-                                NuvioNetworkOfflineCard(
+                                KovelyxNetworkOfflineCard(
                                     condition = networkStatusUiState.condition,
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     onRetry = retryLibraryLoad,
@@ -767,10 +767,10 @@ private fun CloudLibraryToolbar(
     modifier: Modifier = Modifier,
 ) {
     val providerOptions = buildList {
-        add(NuvioDropdownOption(key = "", label = stringResource(Res.string.cloud_library_provider_all)))
+        add(KovelyxDropdownOption(key = "", label = stringResource(Res.string.cloud_library_provider_all)))
         addAll(
             uiState.providers.map { provider ->
-                NuvioDropdownOption(
+                KovelyxDropdownOption(
                     key = provider.providerId,
                     label = provider.providerName,
                 )
@@ -778,10 +778,10 @@ private fun CloudLibraryToolbar(
         )
     }
     val typeOptions = buildList {
-        add(NuvioDropdownOption(key = "", label = stringResource(Res.string.cloud_library_type_all)))
+        add(KovelyxDropdownOption(key = "", label = stringResource(Res.string.cloud_library_type_all)))
         addAll(
             availableTypes.map { type ->
-                NuvioDropdownOption(
+                KovelyxDropdownOption(
                     key = type.name,
                     label = cloudLibraryTypeLabel(type),
                 )
@@ -811,7 +811,7 @@ private fun CloudLibraryToolbar(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                NuvioDropdownChip(
+                KovelyxDropdownChip(
                     title = stringResource(Res.string.cloud_library_select_provider),
                     label = selectedProviderName,
                     selectedKey = selectedProviderId.orEmpty(),
@@ -821,7 +821,7 @@ private fun CloudLibraryToolbar(
                         onProviderSelected(option.key.ifBlank { null })
                     },
                 )
-                NuvioDropdownChip(
+                KovelyxDropdownChip(
                     title = stringResource(Res.string.cloud_library_select_type),
                     label = selectedTypeLabel,
                     selectedKey = selectedType?.name.orEmpty(),
@@ -1242,7 +1242,7 @@ private fun LazyListScope.librarySections(
             onViewAllClick = section.source
                 ?.takeIf { it.items.size > LIBRARY_SECTION_PREVIEW_LIMIT }
                 ?.let { source -> onSectionViewAllClick?.let { { it(source, sortOption) } } },
-            viewAllPillSize = NuvioViewAllPillSize.Compact,
+            viewAllPillSize = KovelyxViewAllPillSize.Compact,
             key = { entry -> entry.globalKey },
             animatePlacement = true,
         ) { entry ->

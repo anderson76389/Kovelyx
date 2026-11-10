@@ -61,9 +61,9 @@ import androidx.compose.ui.unit.dp
 import com.kovelyx.app.isDesktop
 import com.kovelyx.app.core.ui.FullscreenActionButton
 import com.kovelyx.app.core.ui.DesktopBackdropVerticalBias
-import com.kovelyx.app.core.ui.NuvioDesktopImageScaling
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxDesktopImageScaling
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.isFullscreenActionSupported
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
 import com.kovelyx.app.core.ui.heroStretchHeight
@@ -305,7 +305,7 @@ private fun HeroBackgroundLayers(
                 else -> Alignment.Center
             },
             contentScale = ContentScale.Crop,
-            desktopImageScaling = NuvioDesktopImageScaling.Disabled,
+            desktopImageScaling = KovelyxDesktopImageScaling.Disabled,
         )
     }
 }
@@ -539,8 +539,8 @@ private fun DesktopHomeHeroFrame(
     onItemClick: ((MetaPreview) -> Unit)?,
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val opacity = NuvioTokens.Opacity
-    val space = NuvioTokens.Space
+    val opacity = KovelyxTokens.Opacity
+    val space = KovelyxTokens.Space
     val backgroundColor = colorScheme.background
 
     Box(
@@ -928,10 +928,10 @@ private fun DesktopHeroContentBlock(
                 text = item.name,
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.displayLarge.copy(
-                    fontSize = NuvioTokens.Type.displayMd,
-                    lineHeight = NuvioTokens.LineHeight.displayMd,
+                    fontSize = KovelyxTokens.Type.displayMd,
+                    lineHeight = KovelyxTokens.LineHeight.displayMd,
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = NuvioTokens.LetterSpacing.none,
+                    letterSpacing = KovelyxTokens.LetterSpacing.none,
                 ),
                 color = colorScheme.onBackground,
                 textAlign = TextAlign.Start,
@@ -942,13 +942,13 @@ private fun DesktopHeroContentBlock(
 
         val genreText = desktopHeroGenreText(item)
         if (genreText.isNotBlank()) {
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s12))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s12))
             Text(
                 text = genreText,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = NuvioTokens.Type.bodyMd,
+                    fontSize = KovelyxTokens.Type.bodyMd,
                     fontWeight = FontWeight.SemiBold,
-                    letterSpacing = NuvioTokens.LetterSpacing.none,
+                    letterSpacing = KovelyxTokens.LetterSpacing.none,
                 ),
                 color = colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -957,13 +957,13 @@ private fun DesktopHeroContentBlock(
         }
 
         item.description?.takeIf { it.isNotBlank() }?.let { description ->
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s16))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s16))
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = NuvioTokens.Type.bodyLg,
-                    lineHeight = NuvioTokens.LineHeight.bodyLg,
-                    letterSpacing = NuvioTokens.LetterSpacing.none,
+                    fontSize = KovelyxTokens.Type.bodyLg,
+                    lineHeight = KovelyxTokens.LineHeight.bodyLg,
+                    letterSpacing = KovelyxTokens.LetterSpacing.none,
                 ),
                 color = colorScheme.onSurface,
                 maxLines = 4,
@@ -972,9 +972,9 @@ private fun DesktopHeroContentBlock(
         }
 
         if (onItemClick != null) {
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s24))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s24))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Surface(

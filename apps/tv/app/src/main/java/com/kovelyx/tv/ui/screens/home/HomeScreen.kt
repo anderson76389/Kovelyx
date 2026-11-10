@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.compose.animation.AnimatedVisibility
@@ -55,7 +55,7 @@ import com.kovelyx.tv.ui.components.LoadingIndicator
 import com.kovelyx.tv.ui.components.LocalStartupLoadingState
 import com.kovelyx.tv.ui.components.LocalStartupSplashEnabled
 import com.kovelyx.tv.ui.components.shouldShowHomeStartupLoader
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.PosterCardDefaults
 import com.kovelyx.tv.ui.components.PosterCardStyle
 import androidx.compose.ui.res.stringResource
@@ -278,7 +278,7 @@ fun HomeScreen(
                         Text(
                             text = stringResource(R.string.home_no_addons),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                 }
@@ -295,7 +295,7 @@ fun HomeScreen(
                         Text(
                             text = stringResource(R.string.home_no_catalog_addons),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                 }
@@ -321,7 +321,7 @@ fun HomeScreen(
                         Text(
                             text = stringResource(R.string.web_no_catalogs),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                 }
@@ -427,7 +427,7 @@ fun HomeScreen(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = NuvioTheme.spacing.xl)
+                    .padding(top = KovelyxTheme.spacing.xl)
                     .background(
                         color = Color(0xFF5A1C1C),
                         shape = RoundedCornerShape(10.dp)
@@ -440,7 +440,7 @@ fun HomeScreen(
                         StartupAuthNotice.TRAKT -> stringResource(R.string.auth_notice_trakt_logged_out)
                     },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
             }
         }
@@ -733,7 +733,7 @@ private fun HomePosterOptionsDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.home_poster_dialog_subtitle)
@@ -744,8 +744,8 @@ private fun HomePosterOptionsDialog(
                 .fillMaxWidth()
                 .focusRequester(primaryFocusRequester),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(stringResource(R.string.cw_action_go_to_details))
@@ -756,8 +756,8 @@ private fun HomePosterOptionsDialog(
             enabled = !isLibraryPending,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(
@@ -779,8 +779,8 @@ private fun HomePosterOptionsDialog(
                 enabled = !isWatchedPending,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -813,7 +813,7 @@ private fun HomeLibraryListPickerDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.detail_lists_subtitle),
@@ -847,8 +847,8 @@ private fun HomeLibraryListPickerDialog(
                         Modifier.fillMaxWidth()
                     },
                     colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
+                        containerColor = if (selected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextPrimary
                     )
                 ) {
                     Text(
@@ -860,15 +860,15 @@ private fun HomeLibraryListPickerDialog(
             }
         }
 
-        Divider(color = NuvioTheme.colors.Border, thickness = NuvioTheme.spacing.hairline)
+        Divider(color = KovelyxTheme.colors.Border, thickness = KovelyxTheme.spacing.hairline)
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
             Button(
                 onClick = onSave,
                 enabled = !isPending,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))

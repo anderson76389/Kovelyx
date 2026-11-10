@@ -42,8 +42,8 @@ import com.kovelyx.tv.domain.model.LibraryListTab
 import com.kovelyx.tv.domain.model.LibraryListPrivacy
 import kotlinx.coroutines.delay
 import com.kovelyx.tv.domain.model.localizedTitle
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
 import com.kovelyx.tv.R
@@ -82,14 +82,14 @@ internal fun ManageListsDialog(
         Box(
             modifier = Modifier
                 .width(620.dp)
-                .background(NuvioTheme.colors.BackgroundElevated, RoundedCornerShape(NuvioTheme.radii.xl))
-                .padding(NuvioTheme.spacing.xl)
+                .background(KovelyxTheme.colors.BackgroundElevated, RoundedCornerShape(KovelyxTheme.radii.xl))
+                .padding(KovelyxTheme.spacing.xl)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(
                     text = stringResource(R.string.library_manage_lists),
                     style = MaterialTheme.typography.titleLarge,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
 
                 if (errorMessage != null) {
@@ -104,7 +104,7 @@ internal fun ManageListsDialog(
                     Text(
                         text = stringResource(R.string.library_no_lists),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.extendedColors.textSecondary
+                        color = KovelyxTheme.extendedColors.textSecondary
                     )
                 } else {
                     LazyColumn(
@@ -126,8 +126,8 @@ internal fun ManageListsDialog(
                                     Modifier.fillMaxWidth()
                                 },
                                 colors = ButtonDefaults.colors(
-                                    containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                                    contentColor = NuvioTheme.colors.TextPrimary
+                                    containerColor = if (selected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                                    contentColor = KovelyxTheme.colors.TextPrimary
                                 )
                             ) {
                                 Text(
@@ -146,16 +146,16 @@ internal fun ManageListsDialog(
                         modifier = if (personalTabs.isEmpty()) Modifier.focusRequester(firstFocusRequester) else Modifier,
                         enabled = !pending,
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) { Text(stringResource(R.string.library_list_create)) }
                     Button(
                         onClick = onEdit,
                         enabled = !pending && selectedKey != null,
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) { Text(stringResource(R.string.library_list_edit)) }
                     if (capabilities.supportsReordering) {
@@ -163,16 +163,16 @@ internal fun ManageListsDialog(
                             onClick = onMoveUp,
                             enabled = !pending && selectedKey != null,
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextPrimary
+                                containerColor = KovelyxTheme.colors.BackgroundCard,
+                                contentColor = KovelyxTheme.colors.TextPrimary
                             )
                         ) { Text(stringResource(R.string.library_list_move_up)) }
                         Button(
                             onClick = onMoveDown,
                             enabled = !pending && selectedKey != null,
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextPrimary
+                                containerColor = KovelyxTheme.colors.BackgroundCard,
+                                contentColor = KovelyxTheme.colors.TextPrimary
                             )
                         ) { Text(stringResource(R.string.library_list_move_down)) }
                     }
@@ -184,15 +184,15 @@ internal fun ManageListsDialog(
                         enabled = !pending && selectedKey != null,
                         colors = ButtonDefaults.colors(
                             containerColor = Color(0xFF4A2323),
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) { Text(stringResource(R.string.library_list_delete)) }
                     Button(
                         onClick = onDismiss,
                         enabled = !pending,
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     ) { Text(stringResource(R.string.library_list_close)) }
                 }
@@ -229,7 +229,7 @@ internal fun ListEditorDialog(
         nameFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onCancel,
         title = if (state.mode == LibraryListEditorState.Mode.CREATE) stringResource(R.string.library_list_create_dialog_title) else stringResource(R.string.library_list_edit_dialog_title),
         width = 560.dp
@@ -270,15 +270,15 @@ internal fun ListEditorDialog(
                 textDirection = TextDirection.Content
             ),
             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                focusedTextColor = NuvioTheme.colors.TextPrimary,
-                unfocusedTextColor = NuvioTheme.colors.TextPrimary,
-                focusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                unfocusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                focusedBorderColor = NuvioTheme.colors.FocusRing,
-                unfocusedBorderColor = NuvioTheme.colors.Border,
-                focusedLabelColor = NuvioTheme.colors.TextSecondary,
-                unfocusedLabelColor = NuvioTheme.colors.TextTertiary,
-                cursorColor = NuvioTheme.colors.FocusRing,
+                focusedTextColor = KovelyxTheme.colors.TextPrimary,
+                unfocusedTextColor = KovelyxTheme.colors.TextPrimary,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundCard,
+                unfocusedContainerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedBorderColor = KovelyxTheme.colors.FocusRing,
+                unfocusedBorderColor = KovelyxTheme.colors.Border,
+                focusedLabelColor = KovelyxTheme.colors.TextSecondary,
+                unfocusedLabelColor = KovelyxTheme.colors.TextTertiary,
+                cursorColor = KovelyxTheme.colors.FocusRing,
             )
         )
 
@@ -312,15 +312,15 @@ internal fun ListEditorDialog(
                     textDirection = TextDirection.Content
                 ),
                 colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = NuvioTheme.colors.TextPrimary,
-                    unfocusedTextColor = NuvioTheme.colors.TextPrimary,
-                    focusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                    unfocusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedBorderColor = NuvioTheme.colors.FocusRing,
-                    unfocusedBorderColor = NuvioTheme.colors.Border,
-                    focusedLabelColor = NuvioTheme.colors.TextSecondary,
-                    unfocusedLabelColor = NuvioTheme.colors.TextTertiary,
-                    cursorColor = NuvioTheme.colors.FocusRing,
+                    focusedTextColor = KovelyxTheme.colors.TextPrimary,
+                    unfocusedTextColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContainerColor = KovelyxTheme.colors.BackgroundCard,
+                    unfocusedContainerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedBorderColor = KovelyxTheme.colors.FocusRing,
+                    unfocusedBorderColor = KovelyxTheme.colors.Border,
+                    focusedLabelColor = KovelyxTheme.colors.TextSecondary,
+                    unfocusedLabelColor = KovelyxTheme.colors.TextTertiary,
+                    cursorColor = KovelyxTheme.colors.FocusRing,
                 )
             )
         }
@@ -328,7 +328,7 @@ internal fun ListEditorDialog(
         Text(
             text = stringResource(R.string.library_list_privacy),
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.extendedColors.textSecondary
+            color = KovelyxTheme.extendedColors.textSecondary
         )
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -338,8 +338,8 @@ internal fun ListEditorDialog(
                     onClick = { onPrivacyChanged(privacy) },
                     enabled = !pending,
                     colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
+                        containerColor = if (selected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextPrimary
                     )
                 ) {
                     Text(privacy.apiValue.replaceFirstChar { it.uppercase() })
@@ -352,8 +352,8 @@ internal fun ListEditorDialog(
             enabled = !pending,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(if (pending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))

@@ -14,7 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -37,7 +37,7 @@ class OpeningOverlayTest {
         val statusVisible = mutableStateOf(true)
         var closed = false
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 OpeningOverlay(
                     artwork = null,
                     logo = null,
@@ -61,7 +61,7 @@ class OpeningOverlayTest {
     @Test
     fun subtitleProgressUsesTheTvCopy() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 OpeningOverlay(
                     artwork = null,
                     logo = null,
@@ -127,7 +127,7 @@ class OpeningOverlayTest {
 
     private fun showOverlay() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 Box(Modifier.size(640.dp, 360.dp)) {
                     OpeningOverlay(
                         artwork = null,

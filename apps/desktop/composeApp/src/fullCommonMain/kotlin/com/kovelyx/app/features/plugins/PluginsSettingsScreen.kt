@@ -34,12 +34,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioIconActionButton
-import com.kovelyx.app.core.ui.NuvioInfoBadge
-import com.kovelyx.app.core.ui.NuvioInputField
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioSectionLabel
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxIconActionButton
+import com.kovelyx.app.core.ui.KovelyxInfoBadge
+import com.kovelyx.app.core.ui.KovelyxInputField
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxSectionLabel
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 import com.kovelyx.app.features.plugins.runtime.PluginRuntime
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -124,15 +124,15 @@ fun PluginsSettingsPageContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        NuvioSectionLabel(stringResource(Res.string.plugins_section_overview))
-        NuvioSurfaceCard {
+        KovelyxSectionLabel(stringResource(Res.string.plugins_section_overview))
+        KovelyxSurfaceCard {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                NuvioInfoBadge(text = stringResource(Res.string.plugins_badge_repos, sortedRepos.size))
-                NuvioInfoBadge(text = stringResource(Res.string.plugins_badge_providers, sortedScrapers.size))
-                NuvioInfoBadge(
+                KovelyxInfoBadge(text = stringResource(Res.string.plugins_badge_repos, sortedRepos.size))
+                KovelyxInfoBadge(text = stringResource(Res.string.plugins_badge_providers, sortedScrapers.size))
+                KovelyxInfoBadge(
                     text = if (uiState.pluginsEnabled) {
                         stringResource(Res.string.plugins_badge_enabled)
                     } else {
@@ -196,9 +196,9 @@ fun PluginsSettingsPageContent(
             }
         }
 
-        NuvioSectionLabel(stringResource(Res.string.plugins_section_add_repo))
-        NuvioSurfaceCard {
-            NuvioInputField(
+        KovelyxSectionLabel(stringResource(Res.string.plugins_section_add_repo))
+        KovelyxSurfaceCard {
+            KovelyxInputField(
                 value = repositoryUrl,
                 onValueChange = {
                     repositoryUrl = it
@@ -207,7 +207,7 @@ fun PluginsSettingsPageContent(
                 placeholder = stringResource(Res.string.plugins_input_manifest_placeholder),
             )
             Spacer(modifier = Modifier.height(16.dp))
-            NuvioPrimaryButton(
+            KovelyxPrimaryButton(
                 text = if (isAdding) {
                     stringResource(Res.string.plugins_button_installing)
                 } else {
@@ -218,7 +218,7 @@ fun PluginsSettingsPageContent(
                     val requested = repositoryUrl.trim()
                     if (requested.isBlank()) {
                         message = enterRepoUrlError
-                        return@NuvioPrimaryButton
+                        return@KovelyxPrimaryButton
                     }
                     isAdding = true
                     message = null
@@ -246,9 +246,9 @@ fun PluginsSettingsPageContent(
             }
         }
 
-        NuvioSectionLabel(stringResource(Res.string.plugins_section_installed_repos))
+        KovelyxSectionLabel(stringResource(Res.string.plugins_section_installed_repos))
         if (sortedRepos.isEmpty()) {
-            NuvioSurfaceCard {
+            KovelyxSurfaceCard {
                 Text(
                     text = stringResource(Res.string.plugins_empty_repos_title),
                     style = MaterialTheme.typography.titleLarge,
@@ -263,7 +263,7 @@ fun PluginsSettingsPageContent(
             }
         } else {
             sortedRepos.forEach { repo ->
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -295,13 +295,13 @@ fun PluginsSettingsPageContent(
                             )
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            NuvioIconActionButton(
+                            KovelyxIconActionButton(
                                 icon = Icons.Rounded.Refresh,
                                 contentDescription = stringResource(Res.string.plugins_cd_refresh_repo),
                                 tint = MaterialTheme.colorScheme.primary,
                                 onClick = { PluginRepository.refreshRepository(repo.manifestUrl, pushAfterRefresh = true) },
                             )
-                            NuvioIconActionButton(
+                            KovelyxIconActionButton(
                                 icon = Icons.Rounded.Delete,
                                 contentDescription = stringResource(Res.string.plugins_cd_delete_repo),
                                 tint = MaterialTheme.colorScheme.error,
@@ -314,9 +314,9 @@ fun PluginsSettingsPageContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        NuvioInfoBadge(text = stringResource(Res.string.plugins_badge_providers, repo.scraperCount))
+                        KovelyxInfoBadge(text = stringResource(Res.string.plugins_badge_providers, repo.scraperCount))
                         if (repo.isRefreshing) {
-                            NuvioInfoBadge(text = stringResource(Res.string.plugins_badge_refreshing))
+                            KovelyxInfoBadge(text = stringResource(Res.string.plugins_badge_refreshing))
                         }
                     }
                     repo.errorMessage?.let { errorMessage ->
@@ -331,9 +331,9 @@ fun PluginsSettingsPageContent(
             }
         }
 
-        NuvioSectionLabel(stringResource(Res.string.plugins_section_providers))
+        KovelyxSectionLabel(stringResource(Res.string.plugins_section_providers))
         if (sortedScrapers.isEmpty()) {
-            NuvioSurfaceCard {
+            KovelyxSurfaceCard {
                 Text(
                     text = stringResource(Res.string.plugins_empty_providers),
                     style = MaterialTheme.typography.bodyLarge,
@@ -347,7 +347,7 @@ fun PluginsSettingsPageContent(
                 val repositoryName = repositoryNameByUrl[scraper.repositoryUrl]
                     ?: scraper.repositoryUrl.fallbackRepositoryLabel(repoFallbackLabel)
 
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -421,15 +421,15 @@ fun PluginsSettingsPageContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
-                        NuvioInfoBadge(text = scraper.supportedTypes.joinToString(" | "))
-                        NuvioInfoBadge(text = stringResource(Res.string.plugins_provider_version, scraper.version))
+                        KovelyxInfoBadge(text = scraper.supportedTypes.joinToString(" | "))
+                        KovelyxInfoBadge(text = stringResource(Res.string.plugins_provider_version, scraper.version))
                         if (!scraper.manifestEnabled) {
-                            NuvioInfoBadge(text = stringResource(Res.string.plugins_provider_disabled_by_repo))
+                            KovelyxInfoBadge(text = stringResource(Res.string.plugins_provider_disabled_by_repo))
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
-                    NuvioPrimaryButton(
+                    KovelyxPrimaryButton(
                         text = if (isTestingThisScraper) {
                             stringResource(Res.string.plugins_button_testing)
                         } else {

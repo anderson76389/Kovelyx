@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,7 +51,7 @@ fun TraktSourcePickerContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = NuvioTheme.spacing.xxxl, start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl)
+            .padding(top = KovelyxTheme.spacing.xxxl, start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -63,22 +63,22 @@ fun TraktSourcePickerContent(
                     if (isEditing) R.string.collections_editor_edit_trakt_source else R.string.collections_editor_trakt_sources
                 ),
                 style = MaterialTheme.typography.headlineMedium.copy(textDirection = TextDirection.Content),
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
             )
-            NuvioButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
+            KovelyxButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         uiState.traktSearchError?.takeIf { it.isNotBlank() }?.let { error ->
-            Text(error, color = NuvioTheme.colors.Error, style = MaterialTheme.typography.bodySmall)
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Text(error, color = KovelyxTheme.colors.Error, style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
         }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = 6.dp, bottom = NuvioTheme.spacing.xxxl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(top = 6.dp, bottom = KovelyxTheme.spacing.xxxl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             item {
                 TraktSourceForm(
@@ -129,7 +129,7 @@ private fun TraktSourceForm(
     onSearch: () -> Unit,
     onAddFromInput: () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
         TraktLabeledField(
             label = stringResource(R.string.collections_editor_trakt_list),
             value = uiState.traktInput,
@@ -152,15 +152,15 @@ private fun TraktSourceForm(
             onSortChange = onSortChange,
             onSortHowChange = onSortHowChange
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
             TmdbActionButton(onClick = onSearch, primary = false) {
                 Icon(Icons.Default.Search, contentDescription = null)
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                 Text(stringResource(R.string.collections_editor_tmdb_search))
             }
             TmdbActionButton(onClick = onAddFromInput, primary = true) {
                 Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                 Text(stringResource(if (isEditing) R.string.collections_editor_save_source else R.string.collections_editor_add_source))
             }
         }
@@ -175,8 +175,8 @@ private fun TraktLabeledField(
     placeholder: String
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = NuvioTheme.colors.TextPrimary)
-        NuvioTextField(
+        Text(label, style = MaterialTheme.typography.labelMedium, color = KovelyxTheme.colors.TextPrimary)
+        KovelyxTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
@@ -196,7 +196,7 @@ private fun TraktMediaSortControls(
     onSortChange: (String) -> Unit,
     onSortHowChange: (String) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
         TmdbOptionRow(label = stringResource(R.string.library_filter_type)) {
             TmdbChoiceButton(
                 label = stringResource(R.string.type_movie),
@@ -240,7 +240,7 @@ private fun TraktMediaSortControls(
 
 @Composable
 private fun TraktSectionTitle(title: String) {
-    Text(title, style = MaterialTheme.typography.labelLarge, color = NuvioTheme.colors.TextSecondary)
+    Text(title, style = MaterialTheme.typography.labelLarge, color = KovelyxTheme.colors.TextSecondary)
 }
 
 @Composable

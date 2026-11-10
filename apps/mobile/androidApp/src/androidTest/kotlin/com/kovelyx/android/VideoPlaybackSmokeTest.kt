@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.player.AndroidPlaybackEngine
 import com.kovelyx.app.features.player.PlatformPlayerSurface
 import com.kovelyx.app.features.player.PlayerPlaybackSnapshot
@@ -104,7 +104,7 @@ class VideoPlaybackSmokeTest {
         val visible = mutableStateOf(true)
         try {
             compose.setContent {
-                if (visible.value) NuvioTheme {
+                if (visible.value) KovelyxTheme {
                     PlatformPlayerSurface(
                         sourceUrl = fixture.toURI().toASCIIString(),
                         modifier = Modifier.fillMaxSize(),

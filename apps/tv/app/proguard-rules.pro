@@ -92,11 +92,9 @@
     public long nativeHandle;
 }
 
-# ── Supabase / Ktor / Kotlinx Serialization ───────────────────────────────────
--keep class io.github.jan.supabase.** { *; }
+# ── Ktor / Kotlinx Serialization ───────────────────────────────────
 -keep class io.ktor.** { *; }
 -dontwarn io.ktor.**
--keep class com.kovelyx.tv.data.remote.supabase.** { *; }
 # Keep @Serializable classes and their generated serializers
 -keepclassmembers class * {
     kotlinx.serialization.KSerializer serializer(...);

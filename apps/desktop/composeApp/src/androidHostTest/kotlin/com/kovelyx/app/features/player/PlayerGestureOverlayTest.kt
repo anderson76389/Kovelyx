@@ -16,7 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import kotlinx.coroutines.test.TestScope
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -50,7 +50,7 @@ class PlayerGestureOverlayTest {
 
     private fun setPlayerContent() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 val callbacks = runtime.rememberSurfaceGestureCallbacks()
                 val currentFeedback = runtime.liveGestureFeedback ?: runtime.gestureFeedback
                 LaunchedEffect(currentFeedback) {

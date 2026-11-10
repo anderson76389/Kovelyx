@@ -1,6 +1,6 @@
 package com.kovelyx.app.features.player
 
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.addons.AddonRepository
 import com.kovelyx.app.features.addons.enabledAddons
 import com.kovelyx.app.features.debrid.DebridSettingsRepository
@@ -311,7 +311,7 @@ internal fun CoroutineScope.launchPlayerNextEpisodeAutoPlay(
             when (val result = DirectDebridPlaybackResolver.resolveToPlayableStream(stream, nextVideo.season, nextVideo.episode)) {
                 is DirectDebridPlayableResult.Success -> result.stream
                 else -> {
-                    result.toastMessage()?.let { NuvioToastController.show(it) }
+                    result.toastMessage()?.let { KovelyxToastController.show(it) }
                     PlayerStreamsRepository.loadEpisodeStreams(
                         type = type,
                         videoId = nextVideo.id,

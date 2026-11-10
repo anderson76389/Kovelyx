@@ -22,7 +22,7 @@ import com.kovelyx.tv.core.tracking.TrackingProviderId
 import com.kovelyx.tv.data.local.WatchProgressSource
 import com.kovelyx.tv.data.simkl.SimklConnectionMode
 import com.kovelyx.tv.domain.model.LibrarySourceMode
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -166,7 +166,7 @@ class TrackingSettingsOverviewTest {
     fun remoteFocusMovesFromTraktThroughSimklToMdbList() {
         lateinit var traktFocusRequester: FocusRequester
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 traktFocusRequester = remember { FocusRequester() }
                 TrackingSettingsOverview(
                     traktState = TraktUiState(),
@@ -206,7 +206,7 @@ class TrackingSettingsOverviewTest {
     @Test
     fun disconnectedDeviceAuthorizationShowsRetryAction() {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 TraktAccountDialog(
                     state = TraktUiState(),
                     onStartConnection = {},
@@ -223,7 +223,7 @@ class TrackingSettingsOverviewTest {
     @Test
     fun awaitingDeviceAuthorizationShowsCodeAndCancelAction() {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 TraktAccountDialog(
                     state = TraktUiState(
                         mode = TraktConnectionMode.AWAITING_APPROVAL,
@@ -250,7 +250,7 @@ class TrackingSettingsOverviewTest {
         trackingState: TrackingSettingsUiState = TrackingSettingsUiState(isReady = true)
     ) {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 TrackingSettingsOverview(
                     traktState = traktState,
                     simklState = simklState,

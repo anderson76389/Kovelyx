@@ -9,8 +9,8 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.kovelyx.app.core.ui.NuvioTheme
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxTheme
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.details.MetaDetails
 import com.kovelyx.app.features.details.MetaVideo
 import com.kovelyx.app.features.profiles.ProfileRepository
@@ -68,7 +68,7 @@ class EpisodeShuffleSheetTest {
         val enabled = EpisodeShuffleSettings(true, true)
         EpisodeShuffleRepository.save("show", enabled, profileId)
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 val save = rememberShuffleSave("show", profileId, enabled)
                 Button(onClick = { save(enabled.copy(enabled = false)) }) { Text("Stop") }
             }
@@ -76,13 +76,13 @@ class EpisodeShuffleSheetTest {
         compose.onNodeWithText("Stop").performClick()
         compose.runOnIdle {
             assertFalse(EpisodeShuffleRepository.readProfile(profileId).settings("show", "series").enabled)
-            assertEquals("Shuffle off", NuvioToastController.currentToast.value?.message)
+            assertEquals("Shuffle off", KovelyxToastController.currentToast.value?.message)
         }
     }
 
     private fun show(watched: Set<String> = emptySet(), settings: EpisodeShuffleSettings = EpisodeShuffleSettings()) {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 EpisodeShuffleSheet(meta, settings, { true }, watched, emptyList(), true,
                     onDismiss = {}, onPlay = {}, onPlayManually = null, onStartFromBeginning = {})
             }

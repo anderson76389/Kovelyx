@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.format.formatReleaseDateForDisplay
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioAsyncImage
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxAsyncImage
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
 import com.kovelyx.app.core.ui.NuvioPosterWatchedOverlay
 import com.kovelyx.app.core.ui.SkeletonPoster
 import com.kovelyx.app.core.ui.desktopPosterHoverScale
@@ -134,7 +134,7 @@ private fun PosterGridTile(
                     .background(MaterialTheme.colorScheme.surface)
                     .nuvioCardDepth(
                         shape = RoundedCornerShape(cornerRadiusDp.dp),
-                        surface = NuvioCardDepthSurface.Posters,
+                        surface = KovelyxCardDepthSurface.Posters,
                     )
                     .posterCardClickable(
                         onClick = onClick,
@@ -160,7 +160,7 @@ private fun PosterGridTile(
                         }
                     }
                     if (isDesktop) {
-                        NuvioAsyncImage(
+                        KovelyxAsyncImage(
                             model = imageModel,
                             contentDescription = item.name,
                             modifier = Modifier.fillMaxSize(),

@@ -52,7 +52,7 @@ import androidx.compose.ui.input.key.onKeyEvent
 import com.kovelyx.tv.domain.model.Stream
 import com.kovelyx.tv.ui.components.LoadingIndicator
 import com.kovelyx.tv.ui.components.SourceChipStatus
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import androidx.compose.ui.res.stringResource
 import com.kovelyx.tv.R
 import com.kovelyx.tv.ui.util.localizeEpisodeTitle
@@ -211,10 +211,10 @@ internal fun StreamSourcesSidePanel(
         modifier = modifier
             .fillMaxHeight()
             .width(520.dp)
-            .clip(RoundedCornerShape(topStart = NuvioTheme.spacing.lg, bottomStart = NuvioTheme.spacing.lg))
-            .background(NuvioTheme.colors.BackgroundElevated)
+            .clip(RoundedCornerShape(topStart = KovelyxTheme.spacing.lg, bottomStart = KovelyxTheme.spacing.lg))
+            .background(KovelyxTheme.colors.BackgroundElevated)
     ) {
-        Column(modifier = Modifier.padding(NuvioTheme.spacing.xl)) {
+        Column(modifier = Modifier.padding(KovelyxTheme.spacing.xl)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -223,7 +223,7 @@ internal fun StreamSourcesSidePanel(
                 Text(
                     text = stringResource(R.string.sources_title),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
 
                 DialogButton(
@@ -246,7 +246,7 @@ internal fun StreamSourcesSidePanel(
                 )
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             // Current content info
             val context = LocalContext.current
@@ -270,12 +270,12 @@ internal fun StreamSourcesSidePanel(
             Text(
                 text = contentInfoText,
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.extendedColors.textSecondary,
+                color = KovelyxTheme.extendedColors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             AnimatedVisibility(
                 visible = uiState.sourceChips.isNotEmpty() || uiState.sourceAvailableAddons.isNotEmpty(),
@@ -305,14 +305,14 @@ internal fun StreamSourcesSidePanel(
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             when {
                 uiState.isLoadingSourceStreams -> {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = NuvioTheme.spacing.xl),
+                            .padding(vertical = KovelyxTheme.spacing.xl),
                         contentAlignment = Alignment.Center
                     ) {
                         LoadingIndicator()
@@ -360,12 +360,12 @@ internal fun StreamSourcesSidePanel(
 
                     LazyColumn(
                         state = streamListState,
-                        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                         contentPadding = PaddingValues(
-                            start = NuvioTheme.spacing.sm,
+                            start = KovelyxTheme.spacing.sm,
                             top = 14.dp,
-                            end = NuvioTheme.spacing.sm,
-                            bottom = NuvioTheme.spacing.sm
+                            end = KovelyxTheme.spacing.sm,
+                            bottom = KovelyxTheme.spacing.sm
                         ),
                         modifier = Modifier
                             .fillMaxHeight()

@@ -13,10 +13,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 
 @Composable
-fun NuvioProgressBar(
+fun KovelyxProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
-    height: Dp = NuvioTokens.Space.s4,
+    height: Dp = KovelyxTokens.Space.s4,
     trackColor: Color = MaterialTheme.nuvio.colors.playerTimelineTrack,
     fillColor: Color = MaterialTheme.nuvio.colors.playerTimelineFill,
 ) {
@@ -32,7 +32,7 @@ fun NuvioProgressBar(
         Box(
             modifier = Modifier
                 .fillMaxWidth(clampedProgress)
-                .width(NuvioTokens.Space.none)
+                .width(KovelyxTokens.Space.none)
                 .height(height)
                 .clip(tokens.shapes.chip)
                 .background(fillColor),

@@ -29,14 +29,14 @@ import platform.UIKit.UIViewController
 import platform.UIKit.presentationController
 import platform.darwin.NSObject
 
-internal actual val usesNativeNuvioBottomSheet: Boolean = true
+internal actual val usesNativeKovelyxBottomSheet: Boolean = true
 
 private var activeNativeBottomSheet: UIViewController? = null
-private var activeNativeBottomSheetDelegate: NuvioNativeBottomSheetDelegate? = null
+private var activeNativeBottomSheetDelegate: KovelyxNativeBottomSheetDelegate? = null
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal actual fun NuvioNativeModalBottomSheet(
+internal actual fun KovelyxNativeModalBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier,
     containerColor: Color,
@@ -54,8 +54,8 @@ internal actual fun NuvioNativeModalBottomSheet(
     val colorScheme = MaterialTheme.colorScheme
     val typography = MaterialTheme.typography
     val shapes = MaterialTheme.shapes
-    val themeTokens = LocalNuvioThemeTokens.current
-    val typeScale = LocalNuvioTypeScale.current
+    val themeTokens = LocalKovelyxThemeTokens.current
+    val typeScale = LocalKovelyxTypeScale.current
     val appTheme = LocalAppTheme.current
     val themePalette = LocalThemePalette.current
     val density = LocalDensity.current
@@ -78,8 +78,8 @@ internal actual fun NuvioNativeModalBottomSheet(
                     density = latestDensity.value.density,
                     fontScale = latestDensity.value.fontScale,
                 ),
-                LocalNuvioThemeTokens provides latestThemeTokens.value,
-                LocalNuvioTypeScale provides latestTypeScale.value,
+                LocalKovelyxThemeTokens provides latestThemeTokens.value,
+                LocalKovelyxTypeScale provides latestTypeScale.value,
                 LocalAppTheme provides latestAppTheme.value,
                 LocalThemePalette provides latestThemePalette.value,
                 LocalRippleConfiguration provides latestRippleConfiguration.value,
@@ -96,7 +96,7 @@ internal actual fun NuvioNativeModalBottomSheet(
                             modifier = latestModifier.value
                                 .fillMaxSize()
                                 .background(latestContainerColor.value)
-                                .padding(top = NuvioTokens.Space.s20),
+                                .padding(top = KovelyxTokens.Space.s20),
                         ) {
                             latestContent.value(this)
                         }
@@ -121,7 +121,7 @@ internal actual fun NuvioNativeModalBottomSheet(
             prefersScrollingExpandsWhenScrolledToEdge = false
         }
 
-        val dismissalDelegate = NuvioNativeBottomSheetDelegate {
+        val dismissalDelegate = KovelyxNativeBottomSheetDelegate {
             if (activeNativeBottomSheet === sheetController) {
                 activeNativeBottomSheet = null
                 activeNativeBottomSheetDelegate = null
@@ -157,14 +157,14 @@ internal actual fun NuvioNativeModalBottomSheet(
     }
 }
 
-internal actual fun dismissNativeNuvioBottomSheet() {
+internal actual fun dismissNativeKovelyxBottomSheet() {
     activeNativeBottomSheet?.dismissViewControllerAnimated(
         flag = true,
         completion = null,
     )
 }
 
-private class NuvioNativeBottomSheetDelegate(
+private class KovelyxNativeBottomSheetDelegate(
     private val onDismissRequest: () -> Unit,
 ) : NSObject(), UIAdaptivePresentationControllerDelegateProtocol {
     private var didNotifyDismissal = false

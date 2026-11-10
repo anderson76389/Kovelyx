@@ -46,9 +46,9 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.updater.model.AppUpdate
 import kotlinx.coroutines.launch
 
@@ -61,14 +61,14 @@ internal fun UpdateReleaseNotesDialog(
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
     var isFocused by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(NuvioTheme.radii.md)
-    val focusRingColor = NuvioTheme.colors.FocusRing
+    val shape = RoundedCornerShape(KovelyxTheme.radii.md)
+    val focusRingColor = KovelyxTheme.colors.FocusRing
 
     LaunchedEffect(update.tag) {
         notesFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.update_release_notes),
         subtitle = update.title,
@@ -80,7 +80,7 @@ internal fun UpdateReleaseNotesDialog(
                 .fillMaxWidth()
                 .heightIn(max = 420.dp)
                 .clip(shape)
-                .background(NuvioTheme.colors.BackgroundCard)
+                .background(KovelyxTheme.colors.BackgroundCard)
                 .onFocusChanged { isFocused = it.isFocused }
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyDown) {
@@ -120,20 +120,20 @@ internal fun UpdateReleaseNotesDialog(
                         )
                     }
                 }
-                .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm)
+                .padding(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.sm)
                 .verticalScroll(scrollState)
         ) {
             Markdown(
                 content = update.notes.ifBlank { stringResource(R.string.update_no_release_notes) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = NuvioTheme.spacing.sm),
-                colors = markdownColor(text = NuvioTheme.colors.TextSecondary),
+                    .padding(end = KovelyxTheme.spacing.sm),
+                colors = markdownColor(text = KovelyxTheme.colors.TextSecondary),
                 typography = markdownTypography(
                     paragraph = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    h1 = MaterialTheme.typography.titleLarge.copy(color = NuvioTheme.colors.TextPrimary),
-                    h2 = MaterialTheme.typography.titleMedium.copy(color = NuvioTheme.colors.TextPrimary),
-                    h3 = MaterialTheme.typography.bodyLarge.copy(color = NuvioTheme.colors.TextPrimary)
+                    h1 = MaterialTheme.typography.titleLarge.copy(color = KovelyxTheme.colors.TextPrimary),
+                    h2 = MaterialTheme.typography.titleMedium.copy(color = KovelyxTheme.colors.TextPrimary),
+                    h3 = MaterialTheme.typography.bodyLarge.copy(color = KovelyxTheme.colors.TextPrimary)
                 )
             )
         }
@@ -151,7 +151,7 @@ internal fun UpdateUnknownSourcesDialog(
         settingsFocusRequester.requestFocusAfterFrames()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.update_title),
         subtitle = stringResource(R.string.update_unknown_sources),
@@ -160,16 +160,16 @@ internal fun UpdateUnknownSourcesDialog(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onOpenSettings,
                 modifier = Modifier.focusRequester(settingsFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {
@@ -179,10 +179,10 @@ internal fun UpdateUnknownSourcesDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    contentColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50))
             ) {

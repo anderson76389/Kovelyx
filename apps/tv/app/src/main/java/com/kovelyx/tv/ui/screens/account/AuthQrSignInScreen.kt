@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.account
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.content.Intent
 import android.net.Uri
@@ -378,7 +378,7 @@ private fun AuthQrLoginPane(
 
         Spacer(modifier = Modifier.height(28.dp))
         Row(
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isSignedIn || !useEmailLogin) {
@@ -458,7 +458,7 @@ private fun AuthEmailLoginForm(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         InputField(
             value = email,
@@ -707,9 +707,9 @@ private fun StatusPill(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border.copy(alpha = 0.35f), RoundedCornerShape(NuvioTheme.radii.md))
-            .background(containerColor, RoundedCornerShape(NuvioTheme.radii.md))
-            .padding(horizontal = NuvioTheme.spacing.md, vertical = 10.dp),
+            .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border.copy(alpha = 0.35f), RoundedCornerShape(KovelyxTheme.radii.md))
+            .background(containerColor, RoundedCornerShape(KovelyxTheme.radii.md))
+            .padding(horizontal = KovelyxTheme.spacing.md, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -746,13 +746,13 @@ private fun AccountConnectedStatsStrip(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTheme.spacing.hairline)
-                .background(NuvioTheme.colors.Border.copy(alpha = 0.8f))
+                .height(KovelyxTheme.spacing.hairline)
+                .background(KovelyxTheme.colors.Border.copy(alpha = 0.8f))
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -768,8 +768,8 @@ private fun AccountConnectedStatsStrip(
                     Box(
                         modifier = Modifier
                             .height(44.dp)
-                            .width(NuvioTheme.spacing.hairline)
-                            .background(NuvioTheme.colors.Border.copy(alpha = 0.75f))
+                            .width(KovelyxTheme.spacing.hairline)
+                            .background(KovelyxTheme.colors.Border.copy(alpha = 0.75f))
                     )
                 }
             }
@@ -777,8 +777,8 @@ private fun AccountConnectedStatsStrip(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTheme.spacing.hairline)
-                .background(NuvioTheme.colors.Border.copy(alpha = 0.8f))
+                .height(KovelyxTheme.spacing.hairline)
+                .background(KovelyxTheme.colors.Border.copy(alpha = 0.8f))
         )
     }
 }
@@ -796,14 +796,14 @@ private fun AccountStatItem(
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             textAlign = TextAlign.Center
         )
     }

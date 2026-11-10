@@ -30,8 +30,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.ui.FloatingNavigationBar
 import com.kovelyx.app.core.ui.FloatingNavigationItem
-import com.kovelyx.app.core.ui.NuvioClassicNavigationBar
-import com.kovelyx.app.core.ui.NuvioNavBarScrollState
+import com.kovelyx.app.core.ui.KovelyxClassicNavigationBar
+import com.kovelyx.app.core.ui.KovelyxNavBarScrollState
 import com.kovelyx.app.core.ui.nuvio
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
@@ -43,7 +43,7 @@ internal fun NavigationBarPreview(style: NavBarStyle, isTablet: Boolean, glowEna
     val tokens = MaterialTheme.nuvio
     val hazeState = rememberHazeState()
     val barScrollState = remember(style, isTablet) {
-        NuvioNavBarScrollState().apply {
+        KovelyxNavBarScrollState().apply {
             if (isTablet || style == NavBarStyle.COMPACT) collapse()
         }
     }
@@ -84,7 +84,7 @@ internal fun NavigationBarPreview(style: NavBarStyle, isTablet: Boolean, glowEna
                 }
             }
             if (style == NavBarStyle.CLASSIC && !isTablet) {
-                NuvioClassicNavigationBar(
+                KovelyxClassicNavigationBar(
                     Modifier.align(Alignment.BottomCenter).background(tokens.colors.background),
                 ) {
                     items.forEach { item ->

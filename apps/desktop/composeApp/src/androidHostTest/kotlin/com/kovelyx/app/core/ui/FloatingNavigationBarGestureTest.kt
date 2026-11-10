@@ -100,7 +100,7 @@ class FloatingNavigationBarGestureTest {
                 LocalDensity provides Density(1f),
                 LocalLayoutDirection provides direction.value,
             ) {
-                NuvioTheme {
+                KovelyxTheme {
                     Box(
                         Modifier.size(320.dp, 64.dp).pointerInput(isRtl) {
                             detectJellyTabGestures(motion, 1f, { items }, { isRtl })

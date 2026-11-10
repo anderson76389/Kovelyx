@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -42,13 +42,13 @@ fun TorrentOverlay(
             modifier = Modifier
                 .background(
                     color = Color.Black.copy(alpha = 0.7f),
-                    shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                    shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                 )
-                .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+                .padding(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(

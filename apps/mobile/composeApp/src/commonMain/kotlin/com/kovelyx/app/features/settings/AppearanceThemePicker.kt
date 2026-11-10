@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.ui.AppTheme
 import com.kovelyx.app.core.ui.CustomThemeColors
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.ThemeColors
 import com.kovelyx.app.core.ui.accentBrush
 import com.kovelyx.app.core.ui.labelRes
@@ -66,13 +66,13 @@ internal fun AppearanceThemePicker(
     val gradientEnabled = memberAccess.tier != null
     var showEditor by rememberSaveable(profileId, gradientEnabled) { mutableStateOf(false) }
     val themes = availableAppThemes(memberAccess.entitlements)
-    val themeSpacing = if (isTablet) NuvioTokens.Space.s16 else NuvioTokens.Space.s12
+    val themeSpacing = if (isTablet) KovelyxTokens.Space.s16 else KovelyxTokens.Space.s12
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = if (isTablet) NuvioTokens.Space.s20 else NuvioTokens.Space.s16,
-                vertical = if (isTablet) NuvioTokens.Space.s18 else NuvioTokens.Space.s14,
+                horizontal = if (isTablet) KovelyxTokens.Space.s20 else KovelyxTokens.Space.s16,
+                vertical = if (isTablet) KovelyxTokens.Space.s18 else KovelyxTokens.Space.s14,
             ),
     ) {
         val preferredColumns = if (isTablet) 4 else 3
@@ -125,11 +125,11 @@ private fun ThemeChip(
         modifier = modifier
             .clip(tokens.shapes.compactCard)
             .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = NuvioTokens.Space.s4, vertical = NuvioTokens.Space.s8),
+            .padding(horizontal = KovelyxTokens.Space.s4, vertical = KovelyxTokens.Space.s8),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
-            modifier = Modifier.size(NuvioTokens.Space.s56).then(
+            modifier = Modifier.size(KovelyxTokens.Space.s56).then(
                 if (isSelected) Modifier.border(tokens.borders.medium, palette.focusRing, CircleShape)
                 else Modifier,
             ),
@@ -137,7 +137,7 @@ private fun ThemeChip(
         ) {
             Box(
                 modifier = Modifier
-                    .size(NuvioTokens.Space.s40 + NuvioTokens.Space.s4)
+                    .size(KovelyxTokens.Space.s40 + KovelyxTokens.Space.s4)
                     .clip(CircleShape)
                     .background(palette.accentBrush()),
                 contentAlignment = Alignment.Center,
@@ -149,12 +149,12 @@ private fun ThemeChip(
                             if (isSelected) Res.string.cd_selected else Res.string.custom_theme_edit,
                         ),
                         tint = palette.onSecondary,
-                        modifier = Modifier.size(NuvioTokens.Space.s22),
+                        modifier = Modifier.size(KovelyxTokens.Space.s22),
                     )
                 }
             }
         }
-        Spacer(Modifier.height(NuvioTokens.Space.s6))
+        Spacer(Modifier.height(KovelyxTokens.Space.s6))
         Text(
             text = stringResource(theme.labelRes),
             style = MaterialTheme.typography.labelMedium,

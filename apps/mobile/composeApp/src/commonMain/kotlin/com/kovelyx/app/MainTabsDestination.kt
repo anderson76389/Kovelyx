@@ -23,14 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.LocalNuvioBottomNavigationOverlayPadding
-import com.kovelyx.app.core.ui.LocalNuvioNavBarScrollState
-import com.kovelyx.app.core.ui.NuvioNavBarScrollState
-import com.kovelyx.app.core.ui.NuvioClassicNavigationBar
+import com.kovelyx.app.core.ui.LocalKovelyxBottomNavigationOverlayPadding
+import com.kovelyx.app.core.ui.LocalKovelyxNavBarScrollState
+import com.kovelyx.app.core.ui.KovelyxNavBarScrollState
+import com.kovelyx.app.core.ui.KovelyxClassicNavigationBar
 import com.kovelyx.app.core.ui.FloatingNavigationBar
 import com.kovelyx.app.core.ui.FloatingNavigationItem
 import com.kovelyx.app.core.ui.PlatformBackHandler
-import com.kovelyx.app.core.ui.rememberNuvioNavBarScrollState
+import com.kovelyx.app.core.ui.rememberKovelyxNavBarScrollState
 import com.kovelyx.app.features.profiles.NuvioProfile
 import com.kovelyx.app.features.profiles.ProfileSwitcherTab
 import com.kovelyx.app.features.settings.NavBarStyle
@@ -75,7 +75,7 @@ internal fun MainTabsDestination(
             liquidGlassNativeTabBarSupported && liquidGlassNativeTabBarEnabled && initialHomeReady
         }
         val tabsRouteActive = rootRouteActive
-        val navBarScrollState = rememberNuvioNavBarScrollState()
+        val navBarScrollState = rememberKovelyxNavBarScrollState()
         val navBarHazeState = rememberHazeState()
         val navBarStyleSetting by remember { ThemeSettingsRepository.navBarStyle }.collectAsStateWithLifecycle()
         val navBarGlowEnabled by ThemeSettingsRepository.navBarGlowEnabled.collectAsStateWithLifecycle()
@@ -123,7 +123,7 @@ internal fun MainTabsDestination(
             contentWindowInsets = WindowInsets(0),
             bottomBar = {
                 if (!isTabletLayout && !useNativeBottomTabs && navBarStyleSetting == NavBarStyle.CLASSIC) {
-                    NuvioClassicNavigationBar {
+                    KovelyxClassicNavigationBar {
                         NavItem(
                             selected = selectedTab == AppScreenTab.Home,
                             onClick = { onTabSelected(AppScreenTab.Home) },
@@ -159,8 +159,8 @@ internal fun MainTabsDestination(
         ) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize()) {
                 CompositionLocalProvider(
-                    LocalNuvioBottomNavigationOverlayPadding provides if (useNativeBottomTabs) 49.dp else if (!isTabletLayout && navBarStyleSetting != NavBarStyle.CLASSIC) 72.dp else 0.dp,
-                    LocalNuvioNavBarScrollState provides navBarScrollState,
+                    LocalKovelyxBottomNavigationOverlayPadding provides if (useNativeBottomTabs) 49.dp else if (!isTabletLayout && navBarStyleSetting != NavBarStyle.CLASSIC) 72.dp else 0.dp,
+                    LocalKovelyxNavBarScrollState provides navBarScrollState,
                 ) {
                     AppTabHost(
                         selectedTab = selectedTab,
@@ -176,7 +176,7 @@ internal fun MainTabsDestination(
                 }
 
                 if (isTabletLayout && !useNativeBottomTabs) {
-                    val tabletNavBarScrollState = remember { NuvioNavBarScrollState().apply { collapse() } }
+                    val tabletNavBarScrollState = remember { KovelyxNavBarScrollState().apply { collapse() } }
                     FloatingNavigationBar(
                         modifier = Modifier.align(Alignment.TopCenter).widthIn(max = 416.dp),
                         scrollState = tabletNavBarScrollState,

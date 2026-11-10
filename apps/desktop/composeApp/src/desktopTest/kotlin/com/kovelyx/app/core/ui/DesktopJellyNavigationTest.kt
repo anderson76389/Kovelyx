@@ -96,7 +96,7 @@ class DesktopJellyNavigationTest {
         val labels = if (french) listOf("Accueil", "Recherche", "Bibliothèque", "Réglages") else listOf("Home", "Search", "Library", "Settings")
         val icons = listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.VideoLibrary, Icons.Default.Settings)
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 Box(Modifier.size(640.dp, 220.dp).background(Color(0xFF151619))) {
                     DesktopNavigationBar(
                         items = labels.mapIndexed { index, label ->

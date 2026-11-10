@@ -41,12 +41,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioInputField
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxInputField
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 import com.kovelyx.app.core.ui.themePalette
 import com.kovelyx.app.features.membership.CosmeticEntitlement
 import com.kovelyx.app.features.membership.MemberAccessRepository
@@ -127,9 +127,9 @@ fun ProfileEditScreen(
         parseHexColor(visibleAvatarItem?.bgColor ?: fallbackColorHex)
     }
 
-    NuvioScreen(modifier = modifier) {
+    KovelyxScreen(modifier = modifier) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = if (isNew) {
                     stringResource(Res.string.profile_edit_add_title)
                 } else {
@@ -155,7 +155,7 @@ fun ProfileEditScreen(
         }
 
         item {
-            NuvioSurfaceCard {
+            KovelyxSurfaceCard {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = stringResource(Res.string.profile_custom_avatar_url),
@@ -187,7 +187,7 @@ fun ProfileEditScreen(
                             color = MaterialTheme.colorScheme.error,
                         )
                     }
-                    NuvioInputField(
+                    KovelyxInputField(
                         value = avatarUrl,
                         onValueChange = { value ->
                             avatarUrl = value
@@ -210,7 +210,7 @@ fun ProfileEditScreen(
 
         if (canChooseBackground) {
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
                             text = stringResource(Res.string.profile_choose_background),
@@ -253,7 +253,7 @@ fun ProfileEditScreen(
 
         if (!isNew) {
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
                             text = stringResource(Res.string.profile_security),
@@ -270,12 +270,12 @@ fun ProfileEditScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         if (currentProfile?.pinEnabled == true) {
-                            NuvioPrimaryButton(
+                            KovelyxPrimaryButton(
                                 text = stringResource(Res.string.profile_remove_pin_lock),
                                 onClick = { showPinClear = true },
                             )
                         } else {
-                            NuvioPrimaryButton(
+                            KovelyxPrimaryButton(
                                 text = stringResource(Res.string.profile_set_pin_lock),
                                 onClick = { showPinSetup = true },
                             )
@@ -287,7 +287,7 @@ fun ProfileEditScreen(
 
         item {
             Spacer(modifier = Modifier.height(8.dp))
-            NuvioPrimaryButton(
+            KovelyxPrimaryButton(
                 text = if (isSaving) {
                     stringResource(Res.string.profile_saving)
                 } else if (isNew) {
@@ -353,7 +353,7 @@ fun ProfileEditScreen(
         }
     }
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.profile_delete_title),
         message = stringResource(
             Res.string.profile_delete_confirm_message,
@@ -411,7 +411,7 @@ private fun ProfileIdentityCard(
     accentColor: Color,
     hasAvatarChoices: Boolean,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -520,7 +520,7 @@ private fun ProfileIdentityCard(
                 }
             }
 
-            NuvioInputField(
+            KovelyxInputField(
                 value = name,
                 onValueChange = onNameChange,
                 placeholder = stringResource(Res.string.profile_name_placeholder),

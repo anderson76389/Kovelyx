@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.library.LibrarySourceMode
 import com.kovelyx.app.features.mdblist.MdbListTracker
@@ -413,7 +413,7 @@ private fun TrackingPreferenceActionRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (isLoading) {
-                    NuvioLoadingIndicator(
+                    KovelyxLoadingIndicator(
                         modifier = Modifier.size(16.dp),
                     )
                 }

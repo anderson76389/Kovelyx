@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.kovelyx.app.MainActivity
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.mdblist.MdbListTracker
 import com.kovelyx.app.features.library.LibrarySourceMode
 import com.kovelyx.app.features.tracking.TrackingSettingsRepository
@@ -38,7 +38,7 @@ class MdbListSettingsUiTest {
         assumeTrue(InstrumentationRegistry.getArguments().getString("mdblistLive") == "true")
         assumeTrue(MdbListTracker.auth.state.value.isAuthenticated)
         compose.runOnUiThread {
-            compose.activity.setContent { NuvioTheme { SettingsScreen(initialPageName = "TraktAuthentication") } }
+            compose.activity.setContent { KovelyxTheme { SettingsScreen(initialPageName = "TraktAuthentication") } }
         }
         compose.onAllNodesWithText("MDBList").onFirst().performScrollTo().performClick()
         compose.onNodeWithText("Sync watched history and playback progress across devices").performScrollTo().assertIsDisplayed()
@@ -57,7 +57,7 @@ class MdbListSettingsUiTest {
         val profile = MdbListTracker.auth.state.value.scope.profileId
         val original = TrackingSettingsRepository.uiState.value
         compose.runOnUiThread {
-            compose.activity.setContent { NuvioTheme { SettingsScreen(initialPageName = "TraktAuthentication") } }
+            compose.activity.setContent { KovelyxTheme { SettingsScreen(initialPageName = "TraktAuthentication") } }
         }
         try {
             compose.onNode(hasScrollToIndexAction()).performScrollToNode(hasText("Library Source"))

@@ -72,13 +72,13 @@ import com.kovelyx.app.core.sync.ProfileSettingsSync
 import com.kovelyx.app.core.sync.SyncManager
 import com.kovelyx.app.core.ui.DisintegrationRequestController
 import com.kovelyx.app.core.ui.NativeTabBridge
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
-import com.kovelyx.app.core.ui.NuvioContinueWatchingActionSheet
-import com.kovelyx.app.core.ui.NuvioFloatingPrompt
-import com.kovelyx.app.core.ui.NuvioPosterZoomActionOverlay
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioToastController
-import com.kovelyx.app.core.ui.NuvioToastHost
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxContinueWatchingActionSheet
+import com.kovelyx.app.core.ui.KovelyxFloatingPrompt
+import com.kovelyx.app.core.ui.KovelyxPosterZoomActionOverlay
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxToastController
+import com.kovelyx.app.core.ui.KovelyxToastHost
 import com.kovelyx.app.core.ui.PosterZoomAnchor
 import com.kovelyx.app.core.ui.PosterZoomAnchorHolder
 import com.kovelyx.app.core.ui.PosterZoomOverlayAction
@@ -233,7 +233,7 @@ internal fun MainAppContent(
             }
         }
         val navController = remember(navBackStack, onNavigate, onGoBack, onReplace, posterNavigationEnabled) {
-            NuvioNavigator(
+            KovelyxNavigator(
                 backStack = navBackStack,
                 onExternalNavigate = onNavigate,
                 onExternalBack = onGoBack,
@@ -571,11 +571,11 @@ internal fun MainAppContent(
 
         when (condition) {
             NetworkCondition.NoInternet -> {
-                NuvioToastController.show(getString(Res.string.network_no_internet_connection))
+                KovelyxToastController.show(getString(Res.string.network_no_internet_connection))
             }
 
             NetworkCondition.ServersUnreachable -> {
-                NuvioToastController.show(getString(Res.string.network_cannot_reach_servers))
+                KovelyxToastController.show(getString(Res.string.network_cannot_reach_servers))
             }
 
             NetworkCondition.Online -> {
@@ -584,7 +584,7 @@ internal fun MainAppContent(
                     previousConditionName == NetworkCondition.ServersUnreachable.name
                 ) {
                     MemberAccessRepository.refresh()
-                    NuvioToastController.show(getString(Res.string.network_back_online))
+                    KovelyxToastController.show(getString(Res.string.network_back_online))
                 }
             }
 
@@ -764,17 +764,17 @@ internal fun MainAppContent(
                         navController.navigate(AddonsSettingsRoute(addonsSettingsTitle)) {
                             launchSingleTop = true
                         }
-                        NuvioToastController.show(getString(Res.string.addons_modal_checking_title))
+                        KovelyxToastController.show(getString(Res.string.addons_modal_checking_title))
                         AddonRepository.initialize()
                         when (val result = AddonRepository.addAddon(deepLink.manifestUrl)) {
                             is AddAddonResult.Success -> {
-                                NuvioToastController.show(
+                                KovelyxToastController.show(
                                     getString(Res.string.addons_modal_success_message, result.manifest.name),
                                 )
                             }
 
                             is AddAddonResult.Error -> {
-                                NuvioToastController.show(result.message)
+                                KovelyxToastController.show(result.message)
                             }
                         }
                         AppDeepLinkRepository.markConsumed(deepLink)
@@ -835,16 +835,16 @@ internal fun MainAppContent(
                 is ExternalPlayerIntentResult.Success -> {
                     val launched = launchExternalPlayer(intentResult)
                     if (!launched) {
-                        NuvioToastController.show(externalPlayerFailedText)
+                        KovelyxToastController.show(externalPlayerFailedText)
                     }
                     launched
                 }
                 ExternalPlayerIntentResult.NotConfigured -> {
-                    NuvioToastController.show(externalPlayerNotConfiguredText)
+                    KovelyxToastController.show(externalPlayerNotConfiguredText)
                     false
                 }
                 ExternalPlayerIntentResult.Failed -> {
-                    NuvioToastController.show(externalPlayerFailedText)
+                    KovelyxToastController.show(externalPlayerFailedText)
                     false
                 }
             }
@@ -896,7 +896,7 @@ internal fun MainAppContent(
                 uriHandler.openUri(url)
             }.isSuccess
             if (!opened) {
-                NuvioToastController.show(failedOpenBrowserText)
+                KovelyxToastController.show(failedOpenBrowserText)
             }
             return opened
         }
@@ -1016,7 +1016,7 @@ internal fun MainAppContent(
             }
 
             if (!PlaybackAvailability.current().canStream(type, videoId)) {
-                NuvioToastController.show(playbackUnavailableMessage)
+                KovelyxToastController.show(playbackUnavailableMessage)
                 return
             }
 
@@ -1170,17 +1170,17 @@ internal fun MainAppContent(
                                 startFromBeginning = startFromBeginning,
                             )
                             if (!launched) {
-                                NuvioToastController.show(cloudLibraryPlayFailedText)
+                                KovelyxToastController.show(cloudLibraryPlayFailedText)
                             }
                         }
 
                         CloudLibraryPlaybackTargetLookupResult.Disabled -> {
-                            NuvioToastController.show(cloudLibraryPlayDisabledText)
+                            KovelyxToastController.show(cloudLibraryPlayDisabledText)
                         }
 
                         is CloudLibraryPlaybackTargetLookupResult.NotConnected -> {
                             val providerName = lookup.providerName?.takeIf { it.isNotBlank() }
-                            NuvioToastController.show(
+                            KovelyxToastController.show(
                                 providerName?.let { name ->
                                     getString(Res.string.cloud_library_play_provider_not_connected, name)
                                 }
@@ -1189,7 +1189,7 @@ internal fun MainAppContent(
                         }
 
                         CloudLibraryPlaybackTargetLookupResult.NotFound -> {
-                            NuvioToastController.show(cloudLibraryPlayFailedText)
+                            KovelyxToastController.show(cloudLibraryPlayFailedText)
                         }
                     }
                 }
@@ -1389,7 +1389,7 @@ internal fun MainAppContent(
                                                 resumeProgressFraction = resumeItem?.resumeProgressFraction,
                                             )
                                         ) {
-                                            NuvioToastController.show(cloudLibraryPlayFailedText)
+                                            KovelyxToastController.show(cloudLibraryPlayFailedText)
                                         }
                                     }
                                 },
@@ -1724,7 +1724,7 @@ internal fun MainAppContent(
                     )
                     val removesFromLibrary = isSaved &&
                         (posterActionTarget.libraryItem != null || !isRemoteLibrarySource)
-                    NuvioPosterZoomActionOverlay(
+                    KovelyxPosterZoomActionOverlay(
                         imageUrl = selectedPosterAnchor?.imageUrl ?: preview.poster,
                         title = preview.name,
                         subtitle = preview.releaseInfo
@@ -1804,7 +1804,7 @@ internal fun MainAppContent(
                                                                 retry = removeMembershipWithAnimation,
                                                                 onApplied = {},
                                                                 onFailure = { error ->
-                                                                    NuvioToastController.show(
+                                                                    KovelyxToastController.show(
                                                                         error.message
                                                                             ?: trackingListsUpdateFailedMessage,
                                                                     )
@@ -1813,7 +1813,7 @@ internal fun MainAppContent(
                                                         }
                                                     },
                                                     onFailure = { error ->
-                                                        NuvioToastController.show(
+                                                        KovelyxToastController.show(
                                                             error.message ?: trackingListsUpdateFailedMessage,
                                                         )
                                                     },
@@ -1881,7 +1881,7 @@ internal fun MainAppContent(
                     key(item.videoId, anchor) {
                         val showManualPlayOption = StreamAutoPlayPolicy.isEffectivelyEnabled(playerSettingsUiState) && canSelectContinueWatchingStreams(item)
                         val showDetailsOption = !item.isCloudLibraryContinueWatchingItem()
-                        NuvioPosterZoomActionOverlay(
+                        KovelyxPosterZoomActionOverlay(
                             imageUrl = cloudLibraryDisplayArtworkUrl(anchor.imageUrl ?: item.poster ?: item.imageUrl),
                             title = item.title,
                             subtitle = localizedContinueWatchingSubtitle(item),
@@ -1890,7 +1890,7 @@ internal fun MainAppContent(
                                 useEpisodeThumbnails = continueWatchingPreferencesUiState.useEpisodeThumbnails,
                                 artworkUrl = anchor.imageUrl ?: item.poster ?: item.imageUrl,
                             ),
-                            depthSurface = NuvioCardDepthSurface.ContinueWatching,
+                            depthSurface = KovelyxCardDepthSurface.ContinueWatching,
                             anchor = anchor,
                             actions = buildList {
                                 if (showDetailsOption) {
@@ -1947,7 +1947,7 @@ internal fun MainAppContent(
                 }
             }
 
-            NuvioContinueWatchingActionSheet(
+            KovelyxContinueWatchingActionSheet(
                 item = selectedContinueWatchingForActions.takeIf { selectedContinueWatchingZoomAnchor == null },
                 showManualPlayOption = StreamAutoPlayPolicy.isEffectivelyEnabled(playerSettingsUiState) &&
                     selectedContinueWatchingForActions?.let(::canSelectContinueWatchingStreams) == true,
@@ -2046,7 +2046,7 @@ internal fun MainAppContent(
                 onPendingChange = { pendingTrackingRemoval = it },
             )
 
-            NuvioStatusModal(
+            KovelyxStatusModal(
                 title = stringResource(Res.string.app_exit_title),
                 message = stringResource(Res.string.app_exit_message),
                 isVisible = showExitConfirmation,
@@ -2072,7 +2072,7 @@ internal fun MainAppContent(
                 )
             }
 
-            NuvioFloatingPrompt(
+            KovelyxFloatingPrompt(
                 visible = resumePromptItem != null,
                 imageUrl = resumePromptItem?.poster ?: resumePromptItem?.imageUrl,
                 title = resumePromptItem?.title.orEmpty(),
@@ -2080,7 +2080,7 @@ internal fun MainAppContent(
                 progressFraction = resumePromptItem?.progressFraction ?: 0f,
                 actionLabel = stringResource(Res.string.resume_prompt_action),
                 onAction = {
-                    val item = resumePromptItem ?: return@NuvioFloatingPrompt
+                    val item = resumePromptItem ?: return@KovelyxFloatingPrompt
                     resumePromptItem = null
                     openContinueWatching(item, false, false)
                 },
@@ -2090,7 +2090,7 @@ internal fun MainAppContent(
                     .zIndex(15f),
             )
 
-            NuvioToastHost(
+            KovelyxToastHost(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .zIndex(20f),

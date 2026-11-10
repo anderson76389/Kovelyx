@@ -34,9 +34,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioActionLabel
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxActionLabel
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.addons.AddonRepository
 import com.kovelyx.app.features.home.HomeCatalogSettingsItem
 import com.kovelyx.app.features.home.HomeCatalogSettingsRepository
@@ -145,7 +145,7 @@ internal fun LazyListScope.homescreenSettingsContent(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                NuvioLoadingIndicator(
+                KovelyxLoadingIndicator(
                     modifier = Modifier.size(28.dp),
                 )
             }
@@ -175,7 +175,7 @@ internal fun LazyListScope.homescreenSettingsContent(
                 title = sectionTitle,
                 isTablet = isTablet,
                 actions = {
-                    NuvioActionLabel(
+                    KovelyxActionLabel(
                         text = stringResource(Res.string.action_reset),
                         onClick = HomeCatalogSettingsRepository::resetToDefaults,
                     )
@@ -189,7 +189,7 @@ internal fun LazyListScope.homescreenSettingsContent(
                     items = items,
                     onPinnedDragAttempt = {
                         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                        NuvioToastController.show(pinToMoveToast)
+                        KovelyxToastController.show(pinToMoveToast)
                     },
                 )
             }

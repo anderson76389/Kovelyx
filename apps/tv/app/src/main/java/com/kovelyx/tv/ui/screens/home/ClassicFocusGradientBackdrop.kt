@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -63,9 +63,9 @@ internal fun ClassicFocusGradientBackdrop(
     if (!enabled) return
 
     val context = LocalContext.current
-    val fallbackColor = NuvioTheme.colors.FocusBackground
+    val fallbackColor = KovelyxTheme.colors.FocusBackground
     val colorCache = remember(fallbackColor) { classicFocusGradientColorCache() }
-    val overlayDuration = NuvioTheme.motion.durations.overlay
+    val overlayDuration = KovelyxTheme.motion.durations.overlay
 
     // Two-slot crossfade: slot 0 and slot 1 alternate as "incoming" layer.
     var slotColors by remember { mutableStateOf(Color.Transparent to Color.Transparent) }

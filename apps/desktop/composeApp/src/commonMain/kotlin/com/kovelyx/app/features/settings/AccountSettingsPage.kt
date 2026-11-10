@@ -28,10 +28,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.auth.AuthRepository
 import com.kovelyx.app.core.auth.AuthState
 import com.kovelyx.app.core.build.AppFeaturePolicy
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -76,7 +76,7 @@ private fun AccountSettingsBody(
     val canDeleteAccount = AppFeaturePolicy.accountDeletionEnabled && authState is AuthState.Authenticated
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        NuvioSurfaceCard {
+        KovelyxSurfaceCard {
             Text(
                 text = stringResource(Res.string.compose_settings_page_account),
                 style = MaterialTheme.typography.titleLarge,
@@ -122,7 +122,7 @@ private fun AccountSettingsBody(
         // Ne jamais proposer une déconnexion lorsque l'écran indique
         // « Non connecté ». Le mode invité a aussi un état Authenticated.
         if (authState is AuthState.Authenticated) {
-            NuvioPrimaryButton(
+            KovelyxPrimaryButton(
                 text = stringResource(Res.string.settings_account_sign_out),
                 onClick = {
                     if (!signingOut) {
@@ -151,7 +151,7 @@ private fun AccountSettingsBody(
         }
     }
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.settings_account_sign_out_confirm_title),
         message = stringResource(Res.string.settings_account_sign_out_confirm_message),
         isVisible = showSignOutConfirm && authState is AuthState.Authenticated,
@@ -175,7 +175,7 @@ private fun AccountSettingsBody(
         },
     )
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.settings_account_delete_confirm_title),
         message = stringResource(Res.string.settings_account_delete_confirm_message),
         isVisible = showDeleteConfirm,
@@ -184,7 +184,7 @@ private fun AccountSettingsBody(
         confirmText = stringResource(Res.string.settings_account_delete_account),
         dismissText = stringResource(Res.string.action_cancel),
         onConfirm = {
-            if (isDeletingAccount) return@NuvioStatusModal
+            if (isDeletingAccount) return@KovelyxStatusModal
             isDeletingAccount = true
             scope.launch {
                 val result = AuthRepository.deleteAccount()
@@ -214,7 +214,7 @@ private fun DeleteAccountCard(
 ) {
     val tokens = MaterialTheme.nuvio
 
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Text(
             text = stringResource(Res.string.settings_account_delete_account),
             style = MaterialTheme.typography.titleMedium,
@@ -240,7 +240,7 @@ private fun DeleteAccountCard(
             onClick = onDeleteClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTokens.Space.s48 + NuvioTokens.Space.s4),
+                .height(KovelyxTokens.Space.s48 + KovelyxTokens.Space.s4),
             shape = tokens.shapes.button,
             colors = ButtonDefaults.buttonColors(
                 containerColor = tokens.colors.danger,

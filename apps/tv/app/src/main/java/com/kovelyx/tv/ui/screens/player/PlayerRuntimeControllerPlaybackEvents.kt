@@ -356,7 +356,7 @@ internal fun PlayerRuntimeController.startProgressUpdates() {
                         val maxMb = runtime.maxMemory() / (1024 * 1024)
                         Log.d(PlayerRuntimeController.TAG, "BUFFER: ahead=${bufAhead}s, loading=$loading, heap=$usedMb/${maxMb}MB, pos=${pos / 1000}s")
                         
-                        if (NuvioExoPlayerPerformanceHelper.shouldLogMemoryFootprint()) {
+                        if (KovelyxExoPlayerPerformanceHelper.shouldLogMemoryFootprint()) {
                             val defaultAllocator = _loadControl?.allocator as? androidx.media3.exoplayer.upstream.DefaultAllocator
                             val totalFootprintBytes = defaultAllocator?.let { allocator ->
                                 runCatching { allocator.memoryFootprint.toLong() }.getOrDefault(0L)

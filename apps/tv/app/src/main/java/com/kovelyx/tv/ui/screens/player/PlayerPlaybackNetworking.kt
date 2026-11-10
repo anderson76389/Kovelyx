@@ -127,7 +127,7 @@ internal object PlayerPlaybackNetworking {
             }
         }
         return builder
-            .let { NuvioExoPlayerPerformanceHelper.applyNetworkOptimizations(it) }
+            .let { KovelyxExoPlayerPerformanceHelper.applyNetworkOptimizations(it) }
             .build()
     }
 

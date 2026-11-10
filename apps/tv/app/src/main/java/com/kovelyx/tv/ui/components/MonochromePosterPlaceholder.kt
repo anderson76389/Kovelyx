@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -25,9 +25,9 @@ import androidx.tv.material3.Icon
 fun MonochromePosterPlaceholder(
     modifier: Modifier = Modifier
 ) {
-    val base = NuvioTheme.colors.BackgroundCard
-    val strokeColor = NuvioTheme.colors.TextTertiary.copy(alpha = 0.28f)
-    val centerButtonBorder = NuvioTheme.colors.TextTertiary.copy(alpha = 0.18f)
+    val base = KovelyxTheme.colors.BackgroundCard
+    val strokeColor = KovelyxTheme.colors.TextTertiary.copy(alpha = 0.28f)
+    val centerButtonBorder = KovelyxTheme.colors.TextTertiary.copy(alpha = 0.18f)
     val backgroundGradient = remember(base) {
         Brush.verticalGradient(
             colors = listOf(
@@ -46,7 +46,7 @@ fun MonochromePosterPlaceholder(
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(46.dp)
-                .border(width = NuvioTheme.spacing.hairline, color = strokeColor, shape = CircleShape)
+                .border(width = KovelyxTheme.spacing.hairline, color = strokeColor, shape = CircleShape)
         )
 
         Box(
@@ -54,16 +54,16 @@ fun MonochromePosterPlaceholder(
                 .align(Alignment.Center)
                 .size(42.dp)
                 .background(Color.White.copy(alpha = 0.92f), CircleShape)
-                .border(BorderStroke(NuvioTheme.spacing.hairline, centerButtonBorder), CircleShape),
+                .border(BorderStroke(KovelyxTheme.spacing.hairline, centerButtonBorder), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.PlayArrow,
                 contentDescription = null,
-                tint = NuvioTheme.colors.BackgroundCard.copy(alpha = 0.8f),
+                tint = KovelyxTheme.colors.BackgroundCard.copy(alpha = 0.8f),
                 modifier = Modifier
-                    .size(NuvioTheme.spacing.xl)
-                    .offset(x = NuvioTheme.spacing.hairline)
+                    .size(KovelyxTheme.spacing.xl)
+                    .offset(x = KovelyxTheme.spacing.hairline)
             )
         }
     }

@@ -39,7 +39,7 @@ import dev.chrisbanes.haze.hazeEffect
 internal fun DesktopNavigationBar(
     items: List<FloatingNavigationItem>,
     modifier: Modifier = Modifier,
-    scrollState: NuvioNavBarScrollState? = null,
+    scrollState: KovelyxNavBarScrollState? = null,
     hazeState: HazeState? = null,
     contentPadding: PaddingValues = PaddingValues(top = 10.dp, bottom = 8.dp),
     navBarStyle: NavBarStyle = NavBarStyle.ADAPTIVE,
@@ -74,7 +74,7 @@ internal fun DesktopNavigationBar(
     )
     val glowStrength by animateFloatAsState(
         targetValue = if (glowEnabled) 1f else 0f,
-        animationSpec = tween(420, easing = NuvioTokens.Motion.standard),
+        animationSpec = tween(420, easing = KovelyxTokens.Motion.standard),
         label = "desktop_nav_glow",
     )
     BoxWithConstraints(

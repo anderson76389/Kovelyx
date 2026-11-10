@@ -29,11 +29,11 @@ import com.kovelyx.app.isDesktop
 import com.kovelyx.app.core.ui.floatingNavigationGlowSupported
 import com.kovelyx.app.core.ui.AppTheme
 import com.kovelyx.app.isIos
-import com.kovelyx.app.core.ui.NuvioBottomSheetActionRow
-import com.kovelyx.app.core.ui.NuvioBottomSheetDivider
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBottomSheetActionRow
+import com.kovelyx.app.core.ui.KovelyxBottomSheetDivider
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.labelRes
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -259,7 +259,7 @@ internal fun LazyListScope.appearanceSettingsContent(
             )
         }
 
-        NuvioStatusModal(
+        KovelyxStatusModal(
             title = stringResource(Res.string.settings_appearance_app_language_restart_title),
             message = stringResource(Res.string.settings_appearance_app_language_restart_message),
             isVisible = showLanguageRestartDialog,
@@ -381,10 +381,10 @@ private fun DesktopNavigationLayoutBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -406,14 +406,14 @@ private fun DesktopNavigationLayoutBottomSheet(
 
             itemsIndexed(DesktopNavigationLayout.entries) { index, layout ->
                 if (index > 0) {
-                    NuvioBottomSheetDivider()
+                    KovelyxBottomSheetDivider()
                 }
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     title = stringResource(layout.labelRes),
                     onClick = {
                         onLayoutSelected(layout)
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                     trailingContent = {
@@ -454,10 +454,10 @@ private fun AppearanceLanguageBottomSheet(
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -478,13 +478,13 @@ private fun AppearanceLanguageBottomSheet(
             }
 
             items(options) { option ->
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     title = stringResource(option.labelRes),
                     selected = option.language == selectedLanguage,
                     onClick = {
                         onLanguageSelected(option.language)
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                     trailingContent = {
@@ -521,10 +521,10 @@ private fun NavBarStyleBottomSheet(
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -552,15 +552,15 @@ private fun NavBarStyleBottomSheet(
 
             itemsIndexed(availableStyles) { index, style ->
                 if (index > 0) {
-                    NuvioBottomSheetDivider()
+                    KovelyxBottomSheetDivider()
                 }
                 val rowTitle = stringResource(style.labelRes)
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     title = rowTitle,
                     onClick = {
                         onStyleSelected(style)
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                     trailingContent = {

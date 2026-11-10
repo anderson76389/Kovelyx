@@ -6,7 +6,7 @@ import com.kovelyx.app.isDesktop
 import kotlin.math.roundToInt
 
 internal const val PosterLandscapeAspectRatio = 1.77f
-internal const val NuvioDesktopCatalogPosterScale = 1.4f
+internal const val KovelyxDesktopCatalogPosterScale = 1.4f
 private const val PosterLandscapeWidthScale = 180f / 110f
 
 internal fun catalogPosterBaseWidthDp(
@@ -14,7 +14,7 @@ internal fun catalogPosterBaseWidthDp(
     useDesktopSizing: Boolean = isDesktop,
 ): Int =
     if (useDesktopSizing) {
-        (basePosterWidthDp * NuvioDesktopCatalogPosterScale).roundToInt()
+        (basePosterWidthDp * KovelyxDesktopCatalogPosterScale).roundToInt()
     } else {
         basePosterWidthDp
     }

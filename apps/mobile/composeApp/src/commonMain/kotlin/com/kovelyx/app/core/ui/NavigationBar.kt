@@ -49,7 +49,7 @@ import org.jetbrains.compose.resources.painterResource
  * Tracks scroll direction and exposes a label visibility fraction (1 = fully visible, 0 = hidden).
  */
 @Stable
-class NuvioNavBarScrollState {
+class KovelyxNavBarScrollState {
     /** 1f = labels fully visible (expanded), 0f = labels hidden (collapsed, icons only) */
     var labelVisibility by mutableFloatStateOf(1f)
         private set
@@ -99,8 +99,8 @@ class NuvioNavBarScrollState {
 }
 
 @Composable
-fun rememberNuvioNavBarScrollState(): NuvioNavBarScrollState {
-    return androidx.compose.runtime.remember { NuvioNavBarScrollState() }
+fun rememberKovelyxNavBarScrollState(): KovelyxNavBarScrollState {
+    return androidx.compose.runtime.remember { KovelyxNavBarScrollState() }
 }
 
 /**
@@ -110,19 +110,19 @@ fun rememberNuvioNavBarScrollState(): NuvioNavBarScrollState {
  *                  When provided, the pill gets a blur-through effect.
  */
 @Composable
-fun NuvioNavigationBar(
+fun KovelyxNavigationBar(
     modifier: Modifier = Modifier,
-    scrollState: NuvioNavBarScrollState? = null,
+    scrollState: KovelyxNavBarScrollState? = null,
     hazeState: HazeState? = null,
     contentPadding: PaddingValues = floatingNavigationBarPadding(),
     compactSize: Boolean = false,
-    content: @Composable NuvioNavigationBarScope.() -> Unit,
+    content: @Composable KovelyxNavigationBarScope.() -> Unit,
 ) {
     val labelFraction by animateFloatAsState(
         targetValue = scrollState?.labelVisibility ?: 1f,
         animationSpec = tween(
-            durationMillis = NuvioTokens.Motion.sheetEnterMillis,
-            easing = NuvioTokens.Motion.standard,
+            durationMillis = KovelyxTokens.Motion.sheetEnterMillis,
+            easing = KovelyxTokens.Motion.standard,
         ),
         label = "nav_label_alpha",
     )
@@ -143,7 +143,7 @@ fun NuvioNavigationBar(
         val pillModifier = Modifier
             .padding(horizontal = horizontalPadding)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(NuvioTokens.Radius.full))
+            .clip(RoundedCornerShape(KovelyxTokens.Radius.full))
             .then(
                 if (hazeState != null) {
                     Modifier.hazeEffect(state = hazeState) {
@@ -160,13 +160,13 @@ fun NuvioNavigationBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = NuvioTokens.Space.s6,
-                        vertical = NuvioTokens.Space.s4,
+                        horizontal = KovelyxTokens.Space.s6,
+                        vertical = KovelyxTokens.Space.s4,
                     ),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                NuvioNavigationBarScopeImpl(
+                KovelyxNavigationBarScopeImpl(
                     rowScope = this,
                     labelFraction = labelFraction,
                     compactSize = compactSize,
@@ -176,7 +176,7 @@ fun NuvioNavigationBar(
     }
 }
 
-interface NuvioNavigationBarScope {
+interface KovelyxNavigationBarScope {
     @Composable
     fun NavItem(
         selected: Boolean,
@@ -207,13 +207,13 @@ interface NuvioNavigationBarScope {
     )
 }
 
-private class NuvioNavigationBarScopeImpl(
+private class KovelyxNavigationBarScopeImpl(
     private val rowScope: androidx.compose.foundation.layout.RowScope,
     private val labelFraction: Float,
     private val compactSize: Boolean,
-) : NuvioNavigationBarScope {
+) : KovelyxNavigationBarScope {
     private val iconSize = if (compactSize) 24.dp else 28.dp
-    private val itemVerticalPadding = if (compactSize) 4.dp else NuvioTokens.Space.s6
+    private val itemVerticalPadding = if (compactSize) 4.dp else KovelyxTokens.Space.s6
 
     @Composable
     override fun NavItem(
@@ -232,7 +232,7 @@ private class NuvioNavigationBarScopeImpl(
         )
         // Selected item gets a pill-shaped highlight using accent at low opacity
         val selectedBgColor by animateColorAsState(
-            targetValue = if (selected) tokens.colors.accent.copy(alpha = NuvioTokens.Opacity.selected)
+            targetValue = if (selected) tokens.colors.accent.copy(alpha = KovelyxTokens.Opacity.selected)
             else Color.Transparent,
             label = "nav_bg_color",
         )
@@ -241,7 +241,7 @@ private class NuvioNavigationBarScopeImpl(
             Column(
                 modifier = modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(NuvioTokens.Radius.full))
+                    .clip(RoundedCornerShape(KovelyxTokens.Radius.full))
                     .background(selectedBgColor)
                     .selectable(
                         selected = selected,
@@ -281,7 +281,7 @@ private class NuvioNavigationBarScopeImpl(
             label = "nav_icon_color",
         )
         val selectedBgColor by animateColorAsState(
-            targetValue = if (selected) tokens.colors.accent.copy(alpha = NuvioTokens.Opacity.selected)
+            targetValue = if (selected) tokens.colors.accent.copy(alpha = KovelyxTokens.Opacity.selected)
             else Color.Transparent,
             label = "nav_bg_color",
         )
@@ -290,7 +290,7 @@ private class NuvioNavigationBarScopeImpl(
             Column(
                 modifier = modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(NuvioTokens.Radius.full))
+                    .clip(RoundedCornerShape(KovelyxTokens.Radius.full))
                     .background(selectedBgColor)
                     .selectable(
                         selected = selected,
@@ -324,7 +324,7 @@ private class NuvioNavigationBarScopeImpl(
     ) {
         val tokens = MaterialTheme.nuvio
         val selectedBgColor by animateColorAsState(
-            targetValue = if (selected) tokens.colors.accent.copy(alpha = NuvioTokens.Opacity.selected)
+            targetValue = if (selected) tokens.colors.accent.copy(alpha = KovelyxTokens.Opacity.selected)
             else Color.Transparent,
             label = "nav_bg_color",
         )
@@ -337,7 +337,7 @@ private class NuvioNavigationBarScopeImpl(
             Column(
                 modifier = modifier
                     .weight(1f)
-                    .clip(RoundedCornerShape(NuvioTokens.Radius.full))
+                    .clip(RoundedCornerShape(KovelyxTokens.Radius.full))
                     .background(selectedBgColor)
                     .selectable(
                         selected = selected,
@@ -368,17 +368,17 @@ private fun NavItemLabel(
     compactSize: Boolean,
 ) {
     if (label == null || labelFraction <= 0f) return
-    Spacer(modifier = Modifier.height((if (compactSize) 2.dp else NuvioTokens.Space.s3) * labelFraction))
+    Spacer(modifier = Modifier.height((if (compactSize) 2.dp else KovelyxTokens.Space.s3) * labelFraction))
     Box(
         modifier = Modifier
-            .height(NuvioTokens.Space.s14 * labelFraction)
+            .height(KovelyxTokens.Space.s14 * labelFraction)
             .alpha(labelFraction),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = NuvioTokens.Type.labelXs,
-                lineHeight = NuvioTokens.LineHeight.labelXs,
+                fontSize = KovelyxTokens.Type.labelXs,
+                lineHeight = KovelyxTokens.LineHeight.labelXs,
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             ),
             color = iconColor,
@@ -394,31 +394,31 @@ private fun NavItemLabel(
  * No floating pill, no labels, no scroll behavior. Simple icon row with a top divider.
  */
 @Composable
-fun NuvioClassicNavigationBar(
+fun KovelyxClassicNavigationBar(
     modifier: Modifier = Modifier,
-    content: @Composable NuvioNavigationBarScope.() -> Unit,
+    content: @Composable KovelyxNavigationBarScope.() -> Unit,
 ) {
     val tokens = MaterialTheme.nuvio
     Column(modifier.fillMaxWidth()) {
         androidx.compose.material3.HorizontalDivider(
-            thickness = NuvioTokens.Space.hairline,
+            thickness = KovelyxTokens.Space.hairline,
             color = tokens.colors.borderDefault,
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(nuvioBottomNavigationBarInsets().asPaddingValues())
-                .padding(horizontal = NuvioTokens.Space.s4, vertical = nuvioBottomNavigationExtraVerticalPadding),
+                .padding(horizontal = KovelyxTokens.Space.s4, vertical = nuvioBottomNavigationExtraVerticalPadding),
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.controlGap, Alignment.CenterHorizontally),
         ) {
-            NuvioClassicNavigationBarScopeImpl(this).content()
+            KovelyxClassicNavigationBarScopeImpl(this).content()
         }
     }
 }
 
-private class NuvioClassicNavigationBarScopeImpl(
+private class KovelyxClassicNavigationBarScopeImpl(
     private val rowScope: androidx.compose.foundation.layout.RowScope,
-) : NuvioNavigationBarScope {
+) : KovelyxNavigationBarScope {
 
     @Composable
     override fun NavItem(
@@ -448,7 +448,7 @@ private class NuvioClassicNavigationBarScopeImpl(
                         role = Role.Tab,
                         onClick = onClick,
                     )
-                    .padding(NuvioTokens.Space.s10)
+                    .padding(KovelyxTokens.Space.s10)
                     .size(tokens.components.navIconSize)
                     .then(if (selected) Modifier.gradientMask(palette.accentBrush()) else Modifier),
                 imageVector = icon,
@@ -486,7 +486,7 @@ private class NuvioClassicNavigationBarScopeImpl(
                         role = Role.Tab,
                         onClick = onClick,
                     )
-                    .padding(NuvioTokens.Space.s10)
+                    .padding(KovelyxTokens.Space.s10)
                     .size(tokens.components.navIconSize)
                     .then(if (selected) Modifier.gradientMask(palette.accentBrush()) else Modifier),
                 painter = painterResource(icon),
@@ -518,7 +518,7 @@ private class NuvioClassicNavigationBarScopeImpl(
                         role = Role.Tab,
                         onClick = onClick,
                     )
-                    .padding(NuvioTokens.Space.s10),
+                    .padding(KovelyxTokens.Space.s10),
                 contentAlignment = Alignment.Center,
             ) {
                 content()

@@ -40,10 +40,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioToastController
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxToastController
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.features.details.MetaDetails
 import com.kovelyx.app.features.details.MetaVideo
@@ -91,7 +91,7 @@ internal fun EpisodeShuffleSheet(
 
     fun dismiss(after: () -> Unit = {}) {
         scope.launch {
-            dismissNuvioBottomSheet(sheetState) { onDismiss(); after() }
+            dismissKovelyxBottomSheet(sheetState) { onDismiss(); after() }
         }
     }
 
@@ -102,7 +102,7 @@ internal fun EpisodeShuffleSheet(
         if (onSave(EpisodeShuffleSettings(true, includeWatched))) dismiss { action(episode) } else starting = false
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = { if (!starting) dismiss() },
         sheetState = sheetState,
         fullHeight = true,
@@ -184,7 +184,7 @@ internal fun EpisodeShuffleSheet(
                     !it.isEffectivelyCompleted && (it.lastPositionMs > 0 || it.progressFraction > 0)
                 } == true
                 val canPlay = availability.canPlay(meta.type, preview.id, meta.id, preview.season, preview.episode)
-                NuvioPrimaryButton(
+                KovelyxPrimaryButton(
                     text = stringResource(when {
                         starting -> Res.string.shuffle_starting
                         !canPlay -> Res.string.playback_unavailable
@@ -228,8 +228,8 @@ internal fun rememberShuffleSave(
             val changed = current.enabled != settings.enabled ||
                 (settings.enabled && current.includeWatched != settings.includeWatched)
             when {
-                !saved -> NuvioToastController.show(failed)
-                changed -> NuvioToastController.show(when {
+                !saved -> KovelyxToastController.show(failed)
+                changed -> KovelyxToastController.show(when {
                     !settings.enabled -> off
                     settings.includeWatched -> all
                     else -> unwatched

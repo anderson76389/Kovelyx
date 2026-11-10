@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 
-private val MenuShape = RoundedCornerShape(NuvioTokens.Space.s20)
+private val MenuShape = RoundedCornerShape(KovelyxTokens.Space.s20)
 
 private val MenuMinWidth = 180.dp
 
@@ -36,7 +36,7 @@ fun Menu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    offset: DpOffset = DpOffset(NuvioTokens.Space.none, NuvioTokens.Space.s6),
+    offset: DpOffset = DpOffset(KovelyxTokens.Space.none, KovelyxTokens.Space.s6),
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val tokens = MaterialTheme.nuvio
@@ -66,12 +66,12 @@ fun MenuItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTokens.Space.s8)
+            .padding(horizontal = KovelyxTokens.Space.s8)
             .clip(tokens.shapes.compactCard)
             .background(if (selected) tokens.colors.accent.copy(alpha = tokens.opacity.hover) else Color.Transparent)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(NuvioTokens.Space.s12),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+            .padding(KovelyxTokens.Space.s12),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

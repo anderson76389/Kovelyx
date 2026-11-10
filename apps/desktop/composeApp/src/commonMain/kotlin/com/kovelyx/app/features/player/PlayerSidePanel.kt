@@ -43,7 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import com.kovelyx.app.core.ui.PlatformBackHandler
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.shimmer
@@ -178,7 +178,7 @@ internal fun PlayerModalLoading(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(24.dp),
         )
     }

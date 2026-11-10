@@ -1,7 +1,7 @@
 package com.kovelyx.app.features.player
 
 import androidx.compose.runtime.Composable
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.servers.ServerPlayback
 import com.kovelyx.app.features.servers.ServerPlaybackSession
 import com.kovelyx.app.features.servers.label
@@ -110,7 +110,7 @@ private fun PlayerScreenRuntime.restartServerStream(
     serverTrackSwitchJob = scope.launch {
         val playback = restart(url)
         if (playback == null) {
-            NuvioToastController.show(getString(failureMessage))
+            KovelyxToastController.show(getString(failureMessage))
             return@launch
         }
         if (activeSourceUrl != url) {

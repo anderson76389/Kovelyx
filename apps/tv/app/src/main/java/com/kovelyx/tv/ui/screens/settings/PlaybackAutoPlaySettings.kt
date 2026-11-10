@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent
 import androidx.compose.foundation.BorderStroke
@@ -61,7 +61,7 @@ import com.kovelyx.tv.data.local.PlayerSettings
 import com.kovelyx.tv.data.local.NextEpisodeThresholdMode
 import com.kovelyx.tv.data.local.StreamAutoPlayMode
 import com.kovelyx.tv.data.local.StreamAutoPlaySource
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import kotlin.math.roundToInt
 import java.util.Locale
 
@@ -543,7 +543,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
         focusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = {
             onSelectionSaved(selected)
             onDismiss()
@@ -556,7 +556,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 420.dp),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Card(
                 onClick = { selected = emptySet() },
@@ -564,8 +564,8 @@ private fun StreamAutoPlayProviderSelectionDialog(
                     .fillMaxWidth()
                     .then(if (focusedItem == null) Modifier.focusRequester(focusRequester) else Modifier),
                 colors = CardDefaults.colors(
-                    containerColor = if (selected.isEmpty()) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                    containerColor = if (selected.isEmpty()) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground
                 ),
                 shape = CardDefaults.shape(shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)),
                 scale = CardDefaults.scale(focusedScale = 1f)
@@ -578,7 +578,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
                 ) {
                     Text(
                         text = allLabel,
-                        color = if (selected.isEmpty()) NuvioTheme.colors.Primary else NuvioTheme.colors.TextPrimary,
+                        color = if (selected.isEmpty()) KovelyxTheme.colors.Primary else KovelyxTheme.colors.TextPrimary,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.weight(1f)
                     )
@@ -586,7 +586,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.cd_selected),
-                            tint = NuvioTheme.colors.Primary,
+                            tint = KovelyxTheme.colors.Primary,
                             modifier = Modifier.height(20.dp)
                         )
                     }
@@ -597,13 +597,13 @@ private fun StreamAutoPlayProviderSelectionDialog(
                 Text(
                     text = stringResource(R.string.autoplay_no_items),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             } else {
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 300.dp),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = NuvioTheme.spacing.xs)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = KovelyxTheme.spacing.xs)
                 ) {
                     items(
                         items = items,
@@ -622,8 +622,8 @@ private fun StreamAutoPlayProviderSelectionDialog(
                                 .fillMaxWidth()
                                 .then(if (item == focusedItem) Modifier.focusRequester(focusRequester) else Modifier),
                             colors = CardDefaults.colors(
-                                containerColor = if (isSelected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                                containerColor = if (isSelected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground
                             ),
                             shape = CardDefaults.shape(shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)),
                             scale = CardDefaults.scale(focusedScale = 1f)
@@ -636,7 +636,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
                             ) {
                                 Text(
                                     text = item,
-                                    color = if (isSelected) NuvioTheme.colors.Primary else NuvioTheme.colors.TextPrimary,
+                                    color = if (isSelected) KovelyxTheme.colors.Primary else KovelyxTheme.colors.TextPrimary,
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -644,7 +644,7 @@ private fun StreamAutoPlayProviderSelectionDialog(
                                     Icon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = stringResource(R.string.cd_selected),
-                                        tint = NuvioTheme.colors.Primary,
+                                        tint = KovelyxTheme.colors.Primary,
                                         modifier = Modifier.height(18.dp)
                                     )
                                 }
@@ -708,7 +708,7 @@ private fun StreamRegexDialog(
         inputFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.autoplay_regex_title),
         subtitle = stringResource(R.string.autoplay_regex_matches),
@@ -723,18 +723,18 @@ private fun StreamRegexDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
             ) {
                 Text(
                     text = stringResource(R.string.autoplay_regex_presets),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
 
                 val firstPresetFocusRequester = remember { FocusRequester() }
                 LazyRow(
                     modifier = Modifier.settingsOptionRow(firstPresetFocusRequester),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                 ) {
                     itemsIndexed(
                         items = presets,
@@ -756,12 +756,12 @@ private fun StreamRegexDialog(
                                     }
                                 ),
                             colors = CardDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundElevated,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground
                             ),
                             border = CardDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp)
                                 )
                             ),
@@ -770,9 +770,9 @@ private fun StreamRegexDialog(
                         ) {
                             Text(
                                 text = label,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.sm),
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.sm),
                                 style = MaterialTheme.typography.labelLarge,
-                                color = if (isFocused) NuvioTheme.colors.Primary else NuvioTheme.colors.TextPrimary
+                                color = if (isFocused) KovelyxTheme.colors.Primary else KovelyxTheme.colors.TextPrimary
                             )
                         }
                     }
@@ -784,23 +784,23 @@ private fun StreamRegexDialog(
                         .fillMaxWidth()
                         .onFocusChanged { isInputFocused = it.isFocused || it.hasFocus },
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundElevated,
-                        focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                        containerColor = KovelyxTheme.colors.BackgroundElevated,
+                        focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
                     ),
                     border = CardDefaults.border(
                         border = Border(
-                            border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                            border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
                         ),
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
                         )
                     ),
                     shape = CardDefaults.shape(androidx.compose.foundation.shape.RoundedCornerShape(10.dp)),
                     scale = CardDefaults.scale(focusedScale = 1f)
                 ) {
-                    Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.md)) {
+                    Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.md)) {
                         BasicTextField(
                             value = regex,
                             onValueChange = {
@@ -822,15 +822,15 @@ private fun StreamRegexDialog(
                             keyboardActions = KeyboardActions(
                                 onDone = { keyboardController?.hide() }
                             ),
-                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
-                            cursorBrush = SolidColor(if (isInputFocused) NuvioTheme.colors.Primary else Color.Transparent),
+                            cursorBrush = SolidColor(if (isInputFocused) KovelyxTheme.colors.Primary else Color.Transparent),
                             decorationBox = { innerTextField ->
                                 if (regex.isBlank()) {
                                     Text(
                                         text = "4K|2160p|Remux",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = NuvioTheme.colors.TextTertiary
+                                        color = KovelyxTheme.colors.TextTertiary
                                     )
                                 }
                                 innerTextField()
@@ -842,7 +842,7 @@ private fun StreamRegexDialog(
                 if (regexError != null) {
                     Text(
                         text = regexError ?: "",
-                        color = NuvioTheme.colors.Error,
+                        color = KovelyxTheme.colors.Error,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -854,32 +854,32 @@ private fun StreamRegexDialog(
                     Button(
                         onClick = onDismiss,
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundElevated,
-                            contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Primary
+                            containerColor = KovelyxTheme.colors.BackgroundElevated,
+                            contentColor = KovelyxTheme.colors.TextPrimary,
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            focusedContentColor = KovelyxTheme.colors.Primary
                         ),
                         shape = ButtonDefaults.shape(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
                     ) {
                         Text(stringResource(R.string.action_cancel))
                     }
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                     Button(
                         onClick = {
                             regex = ""
                             regexError = null
                         },
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundElevated,
-                            contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Primary
+                            containerColor = KovelyxTheme.colors.BackgroundElevated,
+                            contentColor = KovelyxTheme.colors.TextPrimary,
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            focusedContentColor = KovelyxTheme.colors.Primary
                         ),
                         shape = ButtonDefaults.shape(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
                     ) {
                         Text(stringResource(R.string.action_none))
                     }
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                     Button(
                         onClick = {
                             val value = regex.trim()
@@ -893,10 +893,10 @@ private fun StreamRegexDialog(
                             onSave(value)
                         },
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Primary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary,
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            focusedContentColor = KovelyxTheme.colors.Primary
                         ),
                         shape = ButtonDefaults.shape(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
                     ) {

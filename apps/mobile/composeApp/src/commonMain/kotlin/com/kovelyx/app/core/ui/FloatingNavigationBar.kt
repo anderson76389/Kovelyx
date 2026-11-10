@@ -24,7 +24,7 @@ internal expect val floatingNavigationGlowSupported: Boolean
 internal expect fun FloatingNavigationBar(
     items: List<FloatingNavigationItem>,
     modifier: Modifier = Modifier,
-    scrollState: NuvioNavBarScrollState? = null,
+    scrollState: KovelyxNavBarScrollState? = null,
     hazeState: HazeState? = null,
     contentPadding: PaddingValues = floatingNavigationBarPadding(),
     compactSize: Boolean = false,

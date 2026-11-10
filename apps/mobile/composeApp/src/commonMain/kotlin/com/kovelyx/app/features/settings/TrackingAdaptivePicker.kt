@@ -27,9 +27,9 @@ import com.kovelyx.app.core.ui.DialogButton
 import com.kovelyx.app.core.ui.DialogButtons
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioBottomSheetDivider
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBottomSheetDivider
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.SurfaceEdge
 import kotlinx.coroutines.launch
@@ -92,11 +92,11 @@ private fun <T> TrackingPickerBottomSheet(
 
     fun dismiss() {
         scope.launch {
-            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = ::dismiss,
         sheetState = sheetState,
     ) {
@@ -200,7 +200,7 @@ private fun <T> TrackingPickerContent(
         ) {
             options.forEachIndexed { index, option ->
                 if (index > 0) {
-                    NuvioBottomSheetDivider()
+                    KovelyxBottomSheetDivider()
                 }
                 TrackingPickerOptionRow(
                     option = option,

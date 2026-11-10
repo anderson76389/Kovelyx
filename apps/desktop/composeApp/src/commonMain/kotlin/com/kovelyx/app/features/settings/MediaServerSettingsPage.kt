@@ -27,10 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioToastController
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxToastController
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.servers.ServerCapability
 import com.kovelyx.app.features.servers.ServerConnection
@@ -110,7 +110,7 @@ private fun MediaServerSettingsBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = rowPadding, vertical = if (isTablet) 16.dp else 14.dp),
-                verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s4),
+                verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s4),
             ) {
                 Text(
                     text = connection.name,
@@ -189,7 +189,7 @@ private fun MediaServerSettingsBody(
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = tokens.colors.textMuted,
-                modifier = Modifier.padding(bottom = NuvioTokens.Space.s10),
+                modifier = Modifier.padding(bottom = KovelyxTokens.Space.s10),
             )
             if (connection.libraries.isNotEmpty()) {
                 SettingsGroup(isTablet = isTablet) {
@@ -215,7 +215,7 @@ private fun MediaServerSettingsBody(
                 enabled = connection.enabled && !refreshing,
                 isTablet = isTablet,
                 trailingContent = if (refreshing) {
-                    { NuvioLoadingIndicator(modifier = Modifier.size(tokens.icons.sm)) }
+                    { KovelyxLoadingIndicator(modifier = Modifier.size(tokens.icons.sm)) }
                 } else {
                     null
                 },
@@ -224,7 +224,7 @@ private fun MediaServerSettingsBody(
                     scope.launch {
                         runCatching { ServerRepository.refreshLibraries(connection.id) }
                             .onFailure { if (it is CancellationException) throw it }
-                            .onFailure { NuvioToastController.show(getString(it.serverFailure().message())) }
+                            .onFailure { KovelyxToastController.show(getString(it.serverFailure().message())) }
                         refreshing = false
                     }
                 },
@@ -245,7 +245,7 @@ private fun MediaServerSettingsBody(
             onClick = { confirmRemove = true },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTokens.Space.s48 + NuvioTokens.Space.s4),
+                .height(KovelyxTokens.Space.s48 + KovelyxTokens.Space.s4),
             shape = tokens.shapes.button,
             colors = ButtonDefaults.buttonColors(
                 containerColor = tokens.colors.danger,
@@ -259,7 +259,7 @@ private fun MediaServerSettingsBody(
         }
     }
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.servers_remove_confirm_title),
         message = stringResource(Res.string.servers_remove_confirm_message, connection.name),
         isVisible = confirmRemove,

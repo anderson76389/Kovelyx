@@ -6,11 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
-internal actual val usesNativeNuvioBottomSheet: Boolean = false
+internal actual val usesNativeKovelyxBottomSheet: Boolean = false
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal actual fun NuvioNativeModalBottomSheet(
+internal actual fun KovelyxNativeModalBottomSheet(
     onDismissRequest: () -> Unit,
     modifier: Modifier,
     containerColor: Color,
@@ -20,4 +20,4 @@ internal actual fun NuvioNativeModalBottomSheet(
     content: @Composable ColumnScope.() -> Unit,
 ) = Unit
 
-internal actual fun dismissNativeNuvioBottomSheet() = Unit
+internal actual fun dismissNativeKovelyxBottomSheet() = Unit

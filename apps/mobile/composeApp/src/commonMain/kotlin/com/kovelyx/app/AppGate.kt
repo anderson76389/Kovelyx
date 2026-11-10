@@ -30,8 +30,8 @@ import com.kovelyx.app.core.network.NetworkStatusRepository
 import com.kovelyx.app.core.sync.SyncManager
 import com.kovelyx.app.core.ui.NativeProfileSwitcherController
 import com.kovelyx.app.core.ui.NativeTabBridge
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.PlatformBackHandler
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.auth.AuthScreen
@@ -420,7 +420,7 @@ internal fun AppGate(
                             .background(MaterialTheme.nuvio.colors.background),
                         contentAlignment = Alignment.Center,
                     ) {
-                        NuvioLoadingIndicator()
+                        KovelyxLoadingIndicator()
                     }
                 }
                 AppGateScreen.Auth.name -> {
@@ -503,7 +503,7 @@ internal fun AppGate(
             exit = fadeOut(tween(400)),
             modifier = Modifier
                 .fillMaxSize()
-                .zIndex(NuvioTokens.Z.dialog),
+                .zIndex(KovelyxTokens.Z.dialog),
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 val onBack: (() -> Unit)? = if (!autoSkipProfileSelection) {

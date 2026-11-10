@@ -25,7 +25,7 @@ import androidx.tv.material3.FilterChip
 import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Icon
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import kotlinx.coroutines.delay as coroutineDelay
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -38,9 +38,9 @@ fun RefreshFilterChip(
 ) {
     var isFocused by remember { mutableStateOf(false) }
     val contentColor = if (isFocused) {
-        NuvioTheme.colors.OnSecondary
+        KovelyxTheme.colors.OnSecondary
     } else {
-        NuvioTheme.colors.TextSecondary
+        KovelyxTheme.colors.TextSecondary
     }
 
     val rotationAnimatable = remember { Animatable(0f) }
@@ -87,18 +87,18 @@ fun RefreshFilterChip(
             onFocusChanged(it.isFocused)
         },
         colors = FilterChipDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.Secondary,
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.Secondary,
             contentColor = contentColor,
             focusedContentColor = contentColor
         ),
         border = FilterChipDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                 shape = RoundedCornerShape(20.dp)
             ),
             focusedBorder = Border(
-                border = BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.FocusRing),
+                border = BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.FocusRing),
                 shape = RoundedCornerShape(20.dp)
             )
         ),

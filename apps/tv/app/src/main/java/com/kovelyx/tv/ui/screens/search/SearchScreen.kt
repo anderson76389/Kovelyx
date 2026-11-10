@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.search
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.screens.home.HeroBackdropState
 
 import android.Manifest
@@ -564,7 +564,7 @@ fun SearchScreen(
                 }
                 false
             }
-            .background(NuvioTheme.colors.Background),
+            .background(KovelyxTheme.colors.Background),
         contentAlignment = Alignment.TopCenter
     ) {
         val listState = rememberLazyListState()
@@ -621,10 +621,10 @@ fun SearchScreen(
                 .dpadRepeatThrottle(),
             state = listState,
             contentPadding = PaddingValues(
-                top = if (isDiscoverMode) 10.dp else NuvioTheme.spacing.lg,
-                bottom = NuvioTheme.spacing.lg
+                top = if (isDiscoverMode) 10.dp else KovelyxTheme.spacing.lg,
+                bottom = KovelyxTheme.spacing.lg
             ),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             item(key = "search_input") {
                 SearchInputField(
@@ -1005,7 +1005,7 @@ private fun RecentSearchesSection(
             Text(
                 text = stringResource(R.string.search_recent_title),
                 style = androidx.tv.material3.MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
             Button(
                 onClick = onClearHistory,
@@ -1015,12 +1015,12 @@ private fun RecentSearchesSection(
                         down = firstSearchFocusRequester
                     },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
-                shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
             ) {
                 Text(text = stringResource(R.string.search_recent_clear))
             }
@@ -1044,7 +1044,7 @@ private fun RecentSearchesSection(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     var isSearchFocused by remember(recentQuery) { mutableStateOf(false) }
@@ -1075,13 +1075,13 @@ private fun RecentSearchesSection(
                                 )
                             },
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Primary
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextPrimary,
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            focusedContentColor = KovelyxTheme.colors.Primary
                         ),
                         scale = ButtonDefaults.scale(focusedScale = 1f),
-                        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                     ) {
                         Text(
                             text = recentQuery,
@@ -1126,9 +1126,9 @@ private fun RecentSearchesSection(
                             .then(
                                 if (isRemoveFocused) {
                                     Modifier.border(
-                                        width = NuvioTheme.spacing.xxs,
-                                        color = NuvioTheme.colors.FocusRing,
-                                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                        width = KovelyxTheme.spacing.xxs,
+                                        color = KovelyxTheme.colors.FocusRing,
+                                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                     )
                                 } else {
                                     Modifier
@@ -1136,13 +1136,13 @@ private fun RecentSearchesSection(
                             ),
                         colors = TvIconButtonDefaults.colors(
                             containerColor = Color.Transparent,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            contentColor = NuvioTheme.colors.TextPrimary,
-                            focusedContentColor = NuvioTheme.colors.TextPrimary
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            contentColor = KovelyxTheme.colors.TextPrimary,
+                            focusedContentColor = KovelyxTheme.colors.TextPrimary
                         ),
                         scale = TvIconButtonDefaults.scale(focusedScale = 1f),
                         shape = TvIconButtonDefaults.shape(
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                     ) {
                         Icon(
@@ -1152,7 +1152,7 @@ private fun RecentSearchesSection(
                                 recentQuery
                             ),
                             modifier = Modifier.size(18.dp),
-                            tint = NuvioTheme.colors.TextPrimary
+                            tint = KovelyxTheme.colors.TextPrimary
                         )
                     }
                 }
@@ -1190,7 +1190,7 @@ private fun SearchInputField(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTheme.spacing.xxxl)
+            .padding(horizontal = KovelyxTheme.spacing.xxxl)
             .focusGroup(),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1202,29 +1202,29 @@ private fun SearchInputField(
                         discoverFocusRequester?.let { Modifier.focusRequester(it) } ?: Modifier
                     )
                     .onFocusChanged { isDiscoverButtonFocused = it.isFocused }
-                    .size(NuvioTheme.spacing.huge)
+                    .size(KovelyxTheme.spacing.huge)
                     .border(
-                        width = if (isDiscoverButtonFocused) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                        color = if (isDiscoverButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        width = if (isDiscoverButtonFocused) KovelyxTheme.spacing.xxs else KovelyxTheme.spacing.hairline,
+                        color = if (isDiscoverButtonFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.Border,
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
                     .background(
-                        color = NuvioTheme.colors.BackgroundCard,
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        color = KovelyxTheme.colors.BackgroundCard,
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.Explore,
                     contentDescription = stringResource(R.string.cd_open_discover),
-                    tint = NuvioTheme.colors.TextPrimary
+                    tint = KovelyxTheme.colors.TextPrimary
                 )
             }
 
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
         }
 
         if (showVoiceSearch) {
-            val themeAccent = NuvioTheme.colors.Secondary
+            val themeAccent = KovelyxTheme.colors.Secondary
 
             // Pulsating animation (constant rhythm while listening)
             val pulseTransition = rememberInfiniteTransition(label = "voicePulse")
@@ -1295,26 +1295,26 @@ private fun SearchInputField(
                             }
                         )
                         .onFocusChanged { isVoiceButtonFocused = it.isFocused }
-                        .size(NuvioTheme.spacing.huge)
+                        .size(KovelyxTheme.spacing.huge)
                         .border(
-                            width = if (isVoiceButtonFocused || isVoiceListening) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                            color = if (isVoiceListening) themeAccent else if (isVoiceButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            width = if (isVoiceButtonFocused || isVoiceListening) KovelyxTheme.spacing.xxs else KovelyxTheme.spacing.hairline,
+                            color = if (isVoiceListening) themeAccent else if (isVoiceButtonFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.Border,
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                         .background(
-                            color = if (isVoiceListening) themeAccent.copy(alpha = 0.15f) else NuvioTheme.colors.BackgroundCard,
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            color = if (isVoiceListening) themeAccent.copy(alpha = 0.15f) else KovelyxTheme.colors.BackgroundCard,
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Mic,
                         contentDescription = stringResource(R.string.cd_voice_search),
-                        tint = if (isVoiceListening) themeAccent else NuvioTheme.colors.TextPrimary
+                        tint = if (isVoiceListening) themeAccent else KovelyxTheme.colors.TextPrimary
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
         }
 
         OutlinedTextField(
@@ -1375,24 +1375,24 @@ private fun SearchInputField(
                 }
             ),
             singleLine = true,
-            shape = RoundedCornerShape(NuvioTheme.radii.md),
+            shape = RoundedCornerShape(KovelyxTheme.radii.md),
             placeholder = {
                 Text(
                     text = stringResource(R.string.search_placeholder),
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
             },
             textStyle = TextStyle(
                 textDirection = TextDirection.Content
             ),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                unfocusedContainerColor = NuvioTheme.colors.BackgroundCard,
-                focusedIndicatorColor = NuvioTheme.colors.FocusRing,
-                unfocusedIndicatorColor = NuvioTheme.colors.Border,
-                focusedTextColor = NuvioTheme.colors.TextPrimary,
-                unfocusedTextColor = NuvioTheme.colors.TextPrimary,
-                cursorColor = NuvioTheme.colors.FocusRing
+                focusedContainerColor = KovelyxTheme.colors.BackgroundCard,
+                unfocusedContainerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedIndicatorColor = KovelyxTheme.colors.FocusRing,
+                unfocusedIndicatorColor = KovelyxTheme.colors.Border,
+                focusedTextColor = KovelyxTheme.colors.TextPrimary,
+                unfocusedTextColor = KovelyxTheme.colors.TextPrimary,
+                cursorColor = KovelyxTheme.colors.FocusRing
             )
         )
 
@@ -1400,7 +1400,7 @@ private fun SearchInputField(
         // icon so it is reachable with the D-pad, matching the voice button's treatment.
         if (query.isNotEmpty()) {
             var isClearButtonFocused by remember { mutableStateOf(false) }
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
             IconButton(
                 onClick = {
                     // Clearing drops this button from the row, so hand focus back first.
@@ -1409,21 +1409,21 @@ private fun SearchInputField(
                 },
                 modifier = Modifier
                     .onFocusChanged { isClearButtonFocused = it.isFocused }
-                    .size(NuvioTheme.spacing.huge)
+                    .size(KovelyxTheme.spacing.huge)
                     .border(
-                        width = if (isClearButtonFocused) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                        color = if (isClearButtonFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.Border,
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        width = if (isClearButtonFocused) KovelyxTheme.spacing.xxs else KovelyxTheme.spacing.hairline,
+                        color = if (isClearButtonFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.Border,
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
                     .background(
-                        color = NuvioTheme.colors.BackgroundCard,
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        color = KovelyxTheme.colors.BackgroundCard,
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cd_clear_search),
-                    tint = NuvioTheme.colors.TextPrimary
+                    tint = KovelyxTheme.colors.TextPrimary
                 )
             }
         }

@@ -51,7 +51,7 @@ import coil3.request.allowRgb565
 import coil3.request.crossfade
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.remote.cloudflare.ProfileBackgroundCatalogItem
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 fun ProfileBackgroundPicker(
@@ -67,8 +67,8 @@ fun ProfileBackgroundPicker(
 ) {
     FlowRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md, Alignment.CenterHorizontally),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         ProfileBackgroundItem(
             label = stringResource(R.string.profile_background_normal),
@@ -81,9 +81,9 @@ fun ProfileBackgroundPicker(
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
-                                lerp(NuvioTheme.colors.BackgroundElevated, standardBackgroundColor, 0.3f),
-                                lerp(NuvioTheme.colors.Background, standardBackgroundColor, 0.14f),
-                                NuvioTheme.colors.Background
+                                lerp(KovelyxTheme.colors.BackgroundElevated, standardBackgroundColor, 0.3f),
+                                lerp(KovelyxTheme.colors.Background, standardBackgroundColor, 0.14f),
+                                KovelyxTheme.colors.Background
                             )
                         )
                     )
@@ -138,7 +138,7 @@ private fun ProfileBackgroundItem(
         label = "profileBackgroundBorder"
     )
     val labelColor by animateColorAsState(
-        targetValue = if (isSelected || isFocused) Color.White else NuvioTheme.colors.TextSecondary,
+        targetValue = if (isSelected || isFocused) Color.White else KovelyxTheme.colors.TextSecondary,
         animationSpec = tween(120),
         label = "profileBackgroundLabel"
     )
@@ -162,19 +162,19 @@ private fun ProfileBackgroundItem(
                 selected = isSelected
             },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(86.dp)
                 .clip(shape)
-                .background(NuvioTheme.colors.BackgroundCard)
+                .background(KovelyxTheme.colors.BackgroundCard)
                 .border(
                     border = if (isSelected || isFocused) {
-                        NuvioTheme.focusRing.border(borderWidth)
+                        KovelyxTheme.focusRing.border(borderWidth)
                     } else {
-                        BorderStroke(borderWidth, NuvioTheme.colors.Border)
+                        BorderStroke(borderWidth, KovelyxTheme.colors.Border)
                     },
                     shape = shape
                 )

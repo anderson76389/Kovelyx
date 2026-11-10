@@ -34,10 +34,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioTokens
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxTokens
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.servers.ServerConnection
 import com.kovelyx.app.features.servers.ServerException
@@ -94,7 +94,7 @@ internal fun ServerSignInSheet(
             try {
                 val connection = ServerRepository.connect(request.provider, address, username.trim(), password)
                 password = ""
-                dismissNuvioBottomSheet(sheetState) { onConnected(connection) }
+                dismissKovelyxBottomSheet(sheetState) { onConnected(connection) }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (failure: ServerException) {
@@ -107,7 +107,7 @@ internal fun ServerSignInSheet(
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = { if (!connecting) onDismiss() },
         sheetState = sheetState,
     ) {
@@ -125,8 +125,8 @@ internal fun ServerSignInSheet(
                 title = stringResource(Res.string.servers_sign_in_title, request.provider.displayName),
                 subtitle = stringResource(Res.string.servers_sign_in_subtitle, request.provider.displayName),
             )
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s20))
-            Column(verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12)) {
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s20))
+            Column(verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12)) {
                 OutlinedTextField(
                     value = address,
                     onValueChange = {
@@ -181,19 +181,19 @@ internal fun ServerSignInSheet(
                 )
             }
             error?.let { failure ->
-                Spacer(modifier = Modifier.height(NuvioTokens.Space.s10))
+                Spacer(modifier = Modifier.height(KovelyxTokens.Space.s10))
                 Text(
                     text = failure.signInMessage(request.provider),
                     style = MaterialTheme.typography.bodySmall,
                     color = tokens.colors.danger,
                 )
             }
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s20))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s20))
             Button(
                 onClick = ::connect,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(NuvioTokens.Space.s56),
+                    .height(KovelyxTokens.Space.s56),
                 enabled = canConnect,
                 shape = tokens.shapes.button,
                 colors = ButtonDefaults.buttonColors(
@@ -203,10 +203,10 @@ internal fun ServerSignInSheet(
             ) {
                 if (connecting) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        NuvioLoadingIndicator(
+                        KovelyxLoadingIndicator(
                             modifier = Modifier.size(tokens.icons.sm),
                             color = tokens.colors.onAccent,
                         )
@@ -231,7 +231,7 @@ private fun SheetHeader(title: String, subtitle: String) {
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
     )
-    Spacer(modifier = Modifier.height(NuvioTokens.Space.s4))
+    Spacer(modifier = Modifier.height(KovelyxTokens.Space.s4))
     Text(
         text = subtitle,
         style = MaterialTheme.typography.bodyMedium,

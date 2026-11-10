@@ -46,10 +46,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.SurfaceEdge
 import kotlinx.coroutines.launch
@@ -96,7 +96,7 @@ internal fun AppIconPicker(
     }
 
     confirmationIcon?.let { icon ->
-        NuvioStatusModal(
+        KovelyxStatusModal(
             title = stringResource(Res.string.settings_appearance_app_icon_android_confirmation_title),
             message = stringResource(
                 Res.string.settings_appearance_app_icon_android_confirmation_message,
@@ -126,11 +126,11 @@ private fun AppIconPickerBottomSheet(
 
     fun dismiss() {
         scope.launch {
-            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = ::dismiss,
         sheetState = sheetState,
     ) {
@@ -276,7 +276,7 @@ private fun AppIconChoice(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (pending) {
-                                NuvioLoadingIndicator(
+                                KovelyxLoadingIndicator(
                                     modifier = Modifier.size(14.dp),
                                     color = tokens.colors.onAccent,
                                 )

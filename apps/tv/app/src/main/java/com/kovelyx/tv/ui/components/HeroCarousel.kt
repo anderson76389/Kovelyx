@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.graphics.ColorSpace
 import android.os.Build
@@ -183,14 +183,14 @@ fun HeroCarousel(
         }
 
         // Indicator dots — optimized to minimize recompositions and layout passes
-        val focusRingBrush = NuvioTheme.focusRing.brush()
+        val focusRingBrush = KovelyxTheme.focusRing.brush()
         val dotColorInactive = remember { Color.White.copy(alpha = 0.3f) }
         val dotShape = remember { RoundedCornerShape(3.dp) }
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = NuvioTheme.spacing.lg),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                .padding(bottom = KovelyxTheme.spacing.lg),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             repeat(items.size) { index ->
                 val isActive = index == activeIndex
@@ -200,10 +200,10 @@ fun HeroCarousel(
                     else -> dotColorInactive
                 }
                 val dotWidth = when {
-                    isActive -> NuvioTheme.spacing.xxl
-                    else -> NuvioTheme.spacing.md
+                    isActive -> KovelyxTheme.spacing.xxl
+                    else -> KovelyxTheme.spacing.md
                 }
-                val dotHeight = if (isActive) 6.dp else NuvioTheme.spacing.xs
+                val dotHeight = if (isActive) 6.dp else KovelyxTheme.spacing.xs
                 
                 Box(
                     modifier = Modifier
@@ -289,9 +289,9 @@ private fun HeroCarouselSlide(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl)
+                .padding(start = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl)
                 .fillMaxWidth(0.42f),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             if (showLogo) {
                 AsyncImage(
@@ -309,7 +309,7 @@ private fun HeroCarouselSlide(
                 Text(
                     text = item.name,
                     style = MaterialTheme.typography.headlineLarge,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -318,7 +318,7 @@ private fun HeroCarouselSlide(
             if (leadingMetaText.isNotBlank() || trailingMetadata.isNotEmpty() || ratingText != null) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val hasTrailingMeta = trailingMetadata.isNotEmpty() || ratingText != null
@@ -326,7 +326,7 @@ private fun HeroCarouselSlide(
                         Text(
                             text = leadingMetaText,
                             style = MaterialTheme.typography.labelMedium,
-                            color = NuvioTheme.colors.TextSecondary,
+                            color = KovelyxTheme.colors.TextSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = if (hasTrailingMeta) {
@@ -340,14 +340,14 @@ private fun HeroCarouselSlide(
                         if (leadingMetaText.isNotBlank()) HeroCarouselMetaDivider()
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                         ) {
                             trailingMetadata.forEachIndexed { index, value ->
                                 if (index > 0) HeroCarouselMetaDivider()
                                 Text(
                                     text = value,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = NuvioTheme.colors.TextSecondary,
+                                    color = KovelyxTheme.colors.TextSecondary,
                                     maxLines = 1
                                 )
                             }
@@ -358,17 +358,17 @@ private fun HeroCarouselSlide(
                                     if (trailingMetadata.isNotEmpty()) HeroCarouselMetaDivider()
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
                                     ) {
                                         ImdbRatingSourceLabel(
-                                            logoModifier = Modifier.size(NuvioTheme.spacing.xl),
+                                            logoModifier = Modifier.size(KovelyxTheme.spacing.xl),
                                             textStyle = MaterialTheme.typography.labelMedium,
-                                            textColor = NuvioTheme.colors.TextSecondary
+                                            textColor = KovelyxTheme.colors.TextSecondary
                                         )
                                         Text(
                                             text = ratingText,
                                             style = MaterialTheme.typography.labelMedium,
-                                            color = NuvioTheme.colors.TextSecondary,
+                                            color = KovelyxTheme.colors.TextSecondary,
                                             maxLines = 1
                                         )
                                     }
@@ -393,7 +393,7 @@ private fun HeroCarouselSlide(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         textDirection = description.contentTextDirection()
                     ),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 4,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -406,9 +406,9 @@ private fun HeroCarouselSlide(
 private fun HeroCarouselMetaDivider() {
     Box(
         modifier = Modifier
-            .size(NuvioTheme.spacing.xs.coerceAtLeast(NuvioTheme.spacing.xxs))
+            .size(KovelyxTheme.spacing.xs.coerceAtLeast(KovelyxTheme.spacing.xxs))
             .clip(RoundedCornerShape(percent = 50))
-            .background(NuvioTheme.colors.TextTertiary.copy(alpha = 0.78f))
+            .background(KovelyxTheme.colors.TextTertiary.copy(alpha = 0.78f))
     )
 }
 
@@ -441,7 +441,7 @@ internal fun HeroCarouselBackdrop(
             }
             .build()
     }
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
 
     Box(
         modifier = modifier

@@ -44,7 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.isDesktop
 import com.kovelyx.app.isIos
@@ -1190,12 +1190,12 @@ private fun SettingsSearchRevealItem(
     AnimatedVisibility(
         visibleState = visibleState,
         enter = expandVertically(
-            animationSpec = tween(durationMillis = NuvioTokens.Motion.normalMillis),
+            animationSpec = tween(durationMillis = KovelyxTokens.Motion.normalMillis),
             expandFrom = Alignment.Top,
         ) + fadeIn(
-            animationSpec = tween(durationMillis = NuvioTokens.Motion.fastMillis),
+            animationSpec = tween(durationMillis = KovelyxTokens.Motion.fastMillis),
         ) + slideInVertically(
-            animationSpec = tween(durationMillis = NuvioTokens.Motion.normalMillis),
+            animationSpec = tween(durationMillis = KovelyxTokens.Motion.normalMillis),
             initialOffsetY = { -it / 4 },
         ),
     ) {

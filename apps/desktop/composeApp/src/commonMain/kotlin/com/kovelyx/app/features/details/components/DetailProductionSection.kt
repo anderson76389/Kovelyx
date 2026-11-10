@@ -22,7 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.features.details.MetaCompany
 import com.kovelyx.app.features.details.MetaDetails
 import nuvio.composeapp.generated.resources.*

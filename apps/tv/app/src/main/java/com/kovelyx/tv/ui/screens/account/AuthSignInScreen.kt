@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.account
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -73,16 +73,16 @@ fun AuthSignInScreen(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .background(
-                    color = NuvioTheme.colors.BackgroundElevated,
+                    color = KovelyxTheme.colors.BackgroundElevated,
                     shape = RoundedCornerShape(20.dp)
                 )
-                .padding(NuvioTheme.spacing.xxl),
+                .padding(KovelyxTheme.spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = stringResource(R.string.auth_signin_title),
                 style = MaterialTheme.typography.headlineSmall,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(10.dp))
@@ -90,7 +90,7 @@ fun AuthSignInScreen(
                 Text(
                     text = "Connectez-vous avec votre compte Kovelyx Cloud.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(18.dp))
@@ -118,7 +118,7 @@ fun AuthSignInScreen(
                     Text(
                         text = failure,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.Error,
+                        color = KovelyxTheme.colors.Error,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -127,47 +127,47 @@ fun AuthSignInScreen(
                     onClick = submit,
                     enabled = canSignIn,
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.Secondary,
-                        focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                        contentColor = NuvioTheme.colors.OnSecondary,
-                        focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                        containerColor = KovelyxTheme.colors.Secondary,
+                        focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                        contentColor = KovelyxTheme.colors.OnSecondary,
+                        focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = if (uiState.isLoading) "Connexion…" else "Se connecter",
-                        modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs)
+                        modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs)
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "Les données locales ne seront pas écrasées. La synchronisation automatique est encore en développement.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary,
+                    color = KovelyxTheme.colors.TextTertiary,
                     textAlign = TextAlign.Center
                 )
             } else {
                 Text(
                     text = stringResource(R.string.auth_signin_tv_disabled),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(22.dp))
             Button(
                 onClick = onNavigateToQrSignIn,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Secondary,
-                    focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                    contentColor = NuvioTheme.colors.OnSecondary,
-                    focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                    containerColor = KovelyxTheme.colors.Secondary,
+                    focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                    contentColor = KovelyxTheme.colors.OnSecondary,
+                    focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                 ),
                 shape = ButtonDefaults.shape(RoundedCornerShape(50)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(R.string.auth_signin_qr_btn),
-                    modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs),
+                    modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs),
                     fontWeight = FontWeight.Medium
                 )
             }

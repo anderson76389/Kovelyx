@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class NuvioScreenSpacing(
+data class KovelyxScreenSpacing(
     val horizontal: Dp,
     val vertical: Dp,
     val compactHorizontal: Dp,
@@ -15,7 +15,7 @@ data class NuvioScreenSpacing(
 )
 
 @Immutable
-data class NuvioRailSpacing(
+data class KovelyxRailSpacing(
     val horizontalPadding: Dp,
     val verticalPadding: Dp,
     val rowGap: Dp,
@@ -25,7 +25,7 @@ data class NuvioRailSpacing(
 )
 
 @Immutable
-data class NuvioPanelSpacing(
+data class KovelyxPanelSpacing(
     val outer: Dp,
     val inner: Dp,
     val gap: Dp,
@@ -33,7 +33,7 @@ data class NuvioPanelSpacing(
 )
 
 @Immutable
-data class NuvioSpacingTokens(
+data class KovelyxSpacingTokens(
     val none: Dp,
     val hairline: Dp,
     val xxs: Dp,
@@ -45,17 +45,17 @@ data class NuvioSpacingTokens(
     val xxl: Dp,
     val xxxl: Dp,
     val huge: Dp,
-    val screen: NuvioScreenSpacing,
-    val rail: NuvioRailSpacing,
-    val card: NuvioPanelSpacing,
-    val dialog: NuvioPanelSpacing,
-    val sidePanel: NuvioPanelSpacing,
-    val player: NuvioPanelSpacing,
-    val settings: NuvioPanelSpacing
+    val screen: KovelyxScreenSpacing,
+    val rail: KovelyxRailSpacing,
+    val card: KovelyxPanelSpacing,
+    val dialog: KovelyxPanelSpacing,
+    val sidePanel: KovelyxPanelSpacing,
+    val player: KovelyxPanelSpacing,
+    val settings: KovelyxPanelSpacing
 )
 
-object NuvioSpacing {
-    val tokens = NuvioSpacingTokens(
+object KovelyxSpacing {
+    val tokens = KovelyxSpacingTokens(
         none = 0.dp,
         hairline = 1.dp,
         xxs = 2.dp,
@@ -67,7 +67,7 @@ object NuvioSpacing {
         xxl = 32.dp,
         xxxl = 48.dp,
         huge = 56.dp,
-        screen = NuvioScreenSpacing(
+        screen = KovelyxScreenSpacing(
             horizontal = 48.dp,
             vertical = 24.dp,
             compactHorizontal = 32.dp,
@@ -75,7 +75,7 @@ object NuvioSpacing {
             overscanHorizontal = 56.dp,
             overscanVertical = 36.dp
         ),
-        rail = NuvioRailSpacing(
+        rail = KovelyxRailSpacing(
             horizontalPadding = 48.dp,
             verticalPadding = 6.dp,
             rowGap = 24.dp,
@@ -83,31 +83,31 @@ object NuvioSpacing {
             headerBottom = 14.dp,
             tailPadding = 200.dp
         ),
-        card = NuvioPanelSpacing(
+        card = KovelyxPanelSpacing(
             outer = 12.dp,
             inner = 16.dp,
             gap = 12.dp,
             compactGap = 8.dp
         ),
-        dialog = NuvioPanelSpacing(
+        dialog = KovelyxPanelSpacing(
             outer = 32.dp,
             inner = 24.dp,
             gap = 16.dp,
             compactGap = 12.dp
         ),
-        sidePanel = NuvioPanelSpacing(
+        sidePanel = KovelyxPanelSpacing(
             outer = 36.dp,
             inner = 20.dp,
             gap = 16.dp,
             compactGap = 10.dp
         ),
-        player = NuvioPanelSpacing(
+        player = KovelyxPanelSpacing(
             outer = 52.dp,
             inner = 16.dp,
             gap = 14.dp,
             compactGap = 8.dp
         ),
-        settings = NuvioPanelSpacing(
+        settings = KovelyxPanelSpacing(
             outer = 32.dp,
             inner = 20.dp,
             gap = 16.dp,

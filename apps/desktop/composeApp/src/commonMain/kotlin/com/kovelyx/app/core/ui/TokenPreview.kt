@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 
 @Composable
-fun NuvioTokenPreviewSurface(
+fun KovelyxTokenPreviewSurface(
     modifier: Modifier = Modifier,
     themes: List<AppTheme> = AppTheme.entries,
 ) {
@@ -31,7 +31,7 @@ fun NuvioTokenPreviewSurface(
     ) {
         items(themes.size) { index ->
             val theme = themes[index]
-            NuvioTheme(appTheme = theme) {
+            KovelyxTheme(appTheme = theme) {
                 TokenPreviewThemeSection(theme = theme)
             }
         }
@@ -67,17 +67,17 @@ private fun TokenPreviewThemeSection(theme: AppTheme) {
             ).forEach { color ->
                 Box(
                     modifier = Modifier
-                        .size(NuvioTokens.Icon.xl)
-                        .clip(RoundedCornerShape(NuvioTokens.Radius.sm))
+                        .size(KovelyxTokens.Icon.xl)
+                        .clip(RoundedCornerShape(KovelyxTokens.Radius.sm))
                         .background(color)
-                        .border(tokens.borders.hairline, tokens.colors.borderDefault, RoundedCornerShape(NuvioTokens.Radius.sm)),
+                        .border(tokens.borders.hairline, tokens.colors.borderDefault, RoundedCornerShape(KovelyxTokens.Radius.sm)),
                 )
             }
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTokens.Space.s8)
+                .height(KovelyxTokens.Space.s8)
                 .clip(tokens.shapes.chip)
                 .background(tokens.colors.accent),
         )

@@ -2,7 +2,7 @@ package com.kovelyx.tv.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-object NuvioPrimitives {
+object KovelyxPrimitives {
     val transparent = Color.Transparent
     val black = Color(0xFF000000)
     val white = Color(0xFFFFFFFF)

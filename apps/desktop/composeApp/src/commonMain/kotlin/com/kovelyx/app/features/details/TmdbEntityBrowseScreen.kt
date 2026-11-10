@@ -48,9 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.isDesktop
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioBackButton
-import com.kovelyx.app.core.ui.NuvioDesktopVerticalScrollbar
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxBackButton
+import com.kovelyx.app.core.ui.KovelyxDesktopVerticalScrollbar
 import com.kovelyx.app.core.ui.desktopPageHorizontalPaddingForWidth
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
@@ -142,7 +142,7 @@ fun TmdbEntityBrowseScreen(
         if (!LocalUseNativeNavigation.current) {
             if (isDesktop) {
                 BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    NuvioBackButton(
+                    KovelyxBackButton(
                         onClick = onBack,
                         modifier = Modifier
                             .windowInsetsPadding(WindowInsets.statusBars)
@@ -269,7 +269,7 @@ private fun EntityBrowseContent(
 
                         Spacer(modifier = Modifier.height(32.dp))
                     }
-                    NuvioDesktopVerticalScrollbar(
+                    KovelyxDesktopVerticalScrollbar(
                         state = scrollState,
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
@@ -348,7 +348,7 @@ private fun WideEntityBrowseContent(
                         )
                     }
                 }
-                NuvioDesktopVerticalScrollbar(
+                KovelyxDesktopVerticalScrollbar(
                     state = scrollState,
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
@@ -511,7 +511,7 @@ private fun EntityIdentitySidebar(
                 }
             }
         }
-        NuvioDesktopVerticalScrollbar(
+        KovelyxDesktopVerticalScrollbar(
             state = scrollState,
             modifier = Modifier
                 .align(Alignment.CenterEnd)

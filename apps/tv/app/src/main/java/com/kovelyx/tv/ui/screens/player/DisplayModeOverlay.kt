@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -39,7 +39,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
 private val ROW_HEIGHT = 18.dp
-private val ROW_GAP = NuvioTheme.spacing.xxs
+private val ROW_GAP = KovelyxTheme.spacing.xxs
 
 @Composable
 fun DisplayModeOverlay(
@@ -105,8 +105,8 @@ fun DisplayModeOverlay(
     Column(
         modifier = modifier
             .alpha(containerAlpha.value)
-            .padding(end = NuvioTheme.spacing.xxl, top = NuvioTheme.spacing.xl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+            .padding(end = KovelyxTheme.spacing.xxl, top = KovelyxTheme.spacing.xl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
         horizontalAlignment = Alignment.End
     ) {
         val statusMessage = info.statusMessage?.takeIf { it.isNotBlank() }
@@ -114,7 +114,7 @@ fun DisplayModeOverlay(
             Text(
                 text = statusMessage,
                 fontSize = 11.sp,
-                color = NuvioTheme.colors.Secondary,
+                color = KovelyxTheme.colors.Secondary,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.End,
                 modifier = Modifier
@@ -163,8 +163,8 @@ fun DisplayModeOverlay(
                 modifier = Modifier
                     .width(3.dp)
                     .height((totalLineHeight * lineHeightFraction.value).dp)
-                    .clip(RoundedCornerShape(NuvioTheme.spacing.hairline))
-                    .background(NuvioTheme.colors.Secondary)
+                    .clip(RoundedCornerShape(KovelyxTheme.spacing.hairline))
+                    .background(KovelyxTheme.colors.Secondary)
             )
         }
     }

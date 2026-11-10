@@ -19,10 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioBottomSheetActionRow
-import com.kovelyx.app.core.ui.NuvioBottomSheetDivider
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBottomSheetActionRow
+import com.kovelyx.app.core.ui.KovelyxBottomSheetDivider
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
 import com.kovelyx.app.features.details.MetaVideo
@@ -49,10 +49,10 @@ fun EpisodeWatchedActionSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -66,8 +66,8 @@ fun EpisodeWatchedActionSheet(
                 episode = episode,
                 seasonLabel = seasonLabel,
             )
-            NuvioBottomSheetDivider()
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetDivider()
+            KovelyxBottomSheetActionRow(
                 icon = Icons.Default.CheckCircle,
                 title = if (isEpisodeWatched) {
                     stringResource(Res.string.episode_mark_unwatched)
@@ -77,12 +77,12 @@ fun EpisodeWatchedActionSheet(
                 onClick = {
                     onToggleWatched()
                     coroutineScope.launch {
-                        dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                        dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                     }
                 },
             )
             if (canMarkPreviousEpisodes) {
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     icon = Icons.Default.DoneAll,
                     title = if (arePreviousEpisodesWatched) {
                         stringResource(Res.string.episode_mark_previous_unwatched)
@@ -92,12 +92,12 @@ fun EpisodeWatchedActionSheet(
                     onClick = {
                         onTogglePreviousWatched()
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                 )
             }
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetActionRow(
                 icon = Icons.Default.PlaylistAddCheckCircle,
                 title = if (isSeasonWatched) {
                     stringResource(Res.string.episode_mark_season_unwatched, seasonLabel)
@@ -107,18 +107,18 @@ fun EpisodeWatchedActionSheet(
                 onClick = {
                     onToggleSeasonWatched()
                     coroutineScope.launch {
-                        dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                        dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                     }
                 },
             )
             if (showPlayManually && onPlayManually != null) {
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     icon = Icons.Default.PlayArrow,
                     title = stringResource(Res.string.play_manually),
                     onClick = {
                         onPlayManually()
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                 )
@@ -140,10 +140,10 @@ fun SeasonWatchedActionSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -162,8 +162,8 @@ fun SeasonWatchedActionSheet(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             )
-            NuvioBottomSheetDivider()
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetDivider()
+            KovelyxBottomSheetActionRow(
                 icon = Icons.Default.PlaylistAddCheckCircle,
                 title = if (isSeasonWatched) {
                     stringResource(Res.string.episode_mark_season_unwatched, seasonLabel)
@@ -173,18 +173,18 @@ fun SeasonWatchedActionSheet(
                 onClick = {
                     onToggleSeasonWatched()
                     coroutineScope.launch {
-                        dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                        dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                     }
                 },
             )
             if (canMarkPreviousSeasons) {
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     icon = Icons.Default.DoneAll,
                     title = stringResource(Res.string.episode_mark_previous_seasons_watched),
                     onClick = {
                         onMarkPreviousSeasonsWatched()
                         coroutineScope.launch {
-                            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                         }
                     },
                 )

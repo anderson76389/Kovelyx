@@ -5,8 +5,8 @@ import com.kovelyx.tv.ui.navigation.LocalDetailChildClosedEpoch
 import com.kovelyx.tv.ui.navigation.LocalDetailChildOverlayVisible
 import android.widget.Toast
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
-import com.kovelyx.tv.ui.theme.NuvioMotion
+import com.kovelyx.tv.ui.theme.KovelyxTheme
+import com.kovelyx.tv.ui.theme.KovelyxMotion
 
 import android.view.KeyEvent
 import android.os.SystemClock
@@ -130,7 +130,7 @@ import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.domain.model.WatchProgress
 import com.kovelyx.tv.ui.components.ErrorState
 import com.kovelyx.tv.ui.components.MetaDetailsSkeleton
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.PlayManualOverrideDialog
 import com.kovelyx.tv.ui.components.SynopsisOverlay
 import com.kovelyx.tv.ui.components.TrailerPlayer
@@ -483,7 +483,7 @@ fun MetaDetailsScreen(
     }
     val playOnLoadReturnContentAlpha by animateFloatAsState(
         targetValue = if (playOnLoadReturnRevealRequested) 1f else 0f,
-        animationSpec = NuvioMotion.mediumTween(),
+        animationSpec = KovelyxMotion.mediumTween(),
         label = "playOnLoadReturnContentAlpha",
         finishedListener = { playOnLoadReturnContentRevealed = it == 1f }
     )
@@ -562,7 +562,7 @@ fun MetaDetailsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(NuvioTheme.colors.Background)
+            .background(KovelyxTheme.colors.Background)
             .onPreviewKeyEvent { keyEvent ->
                 if (currentIsTrailerPlaying) {
                     if (currentShowTrailerControls) {
@@ -1120,12 +1120,12 @@ fun MetaDetailsScreen(
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = NuvioTheme.spacing.xl)
+                    .padding(top = KovelyxTheme.spacing.xl)
                     .background(
                         color = if (uiState.userMessageIsError) {
                             Color(0xFF5A1C1C)
                         } else {
-                            NuvioTheme.colors.BackgroundElevated
+                            KovelyxTheme.colors.BackgroundElevated
                         },
                         shape = RoundedCornerShape(10.dp)
                     )
@@ -1134,7 +1134,7 @@ fun MetaDetailsScreen(
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
             }
         }
@@ -1477,7 +1477,7 @@ private fun MetaDetailsContent(
         if (currentIndex == index) {
             val delta = (offset - currentOffset).toFloat()
             if (kotlin.math.abs(delta) > 1f) {
-                listState.animateScrollBy(delta, NuvioMotion.slowTween())
+                listState.animateScrollBy(delta, KovelyxMotion.slowTween())
             }
             return
         }
@@ -1505,7 +1505,7 @@ private fun MetaDetailsContent(
         }
         if (distance <= 1f) return
         coroutineScope.launch {
-            listState.animateScrollBy(distance, NuvioMotion.slowTween())
+            listState.animateScrollBy(distance, KovelyxMotion.slowTween())
         }
     }
 
@@ -2056,7 +2056,7 @@ private fun MetaDetailsContent(
     }
 
     // Backdrop alpha for crossfade
-    val backgroundColor = NuvioTheme.colors.Background
+    val backgroundColor = KovelyxTheme.colors.Background
 
     // Pre-compute gradient brushes once
 
@@ -2815,7 +2815,7 @@ private fun MetaDetailsContent(
                                     downFocusRequester = if (shouldShowCommentsSection && canToggleEpisodeComments) commentsSelectedModeFocusRequester else null,
                                     firstItemFocusRequester = ratingsContentFocusRequester,
                                     ratingsGridFocusRequester = ratingsGridFocusRequester,
-                                    modifier = Modifier.heightIn(min = if (!hasItemsBelow) castSectionHeight else NuvioTheme.spacing.none)
+                                    modifier = Modifier.heightIn(min = if (!hasItemsBelow) castSectionHeight else KovelyxTheme.spacing.none)
                                 )
                             }
                         }
@@ -3313,8 +3313,8 @@ private fun PeopleSectionTabs(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            .padding(top = 20.dp, start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         @Composable
         fun androidx.compose.foundation.layout.RowScope.renderTabs(items: List<PeopleTabItem>) {
@@ -3323,7 +3323,7 @@ private fun PeopleSectionTabs(
                     Text(
                         text = "|",
                         style = MaterialTheme.typography.titleLarge,
-                        color = NuvioTheme.colors.TextPrimary.copy(alpha = 0.45f),
+                        color = KovelyxTheme.colors.TextPrimary.copy(alpha = 0.45f),
                         modifier = Modifier.padding(horizontal = 10.dp)
                     )
                 }
@@ -3395,8 +3395,8 @@ private fun PeopleSectionTabButton(
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = BorderStroke(NuvioTheme.spacing.none, Color.Transparent),
-                shape = RoundedCornerShape(NuvioTheme.radii.xl)
+                border = BorderStroke(KovelyxTheme.spacing.none, Color.Transparent),
+                shape = RoundedCornerShape(KovelyxTheme.radii.xl)
             )
         ),
         scale = CardDefaults.scale(focusedScale = 1.03f)
@@ -3405,11 +3405,11 @@ private fun PeopleSectionTabButton(
             text = label,
             style = MaterialTheme.typography.titleLarge,
             color = when {
-                isFocused -> NuvioTheme.colors.TextPrimary
-                selected -> NuvioTheme.colors.TextPrimary.copy(alpha = 0.92f)
-                else -> NuvioTheme.colors.TextPrimary.copy(alpha = 0.55f)
+                isFocused -> KovelyxTheme.colors.TextPrimary
+                selected -> KovelyxTheme.colors.TextPrimary.copy(alpha = 0.92f)
+                else -> KovelyxTheme.colors.TextPrimary.copy(alpha = 0.55f)
             },
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxs, vertical = NuvioTheme.spacing.xxs)
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxs, vertical = KovelyxTheme.spacing.xxs)
         )
     }
 }
@@ -3432,7 +3432,7 @@ private fun LibraryListPickerDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.detail_lists_subtitle),
@@ -3466,8 +3466,8 @@ private fun LibraryListPickerDialog(
                         Modifier.fillMaxWidth()
                     },
                     colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
+                        containerColor = if (selected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextPrimary
                     )
                 ) {
                     Text(
@@ -3479,15 +3479,15 @@ private fun LibraryListPickerDialog(
             }
         }
 
-        HorizontalDivider(color = NuvioTheme.colors.Border, thickness = NuvioTheme.spacing.hairline)
+        HorizontalDivider(color = KovelyxTheme.colors.Border, thickness = KovelyxTheme.spacing.hairline)
 
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
             Button(
                 onClick = onSave,
                 enabled = !isPending,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(if (isPending) stringResource(R.string.action_saving) else stringResource(R.string.action_save))

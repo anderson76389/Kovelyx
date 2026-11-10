@@ -17,7 +17,7 @@ import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import com.kovelyx.app.core.poster.CustomPosterFallbackInterceptor
 import com.kovelyx.app.core.ui.NativeProfileSwitcherController
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.core.ui.configurePlatformImageLoader
 import com.kovelyx.app.core.ui.desktopUiScaleForWindow
 import com.kovelyx.app.core.ui.platformProvidesImageLoader
@@ -109,7 +109,7 @@ internal fun AppEnvironment(content: @Composable () -> Unit) {
     val customThemeColors by ThemeSettingsRepository.customThemeColors.collectAsStateWithLifecycle()
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        NuvioTheme(
+        KovelyxTheme(
             appTheme = selectedTheme,
             amoled = amoledEnabled,
             customThemeColors = customThemeColors,

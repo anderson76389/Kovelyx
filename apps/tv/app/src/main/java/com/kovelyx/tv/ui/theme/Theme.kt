@@ -13,7 +13,7 @@ import com.kovelyx.tv.domain.model.AppTheme
 import com.kovelyx.tv.domain.model.CustomThemeColors
 import com.kovelyx.tv.domain.model.SettingsUiStyle
 
-data class NuvioExtendedColors(
+data class KovelyxExtendedColors(
     val backgroundElevated: Color,
     val backgroundCard: Color,
     val textSecondary: Color,
@@ -23,12 +23,12 @@ data class NuvioExtendedColors(
     val rating: Color
 )
 
-val LocalNuvioColors = staticCompositionLocalOf {
-    NuvioColorScheme(ThemeColors.Ocean)
+val LocalKovelyxColors = staticCompositionLocalOf {
+    KovelyxColorScheme(ThemeColors.Ocean)
 }
 
-val LocalNuvioExtendedColors = staticCompositionLocalOf {
-    NuvioExtendedColors(
+val LocalKovelyxExtendedColors = staticCompositionLocalOf {
+    KovelyxExtendedColors(
         backgroundElevated = Color(0xFF1A1A1A),
         backgroundCard = Color(0xFF242424),
         textSecondary = Color(0xFFB3B3B3),
@@ -39,7 +39,7 @@ val LocalNuvioExtendedColors = staticCompositionLocalOf {
     )
 }
 
-val LocalNuvioTextStyles = staticCompositionLocalOf { NuvioTextStyles }
+val LocalKovelyxTextStyles = staticCompositionLocalOf { KovelyxTextStyles }
 
 val LocalAppTheme = staticCompositionLocalOf { AppTheme.WHITE }
 
@@ -47,13 +47,13 @@ val LocalThemePalette = staticCompositionLocalOf { ThemeColors.White }
 
 val LocalSettingsUiStyle = staticCompositionLocalOf { SettingsUiStyle.CLASSIC }
 
-val LocalNuvioFocusRingStyle = staticCompositionLocalOf {
+val LocalKovelyxFocusRingStyle = staticCompositionLocalOf {
     createFocusRingStyle(ThemeColors.Ocean)
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-fun NuvioTheme(
+fun KovelyxTheme(
     appTheme: AppTheme = AppTheme.WHITE,
     appFont: AppFont = AppFont.INTER,
     amoledMode: Boolean = false,
@@ -66,13 +66,13 @@ fun NuvioTheme(
         ThemeColors.getColorPalette(appTheme, customThemeColors)
     }
     val focusRingStyle = createFocusRingStyle(palette)
-    val colorScheme = NuvioColorScheme(
+    val colorScheme = KovelyxColorScheme(
         palette = palette,
         amoledMode = amoledMode,
         amoledSurfacesMode = amoledSurfacesMode
     )
-    val typography = buildNuvioTypography(getFontFamily(appFont))
-    val textStyles = buildNuvioTextStyles(typography)
+    val typography = buildKovelyxTypography(getFontFamily(appFont))
+    val textStyles = buildKovelyxTextStyles(typography)
 
     val materialColorScheme = darkColorScheme(
         primary = colorScheme.Primary,
@@ -88,7 +88,7 @@ fun NuvioTheme(
         error = colorScheme.Error
     )
 
-    val extendedColors = NuvioExtendedColors(
+    val extendedColors = KovelyxExtendedColors(
         backgroundElevated = colorScheme.BackgroundElevated,
         backgroundCard = colorScheme.BackgroundCard,
         textSecondary = colorScheme.TextSecondary,
@@ -99,13 +99,13 @@ fun NuvioTheme(
     )
 
     CompositionLocalProvider(
-        LocalNuvioColors provides colorScheme,
-        LocalNuvioExtendedColors provides extendedColors,
-        LocalNuvioTextStyles provides textStyles,
+        LocalKovelyxColors provides colorScheme,
+        LocalKovelyxExtendedColors provides extendedColors,
+        LocalKovelyxTextStyles provides textStyles,
         LocalAppTheme provides appTheme,
         LocalThemePalette provides palette,
         LocalSettingsUiStyle provides settingsUiStyle,
-        LocalNuvioFocusRingStyle provides focusRingStyle
+        LocalKovelyxFocusRingStyle provides focusRingStyle
     ) {
         MaterialTheme(
             colorScheme = materialColorScheme,
@@ -115,67 +115,67 @@ fun NuvioTheme(
     }
 }
 
-object NuvioTheme {
+object KovelyxTheme {
     val palette: ThemeColorPalette
         @Composable
         @ReadOnlyComposable
         get() = LocalThemePalette.current
 
-    val colors: NuvioColorScheme
+    val colors: KovelyxColorScheme
         @Composable
         @ReadOnlyComposable
-        get() = LocalNuvioColors.current
+        get() = LocalKovelyxColors.current
 
-    val extendedColors: NuvioExtendedColors
+    val extendedColors: KovelyxExtendedColors
         @Composable
         @ReadOnlyComposable
-        get() = LocalNuvioExtendedColors.current
+        get() = LocalKovelyxExtendedColors.current
 
-    val textStyles: NuvioTextStyleTokens
+    val textStyles: KovelyxTextStyleTokens
         @Composable
         @ReadOnlyComposable
-        get() = LocalNuvioTextStyles.current
+        get() = LocalKovelyxTextStyles.current
 
-    val spacing: NuvioSpacingTokens
-        get() = NuvioSpacing.tokens
+    val spacing: KovelyxSpacingTokens
+        get() = KovelyxSpacing.tokens
 
-    val radii: NuvioRadiusTokens
-        get() = NuvioRadii.tokens
+    val radii: KovelyxRadiusTokens
+        get() = KovelyxRadii.tokens
 
-    val shapes: NuvioShapeTokens
-        get() = NuvioShapes.tokens
+    val shapes: KovelyxShapeTokens
+        get() = KovelyxShapes.tokens
 
-    val sizes: NuvioSizeTokens
-        get() = NuvioSizes.tokens
+    val sizes: KovelyxSizeTokens
+        get() = KovelyxSizes.tokens
 
-    val strokes: NuvioStrokeTokens
-        get() = NuvioStrokes.tokens
+    val strokes: KovelyxStrokeTokens
+        get() = KovelyxStrokes.tokens
 
-    val elevations: NuvioElevationTokens
-        get() = NuvioElevations.tokens
+    val elevations: KovelyxElevationTokens
+        get() = KovelyxElevations.tokens
 
-    val effects: NuvioEffectTokens
-        get() = NuvioEffects.tokens
+    val effects: KovelyxEffectTokens
+        get() = KovelyxEffects.tokens
 
-    val motion: NuvioMotionTokens
-        get() = NuvioMotion.tokens
+    val motion: KovelyxMotionTokens
+        get() = KovelyxMotion.tokens
 
-    val focus: NuvioFocusTokens
-        get() = NuvioFocus.tokens
+    val focus: KovelyxFocusTokens
+        get() = KovelyxFocus.tokens
 
-    val focusRing: NuvioFocusRingStyle
+    val focusRing: KovelyxFocusRingStyle
         @Composable
         @ReadOnlyComposable
-        get() = LocalNuvioFocusRingStyle.current
+        get() = LocalKovelyxFocusRingStyle.current
 
-    val layout: NuvioLayoutTokens
-        get() = NuvioLayout.tokens
+    val layout: KovelyxLayoutTokens
+        get() = KovelyxLayout.tokens
 
     val media: KovelyxMediaTokens
         get() = KovelyxMedia.tokens
 
-    val components: NuvioComponentTokens
-        get() = NuvioComponents.tokens
+    val components: KovelyxComponentTokens
+        get() = KovelyxComponents.tokens
 
     val currentTheme: AppTheme
         @Composable

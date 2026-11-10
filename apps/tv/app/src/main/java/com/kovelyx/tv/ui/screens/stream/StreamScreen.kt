@@ -98,7 +98,7 @@ import com.kovelyx.tv.ui.components.StreamBadgeChips
 import com.kovelyx.tv.ui.components.StreamsSkeletonList
 import com.kovelyx.tv.ui.screens.player.LoadingOverlay
 import com.kovelyx.tv.ui.screens.player.AddonFilterChips
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.navigation.sourceSelectionRestoreTarget
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -541,7 +541,7 @@ private fun StreamBackdrop(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val backgroundColor = NuvioTheme.colors.Background
+    val backgroundColor = KovelyxTheme.colors.Background
     val backdropModel = remember(context, backdrop) {
         backdrop?.let { image ->
             ImageRequest.Builder(context)
@@ -636,7 +636,7 @@ private fun LeftContentSection(
         listOfNotNull(genres, year).joinToString(" • ")
     }
     Box(
-        modifier = modifier.padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xl),
+        modifier = modifier.padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xl),
         contentAlignment = Alignment.CenterStart
     ) {
         Column(
@@ -659,7 +659,7 @@ private fun LeftContentSection(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.displaySmall,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center
@@ -669,26 +669,26 @@ private fun LeftContentSection(
             // Show episode info or movie info
             if (isEpisode && season != null && episode != null) {
                 // Episode info
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = stringResource(R.string.stream_episode_label, season, episode),
                     style = MaterialTheme.typography.titleLarge,
-                    color = NuvioTheme.extendedColors.textSecondary,
+                    color = KovelyxTheme.extendedColors.textSecondary,
                     textAlign = TextAlign.Center
                 )
                 if (episodeName != null) {
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                     Text(
                         text = episodeName.localizeEpisodeTitle(LocalContext.current),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         textAlign = TextAlign.Center
                     )
                 }
                 if (runtime != null) {
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                     val runtimeText = if (runtime >= 60) {
                         val hours = runtime / 60
                         val mins = runtime % 60
@@ -699,18 +699,18 @@ private fun LeftContentSection(
                     Text(
                         text = runtimeText,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.extendedColors.textSecondary,
+                        color = KovelyxTheme.extendedColors.textSecondary,
                         textAlign = TextAlign.Center
                     )
                 }
             } else {
                 // Movie info - genres and year
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 if (infoText.isNotEmpty()) {
                     Text(
                         text = infoText,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.extendedColors.textSecondary,
+                        color = KovelyxTheme.extendedColors.textSecondary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -828,9 +828,9 @@ private fun RightStreamSection(
 
     Column(
         modifier = modifier
-            .padding(top = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.xxxl)
+            .padding(top = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.xxxl)
     ) {
-        val chipRowHeight = NuvioTheme.spacing.huge
+        val chipRowHeight = KovelyxTheme.spacing.huge
 
         // Addon filter chips
         Box(modifier = Modifier.height(chipRowHeight)) {
@@ -857,7 +857,7 @@ private fun RightStreamSection(
             }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         androidx.compose.animation.AnimatedVisibility(
             visible = enter,
@@ -872,11 +872,11 @@ private fun RightStreamSection(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(NuvioTheme.radii.xl))
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
                     .then(
                         if (hazeState != null) {
                             Modifier.hazeEffect(state = hazeState) {
-                                blurRadius = NuvioTheme.effects.blurPanel
+                                blurRadius = KovelyxTheme.effects.blurPanel
                                 noiseFactor = 0.04f
                                 inputScale = HazeInputScale.Fixed(0.66f)
                             }
@@ -888,7 +888,7 @@ private fun RightStreamSection(
                         if (hazeState != null) {
                             Color(0xFF1C1C1E).copy(alpha = 0.65f)
                         } else {
-                            NuvioTheme.colors.BackgroundCard.copy(alpha = 0.5f)
+                            KovelyxTheme.colors.BackgroundCard.copy(alpha = 0.5f)
                         }
                     ),
                 contentAlignment = Alignment.Center
@@ -951,47 +951,47 @@ private fun ErrorState(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(NuvioTheme.spacing.xxl)
+        modifier = Modifier.padding(KovelyxTheme.spacing.xxl)
     ) {
         Icon(
             imageVector = Icons.Default.Warning,
             contentDescription = null,
-            modifier = Modifier.size(NuvioTheme.spacing.xxxl),
-            tint = NuvioTheme.colors.Error
+            modifier = Modifier.size(KovelyxTheme.spacing.xxxl),
+            tint = KovelyxTheme.colors.Error
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         Text(
             text = message,
             style = MaterialTheme.typography.bodyLarge,
-            color = NuvioTheme.extendedColors.textSecondary,
+            color = KovelyxTheme.extendedColors.textSecondary,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
         var isFocused by remember { mutableStateOf(false) }
         Card(
             onClick = onRetry,
             modifier = Modifier.onFocusChanged { isFocused = it.isFocused },
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.Secondary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.Secondary
             ),
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                    shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                 )
             ),
-            shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+            shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
             scale = CardDefaults.scale(focusedScale = 1.02f)
         ) {
             Text(
                 text = stringResource(R.string.stream_retry),
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isFocused) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextPrimary,
+                color = if (isFocused) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextPrimary,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
             )
         }
@@ -1003,21 +1003,21 @@ private fun EmptyState() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(NuvioTheme.spacing.xxl)
+        modifier = Modifier.padding(KovelyxTheme.spacing.xxl)
     ) {
         Text(
             text = stringResource(R.string.stream_no_streams),
             style = MaterialTheme.typography.bodyLarge,
-            color = NuvioTheme.extendedColors.textSecondary,
+            color = KovelyxTheme.extendedColors.textSecondary,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
         Text(
             text = stringResource(R.string.stream_no_streams_hint),
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.extendedColors.textSecondary,
+            color = KovelyxTheme.extendedColors.textSecondary,
             textAlign = TextAlign.Center
         )
     }
@@ -1138,7 +1138,7 @@ private fun StreamsList(
         state = streamListState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(NuvioTheme.spacing.lg)
+            .padding(KovelyxTheme.spacing.lg)
             .onFocusChanged { onFocusChanged(it.hasFocus) }
             .onKeyEvent { event ->
                 if (event.nativeKeyEvent.action != KeyEvent.ACTION_DOWN) return@onKeyEvent false
@@ -1175,13 +1175,13 @@ private fun StreamsList(
                     else -> false
                 }
             },
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-        contentPadding = PaddingValues(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.xxl)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+        contentPadding = PaddingValues(start = KovelyxTheme.spacing.sm, end = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.xxl)
     ) {
         itemsIndexed(streams, key = { index, _ ->
             streamKeys[index]
         }) { index, stream ->
-            Box(modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs)) {
+            Box(modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs)) {
                 StreamCard(
                     stream = stream,
                     showFileSizeBadges = showFileSizeBadges,
@@ -1231,8 +1231,8 @@ private fun StreamCard(
     val streamName = remember(stream, unknownStreamLabel) { stream.getDisplayNameOrNull() ?: unknownStreamLabel }
     val streamDescription = remember(stream) { stream.getDisplayDescription() }
     val hasBadges = stream.badges.isNotEmpty() || (showFileSizeBadges && stream.behaviorHints?.videoSize != null) || reserveBadgeSpace
-    val cardShape = RoundedCornerShape(NuvioTheme.radii.md)
-    val hasGradientFocusRing = NuvioTheme.palette.focusRingGradient.size > 1
+    val cardShape = RoundedCornerShape(KovelyxTheme.radii.md)
+    val hasGradientFocusRing = KovelyxTheme.palette.focusRingGradient.size > 1
 
     var isFocused by remember { mutableStateOf(false) }
 
@@ -1244,7 +1244,7 @@ private fun StreamCard(
     // Pre-upscale: decode at 2× target pixels so the hardware compositor
     // has enough pixel data for smooth edges inside Card RenderNodes.
     val logoDecodeSize = remember(density) {
-        with(density) { NuvioTheme.spacing.xxl.roundToPx() } * 2
+        with(density) { KovelyxTheme.spacing.xxl.roundToPx() } * 2
     }
     val addonLogoModel = remember(context, stream.addonLogo, logoDecodeSize) {
         stream.addonLogo?.let { logo ->
@@ -1272,14 +1272,14 @@ private fun StreamCard(
                 } else false
             } else Modifier),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundElevated,
-            focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+            containerColor = KovelyxTheme.colors.BackgroundElevated,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
         ),
         shape = CardDefaults.shape(shape = cardShape),
         border = if (hasGradientFocusRing) {
             CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = cardShape
                 )
             )
@@ -1291,13 +1291,13 @@ private fun StreamCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.lg),
+                .padding(KovelyxTheme.spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 if (hasBadges && badgePlacement == StreamBadgePlacement.TOP) {
                     if (stream.badges.isNotEmpty() || (showFileSizeBadges && stream.behaviorHints?.videoSize != null)) {
@@ -1311,7 +1311,7 @@ private fun StreamCard(
                     } else {
                         Spacer(modifier = Modifier.height(20.dp))
                     }
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                 }
 
                 Text(
@@ -1320,7 +1320,7 @@ private fun StreamCard(
                     style = MaterialTheme.typography.titleMedium.copy(
                         textDirection = streamName.contentTextDirection()
                     ),
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
 
                 streamDescription?.let { description ->
@@ -1331,7 +1331,7 @@ private fun StreamCard(
                             style = MaterialTheme.typography.bodySmall.copy(
                                 textDirection = description.contentTextDirection()
                             ),
-                            color = NuvioTheme.extendedColors.textSecondary
+                            color = KovelyxTheme.extendedColors.textSecondary
                         )
                     }
                 }
@@ -1344,7 +1344,7 @@ private fun StreamCard(
                             showFileSizeBadge = showFileSizeBadges,
                             animate = shouldAnimateBadges,
                             focused = isFocused,
-                            modifier = Modifier.padding(top = NuvioTheme.spacing.xxs)
+                            modifier = Modifier.padding(top = KovelyxTheme.spacing.xxs)
                         )
                     } else {
                         Spacer(modifier = Modifier.height(22.dp))
@@ -1361,20 +1361,20 @@ private fun StreamCard(
                             model = addonLogoModel,
                             contentDescription = stream.addonName,
                             modifier = Modifier
-                                .size(NuvioTheme.spacing.xxl)
-                                .clip(RoundedCornerShape(NuvioTheme.radii.xs)),
+                                .size(KovelyxTheme.spacing.xxl)
+                                .clip(RoundedCornerShape(KovelyxTheme.radii.xs)),
                             contentScale = ContentScale.Fit
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
 
                     Text(
                         text = stream.addonName,
                         style = MaterialTheme.typography.labelSmall.copy(
                             textDirection = stream.addonName.contentTextDirection()
                         ),
-                        color = NuvioTheme.extendedColors.textTertiary,
+                        color = KovelyxTheme.extendedColors.textTertiary,
                         maxLines = 1
                     )
                 }
@@ -1398,26 +1398,26 @@ internal fun PlayerChoiceDialog(
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(NuvioTheme.radii.xl))
-                .background(NuvioTheme.colors.BackgroundCard)
+                .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
+                .background(KovelyxTheme.colors.BackgroundCard)
         ) {
             Column(
                 modifier = Modifier
                     .width(400.dp)
-                    .padding(NuvioTheme.spacing.xl),
+                    .padding(KovelyxTheme.spacing.xl),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = stringResource(R.string.stream_player_picker_title),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     var internalFocused by remember { mutableStateOf(false) }
@@ -1428,24 +1428,24 @@ internal fun PlayerChoiceDialog(
                             .focusRequester(focusRequester)
                             .onFocusChanged { internalFocused = it.isFocused },
                         colors = CardDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundElevated,
-                            focusedContainerColor = NuvioTheme.colors.Secondary
+                            containerColor = KovelyxTheme.colors.BackgroundElevated,
+                            focusedContainerColor = KovelyxTheme.colors.Secondary
                         ),
                         border = CardDefaults.border(
                             focusedBorder = Border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                shape = RoundedCornerShape(KovelyxTheme.radii.md)
                             )
                         ),
-                        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md)),
+                        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md)),
                         scale = CardDefaults.scale(focusedScale = 1.05f)
                     ) {
                         Text(
                             text = stringResource(R.string.stream_player_internal),
                             style = MaterialTheme.typography.titleMedium,
-                            color = if (internalFocused) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextPrimary,
+                            color = if (internalFocused) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextPrimary,
                             modifier = Modifier
-                                .padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+                                .padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
                                 .fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )
@@ -1458,24 +1458,24 @@ internal fun PlayerChoiceDialog(
                             .weight(1f)
                             .onFocusChanged { externalFocused = it.isFocused },
                         colors = CardDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundElevated,
-                            focusedContainerColor = NuvioTheme.colors.Secondary
+                            containerColor = KovelyxTheme.colors.BackgroundElevated,
+                            focusedContainerColor = KovelyxTheme.colors.Secondary
                         ),
                         border = CardDefaults.border(
                             focusedBorder = Border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                shape = RoundedCornerShape(KovelyxTheme.radii.md)
                             )
                         ),
-                        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md)),
+                        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md)),
                         scale = CardDefaults.scale(focusedScale = 1.05f)
                     ) {
                         Text(
                             text = stringResource(R.string.stream_player_external),
                             style = MaterialTheme.typography.titleMedium,
-                            color = if (externalFocused) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextPrimary,
+                            color = if (externalFocused) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextPrimary,
                             modifier = Modifier
-                                .padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+                                .padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
                                 .fillMaxWidth(),
                             textAlign = TextAlign.Center
                         )

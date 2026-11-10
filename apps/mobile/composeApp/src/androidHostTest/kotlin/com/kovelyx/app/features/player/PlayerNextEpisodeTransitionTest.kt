@@ -11,7 +11,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.player.skip.NextEpisodeInfo
 import org.junit.Rule
 import org.junit.Test
@@ -68,7 +68,7 @@ class PlayerNextEpisodeTransitionTest {
 
     private fun showOverlays() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 Box(Modifier.size(640.dp, 360.dp)) {
                     PlayerPlaybackOverlays(
                         playerControlsLocked = false,

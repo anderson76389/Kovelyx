@@ -552,7 +552,7 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setVodCacheSizeMb(mb)
     }
 
-    suspend fun setNuvioPerformanceModeEnabled(enabled: Boolean) {
-        playerSettingsDataStore.setNuvioPerformanceModeEnabled(enabled)
+    suspend fun setKovelyxPerformanceModeEnabled(enabled: Boolean) {
+        playerSettingsDataStore.setKovelyxPerformanceModeEnabled(enabled)
     }
 }

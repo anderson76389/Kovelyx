@@ -41,7 +41,7 @@ import androidx.compose.material.icons.filled.PlaylistAddCheckCircle
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -79,10 +79,10 @@ import com.kovelyx.app.core.build.TrailerPlaybackMode
 import com.kovelyx.app.core.network.NetworkCondition
 import com.kovelyx.app.core.network.NetworkStatusRepository
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
-import com.kovelyx.app.core.ui.NuvioBackButton
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
-import com.kovelyx.app.core.ui.NuvioPosterZoomActionOverlay
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxBackButton
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxPosterZoomActionOverlay
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.core.ui.PosterZoomAnchor
 import com.kovelyx.app.core.ui.PosterZoomAnchorHolder
 import com.kovelyx.app.core.ui.PosterZoomOverlayAction
@@ -455,7 +455,7 @@ fun MetaDetailsScreen(
         ) {
             when {
             displayedMeta == null && uiState.isLoading -> {
-                NuvioLoadingIndicator(
+                KovelyxLoadingIndicator(
                     modifier = Modifier.align(Alignment.Center),
                 )
             }
@@ -559,7 +559,7 @@ fun MetaDetailsScreen(
                                             retry = toggleMembership,
                                             onApplied = ::showTrackingMembershipRewriteFeedback,
                                             onFailure = { error ->
-                                                NuvioToastController.show(
+                                                KovelyxToastController.show(
                                                     error.message ?: trackingListsUpdateFailedMessage,
                                                 )
                                             },
@@ -569,7 +569,7 @@ fun MetaDetailsScreen(
                                     }
                                 },
                                 onFailure = { error ->
-                                    NuvioToastController.show(
+                                    KovelyxToastController.show(
                                         error.message ?: trackingListsUpdateFailedMessage,
                                     )
                                 },
@@ -1611,7 +1611,7 @@ fun MetaDetailsScreen(
         }
 
         if (displayedMeta == null) {
-            NuvioBackButton(
+            KovelyxBackButton(
                 onClick = onBack,
                 modifier = Modifier.padding(
                     start = 12.dp,
@@ -1667,13 +1667,13 @@ fun MetaDetailsScreen(
             val seasonLabel = selectedEpisode.season?.let {
                 stringResource(Res.string.episodes_season, it)
             } ?: stringResource(Res.string.episodes_specials)
-            NuvioPosterZoomActionOverlay(
+            KovelyxPosterZoomActionOverlay(
                 imageUrl = zoomAnchor.imageUrl ?: selectedEpisode.thumbnail ?: meta.background ?: meta.poster,
                 title = selectedEpisode.title,
                 subtitle = localizedSeasonEpisodeCode(selectedEpisode.season, selectedEpisode.episode) ?: seasonLabel,
                 isWatched = isSelectedEpisodeWatched,
                 blurred = metaScreenSettingsUiState.blurUnwatchedEpisodes && !isSelectedEpisodeWatched,
-                depthSurface = NuvioCardDepthSurface.EpisodeCards,
+                depthSurface = KovelyxCardDepthSurface.EpisodeCards,
                 anchor = zoomAnchor,
                 actions = buildList {
                     add(
@@ -1805,7 +1805,7 @@ private fun DetailHeaderOverlay(
     )
 
     if (headerProgress <= 0.05f) {
-        NuvioBackButton(
+        KovelyxBackButton(
             onClick = onBack,
             modifier = Modifier
                 .padding(
