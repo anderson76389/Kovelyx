@@ -151,10 +151,19 @@ class Media3PlaybackSoakTest {
                 val elapsed = SystemClock.elapsedRealtime() - start
                 failure.get()?.let { throw AssertionError("Decoder failure during soak", it) }
                 if (elapsed >= nextPause) {
-                    main { checkNotNull(player).pause(); assertFalse(checkNotNull(player).playWhenReady) }
+                    var pausePosition = 0L
+                    main {
+                        checkNotNull(player).pause()
+                        assertFalse(checkNotNull(player).playWhenReady)
+                        pausePosition = checkNotNull(player).currentPosition
+                    }
                     val pauseStart = SystemClock.elapsedRealtime()
                     val pauseCpu = Process.getElapsedCpuTime()
                     Thread.sleep(5_000)
+                    main {
+                        assertTrue("Playback position advanced while paused",
+                            kotlin.math.abs(checkNotNull(player).currentPosition - pausePosition) <= 250L)
+                    }
                     events.put(JSONObject().put("action", "pause-resume").put("elapsed_ms", elapsed)
                         .put("pause_cpu_percent_one_core", (Process.getElapsedCpuTime() - pauseCpu) * 100.0 /
                             (SystemClock.elapsedRealtime() - pauseStart)))
@@ -165,6 +174,10 @@ class Media3PlaybackSoakTest {
                 if (elapsed >= nextSeek) {
                     main { checkNotNull(player).seekTo(15_000L) }
                     ensurePlaying()
+                    main {
+                        assertTrue("Seek did not reach the requested position",
+                            kotlin.math.abs(checkNotNull(player).currentPosition - 15_000L) <= 5_000L)
+                    }
                     events.put(JSONObject().put("action", "seek-15s").put("elapsed_ms", elapsed))
                     nextSeek += 300_000L
                 }
