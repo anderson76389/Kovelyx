@@ -1,0 +1,88 @@
+{
+  "environment": "One Google TV API 34 emulator, 2 GiB RAM",
+  "workload": "Clean guest mode, cold launch, idle, 32 DPAD events",
+  "limitations": [
+    "No physical-device claim",
+    "No playback or poster-network workload",
+    "Three repetitions; small differences may be noise"
+  ],
+  "samples": [
+    {
+      "label": "baseline",
+      "apk_bytes": 133753569,
+      "cold_launch_ms": 907,
+      "pss_kib": 68079,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 15,
+      "frames": 72,
+      "janky_frames": 54
+    },
+    {
+      "label": "candidate",
+      "apk_bytes": 133668668,
+      "cold_launch_ms": 866,
+      "pss_kib": 67048,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 15,
+      "frames": 72,
+      "janky_frames": 53
+    },
+    {
+      "label": "candidate",
+      "apk_bytes": 133668668,
+      "cold_launch_ms": 829,
+      "pss_kib": 66566,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 14,
+      "frames": 71,
+      "janky_frames": 53
+    },
+    {
+      "label": "baseline",
+      "apk_bytes": 133753569,
+      "cold_launch_ms": 883,
+      "pss_kib": 67807,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 13,
+      "frames": 69,
+      "janky_frames": 63
+    },
+    {
+      "label": "baseline",
+      "apk_bytes": 133753569,
+      "cold_launch_ms": 836,
+      "pss_kib": 66862,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 15,
+      "frames": 70,
+      "janky_frames": 52
+    },
+    {
+      "label": "candidate",
+      "apk_bytes": 133668668,
+      "cold_launch_ms": 889,
+      "pss_kib": 65618,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 15,
+      "frames": 72,
+      "janky_frames": 54
+    }
+  ],
+  "medians": {
+    "baseline": {
+      "apk_bytes": 133753569,
+      "cold_launch_ms": 883,
+      "pss_kib": 67807,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 15
+    },
+    "candidate": {
+      "apk_bytes": 133668668,
+      "cold_launch_ms": 866,
+      "pss_kib": 66566,
+      "idle_cpu_percent": 0,
+      "navigation_cpu_percent": 15
+    }
+  },
+  "regressions": []
+}
