@@ -72,7 +72,7 @@ internal fun watchedItemsForSource(
     ?.let { providerId -> providerItems[providerId].orEmpty() }
     ?: nuvioItems
 
-internal fun shouldAcknowledgeNuvioWatchedPush(
+internal fun shouldAcknowledgeKovelyxWatchedPush(
     source: WatchProgressSource,
     outcome: WatchedPushOutcome,
 ): Boolean = source.providerId == null && outcome.nuvioSyncSucceeded
@@ -416,7 +416,7 @@ object WatchedRepository {
                     resetDeltaState = true,
                 )
             } ?: if (forceSnapshot) {
-                refreshNuvioSnapshot(
+                refreshKovelyxSnapshot(
                     operation = operation,
                     profileId = profileId,
                 )
@@ -434,7 +434,7 @@ object WatchedRepository {
         }
     }
 
-    private suspend fun refreshNuvioSnapshot(
+    private suspend fun refreshKovelyxSnapshot(
         operation: WatchedRefreshOperation,
         profileId: Int,
     ): Boolean {
@@ -1116,7 +1116,7 @@ object WatchedRepository {
                     trackerHistorySync = trackerHistorySync,
                     source = source,
                 )
-                if (shouldAcknowledgeNuvioWatchedPush(source = source, outcome = outcome)) {
+                if (shouldAcknowledgeKovelyxWatchedPush(source = source, outcome = outcome)) {
                     recordSuccessfulPush(
                         profileId = profileId,
                         operationGeneration = operationGeneration,

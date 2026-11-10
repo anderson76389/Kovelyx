@@ -690,17 +690,17 @@ internal fun MainAppContent(
                         DeviceSessionRegistration.registerIfAuthenticated()
                         MemberAccessRepository.refreshIfStale()
                         if (syncProfileId != null) {
-                            SyncManager.startPeriodicNuvioSyncPull(syncProfileId)
+                            SyncManager.startPeriodicKovelyxSyncPull(syncProfileId)
                             SyncManager.requestForegroundPull(syncProfileId)
                         } else {
-                            SyncManager.stopPeriodicNuvioSyncPull()
+                            SyncManager.stopPeriodicKovelyxSyncPull()
                         }
                     }
-                    AppVisibility.Background -> SyncManager.stopPeriodicNuvioSyncPull()
+                    AppVisibility.Background -> SyncManager.stopPeriodicKovelyxSyncPull()
                 }
             }
         } finally {
-            SyncManager.stopPeriodicNuvioSyncPull()
+            SyncManager.stopPeriodicKovelyxSyncPull()
         }
     }
     var resumePromptItem by remember { mutableStateOf<ContinueWatchingItem?>(null) }

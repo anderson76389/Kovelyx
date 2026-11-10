@@ -42,7 +42,7 @@ class AuthSessionNoticeDataStore @Inject constructor(
         }
     }
 
-    suspend fun markNuvioAuthenticated() {
+    suspend fun markKovelyxAuthenticated() {
         context.authSessionNoticeDataStore.edit { preferences ->
             preferences[hadNuvioAuthKey] = true
             preferences[nuvioExplicitLogoutKey] = false
@@ -50,7 +50,7 @@ class AuthSessionNoticeDataStore @Inject constructor(
         }
     }
 
-    suspend fun markNuvioExplicitLogout() {
+    suspend fun markKovelyxExplicitLogout() {
         context.authSessionNoticeDataStore.edit { preferences ->
             preferences[hadNuvioAuthKey] = false
             preferences[nuvioExplicitLogoutKey] = true
@@ -58,7 +58,7 @@ class AuthSessionNoticeDataStore @Inject constructor(
         }
     }
 
-    suspend fun markUnexpectedNuvioLogoutIfNeeded(): Boolean {
+    suspend fun markUnexpectedKovelyxLogoutIfNeeded(): Boolean {
         var marked = false
         context.authSessionNoticeDataStore.edit { preferences ->
             val hadAuth = preferences[hadNuvioAuthKey] == true

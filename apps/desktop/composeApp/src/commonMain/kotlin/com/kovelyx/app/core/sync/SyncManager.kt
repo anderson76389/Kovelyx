@@ -333,7 +333,7 @@ object SyncManager {
             }
         }
         foregroundJob?.cancel()
-        stopPeriodicNuvioSyncPull()
+        stopPeriodicKovelyxSyncPull()
     }
 
     private fun accountScopeSnapshot(): CoroutineScope = synchronized(accountScopeLock) {
@@ -525,11 +525,11 @@ object SyncManager {
         }
     }
 
-    fun startPeriodicNuvioSyncPull(profileId: Int) {
+    fun startPeriodicKovelyxSyncPull(profileId: Int) {
         if (CloudflareAccountClient.enabled) {
             if (periodicNuvioSyncPullJob?.isActive == true &&
                 periodicNuvioSyncProfileId == profileId) return
-            stopPeriodicNuvioSyncPull()
+            stopPeriodicKovelyxSyncPull()
             periodicNuvioSyncProfileId = profileId
             CloudflareDataSync.request(profileId)
             periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
@@ -546,12 +546,12 @@ object SyncManager {
         }
         val authState = AuthRepository.state.value
         if (authState !is AuthState.Authenticated || authState.isAnonymous) {
-            stopPeriodicNuvioSyncPull()
+            stopPeriodicKovelyxSyncPull()
             return
         }
         if (periodicNuvioSyncPullJob?.isActive == true && periodicNuvioSyncProfileId == profileId) return
 
-        stopPeriodicNuvioSyncPull()
+        stopPeriodicKovelyxSyncPull()
         periodicNuvioSyncProfileId = profileId
         periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
             while (isActive) {
@@ -592,7 +592,7 @@ object SyncManager {
         }
     }
 
-    fun stopPeriodicNuvioSyncPull() {
+    fun stopPeriodicKovelyxSyncPull() {
         periodicNuvioSyncPullJob?.cancel()
         periodicNuvioSyncPullJob = null
         periodicNuvioSyncProfileId = null
