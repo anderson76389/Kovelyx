@@ -86,6 +86,56 @@ class VerifiedPreviewTests(unittest.TestCase):
              patch.object(PREVIEW, "api", side_effect=[{"workflow_runs": [run]}, {"jobs": jobs}]):
             self.assertEqual(PREVIEW.recoverable_source("b" * 40), run)
 
+    def test_continuity_gate_selects_latest_complete_stable_release(self):
+        def official(tag, **kwargs):
+            return {"tag_name": tag, "assets": [
+                {"name": f"Kovelyx-Android-{tag}.apk"},
+                {"name": f"Kovelyx-TV-{tag}-universal.apk"},
+            ], **kwargs}
+        releases = [
+            official("v1.1.1078"), official("v1.1.1071"),
+            official("v1.1.1099", draft=True),
+            official("v1.1.1092", prerelease=True),
+            {"tag_name": "v1.1.1094", "assets": [
+                {"name": "Kovelyx-Android-v1.1.1094.apk"}]},
+        ]
+        selected = PREVIEW.previous_signed_public_release(releases, "v1.1.1095")
+        self.assertEqual(selected["tag_name"], "v1.1.1078")
+        with self.assertRaises(RuntimeError):
+            PREVIEW.previous_signed_public_release(releases, "v1.1.1000")
+        with self.assertRaises(RuntimeError):
+            PREVIEW.previous_signed_public_release([], "v1.1.1095")
+
+    def test_previous_signer_gate_accepts_matching_apks_and_rejects_mismatch(self):
+        import hashlib
+        tag = "v1.1.1078"
+        names = [f"Kovelyx-Android-{tag}.apk", f"Kovelyx-TV-{tag}-universal.apk"]
+        release = {"tag_name": tag, "assets": [{"name": n} for n in names]}
+        fingerprint = "Signer #1 certificate SHA-256 digest: " + ("b" * 64)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            def mock_gh(*args):
+                # The *download* routine is substituted by local harmless fixtures.
+                self.assertEqual(args[:2], ("release", "download"))
+                name = args[args.index("--pattern") + 1]
+                self.assertIn(name, names)
+                folder = Path(args[args.index("--dir") + 1])
+                folder.mkdir(exist_ok=True)
+                payload = (name + "-fixture").encode("ascii")
+                (folder / name).write_bytes(payload)
+                (folder / (name + ".sha256")).write_text(
+                    hashlib.sha256(payload).hexdigest() + "  " + name + "\n")
+            with patch.object(PREVIEW, "api", return_value=[release]), \\
+                 patch.object(PREVIEW, "gh", side_effect=mock_gh), \\
+                 patch.object(PREVIEW.subprocess, "check_output", return_value=fingerprint + "\n"):
+                PREVIEW.verify_previous_public_signatures(
+                    root, root, "v1.1.1095", [[fingerprint], [fingerprint]])
+                with tempfile.TemporaryDirectory() as other:
+                    with self.assertRaisesRegex(RuntimeError, "Signature APK modifiée"):
+                        PREVIEW.verify_previous_public_signatures(
+                            Path(other), root, "v1.1.1095",
+                            [[fingerprint], ["Signer #1 certificate SHA-256 digest: " + "c" * 64]])
+
     def test_windows_artifacts_are_mapped_from_commit_to_public_version(self):
         sha = "a" * 40
         self.assertEqual(list(PREVIEW.windows_package_names(sha, "v1.1.748-alpha")), [
