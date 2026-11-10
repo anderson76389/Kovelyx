@@ -52,12 +52,12 @@ import com.kovelyx.app.core.ui.DialogButton
 import com.kovelyx.app.core.ui.DialogButtons
 import com.kovelyx.app.core.ui.DialogButtonStyle
 import com.kovelyx.app.core.ui.DialogSurface
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
-import com.kovelyx.app.core.ui.NuvioSectionLabel
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
+import com.kovelyx.app.core.ui.KovelyxSectionLabel
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 import com.kovelyx.app.core.ui.withDuplicateSafeLazyKeys
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
@@ -80,9 +80,9 @@ fun CollectionManagementScreen(
     var showDeleteConfirm by remember { mutableStateOf<String?>(null) }
     var showCopyError by remember { mutableStateOf(false) }
 
-    NuvioScreen {
+    KovelyxScreen {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.collections_header),
                 onBack = onBack,
             ) {
@@ -108,7 +108,7 @@ fun CollectionManagementScreen(
             }
         }
         item {
-            NuvioSurfaceCard {
+            KovelyxSurfaceCard {
                 Text(
                     text = stringResource(
                         Res.string.collections_count_summary,
@@ -123,7 +123,7 @@ fun CollectionManagementScreen(
 
         if (com.kovelyx.app.core.cloud.CloudflareAccountClient.currentSession != null) {
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     val phase = cloudStatus.takeIf { it.profileId == com.kovelyx.app.features.profiles.ProfileRepository.activeProfileId }?.phase
                     Text(stringResource(when (phase) {
                         com.kovelyx.app.core.cloud.CatalogueSyncPhase.TRANSFERRING -> Res.string.catalogue_sync_transferring
@@ -132,21 +132,21 @@ fun CollectionManagementScreen(
                         else -> Res.string.catalogue_sync_pending
                     }), style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(12.dp))
-                    NuvioPrimaryButton(text = stringResource(Res.string.catalogue_sync_now),
+                    KovelyxPrimaryButton(text = stringResource(Res.string.catalogue_sync_now),
                         onClick = { com.kovelyx.app.core.cloud.CloudflareCatalogueSync.requestSync() })
                 }
             }
         }
 
         item {
-            NuvioPrimaryButton(
+            KovelyxPrimaryButton(
                 text = stringResource(Res.string.collections_new),
                 onClick = { onNavigateToEditor(null) },
             )
         }
 
         if (collections.isNotEmpty()) {
-            item { NuvioSectionLabel(text = stringResource(Res.string.collections_your_collections)) }
+            item { KovelyxSectionLabel(text = stringResource(Res.string.collections_your_collections)) }
         }
 
         if (collections.isNotEmpty()) {
@@ -161,7 +161,7 @@ fun CollectionManagementScreen(
 
         if (collections.isEmpty()) {
             item {
-                NuvioSurfaceCard(
+                KovelyxSurfaceCard(
                     modifier = Modifier.padding(top = 24.dp),
                 ) {
                     Icon(
@@ -214,7 +214,7 @@ fun CollectionManagementScreen(
         )
     }
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.collections_copy_json),
         message = stringResource(Res.string.collections_copy_json_error),
         isVisible = showCopyError,
@@ -224,7 +224,7 @@ fun CollectionManagementScreen(
 
     val deleteId = showDeleteConfirm
     val deleteCollection = deleteId?.let { id -> collections.find { it.id == id } }
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.collections_delete_title),
         message = stringResource(Res.string.collections_delete_message, deleteCollection?.title.orEmpty()),
         isVisible = deleteId != null,
@@ -297,7 +297,7 @@ private fun CollectionListItem(
 ) {
     val hapticFeedback = LocalHapticFeedback.current
 
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

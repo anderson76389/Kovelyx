@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.collection
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -104,34 +104,34 @@ fun GenrePickerContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = NuvioTheme.spacing.xxxl, start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl)
+            .padding(top = KovelyxTheme.spacing.xxxl, start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+            Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)) {
                 Text(
                     text = stringResource(R.string.collections_editor_genre_filter),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
-            NuvioButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
+            KovelyxButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = NuvioTheme.spacing.sm, end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.xxxl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            contentPadding = PaddingValues(start = KovelyxTheme.spacing.sm, end = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.xs, bottom = KovelyxTheme.spacing.xxxl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             var optionIndex = 0
             if (allowAll) {
@@ -174,39 +174,39 @@ fun GenrePickerOptionCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.colors(
-            containerColor = if (selected) NuvioTheme.colors.Secondary.copy(alpha = 0.15f) else NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = if (selected) KovelyxTheme.colors.Secondary.copy(alpha = 0.15f) else KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             border = if (selected) Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Secondary.copy(alpha = 0.5f)),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Secondary.copy(alpha = 0.5f)),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ) else Border.None,
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = CardDefaults.scale(focusedScale = 1.01f)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.lg),
+                .padding(KovelyxTheme.spacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
             if (selected) {
                 Text(
                     text = stringResource(R.string.cd_selected),
                     style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.colors.Secondary
+                    color = KovelyxTheme.colors.Secondary
                 )
             }
         }
@@ -281,7 +281,7 @@ fun EmojiPickerContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = NuvioTheme.spacing.xxxl, start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl)
+            .padding(top = KovelyxTheme.spacing.xxxl, start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -291,16 +291,16 @@ fun EmojiPickerContent(
             Text(
                 text = stringResource(R.string.collections_editor_choose_emoji),
                 style = MaterialTheme.typography.headlineMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
-            NuvioButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
+            KovelyxButton(onClick = onBack) { Text(stringResource(R.string.collections_editor_back)) }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = NuvioTheme.spacing.xxxl),
+            contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.xxxl),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             val firstCategory = emojiCategories.keys.first()
@@ -309,12 +309,12 @@ fun EmojiPickerContent(
                     Text(
                         text = stringResource(emojiCategoryLabel(category)),
                         style = MaterialTheme.typography.titleSmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                     LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xs)
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+                        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xs)
                     ) {
                         items(
                             count = emojis.size,
@@ -326,23 +326,23 @@ fun EmojiPickerContent(
                             Card(
                                 onClick = { onSelect(emoji) },
                                 modifier = (if (isFirstEmoji) Modifier.focusRequester(firstEmojiFocusRequester) else Modifier)
-                                    .width(NuvioTheme.spacing.huge)
-                                    .height(NuvioTheme.spacing.huge),
+                                    .width(KovelyxTheme.spacing.huge)
+                                    .height(KovelyxTheme.spacing.huge),
                                 colors = CardDefaults.colors(
-                                    containerColor = if (isSelected) NuvioTheme.colors.Secondary.copy(alpha = 0.3f) else NuvioTheme.colors.BackgroundCard,
-                                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                                    containerColor = if (isSelected) KovelyxTheme.colors.Secondary.copy(alpha = 0.3f) else KovelyxTheme.colors.BackgroundCard,
+                                    focusedContainerColor = KovelyxTheme.colors.FocusBackground
                                 ),
                                 border = CardDefaults.border(
                                     border = if (isSelected) Border(
-                                        border = BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.Secondary),
-                                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                        border = BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.Secondary),
+                                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                     ) else Border.None,
                                     focusedBorder = Border(
-                                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                     )
                                 ),
-                                shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                                shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                                 scale = CardDefaults.scale(focusedScale = 1.1f)
                             ) {
                                 Box(

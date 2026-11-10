@@ -26,8 +26,8 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.core.trakt.KovelyxTvTraktCredentials
 import com.kovelyx.tv.core.trakt.KovelyxTvMdbListCredentials
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 /** Edition locale des clés Trakt avec le clavier de la TV. */
 @Composable
@@ -40,7 +40,7 @@ internal fun TvTraktCredentialsDialog(
     var clientSecret by remember(context) { mutableStateOf(KovelyxTvTraktCredentials.savedClientSecret(context)) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = "Clés Trakt personnelles",
         subtitle = "Créer une application sur trakt.tv/oauth/applications puis saisir ses identifiants.",
@@ -61,10 +61,10 @@ internal fun TvTraktCredentialsDialog(
             Text(
                 "Ces clés restent enregistrées sur cette télévision. Après modification, reconnectez le compte Trakt.",
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextTertiary,
+                color = KovelyxTheme.colors.TextTertiary,
             )
             if (error != null) {
-                Text(error.orEmpty(), color = NuvioTheme.colors.Error)
+                Text(error.orEmpty(), color = KovelyxTheme.colors.Error)
             }
         }
         SettingsDialogActionRow {
@@ -97,8 +97,8 @@ private fun TvCredentialInput(
             onClick = { focusRequester.requestFocus() },
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated,
+                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundElevated,
             ),
         ) {
             BasicTextField(
@@ -106,12 +106,12 @@ private fun TvCredentialInput(
                 onValueChange = onValueChange,
                 singleLine = true,
                 visualTransformation = if (secret) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary),
-                cursorBrush = SolidColor(NuvioTheme.colors.Primary),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = KovelyxTheme.colors.TextPrimary),
+                cursorBrush = SolidColor(KovelyxTheme.colors.Primary),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester)
-                    .background(NuvioTheme.colors.BackgroundElevated)
+                    .background(KovelyxTheme.colors.BackgroundElevated)
                     .padding(14.dp),
             )
         }
@@ -129,7 +129,7 @@ internal fun TvMdbListCredentialsDialog(
         mutableStateOf(KovelyxTvMdbListCredentials.savedClientId(context))
     }
     var error by remember { mutableStateOf<String?>(null) }
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = "identifiant client OAuth MDBList",
         subtitle = "Créez une application Device Code sur mdblist.com/developer/, puis saisissez son identifiant client. La clé API des notes est différente.",
@@ -143,10 +143,10 @@ internal fun TvMdbListCredentialsDialog(
         Text(
             "Pour la clé API des notes, utilisez plutôt Paramètres > Intégrations > MDBList.",
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextTertiary,
+            color = KovelyxTheme.colors.TextTertiary,
         )
         error?.let {
-            Text(it, color = NuvioTheme.colors.Error)
+            Text(it, color = KovelyxTheme.colors.Error)
         }
         SettingsDialogActionRow {
             SettingsDialogActionButton(text = "Annuler", onClick = onDismiss)

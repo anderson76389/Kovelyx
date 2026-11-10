@@ -17,7 +17,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.MemberTier
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @Composable
 internal fun DebugMemberTierCard(
@@ -31,49 +31,49 @@ internal fun DebugMemberTierCard(
     )
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+        Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)) {
             Text(
                 text = stringResource(R.string.debug_member_tier_title),
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
             Text(
                 text = stringResource(R.string.debug_member_tier_subtitle),
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             options.forEach { (tier, label) ->
                 val selected = tier == selectedTier
-                val shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                val shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                 Card(
                     onClick = { onTierSelected(tier) },
                     modifier = Modifier.weight(1f),
                     colors = CardDefaults.colors(
                         containerColor = if (selected) {
-                            NuvioTheme.colors.Secondary.copy(alpha = 0.2f)
+                            KovelyxTheme.colors.Secondary.copy(alpha = 0.2f)
                         } else {
-                            NuvioTheme.colors.BackgroundCard
+                            KovelyxTheme.colors.BackgroundCard
                         },
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground
                     ),
                     border = CardDefaults.border(
                         border = if (selected) {
                             Border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.hairline),
+                                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.hairline),
                                 shape = shape
                             )
                         } else {
                             Border.None
                         },
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                             shape = shape
                         )
                     ),
@@ -83,10 +83,10 @@ internal fun DebugMemberTierCard(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelLarge,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.lg),
+                            .padding(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.lg),
                         textAlign = TextAlign.Center
                     )
                 }

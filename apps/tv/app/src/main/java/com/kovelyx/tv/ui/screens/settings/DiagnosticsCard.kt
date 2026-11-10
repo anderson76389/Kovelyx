@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -52,13 +52,13 @@ internal fun LazyListScope.diagnosticsCardItems(
                 Text(
                     text = stringResource(R.string.diag_last_playback_title),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.Primary
+                    color = KovelyxTheme.colors.Primary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                 Text(
                     text = stringResource(R.string.diag_no_data),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -210,7 +210,7 @@ internal fun LazyListScope.diagnosticsCardItems(
                 valueColor = when {
                     diagnostics.result.startsWith("Error", ignoreCase = true) -> Color(0xFFF44336)
                     diagnostics.result == "Played" -> Color(0xFF4CAF50)
-                    else -> NuvioTheme.colors.TextPrimary
+                    else -> KovelyxTheme.colors.TextPrimary
                 }
             )
         }
@@ -225,12 +225,12 @@ private fun DiagnosticsSectionCard(
         onClick = { /* read-only */ },
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs, alpha = 0.5f),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs, alpha = 0.5f),
                 shape = RoundedCornerShape(10.dp)
             )
         ),
@@ -240,8 +240,8 @@ private fun DiagnosticsSectionCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.sm),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+                .padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.sm),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
         ) {
             content()
         }
@@ -253,24 +253,24 @@ private fun SectionHeader(label: String, subtitle: String? = null) {
     Text(
         text = label.uppercase(),
         style = MaterialTheme.typography.labelSmall,
-        color = NuvioTheme.colors.Primary
+        color = KovelyxTheme.colors.Primary
     )
     if (subtitle != null) {
         Text(
             text = subtitle,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             fontSize = 11.sp
         )
     }
-    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
 }
 
 @Composable
 private fun DiagnosticRow(
     label: String,
     value: String,
-    valueColor: Color = NuvioTheme.colors.TextPrimary
+    valueColor: Color = KovelyxTheme.colors.TextPrimary
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -279,7 +279,7 @@ private fun DiagnosticRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             modifier = Modifier.width(170.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))

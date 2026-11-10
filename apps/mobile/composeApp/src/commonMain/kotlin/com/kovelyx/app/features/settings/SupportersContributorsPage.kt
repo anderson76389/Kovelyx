@@ -26,7 +26,7 @@ import com.kovelyx.app.core.ui.DialogButton
 import com.kovelyx.app.core.ui.DialogButtons
 import com.kovelyx.app.core.ui.DialogButtonStyle
 import com.kovelyx.app.core.ui.DialogSurface
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -51,9 +51,9 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.build.AppFeaturePolicy
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 import com.kovelyx.app.features.addons.httpRequestRaw
 import com.kovelyx.app.features.membership.MembershipOverviewRepository
 import kotlinx.coroutines.launch
@@ -267,11 +267,11 @@ private object SupportersContributorsRepository {
 fun SupportersContributorsSettingsScreen(
     onBack: () -> Unit,
 ) {
-    NuvioScreen(
+    KovelyxScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.compose_settings_page_supporters_contributors),
                 onBack = onBack,
             )
@@ -397,7 +397,7 @@ private fun SupportersContributorsBody(
         )
 
         if (AppFeaturePolicy.donationProgressEnabled) {
-            NuvioSurfaceCard {
+            KovelyxSurfaceCard {
                 if (donationsConfigured) {
                     DonationProgressSection(
                         progress = uiState.donationProgress,
@@ -414,7 +414,7 @@ private fun SupportersContributorsBody(
             }
         }
 
-        NuvioSurfaceCard {
+        KovelyxSurfaceCard {
             CommunityTabRow(
                 selectedTab = uiState.selectedTab,
                 onSelectTab = { tab -> uiState = uiState.copy(selectedTab = tab) },
@@ -566,7 +566,7 @@ private fun ContributorsCard(
     onRetry: () -> Unit,
     onContributorClick: (CommunityContributor) -> Unit,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         when {
             isLoading -> LoadingState(label = stringResource(Res.string.community_loading_contributors))
             errorMessage != null -> ErrorState(
@@ -604,7 +604,7 @@ private fun SupportersCard(
     onRetry: () -> Unit,
     onSupporterClick: (CommunitySupporter) -> Unit,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         when {
             isLoading -> LoadingState(label = stringResource(Res.string.community_loading_supporters))
             errorMessage != null -> ErrorState(
@@ -840,7 +840,7 @@ private fun LoadingState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        NuvioLoadingIndicator()
+        KovelyxLoadingIndicator()
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,

@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.content.Context
 import android.view.KeyEvent
@@ -81,7 +81,7 @@ import com.kovelyx.tv.domain.model.DebridStreamSortCriterion
 import com.kovelyx.tv.domain.model.DebridStreamSortDirection
 import com.kovelyx.tv.domain.model.DebridStreamSortKey
 import com.kovelyx.tv.domain.model.DebridStreamVisualTag
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.addon.QrCodeOverlay
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -137,7 +137,7 @@ fun DebridSettingsContent(
                 LazyColumn(
                     state = state,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = NuvioTheme.spacing.sm),
+                    contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.sm),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item(key = "debrid_notice") {
@@ -151,7 +151,7 @@ fun DebridSettingsContent(
                             checked = uiState.canUseCloudLibrary,
                             onToggle = { viewModel.setCloudLibraryEnabled(!uiState.cloudLibraryEnabled) },
                             modifier = Modifier
-                                .padding(top = NuvioTheme.spacing.xxs)
+                                .padding(top = KovelyxTheme.spacing.xxs)
                                 .then(
                                     if (initialFocusRequester != null && entryOnCloudLibrary) {
                                         Modifier.focusRequester(initialFocusRequester)
@@ -724,10 +724,10 @@ private fun DebridInfoText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = NuvioTheme.colors.TextSecondary,
+        color = KovelyxTheme.colors.TextSecondary,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.sm)
+            .padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.sm)
     )
 }
 
@@ -904,7 +904,7 @@ private fun DebridTextListDialog(
         inputFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = stringResource(R.string.debrid_stream_release_groups_input_subtitle),
@@ -915,8 +915,8 @@ private fun DebridTextListDialog(
             onClick = { inputFocusRequester.requestFocus() },
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
             ),
             shape = CardDefaults.shape(RoundedCornerShape(10.dp)),
             scale = CardDefaults.scale(focusedScale = 1f)
@@ -942,9 +942,9 @@ private fun DebridTextListDialog(
                         },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { submit() }),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
-                    cursorBrush = SolidColor(NuvioTheme.colors.Primary)
+                    cursorBrush = SolidColor(KovelyxTheme.colors.Primary)
                 )
             }
         }
@@ -1303,7 +1303,7 @@ private fun DebridDeviceAuthDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(
             if (isConnected) R.string.debrid_disconnect_provider else R.string.debrid_connect_provider,
@@ -1317,21 +1317,21 @@ private fun DebridDeviceAuthDialog(
             Text(
                 text = stringResource(R.string.debrid_device_auth_connected, provider.displayName),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
         } else if (isStarting) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md, Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 LoadingIndicator(modifier = Modifier.size(18.dp))
                 Text(
                     text = startingMessage,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         } else {
@@ -1342,7 +1342,7 @@ private fun DebridDeviceAuthDialog(
                 Text(
                     text = stringResource(R.string.debrid_device_auth_instructions),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1365,19 +1365,19 @@ private fun DebridDeviceAuthDialog(
             statusMessage?.let { message ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm, Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (isPolling) {
-                        LoadingIndicator(modifier = Modifier.size(NuvioTheme.spacing.lg))
+                        LoadingIndicator(modifier = Modifier.size(KovelyxTheme.spacing.lg))
                     }
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodySmall,
                         color = if (message == failedMessage || message == expiredMessage || message == missingConfigurationMessage) {
-                            NuvioTheme.colors.Error
+                            KovelyxTheme.colors.Error
                         } else {
-                            NuvioTheme.colors.TextSecondary
+                            KovelyxTheme.colors.TextSecondary
                         },
                         textAlign = TextAlign.Center
                     )
@@ -1419,19 +1419,19 @@ private fun DebridDeviceAuthCodes(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         Text(
             text = userCode,
             style = MaterialTheme.typography.headlineSmall,
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center
         )
         Text(
             text = verificationUrl,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextTertiary,
+            color = KovelyxTheme.colors.TextTertiary,
             textAlign = TextAlign.Center
         )
     }
@@ -1493,7 +1493,7 @@ private fun DebridApiKeyDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = subtitle,
@@ -1506,23 +1506,23 @@ private fun DebridApiKeyDialog(
                 .fillMaxWidth()
                 .onFocusChanged { isInputFocused = it.isFocused || it.hasFocus },
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
             ),
             border = CardDefaults.border(
                 border = Border(
-                    border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                    border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                     shape = RoundedCornerShape(10.dp)
                 ),
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = RoundedCornerShape(10.dp)
                 )
             ),
             shape = CardDefaults.shape(RoundedCornerShape(10.dp)),
             scale = CardDefaults.scale(focusedScale = 1f)
         ) {
-            Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.md)) {
+            Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.md)) {
                 BasicTextField(
                     value = value,
                     onValueChange = { value = it },
@@ -1548,17 +1548,17 @@ private fun DebridApiKeyDialog(
                     keyboardActions = KeyboardActions(
                         onDone = { submit() }
                     ),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = NuvioTheme.colors.TextPrimary,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content),
                     cursorBrush = SolidColor(
-                        if (isInputFocused) NuvioTheme.colors.Primary else Color.Transparent
+                        if (isInputFocused) KovelyxTheme.colors.Primary else Color.Transparent
                     ),
                     decorationBox = { innerTextField ->
                         if (value.isBlank()) {
                             Text(
                                 text = placeholder,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = NuvioTheme.colors.TextTertiary
+                                color = KovelyxTheme.colors.TextTertiary
                             )
                         }
                         innerTextField()

@@ -1,0 +1,49 @@
+name: Appliquer le nettoyage des noms internes Kovelyx
+on:
+  push:
+    branches: [cleanup/legacy-owned-names-20261110]
+    paths:
+      - scripts/migrations/rename_owned_ui_symbols.py
+      - scripts/migrations/clean_retired_provider_profiles.py
+      - .github/workflows/prepare-owned-name-cleanup.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: kovelyx-owned-name-cleanup
+  cancel-in-progress: false
+jobs:
+  apply:
+    if: github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/cleanup/legacy-owned-names-20261110'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Renommer les composants applicatifs et retirer les règles de fournisseurs obsolètes
+        run: |
+          set -euo pipefail
+          python3 scripts/migrations/rename_owned_ui_symbols.py --apply
+          python3 scripts/migrations/clean_retired_provider_profiles.py
+          git add -A apps/
+          python3 scripts/migrations/rename_owned_ui_symbols.py > /tmp/kovelyx-cleanup-idempotence.json
+          python3 - <<'PY'
+          import json
+          result=json.load(open('/tmp/kovelyx-cleanup-idempotence.json'))
+          assert result['changed_files'] == 0, result
+          PY
+      - name: Vérifier identités, SDK retirés, interface et lecteurs natifs
+        run: |
+          set -euo pipefail
+          python3 scripts/tests/test_kovelyx_namespace_renames.py
+          python3 scripts/tests/audit-retired-provider-residuals.py --strict
+          python3 scripts/tests/test_private_logging_boundaries.py
+          python3 scripts/tests/test_cloudflare_legacy_boundaries.py
+          python3 scripts/tests/test_native_player_jni_names.py
+          python3 scripts/tests/verify-upstream-independence.py
+      - name: Publier la révision à compiler et tester dans la pull request
+        run: |
+          set -euo pipefail
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'Kovelyx cleanup'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'refactor: rename owned UI symbols and remove retired SDK optimization hints'
+          git push origin HEAD:refs/heads/cleanup/legacy-owned-names-20261110

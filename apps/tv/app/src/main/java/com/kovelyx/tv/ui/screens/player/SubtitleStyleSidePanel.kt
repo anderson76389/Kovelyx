@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.background
 import androidx.compose.ui.draw.alpha
@@ -72,7 +72,7 @@ private val PANEL_OUTLINE_COLORS = listOf(
 
 private val StyleCardWidth = 220.dp
 private val StyleCardHeight = 102.dp
-private val StyleCardGap = NuvioTheme.spacing.md
+private val StyleCardGap = KovelyxTheme.spacing.md
 private val StyleGridWidth = (StyleCardWidth * 3) + (StyleCardGap * 2)
 
 @Composable
@@ -107,7 +107,7 @@ internal fun SubtitleStyleSidePanel(
             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
             .background(Color(0xFF101010))
             .then(if (isStyleDisabledByLibass) Modifier.focusProperties { canFocus = false } else Modifier)
-            .padding(start = NuvioTheme.spacing.lg, end = NuvioTheme.spacing.lg, top = 22.dp, bottom = 10.dp)
+            .padding(start = KovelyxTheme.spacing.lg, end = KovelyxTheme.spacing.lg, top = 22.dp, bottom = 10.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -135,7 +135,7 @@ internal fun SubtitleStyleSidePanel(
             horizontalArrangement = Arrangement.spacedBy(StyleCardGap, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.Top
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+            Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
                 SubtitleStyleSection(
                     title = stringResource(R.string.subtitle_style_font_size),
                     modifier = Modifier
@@ -170,7 +170,7 @@ internal fun SubtitleStyleSidePanel(
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+            Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
                 SubtitleStyleSection(
                     title = stringResource(R.string.subtitle_style_text_color),
                     centerContent = false,
@@ -181,9 +181,9 @@ internal fun SubtitleStyleSidePanel(
                     val currentAlphaPercent = (Color(subtitleStyle.textColor).alpha * 100f).roundToInt().coerceIn(0, 100)
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                     ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
                             PANEL_TEXT_COLORS.forEach { color ->
                                 SubtitleStyleColorChip(
                                     color = color,
@@ -196,7 +196,7 @@ internal fun SubtitleStyleSidePanel(
                             }
                         }
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             SubtitleStyleStepperButton(
@@ -239,7 +239,7 @@ internal fun SubtitleStyleSidePanel(
                                 color = Color.White.copy(alpha = 0.7f)
                             )
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
                             PANEL_OUTLINE_COLORS.forEach { color ->
                                 SubtitleStyleColorChip(
                                     color = color.copy(alpha = if (subtitleStyle.outlineEnabled) 1f else 0.35f),
@@ -257,7 +257,7 @@ internal fun SubtitleStyleSidePanel(
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+            Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
                 SubtitleStyleSection(
                     title = stringResource(R.string.subtitle_style_bottom_offset),
                     modifier = Modifier
@@ -288,13 +288,13 @@ internal fun SubtitleStyleSidePanel(
                             containerColor = Color.White.copy(alpha = 0.1f),
                             focusedContainerColor = Color.White.copy(alpha = 0.2f)
                         ),
-                        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                     ) {
                         Text(
                             text = stringResource(R.string.subtitle_style_reset),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.8f),
-                            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg, vertical = 10.dp)
+                            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg, vertical = 10.dp)
                         )
                     }
                 }
@@ -314,7 +314,7 @@ private fun SubtitleStyleSection(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.06f))
-            .padding(NuvioTheme.spacing.md)
+            .padding(KovelyxTheme.spacing.md)
     ) {
         Column(
             modifier = Modifier.align(Alignment.TopStart)
@@ -358,7 +358,7 @@ private fun SubtitleStyleSettingRow(
             )
         }
         Row(
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             content()
@@ -374,7 +374,7 @@ private fun SubtitleStyleStepperButton(
 ) {
     IconButton(
         onClick = onClick,
-        modifier = modifier.size(NuvioTheme.spacing.xxl),
+        modifier = modifier.size(KovelyxTheme.spacing.xxl),
         colors = IconButtonDefaults.colors(
             containerColor = Color.White.copy(alpha = 0.16f),
             focusedContainerColor = Color.White.copy(alpha = 0.28f),
@@ -383,7 +383,7 @@ private fun SubtitleStyleStepperButton(
         ),
         shape = IconButtonDefaults.shape(shape = RoundedCornerShape(10.dp))
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(NuvioTheme.spacing.lg))
+        Icon(icon, contentDescription = null, modifier = Modifier.size(KovelyxTheme.spacing.lg))
     }
 }
 
@@ -417,8 +417,8 @@ private fun SubtitleStyleColorChip(
     var isFocused by remember { mutableStateOf(false) }
 
     val borderModifier = when {
-        isFocused -> Modifier.border(NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs), CircleShape)
-        isSelected -> Modifier.border(NuvioTheme.spacing.xxs, Color.White, CircleShape)
+        isFocused -> Modifier.border(KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs), CircleShape)
+        isSelected -> Modifier.border(KovelyxTheme.spacing.xxs, Color.White, CircleShape)
         else -> Modifier
     }
 
@@ -459,7 +459,7 @@ private fun SubtitleStyleToggleButton(
             text = if (isEnabled) stringResource(R.string.subtitle_style_on) else stringResource(R.string.subtitle_style_off),
             style = MaterialTheme.typography.bodySmall,
             color = if (isEnabled) Color.White else Color.White.copy(alpha = 0.55f),
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.md, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.md, vertical = 6.dp)
         )
     }
 }

@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.search
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.screens.home.HeroBackdropState
 
 import android.view.KeyEvent as AndroidKeyEvent
@@ -133,18 +133,18 @@ internal fun DiscoverSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTheme.spacing.xxxl),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            .padding(horizontal = KovelyxTheme.spacing.xxxl),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         Text(
             text = stringResource(R.string.discover_title),
             style = MaterialTheme.typography.headlineMedium,
-            color = if (showBuiltInHeader) NuvioTheme.colors.TextPrimary else Color.Transparent
+            color = if (showBuiltInHeader) KovelyxTheme.colors.TextPrimary else Color.Transparent
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             DiscoverDropdownPicker(
                 modifier = Modifier.weight(1f)
@@ -218,7 +218,7 @@ internal fun DiscoverSection(
             Text(
                 text = metadataSegments.joinToString(" • "),
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
         }
 
@@ -345,16 +345,16 @@ private fun DiscoverDropdownPicker(
                 ),
             shape = CardDefaults.shape(shape = RoundedCornerShape(14.dp)),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.FocusBackground
             ),
             border = CardDefaults.border(
                 border = Border(
-                    border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                    border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                     shape = RoundedCornerShape(14.dp)
                 ),
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = RoundedCornerShape(14.dp)
                 )
             ),
@@ -367,12 +367,12 @@ private fun DiscoverDropdownPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -384,7 +384,7 @@ private fun DiscoverDropdownPicker(
                         style = MaterialTheme.typography.titleMedium.copy(
                             textDirection = value.contentTextDirection()
                         ),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -392,7 +392,7 @@ private fun DiscoverDropdownPicker(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = if (expanded) stringResource(R.string.cd_collapse, title) else stringResource(R.string.cd_expand, title),
                         modifier = Modifier.size(20.dp),
-                        tint = if (isFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.TextSecondary
+                        tint = if (isFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -408,22 +408,22 @@ private fun DiscoverDropdownPicker(
                 .width(with(LocalDensity.current) { anchorSize.width.toDp() })
                 .heightIn(max = 320.dp),
             shape = RoundedCornerShape(14.dp),
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            tonalElevation = NuvioTheme.spacing.none,
-            shadowElevation = NuvioTheme.spacing.sm,
-            border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border)
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            tonalElevation = KovelyxTheme.spacing.none,
+            shadowElevation = KovelyxTheme.spacing.sm,
+            border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border)
         ) {
             options.forEach { option ->
                 val isSelected = option.value == selectedValue
                 val isOptionFocused = option.value == focusedOptionValue
                 val itemTextColor = when {
-                    isOptionFocused -> NuvioTheme.colors.OnSecondary
-                    isSelected -> NuvioTheme.colors.TextPrimary
-                    else -> NuvioTheme.colors.TextPrimary
+                    isOptionFocused -> KovelyxTheme.colors.OnSecondary
+                    isSelected -> KovelyxTheme.colors.TextPrimary
+                    else -> KovelyxTheme.colors.TextPrimary
                 }
                 val itemBackgroundColor = when {
-                    isOptionFocused -> NuvioTheme.colors.Secondary
-                    isSelected -> NuvioTheme.colors.FocusBackground
+                    isOptionFocused -> KovelyxTheme.colors.Secondary
+                    isSelected -> KovelyxTheme.colors.FocusBackground
                     else -> Color.Transparent
                 }
 
@@ -438,7 +438,7 @@ private fun DiscoverDropdownPicker(
                                 Modifier
                             }
                         )
-                        .padding(horizontal = 6.dp, vertical = NuvioTheme.spacing.xxs)
+                        .padding(horizontal = 6.dp, vertical = KovelyxTheme.spacing.xxs)
                         .background(
                             color = itemBackgroundColor,
                             shape = RoundedCornerShape(10.dp)
@@ -465,7 +465,7 @@ private fun DiscoverDropdownPicker(
                     onClick = { onSelect(option) },
                     colors = MenuDefaults.itemColors(
                         textColor = itemTextColor,
-                        disabledTextColor = NuvioTheme.colors.TextDisabled
+                        disabledTextColor = KovelyxTheme.colors.TextDisabled
                     )
                 )
             }
@@ -651,9 +651,9 @@ internal fun DiscoverGrid(
                     }
                 }
             ),
-        contentPadding = PaddingValues(bottom = NuvioTheme.spacing.xxl),
+        contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.xxl),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
     ) {
         itemsIndexed(
             items = items,
@@ -774,12 +774,12 @@ private fun DiscoverActionCard(
                 ),
             shape = CardDefaults.shape(shape = cardShape),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.FocusBackground
             ),
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
+                    border = KovelyxTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                     shape = cardShape
                 )
             ),
@@ -802,7 +802,7 @@ private fun DiscoverActionCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -812,7 +812,7 @@ private fun DiscoverActionCard(
         Spacer(
             modifier = Modifier
                 .then(if (globalLandscape) Modifier.fillMaxWidth() else Modifier.width(posterCardStyle.width))
-                .padding(top = NuvioTheme.spacing.sm)
+                .padding(top = KovelyxTheme.spacing.sm)
                 .height(MaterialTheme.typography.titleMedium.lineHeight.value.dp)
         )
     }

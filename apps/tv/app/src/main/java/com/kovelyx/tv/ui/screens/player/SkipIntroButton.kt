@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -194,41 +194,41 @@ fun SkipIntroButton(
                 },
             colors = CardDefaults.colors(
                 containerColor = Color(0xFF1E1E1E).copy(alpha = 0.85f),
-                focusedContainerColor = NuvioTheme.colors.Secondary
+                focusedContainerColor = KovelyxTheme.colors.Secondary
             ),
-            shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md))
+            shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md))
         ) {
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier.width(IntrinsicSize.Max)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.md),
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.SkipNext,
                         contentDescription = null,
-                        tint = if (isFocused) NuvioTheme.colors.OnSecondary else Color.White,
+                        tint = if (isFocused) KovelyxTheme.colors.OnSecondary else Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = getSkipLabel(lastType, targetsPostCredits),
-                        color = if (isFocused) NuvioTheme.colors.OnSecondary else Color.White,
+                        color = if (isFocused) KovelyxTheme.colors.OnSecondary else Color.White,
                         fontSize = 14.sp,
-                        modifier = Modifier.padding(start = NuvioTheme.spacing.sm)
+                        modifier = Modifier.padding(start = KovelyxTheme.spacing.sm)
                     )
                 }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(NuvioTheme.spacing.xs)
-                        .clip(RoundedCornerShape(bottomStart = NuvioTheme.spacing.md, bottomEnd = NuvioTheme.spacing.md))
+                        .height(KovelyxTheme.spacing.xs)
+                        .clip(RoundedCornerShape(bottomStart = KovelyxTheme.spacing.md, bottomEnd = KovelyxTheme.spacing.md))
                         .background(Color.White.copy(alpha = if (controlsVisible || autoHidden || dismissed) 0f else 0.15f))
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(progress.value)
-                            .height(NuvioTheme.spacing.xs)
+                            .height(KovelyxTheme.spacing.xs)
                             .background(Color(0xFF1E1E1E).copy(alpha = if (controlsVisible || autoHidden || dismissed) 0f else 0.85f))
                     )
                 }

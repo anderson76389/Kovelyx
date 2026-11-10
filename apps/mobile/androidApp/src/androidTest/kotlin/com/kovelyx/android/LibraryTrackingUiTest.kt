@@ -15,7 +15,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.core.ui.TrackingListPickerDialog
 import com.kovelyx.app.features.library.LibraryListDialogMode
 import com.kovelyx.app.features.library.LibraryListDialogState
@@ -54,7 +54,7 @@ class LibraryTrackingUiTest {
         val controller = LibraryListManagementController({ context }, { manager })
         controller.open()
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 val state by controller.state.collectAsState()
                 state?.let {
                     LibraryListManagementDialog(it, listOf(movies), capabilities, controller::create, controller::edit,
@@ -93,7 +93,7 @@ class LibraryTrackingUiTest {
     @Test
     fun pendingMutationDisablesEditorAndShowsTvStatusCopy() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 LibraryListManagementDialog(LibraryListDialogState(context, 1, LibraryListDialogMode.EDIT, name = "Weekend", isPending = true),
                     emptyList(), capabilities, {}, {}, {}, {}, {}, {}, {}, {}, {})
             }
@@ -111,7 +111,7 @@ class LibraryTrackingUiTest {
         var saved = false
         val tabs = listOf(movies, movies.copy(key = "trakt:list:42", providerId = TrackingProviderId.TRAKT))
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 TrackingListPickerDialog(true, "Save to lists", tabs, membership.value, false, null,
                     { key -> membership.value = membership.value + (key to (membership.value[key] != true)) }, { saved = true }, {})
             }
@@ -128,7 +128,7 @@ class LibraryTrackingUiTest {
     @Test
     fun errorKeepsEditorAvailableWithoutExposingBackendText() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 LibraryListManagementDialog(LibraryListDialogState(context, 1, LibraryListDialogMode.EDIT,
                     name = "Weekend", error = IllegalStateException("internal backend body")),
                     emptyList(), capabilities, {}, {}, {}, {}, {}, {}, {}, {}, {})

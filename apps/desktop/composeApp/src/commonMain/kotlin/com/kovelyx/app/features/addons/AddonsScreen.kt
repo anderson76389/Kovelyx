@@ -49,17 +49,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.build.AppFeaturePolicy
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioIconActionButton
-import com.kovelyx.app.core.ui.NuvioInfoBadge
-import com.kovelyx.app.core.ui.NuvioInputField
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
-import com.kovelyx.app.core.ui.NuvioSectionLabel
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxIconActionButton
+import com.kovelyx.app.core.ui.KovelyxInfoBadge
+import com.kovelyx.app.core.ui.KovelyxInputField
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
+import com.kovelyx.app.core.ui.KovelyxSectionLabel
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxToastController
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
@@ -70,9 +70,9 @@ fun AddonsScreen(
     title: String? = null,
     onBack: (() -> Unit)? = null,
 ) {
-    NuvioScreen(modifier = modifier) {
+    KovelyxScreen(modifier = modifier) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = title ?: stringResource(Res.string.addon_title),
                 onBack = onBack,
             ) {
@@ -193,7 +193,7 @@ internal fun AddonsSettingsPageContent(
 
     val pendingDeletionUrl = addonPendingDeletionUrl
     if (pendingDeletionUrl != null) {
-        NuvioStatusModal(
+        KovelyxStatusModal(
             title = stringResource(Res.string.addons_delete_confirm_title),
             message = stringResource(Res.string.action_delete_confirm_message),
             isVisible = true,
@@ -228,7 +228,7 @@ internal fun AddonsSettingsPageContent(
             is AddonInstallModalState.Success -> stringResource(Res.string.action_done)
             is AddonInstallModalState.Error -> stringResource(Res.string.action_close)
         }
-        NuvioStatusModal(
+        KovelyxStatusModal(
             title = modalTitle,
             message = modalMessage,
             isVisible = true,
@@ -245,12 +245,12 @@ internal fun AddonsSettingsPageContent(
 
 @Composable
 private fun SectionHeader(text: String) {
-    NuvioSectionLabel(text = text)
+    KovelyxSectionLabel(text = text)
 }
 
 @Composable
 private fun OverviewCard(overview: AddonOverview) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -318,8 +318,8 @@ private fun AddAddonCard(
     onAddonUrlChange: (String) -> Unit,
     onAddClick: () -> Unit,
 ) {
-    NuvioSurfaceCard {
-        NuvioInputField(
+    KovelyxSurfaceCard {
+        KovelyxInputField(
             value = addonUrl,
             onValueChange = onAddonUrlChange,
             placeholder = stringResource(
@@ -331,7 +331,7 @@ private fun AddAddonCard(
             ),
         )
         Spacer(modifier = Modifier.height(18.dp))
-        NuvioPrimaryButton(
+        KovelyxPrimaryButton(
             text = stringResource(
                 if (usePersonalMediaCopy) {
                     Res.string.addons_appstore_install_button
@@ -385,7 +385,7 @@ private sealed interface AddonInstallModalState {
 private fun EmptyStateCard(
     usePersonalMediaCopy: Boolean,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Text(
             text = stringResource(
                 if (usePersonalMediaCopy) {
@@ -426,7 +426,7 @@ private fun InstalledAddonCard(
     val clipboard = LocalClipboardManager.current
     val copiedMessage = stringResource(Res.string.addons_link_copied)
 
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Top,
@@ -475,7 +475,7 @@ private fun InstalledAddonCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             onMoveUpClick?.let { onMoveUp ->
-                NuvioIconActionButton(
+                KovelyxIconActionButton(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Rounded.ArrowUpward,
                     contentDescription = stringResource(Res.string.addons_move_up),
@@ -484,7 +484,7 @@ private fun InstalledAddonCard(
                 )
             }
             onMoveDownClick?.let { onMoveDown ->
-                NuvioIconActionButton(
+                KovelyxIconActionButton(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Rounded.ArrowDownward,
                     contentDescription = stringResource(Res.string.addons_move_down),
@@ -492,7 +492,7 @@ private fun InstalledAddonCard(
                     onClick = onMoveDown,
                 )
             }
-            NuvioIconActionButton(
+            KovelyxIconActionButton(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.Refresh,
                 contentDescription = stringResource(Res.string.addons_refresh),
@@ -500,7 +500,7 @@ private fun InstalledAddonCard(
                 onClick = onRefreshClick,
             )
             onConfigureClick?.let { onConfigure ->
-                NuvioIconActionButton(
+                KovelyxIconActionButton(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Rounded.Settings,
                     contentDescription = stringResource(Res.string.addons_configure),
@@ -508,17 +508,17 @@ private fun InstalledAddonCard(
                     onClick = onConfigure,
                 )
             }
-            NuvioIconActionButton(
+            KovelyxIconActionButton(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.ContentCopy,
                 contentDescription = stringResource(Res.string.addons_copy_link),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = {
                     clipboard.setText(AnnotatedString(addon.manifestUrl))
-                    NuvioToastController.show(copiedMessage)
+                    KovelyxToastController.show(copiedMessage)
                 },
             )
-            NuvioIconActionButton(
+            KovelyxIconActionButton(
                 modifier = Modifier.weight(1f),
                 icon = Icons.Rounded.Delete,
                 contentDescription = stringResource(Res.string.addons_delete),
@@ -536,7 +536,7 @@ private fun InstalledAddonCard(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            NuvioInfoBadge(
+            KovelyxInfoBadge(
                 text = when {
                     !addon.enabled -> stringResource(Res.string.addons_badge_disabled)
                     addon.isRefreshing -> stringResource(Res.string.addons_badge_refreshing)
@@ -545,10 +545,10 @@ private fun InstalledAddonCard(
                 },
             )
             manifest?.let {
-                NuvioInfoBadge(text = stringResource(Res.string.addons_badge_resources, it.resources.size))
-                NuvioInfoBadge(text = stringResource(Res.string.addons_badge_catalogs, it.catalogs.size))
+                KovelyxInfoBadge(text = stringResource(Res.string.addons_badge_resources, it.resources.size))
+                KovelyxInfoBadge(text = stringResource(Res.string.addons_badge_catalogs, it.catalogs.size))
                 if (it.behaviorHints.configurable) {
-                    NuvioInfoBadge(text = stringResource(Res.string.addons_badge_configurable))
+                    KovelyxInfoBadge(text = stringResource(Res.string.addons_badge_configurable))
                 }
             }
         }

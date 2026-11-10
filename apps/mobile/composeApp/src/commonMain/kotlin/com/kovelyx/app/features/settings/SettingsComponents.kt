@@ -49,10 +49,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTokens
-import com.kovelyx.app.core.ui.NuvioActionLabel
-import com.kovelyx.app.core.ui.NuvioBackButton
-import com.kovelyx.app.core.ui.NuvioSectionLabel
+import com.kovelyx.app.core.ui.KovelyxTokens
+import com.kovelyx.app.core.ui.KovelyxActionLabel
+import com.kovelyx.app.core.ui.KovelyxBackButton
+import com.kovelyx.app.core.ui.KovelyxSectionLabel
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.nuvioConsumePointerEvents
 import com.kovelyx.app.features.home.HomeCatalogSettingsItem
@@ -79,7 +79,7 @@ private fun SettingsCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = tokens.colors.surface,
-        shape = if (isTablet) RoundedCornerShape(NuvioTokens.Radius.xl) else tokens.shapes.compactCard,
+        shape = if (isTablet) RoundedCornerShape(KovelyxTokens.Radius.xl) else tokens.shapes.compactCard,
         border = BorderStroke(
             tokens.borders.hairline,
             tokens.colors.borderSubtle,
@@ -107,7 +107,7 @@ internal fun SettingsGroup(
 internal fun SettingsGroupDivider(isTablet: Boolean) {
     val tokens = MaterialTheme.nuvio
     HorizontalDivider(
-        modifier = Modifier.padding(start = if (isTablet) NuvioTokens.Space.s80 - NuvioTokens.Space.s2 else NuvioTokens.Space.s64 + NuvioTokens.Space.s2),
+        modifier = Modifier.padding(start = if (isTablet) KovelyxTokens.Space.s80 - KovelyxTokens.Space.s2 else KovelyxTokens.Space.s64 + KovelyxTokens.Space.s2),
         thickness = tokens.borders.hairline,
         color = tokens.colors.borderSubtle,
     )
@@ -134,14 +134,14 @@ internal fun TabletPageHeader(
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.listGap),
         ) {
             if (showBack) {
-                NuvioBackButton(
+                KovelyxBackButton(
                     onClick = onBack,
                     modifier = Modifier
                         .size(36.dp),
                     shape = tokens.shapes.compactCard,
                     containerColor = tokens.colors.surface,
                     contentColor = tokens.colors.textPrimary,
-                    buttonSize = NuvioTokens.Space.s36,
+                    buttonSize = KovelyxTokens.Space.s36,
                     iconSize = tokens.icons.md,
                 )
             }
@@ -171,8 +171,8 @@ internal fun SettingsSidebarItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = tokens.spacing.listGap, vertical = NuvioTokens.Space.s2)
-            .background(background, RoundedCornerShape(NuvioTokens.Space.s10))
+            .padding(horizontal = tokens.spacing.listGap, vertical = KovelyxTokens.Space.s2)
+            .background(background, RoundedCornerShape(KovelyxTokens.Space.s10))
             .clickable(onClick = onClick)
             .padding(horizontal = tokens.spacing.screenHorizontal, vertical = tokens.spacing.listGap),
         verticalAlignment = Alignment.CenterVertically,
@@ -180,7 +180,7 @@ internal fun SettingsSidebarItem(
         Surface(
             modifier = Modifier.size(tokens.icons.xl),
             color = iconChip,
-            shape = RoundedCornerShape(NuvioTokens.Radius.md),
+            shape = RoundedCornerShape(KovelyxTokens.Radius.md),
         ) {
             Row(
                 modifier = Modifier.fillMaxSize(),
@@ -218,14 +218,14 @@ internal fun SettingsSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            NuvioSectionLabel(text = title)
+            KovelyxSectionLabel(text = title)
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
                 content = actions,
             )
         }
-        Spacer(modifier = Modifier.height(if (isTablet) tokens.spacing.listGap else NuvioTokens.Space.s10))
+        Spacer(modifier = Modifier.height(if (isTablet) tokens.spacing.listGap else KovelyxTokens.Space.s10))
         content()
     }
 }
@@ -251,7 +251,7 @@ internal fun SettingsNavigationRow(
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = horizontalPadding, vertical = verticalPadding)
-            .alpha(if (enabled) NuvioTokens.Opacity.visible else tokens.opacity.medium),
+            .alpha(if (enabled) KovelyxTokens.Opacity.visible else tokens.opacity.medium),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -339,7 +339,7 @@ internal fun SettingsSwitchRow(
                 .weight(1f)
                 .padding(end = 12.dp)
                 .widthIn(max = if (isTablet) 560.dp else Dp.Unspecified)
-                .alpha(if (enabled) NuvioTokens.Opacity.visible else tokens.opacity.medium),
+                .alpha(if (enabled) KovelyxTokens.Opacity.visible else tokens.opacity.medium),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(

@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import com.kovelyx.app.core.ui.platformPhysicalTopInset
 import com.kovelyx.app.features.details.MetaDetails
 import com.kovelyx.app.isIos
@@ -101,7 +101,7 @@ fun DetailFloatingHeader(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (interactive && !useNativeNavigation) {
-                    NuvioBackButton(
+                    KovelyxBackButton(
                         onClick = onBack,
                         modifier = Modifier.size(40.dp),
                         containerColor = Color.Transparent,

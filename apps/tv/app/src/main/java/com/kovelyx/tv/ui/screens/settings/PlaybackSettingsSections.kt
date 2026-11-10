@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,8 +44,8 @@ internal fun PlaybackSettingsSections(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = NuvioTheme.spacing.xs, bottom = NuvioTheme.spacing.xxl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(top = KovelyxTheme.spacing.xs, bottom = KovelyxTheme.spacing.xxl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             items(items = sections, key = { it.name }) { section ->
                 val expanded = section.name in expandedSections

@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -66,7 +66,7 @@ import com.kovelyx.tv.domain.model.DEFAULT_CARD_DEPTH_SHEEN_STRENGTH
 import com.kovelyx.tv.domain.model.FocusedPosterTrailerPlaybackTarget
 import com.kovelyx.tv.domain.model.HomeLayout
 import com.kovelyx.tv.ui.components.CardCwStylePreview
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.components.PosterCwStylePreview
 import com.kovelyx.tv.ui.components.WideCwStylePreview
 import com.kovelyx.tv.ui.components.cardDepthVisual
@@ -91,7 +91,7 @@ internal fun LayoutContinueWatchingSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .settingsOptionRow(firstStyleFocusRequester),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             listOf(
                 ContinueWatchingCardStyle.CARD,
@@ -342,13 +342,13 @@ internal fun LayoutCustomPosterSection(
         Text(
             text = pattern,
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            color = NuvioTheme.colors.TextSecondary,
+            color = KovelyxTheme.colors.TextSecondary,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(NuvioTheme.colors.BackgroundElevated, RoundedCornerShape(10.dp))
-                .padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.md)
+                .background(KovelyxTheme.colors.BackgroundElevated, RoundedCornerShape(10.dp))
+                .padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.md)
         )
     }
     SettingsActionRow(
@@ -401,16 +401,16 @@ private fun CwStyleCard(
             }
         },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         border = CardDefaults.border(
             border = if (isSelected) Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.hairline),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.hairline),
                 shape = RoundedCornerShape(SettingsSecondaryCardRadius)
             ) else Border.None,
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(SettingsSecondaryCardRadius)
             )
         ),
@@ -445,9 +445,9 @@ private fun CwStyleCard(
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(R.string.cd_selected),
-                        tint = NuvioTheme.colors.FocusRing,
+                        tint = KovelyxTheme.colors.FocusRing,
                         modifier = Modifier
-                            .size(NuvioTheme.spacing.lg)
+                            .size(KovelyxTheme.spacing.lg)
                             .padding(end = 6.dp)
                     )
                 }
@@ -458,7 +458,7 @@ private fun CwStyleCard(
                         ContinueWatchingCardStyle.POSTER -> stringResource(R.string.layout_cw_card_style_poster)
                     },
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected || isFocused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary
+                    color = if (isSelected || isFocused) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -508,18 +508,18 @@ private fun ModernTrailerPlaybackTargetRow(
     Text(
         text = stringResource(R.string.layout_trailer_location),
         style = MaterialTheme.typography.labelLarge,
-        color = NuvioTheme.colors.TextSecondary
+        color = KovelyxTheme.colors.TextSecondary
     )
     Text(
         text = stringResource(R.string.layout_trailer_location_sub),
         style = MaterialTheme.typography.bodySmall,
-        color = NuvioTheme.colors.TextTertiary
+        color = KovelyxTheme.colors.TextTertiary
     )
     val firstTrailerTargetFocusRequester = remember { FocusRequester() }
     LazyRow(
         modifier = Modifier.settingsOptionRow(firstTrailerTargetFocusRequester),
-        contentPadding = PaddingValues(end = NuvioTheme.spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        contentPadding = PaddingValues(end = KovelyxTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         item(key = "trailer_target_expanded_card") {
             SettingsChoiceChip(
@@ -579,7 +579,7 @@ private fun CardDepthStyleControls(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         SettingsToggleRow(
             title = stringResource(R.string.settings_card_depth_enabled),
@@ -648,7 +648,7 @@ private fun CardDepthFineTuneDialog(
         initialFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.settings_card_depth_fine_tune_title),
         subtitle = stringResource(R.string.settings_card_depth_fine_tune_hint_tv),
@@ -658,7 +658,7 @@ private fun CardDepthFineTuneDialog(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             CardDepthPreview(
                 style = style,
@@ -669,7 +669,7 @@ private fun CardDepthFineTuneDialog(
             Column(
                 modifier = Modifier
                     .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
             ) {
                 SliderSettingsItem(
                     title = stringResource(R.string.settings_card_depth_edge_value),
@@ -719,16 +719,16 @@ private fun CardDepthResetButton(
         modifier = modifier,
         shape = ButtonDefaults.shape(shape = shape),
         colors = ButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = KovelyxTheme.colors.Background
         ),
         border = ButtonDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                 shape = shape
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = shape
             )
         )
@@ -736,7 +736,7 @@ private fun CardDepthResetButton(
         Text(
             text = stringResource(R.string.layout_reset_default),
             style = MaterialTheme.typography.titleMedium,
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
     }
 }
@@ -746,7 +746,7 @@ private fun CardDepthPreview(
     style: CardDepthStyle,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(NuvioTheme.radii.lg)
+    val shape = RoundedCornerShape(KovelyxTheme.radii.lg)
     Box(
         modifier = modifier
             .clip(shape)
@@ -780,14 +780,14 @@ private fun OptionRow(
     Text(
         text = "$title ($selectedLabel)",
         style = MaterialTheme.typography.labelLarge,
-        color = NuvioTheme.colors.TextSecondary
+        color = KovelyxTheme.colors.TextSecondary
     )
 
     val firstOptionFocusRequester = remember { FocusRequester() }
     LazyRow(
         modifier = Modifier.settingsOptionRow(firstOptionFocusRequester),
-        contentPadding = PaddingValues(end = NuvioTheme.spacing.sm),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        contentPadding = PaddingValues(end = KovelyxTheme.spacing.sm),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         itemsIndexed(
             items = options,

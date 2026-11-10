@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -202,7 +202,7 @@ fun SharedTrailerOverlay(
             Column(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(horizontal = NuvioTheme.spacing.xxl, vertical = NuvioTheme.spacing.xl),
+                    .padding(horizontal = KovelyxTheme.spacing.xxl, vertical = KovelyxTheme.spacing.xl),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
@@ -230,9 +230,9 @@ fun SharedTrailerOverlay(
                 Column(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(horizontal = NuvioTheme.spacing.xxl),
+                        .padding(horizontal = KovelyxTheme.spacing.xxl),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     Text(
                         text = errorMessage,
@@ -295,7 +295,7 @@ fun TrailerSeekOverlay(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = NuvioTheme.spacing.xxl, vertical = NuvioTheme.spacing.xl)
+                .padding(horizontal = KovelyxTheme.spacing.xxl, vertical = KovelyxTheme.spacing.xl)
         ) {
             Box(
                 modifier = Modifier
@@ -309,11 +309,11 @@ fun TrailerSeekOverlay(
                         .fillMaxHeight()
                         .fillMaxWidth(animatedProgress)
                         .clip(RoundedCornerShape(3.dp))
-                        .background(NuvioTheme.colors.Secondary)
+                        .background(KovelyxTheme.colors.Secondary)
                 )
             }
     
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
     
             Row(
                 modifier = Modifier.fillMaxWidth(),

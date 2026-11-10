@@ -100,8 +100,8 @@ import kotlinx.coroutines.launch
 import com.kovelyx.tv.ui.components.PosterCardDefaults
 import com.kovelyx.tv.domain.model.localizedTitle
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.components.KovelyxDialog
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.localizedContentType
 import com.kovelyx.tv.ui.util.localizedGenreLabel
 import kotlinx.coroutines.delay
@@ -284,7 +284,7 @@ fun LibraryScreen(
                 Text(
                     text = stringResource(R.string.library_syncing_library),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -302,7 +302,7 @@ fun LibraryScreen(
         state = gridState,
         modifier = Modifier
             .fillMaxSize()
-            .background(NuvioTheme.colors.Background)
+            .background(KovelyxTheme.colors.Background)
             .focusRestorer {
                 val lastKey = lastFocusedPosterKey
                 (if (lastKey != null && lastKey in posterFocusRequesters) {
@@ -322,9 +322,9 @@ fun LibraryScreen(
                 }
                 false
             },
-        contentPadding = PaddingValues(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, top = NuvioTheme.spacing.xl, bottom = NuvioTheme.spacing.xxl),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+        contentPadding = PaddingValues(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, top = KovelyxTheme.spacing.xl, bottom = KovelyxTheme.spacing.xxl),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             Row(
@@ -335,7 +335,7 @@ fun LibraryScreen(
                 Text(
                     text = stringResource(R.string.library_title),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = if (showBuiltInHeader) NuvioTheme.colors.TextPrimary else Color.Transparent,
+                    color = if (showBuiltInHeader) KovelyxTheme.colors.TextPrimary else Color.Transparent,
                     fontWeight = FontWeight.SemiBold,
                     letterSpacing = 0.5.sp
                 )
@@ -346,11 +346,11 @@ fun LibraryScreen(
                         uiState.sourceMode == LibrarySourceMode.TRAKT -> "TRAKT"
                         uiState.sourceMode == LibrarySourceMode.SIMKL -> "SIMKL"
                         uiState.sourceMode == LibrarySourceMode.MDBLIST -> "MDBLIST"
-                        uiState.isNuvioAccount -> "NUVIO"
+                        uiState.isKovelyxAccount -> "NUVIO"
                         else -> stringResource(R.string.library_source_local)
                     },
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (showBuiltInHeader) NuvioTheme.colors.TextTertiary else Color.Transparent,
+                    color = if (showBuiltInHeader) KovelyxTheme.colors.TextTertiary else Color.Transparent,
                     fontWeight = FontWeight.Medium,
                     letterSpacing = 2.sp
                 )
@@ -373,8 +373,8 @@ fun LibraryScreen(
                             onClick = viewModel::refreshCloudLibrary,
                             enabled = !uiState.cloudLibrary.isRefreshing,
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextPrimary
+                                containerColor = KovelyxTheme.colors.BackgroundCard,
+                                contentColor = KovelyxTheme.colors.TextPrimary
                             )
                         ) {
                             Text(
@@ -509,7 +509,7 @@ fun LibraryScreen(
             libraryServerContent(
                 shelves = serverShelves,
                 posterCardStyle = posterCardStyle,
-                rowInset = NuvioTheme.spacing.xxxl,
+                rowInset = KovelyxTheme.spacing.xxxl,
                 focusTarget = serverFocusTarget,
                 focusedIndexes = serversViewModel.focusedIndexes,
                 onItemFocused = { shelfKey, index ->
@@ -610,7 +610,7 @@ fun LibraryScreen(
             }
         }
 
-        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm)) }
+        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm)) }
     }
 
     if (uiState.showManageDialog && uiState.listManagement != null) {
@@ -701,10 +701,10 @@ fun LibraryScreen(
             Text(
                 text = transientMessage,
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 modifier = Modifier
-                    .padding(top = NuvioTheme.spacing.xl)
-                    .background(NuvioTheme.colors.BackgroundElevated, RoundedCornerShape(10.dp))
+                    .padding(top = KovelyxTheme.spacing.xl)
+                    .background(KovelyxTheme.colors.BackgroundElevated, RoundedCornerShape(10.dp))
                     .padding(horizontal = 18.dp, vertical = 10.dp)
             )
         }
@@ -735,7 +735,7 @@ private fun LibraryViewModeRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)) {
             modes.forEach { mode ->
                 val selected = mode == selectedMode
                 Button(
@@ -743,8 +743,8 @@ private fun LibraryViewModeRow(
                     modifier = Modifier
                         .then(if (selected) Modifier.focusRequester(primaryFocusRequester) else Modifier),
                     colors = ButtonDefaults.colors(
-                        containerColor = if (selected) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundCard,
-                        contentColor = NuvioTheme.colors.TextPrimary
+                        containerColor = if (selected) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundCard,
+                        contentColor = KovelyxTheme.colors.TextPrimary
                     )
                 ) {
                     Text(
@@ -781,7 +781,7 @@ private fun CloudLibrarySelectorsRow(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         LibraryDropdownPicker(
             modifier = Modifier.weight(1f),
@@ -852,7 +852,7 @@ private fun CloudLibrarySearchRow(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
     ) {
         Surface(
@@ -861,20 +861,20 @@ private fun CloudLibrarySearchRow(
                 .weight(1f)
                 .focusRequester(fieldFocusRequester),
             colors = ClickableSurfaceDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.BackgroundCard
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundCard
             ),
             border = ClickableSurfaceDefaults.border(
                 border = Border(
-                    border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                    shape = RoundedCornerShape(NuvioTheme.radii.md)
+                    border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.md)
                 ),
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                    shape = RoundedCornerShape(NuvioTheme.radii.md)
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                    shape = RoundedCornerShape(KovelyxTheme.radii.md)
                 )
             ),
-            shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+            shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
             scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
         ) {
             BasicTextField(
@@ -882,7 +882,7 @@ private fun CloudLibrarySearchRow(
                 onValueChange = onQueryChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+                    .padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
                     .focusRequester(editorFocusRequester)
                     .focusProperties { canFocus = editing }
                     .onFocusChanged {
@@ -917,18 +917,18 @@ private fun CloudLibrarySearchRow(
                     }
                 ),
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content
                 ),
                 cursorBrush = SolidColor(
-                    if (editing) NuvioTheme.colors.FocusRing else Color.Transparent
+                    if (editing) KovelyxTheme.colors.FocusRing else Color.Transparent
                 ),
                 decorationBox = { innerTextField ->
                     if (query.isEmpty()) {
                         Text(
                             text = stringResource(R.string.cloud_library_search_label),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = NuvioTheme.colors.TextTertiary
+                            color = KovelyxTheme.colors.TextTertiary
                         )
                     }
                     innerTextField()
@@ -943,8 +943,8 @@ private fun CloudLibrarySearchRow(
                     editing = false
                 },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.cloud_library_search_clear))
@@ -967,7 +967,7 @@ private fun CloudLibraryLoadingState() {
         Text(
             text = stringResource(R.string.library_syncing_library),
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
     }
 }
@@ -985,12 +985,12 @@ private fun CloudLibraryCard(
         modifier = Modifier.fillMaxWidth(),
         shape = CardDefaults.shape(RoundedCornerShape(10.dp)),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
-            border = Border(border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border), shape = RoundedCornerShape(10.dp)),
-            focusedBorder = Border(border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs), shape = RoundedCornerShape(10.dp))
+            border = Border(border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border), shape = RoundedCornerShape(10.dp)),
+            focusedBorder = Border(border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs), shape = RoundedCornerShape(10.dp))
         ),
         scale = CardDefaults.scale(focusedScale = 1.02f)
     ) {
@@ -1003,14 +1003,14 @@ private fun CloudLibraryCard(
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.titleSmall,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.SemiBold
             )
             fileLine?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
             Row(
@@ -1022,7 +1022,7 @@ private fun CloudLibraryCard(
                     modifier = Modifier.weight(1f),
                     text = cloudLibraryMetadata(item),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
                 Text(
                     text = if (isResolving) {
@@ -1031,7 +1031,7 @@ private fun CloudLibraryCard(
                         cloudLibraryPlayableLabel(item)
                     },
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (item.playableFiles.isEmpty()) NuvioTheme.colors.TextTertiary else NuvioTheme.colors.Primary
+                    color = if (item.playableFiles.isEmpty()) KovelyxTheme.colors.TextTertiary else KovelyxTheme.colors.Primary
                 )
             }
         }
@@ -1085,7 +1085,7 @@ private fun CloudFilePickerDialog(
     onPlay: (CloudLibraryFile) -> Unit,
     onDismiss: () -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.cloud_library_file_picker_title),
         subtitle = item.name,
@@ -1096,7 +1096,7 @@ private fun CloudFilePickerDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = 420.dp),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
         ) {
             items(item.playableFiles, key = { it.stableKey }) { file ->
                 val resolving = resolvingFileKey == "${item.stableKey}:${file.stableKey}"
@@ -1104,8 +1104,8 @@ private fun CloudFilePickerDialog(
                     onClick = { if (!resolving) onPlay(file) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundCard,
-                        focusedContainerColor = NuvioTheme.colors.FocusBackground
+                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                        focusedContainerColor = KovelyxTheme.colors.FocusBackground
                     ),
                     shape = CardDefaults.shape(RoundedCornerShape(10.dp)),
                     scale = CardDefaults.scale(focusedScale = 1f)
@@ -1114,25 +1114,25 @@ private fun CloudFilePickerDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                     ) {
                         Text(
                             text = file.name,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                             fontWeight = FontWeight.SemiBold
                         )
                         formatCloudSize(file.sizeBytes)?.let { size ->
                             Text(
                                 text = size,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = NuvioTheme.colors.TextSecondary
+                                color = KovelyxTheme.colors.TextSecondary
                             )
                         }
                         Text(
                             text = stringResource(R.string.cloud_library_play_file),
                             style = MaterialTheme.typography.labelMedium,
-                            color = NuvioTheme.colors.Primary
+                            color = KovelyxTheme.colors.Primary
                         )
                     }
                 }
@@ -1183,7 +1183,7 @@ private fun LibrarySelectorsRow(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             if (sourceMode != LibrarySourceMode.LOCAL) {
                 LibraryDropdownPicker(
@@ -1247,7 +1247,7 @@ private fun LibrarySelectorsRow(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             if (genres.isNotEmpty()) {
                 val genreAllOption = LibraryOption(allLabel, "__all__")
@@ -1365,16 +1365,16 @@ private fun LibraryDropdownPicker(
                 .onFocusChanged { isFocused = it.isFocused },
             shape = CardDefaults.shape(shape = RoundedCornerShape(14.dp)),
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                focusedContainerColor = KovelyxTheme.colors.FocusBackground
             ),
             border = CardDefaults.border(
                 border = androidx.tv.material3.Border(
-                    border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                    border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                     shape = RoundedCornerShape(14.dp)
                 ),
                 focusedBorder = androidx.tv.material3.Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = RoundedCornerShape(14.dp)
                 )
             ),
@@ -1387,12 +1387,12 @@ private fun LibraryDropdownPicker(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxs)
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelSmall,
-                    color = NuvioTheme.colors.TextTertiary
+                    color = KovelyxTheme.colors.TextTertiary
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1402,14 +1402,14 @@ private fun LibraryDropdownPicker(
                     Text(
                         text = value,
                         style = MaterialTheme.typography.titleMedium,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = if (expanded) stringResource(R.string.cd_collapse, title) else stringResource(R.string.cd_expand, title),
-                        tint = if (isFocused) NuvioTheme.colors.FocusRing else NuvioTheme.colors.TextSecondary
+                        tint = if (isFocused) KovelyxTheme.colors.FocusRing else KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -1425,22 +1425,22 @@ private fun LibraryDropdownPicker(
                 .width(with(LocalDensity.current) { anchorSize.width.toDp() })
                 .heightIn(max = 320.dp),
             shape = RoundedCornerShape(14.dp),
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            tonalElevation = NuvioTheme.spacing.none,
-            shadowElevation = NuvioTheme.spacing.sm,
-            border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border)
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            tonalElevation = KovelyxTheme.spacing.none,
+            shadowElevation = KovelyxTheme.spacing.sm,
+            border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border)
         ) {
             options.forEach { option ->
                 val isSelected = option.value == selectedValue
                 val isOptionFocused = option.value == focusedOptionValue
                 val itemTextColor = when {
-                    isOptionFocused -> NuvioTheme.colors.OnSecondary
-                    isSelected -> NuvioTheme.colors.TextPrimary
-                    else -> NuvioTheme.colors.TextPrimary
+                    isOptionFocused -> KovelyxTheme.colors.OnSecondary
+                    isSelected -> KovelyxTheme.colors.TextPrimary
+                    else -> KovelyxTheme.colors.TextPrimary
                 }
                 val itemBackgroundColor = when {
-                    isOptionFocused -> NuvioTheme.colors.Secondary
-                    isSelected -> NuvioTheme.colors.FocusBackground
+                    isOptionFocused -> KovelyxTheme.colors.Secondary
+                    isSelected -> KovelyxTheme.colors.FocusBackground
                     else -> Color.Transparent
                 }
 
@@ -1455,7 +1455,7 @@ private fun LibraryDropdownPicker(
                                 Modifier
                             }
                         )
-                        .padding(horizontal = 6.dp, vertical = NuvioTheme.spacing.xxs)
+                        .padding(horizontal = 6.dp, vertical = KovelyxTheme.spacing.xxs)
                         .background(
                             color = itemBackgroundColor,
                             shape = RoundedCornerShape(10.dp)
@@ -1479,7 +1479,7 @@ private fun LibraryDropdownPicker(
                     onClick = { onSelect(option) },
                     colors = MenuDefaults.itemColors(
                         textColor = itemTextColor,
-                        disabledTextColor = NuvioTheme.colors.TextDisabled
+                        disabledTextColor = KovelyxTheme.colors.TextDisabled
                     )
                 )
             }
@@ -1503,15 +1503,15 @@ private fun LibraryActionsRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
     ) {
         if (showManageLists) {
             Button(
                 onClick = onManageLists,
                 enabled = !pending && !isSyncing,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.library_manage_lists))
@@ -1521,8 +1521,8 @@ private fun LibraryActionsRow(
             onClick = onRefresh,
             enabled = !pending && !isSyncing,
             colors = ButtonDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundCard,
-                contentColor = NuvioTheme.colors.TextPrimary
+                containerColor = KovelyxTheme.colors.BackgroundCard,
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(if (isSyncing) stringResource(R.string.library_syncing_btn) else stringResource(R.string.library_sync_btn))
@@ -1537,7 +1537,7 @@ private fun ConfirmDeleteDialog(
     onConfirm: () -> Unit,
     onCancel: () -> Unit
 ) {
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onCancel,
         title = stringResource(R.string.library_delete_title),
         subtitle = stringResource(R.string.library_delete_subtitle),
@@ -1549,7 +1549,7 @@ private fun ConfirmDeleteDialog(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.colors(
                 containerColor = Color(0xFF4A2323),
-                contentColor = NuvioTheme.colors.TextPrimary
+                contentColor = KovelyxTheme.colors.TextPrimary
             )
         ) {
             Text(stringResource(R.string.library_list_delete))

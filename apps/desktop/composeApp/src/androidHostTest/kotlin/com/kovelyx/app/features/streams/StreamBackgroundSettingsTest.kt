@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.kovelyx.app.core.storage.ProfileScopedKey
 import com.kovelyx.app.core.sync.decodeSyncString
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.settings.SettingsSearchEntry
 import com.kovelyx.app.features.settings.settingsSearchEntries
 import com.kovelyx.app.features.settings.streamsSettingsContent
@@ -96,7 +96,7 @@ class StreamBackgroundSettingsTest {
     @Test
     fun backgroundPickerChangesAndDisplaysTheSelectedMode() {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 LazyColumn { streamsSettingsContent(isTablet = false) }
             }
         }
@@ -118,7 +118,7 @@ class StreamBackgroundSettingsTest {
     fun tabletsHideTheBackgroundPickerEvenWhenItWasOpenOnMobile() {
         val isTablet = mutableStateOf(false)
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 LazyColumn { streamsSettingsContent(isTablet = isTablet.value) }
             }
         }
@@ -134,7 +134,7 @@ class StreamBackgroundSettingsTest {
         val isTablet = mutableStateOf(false)
         var entries = emptyList<SettingsSearchEntry>()
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 entries = settingsSearchEntries(
                     isTablet = isTablet.value,
                     pluginsEnabled = false,

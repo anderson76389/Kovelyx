@@ -59,13 +59,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.animateDpAsState
-import com.kovelyx.app.core.ui.NuvioInputField
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioScreenHeader
-import com.kovelyx.app.core.ui.NuvioSectionLabel
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxInputField
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
+import com.kovelyx.app.core.ui.KovelyxSectionLabel
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.core.ui.PlatformBackHandler
 import com.kovelyx.app.features.home.PosterShape
@@ -240,11 +240,11 @@ fun CollectionEditorScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        NuvioScreen(
+        KovelyxScreen(
             modifier = Modifier.fillMaxSize(),
         ) {
             stickyHeader {
-                NuvioScreenHeader(
+                KovelyxScreenHeader(
                     title = if (state.isNew) {
                         stringResource(Res.string.collections_new)
                     } else {
@@ -255,7 +255,7 @@ fun CollectionEditorScreen(
             }
 
             item {
-                NuvioInputField(
+                KovelyxInputField(
                     value = state.title,
                     onValueChange = { CollectionEditorRepository.setTitle(it) },
                     placeholder = stringResource(Res.string.collections_editor_placeholder_name),
@@ -263,7 +263,7 @@ fun CollectionEditorScreen(
             }
 
             item {
-                NuvioInputField(
+                KovelyxInputField(
                     value = state.backdropImageUrl,
                     onValueChange = { CollectionEditorRepository.setBackdropImageUrl(it) },
                     placeholder = stringResource(Res.string.collections_editor_placeholder_backdrop),
@@ -271,7 +271,7 @@ fun CollectionEditorScreen(
             }
 
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -310,7 +310,7 @@ fun CollectionEditorScreen(
 
             // View Mode
         item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Text(
                         text = stringResource(Res.string.collections_editor_view_mode),
                         style = MaterialTheme.typography.bodyLarge,
@@ -354,7 +354,7 @@ fun CollectionEditorScreen(
 
             // Show All Tab
         item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -397,7 +397,7 @@ fun CollectionEditorScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    NuvioSectionLabel(text = stringResource(Res.string.collections_editor_folders))
+                    KovelyxSectionLabel(text = stringResource(Res.string.collections_editor_folders))
                     TextButton(
                         onClick = {
                             CollectionEditorRepository.addFolder(newFolderTitle)
@@ -432,7 +432,7 @@ fun CollectionEditorScreen(
 
         if (state.folders.isEmpty()) {
             item {
-                NuvioSurfaceCard(
+                KovelyxSurfaceCard(
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
                     Text(
@@ -469,7 +469,7 @@ fun CollectionEditorScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .padding(bottom = bottomInset),
             ) {
-                NuvioPrimaryButton(
+                KovelyxPrimaryButton(
                     text = if (state.isNew) {
                         stringResource(Res.string.collections_editor_create_collection)
                     } else {
@@ -539,7 +539,7 @@ private fun FolderListItem(
 ) {
     val hapticFeedback = LocalHapticFeedback.current
 
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -644,9 +644,9 @@ private fun FolderEditorPage(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        NuvioScreen(modifier = Modifier.fillMaxSize()) {
+        KovelyxScreen(modifier = Modifier.fillMaxSize()) {
             stickyHeader {
-                NuvioScreenHeader(
+                KovelyxScreenHeader(
                     title = if (state.folders.any { it.id == folder.id }) {
                         stringResource(Res.string.collections_editor_edit_folder)
                     } else {
@@ -657,7 +657,7 @@ private fun FolderEditorPage(
             }
 
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Text(
                         text = stringResource(Res.string.collections_editor_folder_editor_help),
                         style = MaterialTheme.typography.bodyLarge,
@@ -668,8 +668,8 @@ private fun FolderEditorPage(
 
             item {
                 FolderEditorSection(title = stringResource(Res.string.collections_editor_section_basics)) {
-                    NuvioSurfaceCard {
-                        NuvioInputField(
+                    KovelyxSurfaceCard {
+                        KovelyxInputField(
                             value = folder.title,
                             onValueChange = { CollectionEditorRepository.updateFolderTitle(it) },
                             placeholder = stringResource(Res.string.collections_editor_placeholder_folder),
@@ -680,7 +680,7 @@ private fun FolderEditorPage(
 
             item {
                 FolderEditorSection(title = stringResource(Res.string.collections_editor_section_appearance)) {
-                    NuvioSurfaceCard {
+                    KovelyxSurfaceCard {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
@@ -720,7 +720,7 @@ private fun FolderEditorPage(
                             }
 
                             if (folder.coverEmoji != null) {
-                                NuvioInputField(
+                                KovelyxInputField(
                                     value = folder.coverEmoji,
                                     onValueChange = { CollectionEditorRepository.updateFolderCoverEmoji(it) },
                                     placeholder = stringResource(Res.string.collections_editor_cover_emoji),
@@ -729,14 +729,14 @@ private fun FolderEditorPage(
                             }
 
                             if (folder.coverImageUrl != null) {
-                                NuvioInputField(
+                                KovelyxInputField(
                                     value = folder.coverImageUrl,
                                     onValueChange = { CollectionEditorRepository.updateFolderCoverImage(it) },
                                     placeholder = stringResource(Res.string.collections_editor_cover_image_url),
                                 )
                             }
 
-                            NuvioInputField(
+                            KovelyxInputField(
                                 value = folder.focusGifUrl.orEmpty(),
                                 onValueChange = { CollectionEditorRepository.updateFolderFocusGifUrl(it) },
                                 placeholder = stringResource(Res.string.collections_editor_placeholder_gif),
@@ -744,7 +744,7 @@ private fun FolderEditorPage(
                         }
                     }
 
-                    NuvioSurfaceCard {
+                    KovelyxSurfaceCard {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
@@ -858,7 +858,7 @@ private fun FolderEditorPage(
                 ) {
                     val sources = folder.resolvedSources
                     if (sources.isEmpty()) {
-                        NuvioSurfaceCard {
+                        KovelyxSurfaceCard {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text(
                                     text = stringResource(Res.string.collections_editor_catalog_sources_empty_title),
@@ -927,7 +927,7 @@ private fun FolderEditorPage(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .padding(bottom = bottomInset),
             ) {
-                NuvioPrimaryButton(
+                KovelyxPrimaryButton(
                     text = stringResource(Res.string.collections_editor_save),
                     enabled = folder.title.isNotBlank(),
                     onClick = onSave,
@@ -948,16 +948,16 @@ private fun CatalogPickerScreen(
         onBack()
     }
 
-    NuvioScreen(modifier = Modifier.fillMaxSize()) {
+    KovelyxScreen(modifier = Modifier.fillMaxSize()) {
         stickyHeader {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = stringResource(Res.string.collections_editor_select_catalogs),
                 onBack = onBack,
             )
         }
 
         item {
-            NuvioSurfaceCard {
+            KovelyxSurfaceCard {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = stringResource(Res.string.collections_editor_select_catalogs_description),
@@ -1054,9 +1054,9 @@ private fun TmdbSourcePickerScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        NuvioScreen(modifier = Modifier.fillMaxSize()) {
+        KovelyxScreen(modifier = Modifier.fillMaxSize()) {
             stickyHeader {
-                NuvioScreenHeader(
+                KovelyxScreenHeader(
                     title = stringResource(Res.string.collections_editor_tmdb_sources),
                     onBack = onBack,
                 )
@@ -1087,7 +1087,7 @@ private fun TmdbSourcePickerScreen(
             }
 
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Text(
                         text = tmdbModeHelpText(state.tmdbBuilderMode),
                         style = MaterialTheme.typography.bodyMedium,
@@ -1097,7 +1097,7 @@ private fun TmdbSourcePickerScreen(
             }
 
             if (state.tmdbBuilderMode != TmdbBuilderMode.PRESETS) item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (requiresId) {
                             TmdbLabeledField(
@@ -1620,7 +1620,7 @@ private fun TmdbSourcePickerScreen(
                             Text(stringResource(Res.string.collections_editor_tmdb_search))
                         }
                     }
-                    NuvioPrimaryButton(
+                    KovelyxPrimaryButton(
                         text = stringResource(Res.string.collections_editor_add_source),
                         modifier = Modifier.weight(1f),
                         enabled = !requiresId || state.tmdbInput.isNotBlank(),
@@ -1648,9 +1648,9 @@ private fun TraktSourcePickerScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        NuvioScreen(modifier = Modifier.fillMaxSize()) {
+        KovelyxScreen(modifier = Modifier.fillMaxSize()) {
             stickyHeader {
-                NuvioScreenHeader(
+                KovelyxScreenHeader(
                     title = if (state.editingTraktSourceIndex != null) {
                         stringResource(Res.string.collections_editor_edit_trakt_source)
                     } else {
@@ -1661,7 +1661,7 @@ private fun TraktSourcePickerScreen(
             }
 
             item {
-                NuvioSurfaceCard {
+                KovelyxSurfaceCard {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         TmdbLabeledField(
                             label = stringResource(Res.string.collections_editor_trakt_list),
@@ -1801,7 +1801,7 @@ private fun TraktSourcePickerScreen(
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(stringResource(Res.string.collections_editor_tmdb_search))
                 }
-                NuvioPrimaryButton(
+                KovelyxPrimaryButton(
                     text = if (state.editingTraktSourceIndex != null) {
                         stringResource(Res.string.collections_editor_save)
                     } else {
@@ -1840,7 +1840,7 @@ private fun PickerPanel(
     subtitle: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -1922,7 +1922,7 @@ private fun PickerOptionRow(
 
 @Composable
 private fun PickerSectionLabel(text: String) {
-    NuvioSectionLabel(
+    KovelyxSectionLabel(
         text = text.uppercase(),
         modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
     )
@@ -1956,7 +1956,7 @@ private fun TmdbLabeledField(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        NuvioInputField(
+        KovelyxInputField(
             value = value,
             onValueChange = onValueChange,
             placeholder = placeholder,
@@ -2071,7 +2071,7 @@ private fun GenrePickerSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -2133,7 +2133,7 @@ private fun FolderEditorSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            NuvioSectionLabel(text = title)
+            KovelyxSectionLabel(text = title)
             actions?.invoke()
         }
         content()
@@ -2191,7 +2191,7 @@ private fun FolderTmdbSourceCard(
     source: CollectionSource,
     onRemove: () -> Unit,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -2237,7 +2237,7 @@ private fun FolderTraktSourceCard(
     onEdit: () -> Unit,
     onRemove: () -> Unit,
 ) {
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -2310,7 +2310,7 @@ private fun FolderCatalogSourceCard(
         stringResource(Res.string.collections_editor_all_genres)
     }
 
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {

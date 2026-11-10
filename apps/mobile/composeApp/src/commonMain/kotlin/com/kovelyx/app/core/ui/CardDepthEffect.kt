@@ -24,7 +24,7 @@ fun rememberCardDepthStyleUiState(): CardDepthStyleUiState {
 @Composable
 fun Modifier.nuvioCardDepth(
     shape: Shape,
-    surface: NuvioCardDepthSurface,
+    surface: KovelyxCardDepthSurface,
     fallbackBorderAlpha: Float = 0f,
 ): Modifier {
     val state = rememberCardDepthStyleUiState()

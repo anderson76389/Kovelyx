@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.account
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -59,44 +59,44 @@ fun SyncCodeGenerateScreen(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .background(
-                    color = NuvioTheme.colors.BackgroundElevated,
+                    color = KovelyxTheme.colors.BackgroundElevated,
                     shape = RoundedCornerShape(20.dp)
                 )
-                .padding(NuvioTheme.spacing.xxl),
+                .padding(KovelyxTheme.spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = stringResource(R.string.sync_generate_title),
                 style = MaterialTheme.typography.headlineSmall,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
             Text(
                 text = stringResource(R.string.sync_generate_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
             if (uiState.generatedSyncCode != null) {
                 // Show the generated code
                 Text(
                     text = stringResource(R.string.sync_generate_code_label),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = NuvioTheme.colors.Secondary.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            color = KovelyxTheme.colors.Secondary.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                         .padding(20.dp),
                     contentAlignment = Alignment.Center
@@ -107,44 +107,44 @@ fun SyncCodeGenerateScreen(
                             letterSpacing = 1.sp,
                             fontWeight = FontWeight.Bold
                         ),
-                        color = NuvioTheme.colors.Secondary,
+                        color = KovelyxTheme.colors.Secondary,
                         textAlign = TextAlign.Center,
                         maxLines = 1
                     )
                 }
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
                 Text(
                     text = stringResource(R.string.sync_generate_instruction),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary,
+                    color = KovelyxTheme.colors.TextTertiary,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
                 Button(
                     onClick = {
                         viewModel.clearGeneratedSyncCode()
                         onBackPress()
                     },
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.Secondary,
-                        focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                        contentColor = NuvioTheme.colors.OnSecondary,
-                        focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                        containerColor = KovelyxTheme.colors.Secondary,
+                        focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                        contentColor = KovelyxTheme.colors.OnSecondary,
+                        focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                     ),
                     shape = ButtonDefaults.shape(RoundedCornerShape(50)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.sync_generate_done), modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs))
+                    Text(stringResource(R.string.sync_generate_done), modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs))
                 }
             } else {
                 // PIN input form
                 Text(
                     text = stringResource(R.string.sync_generate_pin_label),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                 InputField(
                     value = pin,
                     onValueChange = { if (it.length <= 8) pin = it },
@@ -159,7 +159,7 @@ fun SyncCodeGenerateScreen(
                 )
 
                 if (uiState.error != null) {
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                     Text(
                         text = uiState.error ?: "",
                         style = MaterialTheme.typography.bodySmall,
@@ -167,23 +167,23 @@ fun SyncCodeGenerateScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
                 Button(
                     onClick = { viewModel.generateSyncCode(pin) },
                     enabled = !uiState.isLoading && pin.length >= 4,
                     colors = ButtonDefaults.colors(
-                        containerColor = NuvioTheme.colors.Secondary,
-                        focusedContainerColor = NuvioTheme.colors.SecondaryVariant,
-                        contentColor = NuvioTheme.colors.OnSecondary,
-                        focusedContentColor = NuvioTheme.colors.OnSecondaryVariant
+                        containerColor = KovelyxTheme.colors.Secondary,
+                        focusedContainerColor = KovelyxTheme.colors.SecondaryVariant,
+                        contentColor = KovelyxTheme.colors.OnSecondary,
+                        focusedContentColor = KovelyxTheme.colors.OnSecondaryVariant
                     ),
                     shape = ButtonDefaults.shape(RoundedCornerShape(50)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = if (uiState.isLoading) stringResource(R.string.sync_generate_generating) else stringResource(R.string.sync_generate_code_btn),
-                        modifier = Modifier.padding(vertical = NuvioTheme.spacing.xs),
+                        modifier = Modifier.padding(vertical = KovelyxTheme.spacing.xs),
                         fontWeight = FontWeight.Medium
                     )
                 }

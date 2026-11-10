@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent
 import android.widget.Toast
@@ -50,7 +50,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @Composable
 fun AnimeSkipSettingsContent(
@@ -75,7 +75,7 @@ fun AnimeSkipSettingsContent(
             LazyColumn(
                 state = animeSkipListState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = NuvioTheme.spacing.sm),
+                contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 item(key = "animeskip_enabled") {
@@ -85,7 +85,7 @@ fun AnimeSkipSettingsContent(
                         checked = enabled,
                         onToggle = { viewModel.setEnabled(!enabled) },
                         modifier = Modifier
-                            .padding(top = NuvioTheme.spacing.xxs)
+                            .padding(top = KovelyxTheme.spacing.xxs)
                             .then(
                                 if (initialFocusRequester != null) {
                             Modifier.focusRequester(initialFocusRequester)
@@ -143,7 +143,7 @@ private fun AnimeSkipClientIdDialog(
         }
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.animeskip_dialog_title),
         subtitle = stringResource(R.string.animeskip_dialog_subtitle),
@@ -153,23 +153,23 @@ private fun AnimeSkipClientIdDialog(
             onClick = { inputFocusRequester.requestFocus() },
             modifier = Modifier.fillMaxWidth().onFocusChanged { isInputFocused = it.isFocused || it.hasFocus },
             colors = CardDefaults.colors(
-                containerColor = NuvioTheme.colors.BackgroundElevated,
-                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
             ),
             border = CardDefaults.border(
                 border = Border(
-                    border = androidx.compose.foundation.BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
+                    border = androidx.compose.foundation.BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
                 ),
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
                 )
             ),
             shape = CardDefaults.shape(androidx.compose.foundation.shape.RoundedCornerShape(10.dp)),
             scale = CardDefaults.scale(focusedScale = 1f)
         ) {
-            Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.md)) {
+            Box(modifier = Modifier.padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.md)) {
                 BasicTextField(
                     value = value,
                     onValueChange = { value = it },
@@ -184,11 +184,11 @@ private fun AnimeSkipClientIdDialog(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         textDirection = TextDirection.Content
                     ),
                     cursorBrush = SolidColor(
-                        if (isInputFocused) NuvioTheme.colors.Primary
+                        if (isInputFocused) KovelyxTheme.colors.Primary
                         else androidx.compose.ui.graphics.Color.Transparent
                     ),
                     decorationBox = { innerTextField ->
@@ -196,7 +196,7 @@ private fun AnimeSkipClientIdDialog(
                             Text(
                                 text = stringResource(R.string.animeskip_dialog_placeholder),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = NuvioTheme.colors.TextTertiary
+                                color = KovelyxTheme.colors.TextTertiary
                             )
                         }
                         innerTextField()
@@ -209,24 +209,24 @@ private fun AnimeSkipClientIdDialog(
             Button(
                 onClick = onDismiss,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundElevated,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundElevated,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) { Text(stringResource(R.string.action_cancel)) }
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             Button(
                 onClick = onClear,
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundElevated,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundElevated,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) { Text(stringResource(R.string.action_clear)) }
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             Button(
                 onClick = { if (!validating) viewModel.validateAndSave(value, onSaved) },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(if (validating) stringResource(R.string.action_saving) else stringResource(R.string.action_save))

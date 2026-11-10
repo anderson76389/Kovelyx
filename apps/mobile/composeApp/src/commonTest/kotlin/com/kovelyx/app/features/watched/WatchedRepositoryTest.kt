@@ -199,7 +199,7 @@ class WatchedRepositoryTest {
         )
 
         assertFalse(
-            shouldAcknowledgeNuvioWatchedPush(
+            shouldAcknowledgeKovelyxWatchedPush(
                 source = WatchProgressSource.NUVIO_SYNC,
                 outcome = outcome,
             ),
@@ -211,7 +211,7 @@ class WatchedRepositoryTest {
         val outcome = WatchedPushOutcome(nuvioSyncSucceeded = true)
 
         assertTrue(
-            shouldAcknowledgeNuvioWatchedPush(
+            shouldAcknowledgeKovelyxWatchedPush(
                 source = WatchProgressSource.NUVIO_SYNC,
                 outcome = outcome,
             ),
@@ -287,7 +287,7 @@ class WatchedRepositoryTest {
             succeededTrackerProviderIds = setOf(TrackingProviderId.TRAKT),
         )
 
-        assertFalse(shouldAcknowledgeNuvioWatchedPush(WatchProgressSource.TRAKT, outcome))
+        assertFalse(shouldAcknowledgeKovelyxWatchedPush(WatchProgressSource.TRAKT, outcome))
     }
 
     @Test

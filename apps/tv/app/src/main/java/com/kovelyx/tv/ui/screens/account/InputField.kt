@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.account
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -63,20 +63,20 @@ internal fun InputField(
         onClick = { isEditing = true },
         modifier = modifier,
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = ClickableSurfaceDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
     ) {
         BasicTextField(
@@ -84,7 +84,7 @@ internal fun InputField(
             onValueChange = onValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+                .padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
                 .focusRequester(textFieldFocusRequester)
                 .onFocusChanged {
                     if (!it.isFocused && isEditing) {
@@ -110,17 +110,17 @@ internal fun InputField(
                 }
             ),
             textStyle = MaterialTheme.typography.bodyMedium.copy(
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 textDirection = TextDirection.Content
             ),
-            cursorBrush = SolidColor(if (isEditing) NuvioTheme.colors.Secondary else Color.Transparent),
+            cursorBrush = SolidColor(if (isEditing) KovelyxTheme.colors.Secondary else Color.Transparent),
             visualTransformation = if (isPassword) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
             decorationBox = { innerTextField ->
                 if (value.isEmpty()) {
                     Text(
                         text = placeholder,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.colors.TextTertiary
+                        color = KovelyxTheme.colors.TextTertiary
                     )
                 }
                 innerTextField()

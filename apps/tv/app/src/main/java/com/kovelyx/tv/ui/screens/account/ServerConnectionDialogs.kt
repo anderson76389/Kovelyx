@@ -53,9 +53,9 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.ServerConfiguration
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import kotlinx.coroutines.delay
 
 @Composable
@@ -92,8 +92,8 @@ internal fun ServerOptionsMenuHost(
             colors = IconButtonDefaults.colors(
                 containerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,
-                contentColor = NuvioTheme.colors.TextSecondary,
-                focusedContentColor = NuvioTheme.colors.FocusRing
+                contentColor = KovelyxTheme.colors.TextSecondary,
+                focusedContentColor = KovelyxTheme.colors.FocusRing
             ),
             scale = IconButtonDefaults.scale(focusedScale = 1.12f),
             shape = IconButtonDefaults.shape(shape = CircleShape)
@@ -111,10 +111,10 @@ internal fun ServerOptionsMenuHost(
             offset = DpOffset(x = 0.dp, y = 12.dp),
             modifier = Modifier.width(320.dp),
             shape = RoundedCornerShape(14.dp),
-            containerColor = NuvioTheme.colors.BackgroundCard,
+            containerColor = KovelyxTheme.colors.BackgroundCard,
             tonalElevation = 0.dp,
-            shadowElevation = NuvioTheme.spacing.sm,
-            border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border)
+            shadowElevation = KovelyxTheme.spacing.sm,
+            border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border)
         ) {
             if (uiState.activeServer.isCustom) {
                 ServerMenuItem(
@@ -180,19 +180,19 @@ private fun ServerMenuItem(
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    val itemColor = if (isFocused) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextPrimary
+    val itemColor = if (isFocused) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextPrimary
 
     DropdownMenuItem(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = NuvioTheme.spacing.xxs)
+            .padding(horizontal = 6.dp, vertical = KovelyxTheme.spacing.xxs)
             .background(
-                color = if (isFocused) NuvioTheme.colors.Secondary else Color.Transparent,
+                color = if (isFocused) KovelyxTheme.colors.Secondary else Color.Transparent,
                 shape = RoundedCornerShape(10.dp)
             )
             .border(
-                width = if (isFocused) NuvioTheme.spacing.xxs else NuvioTheme.spacing.hairline,
-                color = if (isFocused) NuvioTheme.colors.FocusRing else Color.Transparent,
+                width = if (isFocused) KovelyxTheme.spacing.xxs else KovelyxTheme.spacing.hairline,
+                color = if (isFocused) KovelyxTheme.colors.FocusRing else Color.Transparent,
                 shape = RoundedCornerShape(10.dp)
             )
             .onFocusChanged { state -> isFocused = state.isFocused || state.hasFocus },
@@ -239,7 +239,7 @@ private fun ServerConnectionDialog(
         urlFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.custom_server_title),
         subtitle = stringResource(R.string.custom_server_description),
@@ -263,14 +263,14 @@ private fun ServerConnectionDialog(
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.action_cancel))
@@ -280,8 +280,8 @@ private fun ServerConnectionDialog(
                 enabled = canDiscover,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -310,7 +310,7 @@ private fun ServerTrustConfirmationDialog(
         cancelFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = { if (!isSwitching) onDismiss() },
         title = stringResource(R.string.custom_server_review_title),
         subtitle = stringResource(R.string.custom_server_review_description),
@@ -327,7 +327,7 @@ private fun ServerTrustConfirmationDialog(
             icon = Icons.Default.Lock,
             label = stringResource(R.string.custom_server_key_label),
             value = stringResource(R.string.custom_server_key_discovered),
-            tint = NuvioTheme.colors.Secondary
+            tint = KovelyxTheme.colors.Secondary
         )
         ServerWarning(server)
         error?.let {
@@ -339,7 +339,7 @@ private fun ServerTrustConfirmationDialog(
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onDismiss,
@@ -348,8 +348,8 @@ private fun ServerTrustConfirmationDialog(
                     .weight(1f)
                     .focusRequester(cancelFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.action_cancel))
@@ -359,8 +359,8 @@ private fun ServerTrustConfirmationDialog(
                 enabled = !isSwitching,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -388,8 +388,8 @@ private fun ServerWarning(server: ServerConfiguration) {
             .fillMaxWidth()
             .border(1.dp, Color(0x66FFB74D), RoundedCornerShape(14.dp))
             .background(Color(0x1FFF9800), RoundedCornerShape(14.dp))
-            .padding(NuvioTheme.spacing.md),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+            .padding(KovelyxTheme.spacing.md),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
     ) {
         Text(
             text = stringResource(R.string.custom_server_warning_title),
@@ -400,12 +400,12 @@ private fun ServerWarning(server: ServerConfiguration) {
         Text(
             text = warning,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
         Text(
             text = stringResource(R.string.custom_server_warning_credentials),
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
     }
 }
@@ -423,7 +423,7 @@ private fun OfficialServerConfirmationDialog(
         cancelFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(R.string.official_server_title),
         subtitle = stringResource(R.string.official_server_description),
@@ -438,7 +438,7 @@ private fun OfficialServerConfirmationDialog(
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onDismiss,
@@ -447,8 +447,8 @@ private fun OfficialServerConfirmationDialog(
                     .weight(1f)
                     .focusRequester(cancelFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.action_cancel))
@@ -458,8 +458,8 @@ private fun OfficialServerConfirmationDialog(
                 enabled = !isSwitching,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(
@@ -483,7 +483,7 @@ private fun ServerDetailRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(24.dp))
@@ -491,12 +491,12 @@ private fun ServerDetailRow(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextPrimary,
+                color = KovelyxTheme.colors.TextPrimary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -513,8 +513,8 @@ private fun ServerMessage(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(containerColor, RoundedCornerShape(NuvioTheme.radii.md))
-            .padding(horizontal = NuvioTheme.spacing.md, vertical = 10.dp),
+            .background(containerColor, RoundedCornerShape(KovelyxTheme.radii.md))
+            .padding(horizontal = KovelyxTheme.spacing.md, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(

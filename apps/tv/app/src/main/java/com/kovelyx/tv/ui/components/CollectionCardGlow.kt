@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
@@ -32,7 +32,7 @@ fun rememberArtworkBackedCardGlow(
     imageUrl: String?,
     fallbackSeed: String,
     enabled: Boolean,
-    fallbackColor: Color = NuvioTheme.colors.FocusBackground
+    fallbackColor: Color = KovelyxTheme.colors.FocusBackground
 ): CardGlow {
     val noGlow = remember { CardDefaults.glow(focusedGlow = Glow.None) }
     if (!enabled) return noGlow

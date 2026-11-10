@@ -22,14 +22,14 @@ import nuvio.composeapp.generated.resources.episodes_cd_watched
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun NuvioWatchedBadge(
+fun KovelyxWatchedBadge(
     modifier: Modifier = Modifier,
 ) {
     val tokens = MaterialTheme.nuvio
     val palette = MaterialTheme.themePalette
     Box(
         modifier = modifier
-            .size(NuvioTokens.Icon.md)
+            .size(KovelyxTokens.Icon.md)
             .clip(tokens.shapes.avatar)
             .background(palette.accentBrush()),
         contentAlignment = Alignment.Center,
@@ -38,13 +38,13 @@ fun NuvioWatchedBadge(
             imageVector = Icons.Default.Check,
             contentDescription = stringResource(Res.string.episodes_cd_watched),
             tint = palette.onSecondary,
-            modifier = Modifier.size(NuvioTokens.Icon.xs),
+            modifier = Modifier.size(KovelyxTokens.Icon.xs),
         )
     }
 }
 
 @Composable
-fun NuvioAnimatedWatchedBadge(
+fun KovelyxAnimatedWatchedBadge(
     isVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -54,7 +54,7 @@ fun NuvioAnimatedWatchedBadge(
         exit = fadeOut(),
         modifier = modifier,
     ) {
-        NuvioWatchedBadge()
+        KovelyxWatchedBadge()
     }
 }
 
@@ -62,9 +62,9 @@ fun NuvioAnimatedWatchedBadge(
 fun BoxScope.NuvioPosterWatchedOverlay(
     isWatched: Boolean,
     modifier: Modifier = Modifier,
-    padding: Dp = NuvioTokens.Space.s6,
+    padding: Dp = KovelyxTokens.Space.s6,
 ) {
-    NuvioAnimatedWatchedBadge(
+    KovelyxAnimatedWatchedBadge(
         isVisible = isWatched,
         modifier = modifier
             .align(Alignment.TopEnd)

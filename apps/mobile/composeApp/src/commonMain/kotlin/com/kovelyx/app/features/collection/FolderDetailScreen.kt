@@ -23,7 +23,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LocalRippleConfiguration
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -50,9 +50,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioPosterCard
-import com.kovelyx.app.core.ui.NuvioPosterShape
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.KovelyxPosterCard
+import com.kovelyx.app.core.ui.KovelyxPosterShape
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.core.ui.withDuplicateSafeLazyKeys
 import com.kovelyx.app.features.home.HomeCatalogSection
@@ -144,7 +144,7 @@ fun FolderDetailScreen(
         }
 
         if (!useNativeNavigation) {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = folder?.title ?: uiState.collectionTitle,
                 modifier = Modifier.padding(horizontal = 16.dp),
                 includeStatusBarPadding = coverImageUrl == null,
@@ -294,11 +294,11 @@ private fun TabbedGridContent(
                             key = { item -> item.lazyKey },
                         ) { keyedItem ->
                             val item = keyedItem.value
-                            NuvioPosterCard(
+                            KovelyxPosterCard(
                                 title = item.name,
                                 imageUrl = item.poster,
                                 fallbackImageUrl = item.rawPosterUrl,
-                                shape = NuvioPosterShape.Poster,
+                                shape = KovelyxPosterShape.Poster,
                                 detailLine = item.releaseInfo,
                                 isWatched = WatchingState.isPosterWatched(
                                     watchedKeys = watchedKeys,
@@ -375,7 +375,7 @@ private fun PaginationLoadingFooter() {
             .padding(vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(28.dp),
         )
     }
@@ -396,7 +396,7 @@ private fun LoadingIndicator() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(32.dp),
         )
     }
@@ -432,9 +432,9 @@ private fun EmptyMessage() {
     }
 }
 
-private fun PosterShape.toNuvioPosterShape(): NuvioPosterShape =
+private fun PosterShape.toNuvioPosterShape(): KovelyxPosterShape =
     when (this) {
-        PosterShape.Poster -> NuvioPosterShape.Poster
-        PosterShape.Square -> NuvioPosterShape.Square
-        PosterShape.Landscape -> NuvioPosterShape.Landscape
+        PosterShape.Poster -> KovelyxPosterShape.Poster
+        PosterShape.Square -> KovelyxPosterShape.Square
+        PosterShape.Landscape -> KovelyxPosterShape.Landscape
     }

@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import com.kovelyx.app.core.i18n.localizedByteUnit
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import kotlin.math.round
 import nuvio.composeapp.generated.resources.Res
@@ -46,11 +46,11 @@ internal fun rememberStreamSizeLabelFormat(): (String) -> String {
 }
 
 internal object StreamBadgeChipDefaults {
-    val shape = RoundedCornerShape(NuvioTokens.Radius.sm)
-    val fileSizeHorizontalPadding = NuvioTokens.Space.s6
-    val fileSizeFontSize: TextUnit = NuvioTokens.Type.labelSm
-    val fileSizeLineHeight: TextUnit = NuvioTokens.LineHeight.bodySm
-    val fileSizeLetterSpacing: TextUnit = NuvioTokens.LetterSpacing.none
+    val shape = RoundedCornerShape(KovelyxTokens.Radius.sm)
+    val fileSizeHorizontalPadding = KovelyxTokens.Space.s6
+    val fileSizeFontSize: TextUnit = KovelyxTokens.Type.labelSm
+    val fileSizeLineHeight: TextUnit = KovelyxTokens.LineHeight.bodySm
+    val fileSizeLetterSpacing: TextUnit = KovelyxTokens.LetterSpacing.none
 }
 
 internal enum class StreamBadgeChipSize(
@@ -101,7 +101,7 @@ internal fun StreamBadgeChip(
         chipModifier = chipModifier.background(Color(backgroundColorArgb), shape)
     }
     if (outlineColorArgb != null) {
-        chipModifier = chipModifier.border(NuvioTokens.Border.thin, Color(outlineColorArgb), shape)
+        chipModifier = chipModifier.border(KovelyxTokens.Border.thin, Color(outlineColorArgb), shape)
     }
 
     Box(

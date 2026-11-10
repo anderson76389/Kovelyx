@@ -62,7 +62,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.kovelyx.tv.domain.model.MetaCompany
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -112,7 +112,7 @@ fun CompanyLogosSection(
     var revealOverflowPx by remember { mutableFloatStateOf(0f) }
     val view = LocalView.current
     val density = LocalDensity.current
-    val revealPaddingPx = remember(density) { with(density) { NuvioTheme.spacing.md.toPx() } }
+    val revealPaddingPx = remember(density) { with(density) { KovelyxTheme.spacing.md.toPx() } }
     val allowPageScrollState = rememberUpdatedState(allowPageScroll)
     val suppressRestoreScroll =
         holdRestoreScrollSuppress || (restoreCompanyId != null && restoreFocusToken > 0)
@@ -150,7 +150,7 @@ fun CompanyLogosSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp, bottom = NuvioTheme.spacing.sm)
+            .padding(top = 20.dp, bottom = KovelyxTheme.spacing.sm)
             .onGloballyPositioned { coords ->
                 val bounds = coords.boundsInWindow()
                 revealOverflowPx = (bounds.bottom - view.height + revealPaddingPx).coerceAtLeast(0f)
@@ -159,8 +159,8 @@ fun CompanyLogosSection(
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
-            color = NuvioTheme.colors.TextPrimary,
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl)
+            color = KovelyxTheme.colors.TextPrimary,
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl)
         )
 
         LazyRow(
@@ -175,8 +175,8 @@ fun CompanyLogosSection(
                 }
                 .focusGroup(),
             state = listState,
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             itemsIndexed(
                 items = companies,
@@ -248,7 +248,7 @@ private fun CompanyLogoCard(
     val context = LocalContext.current
     val density = LocalDensity.current
     val logoWidthPx = remember(density) { with(density) { 140.dp.roundToPx() } }
-    val logoHeightPx = remember(density) { with(density) { NuvioTheme.spacing.huge.roundToPx() } }
+    val logoHeightPx = remember(density) { with(density) { KovelyxTheme.spacing.huge.roundToPx() } }
     val logoModel = remember(context, company.logo, logoWidthPx, logoHeightPx) {
         company.logo?.let { logo ->
             ImageRequest.Builder(context)
@@ -268,7 +268,7 @@ private fun CompanyLogoCard(
         },
         modifier = Modifier
             .width(140.dp)
-            .height(NuvioTheme.spacing.huge)
+            .height(KovelyxTheme.spacing.huge)
             .then(
                 if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier
             )
@@ -286,15 +286,15 @@ private fun CompanyLogoCard(
             .onFocusChanged { state ->
                 if (state.isFocused) onFocused()
             },
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
         colors = CardDefaults.colors(
             containerColor = Color.White,
             focusedContainerColor = Color.White
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
         ),
         scale = CardDefaults.scale(focusedScale = 1.03f)
@@ -302,8 +302,8 @@ private fun CompanyLogoCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTheme.spacing.huge)
-                .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+                .height(KovelyxTheme.spacing.huge)
+                .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
                 .background(Color.White),
         contentAlignment = Alignment.Center
         ) {
@@ -321,10 +321,10 @@ private fun CompanyLogoCard(
                 Text(
                     text = company.name,
                     style = MaterialTheme.typography.labelLarge,
-                    color = NuvioTheme.extendedColors.textSecondary,
+                    color = KovelyxTheme.extendedColors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg)
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg)
                 )
             }
         }

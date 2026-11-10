@@ -33,7 +33,7 @@ import androidx.compose.material.icons.rounded.Forward10
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.Replay10
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -67,7 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.LayoutDirection
 import com.kovelyx.app.core.ui.AppIconResource
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import com.kovelyx.app.core.ui.themePalette
 import com.kovelyx.app.core.ui.accentBrush
 import com.kovelyx.app.core.ui.appIconPainter
@@ -452,7 +452,7 @@ private fun PlayerHeader(
                             onClick = onVideoSettingsClick,
                         )
                     }
-                    NuvioBackButton(
+                    KovelyxBackButton(
                         onClick = onBack,
                         containerColor = Color.Black.copy(alpha = 0.35f),
                         contentColor = Color.White,
@@ -568,7 +568,7 @@ internal fun PlayPauseControlButton(
         contentAlignment = Alignment.Center,
     ) {
         if (isBuffering) {
-            NuvioLoadingIndicator(
+            KovelyxLoadingIndicator(
                 modifier = Modifier.size(metrics.playIconSize),
             )
         } else {

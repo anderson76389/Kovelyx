@@ -97,9 +97,9 @@ fun DialogButtons(
         content = content,
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = NuvioTokens.Space.s8),
+            .padding(top = KovelyxTokens.Space.s8),
     ) { measurables, constraints ->
-        val gap = NuvioTokens.Space.s10.roundToPx()
+        val gap = KovelyxTokens.Space.s10.roundToPx()
         val width = constraints.maxWidth
         val totalGap = gap * (measurables.size - 1).coerceAtLeast(0)
         val itemWidth = (width - totalGap) / measurables.size.coerceAtLeast(1)
@@ -141,7 +141,7 @@ fun DialogButton(
     val contentColor = if (style == DialogButtonStyle.Secondary) tokens.colors.textPrimary else tokens.colors.onAccent
     Button(
         onClick = onClick,
-        modifier = modifier.heightIn(min = NuvioTokens.Space.s48),
+        modifier = modifier.heightIn(min = KovelyxTokens.Space.s48),
         enabled = enabled && !loading,
         elevation = ButtonDefaults.buttonElevation(
             hoveredElevation = 0.dp,
@@ -153,14 +153,14 @@ fun DialogButton(
             disabledContainerColor = containerColor.copy(alpha = containerColor.alpha * tokens.opacity.disabled),
             disabledContentColor = contentColor.copy(alpha = tokens.opacity.disabled),
         ),
-        contentPadding = PaddingValues(horizontal = NuvioTokens.Space.s16),
+        contentPadding = PaddingValues(horizontal = KovelyxTokens.Space.s16),
     ) {
         if (loading) {
-            NuvioLoadingIndicator(
+            KovelyxLoadingIndicator(
                 modifier = Modifier.size(tokens.icons.sm),
                 color = contentColor,
             )
-            Spacer(modifier = Modifier.width(NuvioTokens.Space.s8))
+            Spacer(modifier = Modifier.width(KovelyxTokens.Space.s8))
         }
         Text(
             text = text,
@@ -195,14 +195,14 @@ fun DialogOption(
                 },
             )
             .selectable(selected = selected, enabled = enabled, role = role, onClick = onClick)
-            .padding(horizontal = NuvioTokens.Space.s14, vertical = NuvioTokens.Space.s12),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+            .padding(horizontal = KovelyxTokens.Space.s14, vertical = KovelyxTokens.Space.s12),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         leading?.invoke()
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s2),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s2),
         ) {
             Text(
                 text = text,

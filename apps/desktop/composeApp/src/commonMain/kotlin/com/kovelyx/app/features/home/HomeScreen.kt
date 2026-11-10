@@ -29,11 +29,11 @@ import com.kovelyx.app.core.auth.AuthRepository
 import com.kovelyx.app.core.auth.AuthState
 import com.kovelyx.app.core.network.NetworkCondition
 import com.kovelyx.app.core.network.NetworkStatusRepository
-import com.kovelyx.app.core.ui.LocalNuvioBottomNavigationOverlayPadding
-import com.kovelyx.app.core.ui.LocalNuvioNavBarScrollState
+import com.kovelyx.app.core.ui.LocalKovelyxBottomNavigationOverlayPadding
+import com.kovelyx.app.core.ui.LocalKovelyxNavBarScrollState
 import com.kovelyx.app.core.ui.ScreenActivityEffect
-import com.kovelyx.app.core.ui.NuvioScreen
-import com.kovelyx.app.core.ui.NuvioNetworkOfflineCard
+import com.kovelyx.app.core.ui.KovelyxScreen
+import com.kovelyx.app.core.ui.KovelyxNetworkOfflineCard
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.core.ui.rememberHeroStretchState
 import com.kovelyx.app.core.ui.rememberPosterCardStyleUiState
@@ -171,7 +171,7 @@ fun HomeScreen(
         TrackingSettingsRepository.ensureLoaded()
         TrackingSettingsRepository.uiState
     }.collectAsStateWithLifecycle()
-    val navBarScrollState = LocalNuvioNavBarScrollState.current
+    val navBarScrollState = LocalKovelyxNavBarScrollState.current
     var observedOfflineState by remember { mutableStateOf(false) }
 
     ScreenActivityEffect(scrollToTopRequests) { active ->
@@ -942,7 +942,7 @@ fun HomeScreen(
         }
         val continueWatchingLayout = rememberContinueWatchingLayout(maxWidth.value, posterCardStyle)
         val nativeBottomNavigationOverlayHeight =
-            if (LocalNuvioBottomNavigationOverlayPadding.current > 0.dp) {
+            if (LocalKovelyxBottomNavigationOverlayPadding.current > 0.dp) {
                 nuvioSafeBottomPadding()
             } else {
                 0.dp
@@ -984,7 +984,7 @@ fun HomeScreen(
             topChromePadding
         }
 
-        NuvioScreen(
+        KovelyxScreen(
             modifier = Modifier.fillMaxSize().then(heroStretchModifier),
             horizontalPadding = 0.dp,
             topPadding = effectiveTopPadding,
@@ -1069,7 +1069,7 @@ fun HomeScreen(
                     item(key = "home_empty", contentType = "empty") {
                         when {
                             networkStatusUiState.isOfflineLike && addonManifestErrorMessage != null -> {
-                                NuvioNetworkOfflineCard(
+                                KovelyxNetworkOfflineCard(
                                     condition = networkStatusUiState.condition,
                                     modifier = Modifier.padding(
                                         horizontal = if (isDesktop) homeSectionPadding else 16.dp,
@@ -1115,7 +1115,7 @@ fun HomeScreen(
                     item(key = "home_empty", contentType = "empty") {
                         val loadFailed = !homeUiState.errorMessage.isNullOrBlank()
                         if (networkStatusUiState.isOfflineLike && loadFailed) {
-                            NuvioNetworkOfflineCard(
+                            KovelyxNetworkOfflineCard(
                                 condition = networkStatusUiState.condition,
                                 modifier = Modifier.padding(
                                     horizontal = if (isDesktop) homeSectionPadding else 16.dp,

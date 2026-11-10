@@ -17,7 +17,7 @@ import com.kovelyx.app.core.ui.DialogButtons
 import com.kovelyx.app.core.ui.DialogSurface
 import com.kovelyx.app.core.ui.Menu
 import com.kovelyx.app.core.ui.MenuItem
-import com.kovelyx.app.core.ui.NuvioInputField
+import com.kovelyx.app.core.ui.KovelyxInputField
 import kotlinx.serialization.json.*
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.action_cancel
@@ -82,7 +82,7 @@ fun PluginSettingsDialog(
                         val isPassword = field["isPassword"]?.jsonPrimitive?.boolean ?: false
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(text = label, style = MaterialTheme.typography.labelLarge)
-                            NuvioInputField(
+                            KovelyxInputField(
                                 value = value,
                                 onValueChange = { currentSettings[key] = JsonPrimitive(it) },
                                 placeholder = field["placeholder"]?.jsonPrimitive?.content ?: ""

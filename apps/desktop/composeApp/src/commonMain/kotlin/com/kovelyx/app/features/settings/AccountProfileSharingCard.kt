@@ -10,8 +10,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.cloud.CloudflareAccountClient
 import com.kovelyx.app.core.cloud.CloudflareProfileSharing
-import com.kovelyx.app.core.ui.NuvioStatusModal
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 import com.kovelyx.app.features.profiles.ProfileRepository
 import kotlinx.coroutines.launch
 
@@ -47,7 +47,7 @@ internal fun AccountProfileSharingCard() {
             failed = true
         } finally { loading = false }
     }
-    NuvioSurfaceCard {
+    KovelyxSurfaceCard {
         Text("Synchroniser avec d'autres profils", style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
@@ -104,7 +104,7 @@ internal fun AccountProfileSharingCard() {
         }
     }
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = "Partager avec " + selected.size + " profil(s) ?",
         message = "Fusionner les éléments choisis depuis « $sourceName ». Les dossiers et " +
             "extensions déjà présents seront conservés. Les URL d'extensions " +

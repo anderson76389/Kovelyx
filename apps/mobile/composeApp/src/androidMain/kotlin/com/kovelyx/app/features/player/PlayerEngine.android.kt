@@ -427,7 +427,7 @@ private fun ExoPlayerSurface(
             setParameters(parameters)
         }
 
-        val loadControl = NuvioExoPlayerPerformanceHelper.buildLoadControl(
+        val loadControl = KovelyxExoPlayerPerformanceHelper.buildLoadControl(
             context,
             PlaybackBufferSettings(
                 enabled = playerSettings.bufferEngineEnabled,
@@ -1098,7 +1098,7 @@ private fun LibmpvPlayerSurface(
     val sanitizedSourceHeaders = remember(sourceHeaders) {
         sanitizePlaybackHeaders(sourceHeaders)
     }
-    var playerViewRef by remember { mutableStateOf<NuvioLibmpvView?>(null) }
+    var playerViewRef by remember { mutableStateOf<KovelyxLibmpvView?>(null) }
     val nowPlayingController = remember(context, playerViewRef) {
         playerViewRef?.let { view ->
             AndroidPlayerNowPlayingController(
@@ -1330,7 +1330,7 @@ private fun LibmpvPlayerSurface(
     AndroidView(
         modifier = modifier,
         factory = { viewContext ->
-            NuvioLibmpvView(
+            KovelyxLibmpvView(
                 context = viewContext,
                 videoOutput = if (isLocalFileSource) AndroidLibmpvVideoOutput.Gpu else videoOutput,
                 hardwareDecodingEnabled = if (isLocalFileSource) false else hardwareDecodingEnabled,
@@ -1366,7 +1366,7 @@ private tailrec fun Context.findActivity(): Activity? =
         else -> null
     }
 
-private class NuvioLibmpvView(
+private class KovelyxLibmpvView(
     context: Context,
     private val videoOutput: AndroidLibmpvVideoOutput,
     private val hardwareDecodingEnabled: Boolean,
@@ -1614,9 +1614,9 @@ private class NuvioLibmpvView(
 
             override fun pause() = setPaused(true)
 
-            override fun seekTo(positionMs: Long) = this@NuvioLibmpvView.seekToMs(positionMs)
+            override fun seekTo(positionMs: Long) = this@KovelyxLibmpvView.seekToMs(positionMs)
 
-            override fun seekBy(offsetMs: Long) = this@NuvioLibmpvView.seekByMs(offsetMs)
+            override fun seekBy(offsetMs: Long) = this@KovelyxLibmpvView.seekByMs(offsetMs)
 
             override fun retry() {
                 executeMpv { loadCurrentSourceNow(playWhenReady = true) }

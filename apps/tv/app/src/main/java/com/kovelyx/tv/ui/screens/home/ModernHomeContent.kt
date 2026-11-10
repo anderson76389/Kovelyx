@@ -6,7 +6,7 @@
 
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.AnimationSpec
@@ -671,7 +671,7 @@ fun ModernHomeContent(
     val screenWidth = localConfiguration.screenWidthDp.dp
     val screenHeight = localConfiguration.screenHeightDp.dp
 
-    Box(modifier = Modifier.fillMaxSize().background(NuvioTheme.colors.Background)) {
+    Box(modifier = Modifier.fillMaxSize().background(KovelyxTheme.colors.Background)) {
             val posterCardCornerRadius = remember(uiState.posterCardCornerRadiusDp) { uiState.posterCardCornerRadiusDp.dp }
             val rowHorizontalPadding = 52.dp
 
@@ -991,7 +991,7 @@ fun ModernHomeContent(
             val rowTitleHeight = remember(rowTitleLineHeight, localDensity) {
                 with(localDensity) {
                     runCatching { rowTitleLineHeight.toDp() }
-                        .getOrDefault(NuvioTheme.spacing.xl)
+                        .getOrDefault(KovelyxTheme.spacing.xl)
                 }
             }
             val heroBackdropHeight = remember(screenHeight, rowsViewportHeight, rowTitleHeight) { (screenHeight - rowsViewportHeight + rowTitleHeight + 14.dp).coerceAtMost(screenHeight) }
@@ -1027,7 +1027,7 @@ fun ModernHomeContent(
                 if (fullScreenBackdrop) {
                     Modifier.align(Alignment.TopStart).fillMaxWidth().height(screenHeight)
                 } else {
-                    Modifier.align(Alignment.TopEnd).offset(x = NuvioTheme.spacing.huge).fillMaxWidth(MODERN_HERO_MEDIA_WIDTH_FRACTION).height(heroBackdropHeight)
+                    Modifier.align(Alignment.TopEnd).offset(x = KovelyxTheme.spacing.huge).fillMaxWidth(MODERN_HERO_MEDIA_WIDTH_FRACTION).height(heroBackdropHeight)
                 }
             }
 
@@ -1071,7 +1071,7 @@ fun ModernHomeContent(
             val heroMetadataModifier = remember(rowHorizontalPadding, rowsViewportHeight) {
                 Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = rowHorizontalPadding, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.none + rowsViewportHeight + NuvioTheme.spacing.lg)
+                    .padding(start = rowHorizontalPadding, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.none + rowsViewportHeight + KovelyxTheme.spacing.lg)
                     .fillMaxWidth(MODERN_HERO_TEXT_WIDTH_FRACTION)
             }
 
@@ -1158,7 +1158,7 @@ fun ModernHomeContent(
                 onFastScrollingChanged = onFastScrollingChangedLambda,
                 contentFocusRequester = contentFocusRequester,
                 rowsViewportHeight = rowsViewportHeight,
-                catalogBottomPadding = NuvioTheme.spacing.none,
+                catalogBottomPadding = KovelyxTheme.spacing.none,
                 trailerContentAlpha = stableTrailerContentAlphaLambda,
                 verticalRowBringIntoViewSpec = verticalRowBringIntoViewSpec,
                 onRowItemFocusedInternal = onRowItemFocusedInternalLambda,
@@ -1268,7 +1268,7 @@ private fun ModernHeroSection(
     onFirstFrameRendered: () -> Unit
 ) {
     val highlighterEnabled = LocalRecompositionHighlighterEnabled.current
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
     ModernHeroScene(
         state = heroSceneState,
         isFullScreen = isFullScreen,

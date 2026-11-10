@@ -459,7 +459,7 @@ object WatchProgressRepository {
                 force = force,
             )
         }
-        return refreshNuvioSource(
+        return refreshKovelyxSource(
             profileId = profileId,
             operationGeneration = operationGeneration,
             force = force,
@@ -523,7 +523,7 @@ object WatchProgressRepository {
         }
     }
 
-    private suspend fun refreshNuvioSource(
+    private suspend fun refreshKovelyxSource(
         profileId: Int,
         operationGeneration: Long,
         force: Boolean,
@@ -545,7 +545,7 @@ object WatchProgressRepository {
         return nuvioPullMutex.withLock {
             try {
                 if (force) {
-                    pullNuvioSnapshotFromServer(
+                    pullKovelyxSnapshotFromServer(
                         profileId = profileId,
                         operationGeneration = operationGeneration,
                     )
@@ -565,7 +565,7 @@ object WatchProgressRepository {
         }
     }
 
-    private suspend fun pullNuvioSnapshotFromServer(
+    private suspend fun pullKovelyxSnapshotFromServer(
         profileId: Int,
         operationGeneration: Long,
     ) {

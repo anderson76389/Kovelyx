@@ -19,7 +19,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal actual fun NuvioDesktopVerticalScrollbar(
+internal actual fun KovelyxDesktopVerticalScrollbar(
     state: LazyListState,
     modifier: Modifier,
     backgroundColor: Color?,
@@ -33,7 +33,7 @@ internal actual fun NuvioDesktopVerticalScrollbar(
 }
 
 @Composable
-internal actual fun NuvioDesktopVerticalScrollbar(
+internal actual fun KovelyxDesktopVerticalScrollbar(
     state: LazyGridState,
     modifier: Modifier,
     backgroundColor: Color?,
@@ -46,7 +46,7 @@ internal actual fun NuvioDesktopVerticalScrollbar(
 }
 
 @Composable
-internal actual fun NuvioDesktopVerticalScrollbar(
+internal actual fun KovelyxDesktopVerticalScrollbar(
     state: ScrollState,
     modifier: Modifier,
     backgroundColor: Color?,

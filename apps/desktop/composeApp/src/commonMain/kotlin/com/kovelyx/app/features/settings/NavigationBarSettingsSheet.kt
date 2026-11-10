@@ -21,11 +21,11 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioBottomSheetActionRow
-import com.kovelyx.app.core.ui.NuvioBottomSheetDivider
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBottomSheetActionRow
+import com.kovelyx.app.core.ui.KovelyxBottomSheetDivider
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.floatingNavigationGlowSupported
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.*
@@ -44,9 +44,9 @@ internal fun NavigationBarSettingsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val dismiss: () -> Unit = {
-        scope.launch { dismissNuvioBottomSheet(sheetState, onDismiss) }
+        scope.launch { dismissKovelyxBottomSheet(sheetState, onDismiss) }
     }
-    NuvioModalBottomSheet(onDismissRequest = dismiss, sheetState = sheetState) {
+    KovelyxModalBottomSheet(onDismissRequest = dismiss, sheetState = sheetState) {
         LazyColumn(Modifier.fillMaxWidth()) {
             item {
                 Text(
@@ -60,7 +60,7 @@ internal fun NavigationBarSettingsSheet(
             if (!isTablet) {
                 NavBarStyle.entries.forEach { style ->
                     item(key = style.key) {
-                        NuvioBottomSheetActionRow(
+                        KovelyxBottomSheetActionRow(
                             title = stringResource(style.labelRes),
                             onClick = { onStyleSelected(style) },
                             selected = style == selectedStyle,
@@ -80,7 +80,7 @@ internal fun NavigationBarSettingsSheet(
             item {
                 AnimatedVisibility(floatingNavigationGlowSupported && selectedStyle != NavBarStyle.CLASSIC) {
                     Column {
-                        NuvioBottomSheetDivider()
+                        KovelyxBottomSheetDivider()
                         SettingsSwitchRow(
                             title = stringResource(Res.string.settings_nav_bar_glow),
                             description = stringResource(Res.string.settings_nav_bar_glow_description),
@@ -92,7 +92,7 @@ internal fun NavigationBarSettingsSheet(
                 }
             }
             item {
-                NuvioPrimaryButton(
+                KovelyxPrimaryButton(
                     text = stringResource(Res.string.action_done),
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
                     onClick = dismiss,

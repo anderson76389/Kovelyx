@@ -6,7 +6,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 
-data class NuvioTypeScale(
+data class KovelyxTypeScale(
     val labelXs: TextStyle,
     val labelSm: TextStyle,
     val bodySm: TextStyle,
@@ -19,21 +19,21 @@ data class NuvioTypeScale(
     val displayMd: TextStyle,
 )
 
-internal val LocalNuvioTypeScale = staticCompositionLocalOf {
-    NuvioTypeScale(
-        labelXs = TextStyle(fontSize = NuvioTokens.Type.labelXs, lineHeight = NuvioTokens.LineHeight.labelXs, fontWeight = FontWeight.Medium),
-        labelSm = TextStyle(fontSize = NuvioTokens.Type.labelSm, lineHeight = NuvioTokens.LineHeight.labelSm, fontWeight = FontWeight.Medium),
-        bodySm = TextStyle(fontSize = NuvioTokens.Type.bodySm, lineHeight = NuvioTokens.LineHeight.bodySm, fontWeight = FontWeight.Normal),
-        bodyMd = TextStyle(fontSize = NuvioTokens.Type.bodyMd, lineHeight = NuvioTokens.LineHeight.bodyMd, fontWeight = FontWeight.Normal),
-        bodyLg = TextStyle(fontSize = NuvioTokens.Type.bodyLg, lineHeight = NuvioTokens.LineHeight.bodyLg, fontWeight = FontWeight.Medium),
-        titleSm = TextStyle(fontSize = NuvioTokens.Type.titleSm, lineHeight = NuvioTokens.LineHeight.titleSm, fontWeight = FontWeight.Bold),
-        titleMd = TextStyle(fontSize = NuvioTokens.Type.titleMd, lineHeight = NuvioTokens.LineHeight.titleMd, fontWeight = FontWeight.Bold),
-        titleLg = TextStyle(fontSize = NuvioTokens.Type.titleLg, lineHeight = NuvioTokens.LineHeight.titleLg, fontWeight = FontWeight.Bold),
-        displaySm = TextStyle(fontSize = NuvioTokens.Type.displaySm, lineHeight = NuvioTokens.LineHeight.displaySm, fontWeight = FontWeight.ExtraBold),
-        displayMd = TextStyle(fontSize = NuvioTokens.Type.displayMd, lineHeight = NuvioTokens.LineHeight.displayMd, fontWeight = FontWeight.ExtraBold),
+internal val LocalKovelyxTypeScale = staticCompositionLocalOf {
+    KovelyxTypeScale(
+        labelXs = TextStyle(fontSize = KovelyxTokens.Type.labelXs, lineHeight = KovelyxTokens.LineHeight.labelXs, fontWeight = FontWeight.Medium),
+        labelSm = TextStyle(fontSize = KovelyxTokens.Type.labelSm, lineHeight = KovelyxTokens.LineHeight.labelSm, fontWeight = FontWeight.Medium),
+        bodySm = TextStyle(fontSize = KovelyxTokens.Type.bodySm, lineHeight = KovelyxTokens.LineHeight.bodySm, fontWeight = FontWeight.Normal),
+        bodyMd = TextStyle(fontSize = KovelyxTokens.Type.bodyMd, lineHeight = KovelyxTokens.LineHeight.bodyMd, fontWeight = FontWeight.Normal),
+        bodyLg = TextStyle(fontSize = KovelyxTokens.Type.bodyLg, lineHeight = KovelyxTokens.LineHeight.bodyLg, fontWeight = FontWeight.Medium),
+        titleSm = TextStyle(fontSize = KovelyxTokens.Type.titleSm, lineHeight = KovelyxTokens.LineHeight.titleSm, fontWeight = FontWeight.Bold),
+        titleMd = TextStyle(fontSize = KovelyxTokens.Type.titleMd, lineHeight = KovelyxTokens.LineHeight.titleMd, fontWeight = FontWeight.Bold),
+        titleLg = TextStyle(fontSize = KovelyxTokens.Type.titleLg, lineHeight = KovelyxTokens.LineHeight.titleLg, fontWeight = FontWeight.Bold),
+        displaySm = TextStyle(fontSize = KovelyxTokens.Type.displaySm, lineHeight = KovelyxTokens.LineHeight.displaySm, fontWeight = FontWeight.ExtraBold),
+        displayMd = TextStyle(fontSize = KovelyxTokens.Type.displayMd, lineHeight = KovelyxTokens.LineHeight.displayMd, fontWeight = FontWeight.ExtraBold),
     )
 }
 
-val MaterialTheme.nuvioTypeScale: NuvioTypeScale
+val MaterialTheme.nuvioTypeScale: KovelyxTypeScale
     @Composable
-    get() = LocalNuvioTypeScale.current
+    get() = LocalKovelyxTypeScale.current

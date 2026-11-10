@@ -1,6 +1,6 @@
 package com.kovelyx.app.features.player
 
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.debrid.DirectDebridPlayableResult
 import com.kovelyx.app.features.debrid.DirectDebridPlaybackResolver
 import com.kovelyx.app.features.debrid.toastMessage
@@ -42,7 +42,7 @@ internal fun PlayerScreenRuntime.resolveDebridForPlayer(
         when (resolved) {
             is DirectDebridPlayableResult.Success -> onResolved(resolved.stream)
             else -> {
-                resolved.toastMessage()?.let { NuvioToastController.show(it) }
+                resolved.toastMessage()?.let { KovelyxToastController.show(it) }
                 if (resolved == DirectDebridPlayableResult.Stale) {
                     onStale()
                 }
@@ -61,7 +61,7 @@ internal fun PlayerScreenRuntime.prepareServerForPlayer(
         runCatching { ServerPlayback.prepare(stream) }
             .onFailure { if (it is CancellationException) throw it }
             .onSuccess { onPrepared(it) }
-            .onFailure { NuvioToastController.show(it.serverPlaybackMessage()) }
+            .onFailure { KovelyxToastController.show(it.serverPlaybackMessage()) }
     }
     return true
 }
@@ -74,7 +74,7 @@ internal fun PlayerScreenRuntime.resolveYouTubeForPlayer(
     scope.launch {
         val resolved = YouTubeStreamResolver.Default.resolve(stream)
         if (resolved == null) {
-            NuvioToastController.show(getString(Res.string.youtube_resolution_failed))
+            KovelyxToastController.show(getString(Res.string.youtube_resolution_failed))
             return@launch
         }
         onResolved(resolved)

@@ -12,7 +12,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 
 @Composable
-internal actual fun NuvioAsyncImage(
+internal actual fun KovelyxAsyncImage(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier,
@@ -28,7 +28,7 @@ internal actual fun NuvioAsyncImage(
     colorFilter: ColorFilter?,
     filterQuality: FilterQuality?,
     clipToBounds: Boolean,
-    desktopImageScaling: NuvioDesktopImageScaling,
+    desktopImageScaling: KovelyxDesktopImageScaling,
 ) {
     AsyncImage(
         model = model,

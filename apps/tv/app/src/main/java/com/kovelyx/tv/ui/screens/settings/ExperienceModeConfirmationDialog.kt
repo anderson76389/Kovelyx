@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -18,7 +18,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
 import com.kovelyx.tv.domain.model.ExperienceMode
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @Composable
 internal fun ExperienceModeConfirmationDialog(
@@ -33,7 +33,7 @@ internal fun ExperienceModeConfirmationDialog(
         confirmFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = stringResource(
             if (isEssential) {
@@ -51,14 +51,14 @@ internal fun ExperienceModeConfirmationDialog(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Button(
                 onClick = onDismiss,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.action_cancel))
@@ -72,8 +72,8 @@ internal fun ExperienceModeConfirmationDialog(
                     .weight(1f)
                     .focusRequester(confirmFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(

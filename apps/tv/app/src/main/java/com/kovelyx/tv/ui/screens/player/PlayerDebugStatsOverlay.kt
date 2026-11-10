@@ -251,14 +251,14 @@ private class DebugStatsSampler(context: Context) {
         } else {
             runCatching { Debug.getNativeHeapAllocatedSize() / MB }.getOrDefault(-1L)
         }
-        val targetBufferMb = NuvioExoPlayerPerformanceHelper.calculatedMemoryUsageMb
+        val targetBufferMb = KovelyxExoPlayerPerformanceHelper.calculatedMemoryUsageMb
         val nativeText = when {
             nativeMb < 0L -> ""
             targetBufferMb > 0 -> "   native $nativeMb / $targetBufferMb MB"
             else -> "   native $nativeMb MB"
         }
-        val safeLimitMb = NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(appContext)
-        val warningLimitMb = NuvioExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(appContext)
+        val safeLimitMb = KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(appContext)
+        val warningLimitMb = KovelyxExoPlayerPerformanceHelper.getWarningNativeMemoryLimitMb(appContext)
 
         val severity = when {
             nativeMb > 0L && nativeMb > warningLimitMb -> DebugStatSeverity.DANGER

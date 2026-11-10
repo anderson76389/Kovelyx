@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.rememberScrollState
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,9 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kovelyx.app.core.network.NetworkCondition
-import com.kovelyx.app.core.ui.NuvioDropdownChip
-import com.kovelyx.app.core.ui.NuvioDropdownOption
-import com.kovelyx.app.core.ui.NuvioNetworkOfflineCard
+import com.kovelyx.app.core.ui.KovelyxDropdownChip
+import com.kovelyx.app.core.ui.KovelyxDropdownOption
+import com.kovelyx.app.core.ui.KovelyxNetworkOfflineCard
 import com.kovelyx.app.features.home.MetaPreview
 import com.kovelyx.app.features.home.components.PosterGridRow
 import com.kovelyx.app.features.home.components.PosterGridSkeletonRow
@@ -141,19 +141,19 @@ private fun DiscoverFilterRow(
         modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        NuvioDropdownChip(
+        KovelyxDropdownChip(
             title = stringResource(Res.string.discover_select_type),
             label = state.selectedType?.displayTypeLabel() ?: stringResource(Res.string.discover_type),
             selectedKey = state.selectedType,
-            options = state.typeOptions.map { NuvioDropdownOption(key = it, label = it.displayTypeLabel()) },
+            options = state.typeOptions.map { KovelyxDropdownOption(key = it, label = it.displayTypeLabel()) },
             enabled = state.typeOptions.isNotEmpty(),
             onSelected = { onTypeSelected(it.key) },
         )
-        NuvioDropdownChip(
+        KovelyxDropdownChip(
             title = stringResource(Res.string.discover_select_catalog),
             label = state.selectedCatalog?.catalogName ?: stringResource(Res.string.discover_catalog),
             selectedKey = state.selectedCatalogKey,
-            options = state.catalogOptions.map { option -> NuvioDropdownOption(key = option.key, label = option.catalogName) },
+            options = state.catalogOptions.map { option -> KovelyxDropdownOption(key = option.key, label = option.catalogName) },
             enabled = state.catalogOptions.isNotEmpty(),
             onSelected = { onCatalogSelected(it.key) },
         )
@@ -161,11 +161,11 @@ private fun DiscoverFilterRow(
         val selectedCatalog = state.selectedCatalog
         val genreOptions = buildList {
             if (selectedCatalog?.genreRequired != true) {
-                add(NuvioDropdownOption(key = "", label = stringResource(Res.string.discover_all_genres)))
+                add(KovelyxDropdownOption(key = "", label = stringResource(Res.string.discover_all_genres)))
             }
-            addAll(state.genreOptions.map { genre -> NuvioDropdownOption(key = genre, label = genre) })
+            addAll(state.genreOptions.map { genre -> KovelyxDropdownOption(key = genre, label = genre) })
         }
-        NuvioDropdownChip(
+        KovelyxDropdownChip(
             title = stringResource(Res.string.discover_select_genre),
             label = state.selectedGenre ?: stringResource(Res.string.discover_all_genres),
             selectedKey = state.selectedGenre ?: "",
@@ -186,7 +186,7 @@ private fun CatalogLoadingFooter(modifier: Modifier = Modifier) {
             .padding(vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(22.dp),
         )
     }
@@ -204,7 +204,7 @@ private fun DiscoverEmptyStateCard(
         reason == DiscoverEmptyStateReason.RequestFailed &&
         (networkCondition == NetworkCondition.NoInternet || networkCondition == NetworkCondition.ServersUnreachable)
     ) {
-        NuvioNetworkOfflineCard(
+        KovelyxNetworkOfflineCard(
             condition = networkCondition,
             modifier = modifier,
             onRetry = onRetry,

@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 @Composable
 fun ClassicLayoutPreview(
     modifier: Modifier = Modifier,
-    accentColor: Color = NuvioTheme.colors.Primary,
+    accentColor: Color = KovelyxTheme.colors.Primary,
     animated: Boolean = true
 ) {
     if (animated) {
@@ -84,7 +84,7 @@ private fun ClassicLayoutPreviewFrame(
     accentColor: Color,
     scrollOffset: Float
 ) {
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
     val cardColor = accentColor.copy(alpha = 0.6f)
     val cardColorDim = accentColor.copy(alpha = 0.3f)
 
@@ -147,7 +147,7 @@ private fun DrawScope.drawClassicLayoutPreview(
 @Composable
 fun GridLayoutPreview(
     modifier: Modifier = Modifier,
-    accentColor: Color = NuvioTheme.colors.Primary,
+    accentColor: Color = KovelyxTheme.colors.Primary,
     animated: Boolean = true
 ) {
     if (animated) {
@@ -198,7 +198,7 @@ private fun GridLayoutPreviewFrame(
     accentColor: Color,
     scrollOffset: Float
 ) {
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
     val cardColor = accentColor.copy(alpha = 0.5f)
     val cardColorAlt = accentColor.copy(alpha = 0.3f)
 
@@ -245,7 +245,7 @@ private fun DrawScope.drawGridLayoutPreview(
 @Composable
 fun ModernLayoutPreview(
     modifier: Modifier = Modifier,
-    accentColor: Color = NuvioTheme.colors.Primary,
+    accentColor: Color = KovelyxTheme.colors.Primary,
     animated: Boolean = true
 ) {
     if (animated) {
@@ -296,7 +296,7 @@ private fun ModernLayoutPreviewFrame(
     accentColor: Color,
     scrollOffset: Float
 ) {
-    LayoutPreviewFrame(modifier = modifier, background = NuvioTheme.colors.Background) {
+    LayoutPreviewFrame(modifier = modifier, background = KovelyxTheme.colors.Background) {
         drawModernLayoutPreview(scrollOffset, accentColor)
     }
 }
@@ -348,13 +348,13 @@ private fun DrawScope.drawModernLayoutPreview(
 @Composable
 fun CardCwStylePreview(
     modifier: Modifier = Modifier,
-    accentColor: Color = NuvioTheme.colors.Primary
+    accentColor: Color = KovelyxTheme.colors.Primary
 ) {
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+            .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
             .background(bgColor)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -427,12 +427,12 @@ fun CardCwStylePreview(
 @Composable
 fun WideCwStylePreview(
     modifier: Modifier = Modifier,
-    accentColor: Color = NuvioTheme.colors.Primary
+    accentColor: Color = KovelyxTheme.colors.Primary
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(NuvioTheme.radii.sm))
-            .background(NuvioTheme.colors.Background)
+            .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
+            .background(KovelyxTheme.colors.Background)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
@@ -510,13 +510,13 @@ fun WideCwStylePreview(
 @Composable
 fun PosterCwStylePreview(
     modifier: Modifier = Modifier,
-    accentColor: Color = NuvioTheme.colors.Primary
+    accentColor: Color = KovelyxTheme.colors.Primary
 ) {
-    val bgColor = NuvioTheme.colors.Background
+    val bgColor = KovelyxTheme.colors.Background
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+            .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
             .background(bgColor)
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -592,7 +592,7 @@ private fun LayoutPreviewFrame(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+            .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
             .background(background)
     ) {
         Canvas(modifier = Modifier.fillMaxSize(), onDraw = onDraw)

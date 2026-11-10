@@ -13,7 +13,7 @@ import androidx.tv.material3.ButtonDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -32,7 +32,7 @@ fun PlayManualOverrideDialog(
         primaryFocusRequester.requestFocus()
     }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         subtitle = subtitle
@@ -44,8 +44,8 @@ fun PlayManualOverrideDialog(
                     .fillMaxWidth()
                     .focusRequester(primaryFocusRequester),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.play_manually))
@@ -59,8 +59,8 @@ fun PlayManualOverrideDialog(
                     .fillMaxWidth()
                     .then(if (!showPlayManually) Modifier.focusRequester(primaryFocusRequester) else Modifier),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextPrimary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextPrimary
                 )
             ) {
                 Text(stringResource(R.string.cw_action_start_from_beginning))

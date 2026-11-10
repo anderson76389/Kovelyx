@@ -1,8 +1,8 @@
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioMotion
+import com.kovelyx.tv.ui.theme.KovelyxMotion
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -208,7 +208,7 @@ fun LoadingOverlay(
                             textAlign = TextAlign.Center,
                             maxLines = 2,
                             modifier = Modifier
-                                .padding(horizontal = NuvioTheme.spacing.xl)
+                                .padding(horizontal = KovelyxTheme.spacing.xl)
                                 .graphicsLayer {
                                     alpha = logoAlpha
                                     scaleX = logoScale
@@ -236,7 +236,7 @@ fun LoadingOverlay(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .offset(y = messageOffset)
-                            .padding(horizontal = NuvioTheme.spacing.xl)
+                            .padding(horizontal = KovelyxTheme.spacing.xl)
                     ) {
                         Crossfade(
                             targetState = message?.takeIf { it.isNotBlank() },
@@ -266,25 +266,25 @@ fun LoadingOverlay(
                             Spacer(modifier = Modifier.height(10.dp))
                             val animatedProgress by animateFloatAsState(
                                 targetValue = progress.coerceIn(0f, 1f),
-                                animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.overlay),
+                                animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.overlay),
                                 label = "loadingProgress"
                             )
                             Box(
                                 modifier = Modifier
                                     .width(240.dp)
-                                    .height(NuvioTheme.spacing.xs)
+                                    .height(KovelyxTheme.spacing.xs)
                                     .background(
                                         color = Color.White.copy(alpha = 0.2f),
-                                        shape = RoundedCornerShape(NuvioTheme.radii.xxs)
+                                        shape = RoundedCornerShape(KovelyxTheme.radii.xxs)
                                     )
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth(animatedProgress)
-                                        .height(NuvioTheme.spacing.xs)
+                                        .height(KovelyxTheme.spacing.xs)
                                         .background(
                                             color = Color.White.copy(alpha = 0.85f),
-                                            shape = RoundedCornerShape(NuvioTheme.radii.xxs)
+                                            shape = RoundedCornerShape(KovelyxTheme.radii.xxs)
                                         )
                                 )
                             }

@@ -10,13 +10,13 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImagePainter
 
-internal enum class NuvioDesktopImageScaling {
+internal enum class KovelyxDesktopImageScaling {
     Auto,
     Disabled,
 }
 
 @Composable
-internal expect fun NuvioAsyncImage(
+internal expect fun KovelyxAsyncImage(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
@@ -32,5 +32,5 @@ internal expect fun NuvioAsyncImage(
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality? = null,
     clipToBounds: Boolean = true,
-    desktopImageScaling: NuvioDesktopImageScaling = NuvioDesktopImageScaling.Auto,
+    desktopImageScaling: KovelyxDesktopImageScaling = KovelyxDesktopImageScaling.Auto,
 )

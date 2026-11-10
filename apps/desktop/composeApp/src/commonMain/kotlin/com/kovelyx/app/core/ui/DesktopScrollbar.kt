@@ -8,21 +8,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 @Composable
-internal expect fun NuvioDesktopVerticalScrollbar(
+internal expect fun KovelyxDesktopVerticalScrollbar(
     state: LazyListState,
     modifier: Modifier = Modifier,
     backgroundColor: Color? = null,
 )
 
 @Composable
-internal expect fun NuvioDesktopVerticalScrollbar(
+internal expect fun KovelyxDesktopVerticalScrollbar(
     state: LazyGridState,
     modifier: Modifier = Modifier,
     backgroundColor: Color? = null,
 )
 
 @Composable
-internal expect fun NuvioDesktopVerticalScrollbar(
+internal expect fun KovelyxDesktopVerticalScrollbar(
     state: ScrollState,
     modifier: Modifier = Modifier,
     backgroundColor: Color? = null,

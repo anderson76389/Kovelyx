@@ -29,8 +29,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.isFullscreenActionActive
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
 import com.kovelyx.app.core.ui.toggleFullscreenAction
@@ -156,12 +156,12 @@ fun TrailerPlayerPopup(
     val dismissSheet: () -> Unit = {
         releasePlayerThen {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = dismissSheet,
         sheetState = sheetState,
     ) {

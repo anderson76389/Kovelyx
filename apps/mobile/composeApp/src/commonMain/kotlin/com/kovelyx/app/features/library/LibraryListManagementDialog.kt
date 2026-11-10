@@ -30,9 +30,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.rememberModalBottomSheetState
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.tracking.LibraryListPrivacy
 import com.kovelyx.app.features.tracking.TrackingLibraryTab
@@ -64,14 +64,14 @@ fun LibraryListManagementDialog(
     val editing = personal.firstOrNull { it.key == state.key }
     val creating = state.mode == LibraryListDialogMode.EDIT && state.key == null
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    NuvioModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    KovelyxModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         val keyboard = LocalSoftwareKeyboardController.current
         val scope = rememberCoroutineScope()
         val submit = { keyboard?.hide(); onSubmit() }
         val back = { keyboard?.hide(); onBack() }
         val dismiss: () -> Unit = {
             keyboard?.hide()
-            scope.launch { dismissNuvioBottomSheet(sheetState, onDismiss) }
+            scope.launch { dismissKovelyxBottomSheet(sheetState, onDismiss) }
         }
         Column(
             modifier = Modifier.fillMaxWidth().heightIn(max = 640.dp).imePadding().navigationBarsPadding()
@@ -130,12 +130,12 @@ fun LibraryListManagementDialog(
                 )
             }
             when (state.mode) {
-                LibraryListDialogMode.MANAGE -> NuvioPrimaryButton(
+                LibraryListDialogMode.MANAGE -> KovelyxPrimaryButton(
                     text = stringResource(Res.string.library_create_list),
                     onClick = onCreate,
                 )
                 LibraryListDialogMode.EDIT -> {
-                    NuvioPrimaryButton(
+                    KovelyxPrimaryButton(
                         text = stringResource(when {
                             state.isPending -> Res.string.action_saving
                             creating -> Res.string.library_create_list_action

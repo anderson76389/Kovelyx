@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -56,7 +56,7 @@ import com.kovelyx.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.kovelyx.tv.data.local.AVAILABLE_TMDB_LANGUAGES
 import com.kovelyx.tv.data.local.AudioLanguageOption
 import com.kovelyx.tv.data.local.displayName
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.detail.requestFocusAfterFrames
 import kotlin.math.roundToInt
 
@@ -123,7 +123,7 @@ internal fun ColorSelectionDialog(
     var currentChipColor by remember { mutableStateOf(initialChip) }
     var alphaPercent by remember { mutableIntStateOf((selectedColor.alpha * 100f).roundToInt().coerceIn(0, 100)) }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = onDismiss,
         title = title,
         suppressFirstKeyUp = false
@@ -136,8 +136,8 @@ internal fun ColorSelectionDialog(
             val firstColorFocusRequester = remember { FocusRequester() }
             LazyRow(
                 state = colorListState,
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+                contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.sm),
                 modifier = Modifier
                     .fillMaxWidth()
                     .settingsOptionRow(firstColorFocusRequester)
@@ -172,110 +172,110 @@ internal fun ColorSelectionDialog(
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(R.string.sub_opacity),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary,
+                    color = KovelyxTheme.colors.TextSecondary,
                     modifier = Modifier.width(70.dp)
                 )
                 Card(
                     onClick = { alphaPercent = (alphaPercent - 10).coerceAtLeast(0) },
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundElevated,
-                        focusedContainerColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundElevated,
+                        focusedContainerColor = KovelyxTheme.colors.Primary
                     ),
                     border = CardDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                         )
                     ),
-                    shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm))
+                    shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm))
                 ) {
                     Text(
                         text = "−",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextPrimary,
-                        modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg, vertical = NuvioTheme.spacing.sm)
+                        color = KovelyxTheme.colors.TextPrimary,
+                        modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg, vertical = KovelyxTheme.spacing.sm)
                     )
                 }
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(NuvioTheme.spacing.sm)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                        .background(NuvioTheme.colors.BackgroundElevated)
+                        .height(KovelyxTheme.spacing.sm)
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
+                        .background(KovelyxTheme.colors.BackgroundElevated)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(alphaPercent / 100f)
-                            .height(NuvioTheme.spacing.sm)
-                            .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                            .background(NuvioTheme.colors.Primary)
+                            .height(KovelyxTheme.spacing.sm)
+                            .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
+                            .background(KovelyxTheme.colors.Primary)
                     )
                 }
                 Text(
                     text = "$alphaPercent%",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
                 Card(
                     onClick = { alphaPercent = (alphaPercent + 10).coerceAtMost(100) },
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundElevated,
-                        focusedContainerColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundElevated,
+                        focusedContainerColor = KovelyxTheme.colors.Primary
                     ),
                     border = CardDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                         )
                     ),
-                    shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm))
+                    shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm))
                 ) {
                     Text(
                         text = "+",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextPrimary,
-                        modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg, vertical = NuvioTheme.spacing.sm)
+                        color = KovelyxTheme.colors.TextPrimary,
+                        modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg, vertical = KovelyxTheme.spacing.sm)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Card(
                     onClick = onDismiss,
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundElevated,
-                        focusedContainerColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundElevated,
+                        focusedContainerColor = KovelyxTheme.colors.Primary
                     ),
                     border = CardDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                         )
                     ),
-                    shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+                    shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = stringResource(R.string.action_cancel),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         modifier = Modifier
-                            .padding(NuvioTheme.spacing.md)
+                            .padding(KovelyxTheme.spacing.md)
                             .fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
@@ -283,24 +283,24 @@ internal fun ColorSelectionDialog(
                 Card(
                     onClick = { onColorSelected(currentChipColor.copy(alpha = alphaPercent / 100f)) },
                     colors = CardDefaults.colors(
-                        containerColor = NuvioTheme.colors.BackgroundElevated,
-                        focusedContainerColor = NuvioTheme.colors.Primary
+                        containerColor = KovelyxTheme.colors.BackgroundElevated,
+                        focusedContainerColor = KovelyxTheme.colors.Primary
                     ),
                     border = CardDefaults.border(
                         focusedBorder = Border(
-                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                            shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                            shape = RoundedCornerShape(KovelyxTheme.radii.sm)
                         )
                     ),
-                    shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+                    shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = stringResource(R.string.action_apply),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         modifier = Modifier
-                            .padding(NuvioTheme.spacing.md)
+                            .padding(KovelyxTheme.spacing.md)
                             .fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
@@ -327,7 +327,7 @@ private fun ColorOption(
     Card(
         onClick = onClick,
         modifier = Modifier
-            .size(NuvioTheme.spacing.xxxl)
+            .size(KovelyxTheme.spacing.xxxl)
             .then(modifier)
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
@@ -335,11 +335,11 @@ private fun ColorOption(
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(3.dp),
+                border = KovelyxTheme.focusRing.border(3.dp),
                 shape = CircleShape
             ),
             border = if (isSelected) Border(
-                border = BorderStroke(3.dp, NuvioTheme.colors.Primary),
+                border = BorderStroke(3.dp, KovelyxTheme.colors.Primary),
                 shape = CircleShape
             ) else Border.None
         ),
@@ -356,7 +356,7 @@ private fun ColorOption(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(Color.Gray)
-                        .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, CircleShape)
+                        .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, CircleShape)
                 )
             } else {
                 Box(
@@ -364,7 +364,7 @@ private fun ColorOption(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(color)
-                        .border(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border, CircleShape)
+                        .border(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border, CircleShape)
                 )
             }
 

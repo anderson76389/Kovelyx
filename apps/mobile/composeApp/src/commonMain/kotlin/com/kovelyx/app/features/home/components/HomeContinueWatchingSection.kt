@@ -49,11 +49,11 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.kovelyx.app.core.ui.DisintegratingContainer
 import com.kovelyx.app.core.ui.DisintegrationRequest
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
-import com.kovelyx.app.core.ui.NuvioProgressBar
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxProgressBar
 import com.kovelyx.app.core.ui.nuvioCardDepth
 import com.kovelyx.app.core.ui.NuvioShelfSection
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.PosterLandscapeAspectRatio
 import com.kovelyx.app.core.ui.PosterCardStyleUiState
 import com.kovelyx.app.core.ui.ScopedDisintegrationTracker
@@ -92,8 +92,8 @@ internal fun continueWatchingSectionHeightEstimate(
     layout: ContinueWatchingLayout,
     basePosterWidthDp: Int,
 ): Dp {
-    val headerHeight = NuvioTokens.Space.s40
-    val headerToRowGap = NuvioTokens.Space.s8 + NuvioTokens.Space.s2
+    val headerHeight = KovelyxTokens.Space.s40
+    val headerToRowGap = KovelyxTokens.Space.s8 + KovelyxTokens.Space.s2
     val rowHeight = when (style) {
         ContinueWatchingSectionStyle.Card -> continueWatchingLandscapeCardHeight(basePosterWidthDp)
         ContinueWatchingSectionStyle.Wide -> layout.wideCardHeight
@@ -109,7 +109,7 @@ internal fun continueWatchingHeroViewportReserveHeight(
 ): Dp {
     val bottomNavigationClearance = when (style) {
         ContinueWatchingSectionStyle.Card,
-        ContinueWatchingSectionStyle.Wide -> NuvioTokens.Space.s24
+        ContinueWatchingSectionStyle.Wide -> KovelyxTokens.Space.s24
         ContinueWatchingSectionStyle.Poster -> 0.dp
     }
     return continueWatchingSectionHeightEstimate(
@@ -473,7 +473,7 @@ private fun CardStylePreview() {
                     .background(Color.White.copy(alpha = 0.75f)),
             )
         }
-        NuvioProgressBar(
+        KovelyxProgressBar(
             progress = 0.55f,
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -521,7 +521,7 @@ private fun WideCardPreview() {
                     .clip(RoundedCornerShape(2.dp))
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.14f)),
             )
-            NuvioProgressBar(
+            KovelyxProgressBar(
                 progress = 0.6f,
                 modifier = Modifier.fillMaxWidth(),
                 height = 4.dp,
@@ -553,7 +553,7 @@ private fun PosterCardPreview() {
                     .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 4.dp, vertical = 4.dp),
             ) {
-                NuvioProgressBar(
+                KovelyxProgressBar(
                     progress = 0.45f,
                     modifier = Modifier.width(40.dp),
                     height = 4.dp,
@@ -717,7 +717,7 @@ private fun ContinueWatchingCard(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .nuvioCardDepth(
                 shape = RoundedCornerShape(cardMetrics.cornerRadius),
-                surface = NuvioCardDepthSurface.ContinueWatching,
+                surface = KovelyxCardDepthSurface.ContinueWatching,
             )
             .posterCardClickable(
                 onClick = onClick,
@@ -995,7 +995,7 @@ private fun ContinueWatchingWideCard(
 
             if (item.progressFraction > 0f) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    NuvioProgressBar(
+                    KovelyxProgressBar(
                         progress = item.progressFraction,
                         modifier = Modifier.fillMaxWidth(),
                         height = layout.progressHeight,
@@ -1042,7 +1042,7 @@ private fun ContinueWatchingPosterCard(
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .nuvioCardDepth(
                     shape = RoundedCornerShape(cornerRadius),
-                    surface = NuvioCardDepthSurface.ContinueWatching,
+                    surface = KovelyxCardDepthSurface.ContinueWatching,
                 )
                 .posterCardClickable(
                     onClick = onClick,
@@ -1101,7 +1101,7 @@ private fun ContinueWatchingPosterCard(
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(horizontal = 6.dp, vertical = 6.dp),
                 ) {
-                    NuvioProgressBar(
+                    KovelyxProgressBar(
                         progress = item.progressFraction,
                         modifier = Modifier.width(layout.posterCardWidth - 32.dp),
                         height = layout.progressHeight,

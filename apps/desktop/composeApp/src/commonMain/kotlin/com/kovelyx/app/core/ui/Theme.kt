@@ -34,8 +34,8 @@ val MaterialTheme.themePalette: ThemeColorPalette
     @ReadOnlyComposable
     get() = LocalThemePalette.current
 
-internal val LocalNuvioPlatformDensity = staticCompositionLocalOf<Density> {
-    error("Platform density is unavailable outside NuvioTheme")
+internal val LocalKovelyxPlatformDensity = staticCompositionLocalOf<Density> {
+    error("Platform density is unavailable outside KovelyxTheme")
 }
 
 val MaterialTheme.appTheme: AppTheme
@@ -72,153 +72,153 @@ private val JetBrainsSans: FontFamily
         Font(Res.font.jetbrains_sans_regular, FontWeight.Normal, FontStyle.Normal),
     )
 
-private val NuvioTypography: Typography
+private val KovelyxTypography: Typography
     @Composable
     get() = Typography(
         displayLarge = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.pageDisplay,
-            lineHeight = NuvioTokens.LineHeight.pageDisplay,
+            fontSize = KovelyxTokens.Type.pageDisplay,
+            lineHeight = KovelyxTokens.LineHeight.pageDisplay,
             fontWeight = FontWeight.Bold,
-            letterSpacing = NuvioTokens.LetterSpacing.pageDisplay,
+            letterSpacing = KovelyxTokens.LetterSpacing.pageDisplay,
         ),
         headlineLarge = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.headline,
-            lineHeight = NuvioTokens.LineHeight.headline,
+            fontSize = KovelyxTokens.Type.headline,
+            lineHeight = KovelyxTokens.LineHeight.headline,
             fontWeight = FontWeight.SemiBold,
-            letterSpacing = NuvioTokens.LetterSpacing.headline,
+            letterSpacing = KovelyxTokens.LetterSpacing.headline,
         ),
         titleLarge = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.titleSm,
-            lineHeight = NuvioTokens.LineHeight.materialTitleLarge,
+            fontSize = KovelyxTokens.Type.titleSm,
+            lineHeight = KovelyxTokens.LineHeight.materialTitleLarge,
             fontWeight = FontWeight.SemiBold,
         ),
         titleMedium = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodyLg,
-            lineHeight = NuvioTokens.LineHeight.bodyMd,
+            fontSize = KovelyxTokens.Type.bodyLg,
+            lineHeight = KovelyxTokens.LineHeight.bodyMd,
             fontWeight = FontWeight.SemiBold,
         ),
         bodyLarge = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodyApp,
-            lineHeight = NuvioTokens.LineHeight.bodyApp,
+            fontSize = KovelyxTokens.Type.bodyApp,
+            lineHeight = KovelyxTokens.LineHeight.bodyApp,
             fontWeight = FontWeight.Normal,
         ),
         bodyMedium = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodyMd,
-            lineHeight = NuvioTokens.LineHeight.bodyMd,
+            fontSize = KovelyxTokens.Type.bodyMd,
+            lineHeight = KovelyxTokens.LineHeight.bodyMd,
             fontWeight = FontWeight.Normal,
         ),
         labelLarge = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodyMd,
-            lineHeight = NuvioTokens.LineHeight.bodySm,
+            fontSize = KovelyxTokens.Type.bodyMd,
+            lineHeight = KovelyxTokens.LineHeight.bodySm,
             fontWeight = FontWeight.SemiBold,
         ),
         labelMedium = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.labelSm,
-            lineHeight = NuvioTokens.LineHeight.labelXs,
+            fontSize = KovelyxTokens.Type.labelSm,
+            lineHeight = KovelyxTokens.LineHeight.labelXs,
             fontWeight = FontWeight.SemiBold,
-            letterSpacing = NuvioTokens.LetterSpacing.label,
+            letterSpacing = KovelyxTokens.LetterSpacing.label,
         ),
     )
 
-private val NuvioTypeTokens: NuvioTypeScale
+private val KovelyxTypeTokens: KovelyxTypeScale
     @Composable
-    get() = NuvioTypeScale(
+    get() = KovelyxTypeScale(
         labelXs = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.labelXs,
-            lineHeight = NuvioTokens.LineHeight.labelXs,
+            fontSize = KovelyxTokens.Type.labelXs,
+            lineHeight = KovelyxTokens.LineHeight.labelXs,
             fontWeight = FontWeight.SemiBold,
         ),
         labelSm = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.labelSm,
-            lineHeight = NuvioTokens.LineHeight.labelSm,
+            fontSize = KovelyxTokens.Type.labelSm,
+            lineHeight = KovelyxTokens.LineHeight.labelSm,
             fontWeight = FontWeight.SemiBold,
         ),
         bodySm = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodySm,
-            lineHeight = NuvioTokens.LineHeight.bodySm,
+            fontSize = KovelyxTokens.Type.bodySm,
+            lineHeight = KovelyxTokens.LineHeight.bodySm,
             fontWeight = FontWeight.Normal,
         ),
         bodyMd = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodyMd,
-            lineHeight = NuvioTokens.LineHeight.bodyMd,
+            fontSize = KovelyxTokens.Type.bodyMd,
+            lineHeight = KovelyxTokens.LineHeight.bodyMd,
             fontWeight = FontWeight.Normal,
         ),
         bodyLg = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.bodyLg,
-            lineHeight = NuvioTokens.LineHeight.bodyLg,
+            fontSize = KovelyxTokens.Type.bodyLg,
+            lineHeight = KovelyxTokens.LineHeight.bodyLg,
             fontWeight = FontWeight.Normal,
         ),
         titleSm = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.titleSm,
-            lineHeight = NuvioTokens.LineHeight.titleSm,
+            fontSize = KovelyxTokens.Type.titleSm,
+            lineHeight = KovelyxTokens.LineHeight.titleSm,
             fontWeight = FontWeight.SemiBold,
         ),
         titleMd = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.titleMd,
-            lineHeight = NuvioTokens.LineHeight.titleMd,
+            fontSize = KovelyxTokens.Type.titleMd,
+            lineHeight = KovelyxTokens.LineHeight.titleMd,
             fontWeight = FontWeight.SemiBold,
         ),
         titleLg = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.titleLg,
-            lineHeight = NuvioTokens.LineHeight.titleLg,
+            fontSize = KovelyxTokens.Type.titleLg,
+            lineHeight = KovelyxTokens.LineHeight.titleLg,
             fontWeight = FontWeight.SemiBold,
         ),
         displaySm = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.displaySm,
-            lineHeight = NuvioTokens.LineHeight.displaySm,
+            fontSize = KovelyxTokens.Type.displaySm,
+            lineHeight = KovelyxTokens.LineHeight.displaySm,
             fontWeight = FontWeight.Bold,
         ),
         displayMd = TextStyle(
             fontFamily = JetBrainsSans,
-            fontSize = NuvioTokens.Type.displayMd,
-            lineHeight = NuvioTokens.LineHeight.displayMd,
+            fontSize = KovelyxTokens.Type.displayMd,
+            lineHeight = KovelyxTokens.LineHeight.displayMd,
             fontWeight = FontWeight.Bold,
         ),
     )
 
-private val NuvioRippleConfiguration = RippleConfiguration(
+private val KovelyxRippleConfiguration = RippleConfiguration(
     color = Color.Black,
 )
 
-private const val NuvioDesktopFontScale = 1.08f
-private const val NuvioDesktopBaseWidthDp = 1280f
-private const val NuvioDesktopBaseHeightDp = 820f
-private const val NuvioDesktopMinUiScale = 1f
-private const val NuvioDesktopMaxUiScale = 1.18f
+private const val KovelyxDesktopFontScale = 1.08f
+private const val KovelyxDesktopBaseWidthDp = 1280f
+private const val KovelyxDesktopBaseHeightDp = 820f
+private const val KovelyxDesktopMinUiScale = 1f
+private const val KovelyxDesktopMaxUiScale = 1.18f
 
 internal fun desktopUiScaleForWindow(widthDp: Float, heightDp: Float): Float {
-    if (!isDesktop || widthDp <= 0f || heightDp <= 0f) return NuvioDesktopMinUiScale
+    if (!isDesktop || widthDp <= 0f || heightDp <= 0f) return KovelyxDesktopMinUiScale
 
     val rawScale = minOf(
-        widthDp / NuvioDesktopBaseWidthDp,
-        heightDp / NuvioDesktopBaseHeightDp,
+        widthDp / KovelyxDesktopBaseWidthDp,
+        heightDp / KovelyxDesktopBaseHeightDp,
     )
-    return rawScale.coerceIn(NuvioDesktopMinUiScale, NuvioDesktopMaxUiScale)
+    return rawScale.coerceIn(KovelyxDesktopMinUiScale, KovelyxDesktopMaxUiScale)
 }
 
 @Composable
-fun NuvioTheme(
+fun KovelyxTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     appTheme: AppTheme = AppTheme.WHITE,
     amoled: Boolean = false,
-    desktopUiScale: Float = NuvioDesktopMinUiScale,
+    desktopUiScale: Float = KovelyxDesktopMinUiScale,
     customThemeColors: CustomThemeColors = CustomThemeColors.Default,
     content: @Composable () -> Unit,
 ) {
@@ -226,29 +226,29 @@ fun NuvioTheme(
         ThemeColors.getColorPalette(appTheme, customThemeColors)
     }
     val colorScheme = buildColorScheme(palette, amoled = amoled)
-    val tokens = defaultNuvioThemeTokens(palette, amoled = amoled, colorScheme = colorScheme)
+    val tokens = defaultKovelyxThemeTokens(palette, amoled = amoled, colorScheme = colorScheme)
 
     val density = LocalDensity.current
     val effectiveDesktopUiScale = if (isDesktop) {
-        desktopUiScale.coerceIn(NuvioDesktopMinUiScale, NuvioDesktopMaxUiScale)
+        desktopUiScale.coerceIn(KovelyxDesktopMinUiScale, KovelyxDesktopMaxUiScale)
     } else {
-        NuvioDesktopMinUiScale
+        KovelyxDesktopMinUiScale
     }
     CompositionLocalProvider(
-        LocalNuvioPlatformDensity provides density,
+        LocalKovelyxPlatformDensity provides density,
         LocalDensity provides Density(
             density = density.density * effectiveDesktopUiScale,
-            fontScale = if (isDesktop) NuvioDesktopFontScale else 1f,
+            fontScale = if (isDesktop) KovelyxDesktopFontScale else 1f,
         ),
-        LocalNuvioThemeTokens provides tokens,
-        LocalNuvioTypeScale provides NuvioTypeTokens,
-        LocalRippleConfiguration provides NuvioRippleConfiguration,
+        LocalKovelyxThemeTokens provides tokens,
+        LocalKovelyxTypeScale provides KovelyxTypeTokens,
+        LocalRippleConfiguration provides KovelyxRippleConfiguration,
         LocalAppTheme provides appTheme,
         LocalThemePalette provides palette,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = NuvioTypography,
+            typography = KovelyxTypography,
         ) {
             SkeletonAnimationProvider(content = content)
         }

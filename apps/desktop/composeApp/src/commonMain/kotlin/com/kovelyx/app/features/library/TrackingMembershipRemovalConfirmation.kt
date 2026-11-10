@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import com.kovelyx.app.core.ui.NuvioStatusModal
+import com.kovelyx.app.core.ui.KovelyxStatusModal
 import com.kovelyx.app.features.tracking.TrackingMembershipApplyResult
 import com.kovelyx.app.features.tracking.TrackingMembershipRemovalConfirmation
 import com.kovelyx.app.features.tracking.TrackingMembershipRemovalImpact
@@ -74,7 +74,7 @@ fun TrackingMembershipRemovalConfirmationHost(
         else -> stringResource(Res.string.tracking_removal_impact_history_and_rating)
     }
 
-    NuvioStatusModal(
+    KovelyxStatusModal(
         title = stringResource(Res.string.tracking_remove_confirmation_title, providerNames),
         message = stringResource(
             Res.string.tracking_remove_confirmation_message,
@@ -88,8 +88,8 @@ fun TrackingMembershipRemovalConfirmationHost(
         confirmText = stringResource(Res.string.action_remove_anyway),
         dismissText = stringResource(Res.string.action_cancel),
         onConfirm = {
-            val request = pending ?: return@NuvioStatusModal
-            if (isBusy) return@NuvioStatusModal
+            val request = pending ?: return@KovelyxStatusModal
+            if (isBusy) return@KovelyxStatusModal
             isBusy = true
             scope.launch {
                 try {

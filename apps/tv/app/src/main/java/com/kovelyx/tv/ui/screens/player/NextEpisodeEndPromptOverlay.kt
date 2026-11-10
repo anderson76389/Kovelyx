@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
@@ -68,9 +68,9 @@ fun NextEpisodeEndPromptOverlay(
             modifier = Modifier
                 .fillMaxWidth(0.78f)
                 .focusGroup()
-                .padding(horizontal = NuvioTheme.spacing.xxl),
+                .padding(horizontal = KovelyxTheme.spacing.xxl),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             Text(
                 text = stringResource(R.string.player_next_episode_prompt_title),
@@ -86,7 +86,7 @@ fun NextEpisodeEndPromptOverlay(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
 
             Text(
                 text = stringResource(R.string.next_episode_label),
@@ -107,7 +107,7 @@ fun NextEpisodeEndPromptOverlay(
             Spacer(modifier = Modifier.height(14.dp))
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl

@@ -12,13 +12,13 @@ internal actual val floatingNavigationGlowSupported: Boolean
 internal actual fun FloatingNavigationBar(
     items: List<FloatingNavigationItem>,
     modifier: Modifier,
-    scrollState: NuvioNavBarScrollState?,
+    scrollState: KovelyxNavBarScrollState?,
     hazeState: HazeState?,
     contentPadding: PaddingValues,
     compactSize: Boolean,
     glowEnabled: Boolean,
 ) {
-    NuvioNavigationBar(modifier, scrollState, hazeState, contentPadding, compactSize) {
+    KovelyxNavigationBar(modifier, scrollState, hazeState, contentPadding, compactSize) {
         items.forEach { item ->
             when {
                 item.icon != null -> NavItem(

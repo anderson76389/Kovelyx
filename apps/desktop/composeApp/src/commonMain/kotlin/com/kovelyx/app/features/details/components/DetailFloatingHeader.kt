@@ -38,8 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import com.kovelyx.app.core.ui.FullscreenActionButton
 import com.kovelyx.app.core.ui.fullscreenActionHorizontalInsetForWidth
 import com.kovelyx.app.core.ui.isFullscreenActionSupported
@@ -107,7 +107,7 @@ fun DetailFloatingHeader(
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     if (interactive) {
-                        NuvioBackButton(
+                        KovelyxBackButton(
                             onClick = onBack,
                             modifier = Modifier.size(40.dp),
                             containerColor = Color.Transparent,

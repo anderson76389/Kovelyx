@@ -63,7 +63,7 @@ import com.kovelyx.tv.ui.components.SourceChipItem
 import com.kovelyx.tv.ui.components.SourceChipStatus
 import com.kovelyx.tv.ui.components.SourceStatusFilterChip
 import com.kovelyx.tv.ui.components.StreamBadgeChips
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.contentTextDirection
 import com.kovelyx.tv.ui.util.toAbsoluteAlignment
 import androidx.compose.ui.res.stringResource
@@ -95,7 +95,7 @@ internal fun StreamItem(
     // Pre-upscale: decode at 2× target pixels so the hardware compositor
     // has enough pixel data for smooth edges inside Card RenderNodes.
     val logoDecodeSize = remember(density) {
-        with(density) { NuvioTheme.spacing.xxl.roundToPx() } * 2
+        with(density) { KovelyxTheme.spacing.xxl.roundToPx() } * 2
     }
     val addonLogoModel = remember(context, stream.addonLogo, logoDecodeSize) {
         stream.addonLogo?.let { logo ->
@@ -123,21 +123,21 @@ internal fun StreamItem(
                 } else false
             } else Modifier),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundElevated,
-            focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+            containerColor = KovelyxTheme.colors.BackgroundElevated,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
         ),
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md)),
         border = CardDefaults.border(
             border = Border(
                 border = BorderStroke(
-                    NuvioTheme.spacing.hairline,
-                    if (isCurrentStream) NuvioTheme.colors.Primary.copy(alpha = 0.65f) else Color.Transparent
+                    KovelyxTheme.spacing.hairline,
+                    if (isCurrentStream) KovelyxTheme.colors.Primary.copy(alpha = 0.65f) else Color.Transparent
                 ),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
         scale = CardDefaults.scale(focusedScale = 1.04f)
@@ -145,13 +145,13 @@ internal fun StreamItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.lg),
+                .padding(KovelyxTheme.spacing.lg),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
             ) {
                 if (hasBadges && badgePlacement == StreamBadgePlacement.TOP) {
                     StreamBadgeChips(
@@ -159,34 +159,34 @@ internal fun StreamItem(
                         fileSizeBytes = stream.behaviorHints?.videoSize,
                         showFileSizeBadge = showFileSizeBadges
                     )
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                 }
 
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                     Row(
                         modifier = Modifier.align(streamName.contentTextDirection().toAbsoluteAlignment()),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
                     ) {
                         Text(
                             text = streamName,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 textDirection = streamName.contentTextDirection()
                             ),
-                            color = NuvioTheme.colors.TextPrimary
+                            color = KovelyxTheme.colors.TextPrimary
                         )
 
                         if (isCurrentStream) {
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(999.dp))
-                                    .background(NuvioTheme.colors.Primary.copy(alpha = 0.2f))
-                                    .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs)
+                                    .background(KovelyxTheme.colors.Primary.copy(alpha = 0.2f))
+                                    .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs)
                             ) {
                                 Text(
                                     text = stringResource(R.string.sources_playing),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = NuvioTheme.colors.Primary
+                                    color = KovelyxTheme.colors.Primary
                                 )
                             }
                         }
@@ -201,7 +201,7 @@ internal fun StreamItem(
                             style = MaterialTheme.typography.bodySmall.copy(
                                 textDirection = description.contentTextDirection()
                             ),
-                            color = NuvioTheme.extendedColors.textSecondary
+                            color = KovelyxTheme.extendedColors.textSecondary
                         )
                     }
                 }
@@ -211,7 +211,7 @@ internal fun StreamItem(
                         badges = stream.badges,
                         fileSizeBytes = stream.behaviorHints?.videoSize,
                         showFileSizeBadge = showFileSizeBadges,
-                        modifier = Modifier.padding(top = NuvioTheme.spacing.xxs)
+                        modifier = Modifier.padding(top = KovelyxTheme.spacing.xxs)
                     )
                 }
             }
@@ -225,20 +225,20 @@ internal fun StreamItem(
                             model = addonLogoModel,
                             contentDescription = stream.addonName,
                             modifier = Modifier
-                                .size(NuvioTheme.spacing.xxl)
-                                .clip(RoundedCornerShape(NuvioTheme.radii.xs)),
+                                .size(KovelyxTheme.spacing.xxl)
+                                .clip(RoundedCornerShape(KovelyxTheme.radii.xs)),
                             contentScale = ContentScale.Fit
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
 
                     Text(
                         text = stream.addonName,
                         style = MaterialTheme.typography.labelSmall.copy(
                             textDirection = stream.addonName.contentTextDirection()
                         ),
-                        color = NuvioTheme.extendedColors.textTertiary,
+                        color = KovelyxTheme.extendedColors.textTertiary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -366,8 +366,8 @@ internal fun AddonFilterChips(
 
     LazyRow(
         state = chipListState,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
         modifier = Modifier
             .onFocusChanged { focusState ->
                 val hasFocus = focusState.hasFocus

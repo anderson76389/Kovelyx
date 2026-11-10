@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.Dp
 
 @Immutable
-class NuvioFocusRingStyle internal constructor(
+class KovelyxFocusRingStyle internal constructor(
     val solidColor: Color,
     private val gradientColors: List<Color>
 ) {
@@ -37,8 +37,8 @@ internal fun createThemeBrush(colors: List<Color>): Brush {
     }
 }
 
-internal fun createFocusRingStyle(palette: ThemeColorPalette): NuvioFocusRingStyle {
-    return NuvioFocusRingStyle(
+internal fun createFocusRingStyle(palette: ThemeColorPalette): KovelyxFocusRingStyle {
+    return KovelyxFocusRingStyle(
         solidColor = palette.focusRing,
         gradientColors = palette.focusRingGradient
     )

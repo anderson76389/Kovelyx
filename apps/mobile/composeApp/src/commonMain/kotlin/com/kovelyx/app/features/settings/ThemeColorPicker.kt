@@ -31,7 +31,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.kovelyx.app.core.ui.HsvColor
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.formatHexColor
 import com.kovelyx.app.core.ui.nuvio
 import kotlin.math.roundToInt
@@ -67,22 +67,22 @@ internal fun ThemeColorPicker(
         onColorChanged(emittedColor)
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8)) {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s4)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s4)) {
             colorSwatches.forEach { swatch ->
                 Box(
                     Modifier
-                        .size(NuvioTokens.Space.s48)
+                        .size(KovelyxTokens.Space.s48)
                         .clip(CircleShape)
                         .selectable(color == swatch, role = Role.RadioButton, onClick = { onColorChanged(swatch) })
                         .semantics { contentDescription = formatHexColor(swatch) }
-                        .padding(NuvioTokens.Space.s6)
+                        .padding(KovelyxTokens.Space.s6)
                         .border(
                             tokens.borders.medium,
                             if (color == swatch) tokens.colors.textPrimary else tokens.colors.borderDefault,
                             CircleShape,
                         )
-                        .padding(NuvioTokens.Space.s4)
+                        .padding(KovelyxTokens.Space.s4)
                         .clip(CircleShape)
                         .background(Color(swatch or 0xFF000000.toInt())),
                 )
@@ -136,7 +136,7 @@ private fun ColorChannelSlider(
             modifier = Modifier.fillMaxWidth().semantics { contentDescription = title },
             track = {
                 Box(
-                    Modifier.fillMaxWidth().height(NuvioTokens.Space.s8)
+                    Modifier.fillMaxWidth().height(KovelyxTokens.Space.s8)
                         .clip(tokens.shapes.chip).background(brush),
                 )
             },

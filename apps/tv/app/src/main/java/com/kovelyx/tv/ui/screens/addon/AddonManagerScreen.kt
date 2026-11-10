@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.addon
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.graphics.Bitmap
 import android.widget.Toast
@@ -112,7 +112,7 @@ import com.kovelyx.tv.domain.model.Addon
 import com.kovelyx.tv.domain.model.CatalogDescriptor
 import com.kovelyx.tv.domain.model.ExperienceMode
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.util.contentTextDirection
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -151,7 +151,7 @@ fun AddonManagerScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(NuvioTheme.colors.Background),
+                .background(KovelyxTheme.colors.Background),
             contentAlignment = Alignment.Center
         ) {
             LoadingIndicator()
@@ -272,7 +272,7 @@ fun AddonManagerScreen(
                 Text(
                     text = stringResource(R.string.addon_title),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = if (showBuiltInHeader) NuvioTheme.colors.TextPrimary else Color.Transparent
+                    color = if (showBuiltInHeader) KovelyxTheme.colors.TextPrimary else Color.Transparent
                 )
             }
 
@@ -281,13 +281,13 @@ fun AddonManagerScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1A3A5C)),
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     ) {
                         Text(
                             text = stringResource(R.string.addon_readonly_notice),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = NuvioTheme.colors.TextSecondary,
-                            modifier = androidx.compose.ui.Modifier.padding(NuvioTheme.spacing.lg)
+                            color = KovelyxTheme.colors.TextSecondary,
+                            modifier = androidx.compose.ui.Modifier.padding(KovelyxTheme.spacing.lg)
                         )
                     }
                 }
@@ -299,19 +299,19 @@ fun AddonManagerScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateContentSize(),
-                        colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
-                        shape = RoundedCornerShape(NuvioTheme.radii.md)
+                        colors = CardDefaults.cardColors(containerColor = KovelyxTheme.colors.BackgroundCard),
+                        shape = RoundedCornerShape(KovelyxTheme.radii.md)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
                                 text = stringResource(R.string.addon_install_title),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                                color = NuvioTheme.colors.TextPrimary,
+                                color = KovelyxTheme.colors.TextPrimary,
                             )
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 // Surface always stays in the tree for stable D-pad focus
@@ -321,23 +321,23 @@ fun AddonManagerScreen(
                                         .weight(1f)
                                         .focusRequester(surfaceFocusRequester),
                                     colors = ClickableSurfaceDefaults.colors(
-                                        containerColor = NuvioTheme.colors.BackgroundElevated,
-                                        focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                                        containerColor = KovelyxTheme.colors.BackgroundElevated,
+                                        focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
                                     ),
                                     border = ClickableSurfaceDefaults.border(
                                         border = Border(
-                                            border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                            border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
+                                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                         ),
                                         focusedBorder = Border(
-                                            border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                            border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                         )
                                     ),
-                                    shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                                    shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                                     scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
                                 ) {
-                                    Box(modifier = Modifier.padding(NuvioTheme.spacing.md)) {
+                                    Box(modifier = Modifier.padding(KovelyxTheme.spacing.md)) {
                                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                                         BasicTextField(
                                             value = uiState.installUrl,
@@ -365,16 +365,16 @@ fun AddonManagerScreen(
                                                 }
                                             ),
                                             textStyle = MaterialTheme.typography.bodyMedium.copy(
-                                                color = NuvioTheme.colors.TextPrimary,
+                                                color = KovelyxTheme.colors.TextPrimary,
                                             textDirection = TextDirection.Content
                                             ),
-                                            cursorBrush = SolidColor(if (isEditing) NuvioTheme.colors.Primary else Color.Transparent),
+                                            cursorBrush = SolidColor(if (isEditing) KovelyxTheme.colors.Primary else Color.Transparent),
                                             decorationBox = { innerTextField ->
                                                 if (uiState.installUrl.isEmpty()) {
                                                     Text(
                                                         text = stringResource(R.string.addon_install_placeholder),
                                                         style = MaterialTheme.typography.bodyMedium,
-                                                        color = NuvioTheme.colors.TextTertiary
+                                                        color = KovelyxTheme.colors.TextTertiary
                                                     )
                                                 }
                                                 innerTextField()
@@ -396,12 +396,12 @@ fun AddonManagerScreen(
                                         .focusRequester(installButtonFocusRequester)
                                         .semantics { role = Role.Button },
                                     colors = ButtonDefaults.colors(
-                                        containerColor = NuvioTheme.colors.BackgroundCard,
-                                        contentColor = NuvioTheme.colors.TextPrimary,
-                                        focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                                        focusedContentColor = NuvioTheme.colors.Primary
+                                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                                        contentColor = KovelyxTheme.colors.TextPrimary,
+                                        focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                                        focusedContentColor = KovelyxTheme.colors.Primary
                                     ),
-                                    shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                                    shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                                 ) {
                                     Text(text = if (uiState.isInstalling) stringResource(R.string.addon_installing) else stringResource(R.string.addon_install_btn))
                                 }
@@ -411,7 +411,7 @@ fun AddonManagerScreen(
                                 Text(
                                     text = uiState.error.orEmpty(),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = NuvioTheme.colors.Error,
+                                    color = KovelyxTheme.colors.Error,
                                     modifier = Modifier.padding(top = 10.dp)
                                 )
                             }
@@ -461,11 +461,11 @@ fun AddonManagerScreen(
                     Text(
                         text = stringResource(R.string.addon_installed_section),
                         style = MaterialTheme.typography.titleLarge.copy(textDirection = TextDirection.Content),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                     )
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
                     if (uiState.isLoading && uiState.installedAddons.isEmpty()) {
-                        LoadingIndicator(modifier = Modifier.height(NuvioTheme.spacing.xl))
+                        LoadingIndicator(modifier = Modifier.height(KovelyxTheme.spacing.xl))
                     }
                 }
             }
@@ -475,7 +475,7 @@ fun AddonManagerScreen(
                     Text(
                         text = stringResource(R.string.addon_empty),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             } else {
@@ -540,7 +540,7 @@ fun AddonManagerScreen(
         }
 
         addonUrlPendingDeletion?.let { addonUrl ->
-            NuvioDialog(
+            KovelyxDialog(
                 onDismiss = { addonUrlPendingDeletion = null },
                 title = stringResource(R.string.addon_delete_confirm_title),
                 subtitle = stringResource(R.string.addon_delete_confirm_message),
@@ -548,7 +548,7 @@ fun AddonManagerScreen(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md, Alignment.End)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md, Alignment.End)
                 ) {
                     Button(
                         onClick = { addonUrlPendingDeletion = null },
@@ -587,7 +587,7 @@ internal fun AddonMessageOverlay(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(NuvioTheme.spacing.xl),
+            .padding(KovelyxTheme.spacing.xl),
         contentAlignment = Alignment.BottomCenter
     ) {
         AnimatedVisibility(
@@ -605,12 +605,12 @@ internal fun AddonMessageOverlay(
                         Color(0xFF2E7D32).copy(alpha = 0.92f)
                     }
                 ),
-                shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = NuvioTheme.spacing.md),
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = KovelyxTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
                     Icon(
                         imageVector = if (isError) Icons.Default.Close else Icons.Default.Check,
@@ -643,12 +643,12 @@ private fun ManageFromPhoneCard(
             .onFocusChanged { isFocused = it.isFocused }
             .semantics { role = Role.Button },
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = ClickableSurfaceDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(18.dp)
             )
         ),
@@ -667,19 +667,19 @@ private fun ManageFromPhoneCard(
                     imageVector = Icons.Default.QrCode2,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                    tint = if (isFocused) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary
+                    tint = if (isFocused) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary
                 )
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.lg))
                 Column {
                     Text(
                         text = stringResource(R.string.addon_manage_from_phone_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                     )
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -687,7 +687,7 @@ private fun ManageFromPhoneCard(
                 imageVector = Icons.Default.PhoneAndroid,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = NuvioTheme.colors.TextSecondary
+                tint = KovelyxTheme.colors.TextSecondary
             )
         }
     }
@@ -705,12 +705,12 @@ private fun CatalogOrderEntryCard(onClick: () -> Unit) {
             .onFocusChanged { isFocused = it.isFocused }
             .semantics { role = Role.Button },
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = ClickableSurfaceDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(18.dp)
             )
         ),
@@ -729,19 +729,19 @@ private fun CatalogOrderEntryCard(onClick: () -> Unit) {
                     imageVector = Icons.Default.Reorder,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                    tint = if (isFocused) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary
+                    tint = if (isFocused) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary
                 )
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.lg))
                 Column {
                     Text(
                         text = stringResource(R.string.addon_reorder_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                     )
                     Text(
                         text = stringResource(R.string.addon_reorder_subtitle),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -749,7 +749,7 @@ private fun CatalogOrderEntryCard(onClick: () -> Unit) {
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = NuvioTheme.colors.TextSecondary
+                tint = KovelyxTheme.colors.TextSecondary
             )
         }
     }
@@ -767,12 +767,12 @@ private fun CollectionsEntryCard(onClick: () -> Unit) {
             .onFocusChanged { isFocused = it.isFocused }
             .semantics { role = Role.Button },
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = ClickableSurfaceDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(18.dp)
             )
         ),
@@ -791,19 +791,19 @@ private fun CollectionsEntryCard(onClick: () -> Unit) {
                     imageVector = Icons.Default.FolderOpen,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                    tint = if (isFocused) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary
+                    tint = if (isFocused) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary
                 )
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.lg))
                 Column {
                     Text(
                         text = stringResource(R.string.collections_card_title),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                     )
                     Text(
                         text = stringResource(R.string.collections_card_subtitle),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -811,7 +811,7 @@ private fun CollectionsEntryCard(onClick: () -> Unit) {
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = NuvioTheme.colors.TextSecondary
+                tint = KovelyxTheme.colors.TextSecondary
             )
         }
     }
@@ -833,12 +833,12 @@ private fun RefreshAddonsEntryCard(
             .onFocusChanged { isFocused = it.isFocused }
             .semantics { role = Role.Button },
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = ClickableSurfaceDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = RoundedCornerShape(18.dp)
             )
         ),
@@ -857,19 +857,19 @@ private fun RefreshAddonsEntryCard(
                     imageVector = Icons.Default.Refresh,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                    tint = if (isFocused) NuvioTheme.colors.Secondary else NuvioTheme.colors.TextSecondary
+                    tint = if (isFocused) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.TextSecondary
                 )
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.lg))
                 Column {
                     Text(
                         text = stringResource(R.string.addon_refresh_action),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                     )
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -877,7 +877,7 @@ private fun RefreshAddonsEntryCard(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = null,
                 modifier = Modifier.size(20.dp),
-                tint = NuvioTheme.colors.TextSecondary
+                tint = KovelyxTheme.colors.TextSecondary
             )
         }
     }
@@ -915,11 +915,11 @@ internal fun QrCodeOverlay(
             Text(
                 text = instruction,
                 style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextSecondary,
+                color = KovelyxTheme.colors.TextSecondary,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             if (qrBitmap != null) {
                 Image(
@@ -930,18 +930,18 @@ internal fun QrCodeOverlay(
                 )
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
             if (serverUrl != null) {
                 Text(
                     text = serverUrl,
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary,
+                    color = KovelyxTheme.colors.TextTertiary,
                     textAlign = TextAlign.Center
                 )
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
             Surface(
                 onClick = onClose,
@@ -949,12 +949,12 @@ internal fun QrCodeOverlay(
                     .focusRequester(focusRequester)
                     .semantics { role = Role.Button },
                 colors = ClickableSurfaceDefaults.colors(
-                    containerColor = NuvioTheme.colors.Surface,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                    containerColor = KovelyxTheme.colors.Surface,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground
                 ),
                 border = ClickableSurfaceDefaults.border(
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                         shape = RoundedCornerShape(50)
                     )
                 ),
@@ -962,19 +962,19 @@ internal fun QrCodeOverlay(
                 scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xl, vertical = NuvioTheme.spacing.md),
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xl, vertical = KovelyxTheme.spacing.md),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = NuvioTheme.colors.TextPrimary
+                        tint = KovelyxTheme.colors.TextPrimary
                     )
-                    Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                     Text(
                         text = stringResource(R.string.addon_qr_close),
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         style = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
                     )
                 }
@@ -1011,96 +1011,96 @@ internal fun ConfirmAddonChangesDialog(
                 .width(560.dp)
                 .heightIn(max = 640.dp),
             colors = ClickableSurfaceDefaults.colors(
-                containerColor = NuvioTheme.colors.SurfaceVariant
+                containerColor = KovelyxTheme.colors.SurfaceVariant
             ),
-            shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.xl))
+            shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.xl))
         ) {
             Column(
-                modifier = Modifier.padding(NuvioTheme.spacing.xl),
+                modifier = Modifier.padding(KovelyxTheme.spacing.xl),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = stringResource(R.string.addon_confirm_title),
                     style = MaterialTheme.typography.headlineSmall.copy(textDirection = TextDirection.Content),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                 )
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
                 Text(
                     text = stringResource(R.string.addon_confirm_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 320.dp)
                         .background(
-                            color = NuvioTheme.colors.Surface,
-                            shape = RoundedCornerShape(NuvioTheme.radii.md)
+                            color = KovelyxTheme.colors.Surface,
+                            shape = RoundedCornerShape(KovelyxTheme.radii.md)
                         )
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(NuvioTheme.spacing.md)
+                            .padding(KovelyxTheme.spacing.md)
                             .verticalScroll(scrollState)
                     ) {
                         if (pendingChange.addedUrls.isNotEmpty()) {
                             Text(
                                 text = stringResource(R.string.addon_confirm_added),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = NuvioTheme.colors.Success,
+                                color = KovelyxTheme.colors.Success,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = NuvioTheme.spacing.xs)
+                                    .padding(bottom = KovelyxTheme.spacing.xs)
                             )
                             pendingChange.addedUrls.forEach { url ->
                                 val displayName = pendingChange.addedNames[url] ?: url
                                 Text(
                                     text = "+ $displayName",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = NuvioTheme.colors.Success,
+                                    color = KovelyxTheme.colors.Success,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.xxs)
+                                        .padding(start = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.xxs)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         }
 
                         if (pendingChange.removedUrls.isNotEmpty()) {
                             Text(
                                 text = stringResource(R.string.addon_confirm_removed),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = NuvioTheme.colors.Error,
+                                color = KovelyxTheme.colors.Error,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = NuvioTheme.spacing.xs)
+                                    .padding(bottom = KovelyxTheme.spacing.xs)
                             )
                             pendingChange.removedUrls.forEach { url ->
                                 val displayName = pendingChange.removedNames[url] ?: url
                                 Text(
                                     text = "- $displayName",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = NuvioTheme.colors.Error,
+                                    color = KovelyxTheme.colors.Error,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.xxs)
+                                        .padding(start = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.xxs)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         }
 
                         if (pendingChange.catalogsReordered) {
                             Text(
                                 text = stringResource(R.string.addon_confirm_catalog_reordered),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = NuvioTheme.colors.TextSecondary,
+                                color = KovelyxTheme.colors.TextSecondary,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = 6.dp)
@@ -1111,64 +1111,64 @@ internal fun ConfirmAddonChangesDialog(
                             Text(
                                 text = stringResource(R.string.addon_confirm_catalogs_disabled),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = NuvioTheme.colors.Error,
+                                color = KovelyxTheme.colors.Error,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = NuvioTheme.spacing.xs)
+                                    .padding(bottom = KovelyxTheme.spacing.xs)
                             )
                             pendingChange.disabledCatalogNames.forEach { name ->
                                 Text(
                                     text = "- $name",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = NuvioTheme.colors.Error,
+                                    color = KovelyxTheme.colors.Error,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.xxs)
+                                        .padding(start = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.xxs)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         }
 
                         if (pendingChange.enabledCatalogNames.isNotEmpty()) {
                             Text(
                                 text = stringResource(R.string.addon_confirm_catalogs_enabled),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = NuvioTheme.colors.Success,
+                                color = KovelyxTheme.colors.Success,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = NuvioTheme.spacing.xs)
+                                    .padding(bottom = KovelyxTheme.spacing.xs)
                             )
                             pendingChange.enabledCatalogNames.forEach { name ->
                                 Text(
                                     text = "+ $name",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = NuvioTheme.colors.Success,
+                                    color = KovelyxTheme.colors.Success,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.xxs)
+                                        .padding(start = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.xxs)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         }
 
                         if (pendingChange.collectionsChanged) {
                             Text(
                                 text = stringResource(R.string.addon_pending_collections_updated),
                                 style = MaterialTheme.typography.titleSmall,
-                                color = NuvioTheme.colors.TextPrimary,
+                                color = KovelyxTheme.colors.TextPrimary,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = NuvioTheme.spacing.xs)
+                                    .padding(bottom = KovelyxTheme.spacing.xs)
                             )
                             Text(
                                 text = stringResource(R.string.addon_pending_collections_replace, pendingChange.proposedCollectionCount),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = NuvioTheme.colors.TextSecondary,
+                                color = KovelyxTheme.colors.TextSecondary,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(start = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.xxs)
+                                    .padding(start = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.xxs)
                             )
-                            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         }
 
                         if (
@@ -1182,7 +1182,7 @@ internal fun ConfirmAddonChangesDialog(
                             Text(
                                 text = stringResource(R.string.addon_confirm_no_changes),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = NuvioTheme.colors.TextSecondary
+                                color = KovelyxTheme.colors.TextSecondary
                             )
                         }
                     }
@@ -1191,53 +1191,53 @@ internal fun ConfirmAddonChangesDialog(
                 Text(
                     text = stringResource(R.string.addon_confirm_total_addons, pendingChange.proposedUrls.size),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary,
+                    color = KovelyxTheme.colors.TextTertiary,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
                     text = stringResource(R.string.addon_confirm_total_catalogs, pendingChange.proposedCatalogOrderKeys.size),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextTertiary,
+                    color = KovelyxTheme.colors.TextTertiary,
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
                 if (pendingChange.isApplying) {
                     LoadingIndicator(modifier = Modifier.size(36.dp))
                 } else {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
                     ) {
                         Surface(
                             onClick = onReject,
                             modifier = Modifier.semantics { role = Role.Button },
                             colors = ClickableSurfaceDefaults.colors(
-                                containerColor = NuvioTheme.colors.Surface,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground
+                                containerColor = KovelyxTheme.colors.Surface,
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground
                             ),
                             border = ClickableSurfaceDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                                     shape = RoundedCornerShape(50)
                                 )
                             ),
                             shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(50))
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xl, vertical = NuvioTheme.spacing.md),
+                                modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xl, vertical = KovelyxTheme.spacing.md),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp),
-                                    tint = NuvioTheme.colors.TextPrimary
+                                    tint = KovelyxTheme.colors.TextPrimary
                                 )
-                                Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+                                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
                                 Text(
                                     text = stringResource(R.string.addon_confirm_reject),
-                                    color = NuvioTheme.colors.TextPrimary,
+                                    color = KovelyxTheme.colors.TextPrimary,
                                     style = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
                                 )
                             }
@@ -1249,12 +1249,12 @@ internal fun ConfirmAddonChangesDialog(
                                 .focusRequester(focusRequester)
                                 .semantics { role = Role.Button },
                             colors = ClickableSurfaceDefaults.colors(
-                                containerColor = NuvioTheme.colors.Secondary,
-                                focusedContainerColor = NuvioTheme.colors.SecondaryVariant
+                                containerColor = KovelyxTheme.colors.Secondary,
+                                focusedContainerColor = KovelyxTheme.colors.SecondaryVariant
                             ),
                             border = ClickableSurfaceDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                                     shape = RoundedCornerShape(50)
                                 )
                             ),
@@ -1262,8 +1262,8 @@ internal fun ConfirmAddonChangesDialog(
                         ) {
                             Text(
                                 text = stringResource(R.string.addon_confirm_confirm),
-                                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xl, vertical = NuvioTheme.spacing.md),
-                                color = NuvioTheme.colors.OnSecondary
+                                modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xl, vertical = KovelyxTheme.spacing.md),
+                                color = KovelyxTheme.colors.OnSecondary
                             )
                         }
                     }
@@ -1293,8 +1293,8 @@ private fun AddonCard(
             modifier = modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
-            shape = RoundedCornerShape(NuvioTheme.radii.md)
+            colors = CardDefaults.cardColors(containerColor = KovelyxTheme.colors.BackgroundCard),
+            shape = RoundedCornerShape(KovelyxTheme.radii.md)
         ) {
             AddonCardContent(
                 addon = addon,
@@ -1313,8 +1313,8 @@ private fun AddonCard(
                 .focusProperties {
                     enter = { effectiveToggleFocusRequester }
                 },
-            colors = CardDefaults.cardColors(containerColor = NuvioTheme.colors.BackgroundCard),
-            shape = RoundedCornerShape(NuvioTheme.radii.md)
+            colors = CardDefaults.cardColors(containerColor = KovelyxTheme.colors.BackgroundCard),
+            shape = RoundedCornerShape(KovelyxTheme.radii.md)
         ) {
             AddonCardContent(
                 addon = addon,
@@ -1359,7 +1359,7 @@ private fun AddonCardContent(
                 Text(
                     text = addon.displayName,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, textDirection = TextDirection.Content),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -1369,14 +1369,14 @@ private fun AddonCardContent(
                         Text(
                             text = "v${addon.version}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                     if (!addon.enabled) {
                         Text(
                             text = stringResource(R.string.addons_badge_disabled),
                             style = MaterialTheme.typography.labelSmall,
-                            color = NuvioTheme.colors.TextSecondary
+                            color = KovelyxTheme.colors.TextSecondary
                         )
                     }
                 }
@@ -1390,19 +1390,19 @@ private fun AddonCardContent(
                     Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
                 },
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.BackgroundCard,
-                    contentColor = NuvioTheme.colors.TextSecondary,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                    focusedContentColor = NuvioTheme.colors.Primary
+                    containerColor = KovelyxTheme.colors.BackgroundCard,
+                    contentColor = KovelyxTheme.colors.TextSecondary,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                    focusedContentColor = KovelyxTheme.colors.Primary
                 ),
-                shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
             ) {
                 Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.addons_copy_link))
             }
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
             if (!isReadOnly) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Surface(
@@ -1415,15 +1415,15 @@ private fun AddonCardContent(
                             },
                         colors = ClickableSurfaceDefaults.colors(
                             containerColor = Color.Transparent,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground
                         ),
                         border = ClickableSurfaceDefaults.border(
                             focusedBorder = Border(
-                                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                shape = RoundedCornerShape(KovelyxTheme.radii.md)
                             )
                         ),
-                        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+                        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
                         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
                     ) {
                         Box(
@@ -1434,8 +1434,8 @@ private fun AddonCardContent(
                                 checked = addon.enabled,
                                 onCheckedChange = null,
                                 colors = SwitchDefaults.colors(
-                                    checkedThumbColor = NuvioTheme.colors.Secondary,
-                                    checkedTrackColor = NuvioTheme.colors.Secondary.copy(alpha = 0.3f)
+                                    checkedThumbColor = KovelyxTheme.colors.Secondary,
+                                    checkedTrackColor = KovelyxTheme.colors.Secondary.copy(alpha = 0.3f)
                                 )
                             )
                         }
@@ -1446,12 +1446,12 @@ private fun AddonCardContent(
                             enabled = canMoveUp,
                             modifier = Modifier.semantics { role = Role.Button },
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextSecondary,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                                focusedContentColor = NuvioTheme.colors.Primary
+                                containerColor = KovelyxTheme.colors.BackgroundCard,
+                                contentColor = KovelyxTheme.colors.TextSecondary,
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                                focusedContentColor = KovelyxTheme.colors.Primary
                             ),
-                            shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                            shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                         ) {
                             Icon(imageVector = Icons.Default.ArrowUpward, contentDescription = stringResource(R.string.cd_move_up))
                         }
@@ -1460,12 +1460,12 @@ private fun AddonCardContent(
                             enabled = canMoveDown,
                             modifier = Modifier.semantics { role = Role.Button },
                             colors = ButtonDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundCard,
-                                contentColor = NuvioTheme.colors.TextSecondary,
-                                focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                                focusedContentColor = NuvioTheme.colors.Primary
+                                containerColor = KovelyxTheme.colors.BackgroundCard,
+                                contentColor = KovelyxTheme.colors.TextSecondary,
+                                focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                                focusedContentColor = KovelyxTheme.colors.Primary
                             ),
-                            shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                            shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                         ) {
                             Icon(imageVector = Icons.Default.ArrowDownward, contentDescription = stringResource(R.string.cd_move_down))
                         }
@@ -1474,12 +1474,12 @@ private fun AddonCardContent(
                         onClick = onRemove,
                         modifier = Modifier.semantics { role = Role.Button },
                         colors = ButtonDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            contentColor = NuvioTheme.colors.TextSecondary,
-                            focusedContainerColor = NuvioTheme.colors.FocusBackground,
-                            focusedContentColor = NuvioTheme.colors.Error
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            contentColor = KovelyxTheme.colors.TextSecondary,
+                            focusedContainerColor = KovelyxTheme.colors.FocusBackground,
+                            focusedContentColor = KovelyxTheme.colors.Error
                         ),
-                        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
                     ) {
                         Text(text = stringResource(R.string.addon_remove))
                     }
@@ -1488,30 +1488,30 @@ private fun AddonCardContent(
         }
 
         if (!addon.description.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
             Text(
                 text = addon.description ?: "",
                 style = MaterialTheme.typography.bodyMedium.copy(
                     textDirection = (addon.description ?: "").contentTextDirection()
                 ),
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
         Text(
             text = addon.baseUrl,
             style = MaterialTheme.typography.bodySmall.copy(
                 textDirection = addon.baseUrl.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
         Text(
             text = stringResource(R.string.addon_catalogs_types, addon.catalogs.size, addon.rawTypes.joinToString()),
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
     }
 }

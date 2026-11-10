@@ -25,7 +25,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.LocalRippleConfiguration
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -55,11 +55,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioDesktopVerticalScrollbar
-import com.kovelyx.app.core.ui.NuvioPosterCard
-import com.kovelyx.app.core.ui.NuvioPosterShape
-import com.kovelyx.app.core.ui.NuvioScreenHeader
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxDesktopVerticalScrollbar
+import com.kovelyx.app.core.ui.KovelyxPosterCard
+import com.kovelyx.app.core.ui.KovelyxPosterShape
+import com.kovelyx.app.core.ui.KovelyxScreenHeader
 import com.kovelyx.app.core.ui.catalogPosterBaseWidthDp
 import com.kovelyx.app.core.ui.desktopPageHorizontalPaddingForWidth
 import com.kovelyx.app.core.ui.nuvioSafeBottomPadding
@@ -154,7 +154,7 @@ fun FolderDetailScreen(
             val desktopPagePadding = desktopPageHorizontalPaddingForWidth(maxWidth.value)
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!useNativeNavigation) {
-                    NuvioScreenHeader(
+                    KovelyxScreenHeader(
                         title = folder?.title ?: uiState.collectionTitle,
                         modifier = Modifier.padding(horizontal = desktopPagePadding),
                         backgroundColor = Color.Transparent,
@@ -271,7 +271,7 @@ private fun MobileFolderDetailContent(
         }
 
         if (!useNativeNavigation) {
-            NuvioScreenHeader(
+            KovelyxScreenHeader(
                 title = folder?.title ?: uiState.collectionTitle,
                 modifier = Modifier.padding(horizontal = 16.dp),
                 includeStatusBarPadding = coverImageUrl == null,
@@ -442,13 +442,13 @@ private fun TabbedGridContent(
                                     onClick = { onPosterClick(item) },
                                     onLongClick = null,
                                 ) { cardModifier ->
-                                    NuvioPosterCard(
+                                    KovelyxPosterCard(
                                         title = item.name,
                                         imageUrl = item.poster,
                                         modifier = cardModifier,
                                         basePosterWidthDp = if (isDesktop) basePosterWidthDp else null,
                                         fallbackImageUrl = item.rawPosterUrl,
-                                        shape = NuvioPosterShape.Poster,
+                                        shape = KovelyxPosterShape.Poster,
                                         detailLine = item.releaseInfo,
                                         isWatched = isWatched,
                                         onClick = { onPosterClick(item) },
@@ -462,7 +462,7 @@ private fun TabbedGridContent(
                                 }
                             }
                         }
-                        NuvioDesktopVerticalScrollbar(
+                        KovelyxDesktopVerticalScrollbar(
                             state = gridState,
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
@@ -543,7 +543,7 @@ private fun RowsContent(
                 )
             }
         }
-        NuvioDesktopVerticalScrollbar(
+        KovelyxDesktopVerticalScrollbar(
             state = listState,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -570,7 +570,7 @@ private fun PaginationLoadingFooter() {
             .padding(vertical = 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(28.dp),
         )
     }
@@ -582,7 +582,7 @@ private fun LoadingIndicator() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier.size(32.dp),
         )
     }
@@ -618,9 +618,9 @@ private fun EmptyMessage() {
     }
 }
 
-private fun PosterShape.toNuvioPosterShape(): NuvioPosterShape =
+private fun PosterShape.toNuvioPosterShape(): KovelyxPosterShape =
     when (this) {
-        PosterShape.Poster -> NuvioPosterShape.Poster
-        PosterShape.Square -> NuvioPosterShape.Square
-        PosterShape.Landscape -> NuvioPosterShape.Landscape
+        PosterShape.Poster -> KovelyxPosterShape.Poster
+        PosterShape.Square -> KovelyxPosterShape.Square
+        PosterShape.Landscape -> KovelyxPosterShape.Landscape
     }

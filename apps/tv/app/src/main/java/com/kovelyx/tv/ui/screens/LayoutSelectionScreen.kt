@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -77,22 +77,22 @@ fun LayoutSelectionScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 80.dp, vertical = NuvioTheme.spacing.xxxl),
+                .padding(horizontal = 80.dp, vertical = KovelyxTheme.spacing.xxxl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header
             Text(
                 text = stringResource(R.string.layout_selection_welcome),
                 style = MaterialTheme.typography.headlineLarge,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
             Text(
                 text = stringResource(R.string.layout_selection_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -102,7 +102,7 @@ fun LayoutSelectionScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xxl, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xxl, Alignment.CenterHorizontally)
             ) {
                 LayoutOptionCard(
                     layout = HomeLayout.MODERN,
@@ -126,7 +126,7 @@ fun LayoutSelectionScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
             // Continue button
             Button(
@@ -136,19 +136,19 @@ fun LayoutSelectionScreen(
                 },
                 modifier = Modifier
                     .width(200.dp)
-                    .height(NuvioTheme.spacing.xxxl)
+                    .height(KovelyxTheme.spacing.xxxl)
                     .focusRequester(continueFocusRequester),
                 shape = ButtonDefaults.shape(
-                    shape = RoundedCornerShape(NuvioTheme.spacing.xl)
+                    shape = RoundedCornerShape(KovelyxTheme.spacing.xl)
                 ),
                 colors = ButtonDefaults.colors(
-                    containerColor = NuvioTheme.colors.Primary,
-                    focusedContainerColor = NuvioTheme.colors.FocusBackground
+                    containerColor = KovelyxTheme.colors.Primary,
+                    focusedContainerColor = KovelyxTheme.colors.FocusBackground
                 ),
                 border = ButtonDefaults.border(
                     focusedBorder = Border(
-                        border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                        shape = RoundedCornerShape(NuvioTheme.spacing.xl)
+                        border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                        shape = RoundedCornerShape(KovelyxTheme.spacing.xl)
                     )
                 )
             ) {
@@ -181,24 +181,24 @@ private fun LayoutOptionCard(
         modifier = modifier
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
         ),
         border = CardDefaults.border(
             border = Border.None,
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.xl)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.xl)
             )
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.xl)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.xl)),
         scale = CardDefaults.scale(focusedScale = 1.03f)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(NuvioTheme.spacing.lg),
+                    .padding(KovelyxTheme.spacing.lg),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Animated preview
@@ -220,7 +220,7 @@ private fun LayoutOptionCard(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
                 Text(
                     text = when (layout) {
@@ -229,10 +229,10 @@ private fun LayoutOptionCard(
                         HomeLayout.MODERN -> stringResource(R.string.layout_modern)
                     },
                     style = MaterialTheme.typography.titleLarge,
-                    color = if (isSelected || isFocused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary
+                    color = if (isSelected || isFocused) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary
                 )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
 
             Text(
                 text = when (layout) {
@@ -241,7 +241,7 @@ private fun LayoutOptionCard(
                     HomeLayout.MODERN -> stringResource(R.string.layout_modern_desc)
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextTertiary
+                color = KovelyxTheme.colors.TextTertiary
             )
             }
 
@@ -249,11 +249,11 @@ private fun LayoutOptionCard(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(R.string.cd_selected),
-                    tint = NuvioTheme.colors.FocusRing,
+                    tint = KovelyxTheme.colors.FocusRing,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(NuvioTheme.spacing.sm)
-                        .size(NuvioTheme.spacing.xl)
+                        .padding(KovelyxTheme.spacing.sm)
+                        .size(KovelyxTheme.spacing.xl)
                 )
             }
         }

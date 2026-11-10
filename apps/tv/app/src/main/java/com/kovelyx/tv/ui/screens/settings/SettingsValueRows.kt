@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent
 import androidx.compose.foundation.background
@@ -177,7 +177,7 @@ private fun SliderSettingsItemLayout(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = SettingsRowContentInset, vertical = NuvioTheme.spacing.md)
+                .padding(horizontal = SettingsRowContentInset, vertical = KovelyxTheme.spacing.md)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -187,28 +187,28 @@ private fun SliderSettingsItemLayout(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = NuvioTheme.colors.TextPrimary.copy(alpha = contentAlpha),
+                        color = KovelyxTheme.colors.TextPrimary.copy(alpha = contentAlpha),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     if (subtitle != null) {
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                         Text(
                             text = subtitle,
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextSecondary.copy(alpha = contentAlpha),
+                            color = KovelyxTheme.colors.TextSecondary.copy(alpha = contentAlpha),
                             maxLines = 3,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
 
                 Text(
                     text = valueText,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = NuvioTheme.colors.Primary.copy(alpha = contentAlpha)
+                    color = KovelyxTheme.colors.Primary.copy(alpha = contentAlpha)
                 )
             }
 
@@ -216,7 +216,7 @@ private fun SliderSettingsItemLayout(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 SliderStepButton(
@@ -230,16 +230,16 @@ private fun SliderSettingsItemLayout(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(NuvioTheme.spacing.sm)
-                        .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                        .background(NuvioTheme.colors.BackgroundElevated)
+                        .height(KovelyxTheme.spacing.sm)
+                        .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
+                        .background(KovelyxTheme.colors.BackgroundElevated)
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(progressFraction.coerceIn(0f, 1f))
-                            .height(NuvioTheme.spacing.sm)
-                            .clip(RoundedCornerShape(NuvioTheme.radii.xs))
-                            .background(NuvioTheme.colors.Primary.copy(alpha = contentAlpha))
+                            .height(KovelyxTheme.spacing.sm)
+                            .clip(RoundedCornerShape(KovelyxTheme.radii.xs))
+                            .background(KovelyxTheme.colors.Primary.copy(alpha = contentAlpha))
                     )
                 }
 
@@ -277,15 +277,15 @@ private fun SliderStepButton(
             }
         },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.Background,
-            focusedContainerColor = if (flat) settingsFocusFillColor() else NuvioTheme.colors.Background
+            containerColor = KovelyxTheme.colors.Background,
+            focusedContainerColor = if (flat) settingsFocusFillColor() else KovelyxTheme.colors.Background
         ),
         border = if (flat) {
             CardDefaults.border(border = Border.None, focusedBorder = Border.None)
         } else {
             CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = CircleShape
                 )
             )
@@ -300,7 +300,7 @@ private fun SliderStepButton(
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = (if (isFocused) NuvioTheme.colors.OnPrimary else NuvioTheme.colors.TextPrimary)
+                tint = (if (isFocused) KovelyxTheme.colors.OnPrimary else KovelyxTheme.colors.TextPrimary)
                     .copy(alpha = contentAlpha),
                 modifier = Modifier.size(20.dp)
             )
@@ -340,19 +340,19 @@ internal fun ColorSettingsItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 62.dp)
-                .padding(horizontal = SettingsRowContentInset, vertical = NuvioTheme.spacing.md),
+                .padding(horizontal = SettingsRowContentInset, vertical = KovelyxTheme.spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.colors.TextPrimary.copy(alpha = contentAlpha),
+                color = KovelyxTheme.colors.TextPrimary.copy(alpha = contentAlpha),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
 
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
 
             if (showTransparent || currentColor.alpha == 0f) {
                 Box(
@@ -360,7 +360,7 @@ internal fun ColorSettingsItem(
                         .size(28.dp)
                         .clip(CircleShape)
                         .background(Color.Gray)
-                        .border(NuvioTheme.spacing.xxs, NuvioTheme.colors.Border, CircleShape)
+                        .border(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.Border, CircleShape)
                 ) {
                     Box(
                         modifier = Modifier
@@ -374,7 +374,7 @@ internal fun ColorSettingsItem(
                         .size(28.dp)
                         .clip(CircleShape)
                         .background(currentColor)
-                        .border(NuvioTheme.spacing.xxs, NuvioTheme.colors.Border, CircleShape)
+                        .border(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.Border, CircleShape)
                 )
             }
         }

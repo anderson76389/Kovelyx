@@ -68,8 +68,8 @@ import com.kovelyx.app.core.ui.DialogButton
 import com.kovelyx.app.core.ui.DialogButtons
 import com.kovelyx.app.core.ui.DialogButtonStyle
 import com.kovelyx.app.core.ui.DialogSurface
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.features.profiles.ProfileRepository
 import com.kovelyx.app.features.simkl.SimklAuthError
@@ -485,7 +485,7 @@ internal fun TrackingProviderCard(
                     )
                 }
                 if (isLoading || isSyncing) {
-                    NuvioLoadingIndicator(color = Color.White, modifier = Modifier.size(18.dp))
+                    KovelyxLoadingIndicator(color = Color.White, modifier = Modifier.size(18.dp))
                 }
                 Icon(
                     imageVector = Icons.Rounded.ExpandMore,
@@ -700,7 +700,7 @@ private fun TrackingBrandPrimaryButton(
         ),
     ) {
         when {
-            loading -> NuvioLoadingIndicator(
+            loading -> KovelyxLoadingIndicator(
                 color = Color(0xFF171717),
                 modifier = Modifier.size(18.dp),
             )
@@ -725,7 +725,7 @@ private fun TrackingBrandMessage(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = if (isError) TrackingErrorColor.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.1f),
-        shape = RoundedCornerShape(NuvioTokens.Radius.md),
+        shape = RoundedCornerShape(KovelyxTokens.Radius.md),
     ) {
         Text(
             text = text,

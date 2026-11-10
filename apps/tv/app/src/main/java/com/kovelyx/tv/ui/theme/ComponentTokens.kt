@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class NuvioCardComponentTokens(
+data class KovelyxCardComponentTokens(
     val width: Dp,
     val height: Dp,
     val cornerRadius: Dp,
@@ -15,7 +15,7 @@ data class NuvioCardComponentTokens(
 )
 
 @Immutable
-data class NuvioRowComponentTokens(
+data class KovelyxRowComponentTokens(
     val horizontalPadding: Dp,
     val verticalPadding: Dp,
     val itemSpacing: Dp,
@@ -23,7 +23,7 @@ data class NuvioRowComponentTokens(
 )
 
 @Immutable
-data class NuvioSidebarComponentTokens(
+data class KovelyxSidebarComponentTokens(
     val legacyCollapsedWidth: Dp,
     val legacyExpandedWidth: Dp,
     val collapsedWidth: Dp,
@@ -37,7 +37,7 @@ data class NuvioSidebarComponentTokens(
 )
 
 @Immutable
-data class NuvioDialogComponentTokens(
+data class KovelyxDialogComponentTokens(
     val maxWidth: Dp,
     val contentPadding: Dp,
     val cornerRadius: Dp,
@@ -45,7 +45,7 @@ data class NuvioDialogComponentTokens(
 )
 
 @Immutable
-data class NuvioPlayerComponentTokens(
+data class KovelyxPlayerComponentTokens(
     val overlayHorizontalPadding: Dp,
     val overlayVerticalPadding: Dp,
     val controlSize: Dp,
@@ -55,7 +55,7 @@ data class NuvioPlayerComponentTokens(
 )
 
 @Immutable
-data class NuvioSettingsComponentTokens(
+data class KovelyxSettingsComponentTokens(
     val containerRadius: Dp,
     val secondaryCardRadius: Dp,
     val railItemHeight: Dp,
@@ -64,27 +64,27 @@ data class NuvioSettingsComponentTokens(
 )
 
 @Immutable
-data class NuvioComponentTokens(
-    val posterCard: NuvioCardComponentTokens,
-    val backdropCard: NuvioCardComponentTokens,
-    val collectionCard: NuvioCardComponentTokens,
-    val continueWatchingCard: NuvioCardComponentTokens,
-    val episodeCard: NuvioCardComponentTokens,
-    val row: NuvioRowComponentTokens,
-    val sidebar: NuvioSidebarComponentTokens,
-    val dialog: NuvioDialogComponentTokens,
-    val sidePanel: NuvioDialogComponentTokens,
-    val settings: NuvioSettingsComponentTokens,
-    val player: NuvioPlayerComponentTokens,
+data class KovelyxComponentTokens(
+    val posterCard: KovelyxCardComponentTokens,
+    val backdropCard: KovelyxCardComponentTokens,
+    val collectionCard: KovelyxCardComponentTokens,
+    val continueWatchingCard: KovelyxCardComponentTokens,
+    val episodeCard: KovelyxCardComponentTokens,
+    val row: KovelyxRowComponentTokens,
+    val sidebar: KovelyxSidebarComponentTokens,
+    val dialog: KovelyxDialogComponentTokens,
+    val sidePanel: KovelyxDialogComponentTokens,
+    val settings: KovelyxSettingsComponentTokens,
+    val player: KovelyxPlayerComponentTokens,
     val buttonHeight: Dp,
     val chipHeight: Dp,
     val badgeHeight: Dp,
     val skeletonCornerRadius: Dp
 )
 
-object NuvioComponents {
-    val tokens = NuvioComponentTokens(
-        posterCard = NuvioCardComponentTokens(
+object KovelyxComponents {
+    val tokens = KovelyxComponentTokens(
+        posterCard = KovelyxCardComponentTokens(
             width = 126.dp,
             height = 189.dp,
             cornerRadius = 12.dp,
@@ -92,7 +92,7 @@ object NuvioComponents {
             focusedBorderWidth = 2.dp,
             focusedScale = 1.02f
         ),
-        backdropCard = NuvioCardComponentTokens(
+        backdropCard = KovelyxCardComponentTokens(
             width = 320.dp,
             height = 180.dp,
             cornerRadius = 16.dp,
@@ -100,7 +100,7 @@ object NuvioComponents {
             focusedBorderWidth = 2.dp,
             focusedScale = 1.02f
         ),
-        collectionCard = NuvioCardComponentTokens(
+        collectionCard = KovelyxCardComponentTokens(
             width = 320.dp,
             height = 180.dp,
             cornerRadius = 16.dp,
@@ -108,7 +108,7 @@ object NuvioComponents {
             focusedBorderWidth = 2.dp,
             focusedScale = 1.02f
         ),
-        continueWatchingCard = NuvioCardComponentTokens(
+        continueWatchingCard = KovelyxCardComponentTokens(
             width = 260.dp,
             height = 146.dp,
             cornerRadius = 12.dp,
@@ -116,7 +116,7 @@ object NuvioComponents {
             focusedBorderWidth = 2.dp,
             focusedScale = 1.02f
         ),
-        episodeCard = NuvioCardComponentTokens(
+        episodeCard = KovelyxCardComponentTokens(
             width = 320.dp,
             height = 207.dp,
             cornerRadius = 16.dp,
@@ -124,13 +124,13 @@ object NuvioComponents {
             focusedBorderWidth = 2.dp,
             focusedScale = 1.02f
         ),
-        row = NuvioRowComponentTokens(
+        row = KovelyxRowComponentTokens(
             horizontalPadding = 48.dp,
             verticalPadding = 6.dp,
             itemSpacing = 12.dp,
             titleBottomSpacing = 14.dp
         ),
-        sidebar = NuvioSidebarComponentTokens(
+        sidebar = KovelyxSidebarComponentTokens(
             legacyCollapsedWidth = 72.dp,
             legacyExpandedWidth = 196.dp,
             collapsedWidth = 184.dp,
@@ -142,26 +142,26 @@ object NuvioComponents {
             panelRadius = 30.dp,
             contentGap = 14.dp
         ),
-        dialog = NuvioDialogComponentTokens(
+        dialog = KovelyxDialogComponentTokens(
             maxWidth = 720.dp,
             contentPadding = 24.dp,
             cornerRadius = 16.dp,
             actionSpacing = 12.dp
         ),
-        sidePanel = NuvioDialogComponentTokens(
+        sidePanel = KovelyxDialogComponentTokens(
             maxWidth = 420.dp,
             contentPadding = 20.dp,
             cornerRadius = 20.dp,
             actionSpacing = 12.dp
         ),
-        settings = NuvioSettingsComponentTokens(
+        settings = KovelyxSettingsComponentTokens(
             containerRadius = 28.dp,
             secondaryCardRadius = 18.dp,
             railItemHeight = 56.dp,
             workspacePadding = 20.dp,
             rowGap = 16.dp
         ),
-        player = NuvioPlayerComponentTokens(
+        player = KovelyxPlayerComponentTokens(
             overlayHorizontalPadding = 52.dp,
             overlayVerticalPadding = 36.dp,
             controlSize = 44.dp,

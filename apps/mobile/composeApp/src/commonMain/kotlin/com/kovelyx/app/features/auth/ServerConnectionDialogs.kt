@@ -45,9 +45,9 @@ import com.kovelyx.app.core.ui.DialogButtonStyle
 import com.kovelyx.app.core.ui.DialogSurface
 import com.kovelyx.app.core.ui.Menu
 import com.kovelyx.app.core.ui.MenuItem
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.action_cancel
@@ -150,7 +150,7 @@ internal fun ServerConnectionSheet(
     var url by rememberSaveable { mutableStateOf("") }
     val error = serverDiscoveryError(state)
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         showDragHandle = true,
@@ -171,13 +171,13 @@ internal fun ServerConnectionSheet(
                 color = tokens.colors.textPrimary,
                 fontWeight = FontWeight.SemiBold,
             )
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s8))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s8))
             Text(
                 text = stringResource(Res.string.server_connect_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = tokens.colors.textMuted,
             )
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s20))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s20))
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
@@ -204,19 +204,19 @@ internal fun ServerConnectionSheet(
                 ),
             )
             if (error != null) {
-                Spacer(modifier = Modifier.height(NuvioTokens.Space.s10))
+                Spacer(modifier = Modifier.height(KovelyxTokens.Space.s10))
                 Text(
                     text = error,
                     style = MaterialTheme.typography.bodySmall,
                     color = tokens.colors.danger,
                 )
             }
-            Spacer(modifier = Modifier.height(NuvioTokens.Space.s20))
+            Spacer(modifier = Modifier.height(KovelyxTokens.Space.s20))
             Button(
                 onClick = { onDiscover(url) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(NuvioTokens.Space.s56),
+                    .height(KovelyxTokens.Space.s56),
                 enabled = url.isNotBlank() && !state.isDiscovering,
                 shape = tokens.shapes.button,
                 colors = ButtonDefaults.buttonColors(
@@ -226,10 +226,10 @@ internal fun ServerConnectionSheet(
             ) {
                 if (state.isDiscovering) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        NuvioLoadingIndicator(
+                        KovelyxLoadingIndicator(
                             modifier = Modifier.size(tokens.icons.sm),
                             color = tokens.colors.onAccent,
                         )
@@ -275,10 +275,10 @@ internal fun ServerTrustDialog(
                 .fillMaxWidth()
                 .background(
                     color = tokens.colors.warning.copy(alpha = tokens.opacity.selected),
-                    shape = RoundedCornerShape(NuvioTokens.Radius.lg),
+                    shape = RoundedCornerShape(KovelyxTokens.Radius.lg),
                 )
-                .padding(NuvioTokens.Space.s14),
-            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8),
+                .padding(KovelyxTokens.Space.s14),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8),
         ) {
             Text(
                 text = stringResource(Res.string.server_warning_title),
@@ -364,8 +364,8 @@ private fun ServerDetail(
         modifier = Modifier
             .fillMaxWidth()
             .background(tokens.colors.surfaceCard, tokens.shapes.compactCard)
-            .padding(NuvioTokens.Space.s14),
-        verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s4),
+            .padding(KovelyxTokens.Space.s14),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s4),
     ) {
         Text(
             text = label,

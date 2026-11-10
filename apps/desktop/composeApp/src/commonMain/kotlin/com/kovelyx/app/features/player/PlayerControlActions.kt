@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kovelyx.app.core.ui.AppIconResource
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import com.kovelyx.app.core.ui.appIconPainter
 import com.kovelyx.app.core.ui.nuvioTypeScale
 import nuvio.composeapp.generated.resources.*
@@ -70,7 +70,7 @@ internal fun PlayerToolbar(
             icon = if (isLocked) Icons.Rounded.LockOpen else Icons.Rounded.Lock,
             onClick = onLockToggle,
         )
-        NuvioBackButton(
+        KovelyxBackButton(
             onClick = onBack,
             containerColor = Color.Transparent,
             contentColor = Color.White,

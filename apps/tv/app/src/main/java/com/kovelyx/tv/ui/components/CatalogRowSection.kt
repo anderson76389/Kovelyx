@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.draw.clip
@@ -286,17 +286,17 @@ fun CatalogRowSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.md),
+                .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.md),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)) {
+            Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)) {
                 Text(
                     text = catalogTitle.ifBlank { " " },
                     style = MaterialTheme.typography.headlineMedium.copy(
                         textDirection = catalogTitle.contentTextDirection()
                     ),
-                    color = if (catalogTitle.isBlank()) Color.Transparent else NuvioTheme.colors.TextPrimary,
+                    color = if (catalogTitle.isBlank()) Color.Transparent else KovelyxTheme.colors.TextPrimary,
                     maxLines = 3,
                     overflow = TextOverflow.Clip
                 )
@@ -307,7 +307,7 @@ fun CatalogRowSection(
                         style = MaterialTheme.typography.labelMedium.copy(
                             textDirection = addonText.contentTextDirection()
                         ),
-                        color = if (catalogTitle.isBlank()) Color.Transparent else NuvioTheme.colors.TextTertiary
+                        color = if (catalogTitle.isBlank()) Color.Transparent else KovelyxTheme.colors.TextTertiary
                     )
                 }
             }
@@ -318,7 +318,7 @@ fun CatalogRowSection(
         val layoutDirection = LocalLayoutDirection.current
         val isRtl = layoutDirection == LayoutDirection.Rtl
         val horizontalBringIntoViewSpec = remember(density, defaultBringIntoViewSpec, isRtl) {
-            val startPx = with(density) { NuvioTheme.spacing.xxxl.roundToPx() }
+            val startPx = with(density) { KovelyxTheme.spacing.xxxl.roundToPx() }
             @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
             object : BringIntoViewSpec {
                 override val scrollAnimationSpec: AnimationSpec<Float> =
@@ -383,8 +383,8 @@ fun CatalogRowSection(
                     }
                 }
                 .focusGroup(),
-            contentPadding = PaddingValues(start = NuvioTheme.spacing.xxxl, end = 200.dp),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            contentPadding = PaddingValues(start = KovelyxTheme.spacing.xxxl, end = 200.dp),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             itemsIndexed(
                 items = catalogRow.items,
@@ -468,8 +468,8 @@ fun CatalogRowSection(
                             .focusProperties { canFocus = false },
                         shape = CardDefaults.shape(shape = seeAllCardShape),
                         colors = CardDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
                         )
                     ) {
                         Box(
@@ -502,12 +502,12 @@ fun CatalogRowSection(
                             .then(directionalFocusModifier),
                         shape = CardDefaults.shape(shape = seeAllCardShape),
                         colors = CardDefaults.colors(
-                            containerColor = NuvioTheme.colors.BackgroundCard,
-                            focusedContainerColor = NuvioTheme.colors.BackgroundCard
+                            containerColor = KovelyxTheme.colors.BackgroundCard,
+                            focusedContainerColor = KovelyxTheme.colors.BackgroundCard
                         ),
                         border = CardDefaults.border(
                             focusedBorder = Border(
-                                border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
+                                border = KovelyxTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                                 shape = seeAllCardShape
                             )
                         ),
@@ -531,14 +531,14 @@ fun CatalogRowSection(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = seeAllLabel ?: stringResource(R.string.action_see_all),
-                                    modifier = Modifier.size(NuvioTheme.spacing.xxl),
-                                    tint = NuvioTheme.colors.TextSecondary
+                                    modifier = Modifier.size(KovelyxTheme.spacing.xxl),
+                                    tint = KovelyxTheme.colors.TextSecondary
                                 )
-                                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                                 Text(
                                     text = seeAllLabel ?: stringResource(R.string.action_see_all),
                                     style = MaterialTheme.typography.titleSmall,
-                                    color = NuvioTheme.colors.TextSecondary
+                                    color = KovelyxTheme.colors.TextSecondary
                                 )
                             }
                         }

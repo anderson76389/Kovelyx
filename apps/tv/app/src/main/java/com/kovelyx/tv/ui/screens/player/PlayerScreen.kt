@@ -5,9 +5,9 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioMotion
+import com.kovelyx.tv.ui.theme.KovelyxMotion
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.theme.accentBrush
 
 import android.util.Log
@@ -929,7 +929,7 @@ fun PlayerScreen(
             label = "postPlayRecommendationPlayerWidth"
         )
         val postPlayRecommendationPlayerPadding by animateDpAsState(
-            targetValue = if (postPlayRecommendationState.isVisible) NuvioTheme.spacing.xxl else 0.dp,
+            targetValue = if (postPlayRecommendationState.isVisible) KovelyxTheme.spacing.xxl else 0.dp,
             animationSpec = tween(durationMillis = POST_PLAY_RECOMMENDATION_TRANSITION_MS),
             label = "postPlayRecommendationPlayerPadding"
         )
@@ -1138,7 +1138,7 @@ fun PlayerScreen(
                 viewModel = viewModel,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = NuvioTheme.spacing.xl, top = NuvioTheme.spacing.xl)
+                    .padding(start = KovelyxTheme.spacing.xl, top = KovelyxTheme.spacing.xl)
                     .zIndex(2.75f)
             )
         }
@@ -1154,7 +1154,7 @@ fun PlayerScreen(
             totalProgress = uiState.torrentTotalProgress,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = NuvioTheme.spacing.lg, end = NuvioTheme.spacing.lg)
+                .padding(top = KovelyxTheme.spacing.lg, end = KovelyxTheme.spacing.lg)
                 .zIndex(2.7f)
         )
 
@@ -1196,7 +1196,7 @@ fun PlayerScreen(
 
         val skipButtonBottomPadding by animateDpAsState(
             targetValue = if (uiState.showControls) 122.dp else 30.dp,
-            animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.fast),
+            animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.fast),
             label = "skipButtonBottomPadding"
         )
 
@@ -1244,7 +1244,7 @@ fun PlayerScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = NuvioTheme.spacing.xxl, bottom = skipButtonBottomPadding)
+                .padding(start = KovelyxTheme.spacing.xxl, bottom = skipButtonBottomPadding)
                 .zIndex(2.1f)
         )
         PostPlayOverlay(
@@ -1313,7 +1313,7 @@ fun PlayerScreen(
             exit = fadeOut(animationSpec = tween(150)),
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(end = 28.dp, top = NuvioTheme.spacing.xl)
+                .padding(end = 28.dp, top = KovelyxTheme.spacing.xl)
                 .zIndex(2.15f)
         ) {
             PlayerClockOverlayHost(
@@ -1426,8 +1426,8 @@ fun PlayerScreen(
 
         AnimatedVisibility(
             visible = uiState.showStreamSourceIndicator,
-            enter = fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
-            exit = fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
+            enter = fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
+            exit = fadeOut(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 128.dp)
@@ -1437,8 +1437,8 @@ fun PlayerScreen(
 
         AnimatedVisibility(
             visible = uiState.showPlayerEngineSwitchInfo && uiState.error == null,
-            enter = fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
-            exit = fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
+            enter = fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
+            exit = fadeOut(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
             modifier = Modifier
                 .align(Alignment.Center)
                 .zIndex(2.35f)
@@ -1758,7 +1758,7 @@ private fun MpvPlayerSurface(
     val context = LocalContext.current
     val latestAspectMode by rememberUpdatedState(aspectMode)
     val mpvView = remember(context) {
-        NuvioMpvSurfaceView(context).apply {
+        KovelyxMpvSurfaceView(context).apply {
             isFocusable = false
             isFocusableInTouchMode = false
         }
@@ -2244,14 +2244,14 @@ private fun PlayerControlsOverlay(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = NuvioTheme.spacing.xxl, vertical = NuvioTheme.spacing.xl)
+                .padding(horizontal = KovelyxTheme.spacing.xxl, vertical = KovelyxTheme.spacing.xl)
         ) {
             val skipIntroVisible = uiState.activeSkipInterval != null
 
             AnimatedVisibility(
                 visible = !skipIntroVisible,
-                enter = fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
-                exit = fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.fast))
+                enter = fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
+                exit = fadeOut(animationSpec = tween(KovelyxMotion.tokens.durations.fast))
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     val displayName = if (uiState.currentSeason != null && uiState.currentEpisode != null) {
@@ -2309,7 +2309,7 @@ private fun PlayerControlsOverlay(
                             AnimatedVisibility(
                                 visible = showVia,
                                 enter = fadeIn(animationSpec = tween(durationMillis = 220)),
-                                exit = fadeOut(animationSpec = tween(durationMillis = NuvioMotion.tokens.durations.fast))
+                                exit = fadeOut(animationSpec = tween(durationMillis = KovelyxMotion.tokens.durations.fast))
                             ) {
                                 Text(
                                     text = stringResource(R.string.player_via, (uiState.currentStreamName ?: "").replace("\n", " · ")),
@@ -2324,7 +2324,7 @@ private fun PlayerControlsOverlay(
                 }
             }
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
             if (!isLivePlayback) {
                 // Progress bar — always LTR regardless of locale
@@ -2340,9 +2340,9 @@ private fun PlayerControlsOverlay(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
             } else {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
             }
 
             // Control buttons row — always LTR regardless of locale
@@ -2353,7 +2353,7 @@ private fun PlayerControlsOverlay(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val hasEpisodeContext = uiState.currentSeason != null && uiState.currentEpisode != null
@@ -2444,16 +2444,16 @@ private fun PlayerControlsOverlay(
                     AnimatedVisibility(
                         visible = uiState.showMoreDialog,
                         enter = slideInHorizontally(
-                            animationSpec = tween(NuvioMotion.tokens.durations.fast),
+                            animationSpec = tween(KovelyxMotion.tokens.durations.fast),
                             initialOffsetX = { it / 2 }
-                        ) + fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
+                        ) + fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
                         exit = slideOutHorizontally(
                             animationSpec = tween(160),
                             targetOffsetX = { it / 2 }
                         ) + fadeOut(animationSpec = tween(160))
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs),
+                            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             ControlButton(
@@ -2604,8 +2604,8 @@ private fun ReportControlButton(
         )
         AnimatedVisibility(
             visible = showReportId && !reportId.isNullOrBlank(),
-            enter = fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
-            exit = fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
+            enter = fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
+            exit = fadeOut(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .offset(y = (-30).dp)
@@ -2641,7 +2641,7 @@ private fun ControlButton(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier
-            .size(NuvioTheme.spacing.xxxl)
+            .size(KovelyxTheme.spacing.xxxl)
             .then(
                 if (focusRequester != null) Modifier.focusRequester(focusRequester)
                 else Modifier
@@ -2690,7 +2690,7 @@ private fun ControlButton(
             Icon(
                 painter = iconPainter,
                 contentDescription = contentDescription,
-                modifier = Modifier.size(NuvioTheme.spacing.xl)
+                modifier = Modifier.size(KovelyxTheme.spacing.xl)
             )
         } else {
             Icon(
@@ -2717,7 +2717,7 @@ private fun ProgressBar(
     /** Position (ms) up to which content is buffered. Pass 0 to skip the overlay. */
     bufferedPosition: Long = 0L
 ) {
-    val accentBrush = NuvioTheme.palette.accentBrush()
+    val accentBrush = KovelyxTheme.palette.accentBrush()
     val progress = if (duration > 0) {
         (currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
     } else 0f
@@ -2741,7 +2741,7 @@ private fun ProgressBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (isFocused) NuvioTheme.spacing.md else NuvioTheme.spacing.sm)
+            .height(if (isFocused) KovelyxTheme.spacing.md else KovelyxTheme.spacing.sm)
             .then(
                 if (focusRequester != null) Modifier.focusRequester(focusRequester)
                 else Modifier
@@ -2849,7 +2849,7 @@ private fun ProgressBar(
             .playerProgressFill(
                 progress = { animatedProgress },
                 bufferedProgress = { animatedBufferedProgress },
-                bufferedColor = NuvioTheme.colors.Secondary,
+                bufferedColor = KovelyxTheme.colors.Secondary,
                 playedBrush = accentBrush
             )
     )
@@ -2864,7 +2864,7 @@ private fun SeekOverlay(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTheme.spacing.xxl, vertical = NuvioTheme.spacing.xl)
+            .padding(horizontal = KovelyxTheme.spacing.xxl, vertical = KovelyxTheme.spacing.xl)
     ) {
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             ProgressBar(
@@ -2875,7 +2875,7 @@ private fun SeekOverlay(
                 bufferedPosition = bufferedPosition
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -2934,7 +2934,7 @@ private fun PlayerClockOverlay(
 
     Column(
         modifier = Modifier
-            .padding(horizontal = NuvioTheme.spacing.xxs, vertical = NuvioTheme.spacing.xxs),
+            .padding(horizontal = KovelyxTheme.spacing.xxs, vertical = KovelyxTheme.spacing.xxs),
         horizontalAlignment = Alignment.End
     ) {
         Text(
@@ -3007,9 +3007,9 @@ private fun AspectRatioIndicator(text: String) {
         modifier = Modifier
             .background(
                 color = Color.Black.copy(alpha = 0.85f),
-                shape = RoundedCornerShape(NuvioTheme.spacing.xl)
+                shape = RoundedCornerShape(KovelyxTheme.spacing.xl)
             )
-            .padding(horizontal = 20.dp, vertical = NuvioTheme.spacing.md),
+            .padding(horizontal = 20.dp, vertical = KovelyxTheme.spacing.md),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -3031,7 +3031,7 @@ private fun AspectRatioIndicator(text: String) {
             )
         }
 
-        Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
 
         // Text
         Text(
@@ -3053,7 +3053,7 @@ private fun StreamSourceIndicator(text: String) {
                 color = Color.Black.copy(alpha = 0.82f),
                 shape = RoundedCornerShape(20.dp)
             )
-            .padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.sm),
+            .padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -3075,7 +3075,7 @@ private fun PlayerEngineSwitchIndicator(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
             .background(Color.Black.copy(alpha = 0.86f))
-            .padding(horizontal = 22.dp, vertical = NuvioTheme.spacing.lg),
+            .padding(horizontal = 22.dp, vertical = KovelyxTheme.spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -3095,7 +3095,7 @@ private fun PlayerEngineSwitchIndicator(
             )
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
         Text(
             text = message,
@@ -3160,7 +3160,7 @@ private fun SubtitleDelayOverlay(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(NuvioTheme.spacing.xl)
+                .height(KovelyxTheme.spacing.xl)
         ) {
             val thumbWidth = 22.dp
             val thumbOffset = (maxWidth - thumbWidth) * fraction
@@ -3168,8 +3168,8 @@ private fun SubtitleDelayOverlay(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(NuvioTheme.spacing.xs)
-                    .clip(RoundedCornerShape(NuvioTheme.radii.xxs))
+                    .height(KovelyxTheme.spacing.xs)
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.xxs))
                     .align(AbsoluteAlignment.CenterLeft)
                     .background(Color.White.copy(alpha = 0.15f))
             )
@@ -3183,7 +3183,7 @@ private fun SubtitleDelayOverlay(
                     val tickHeight = if (index == 2) 13.dp else 9.dp
                     Box(
                         modifier = Modifier
-                            .width(NuvioTheme.spacing.hairline)
+                            .width(KovelyxTheme.spacing.hairline)
                             .height(tickHeight)
                             .background(sliderAccent.copy(alpha = if (isSliderFocused) 0.52f else 0.22f))
                     )
@@ -3195,13 +3195,13 @@ private fun SubtitleDelayOverlay(
                     .absoluteOffset(x = thumbOffset)
                     .align(AbsoluteAlignment.CenterLeft)
                     .width(thumbWidth)
-                    .height(NuvioTheme.spacing.sm)
-                    .clip(RoundedCornerShape(NuvioTheme.radii.sm))
+                    .height(KovelyxTheme.spacing.sm)
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.sm))
                     .background(sliderAccent.copy(alpha = 0.95f))
             )
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -3226,7 +3226,7 @@ private fun SubtitleDelayOverlay(
                     },
                     focusedContainerColor = Color.White.copy(alpha = 0.22f)
                 ),
-                shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
             ) {
                 Box(
                     modifier = Modifier
@@ -3262,7 +3262,7 @@ private fun SubtitleDelayOverlay(
                     },
                     focusedContainerColor = Color.White.copy(alpha = 0.22f)
                 ),
-                shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md))
+                shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md))
             ) {
                 Box(
                     modifier = Modifier
@@ -3287,7 +3287,7 @@ private fun SubtitleDelayOverlay(
 private fun rememberRawSvgPainter(@RawRes iconRes: Int): Painter {
     val context = LocalContext.current
     val density = androidx.compose.ui.platform.LocalDensity.current
-    val sizePx = with(density) { NuvioTheme.spacing.xl.roundToPx() }
+    val sizePx = with(density) { KovelyxTheme.spacing.xl.roundToPx() }
     val request = remember(iconRes, context, sizePx) {
         ImageRequest.Builder(context)
             .data(iconRes)
@@ -3313,11 +3313,11 @@ private fun LoadingIssueReportAction(
     }
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(NuvioTheme.radii.lg))
+            .clip(RoundedCornerShape(KovelyxTheme.radii.lg))
             .background(Color.Black.copy(alpha = 0.72f))
-            .padding(horizontal = NuvioTheme.spacing.lg, vertical = NuvioTheme.spacing.md),
+            .padding(horizontal = KovelyxTheme.spacing.lg, vertical = KovelyxTheme.spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         val reportMessage = when (reportStatus) {
             PlaybackIssueReportStatus.Sent -> stringResource(R.string.player_report_issue_sent, reportId.orEmpty())
@@ -3407,7 +3407,7 @@ private fun ErrorOverlay(
         Column(
             modifier = Modifier.focusGroup(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
         ) {
             Text(
                 text = stringResource(R.string.player_error_title),
@@ -3420,10 +3420,10 @@ private fun ErrorOverlay(
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxl)
+                modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxl)
             )
 
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
             val reportMessage = when (reportStatus) {
                 PlaybackIssueReportStatus.Idle -> null
@@ -3436,17 +3436,17 @@ private fun ErrorOverlay(
                     text = reportMessage,
                     style = MaterialTheme.typography.bodyMedium,
                     color = when (reportStatus) {
-                        PlaybackIssueReportStatus.Sent -> NuvioTheme.colors.Secondary
+                        PlaybackIssueReportStatus.Sent -> KovelyxTheme.colors.Secondary
                         PlaybackIssueReportStatus.Failed -> Color(0xFFFF8A80)
                         else -> Color.White.copy(alpha = 0.7f)
                     },
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxl)
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxl)
                 )
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (onSwitchMpvAction != null) {
@@ -3516,26 +3516,26 @@ internal fun PlayerOverlayButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val shape = RoundedCornerShape(NuvioTheme.spacing.xxl)
+    val shape = RoundedCornerShape(KovelyxTheme.spacing.xxl)
     Button(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier,
         colors = ButtonDefaults.colors(
-            containerColor = if (primary) Color.White else NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = if (primary) Color.White else NuvioTheme.colors.Secondary,
-            contentColor = if (primary) Color.Black else NuvioTheme.colors.TextPrimary,
-            focusedContentColor = if (primary) Color.Black else NuvioTheme.colors.OnSecondary
+            containerColor = if (primary) Color.White else KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = if (primary) Color.White else KovelyxTheme.colors.Secondary,
+            contentColor = if (primary) Color.Black else KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = if (primary) Color.Black else KovelyxTheme.colors.OnSecondary
         ),
         shape = ButtonDefaults.shape(shape = shape),
         border = ButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = shape
             )
         ),
         contentPadding = PaddingValues(
-            horizontal = NuvioTheme.spacing.lg,
+            horizontal = KovelyxTheme.spacing.lg,
             vertical = 14.dp
         ),
         scale = ButtonDefaults.scale()
@@ -3573,23 +3573,23 @@ private fun SpeedSelectionDialog(
         Box(
             modifier = Modifier
                 .width(300.dp)
-                .clip(RoundedCornerShape(NuvioTheme.radii.xl))
-                .background(NuvioTheme.colors.BackgroundElevated)
+                .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
+                .background(KovelyxTheme.colors.BackgroundElevated)
         ) {
             Column(
-                modifier = Modifier.padding(NuvioTheme.spacing.xl)
+                modifier = Modifier.padding(KovelyxTheme.spacing.xl)
             ) {
                 Text(
                     text = stringResource(R.string.player_speed_title),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = NuvioTheme.colors.TextPrimary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.lg)
+                    color = KovelyxTheme.colors.TextPrimary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.lg)
                 )
 
                 LazyColumn(
                     state = listState,
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
-                    contentPadding = PaddingValues(top = NuvioTheme.spacing.xs)
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
+                    contentPadding = PaddingValues(top = KovelyxTheme.spacing.xs)
                 ) {
                     itemsIndexed(PLAYBACK_SPEEDS) { index, speed ->
                         SpeedItem(
@@ -3616,18 +3616,18 @@ private fun MoreActionsDialog(
         Box(
             modifier = Modifier
                 .width(360.dp)
-                .clip(RoundedCornerShape(NuvioTheme.radii.xl))
-                .background(NuvioTheme.colors.BackgroundElevated)
+                .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
+                .background(KovelyxTheme.colors.BackgroundElevated)
         ) {
             Column(
-                modifier = Modifier.padding(NuvioTheme.spacing.xl),
+                modifier = Modifier.padding(KovelyxTheme.spacing.xl),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
                     text = stringResource(R.string.player_more_actions_title),
                     style = MaterialTheme.typography.headlineSmall,
-                    color = NuvioTheme.colors.TextPrimary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
+                    color = KovelyxTheme.colors.TextPrimary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.sm)
                 )
 
                 MoreActionItem(
@@ -3660,16 +3660,16 @@ private fun MoreActionItem(
             .fillMaxWidth()
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         shape = CardDefaults.shape(shape = RoundedCornerShape(10.dp))
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            color = NuvioTheme.colors.TextPrimary,
-            modifier = Modifier.padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+            color = KovelyxTheme.colors.TextPrimary,
+            modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
         )
     }
 }
@@ -3689,30 +3689,30 @@ private fun SpeedItem(
             .fillMaxWidth()
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = if (isSelected) NuvioTheme.colors.Secondary.copy(alpha = 0.2f) else NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = if (isSelected) KovelyxTheme.colors.Secondary.copy(alpha = 0.2f) else KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm))
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(NuvioTheme.spacing.lg),
+                .padding(KovelyxTheme.spacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = if (speed == 1f) stringResource(R.string.player_speed_normal) else "${speed}x",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (isSelected) NuvioTheme.colors.Primary else NuvioTheme.colors.TextPrimary
+                color = if (isSelected) KovelyxTheme.colors.Primary else KovelyxTheme.colors.TextPrimary
             )
 
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = stringResource(R.string.cd_selected),
-                    tint = NuvioTheme.colors.Secondary,
-                    modifier = Modifier.size(NuvioTheme.spacing.xl)
+                    tint = KovelyxTheme.colors.Secondary,
+                    modifier = Modifier.size(KovelyxTheme.spacing.xl)
                 )
             }
         }
@@ -3732,22 +3732,22 @@ internal fun DialogButton(
         enabled = enabled,
         modifier = modifier,
         colors = ButtonDefaults.colors(
-            containerColor = if (isPrimary) NuvioTheme.colors.Secondary else NuvioTheme.colors.BackgroundCard,
-            contentColor = if (isPrimary) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextSecondary,
-            focusedContainerColor = if (isPrimary) NuvioTheme.colors.SecondaryVariant else NuvioTheme.colors.FocusBackground,
-            focusedContentColor = if (isPrimary) NuvioTheme.colors.OnSecondaryVariant else NuvioTheme.colors.Primary
+            containerColor = if (isPrimary) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.BackgroundCard,
+            contentColor = if (isPrimary) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextSecondary,
+            focusedContainerColor = if (isPrimary) KovelyxTheme.colors.SecondaryVariant else KovelyxTheme.colors.FocusBackground,
+            focusedContentColor = if (isPrimary) KovelyxTheme.colors.OnSecondaryVariant else KovelyxTheme.colors.Primary
         ),
         border = ButtonDefaults.border(
             focusedBorder = Border(
                 border = if (isPrimary) {
-                    BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.SecondaryVariant)
+                    BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.SecondaryVariant)
                 } else {
-                    NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
+                    KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs)
                 },
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = ButtonDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ButtonDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = ButtonDefaults.scale(focusedScale = 1f)
     ) {
         Text(
@@ -3802,21 +3802,21 @@ private fun PlayerBufferingIndicator(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 LoadingIndicator()
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                 Text(
                     text = torrentBufferingMessage,
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.White.copy(alpha = 0.8f)
                 )
                 if (torrentBufferingProgress > 0f) {
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                     Box(
                         modifier = Modifier
                             .width(200.dp)
                             .height(3.dp)
                             .background(
                                 color = Color.White.copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(NuvioTheme.radii.xxs)
+                                shape = RoundedCornerShape(KovelyxTheme.radii.xxs)
                             )
                     ) {
                         Box(
@@ -3825,7 +3825,7 @@ private fun PlayerBufferingIndicator(
                                 .height(3.dp)
                                 .background(
                                     color = Color.White.copy(alpha = 0.85f),
-                                    shape = RoundedCornerShape(NuvioTheme.radii.xxs)
+                                    shape = RoundedCornerShape(KovelyxTheme.radii.xxs)
                                 )
                         )
                     }

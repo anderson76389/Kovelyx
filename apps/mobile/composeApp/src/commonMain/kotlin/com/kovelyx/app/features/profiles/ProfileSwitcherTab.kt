@@ -72,7 +72,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import dev.chrisbanes.haze.HazeState
 import com.kovelyx.app.isIos
@@ -416,7 +416,7 @@ fun NativeProfileSwitcherPopup(
             if (popupVisible && profiles.isNotEmpty() && !isSwitchingProfile) {
                 Popup(
                     alignment = Alignment.BottomCenter,
-                    offset = IntOffset(0, with(density) { -NuvioTokens.Space.s64.roundToPx() }),
+                    offset = IntOffset(0, with(density) { -KovelyxTokens.Space.s64.roundToPx() }),
                     properties = PopupProperties(focusable = true),
                     onDismissRequest = onDismissRequest,
                 ) {
@@ -538,29 +538,29 @@ private fun PopupAddProfileBubble(
                 indication = null,
                 onClick = onClick,
             )
-            .padding(NuvioTokens.Space.s4),
+            .padding(KovelyxTokens.Space.s4),
     ) {
         Box(
             modifier = Modifier
                 .size(tokens.components.avatarSize)
                 .clip(tokens.shapes.avatar)
                 .background(tokens.colors.surfaceCard)
-                .border(tokens.borders.thin + NuvioTokens.Space.hairline, tokens.colors.borderDefault.copy(alpha = tokens.opacity.medium), tokens.shapes.avatar),
+                .border(tokens.borders.thin + KovelyxTokens.Space.hairline, tokens.colors.borderDefault.copy(alpha = tokens.opacity.medium), tokens.shapes.avatar),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Rounded.Add,
                 contentDescription = stringResource(Res.string.compose_profile_add_profile),
                 tint = tokens.colors.textMuted,
-                modifier = Modifier.size(tokens.icons.md + NuvioTokens.Space.s2),
+                modifier = Modifier.size(tokens.icons.md + KovelyxTokens.Space.s2),
             )
         }
 
-        Spacer(modifier = Modifier.height(NuvioTokens.Space.s4))
+        Spacer(modifier = Modifier.height(KovelyxTokens.Space.s4))
 
         Text(
             text = stringResource(Res.string.compose_profile_add_profile),
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = NuvioTokens.Type.labelXs),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = KovelyxTokens.Type.labelXs),
             color = tokens.colors.textMuted,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -632,7 +632,7 @@ private fun PopupProfileBubble(
                 indication = null,
                 onClick = onClick,
             )
-            .padding(NuvioTokens.Space.s4),
+            .padding(KovelyxTokens.Space.s4),
     ) {
         Box(
             modifier = Modifier.size(52.dp),
@@ -652,7 +652,7 @@ private fun PopupProfileBubble(
                     .then(
                         when {
                             isSelected -> Modifier.border(
-                                tokens.borders.medium + NuvioTokens.Space.hairline,
+                                tokens.borders.medium + KovelyxTokens.Space.hairline,
                                 tokens.colors.borderSelected,
                                 tokens.shapes.avatar,
                             )
@@ -662,7 +662,7 @@ private fun PopupProfileBubble(
                                 tokens.shapes.avatar,
                             )
                             avatarImageUrl == null -> Modifier.border(
-                                tokens.borders.thin + NuvioTokens.Space.hairline,
+                                tokens.borders.thin + KovelyxTokens.Space.hairline,
                                 avatarColor.copy(alpha = 0.3f),
                                 tokens.shapes.avatar,
                             )
@@ -681,7 +681,7 @@ private fun PopupProfileBubble(
                 } else if (profile.name.isNotBlank()) {
                     Text(
                         text = profile.name.take(1).uppercase(),
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = NuvioTokens.Type.titleSm),
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = KovelyxTokens.Type.titleSm),
                         color = avatarColor,
                         fontWeight = FontWeight.Bold,
                     )
@@ -703,7 +703,7 @@ private fun PopupProfileBubble(
                         .size(18.dp)
                         .clip(tokens.shapes.avatar)
                         .background(tokens.colors.surfacePopover)
-                        .border(tokens.borders.thin + NuvioTokens.Space.hairline, tokens.colors.surfaceSheet, tokens.shapes.avatar),
+                        .border(tokens.borders.thin + KovelyxTokens.Space.hairline, tokens.colors.surfaceSheet, tokens.shapes.avatar),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -716,13 +716,13 @@ private fun PopupProfileBubble(
             }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTokens.Space.s4))
+        Spacer(modifier = Modifier.height(KovelyxTokens.Space.s4))
 
         Text(
             text = profile.name.ifBlank {
                 stringResource(Res.string.profile_label_number, profile.profileIndex)
             },
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = NuvioTokens.Type.labelXs),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = KovelyxTokens.Type.labelXs),
             color = if (isSelected) tokens.colors.accent else tokens.colors.textMuted,
             fontWeight = if (isActive || isSelected) FontWeight.Bold else FontWeight.Medium,
             textAlign = TextAlign.Center,
@@ -786,7 +786,7 @@ fun ActiveProfileMiniAvatar(
                     avatarColor.copy(alpha = 0.15f)
                 },
             )
-            .border(tokens.borders.thin + NuvioTokens.Space.hairline, borderColor, tokens.shapes.avatar),
+            .border(tokens.borders.thin + KovelyxTokens.Space.hairline, borderColor, tokens.shapes.avatar),
         contentAlignment = Alignment.Center,
     ) {
         if (avatarImageUrl != null) {

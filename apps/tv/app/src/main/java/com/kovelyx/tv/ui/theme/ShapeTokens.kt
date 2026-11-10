@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class NuvioRadiusTokens(
+data class KovelyxRadiusTokens(
     val none: Dp,
     val xxs: Dp,
     val xs: Dp,
@@ -22,7 +22,7 @@ data class NuvioRadiusTokens(
 )
 
 @Immutable
-data class NuvioShapeTokens(
+data class KovelyxShapeTokens(
     val posterCard: Shape,
     val backdropCard: Shape,
     val collectionCard: Shape,
@@ -41,8 +41,8 @@ data class NuvioShapeTokens(
     val circle: Shape
 )
 
-object NuvioRadii {
-    val tokens = NuvioRadiusTokens(
+object KovelyxRadii {
+    val tokens = KovelyxRadiusTokens(
         none = 0.dp,
         xxs = 2.dp,
         xs = 4.dp,
@@ -56,23 +56,23 @@ object NuvioRadii {
     )
 }
 
-object NuvioShapes {
-    val tokens = NuvioShapeTokens(
-        posterCard = RoundedCornerShape(NuvioRadii.tokens.md),
-        backdropCard = RoundedCornerShape(NuvioRadii.tokens.xl),
-        collectionCard = RoundedCornerShape(NuvioRadii.tokens.xl),
-        button = RoundedCornerShape(NuvioRadii.tokens.md),
-        iconButton = RoundedCornerShape(NuvioRadii.tokens.md),
-        chip = RoundedCornerShape(NuvioRadii.tokens.full),
-        badge = RoundedCornerShape(NuvioRadii.tokens.xs),
-        dialog = RoundedCornerShape(NuvioRadii.tokens.xl),
-        sidePanel = RoundedCornerShape(NuvioRadii.tokens.xxl),
+object KovelyxShapes {
+    val tokens = KovelyxShapeTokens(
+        posterCard = RoundedCornerShape(KovelyxRadii.tokens.md),
+        backdropCard = RoundedCornerShape(KovelyxRadii.tokens.xl),
+        collectionCard = RoundedCornerShape(KovelyxRadii.tokens.xl),
+        button = RoundedCornerShape(KovelyxRadii.tokens.md),
+        iconButton = RoundedCornerShape(KovelyxRadii.tokens.md),
+        chip = RoundedCornerShape(KovelyxRadii.tokens.full),
+        badge = RoundedCornerShape(KovelyxRadii.tokens.xs),
+        dialog = RoundedCornerShape(KovelyxRadii.tokens.xl),
+        sidePanel = RoundedCornerShape(KovelyxRadii.tokens.xxl),
         sidebar = RoundedCornerShape(30.dp),
-        navItem = RoundedCornerShape(NuvioRadii.tokens.full),
-        progress = RoundedCornerShape(NuvioRadii.tokens.xxs),
-        slider = RoundedCornerShape(NuvioRadii.tokens.full),
-        field = RoundedCornerShape(NuvioRadii.tokens.md),
-        menu = RoundedCornerShape(NuvioRadii.tokens.lg),
+        navItem = RoundedCornerShape(KovelyxRadii.tokens.full),
+        progress = RoundedCornerShape(KovelyxRadii.tokens.xxs),
+        slider = RoundedCornerShape(KovelyxRadii.tokens.full),
+        field = RoundedCornerShape(KovelyxRadii.tokens.md),
+        menu = RoundedCornerShape(KovelyxRadii.tokens.lg),
         circle = CircleShape
     )
 }

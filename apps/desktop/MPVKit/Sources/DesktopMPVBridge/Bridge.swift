@@ -9,19 +9,19 @@ private func retainAndReturn(_ s: String) -> UnsafePointer<CChar>? {
     return ns.utf8String
 }
 
-private func player(_ ptr: UnsafeMutableRawPointer) -> NuvioPlayerWindow {
-    return Unmanaged<NuvioPlayerWindow>.fromOpaque(ptr).takeUnretainedValue()
+private func player(_ ptr: UnsafeMutableRawPointer) -> KovelyxPlayerWindow {
+    return Unmanaged<KovelyxPlayerWindow>.fromOpaque(ptr).takeUnretainedValue()
 }
 
 @_cdecl("nuvio_player_create")
 public func nuvio_player_create() -> UnsafeMutableRawPointer {
-    let p = NuvioPlayerWindow()
+    let p = KovelyxPlayerWindow()
     return Unmanaged.passRetained(p).toOpaque()
 }
 
 @_cdecl("nuvio_player_destroy")
 public func nuvio_player_destroy(_ ptr: UnsafeMutableRawPointer) {
-    let p = Unmanaged<NuvioPlayerWindow>.fromOpaque(ptr).takeRetainedValue()
+    let p = Unmanaged<KovelyxPlayerWindow>.fromOpaque(ptr).takeRetainedValue()
     p.close()
 }
 
@@ -531,7 +531,7 @@ public func nuvio_player_add_source_stream(
     _ url: UnsafePointer<CChar>,
     _ isCurrent: Bool
 ) {
-    let info = NuvioStreamInfo(
+    let info = KovelyxStreamInfo(
         id: String(cString: id),
         label: String(cString: label),
         subtitle: subtitle.map { String(cString: $0) },
@@ -559,7 +559,7 @@ public func nuvio_player_add_source_addon_group(
     _ isLoading: Bool,
     _ hasError: Bool
 ) {
-    let info = NuvioAddonGroupInfo(
+    let info = KovelyxAddonGroupInfo(
         id: String(cString: id),
         addonName: String(cString: addonName),
         addonId: String(cString: addonId),
@@ -593,7 +593,7 @@ public func nuvio_player_add_episode(
     _ season: Int32,
     _ episode: Int32
 ) {
-    let info = NuvioEpisodeInfo(
+    let info = KovelyxEpisodeInfo(
         id: String(cString: id),
         title: String(cString: title),
         overview: overview.map { String(cString: $0) },
@@ -628,7 +628,7 @@ public func nuvio_player_add_episode_stream(
     _ url: UnsafePointer<CChar>,
     _ isCurrent: Bool
 ) {
-    let info = NuvioStreamInfo(
+    let info = KovelyxStreamInfo(
         id: String(cString: id),
         label: String(cString: label),
         subtitle: subtitle.map { String(cString: $0) },
@@ -656,7 +656,7 @@ public func nuvio_player_add_episode_addon_group(
     _ isLoading: Bool,
     _ hasError: Bool
 ) {
-    let info = NuvioAddonGroupInfo(
+    let info = KovelyxAddonGroupInfo(
         id: String(cString: id),
         addonName: String(cString: addonName),
         addonId: String(cString: addonId),

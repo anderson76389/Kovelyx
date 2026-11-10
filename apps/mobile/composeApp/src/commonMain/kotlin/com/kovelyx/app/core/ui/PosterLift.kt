@@ -70,7 +70,7 @@ internal fun Modifier.posterCardClickable(
     onClick: (() -> Unit)?,
     onLongClick: (() -> Unit)?,
     zoomImageUrl: String? = null,
-    zoomCornerRadius: Dp = NuvioTokens.Radius.poster,
+    zoomCornerRadius: Dp = KovelyxTokens.Radius.poster,
 ): Modifier {
     val graphicsContext = LocalGraphicsContext.current
     val source = remember(graphicsContext, zoomImageUrl) { PosterLiftSource(graphicsContext) }

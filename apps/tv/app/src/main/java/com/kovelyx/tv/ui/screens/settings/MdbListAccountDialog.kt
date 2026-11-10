@@ -5,7 +5,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 
 @Composable
 internal fun MdbListAccountDialog(
@@ -33,7 +33,7 @@ internal fun MdbListAccountDialog(
             )
         }
     } else {
-        NuvioDialog(onDismiss = onDismiss, title = "", width = 720.dp, titleTextAlign = TextAlign.Center, suppressFirstKeyUp = false) {
+        KovelyxDialog(onDismiss = onDismiss, title = "", width = 720.dp, titleTextAlign = TextAlign.Center, suppressFirstKeyUp = false) {
             TrackingDeviceAuthContent(
                 providerName = stringResource(R.string.mdblist_name),
                 logo = logo,

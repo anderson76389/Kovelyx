@@ -17,8 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.kovelyx.app.core.ui.DisintegrationRequest
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.features.cloud.CloudLibraryContentType
 import com.kovelyx.app.features.cloud.CloudLibraryFile
 import com.kovelyx.app.features.cloud.CloudLibraryItem
@@ -36,7 +36,7 @@ import com.kovelyx.app.features.settings.AppBrandWordmark
 import com.kovelyx.app.features.settings.SettingsScreen
 import com.kovelyx.app.features.watchprogress.ContinueWatchingItem
 import com.kovelyx.app.navigation.AppRoute
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import kotlinx.coroutines.flow.Flow
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.app_brand_name
@@ -44,7 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun rememberGuardedPopBackStack(
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     route: AppRoute,
     beforePop: () -> Unit = {},
 ): () -> Unit {
@@ -218,7 +218,7 @@ internal fun AppLoadingContent(
                 .fillMaxWidth(0.48f)
                 .height(44.dp),
         )
-        NuvioLoadingIndicator(
+        KovelyxLoadingIndicator(
             modifier = Modifier
                 .align(Alignment.Center)
                 .offset(y = 72.dp),
@@ -232,7 +232,7 @@ internal fun AppLaunchOverlay(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.zIndex(NuvioTokens.Z.dialog),
+        modifier = modifier.zIndex(KovelyxTokens.Z.dialog),
     ) {
         ProfileBackgroundBackdrop(
             profile = profile,

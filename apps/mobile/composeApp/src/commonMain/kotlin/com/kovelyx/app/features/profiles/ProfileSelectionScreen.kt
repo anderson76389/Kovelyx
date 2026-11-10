@@ -59,8 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.kovelyx.app.core.ui.NuvioBackButton
-import com.kovelyx.app.core.ui.NuvioToastHost
+import com.kovelyx.app.core.ui.KovelyxBackButton
+import com.kovelyx.app.core.ui.KovelyxToastHost
 import com.kovelyx.app.features.membership.CosmeticEntitlement
 import com.kovelyx.app.features.settings.MemberBrandWordmark
 import kotlinx.coroutines.delay
@@ -292,7 +292,7 @@ fun ProfileSelectionScreen(
         }
 
         if (onBack != null && interactionEnabled && contentVisible) {
-            NuvioBackButton(
+            KovelyxBackButton(
                 onClick = onBack,
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -300,7 +300,7 @@ fun ProfileSelectionScreen(
             )
         }
 
-        NuvioToastHost(modifier = Modifier.align(Alignment.TopCenter))
+        KovelyxToastHost(modifier = Modifier.align(Alignment.TopCenter))
     }
 
     pinDialogProfile?.let { profile ->

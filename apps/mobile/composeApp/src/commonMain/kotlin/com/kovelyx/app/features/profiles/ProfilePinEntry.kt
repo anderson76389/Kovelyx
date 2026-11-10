@@ -39,7 +39,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
-import com.kovelyx.app.core.ui.NuvioTokens
+import com.kovelyx.app.core.ui.KovelyxTokens
 import com.kovelyx.app.core.ui.nuvio
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.*
@@ -70,7 +70,7 @@ internal fun InlinePinEntry(
             color = tokens.colors.textMuted,
         )
 
-        Spacer(modifier = Modifier.height(NuvioTokens.Space.s14))
+        Spacer(modifier = Modifier.height(KovelyxTokens.Space.s14))
 
         Row(horizontalArrangement = Arrangement.spacedBy(tokens.spacing.listGap)) {
             repeat(4) { index ->
@@ -100,7 +100,7 @@ internal fun InlinePinEntry(
                             scaleX = dotScale.value
                             scaleY = dotScale.value
                         }
-                        .size(NuvioTokens.Space.s14)
+                        .size(KovelyxTokens.Space.s14)
                         .clip(tokens.shapes.avatar)
                         .then(
                             if (filled) Modifier.background(dotColor)
@@ -123,7 +123,7 @@ internal fun InlinePinEntry(
             )
         }
 
-        Spacer(modifier = Modifier.height(NuvioTokens.Space.s14))
+        Spacer(modifier = Modifier.height(KovelyxTokens.Space.s14))
 
         CompactPinKeypad(
             onDigit = { digit ->
@@ -169,7 +169,7 @@ internal fun InlinePinEntry(
             modifier = Modifier
                 .clip(tokens.shapes.compactCard)
                 .clickable(onClick = onCancel)
-                .padding(horizontal = tokens.spacing.cardPadding, vertical = NuvioTokens.Space.s6),
+                .padding(horizontal = tokens.spacing.cardPadding, vertical = KovelyxTokens.Space.s6),
         )
     }
 }

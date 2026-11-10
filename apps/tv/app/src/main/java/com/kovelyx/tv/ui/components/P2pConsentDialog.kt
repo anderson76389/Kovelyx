@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -71,23 +71,23 @@ fun P2pConsentDialog(
         CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(NuvioTheme.radii.xl))
-                    .background(NuvioTheme.colors.BackgroundCard)
+                    .clip(RoundedCornerShape(KovelyxTheme.radii.xl))
+                    .background(KovelyxTheme.colors.BackgroundCard)
             ) {
                 Column(
                     modifier = Modifier
                         .width(520.dp) // Increased width from 460.dp to 520.dp for better text distribution
-                        .padding(NuvioTheme.spacing.xl),
+                        .padding(KovelyxTheme.spacing.xl),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = stringResource(R.string.p2p_consent_title),
                         style = MaterialTheme.typography.headlineSmall,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
                     val scrollState = rememberScrollState()
                     val coroutineScope = rememberCoroutineScope()
@@ -123,16 +123,16 @@ fun P2pConsentDialog(
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 textDirection = bodyText.contentTextDirection()
                             ),
-                            color = NuvioTheme.colors.TextSecondary,
+                            color = KovelyxTheme.colors.TextSecondary,
                             textAlign = TextAlign.Start,
-                            modifier = Modifier.padding(end = NuvioTheme.spacing.xs)
+                            modifier = Modifier.padding(end = KovelyxTheme.spacing.xs)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Card(
@@ -141,24 +141,24 @@ fun P2pConsentDialog(
                                 .weight(1f)
                                 .focusRequester(focusRequester),
                             colors = CardDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundElevated,
-                                focusedContainerColor = NuvioTheme.colors.BackgroundElevated
+                                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                                focusedContainerColor = KovelyxTheme.colors.BackgroundElevated
                             ),
                             border = CardDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                    shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                    shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                 )
                             ),
-                            shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md)),
+                            shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md)),
                             scale = CardDefaults.scale(focusedScale = 1.05f)
                         ) {
                             Text(
                                 text = stringResource(R.string.p2p_consent_cancel),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = NuvioTheme.colors.TextPrimary,
+                                color = KovelyxTheme.colors.TextPrimary,
                                 modifier = Modifier
-                                    .padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+                                    .padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
                                     .fillMaxWidth(),
                                 textAlign = TextAlign.Center
                             )
@@ -171,24 +171,24 @@ fun P2pConsentDialog(
                                 .weight(1f)
                                 .onFocusChanged { enableFocused = it.isFocused },
                             colors = CardDefaults.colors(
-                                containerColor = NuvioTheme.colors.BackgroundElevated,
-                                focusedContainerColor = NuvioTheme.colors.Secondary
+                                containerColor = KovelyxTheme.colors.BackgroundElevated,
+                                focusedContainerColor = KovelyxTheme.colors.Secondary
                             ),
                             border = CardDefaults.border(
                                 focusedBorder = Border(
-                                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                                    shape = RoundedCornerShape(NuvioTheme.radii.md)
+                                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                                    shape = RoundedCornerShape(KovelyxTheme.radii.md)
                                 )
                             ),
-                            shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.md)),
+                            shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.md)),
                             scale = CardDefaults.scale(focusedScale = 1.05f)
                         ) {
                             Text(
                                 text = stringResource(R.string.p2p_consent_enable),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = if (enableFocused) NuvioTheme.colors.OnSecondary else NuvioTheme.colors.TextPrimary,
+                                color = if (enableFocused) KovelyxTheme.colors.OnSecondary else KovelyxTheme.colors.TextPrimary,
                                 modifier = Modifier
-                                    .padding(horizontal = NuvioTheme.spacing.lg, vertical = 14.dp)
+                                    .padding(horizontal = KovelyxTheme.spacing.lg, vertical = 14.dp)
                                     .fillMaxWidth(),
                                 textAlign = TextAlign.Center
                             )

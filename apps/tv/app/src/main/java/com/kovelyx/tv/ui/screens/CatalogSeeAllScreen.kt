@@ -3,7 +3,7 @@
 package com.kovelyx.tv.ui.screens
 
 import com.kovelyx.tv.domain.model.catalogRowLegacyKey
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -203,31 +203,31 @@ fun CatalogSeeAllScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = NuvioTheme.spacing.xl)
+            .padding(vertical = KovelyxTheme.spacing.xl)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = NuvioTheme.spacing.xxxl),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = KovelyxTheme.spacing.xxxl),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = catalogRow?.catalogName ?: stringResource(R.string.catalog_see_all_title_fallback),
                 style = MaterialTheme.typography.headlineLarge,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
         }
 
         if (uiState.catalogAddonNameEnabled) {
             catalogRow?.addonName?.let { addonName ->
                 Text(
-                    modifier = Modifier.padding(horizontal = NuvioTheme.spacing.xxxl),
+                    modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl),
                     text = stringResource(R.string.catalog_see_all_from, addonName),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
         val hasItems = catalogRow?.items?.isNotEmpty() == true
         val isCatalogLoading = if (catalogRow == null) serverFailed?.value != true else catalogRow.isLoading
@@ -244,13 +244,13 @@ fun CatalogSeeAllScreen(
                     ),
                     modifier = Modifier.dpadRepeatThrottle(),
                     contentPadding = PaddingValues(
-                        start = NuvioTheme.spacing.xxxl,
-                        end = NuvioTheme.spacing.xl,
-                        top = NuvioTheme.spacing.md,
-                        bottom = NuvioTheme.spacing.xxl
+                        start = KovelyxTheme.spacing.xxxl,
+                        end = KovelyxTheme.spacing.xl,
+                        top = KovelyxTheme.spacing.md,
+                        bottom = KovelyxTheme.spacing.xxl
                     ),
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
-                    verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.lg)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.lg)
                 ) {
                     itemsIndexed(
                         items = catalogRow.items,
@@ -319,8 +319,8 @@ fun CatalogSeeAllScreen(
                                         .then(Modifier.focusProperties { canFocus = false }),
                                     shape = androidx.tv.material3.CardDefaults.shape(shape = cardShape),
                                     colors = androidx.tv.material3.CardDefaults.colors(
-                                        containerColor = NuvioTheme.colors.BackgroundCard,
-                                        focusedContainerColor = NuvioTheme.colors.BackgroundCard
+                                        containerColor = KovelyxTheme.colors.BackgroundCard,
+                                        focusedContainerColor = KovelyxTheme.colors.BackgroundCard
                                     )
                                 ) {
                                     Box(
@@ -342,7 +342,7 @@ fun CatalogSeeAllScreen(
                                 Spacer(
                                     modifier = Modifier
                                         .then(if (globalLandscape) Modifier.fillMaxWidth() else Modifier.width(posterCardStyle.width))
-                                        .padding(top = NuvioTheme.spacing.sm)
+                                        .padding(top = KovelyxTheme.spacing.sm)
                                         .height(MaterialTheme.typography.titleMedium.lineHeight.value.dp)
                                 )
                             }

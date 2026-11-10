@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 enum class ProfileEditorTab {
     Avatar,
@@ -46,7 +46,7 @@ fun ProfileEditorTabs(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         ProfileEditorTabItem(
             label = stringResource(R.string.profile_editor_tab_avatar),
@@ -73,15 +73,15 @@ private fun ProfileEditorTabItem(
     val interactionSource = remember { MutableInteractionSource() }
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isFocused -> NuvioTheme.colors.FocusBackground
-            isSelected -> NuvioTheme.colors.Secondary.copy(alpha = 0.22f)
+            isFocused -> KovelyxTheme.colors.FocusBackground
+            isSelected -> KovelyxTheme.colors.Secondary.copy(alpha = 0.22f)
             else -> Color.White.copy(alpha = 0.06f)
         },
         animationSpec = tween(120),
         label = "profileEditorTabBackground"
     )
     val textColor by animateColorAsState(
-        targetValue = if (isSelected || isFocused) Color.White else NuvioTheme.colors.TextSecondary,
+        targetValue = if (isSelected || isFocused) Color.White else KovelyxTheme.colors.TextSecondary,
         animationSpec = tween(120),
         label = "profileEditorTabText"
     )
@@ -97,9 +97,9 @@ private fun ProfileEditorTabItem(
             .background(backgroundColor)
             .border(
                 border = if (isFocused) {
-                    NuvioTheme.focusRing.border(2.dp)
+                    KovelyxTheme.focusRing.border(2.dp)
                 } else {
-                    BorderStroke(1.dp, if (isSelected) NuvioTheme.colors.Secondary else NuvioTheme.colors.Border)
+                    BorderStroke(1.dp, if (isSelected) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.Border)
                 },
                 shape = shape
             )
@@ -113,6 +113,6 @@ private fun ProfileEditorTabItem(
                 role = Role.Tab
                 selected = isSelected
             }
-            .padding(horizontal = 18.dp, vertical = NuvioTheme.spacing.sm)
+            .padding(horizontal = 18.dp, vertical = KovelyxTheme.spacing.sm)
     )
 }

@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
-import com.kovelyx.tv.ui.theme.NuvioMotion
+import com.kovelyx.tv.ui.theme.KovelyxMotion
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.animation.AnimatedVisibility
@@ -69,7 +69,7 @@ import com.kovelyx.tv.domain.model.NextToWatch
 import com.kovelyx.tv.ui.components.ImdbRatingSourceLabel
 import com.kovelyx.tv.ui.components.MDBListRatingsRow
 import com.kovelyx.tv.ui.components.SynopsisDescription
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Visibility
@@ -168,7 +168,7 @@ fun HeroContentSection(
         label = "logoHeight"
     )
     val logoBottomPadding by animateDpAsState(
-        targetValue = if (isTrailerPlaying) NuvioTheme.spacing.xl else NuvioTheme.spacing.lg,
+        targetValue = if (isTrailerPlaying) KovelyxTheme.spacing.xl else KovelyxTheme.spacing.lg,
         animationSpec = tween(600),
         label = "logoPadding"
     )
@@ -189,7 +189,7 @@ fun HeroContentSection(
                 .animateContentSize(
                     animationSpec = tween(600)
                 )
-                .padding(start = NuvioTheme.spacing.xxxl, end = NuvioTheme.spacing.xxxl, bottom = NuvioTheme.spacing.lg),
+                .padding(start = KovelyxTheme.spacing.xxxl, end = KovelyxTheme.spacing.xxxl, bottom = KovelyxTheme.spacing.lg),
             verticalArrangement = Arrangement.Bottom
         ) {
             // Logo/Title — always visible during trailer, animates size
@@ -209,14 +209,14 @@ fun HeroContentSection(
                 // Text title hides entirely during trailer
                 AnimatedVisibility(
                     visible = !isTrailerPlaying,
-                    enter = fadeIn(tween(NuvioMotion.tokens.durations.overlay)),
-                    exit = fadeOut(tween(NuvioMotion.tokens.durations.overlay))
+                    enter = fadeIn(tween(KovelyxMotion.tokens.durations.overlay)),
+                    exit = fadeOut(tween(KovelyxMotion.tokens.durations.overlay))
                 ) {
                     Text(
                         text = meta.name,
                         style = MaterialTheme.typography.displayMedium,
-                        color = NuvioTheme.colors.TextPrimary,
-                        modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
+                        color = KovelyxTheme.colors.TextPrimary,
+                        modifier = Modifier.padding(bottom = KovelyxTheme.spacing.sm)
                     )
                 }
             }
@@ -230,20 +230,20 @@ fun HeroContentSection(
                 Text(
                     text = stringResource(R.string.hero_press_back_trailer),
                     style = MaterialTheme.typography.labelMedium,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.sm)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.sm)
                 )
             }
 
             // Everything below the logo fades out during trailer
             AnimatedVisibility(
                 visible = !isTrailerPlaying,
-                enter = fadeIn(tween(NuvioMotion.tokens.durations.overlay)),
-                exit = fadeOut(tween(NuvioMotion.tokens.durations.overlay))
+                enter = fadeIn(tween(KovelyxMotion.tokens.durations.overlay)),
+                exit = fadeOut(tween(KovelyxMotion.tokens.durations.overlay))
             ) {
                 Column {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         PlayButton(
@@ -313,7 +313,7 @@ fun HeroContentSection(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.lg))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.lg))
 
                     // Director/Writer line above description
                     if (!creditLine.isNullOrBlank()) {
@@ -322,12 +322,12 @@ fun HeroContentSection(
                             style = MaterialTheme.typography.labelLarge.copy(
                                 textDirection = creditLine.contentTextDirection()
                             ),
-                            color = NuvioTheme.extendedColors.textSecondary,
+                            color = KovelyxTheme.extendedColors.textSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.fillMaxWidth(0.6f)
                         )
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
                     }
 
                     if (mdbListRatings?.isEmpty() == false) {
@@ -344,7 +344,7 @@ fun HeroContentSection(
                             onTruncationChanged = onTruncationChanged,
                             modifier = Modifier
                                 .fillMaxWidth(0.6f)
-                                .padding(bottom = NuvioTheme.spacing.md)
+                                .padding(bottom = KovelyxTheme.spacing.md)
                         )
                     }
 
@@ -442,23 +442,23 @@ internal fun PlayButton(
             focusedContentColor = androidx.compose.ui.graphics.Color.Black
         ),
         shape = ButtonDefaults.shape(
-            shape = RoundedCornerShape(NuvioTheme.spacing.xxl)
+            shape = RoundedCornerShape(KovelyxTheme.spacing.xxl)
         ),
         border = ButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.spacing.xxl)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.spacing.xxl)
             )
         ),
-        contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xl, vertical = 14.dp)
+        contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xl, vertical = 14.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
             modifier = Modifier.animateContentSize(
                 animationSpec = tween(
-                    durationMillis = NuvioMotion.tokens.durations.fast,
-                    easing = NuvioMotion.tokens.easings.standard
+                    durationMillis = KovelyxMotion.tokens.durations.fast,
+                    easing = KovelyxMotion.tokens.easings.standard
                 )
             )
         ) {
@@ -469,8 +469,8 @@ internal fun PlayButton(
             )
             AnimatedVisibility(
                 visible = text != null,
-                enter = fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)),
-                exit = fadeOut(animationSpec = tween(NuvioMotion.tokens.durations.quick))
+                enter = fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)),
+                exit = fadeOut(animationSpec = tween(KovelyxMotion.tokens.durations.quick))
             ) {
                 Text(
                     text = text ?: "",
@@ -494,20 +494,20 @@ private fun ActionIconButtonPainter(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier
-            .size(NuvioTheme.spacing.xxxl)
+            .size(KovelyxTheme.spacing.xxxl)
             .onFocusChanged { state ->
                 if (state.isFocused) onFocused()
             }
             .focusProperties { up = FocusRequester.Cancel },
         colors = IconButtonDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.Secondary,
-            contentColor = NuvioTheme.colors.TextPrimary,
-            focusedContentColor = NuvioTheme.colors.OnSecondary
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.Secondary,
+            contentColor = KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = KovelyxTheme.colors.OnSecondary
         ),
         border = IconButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = CircleShape
             )
         ),
@@ -552,7 +552,7 @@ private fun ActionIconButton(
         enabled = enabled,
         modifier = Modifier
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-            .size(NuvioTheme.spacing.xxxl)
+            .size(KovelyxTheme.spacing.xxxl)
             .onFocusChanged { state ->
                 if (state.isFocused) onFocused()
             }
@@ -590,14 +590,14 @@ private fun ActionIconButton(
             }
             .focusProperties { up = FocusRequester.Cancel },
         colors = IconButtonDefaults.colors(
-            containerColor = if (selected) selectedContainerColor else NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.Secondary,
-            contentColor = if (selected) selectedContentColor else NuvioTheme.colors.TextPrimary,
-            focusedContentColor = NuvioTheme.colors.OnSecondary
+            containerColor = if (selected) selectedContainerColor else KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.Secondary,
+            contentColor = if (selected) selectedContentColor else KovelyxTheme.colors.TextPrimary,
+            focusedContentColor = KovelyxTheme.colors.OnSecondary
         ),
         border = IconButtonDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = CircleShape
             )
         ),
@@ -614,7 +614,7 @@ private fun ActionIconButton(
             icon != null -> Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                modifier = Modifier.size(NuvioTheme.spacing.xl)
+                modifier = Modifier.size(KovelyxTheme.spacing.xl)
             )
         }
     }
@@ -690,11 +690,11 @@ private fun MetaInfoRow(
         }
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)) {
+    Column(verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)) {
         // Primary row: Genres, Release, Ratings
         Row(
             modifier = if (reserveImdbRatingHeight) Modifier.height(30.dp) else Modifier,
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (meta.genres.isNotEmpty()) {
@@ -702,7 +702,7 @@ private fun MetaInfoRow(
                     text = genresText,
                     modifier = Modifier.weight(1f, fill = false),
                     style = MaterialTheme.typography.labelLarge,
-                    color = NuvioTheme.extendedColors.textSecondary,
+                    color = KovelyxTheme.extendedColors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -715,7 +715,7 @@ private fun MetaInfoRow(
                 Text(
                     text = year,
                     style = MaterialTheme.typography.labelLarge,
-                    color = NuvioTheme.extendedColors.textSecondary
+                    color = KovelyxTheme.extendedColors.textSecondary
                 )
                 if (shouldShowImdbRating || shouldShowTmdbRating) {
                     MetaInfoDivider()
@@ -725,18 +725,18 @@ private fun MetaInfoRow(
             imdbRating?.let { rating ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
                 ) {
                     ImdbRatingSourceLabel(
                         logoModifier = Modifier.size(30.dp),
                         textStyle = MaterialTheme.typography.labelLarge,
-                        textColor = NuvioTheme.extendedColors.textSecondary
+                        textColor = KovelyxTheme.extendedColors.textSecondary
                     )
                     val ratingText = remember(rating) { String.format("%.1f", rating) }
                     Text(
                         text = ratingText,
                         style = MaterialTheme.typography.labelLarge,
-                        color = NuvioTheme.extendedColors.textSecondary
+                        color = KovelyxTheme.extendedColors.textSecondary
                     )
                 }
             }
@@ -744,19 +744,19 @@ private fun MetaInfoRow(
             tmdbRating?.let { rating ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+                    horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
                 ) {
                     AsyncImage(
                         model = tmdbModel,
                         contentDescription = null,
-                        modifier = Modifier.size(NuvioTheme.spacing.xl),
+                        modifier = Modifier.size(KovelyxTheme.spacing.xl),
                         contentScale = ContentScale.Fit
                     )
                     val ratingText = remember(rating) { (rating * 10).toInt().toString() }
                     Text(
                         text = ratingText,
                         style = MaterialTheme.typography.labelLarge,
-                        color = NuvioTheme.extendedColors.textSecondary
+                        color = KovelyxTheme.extendedColors.textSecondary
                     )
                 }
             }
@@ -765,15 +765,15 @@ private fun MetaInfoRow(
         // Secondary row: Runtime, Age Rating, Status, Country, Language
         if (ageRatingBadge != null || statusBadge != null || secondaryItems.isNotEmpty()) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (ageRatingBadge != null && statusBadge != null) {
                     CombinedMetaBadge(
                         leftText = ageRatingBadge,
-                        leftColor = NuvioTheme.colors.TextSecondary,
+                        leftColor = KovelyxTheme.colors.TextSecondary,
                         rightText = statusBadge,
-                        rightColor = NuvioTheme.colors.TextPrimary
+                        rightColor = KovelyxTheme.colors.TextPrimary
                     )
                 } else {
                     ageRatingBadge?.let { badge ->
@@ -782,7 +782,7 @@ private fun MetaInfoRow(
                     statusBadge?.let { badge ->
                         HeroMetaBadge(
                             text = badge,
-                            contentColor = NuvioTheme.colors.TextPrimary
+                            contentColor = KovelyxTheme.colors.TextPrimary
                         )
                     }
                 }
@@ -793,7 +793,7 @@ private fun MetaInfoRow(
                     Text(
                         text = value,
                         style = MaterialTheme.typography.labelMedium,
-                        color = NuvioTheme.colors.TextPrimary
+                        color = KovelyxTheme.colors.TextPrimary
                     )
                     if (index < secondaryItems.lastIndex) {
                         MetaInfoDivider()
@@ -807,15 +807,15 @@ private fun MetaInfoRow(
 @Composable
 private fun HeroMetaBadge(
     text: String,
-    contentColor: Color = NuvioTheme.colors.TextSecondary
+    contentColor: Color = KovelyxTheme.colors.TextSecondary
 ) {
     Box(
         modifier = Modifier
             .border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, contentColor.copy(alpha = 0.55f)),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, contentColor.copy(alpha = 0.55f)),
                 shape = RoundedCornerShape(6.dp)
             )
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -830,20 +830,20 @@ private fun HeroMetaBadge(
 @Composable
 private fun CombinedMetaBadge(
     leftText: String,
-    leftColor: Color = NuvioTheme.colors.TextSecondary,
+    leftColor: Color = KovelyxTheme.colors.TextSecondary,
     rightText: String,
-    rightColor: Color = NuvioTheme.colors.TextPrimary
+    rightColor: Color = KovelyxTheme.colors.TextPrimary
 ) {
     val dividerColor = leftColor.copy(alpha = 0.55f)
     Row(
         modifier = Modifier
             .border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, dividerColor),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, dividerColor),
                 shape = RoundedCornerShape(6.dp)
             )
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = NuvioTheme.spacing.xs),
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = KovelyxTheme.spacing.xs),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         Text(
             text = leftText,
@@ -853,8 +853,8 @@ private fun CombinedMetaBadge(
         )
         Box(
             modifier = Modifier
-                .width(NuvioTheme.spacing.hairline)
-                .height(NuvioTheme.spacing.md)
+                .width(KovelyxTheme.spacing.hairline)
+                .height(KovelyxTheme.spacing.md)
                 .background(dividerColor)
         )
         Text(
@@ -944,7 +944,7 @@ private fun rememberRawSvgPainter(
     @androidx.annotation.RawRes rawRes: Int
 ): Painter {
     val density = androidx.compose.ui.platform.LocalDensity.current
-    val sizePx = with(density) { NuvioTheme.spacing.xl.roundToPx() }
+    val sizePx = with(density) { KovelyxTheme.spacing.xl.roundToPx() }
     val model = remember(rawRes, context, sizePx) {
         ImageRequest.Builder(context)
             .data(rawRes)
@@ -960,6 +960,6 @@ private fun MetaInfoDivider() {
     Text(
         text = "•",
         style = MaterialTheme.typography.labelLarge,
-        color = NuvioTheme.extendedColors.textTertiary
+        color = KovelyxTheme.extendedColors.textTertiary
     )
 }

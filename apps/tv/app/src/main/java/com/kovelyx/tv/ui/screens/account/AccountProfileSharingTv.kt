@@ -11,7 +11,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.core.auth.CloudflareTvAccountClient
 import com.kovelyx.tv.core.sync.CloudflareTvProfileSharing
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import kotlinx.coroutines.launch
 
 /** TV D-pad friendly manual one-shot sharing; cloud profiles are never linked implicitly. */
@@ -39,17 +39,17 @@ internal fun AccountProfileSharingTv() {
     }
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
         Text("Synchroniser avec d'autres profils", style = MaterialTheme.typography.titleMedium,
-            color = NuvioTheme.colors.TextPrimary)
+            color = KovelyxTheme.colors.TextPrimary)
         Text("Choisissez le profil source, les destinataires et le contenu à copier. " +
             "Les données existantes sont fusionnées, jamais supprimées. " +
             "Les futures modifications ne seront pas automatiquement partagées.",
-            style = MaterialTheme.typography.bodySmall,color = NuvioTheme.colors.TextSecondary)
+            style = MaterialTheme.typography.bodySmall,color = KovelyxTheme.colors.TextSecondary)
         if (profiles.size < 2) {
             Text("Deux profils Cloudflare sont nécessaires.",
-                style = MaterialTheme.typography.bodySmall,color = NuvioTheme.colors.TextTertiary)
+                style = MaterialTheme.typography.bodySmall,color = KovelyxTheme.colors.TextTertiary)
         } else {
             Text("Profil source",style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextPrimary)
+                color = KovelyxTheme.colors.TextPrimary)
             profiles.forEach { item ->
                 ShareTvChoice(
                     text = (if (item.first == source) "✓ " else "○ ") + item.second,
@@ -62,7 +62,7 @@ internal fun AccountProfileSharingTv() {
                 )
             }
             Text("Profils destinataires",style = MaterialTheme.typography.bodyMedium,
-                color = NuvioTheme.colors.TextPrimary)
+                color = KovelyxTheme.colors.TextPrimary)
             profiles.filter { it.first != source }.forEach { item ->
                 ShareTvChoice(
                     text = (if (item.first in targets) "✓ " else "○ ") + item.second,
@@ -83,7 +83,7 @@ internal fun AccountProfileSharingTv() {
             )
             Text("Les URLs des extensions personnalisées peuvent contenir des clés privées. " +
                 "Seuls les profils sélectionnés de votre compte les recevront.",
-                style = MaterialTheme.typography.bodySmall,color = NuvioTheme.colors.TextTertiary)
+                style = MaterialTheme.typography.bodySmall,color = KovelyxTheme.colors.TextTertiary)
             ShareTvChoice(
                 text = if (busy) "Synchronisation en cours…"
                     else if (confirmation) "CONFIRMER LE PARTAGE VERS " + targets.size + " PROFIL(S)"
@@ -118,7 +118,7 @@ internal fun AccountProfileSharingTv() {
             )
         }
         if (status.isNotBlank()) Text(status, style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary)
+            color = KovelyxTheme.colors.TextSecondary)
     }
 }
 
@@ -128,12 +128,12 @@ private fun ShareTvChoice(text: String, enabled: Boolean, onClick: () -> Unit) {
         onClick = { if (enabled) onClick() },
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         )
     ) {
         Text(text, modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = if (enabled) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextTertiary)
+            color = if (enabled) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextTertiary)
     }
 }

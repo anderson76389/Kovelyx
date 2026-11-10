@@ -64,9 +64,9 @@ import com.kovelyx.app.core.poster.CustomPosterUrlRepository
 import com.kovelyx.app.core.ui.DefaultCardDepthEdgeCoverage
 import com.kovelyx.app.core.ui.DefaultCardDepthEdgeStrength
 import com.kovelyx.app.core.ui.DefaultCardDepthSheenStrength
-import com.kovelyx.app.core.ui.NuvioActionLabel
-import com.kovelyx.app.core.ui.NuvioCardDepthSurface
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxActionLabel
+import com.kovelyx.app.core.ui.KovelyxCardDepthSurface
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
 import com.kovelyx.app.core.ui.PosterCardStyleRepository
 import com.kovelyx.app.core.ui.PosterCardStyleUiState
 import com.kovelyx.app.core.ui.cardDepthVisual
@@ -151,7 +151,7 @@ internal fun LazyListScope.posterCustomizationSettingsContent(
             title = stringResource(Res.string.settings_poster_card_style),
             isTablet = isTablet,
             actions = {
-                NuvioActionLabel(
+                KovelyxActionLabel(
                     text = stringResource(Res.string.action_reset),
                     onClick = PosterCardStyleRepository::resetToDefaults,
                 )
@@ -185,7 +185,7 @@ internal fun LazyListScope.posterCustomizationSettingsContent(
             isTablet = isTablet,
             actions = {
                 if (isActive) {
-                    NuvioActionLabel(
+                    KovelyxActionLabel(
                         text = stringResource(Res.string.settings_custom_poster_clear),
                         onClick = {
                             editingPattern = ""
@@ -276,7 +276,7 @@ internal fun LazyListScope.posterCustomizationSettingsContent(
             title = stringResource(Res.string.settings_card_depth_title),
             isTablet = isTablet,
             actions = {
-                NuvioActionLabel(
+                KovelyxActionLabel(
                     text = stringResource(Res.string.action_reset),
                     onClick = CardDepthStyleRepository::resetToDefaults,
                 )
@@ -315,11 +315,11 @@ private fun CardDepthStyleControls(
         PresetOption(stringResource(Res.string.settings_card_depth_coverage_full), 100),
     )
     val surfaceRows = listOf(
-        stringResource(Res.string.settings_card_depth_surface_posters) to NuvioCardDepthSurface.Posters,
-        stringResource(Res.string.settings_card_depth_surface_continue_watching) to NuvioCardDepthSurface.ContinueWatching,
-        stringResource(Res.string.settings_card_depth_surface_episodes) to NuvioCardDepthSurface.EpisodeCards,
-        stringResource(Res.string.settings_card_depth_surface_cast) to NuvioCardDepthSurface.Cast,
-        stringResource(Res.string.settings_card_depth_surface_trailers) to NuvioCardDepthSurface.Trailers,
+        stringResource(Res.string.settings_card_depth_surface_posters) to KovelyxCardDepthSurface.Posters,
+        stringResource(Res.string.settings_card_depth_surface_continue_watching) to KovelyxCardDepthSurface.ContinueWatching,
+        stringResource(Res.string.settings_card_depth_surface_episodes) to KovelyxCardDepthSurface.EpisodeCards,
+        stringResource(Res.string.settings_card_depth_surface_cast) to KovelyxCardDepthSurface.Cast,
+        stringResource(Res.string.settings_card_depth_surface_trailers) to KovelyxCardDepthSurface.Trailers,
     )
 
     Column(
@@ -424,7 +424,7 @@ private fun CardDepthFineTuneSheet(
         CardDepthStyleRepository.setEdgeCoverage(draftCoverage.roundToInt())
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             commitDraft()
             onDismiss()
@@ -449,7 +449,7 @@ private fun CardDepthFineTuneSheet(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                 )
-                NuvioActionLabel(
+                KovelyxActionLabel(
                     text = stringResource(Res.string.action_reset),
                     onClick = {
                         draftEdge = DefaultCardDepthEdgeStrength.toFloat()

@@ -16,7 +16,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mdblist.MdbListDeviceSession
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -97,7 +97,7 @@ class MdbListAccountDialogTest {
         onDismiss: () -> Unit = {}
     ) {
         composeRule.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 MdbListAccountDialog(state, onStart, onStart, onSync, onDisconnect, onDismiss)
             }
         }

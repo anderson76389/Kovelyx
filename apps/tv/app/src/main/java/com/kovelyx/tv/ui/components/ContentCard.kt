@@ -71,7 +71,7 @@ import com.kovelyx.tv.domain.model.ContentType
 import com.kovelyx.tv.domain.model.CardDepthSurface
 import com.kovelyx.tv.domain.model.MetaPreview
 import com.kovelyx.tv.domain.model.PosterShape
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.CachePolicy
@@ -288,7 +288,7 @@ fun ContentCard(
             builder.build()
         }
         val logoRequestHeightPx = remember(density) {
-            with(density) { NuvioTheme.spacing.xxxl.roundToPx() }
+            with(density) { KovelyxTheme.spacing.xxxl.roundToPx() }
         }
         val logoModel = remember(item.logo, requestWidthPx, logoRequestHeightPx) {
             item.logo?.let { logoUrl ->
@@ -303,7 +303,7 @@ fun ContentCard(
         var logoLoadFailed by remember(item.logo) { mutableStateOf(false) }
         val showExpandedLogo = !item.logo.isNullOrBlank() && !logoLoadFailed
 
-        val bgCardColor = NuvioTheme.colors.BackgroundCard
+        val bgCardColor = KovelyxTheme.colors.BackgroundCard
         val backgroundPainter = remember(bgCardColor) { androidx.compose.ui.graphics.painter.ColorPainter(bgCardColor) }
 
         Card(
@@ -387,7 +387,7 @@ fun ContentCard(
             ),
             border = CardDefaults.border(
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
+                    border = KovelyxTheme.focusRing.border(posterCardStyle.focusedBorderWidth),
                     shape = cardShape
                 )
             ),
@@ -415,7 +415,7 @@ fun ContentCard(
                             .fillMaxSize()
                             .placeholderCardShimmer(
                                 shimmerOffsetState = effectivePlaceholderShimmerOffsetState,
-                                backgroundColor = NuvioTheme.colors.BackgroundCard
+                                backgroundColor = KovelyxTheme.colors.BackgroundCard
                             )
                     )
                 } else if (!imageUrl.isNullOrBlank()) {
@@ -523,7 +523,7 @@ fun ContentCard(
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(start = NuvioTheme.spacing.md, end = NuvioTheme.spacing.md, bottom = NuvioTheme.spacing.md)
+                            .padding(start = KovelyxTheme.spacing.md, end = KovelyxTheme.spacing.md, bottom = KovelyxTheme.spacing.md)
                             .fillMaxWidth(0.75f)
                     ) {
                         if (showExpandedLogo) {
@@ -532,7 +532,7 @@ fun ContentCard(
                                 contentDescription = item.name,
                                 onError = { logoLoadFailed = true },
                                 modifier = Modifier
-                                    .height(NuvioTheme.spacing.xxxl)
+                                    .height(KovelyxTheme.spacing.xxxl)
                                     .fillMaxWidth(),
                                 contentScale = ContentScale.Fit,
                                 alignment = Alignment.CenterStart
@@ -580,7 +580,7 @@ fun ContentCard(
                             .align(Alignment.BottomStart)
                             .fillMaxWidth(0.62f)
                             .height(baseCardHeight * 0.34f)
-                            .padding(start = 10.dp, end = 10.dp, bottom = NuvioTheme.spacing.sm)
+                            .padding(start = 10.dp, end = 10.dp, bottom = KovelyxTheme.spacing.sm)
                             .zIndex(1.6f),
                         contentScale = ContentScale.Fit,
                         alignment = Alignment.CenterStart
@@ -611,7 +611,7 @@ fun ContentCard(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .fillMaxWidth(0.62f)
-                            .padding(start = 10.dp, end = 10.dp, bottom = NuvioTheme.spacing.md)
+                            .padding(start = 10.dp, end = 10.dp, bottom = KovelyxTheme.spacing.md)
                             .zIndex(1.6f)
                     )
                 }
@@ -620,7 +620,7 @@ fun ContentCard(
                     WatchedMarker(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.sm)
+                            .padding(end = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.sm)
                             .zIndex(2f)
                     )
                 }
@@ -635,7 +635,7 @@ fun ContentCard(
             Column(
                 modifier = Modifier
                     .then(if (isBackdropExpanded && !globalLandscape) Modifier.requiredWidth(expandedCardWidth) else Modifier.fillMaxWidth())
-                    .padding(top = NuvioTheme.spacing.sm)
+                    .padding(top = KovelyxTheme.spacing.sm)
                     .then(
                         if (effectiveExpandEnabled) {
                             Modifier.defaultMinSize(minHeight = 60.dp)
@@ -662,7 +662,7 @@ fun ContentCard(
                             Text(
                                 text = metaTokens.joinToString("  •  "),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = NuvioTheme.extendedColors.textSecondary,
+                                color = KovelyxTheme.extendedColors.textSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f, fill = false)
@@ -673,7 +673,7 @@ fun ContentCard(
                                 Text(
                                     text = "  •  ",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = NuvioTheme.extendedColors.textSecondary
+                                    color = KovelyxTheme.extendedColors.textSecondary
                                 )
                             }
                             Box(
@@ -681,31 +681,31 @@ fun ContentCard(
                                     
                                     .border(
                                         border = BorderStroke(
-                                            NuvioTheme.spacing.hairline,
-                                            NuvioTheme.extendedColors.textSecondary.copy(alpha = 0.55f)
+                                            KovelyxTheme.spacing.hairline,
+                                            KovelyxTheme.extendedColors.textSecondary.copy(alpha = 0.55f)
                                         ),
                                         shape = RoundedCornerShape(4.dp)
                                     )
-                                    .padding(horizontal = NuvioTheme.spacing.sm, vertical = 2.dp),
+                                    .padding(horizontal = KovelyxTheme.spacing.sm, vertical = 2.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = ageRating,
                                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                                    color = NuvioTheme.extendedColors.textSecondary,
+                                    color = KovelyxTheme.extendedColors.textSecondary,
                                     maxLines = 1
                                 )
                             }
                         }
                     }
                     item.description?.takeIf { it.isNotBlank() }?.let { description ->
-                        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                         Text(
                             text = description,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 textDirection = description.contentTextDirection()
                             ),
-                            color = NuvioTheme.colors.TextPrimary,
+                            color = KovelyxTheme.colors.TextPrimary,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -717,7 +717,7 @@ fun ContentCard(
                         text = item.name,
                         focused = isFocused,
                         style = MaterialTheme.typography.titleMedium,
-                        color = NuvioTheme.colors.TextPrimary,
+                        color = KovelyxTheme.colors.TextPrimary,
                     )
                     item.releaseInfo?.let { info ->
                         Spacer(modifier = Modifier.height(2.dp))
@@ -725,7 +725,7 @@ fun ContentCard(
                             text = info,
                             focused = isFocused,
                             style = MaterialTheme.typography.labelMedium,
-                            color = NuvioTheme.extendedColors.textSecondary,
+                            color = KovelyxTheme.extendedColors.textSecondary,
                         )
                     }
                     if (effectiveExpandEnabled) {

@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.home
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.animation.core.AnimationSpec
@@ -533,7 +533,7 @@ internal fun ModernRowSection(
             titleMediumStyle.copy(fontWeight = FontWeight.SemiBold)
         }
         val rowTitle = row.title
-        val textColor = NuvioTheme.colors.TextPrimary
+        val textColor = KovelyxTheme.colors.TextPrimary
         val textModifier = remember(rowTitleBottom) {
             Modifier.padding(start = 52.dp, bottom = rowTitleBottom)
         }
@@ -908,7 +908,7 @@ internal fun ModernRowSection(
                     }
                     .focusGroup(),
                 contentPadding = PaddingValues(horizontal = rowStartPadding),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
             ) {
                 itemsIndexed(
                     items = row.items.list,
@@ -1262,8 +1262,8 @@ private fun ModernCarouselCard(
             (effectiveIgnoreLandscapePoster || isBackdropExpanded || item.metaPreview?.landscapePoster.isNullOrBlank() || customPosterLoadFailed)
     var longPressTriggered by remember { mutableStateOf(false) }
     val longPressKeyTracker = rememberLongPressKeyTracker()
-    val backgroundCardColor = NuvioTheme.colors.BackgroundCard
-    val focusRingBorder = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
+    val backgroundCardColor = KovelyxTheme.colors.BackgroundCard
+    val focusRingBorder = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs)
     val titleMedium = MaterialTheme.typography.titleMedium
     val backgroundPainter = remember(backgroundCardColor) { ColorPainter(backgroundCardColor) }
     val focusedBorder = remember(cardShape, focusRingBorder) {
@@ -1282,7 +1282,7 @@ private fun ModernCarouselCard(
     val isFastScrolling = isFastScrollingState.value
     val transparentFocusBorder = remember(cardShape) {
         Border(
-            border = BorderStroke(NuvioTheme.spacing.none, Color.Transparent),
+            border = BorderStroke(KovelyxTheme.spacing.none, Color.Transparent),
             shape = cardShape
         )
     }
@@ -1305,7 +1305,7 @@ private fun ModernCarouselCard(
         modifier = modifier
             .width(animatedCardWidth)
             .recompositionHighlighter(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         Card(
             onClick = {
@@ -1485,7 +1485,7 @@ private fun ModernCarouselCard(
                             .align(Alignment.BottomStart)
                             .fillMaxWidth(0.62f)
                             .height(cardHeight * 0.34f)
-                            .padding(start = 10.dp, end = 10.dp, bottom = NuvioTheme.spacing.sm),
+                            .padding(start = 10.dp, end = 10.dp, bottom = KovelyxTheme.spacing.sm),
                         contentScale = ContentScale.Fit,
                         alignment = Alignment.CenterStart
                     )
@@ -1501,7 +1501,7 @@ private fun ModernCarouselCard(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
                             .fillMaxWidth(0.62f)
-                            .padding(start = 10.dp, end = 10.dp, bottom = NuvioTheme.spacing.md)
+                            .padding(start = 10.dp, end = 10.dp, bottom = KovelyxTheme.spacing.md)
                     )
                 }
 
@@ -1509,7 +1509,7 @@ private fun ModernCarouselCard(
                     WatchedMarker(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(end = NuvioTheme.spacing.sm, top = NuvioTheme.spacing.sm)
+                            .padding(end = KovelyxTheme.spacing.sm, top = KovelyxTheme.spacing.sm)
                             .zIndex(2f)
                     )
                 }
@@ -1520,25 +1520,25 @@ private fun ModernCarouselCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = NuvioTheme.spacing.xs)
+                    .padding(horizontal = KovelyxTheme.spacing.xs)
             ) {
                 Text(
                     text = item.title,
                     style = titleStyle.copy(
                         textDirection = item.title.contentTextDirection()
                     ),
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 item.subtitle?.takeIf { it.isNotBlank() }?.let { subtitle ->
-                    Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                    Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.labelMedium.copy(
                             textDirection = subtitle.contentTextDirection()
                         ),
-                        color = NuvioTheme.colors.TextSecondary,
+                        color = KovelyxTheme.colors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

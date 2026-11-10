@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,7 +53,7 @@ private data class TrailerListItem(
 fun TrailerSection(
     trailers: List<MetaTrailer>,
     listState: LazyListState,
-    posterCardCornerRadius: Dp = NuvioTheme.spacing.md,
+    posterCardCornerRadius: Dp = KovelyxTheme.spacing.md,
     upFocusRequester: FocusRequester? = null,
     downFocusRequester: FocusRequester? = null,
     sectionFocusRequester: FocusRequester? = null,
@@ -157,7 +157,7 @@ fun TrailerSection(
             width = 260.dp,
             height = 146.dp,
             cornerRadius = posterCardCornerRadius,
-            focusedBorderWidth = NuvioTheme.spacing.xxs,
+            focusedBorderWidth = KovelyxTheme.spacing.xxs,
             focusedScale = 1.02f
         )
     }
@@ -165,7 +165,7 @@ fun TrailerSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = NuvioTheme.spacing.sm, bottom = NuvioTheme.spacing.sm)
+            .padding(top = KovelyxTheme.spacing.sm, bottom = KovelyxTheme.spacing.sm)
     ) {
         LazyRow(
             state = listState,
@@ -179,8 +179,8 @@ fun TrailerSection(
                     }
                 }
                 .focusGroup(),
-            contentPadding = PaddingValues(horizontal = NuvioTheme.spacing.xxxl, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(horizontal = KovelyxTheme.spacing.xxxl, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             itemsIndexed(
                 items = trailerItems,
@@ -234,12 +234,12 @@ fun TrailerSection(
                         Text(
                             text = subtitle,
                             style = MaterialTheme.typography.bodySmall,
-                            color = NuvioTheme.colors.TextTertiary,
+                            color = KovelyxTheme.colors.TextTertiary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
                                 .width(landscapeStyle.width)
-                                .padding(start = NuvioTheme.spacing.xxs, end = NuvioTheme.spacing.xxs, top = NuvioTheme.spacing.xxs)
+                                .padding(start = KovelyxTheme.spacing.xxs, end = KovelyxTheme.spacing.xxs, top = KovelyxTheme.spacing.xxs)
                         )
                     }
                 }

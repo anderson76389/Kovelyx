@@ -2,9 +2,9 @@
 
 package com.kovelyx.tv.ui.screens.player
 
-import com.kovelyx.tv.ui.theme.NuvioMotion
+import com.kovelyx.tv.ui.theme.KovelyxMotion
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -113,11 +113,11 @@ fun PostPlayOverlay(
             ),
             border = CardDefaults.border(
                 border = Border(
-                    border = BorderStroke(NuvioTheme.spacing.hairline, Color.White.copy(alpha = 0.16f)),
+                    border = BorderStroke(KovelyxTheme.spacing.hairline, Color.White.copy(alpha = 0.16f)),
                     shape = RoundedCornerShape(14.dp),
                 ),
                 focusedBorder = Border(
-                    border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                    border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                     shape = RoundedCornerShape(14.dp),
                 ),
             ),
@@ -144,7 +144,7 @@ fun PostPlayOverlay(
         ) {
             transition.AnimatedContent(
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(NuvioMotion.tokens.durations.fast)) togetherWith
+                    fadeIn(animationSpec = tween(KovelyxMotion.tokens.durations.fast)) togetherWith
                         fadeOut(animationSpec = tween(120))
                 },
                 contentKey = { it?.let { current -> current::class } },
@@ -193,7 +193,7 @@ private fun AutoPlayBody(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
             Text(
                 text = nextEpisodeDisplayLabel(nextEpisode),
                 color = Color.White,
@@ -210,17 +210,17 @@ private fun AutoPlayBody(
                 else -> null
             }
             if (statusText != null) {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                 NextEpisodeStatusLine(text = statusText)
             }
         }
 
         Row(
             modifier = Modifier
-                .padding(start = NuvioTheme.spacing.sm)
+                .padding(start = KovelyxTheme.spacing.sm)
                 .clip(CircleShape)
                 .border(
-                    BorderStroke(NuvioTheme.spacing.hairline, Color.White.copy(alpha = 0.2f)),
+                    BorderStroke(KovelyxTheme.spacing.hairline, Color.White.copy(alpha = 0.2f)),
                     CircleShape,
                 )
                 .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -280,7 +280,7 @@ private fun StillWatchingBody(
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
             Text(
                 text = nextEpisodeDisplayLabel(nextEpisode),
                 color = Color.White,
@@ -290,7 +290,7 @@ private fun StillWatchingBody(
                 fontWeight = FontWeight.SemiBold,
             )
             if (mode.countdownSec != null) {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xxs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xxs))
                 NextEpisodeStatusLine(
                     text = stringResource(R.string.still_watching_countdown, mode.countdownSec),
                 )
@@ -298,7 +298,7 @@ private fun StillWatchingBody(
         }
         val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         Row(
-            modifier = Modifier.padding(start = NuvioTheme.spacing.sm),
+            modifier = Modifier.padding(start = KovelyxTheme.spacing.sm),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -356,11 +356,11 @@ private fun PostPlayPillButton(
         ),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, Color.White.copy(alpha = 0.2f)),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, Color.White.copy(alpha = 0.2f)),
                 shape = CircleShape,
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
                 shape = CircleShape,
             ),
         ),

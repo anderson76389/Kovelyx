@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.core.i18n.localizedByteUnit
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlin.time.TimeSource
@@ -96,7 +96,7 @@ class AppUpdaterController internal constructor(
         if (!AppFeaturePolicy.inAppUpdaterEnabled || !AppUpdaterPlatform.isSupported) {
             if (showNoUpdateFeedback) {
                 scope.launch {
-                    NuvioToastController.show(getString(Res.string.updates_not_available))
+                    KovelyxToastController.show(getString(Res.string.updates_not_available))
                 }
             }
             return
@@ -147,7 +147,7 @@ class AppUpdaterController internal constructor(
                 }
 
                 if (showNoUpdateFeedback && !remoteNewer) {
-                    NuvioToastController.show(noUpdateMessage(channel))
+                    KovelyxToastController.show(noUpdateMessage(channel))
                 }
             }.onFailure { error ->
                 _uiState.update { state ->
@@ -169,7 +169,7 @@ class AppUpdaterController internal constructor(
                 }
 
                 if (showNoUpdateFeedback) {
-                    NuvioToastController.show(
+                    KovelyxToastController.show(
                         if (error is NoChannelReleaseException) noUpdateMessage(channel)
                         else error.message ?: getString(Res.string.updates_check_failed),
                     )

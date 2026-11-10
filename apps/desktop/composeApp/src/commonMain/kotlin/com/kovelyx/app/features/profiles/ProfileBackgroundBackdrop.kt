@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.core.ui.ProfileMeshBackground
 import com.kovelyx.app.features.membership.MemberAccessRepository
 import com.kovelyx.app.features.membership.ProfileBackgroundRepository

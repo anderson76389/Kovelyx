@@ -39,7 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NuvioContinueWatchingActionSheet(
+fun KovelyxContinueWatchingActionSheet(
     item: ContinueWatchingItem?,
     showManualPlayOption: Boolean,
     showDetailsOption: Boolean = true,
@@ -57,14 +57,14 @@ fun NuvioContinueWatchingActionSheet(
     fun dismissAfter(action: () -> Unit) {
         action()
         coroutineScope.launch {
-            dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+            dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
         }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -75,29 +75,29 @@ fun NuvioContinueWatchingActionSheet(
                 .padding(bottom = nuvioSafeBottomPadding(tokens.spacing.screenHorizontal)),
         ) {
             ContinueWatchingSheetHeader(item = item)
-            NuvioBottomSheetDivider()
+            KovelyxBottomSheetDivider()
             if (showDetailsOption) {
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     icon = Icons.Default.Info,
                     title = stringResource(Res.string.cw_action_go_to_details),
                     onClick = { dismissAfter(onOpenDetails) },
                 )
             }
             if (showManualPlayOption && onPlayManually != null) {
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     icon = Icons.Default.PlayArrow,
                     title = stringResource(Res.string.play_manually),
                     onClick = { dismissAfter(onPlayManually) },
                 )
             }
             if (!item.isNextUp && onStartFromBeginning != null) {
-                NuvioBottomSheetActionRow(
+                KovelyxBottomSheetActionRow(
                     icon = Icons.Default.Replay,
                     title = stringResource(Res.string.cw_action_start_from_beginning),
                     onClick = { dismissAfter(onStartFromBeginning) },
                 )
             }
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetActionRow(
                 icon = Icons.Default.DeleteOutline,
                 title = stringResource(Res.string.cw_action_remove),
                 onClick = { dismissAfter(onRemove) },
@@ -116,20 +116,20 @@ private fun ContinueWatchingSheetHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = tokens.spacing.screenHorizontal, vertical = NuvioTokens.Space.s14),
-        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s14),
+            .padding(horizontal = tokens.spacing.screenHorizontal, vertical = KovelyxTokens.Space.s14),
+        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s14),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(width = NuvioTokens.Space.s64, height = NuvioTokens.Space.s80 + NuvioTokens.Space.s12)
+                .size(width = KovelyxTokens.Space.s64, height = KovelyxTokens.Space.s80 + KovelyxTokens.Space.s12)
                 .clip(androidx.compose.foundation.shape.RoundedCornerShape(posterCardStyle.cornerRadiusDp.dp))
                 .background(tokens.colors.surfaceCard),
             contentAlignment = Alignment.Center,
         ) {
             val artwork = item.poster ?: item.imageUrl
             if (artwork != null) {
-                NuvioAsyncImage(
+                KovelyxAsyncImage(
                     model = cloudLibraryDisplayArtworkUrl(artwork),
                     contentDescription = item.title,
                     modifier = Modifier.matchParentSize(),
@@ -149,7 +149,7 @@ private fun ContinueWatchingSheetHeader(
 
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s4),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s4),
         ) {
             Text(
                 text = item.title,

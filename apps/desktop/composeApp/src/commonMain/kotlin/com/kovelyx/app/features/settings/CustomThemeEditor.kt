@@ -39,11 +39,11 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import com.kovelyx.app.core.ui.CustomThemeColors
-import com.kovelyx.app.core.ui.NuvioInputField
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioTokens
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxInputField
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxTokens
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.core.ui.formatHexColor
 import com.kovelyx.app.core.ui.nuvio
 import com.kovelyx.app.core.ui.parseHexColor
@@ -88,10 +88,10 @@ internal fun CustomThemeEditor(
         encodedColors = draftColors.withColor(if (gradientEnabled) selectedIndex else 1, color).encode()
     }
     fun dismiss() {
-        scope.launch { dismissNuvioBottomSheet(sheetState, onDismiss) }
+        scope.launch { dismissKovelyxBottomSheet(sheetState, onDismiss) }
     }
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = ::dismiss,
         sheetState = sheetState,
         fullHeight = true,
@@ -100,7 +100,7 @@ internal fun CustomThemeEditor(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(0.94f)
                 .imePadding().navigationBarsPadding()
                 .padding(horizontal = tokens.spacing.sheetPadding),
-            verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
         ) {
             Text(
                 text = stringResource(
@@ -111,12 +111,12 @@ internal fun CustomThemeEditor(
             )
             Column(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s16),
+                verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s16),
             ) {
                 if (allowGradient) {
                     FlowRow(
                         modifier = Modifier.selectableGroup(),
-                        horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8),
+                        horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8),
                     ) {
                         listOf(true, false).forEach { gradient ->
                             FilterChip(
@@ -145,7 +145,7 @@ internal fun CustomThemeEditor(
                 )
                 CustomThemePreview(colors)
                 if (gradientEnabled) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8)) {
                         colors.colors.forEachIndexed { index, color ->
                             ThemeColorSlot(
                                 index = index,
@@ -165,14 +165,14 @@ internal fun CustomThemeEditor(
                         hexCode = formatHexColor(it)
                     },
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s8)) {
+                Column(verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s8)) {
                     val hexLabel = stringResource(Res.string.custom_theme_hex_title)
                     Text(
                         text = hexLabel,
                         style = MaterialTheme.typography.labelLarge,
                         color = tokens.colors.textPrimary,
                     )
-                    NuvioInputField(
+                    KovelyxInputField(
                         value = hexCode,
                         onValueChange = { value ->
                             hexCode = value
@@ -191,13 +191,13 @@ internal fun CustomThemeEditor(
                 }
             }
             Row(
-                modifier = Modifier.padding(bottom = NuvioTokens.Space.s12),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s12),
+                modifier = Modifier.padding(bottom = KovelyxTokens.Space.s12),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s12),
             ) {
-                TextButton(onClick = ::dismiss, modifier = Modifier.height(NuvioTokens.Space.s48 + NuvioTokens.Space.s4)) {
+                TextButton(onClick = ::dismiss, modifier = Modifier.height(KovelyxTokens.Space.s48 + KovelyxTokens.Space.s4)) {
                     Text(stringResource(Res.string.action_cancel))
                 }
-                NuvioPrimaryButton(
+                KovelyxPrimaryButton(
                     text = stringResource(Res.string.custom_theme_save),
                     modifier = Modifier.weight(1f),
                     enabled = validHex,
@@ -229,11 +229,11 @@ private fun ThemeColorSlot(
                 tokens.shapes.compactCard,
             )
             .selectable(selected, role = Role.RadioButton, onClick = onClick)
-            .padding(NuvioTokens.Space.s8),
-        verticalArrangement = Arrangement.spacedBy(NuvioTokens.Space.s6),
+            .padding(KovelyxTokens.Space.s8),
+        verticalArrangement = Arrangement.spacedBy(KovelyxTokens.Space.s6),
     ) {
         Box(
-            Modifier.fillMaxWidth().height(NuvioTokens.Space.s32)
+            Modifier.fillMaxWidth().height(KovelyxTokens.Space.s32)
                 .clip(tokens.shapes.compactCard).background(Color(color or 0xFF000000.toInt())),
         )
         Text(

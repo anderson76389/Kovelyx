@@ -19,7 +19,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,11 +47,11 @@ internal fun AutoSyncedChip(subtitleUrl: String, selected: Boolean) {
     val syncedUrl by AutoSyncSyncedSubtitle.url.collectAsState()
     if (!selected || syncedUrl != subtitleUrl) return
 
-    val contentColor = NuvioTheme.colors.OnSecondary.copy(alpha = 0.9f)
+    val contentColor = KovelyxTheme.colors.OnSecondary.copy(alpha = 0.9f)
     Row(
         modifier = Modifier
-            .background(NuvioTheme.colors.OnSecondary.copy(alpha = 0.14f), RoundedCornerShape(999.dp))
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = 3.dp),
+            .background(KovelyxTheme.colors.OnSecondary.copy(alpha = 0.14f), RoundedCornerShape(999.dp))
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = 3.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

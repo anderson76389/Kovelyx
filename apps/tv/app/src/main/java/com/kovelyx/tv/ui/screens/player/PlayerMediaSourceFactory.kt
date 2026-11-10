@@ -131,7 +131,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
         PlayerPlaybackNetworking.playbackHttpClient.newBuilder()
             .socketFactory(NoDelaySocketFactory)
             .cookieJar(KovelyxApplication.extensionCookieJar)
-            .let { NuvioExoPlayerPerformanceHelper.applyNetworkOptimizations(it) }
+            .let { KovelyxExoPlayerPerformanceHelper.applyNetworkOptimizations(it) }
             .build()
     }
 
@@ -144,7 +144,7 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
             HttpLanes.callFactory(
                 playbackHttpClient,
                 connections,
-                NuvioExoPlayerPerformanceHelper::lanePool
+                KovelyxExoPlayerPerformanceHelper::lanePool
             ).also { factory ->
                 if (factory is LaneCallFactory) {
                     Log.i("PlayerMediaSourceFactory", "HTTP2_LANES lanes=${factory.lanes.size}")
@@ -161,8 +161,8 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
     ): Int {
         if (!nuvioPerformanceModeEnabled) return connections + 1
         val chunkMb = (chunkBytes / (1024L * 1024L)).toInt().coerceAtLeast(1)
-        val safeNativeMb = NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
-        val reserveMb = NuvioExoPlayerPerformanceHelper.targetBufferSizeMb.coerceAtLeast(0)
+        val safeNativeMb = KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)
+        val reserveMb = KovelyxExoPlayerPerformanceHelper.targetBufferSizeMb.coerceAtLeast(0)
         return com.kovelyx.tv.ui.screens.settings.MemoryBudget.prefetchDepthChunks(
             connections, chunkMb, safeNativeMb, reserveMb
         )
@@ -219,11 +219,11 @@ internal class PlayerMediaSourceFactory(private val context: Context) {
             "PlayerMediaSource",
             "PLAYBACK_CONFIG: native=$nativeEngineEnabled " +
                 "customBuffers=$bufferEngineEnabled budgetManaged=$bufferBudgetManaged " +
-                "minBufferMs=${NuvioExoPlayerPerformanceHelper.minBufferMs} " +
-                "maxBufferMs=${NuvioExoPlayerPerformanceHelper.maxBufferMs} " +
-                "backBufferMs=${NuvioExoPlayerPerformanceHelper.backBufferMs} " +
-                "targetMb=${NuvioExoPlayerPerformanceHelper.targetBufferSizeMb} " +
-                "safeNativeMb=${NuvioExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)} " +
+                "minBufferMs=${KovelyxExoPlayerPerformanceHelper.minBufferMs} " +
+                "maxBufferMs=${KovelyxExoPlayerPerformanceHelper.maxBufferMs} " +
+                "backBufferMs=${KovelyxExoPlayerPerformanceHelper.backBufferMs} " +
+                "targetMb=${KovelyxExoPlayerPerformanceHelper.targetBufferSizeMb} " +
+                "safeNativeMb=${KovelyxExoPlayerPerformanceHelper.getSafeNativeMemoryLimitMb(context)} " +
                 "parallel=${if (useParallelConnections) parallelConnectionCount else 0} chunkKb=$parallelChunkSizeKb"
         )
         val useChunkSessionSource = useParallelConnections && !isHls && !isDash

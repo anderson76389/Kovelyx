@@ -14,13 +14,13 @@ import nuvio.composeapp.generated.resources.action_retry
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun NuvioNetworkOfflineCard(
+fun KovelyxNetworkOfflineCard(
     condition: NetworkCondition,
     modifier: Modifier = Modifier,
     onRetry: (() -> Unit)? = null,
 ) {
     val tokens = MaterialTheme.nuvio
-    NuvioSurfaceCard(modifier = modifier) {
+    KovelyxSurfaceCard(modifier = modifier) {
         Text(
             text = condition.titleForEmptyState(),
             style = MaterialTheme.typography.titleLarge,
@@ -34,7 +34,7 @@ fun NuvioNetworkOfflineCard(
         )
         if (onRetry != null) {
             Spacer(modifier = Modifier.height(tokens.spacing.screenHorizontal))
-            NuvioPrimaryButton(
+            KovelyxPrimaryButton(
                 text = stringResource(Res.string.action_retry),
                 onClick = onRetry,
             )

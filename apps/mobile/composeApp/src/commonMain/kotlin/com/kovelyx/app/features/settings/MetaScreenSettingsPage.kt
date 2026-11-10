@@ -39,7 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.features.shuffle.EpisodeShuffleRepository
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import nuvio.composeapp.generated.resources.random_episode_title
 import nuvio.composeapp.generated.resources.layout_random_episode_sub
 import nuvio.composeapp.generated.resources.shuffle_save_failed
@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.core.build.TrailerPlaybackMode
 import com.kovelyx.app.core.ui.Chip
-import com.kovelyx.app.core.ui.NuvioActionLabel
+import com.kovelyx.app.core.ui.KovelyxActionLabel
 import com.kovelyx.app.features.details.MetaEpisodeCardStyle
 import com.kovelyx.app.features.details.MetaScreenBackgroundMode
 import com.kovelyx.app.features.details.MetaScreenSectionItem
@@ -190,7 +190,7 @@ internal fun LazyListScope.metaScreenSettingsContent(
                     checked = shuffleProfile.available,
                     isTablet = isTablet,
                     onCheckedChange = {
-                        if (!EpisodeShuffleRepository.setAvailable(it)) NuvioToastController.show(shuffleSaveFailed)
+                        if (!EpisodeShuffleRepository.setAvailable(it)) KovelyxToastController.show(shuffleSaveFailed)
                     },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
@@ -215,7 +215,7 @@ internal fun LazyListScope.metaScreenSettingsContent(
             title = stringResource(Res.string.settings_meta_section_sections),
             isTablet = isTablet,
             actions = {
-                NuvioActionLabel(
+                KovelyxActionLabel(
                     text = stringResource(Res.string.action_reset),
                     onClick = MetaScreenSettingsRepository::resetToDefaults,
                 )

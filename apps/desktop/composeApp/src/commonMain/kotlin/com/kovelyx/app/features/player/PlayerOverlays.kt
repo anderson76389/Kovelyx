@@ -43,8 +43,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kovelyx.app.core.ui.NuvioAsyncImage as AsyncImage
-import com.kovelyx.app.core.ui.NuvioBackButton
+import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxBackButton
 import com.kovelyx.app.core.ui.nuvioTypeScale
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.compose_player_episode_code_full

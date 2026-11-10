@@ -21,7 +21,7 @@ import androidx.tv.material3.Card
 import androidx.tv.material3.CardDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import com.kovelyx.tv.R
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
@@ -56,11 +56,11 @@ internal fun PostPlayRecommendationPlayerWindow(
         shape = CardDefaults.shape(shape = shape),
         border = CardDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, Color.Transparent),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, Color.Transparent),
                 shape = shape
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xs),
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xs),
                 shape = shape
             )
         ),

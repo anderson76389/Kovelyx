@@ -61,7 +61,7 @@ private const val AutoDismissDelayMs = 15_000L
 private const val SwipeDismissThreshold = 80f
 
 @Composable
-fun NuvioFloatingPrompt(
+fun KovelyxFloatingPrompt(
     visible: Boolean,
     imageUrl: String?,
     title: String,
@@ -100,7 +100,7 @@ fun NuvioFloatingPrompt(
             delay(autoDismissMs)
             val dismissDistance = maxOf(
                 promptHeightPx.toFloat() + with(density) { tokens.spacing.sectionGap.toPx() },
-                with(density) { (NuvioTokens.Space.s80 + NuvioTokens.Space.s80).toPx() },
+                with(density) { (KovelyxTokens.Space.s80 + KovelyxTokens.Space.s80).toPx() },
             )
             dragOffsetY.animateTo(
                 targetValue = dismissDistance,
@@ -130,7 +130,7 @@ fun NuvioFloatingPrompt(
                     },
                 )
                 .fillMaxWidth()
-                .padding(bottom = navBarBottom + NuvioTokens.Space.s72)
+                .padding(bottom = navBarBottom + KovelyxTokens.Space.s72)
                 .padding(horizontal = tokens.spacing.screenHorizontal)
                 .offset { IntOffset(0, dragOffsetY.value.roundToInt().coerceAtLeast(0)) }
                 .pointerInput(Unit) {
@@ -142,7 +142,7 @@ fun NuvioFloatingPrompt(
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     val dismissDistance = maxOf(
                                         promptHeightPx.toFloat() + with(density) { tokens.spacing.sectionGap.toPx() },
-                                        with(density) { (NuvioTokens.Space.s80 + NuvioTokens.Space.s80).toPx() },
+                                        with(density) { (KovelyxTokens.Space.s80 + KovelyxTokens.Space.s80).toPx() },
                                     )
                                     dragOffsetY.animateTo(
                                         targetValue = dismissDistance,
@@ -187,19 +187,19 @@ fun NuvioFloatingPrompt(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = NuvioTokens.Space.s2),
+                            .padding(start = KovelyxTokens.Space.s2),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.listGap),
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(width = NuvioTokens.Space.s56 - NuvioTokens.Space.s2, height = NuvioTokens.Space.s80 - NuvioTokens.Space.s2)
+                                .size(width = KovelyxTokens.Space.s56 - KovelyxTokens.Space.s2, height = KovelyxTokens.Space.s80 - KovelyxTokens.Space.s2)
                                 .clip(tokens.shapes.compactCard)
                                 .background(tokens.colors.surfaceCard),
                             contentAlignment = Alignment.Center,
                         ) {
                             if (imageUrl != null) {
-                                NuvioAsyncImage(
+                                KovelyxAsyncImage(
                                     model = imageUrl,
                                     contentDescription = null,
                                     modifier = Modifier.matchParentSize(),
@@ -234,12 +234,12 @@ fun NuvioFloatingPrompt(
                         }
 
                         Box(
-                            modifier = Modifier.size(NuvioTokens.Space.s40 + NuvioTokens.Space.s2),
+                            modifier = Modifier.size(KovelyxTokens.Space.s40 + KovelyxTokens.Space.s2),
                             contentAlignment = Alignment.Center,
                         ) {
                             FilledIconButton(
                                 onClick = actionWithHaptic,
-                                modifier = Modifier.size(NuvioTokens.Space.s40 + NuvioTokens.Space.s2),
+                                modifier = Modifier.size(KovelyxTokens.Space.s40 + KovelyxTokens.Space.s2),
                                 shape = tokens.shapes.avatar,
                             ) {
                                 Icon(
@@ -256,13 +256,13 @@ fun NuvioFloatingPrompt(
                             .fillMaxWidth()
                             .clip(tokens.shapes.chip)
                             .background(tokens.colors.playerTimelineTrack)
-                            .height(NuvioTokens.Space.s8)
+                            .height(KovelyxTokens.Space.s8)
                             .padding(tokens.borders.thin),
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth(progressFraction.coerceIn(0f, 1f))
-                                .height(NuvioTokens.Space.s6)
+                                .height(KovelyxTokens.Space.s6)
                                 .clip(tokens.shapes.chip),
                         ) {
                             Box(

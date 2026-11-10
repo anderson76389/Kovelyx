@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.contentTextDirection
 
 import androidx.compose.animation.core.Animatable
@@ -77,9 +77,9 @@ fun SourceStatusFilterChip(
     }
 
     val textColor = when {
-        isError -> NuvioTheme.colors.Error
-        isFocused || isSelected -> NuvioTheme.colors.OnSecondary
-        else -> NuvioTheme.colors.TextSecondary
+        isError -> KovelyxTheme.colors.Error
+        isFocused || isSelected -> KovelyxTheme.colors.OnSecondary
+        else -> KovelyxTheme.colors.TextSecondary
     }
 
     FilterChip(
@@ -98,10 +98,10 @@ fun SourceStatusFilterChip(
                 }
             },
         colors = FilterChipDefaults.colors(
-            containerColor = if (shouldUseNormalColors) NuvioTheme.colors.BackgroundCard else NuvioTheme.colors.Error.copy(alpha = 0.05f),
-            focusedContainerColor = if (shouldUseNormalColors) NuvioTheme.colors.Secondary else NuvioTheme.colors.Error.copy(alpha = 0.08f),
-            selectedContainerColor = if (shouldUseNormalColors) NuvioTheme.colors.Secondary else NuvioTheme.colors.Error.copy(alpha = 0.07f),
-            focusedSelectedContainerColor = if (shouldUseNormalColors) NuvioTheme.colors.Secondary else NuvioTheme.colors.Error.copy(alpha = 0.09f),
+            containerColor = if (shouldUseNormalColors) KovelyxTheme.colors.BackgroundCard else KovelyxTheme.colors.Error.copy(alpha = 0.05f),
+            focusedContainerColor = if (shouldUseNormalColors) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.Error.copy(alpha = 0.08f),
+            selectedContainerColor = if (shouldUseNormalColors) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.Error.copy(alpha = 0.07f),
+            focusedSelectedContainerColor = if (shouldUseNormalColors) KovelyxTheme.colors.Secondary else KovelyxTheme.colors.Error.copy(alpha = 0.09f),
             contentColor = textColor,
             focusedContentColor = textColor,
             selectedContentColor = textColor,
@@ -109,26 +109,26 @@ fun SourceStatusFilterChip(
         ),
         border = FilterChipDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, if (isError) NuvioTheme.colors.Error.copy(alpha = 0.7f) else NuvioTheme.colors.Border),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, if (isError) KovelyxTheme.colors.Error.copy(alpha = 0.7f) else KovelyxTheme.colors.Border),
                 shape = RoundedCornerShape(20.dp)
             ),
             focusedBorder = Border(
                 border = if (isError) {
-                    BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.Error.copy(alpha = 0.8f))
+                    BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.Error.copy(alpha = 0.8f))
                 } else {
-                    NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
+                    KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs)
                 },
                 shape = RoundedCornerShape(20.dp)
             ),
             selectedBorder = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, if (isError) NuvioTheme.colors.Error.copy(alpha = 0.75f) else NuvioTheme.colors.Primary),
+                border = BorderStroke(KovelyxTheme.spacing.hairline, if (isError) KovelyxTheme.colors.Error.copy(alpha = 0.75f) else KovelyxTheme.colors.Primary),
                 shape = RoundedCornerShape(20.dp)
             ),
             focusedSelectedBorder = Border(
                 border = if (isError) {
-                    BorderStroke(NuvioTheme.spacing.xxs, NuvioTheme.colors.Error.copy(alpha = 0.8f))
+                    BorderStroke(KovelyxTheme.spacing.xxs, KovelyxTheme.colors.Error.copy(alpha = 0.8f))
                 } else {
-                    NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs)
+                    KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs)
                 },
                 shape = RoundedCornerShape(20.dp)
             )

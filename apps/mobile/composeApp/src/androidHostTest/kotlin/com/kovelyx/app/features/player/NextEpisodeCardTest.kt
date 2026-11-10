@@ -19,7 +19,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import com.kovelyx.app.features.player.skip.NextEpisodeCard
 import com.kovelyx.app.features.player.skip.NextEpisodeInfo
 import org.junit.Rule
@@ -153,7 +153,7 @@ class NextEpisodeCardTest {
 
     private fun showCard(hasAired: Boolean = true) {
         compose.setContent {
-            NuvioTheme {
+            KovelyxTheme {
                 val unlocked = rememberUpdatedState(false)
                 val noop = rememberUpdatedState<() -> Unit>({})
                 Box(

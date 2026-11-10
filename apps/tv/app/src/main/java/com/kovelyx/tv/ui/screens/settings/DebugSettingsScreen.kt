@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.settings
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,7 +43,7 @@ import androidx.tv.material3.Switch
 import androidx.tv.material3.SwitchDefaults
 import androidx.tv.material3.Text
 import com.kovelyx.tv.ui.components.LoadingIndicator
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.account.InputField
 
 @Composable
@@ -57,34 +57,34 @@ fun DebugSettingsContent(
         Text(
             text = stringResource(R.string.debug_title),
             style = MaterialTheme.typography.headlineMedium,
-            color = NuvioTheme.colors.Secondary
+            color = KovelyxTheme.colors.Secondary
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
 
         Text(
             text = stringResource(R.string.debug_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
 
-        Spacer(modifier = Modifier.height(NuvioTheme.spacing.xl))
+        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xl))
 
         val debugListState = rememberLazyListState()
         Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             state = debugListState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(top = NuvioTheme.spacing.md, bottom = NuvioTheme.spacing.xxl),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(top = KovelyxTheme.spacing.md, bottom = KovelyxTheme.spacing.xxl),
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             // ── Popup / Dialog Testing ──
             item(key = "debug_popup_header") {
                 Text(
                     text = stringResource(R.string.debug_section_popup),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.xs)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.xs)
                 )
             }
 
@@ -97,12 +97,12 @@ fun DebugSettingsContent(
             }
 
             item(key = "debug_progress_header") {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = stringResource(R.string.debug_section_progress),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.xs)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.xs)
                 )
             }
 
@@ -112,12 +112,12 @@ fun DebugSettingsContent(
 
             // ── Feature Toggles ──
             item(key = "debug_feature_toggles_header") {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = stringResource(R.string.debug_section_features),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.xs)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.xs)
                 )
             }
 
@@ -166,12 +166,12 @@ fun DebugSettingsContent(
 
             // ── Library Testing ──
             item(key = "debug_library_header") {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = stringResource(R.string.debug_section_library),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.xs)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.xs)
                 )
             }
 
@@ -187,12 +187,12 @@ fun DebugSettingsContent(
 
             // ── Manual Sign In ──
             item(key = "debug_account_header") {
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = stringResource(R.string.debug_section_account),
                     style = MaterialTheme.typography.titleSmall,
-                    color = NuvioTheme.colors.TextTertiary,
-                    modifier = Modifier.padding(bottom = NuvioTheme.spacing.xs)
+                    color = KovelyxTheme.colors.TextTertiary,
+                    modifier = Modifier.padding(bottom = KovelyxTheme.spacing.xs)
                 )
             }
 
@@ -211,7 +211,7 @@ fun DebugSettingsContent(
     }
 
     if (showErrorDialog) {
-        NuvioDialog(
+        KovelyxDialog(
             onDismiss = { showErrorDialog = false },
             title = stringResource(R.string.debug_error_dialog_title),
             subtitle = stringResource(R.string.debug_error_dialog_subtitle)
@@ -230,41 +230,41 @@ private fun DebugProgressIndicatorCard() {
         onClick = { },
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = CardDefaults.scale(focusedScale = 1.02f)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             Text(
                 text = stringResource(R.string.debug_progress_indicator_title),
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
             Text(
                 text = stringResource(R.string.debug_progress_indicator_subtitle),
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xl),
+                horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xl),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 DebugProgressIndicatorPreview(stringResource(R.string.debug_progress_indicator_small), 18.dp)
-                DebugProgressIndicatorPreview(stringResource(R.string.debug_progress_indicator_default), NuvioTheme.spacing.xxxl)
+                DebugProgressIndicatorPreview(stringResource(R.string.debug_progress_indicator_default), KovelyxTheme.spacing.xxxl)
                 DebugProgressIndicatorPreview(stringResource(R.string.debug_progress_indicator_large), 56.dp)
             }
         }
@@ -278,13 +278,13 @@ private fun DebugProgressIndicatorPreview(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.sm)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
         LoadingIndicator(modifier = Modifier.size(size))
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
     }
 }
@@ -301,16 +301,16 @@ private fun DebugToggleCard(
         modifier = Modifier
             .fillMaxWidth(),
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = CardDefaults.scale(focusedScale = 1.02f)
     ) {
         Row(
@@ -324,26 +324,26 @@ private fun DebugToggleCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
 
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
 
             Switch(
                 checked = checked,
                 onCheckedChange = null,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = NuvioTheme.colors.Secondary,
-                    checkedTrackColor = NuvioTheme.colors.Secondary.copy(alpha = 0.3f),
-                    uncheckedThumbColor = NuvioTheme.colors.TextSecondary,
-                    uncheckedTrackColor = NuvioTheme.colors.BackgroundCard
+                    checkedThumbColor = KovelyxTheme.colors.Secondary,
+                    checkedTrackColor = KovelyxTheme.colors.Secondary.copy(alpha = 0.3f),
+                    uncheckedThumbColor = KovelyxTheme.colors.TextSecondary,
+                    uncheckedTrackColor = KovelyxTheme.colors.BackgroundCard
                 )
             )
         }
@@ -364,16 +364,16 @@ private fun DebugActionCard(
             .fillMaxWidth()
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = CardDefaults.scale(focusedScale = 1.02f)
     ) {
         Column(
@@ -384,13 +384,13 @@ private fun DebugActionCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.xs))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.xs))
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
         }
     }
@@ -409,19 +409,19 @@ private fun DebugDialogButton(
             .fillMaxWidth()
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.Secondary
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.Secondary
         ),
-        shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.sm)),
+        shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.sm)),
         scale = CardDefaults.scale(focusedScale = 1.0f)
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isFocused) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextSecondary,
+            color = if (isFocused) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextSecondary,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = NuvioTheme.spacing.md, horizontal = NuvioTheme.spacing.lg),
+                .padding(vertical = KovelyxTheme.spacing.md, horizontal = KovelyxTheme.spacing.lg),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
     }
@@ -438,18 +438,18 @@ private fun DebugGenerateLibraryCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(NuvioTheme.spacing.xs),
+            .padding(KovelyxTheme.spacing.xs),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
             text = stringResource(R.string.debug_generate_library_title),
             style = MaterialTheme.typography.titleMedium,
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
         Text(
             text = stringResource(R.string.debug_generate_library_subtitle),
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
 
         InputField(
@@ -463,7 +463,7 @@ private fun DebugGenerateLibraryCard(
             Text(
                 text = result,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (result.startsWith("Failed")) NuvioTheme.colors.Error else NuvioTheme.colors.Secondary
+                color = if (result.startsWith("Failed")) KovelyxTheme.colors.Error else KovelyxTheme.colors.Secondary
             )
         }
 
@@ -491,18 +491,18 @@ private fun DebugSignInCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(NuvioTheme.spacing.xs),
+            .padding(KovelyxTheme.spacing.xs),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
             text = stringResource(R.string.debug_manual_signin_title),
             style = MaterialTheme.typography.titleMedium,
-            color = NuvioTheme.colors.TextPrimary
+            color = KovelyxTheme.colors.TextPrimary
         )
         Text(
             text = stringResource(R.string.debug_manual_signin_subtitle),
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
 
         InputField(
@@ -523,7 +523,7 @@ private fun DebugSignInCard(
             Text(
                 text = result,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (result.startsWith("Failed")) NuvioTheme.colors.Error else NuvioTheme.colors.Secondary
+                color = if (result.startsWith("Failed")) KovelyxTheme.colors.Error else KovelyxTheme.colors.Secondary
             )
         }
 

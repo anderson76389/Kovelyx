@@ -62,12 +62,12 @@ import com.kovelyx.app.features.addons.AddonRepository
 import com.kovelyx.app.features.plugins.PluginRepository
 import com.kovelyx.app.features.plugins.PluginsUiState
 import com.kovelyx.app.core.build.AppFeaturePolicy
-import com.kovelyx.app.core.ui.NuvioBackButton
-import com.kovelyx.app.core.ui.NuvioBottomSheetActionRow
-import com.kovelyx.app.core.ui.NuvioBottomSheetDivider
-import com.kovelyx.app.core.ui.NuvioModalBottomSheet
-import com.kovelyx.app.core.ui.NuvioToastController
-import com.kovelyx.app.core.ui.dismissNuvioBottomSheet
+import com.kovelyx.app.core.ui.KovelyxBackButton
+import com.kovelyx.app.core.ui.KovelyxBottomSheetActionRow
+import com.kovelyx.app.core.ui.KovelyxBottomSheetDivider
+import com.kovelyx.app.core.ui.KovelyxModalBottomSheet
+import com.kovelyx.app.core.ui.KovelyxToastController
+import com.kovelyx.app.core.ui.dismissKovelyxBottomSheet
 import com.kovelyx.app.features.downloads.DownloadsRepository
 import com.kovelyx.app.features.details.MetaScreenSettingsRepository
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -300,7 +300,7 @@ fun StreamsScreen(
                 .padding(start = 12.dp, top = if (useNativeNavigation) 52.dp else 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            NuvioBackButton(
+            KovelyxBackButton(
                 onClick = onBack,
                 modifier = Modifier
                     .size(40.dp),
@@ -318,7 +318,7 @@ fun StreamsScreen(
                 val directUrl = stream.playableDirectUrl ?: stream.externalOpenUrl
                 if (!directUrl.isNullOrBlank()) {
                     clipboardManager.setText(AnnotatedString(directUrl))
-                    NuvioToastController.show(streamLinkCopiedText)
+                    KovelyxToastController.show(streamLinkCopiedText)
                 } else if (DirectDebridPlaybackResolver.shouldResolveToPlayableStream(stream)) {
                     downloadScope.launch {
                         val resolved = DirectDebridPlaybackResolver.resolveToPlayableStream(
@@ -331,21 +331,21 @@ fun StreamsScreen(
                                 val resolvedUrl = resolved.stream.playableDirectUrl
                                 if (!resolvedUrl.isNullOrBlank()) {
                                     clipboardManager.setText(AnnotatedString(resolvedUrl))
-                                    NuvioToastController.show(streamLinkCopiedText)
+                                    KovelyxToastController.show(streamLinkCopiedText)
                                 } else {
-                                    NuvioToastController.show(noDirectStreamLinkText)
+                                    KovelyxToastController.show(noDirectStreamLinkText)
                                 }
                             }
                             else -> {
                                 val message = resolved.toastMessage()
                                 if (message != null) {
-                                    NuvioToastController.show(message)
+                                    KovelyxToastController.show(message)
                                 }
                             }
                         }
                     }
                 } else {
-                    NuvioToastController.show(noDirectStreamLinkText)
+                    KovelyxToastController.show(noDirectStreamLinkText)
                 }
             },
             onDownload = { stream ->
@@ -373,12 +373,12 @@ fun StreamsScreen(
                                     episodeThumbnail = episodeThumbnail,
                                     stream = resolved.stream,
                                 )
-                                NuvioToastController.show(result.toastMessage())
+                                KovelyxToastController.show(result.toastMessage())
                             }
                             else -> {
                                 val message = resolved.toastMessage()
                                 if (message != null) {
-                                    NuvioToastController.show(message)
+                                    KovelyxToastController.show(message)
                                 }
                             }
                         }
@@ -399,7 +399,7 @@ fun StreamsScreen(
                         episodeThumbnail = episodeThumbnail,
                         stream = stream,
                     )
-                    NuvioToastController.show(result.toastMessage())
+                    KovelyxToastController.show(result.toastMessage())
                 }
             },
             onOpen = { stream, openExternally ->
@@ -882,7 +882,7 @@ private fun LazyListScope.streamSection(
                     if (isSelectable) {
                         onStreamSelected(stream, resumePositionMs, resumeProgressFraction)
                     } else if (isUnsupportedTorrentStream) {
-                        NuvioToastController.show(torrentNotSupportedText)
+                        KovelyxToastController.show(torrentNotSupportedText)
                     }
                 },
                 onLongClick = {
@@ -989,10 +989,10 @@ private fun StreamActionsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
 
-    NuvioModalBottomSheet(
+    KovelyxModalBottomSheet(
         onDismissRequest = {
             coroutineScope.launch {
-                dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
             }
         },
         sheetState = sheetState,
@@ -1029,18 +1029,18 @@ private fun StreamActionsSheet(
                     }
             }
 
-            NuvioBottomSheetDivider()
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetDivider()
+            KovelyxBottomSheetActionRow(
                 icon = Icons.Rounded.ContentCopy,
                 title = stringResource(Res.string.streams_copy_link),
                 onClick = {
                     onCopyLink(stream)
                     coroutineScope.launch {
-                        dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                        dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                     }
                 },
             )
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetActionRow(
                 icon = Icons.AutoMirrored.Rounded.OpenInNew,
                 title = stringResource(
                     if (externalPlayerEnabled) {
@@ -1052,17 +1052,17 @@ private fun StreamActionsSheet(
                 onClick = {
                     onOpen(stream, !externalPlayerEnabled)
                     coroutineScope.launch {
-                        dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                        dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                     }
                 },
             )
-            NuvioBottomSheetActionRow(
+            KovelyxBottomSheetActionRow(
                 icon = Icons.Rounded.Download,
                 title = stringResource(Res.string.streams_download_file),
                 onClick = {
                     onDownload(stream)
                     coroutineScope.launch {
-                        dismissNuvioBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
+                        dismissKovelyxBottomSheet(sheetState = sheetState, onDismiss = onDismiss)
                     }
                 },
             )

@@ -2,7 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.account
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.util.contentTextDirection
 
 import androidx.compose.foundation.BorderStroke
@@ -75,7 +75,7 @@ fun AccountSettingsContent(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = NuvioTheme.spacing.sm),
+        contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.sm),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         when (val authState = uiState.authState) {
@@ -84,7 +84,7 @@ fun AccountSettingsContent(
                     Text(
                         text = stringResource(R.string.account_loading),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
             }
@@ -94,7 +94,7 @@ fun AccountSettingsContent(
                     Text(
                         text = stringResource(R.string.account_sync_description),
                         style = MaterialTheme.typography.bodySmall,
-                        color = NuvioTheme.colors.TextSecondary
+                        color = KovelyxTheme.colors.TextSecondary
                     )
                 }
                 item(key = "account_sync_note_signed_out") {
@@ -143,7 +143,7 @@ private fun SignedInAccountSettingsContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            contentPadding = PaddingValues(bottom = NuvioTheme.spacing.xs),
+            contentPadding = PaddingValues(bottom = KovelyxTheme.spacing.xs),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             val authState = uiState.authState as AuthState.FullAccount
@@ -206,10 +206,10 @@ private fun AccountInlineNote(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = NuvioTheme.colors.TextTertiary,
+        color = KovelyxTheme.colors.TextTertiary,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = NuvioTheme.spacing.md)
+            .padding(horizontal = KovelyxTheme.spacing.md)
     )
 }
 
@@ -219,8 +219,8 @@ private fun SyncOverviewCard(overview: SyncOverview) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = NuvioTheme.colors.BackgroundCard,
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                color = KovelyxTheme.colors.BackgroundCard,
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
             .padding(10.dp)
     ) {
@@ -230,16 +230,16 @@ private fun SyncOverviewCard(overview: SyncOverview) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = NuvioTheme.colors.BackgroundElevated,
+                        color = KovelyxTheme.colors.BackgroundElevated,
                         shape = RoundedCornerShape(6.dp)
                     )
-                    .padding(horizontal = NuvioTheme.spacing.sm, vertical = 6.dp),
+                    .padding(horizontal = KovelyxTheme.spacing.sm, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(R.string.account_total_label),
                     style = MaterialTheme.typography.bodySmall,
-                    color = NuvioTheme.colors.Secondary,
+                    color = KovelyxTheme.colors.Secondary,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.width(100.dp)
                 )
@@ -271,13 +271,13 @@ private fun SyncStatChip(label: String, value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
-            color = NuvioTheme.colors.Secondary,
+            color = KovelyxTheme.colors.Secondary,
             fontWeight = FontWeight.Bold
         )
         Text(
             text = label,
             fontSize = 9.sp,
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
     }
 }
@@ -295,15 +295,15 @@ private fun ProfileSyncRow(profile: ProfileSyncStats) {
             .onFocusChanged { isFocused = it.isFocused }
             .focusable()
             .background(
-                color = if (isFocused) NuvioTheme.colors.FocusBackground else NuvioTheme.colors.BackgroundElevated,
+                color = if (isFocused) KovelyxTheme.colors.FocusBackground else KovelyxTheme.colors.BackgroundElevated,
                 shape = rowShape
             )
             .border(
-                width = NuvioTheme.spacing.xxs,
-                color = if (isFocused) NuvioTheme.colors.FocusRing else Color.Transparent,
+                width = KovelyxTheme.spacing.xxs,
+                color = if (isFocused) KovelyxTheme.colors.FocusRing else Color.Transparent,
                 shape = rowShape
             )
-            .padding(horizontal = NuvioTheme.spacing.sm, vertical = 6.dp),
+            .padding(horizontal = KovelyxTheme.spacing.sm, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
@@ -321,14 +321,14 @@ private fun ProfileSyncRow(profile: ProfileSyncStats) {
             )
         }
 
-        Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
 
         Text(
             text = profile.profileName,
             style = MaterialTheme.typography.bodySmall.copy(
                 textDirection = profile.profileName.contentTextDirection()
             ),
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             fontWeight = FontWeight.Medium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -354,13 +354,13 @@ private fun ProfileStatValue(count: Int, label: String) {
         Text(
             text = count.toString(),
             fontSize = 12.sp,
-            color = if (count > 0) NuvioTheme.colors.TextPrimary else NuvioTheme.colors.TextTertiary,
+            color = if (count > 0) KovelyxTheme.colors.TextPrimary else KovelyxTheme.colors.TextTertiary,
             fontWeight = FontWeight.Medium
         )
         Text(
             text = label,
             fontSize = 8.sp,
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
     }
 }
@@ -371,8 +371,8 @@ private fun SyncOverviewLoadingCard() {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = NuvioTheme.colors.BackgroundCard,
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                color = KovelyxTheme.colors.BackgroundCard,
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
             .padding(10.dp),
         contentAlignment = Alignment.Center
@@ -380,7 +380,7 @@ private fun SyncOverviewLoadingCard() {
         Text(
             text = stringResource(R.string.account_loading_sync),
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
     }
 }
@@ -401,16 +401,16 @@ private fun SettingsActionButton(
             .fillMaxWidth()
             .onFocusChanged { isFocused = it.isFocused },
         colors = CardDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
         ),
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
         scale = CardDefaults.scale(focusedScale = 1.02f)
     ) {
         Row(
@@ -423,20 +423,20 @@ private fun SettingsActionButton(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(22.dp),
-                tint = if (isFocused) NuvioTheme.colors.Primary else NuvioTheme.colors.TextSecondary
+                tint = if (isFocused) KovelyxTheme.colors.Primary else KovelyxTheme.colors.TextSecondary
             )
-            Spacer(modifier = Modifier.width(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.width(KovelyxTheme.spacing.md))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextPrimary,
+                    color = KovelyxTheme.colors.TextPrimary,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = subtitle,
                     fontSize = 11.sp,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }
@@ -449,28 +449,28 @@ private fun StatusCard(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = NuvioTheme.colors.Secondary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                color = KovelyxTheme.colors.Secondary.copy(alpha = 0.1f),
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
-            .padding(horizontal = NuvioTheme.spacing.md, vertical = NuvioTheme.spacing.sm),
+            .padding(horizontal = KovelyxTheme.spacing.md, vertical = KovelyxTheme.spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = null,
-            modifier = Modifier.size(NuvioTheme.spacing.lg),
-            tint = NuvioTheme.colors.Secondary
+            modifier = Modifier.size(KovelyxTheme.spacing.lg),
+            tint = KovelyxTheme.colors.Secondary
         )
-        Spacer(modifier = Modifier.width(NuvioTheme.spacing.sm))
+        Spacer(modifier = Modifier.width(KovelyxTheme.spacing.sm))
         Text(
             text = "$label  ",
             style = MaterialTheme.typography.labelSmall,
-            color = NuvioTheme.colors.TextTertiary
+            color = KovelyxTheme.colors.TextTertiary
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
-            color = NuvioTheme.colors.TextPrimary,
+            color = KovelyxTheme.colors.TextPrimary,
             fontWeight = FontWeight.Medium
         )
     }
@@ -490,15 +490,15 @@ private fun SignOutSettingsButton(
         ),
         border = CardDefaults.border(
             focusedBorder = Border(
-                border = BorderStroke(NuvioTheme.spacing.xxs, Color(0xFFF44336).copy(alpha = 0.5f)),
-                shape = RoundedCornerShape(NuvioTheme.radii.sm)
+                border = BorderStroke(KovelyxTheme.spacing.xxs, Color(0xFFF44336).copy(alpha = 0.5f)),
+                shape = RoundedCornerShape(KovelyxTheme.radii.sm)
             )
         ),
-        shape = CardDefaults.shape(shape = RoundedCornerShape(NuvioTheme.radii.sm)),
+        shape = CardDefaults.shape(shape = RoundedCornerShape(KovelyxTheme.radii.sm)),
         scale = CardDefaults.scale(focusedScale = 1.02f)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = NuvioTheme.spacing.sm),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = KovelyxTheme.spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

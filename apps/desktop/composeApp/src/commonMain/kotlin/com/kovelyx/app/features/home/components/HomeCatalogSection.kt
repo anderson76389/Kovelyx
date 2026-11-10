@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.kovelyx.app.core.ui.NuvioShelfSection
-import com.kovelyx.app.core.ui.NuvioViewAllPillSize
+import com.kovelyx.app.core.ui.KovelyxViewAllPillSize
 import com.kovelyx.app.core.ui.rememberPosterCardStyleUiState
 import com.kovelyx.app.isDesktop
 import com.kovelyx.app.features.home.HomeCatalogSection
@@ -78,7 +78,7 @@ private fun HomeCatalogRowSectionContent(
         rowContentPadding = PaddingValues(horizontal = sectionPadding),
         onViewAllClick = onViewAllClick,
         onTitleClick = onViewAllClick?.takeIf { isDesktop },
-        viewAllPillSize = NuvioViewAllPillSize.Compact,
+        viewAllPillSize = KovelyxViewAllPillSize.Compact,
         key = { item -> item.stableKey() },
     ) { item ->
         HomePosterCard(

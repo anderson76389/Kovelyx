@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-object NuvioTokens {
+object KovelyxTokens {
     object Space {
         val none = 0.dp
         val hairline = 0.5.dp
@@ -184,7 +184,7 @@ object NuvioTokens {
 }
 
 @Immutable
-data class NuvioColorTokens(
+data class KovelyxColorTokens(
     val background: Color,
     val backgroundAmoled: Color,
     val surface: Color,
@@ -231,7 +231,7 @@ data class NuvioColorTokens(
 )
 
 @Immutable
-data class NuvioShapeTokens(
+data class KovelyxShapeTokens(
     val card: Shape,
     val compactCard: Shape,
     val sheet: Shape,
@@ -244,7 +244,7 @@ data class NuvioShapeTokens(
 )
 
 @Immutable
-data class NuvioSpacingTokens(
+data class KovelyxSpacingTokens(
     val screenHorizontal: Dp,
     val screenTop: Dp,
     val screenBottom: Dp,
@@ -260,14 +260,14 @@ data class NuvioSpacingTokens(
 )
 
 @Immutable
-data class NuvioBorderTokens(
+data class KovelyxBorderTokens(
     val hairline: Dp,
     val thin: Dp,
     val medium: Dp,
 )
 
 @Immutable
-data class NuvioElevationTokens(
+data class KovelyxElevationTokens(
     val flat: Dp,
     val raised: Dp,
     val modal: Dp,
@@ -276,7 +276,7 @@ data class NuvioElevationTokens(
 )
 
 @Immutable
-data class NuvioMotionTokens(
+data class KovelyxMotionTokens(
     val instantMillis: Int,
     val fastMillis: Int,
     val normalMillis: Int,
@@ -291,7 +291,7 @@ data class NuvioMotionTokens(
 )
 
 @Immutable
-data class NuvioOpacityTokens(
+data class KovelyxOpacityTokens(
     val invisible: Float,
     val disabled: Float,
     val secondary: Float,
@@ -309,7 +309,7 @@ data class NuvioOpacityTokens(
 )
 
 @Immutable
-data class NuvioIconTokens(
+data class KovelyxIconTokens(
     val xs: Dp,
     val sm: Dp,
     val md: Dp,
@@ -319,7 +319,7 @@ data class NuvioIconTokens(
 )
 
 @Immutable
-data class NuvioBreakpointTokens(
+data class KovelyxBreakpointTokens(
     val phone: Dp,
     val largePhone: Dp,
     val tablet: Dp,
@@ -329,7 +329,7 @@ data class NuvioBreakpointTokens(
 )
 
 @Immutable
-data class NuvioComponentTokens(
+data class KovelyxComponentTokens(
     val navItemShape: Shape,
     val navIconSize: Dp,
     val navItemMaxWidth: Dp,
@@ -343,33 +343,33 @@ data class NuvioComponentTokens(
 )
 
 @Immutable
-data class NuvioThemeTokens(
-    val colors: NuvioColorTokens,
-    val spacing: NuvioSpacingTokens,
-    val shapes: NuvioShapeTokens,
-    val borders: NuvioBorderTokens,
-    val elevation: NuvioElevationTokens,
-    val motion: NuvioMotionTokens,
-    val opacity: NuvioOpacityTokens,
-    val icons: NuvioIconTokens,
-    val breakpoints: NuvioBreakpointTokens,
-    val components: NuvioComponentTokens,
+data class KovelyxThemeTokens(
+    val colors: KovelyxColorTokens,
+    val spacing: KovelyxSpacingTokens,
+    val shapes: KovelyxShapeTokens,
+    val borders: KovelyxBorderTokens,
+    val elevation: KovelyxElevationTokens,
+    val motion: KovelyxMotionTokens,
+    val opacity: KovelyxOpacityTokens,
+    val icons: KovelyxIconTokens,
+    val breakpoints: KovelyxBreakpointTokens,
+    val components: KovelyxComponentTokens,
 )
 
-internal val LocalNuvioThemeTokens = staticCompositionLocalOf {
-    defaultNuvioThemeTokens(ThemeColors.White, amoled = false, colorScheme = null)
+internal val LocalKovelyxThemeTokens = staticCompositionLocalOf {
+    defaultKovelyxThemeTokens(ThemeColors.White, amoled = false, colorScheme = null)
 }
 
-val MaterialTheme.nuvio: NuvioThemeTokens
+val MaterialTheme.nuvio: KovelyxThemeTokens
     @Composable
     @Stable
-    get() = LocalNuvioThemeTokens.current
+    get() = LocalKovelyxThemeTokens.current
 
-internal fun defaultNuvioThemeTokens(
+internal fun defaultKovelyxThemeTokens(
     palette: ThemeColorPalette,
     amoled: Boolean,
     colorScheme: ColorScheme?,
-): NuvioThemeTokens {
+): KovelyxThemeTokens {
     val background = if (amoled) Color.Black else palette.background
     val textPrimary = Color(0xFFF5F7F8)
     val textSecondary = Color(0xFFB8BEC5)
@@ -380,10 +380,10 @@ internal fun defaultNuvioThemeTokens(
     val accentStrong = palette.secondaryVariant
     val borderSubtle = Color(0xFF252A2A).copy(alpha = 0.55f)
     val borderDefault = Color(0xFF252A2A)
-    val overlayScrim = Color.Black.copy(alpha = NuvioTokens.Opacity.overlayMedium)
+    val overlayScrim = Color.Black.copy(alpha = KovelyxTokens.Opacity.overlayMedium)
 
-    return NuvioThemeTokens(
-        colors = NuvioColorTokens(
+    return KovelyxThemeTokens(
+        colors = KovelyxColorTokens(
             background = background,
             backgroundAmoled = Color.Black,
             surface = surface,
@@ -396,7 +396,7 @@ internal fun defaultNuvioThemeTokens(
             textPrimary = textPrimary,
             textSecondary = textSecondary,
             textMuted = textMuted,
-            textDisabled = textMuted.copy(alpha = NuvioTokens.Opacity.disabled),
+            textDisabled = textMuted.copy(alpha = KovelyxTokens.Opacity.disabled),
             textInverse = Color(0xFF111111),
             accent = accent,
             accentStrong = accentStrong,
@@ -407,17 +407,17 @@ internal fun defaultNuvioThemeTokens(
             borderDefault = borderDefault,
             borderStrong = Color(0xFF3A4040),
             borderFocus = palette.focusRing,
-            borderSelected = accent.copy(alpha = NuvioTokens.Opacity.strong),
+            borderSelected = accent.copy(alpha = KovelyxTokens.Opacity.strong),
             success = Color(0xFF66BB6A),
             warning = Color(0xFFFFC857),
             danger = colorScheme?.error ?: Color(0xFFE36A8A),
             info = Color(0xFF42A5F5),
             neutral = textMuted,
             overlayScrim = overlayScrim,
-            overlayHover = Color.White.copy(alpha = NuvioTokens.Opacity.hover),
-            overlayPressed = Color.White.copy(alpha = NuvioTokens.Opacity.pressed),
-            overlaySelected = Color.White.copy(alpha = NuvioTokens.Opacity.selected),
-            overlayDisabled = Color.Black.copy(alpha = NuvioTokens.Opacity.disabled),
+            overlayHover = Color.White.copy(alpha = KovelyxTokens.Opacity.hover),
+            overlayPressed = Color.White.copy(alpha = KovelyxTokens.Opacity.pressed),
+            overlaySelected = Color.White.copy(alpha = KovelyxTokens.Opacity.selected),
+            overlayDisabled = Color.Black.copy(alpha = KovelyxTokens.Opacity.disabled),
             shimmer = Color.White.copy(alpha = 0.10f),
             skeleton = Color.White.copy(alpha = 0.06f),
             playerControlsBackground = Color.Black.copy(alpha = 0.72f),
@@ -428,98 +428,98 @@ internal fun defaultNuvioThemeTokens(
             playerBuffering = accent,
             parentalGuide = Color(0xFF5D1F1F),
         ),
-        spacing = NuvioSpacingTokens(
-            screenHorizontal = NuvioTokens.Space.s16,
-            screenTop = NuvioTokens.Space.s10,
-            screenBottom = NuvioTokens.Space.s18,
-            sectionGap = NuvioTokens.Space.s24,
-            listGap = NuvioTokens.Space.s12,
-            railGap = NuvioTokens.Space.s14,
-            cardPadding = NuvioTokens.Space.s18,
-            cardPaddingCompact = NuvioTokens.Space.s14,
-            controlGap = NuvioTokens.Space.s8,
-            dialogPadding = NuvioTokens.Space.s20,
-            sheetPadding = NuvioTokens.Space.s20,
-            playerOverlayPadding = NuvioTokens.Space.s24,
+        spacing = KovelyxSpacingTokens(
+            screenHorizontal = KovelyxTokens.Space.s16,
+            screenTop = KovelyxTokens.Space.s10,
+            screenBottom = KovelyxTokens.Space.s18,
+            sectionGap = KovelyxTokens.Space.s24,
+            listGap = KovelyxTokens.Space.s12,
+            railGap = KovelyxTokens.Space.s14,
+            cardPadding = KovelyxTokens.Space.s18,
+            cardPaddingCompact = KovelyxTokens.Space.s14,
+            controlGap = KovelyxTokens.Space.s8,
+            dialogPadding = KovelyxTokens.Space.s20,
+            sheetPadding = KovelyxTokens.Space.s20,
+            playerOverlayPadding = KovelyxTokens.Space.s24,
         ),
-        shapes = NuvioShapeTokens(
-            card = RoundedCornerShape(NuvioTokens.Radius.card),
-            compactCard = RoundedCornerShape(NuvioTokens.Radius.compactCard),
-            sheet = RoundedCornerShape(NuvioTokens.Radius.sheet),
-            dialog = RoundedCornerShape(NuvioTokens.Radius.dialog),
-            button = RoundedCornerShape(NuvioTokens.Radius.button),
-            chip = RoundedCornerShape(NuvioTokens.Radius.chip),
-            poster = RoundedCornerShape(NuvioTokens.Radius.poster),
-            avatar = RoundedCornerShape(NuvioTokens.Radius.avatar),
-            playerPanel = RoundedCornerShape(NuvioTokens.Radius.playerPanel),
+        shapes = KovelyxShapeTokens(
+            card = RoundedCornerShape(KovelyxTokens.Radius.card),
+            compactCard = RoundedCornerShape(KovelyxTokens.Radius.compactCard),
+            sheet = RoundedCornerShape(KovelyxTokens.Radius.sheet),
+            dialog = RoundedCornerShape(KovelyxTokens.Radius.dialog),
+            button = RoundedCornerShape(KovelyxTokens.Radius.button),
+            chip = RoundedCornerShape(KovelyxTokens.Radius.chip),
+            poster = RoundedCornerShape(KovelyxTokens.Radius.poster),
+            avatar = RoundedCornerShape(KovelyxTokens.Radius.avatar),
+            playerPanel = RoundedCornerShape(KovelyxTokens.Radius.playerPanel),
         ),
-        borders = NuvioBorderTokens(
-            hairline = NuvioTokens.Border.hairline,
-            thin = NuvioTokens.Border.thin,
-            medium = NuvioTokens.Border.medium,
+        borders = KovelyxBorderTokens(
+            hairline = KovelyxTokens.Border.hairline,
+            thin = KovelyxTokens.Border.thin,
+            medium = KovelyxTokens.Border.medium,
         ),
-        elevation = NuvioElevationTokens(
-            flat = NuvioTokens.Elevation.none,
-            raised = NuvioTokens.Elevation.raised,
-            modal = NuvioTokens.Elevation.modal,
-            overlay = NuvioTokens.Elevation.overlay,
-            playerControls = NuvioTokens.Elevation.playerControls,
+        elevation = KovelyxElevationTokens(
+            flat = KovelyxTokens.Elevation.none,
+            raised = KovelyxTokens.Elevation.raised,
+            modal = KovelyxTokens.Elevation.modal,
+            overlay = KovelyxTokens.Elevation.overlay,
+            playerControls = KovelyxTokens.Elevation.playerControls,
         ),
-        motion = NuvioMotionTokens(
-            instantMillis = NuvioTokens.Motion.instantMillis,
-            fastMillis = NuvioTokens.Motion.fastMillis,
-            normalMillis = NuvioTokens.Motion.normalMillis,
-            sheetEnterMillis = NuvioTokens.Motion.sheetEnterMillis,
-            sheetExitMillis = NuvioTokens.Motion.sheetExitMillis,
-            slowMillis = NuvioTokens.Motion.slowMillis,
-            cinematicMillis = NuvioTokens.Motion.cinematicMillis,
-            standard = NuvioTokens.Motion.standard,
-            emphasized = NuvioTokens.Motion.emphasized,
-            decelerate = NuvioTokens.Motion.decelerate,
-            accelerate = NuvioTokens.Motion.accelerate,
+        motion = KovelyxMotionTokens(
+            instantMillis = KovelyxTokens.Motion.instantMillis,
+            fastMillis = KovelyxTokens.Motion.fastMillis,
+            normalMillis = KovelyxTokens.Motion.normalMillis,
+            sheetEnterMillis = KovelyxTokens.Motion.sheetEnterMillis,
+            sheetExitMillis = KovelyxTokens.Motion.sheetExitMillis,
+            slowMillis = KovelyxTokens.Motion.slowMillis,
+            cinematicMillis = KovelyxTokens.Motion.cinematicMillis,
+            standard = KovelyxTokens.Motion.standard,
+            emphasized = KovelyxTokens.Motion.emphasized,
+            decelerate = KovelyxTokens.Motion.decelerate,
+            accelerate = KovelyxTokens.Motion.accelerate,
         ),
-        opacity = NuvioOpacityTokens(
-            invisible = NuvioTokens.Opacity.invisible,
-            disabled = NuvioTokens.Opacity.disabled,
-            secondary = NuvioTokens.Opacity.secondary,
-            muted = NuvioTokens.Opacity.muted,
-            selected = NuvioTokens.Opacity.selected,
-            hover = NuvioTokens.Opacity.hover,
-            pressed = NuvioTokens.Opacity.pressed,
-            subtle = NuvioTokens.Opacity.subtle,
-            medium = NuvioTokens.Opacity.medium,
-            strong = NuvioTokens.Opacity.strong,
-            overlayLight = NuvioTokens.Opacity.overlayLight,
-            overlayMedium = NuvioTokens.Opacity.overlayMedium,
-            overlayHeavy = NuvioTokens.Opacity.overlayHeavy,
-            visible = NuvioTokens.Opacity.visible,
+        opacity = KovelyxOpacityTokens(
+            invisible = KovelyxTokens.Opacity.invisible,
+            disabled = KovelyxTokens.Opacity.disabled,
+            secondary = KovelyxTokens.Opacity.secondary,
+            muted = KovelyxTokens.Opacity.muted,
+            selected = KovelyxTokens.Opacity.selected,
+            hover = KovelyxTokens.Opacity.hover,
+            pressed = KovelyxTokens.Opacity.pressed,
+            subtle = KovelyxTokens.Opacity.subtle,
+            medium = KovelyxTokens.Opacity.medium,
+            strong = KovelyxTokens.Opacity.strong,
+            overlayLight = KovelyxTokens.Opacity.overlayLight,
+            overlayMedium = KovelyxTokens.Opacity.overlayMedium,
+            overlayHeavy = KovelyxTokens.Opacity.overlayHeavy,
+            visible = KovelyxTokens.Opacity.visible,
         ),
-        icons = NuvioIconTokens(
-            xs = NuvioTokens.Icon.xs,
-            sm = NuvioTokens.Icon.sm,
-            md = NuvioTokens.Icon.md,
-            lg = NuvioTokens.Icon.lg,
-            xl = NuvioTokens.Icon.xl,
-            xxl = NuvioTokens.Icon.xxl,
+        icons = KovelyxIconTokens(
+            xs = KovelyxTokens.Icon.xs,
+            sm = KovelyxTokens.Icon.sm,
+            md = KovelyxTokens.Icon.md,
+            lg = KovelyxTokens.Icon.lg,
+            xl = KovelyxTokens.Icon.xl,
+            xxl = KovelyxTokens.Icon.xxl,
         ),
-        breakpoints = NuvioBreakpointTokens(
-            phone = NuvioTokens.Breakpoint.phone,
-            largePhone = NuvioTokens.Breakpoint.largePhone,
-            tablet = NuvioTokens.Breakpoint.tablet,
-            largeTablet = NuvioTokens.Breakpoint.largeTablet,
-            desktop = NuvioTokens.Breakpoint.desktop,
-            playerWide = NuvioTokens.Breakpoint.playerWide,
+        breakpoints = KovelyxBreakpointTokens(
+            phone = KovelyxTokens.Breakpoint.phone,
+            largePhone = KovelyxTokens.Breakpoint.largePhone,
+            tablet = KovelyxTokens.Breakpoint.tablet,
+            largeTablet = KovelyxTokens.Breakpoint.largeTablet,
+            desktop = KovelyxTokens.Breakpoint.desktop,
+            playerWide = KovelyxTokens.Breakpoint.playerWide,
         ),
-        components = NuvioComponentTokens(
-            navItemShape = RoundedCornerShape(NuvioTokens.Radius.xl),
-            navIconSize = NuvioTokens.Icon.xl,
+        components = KovelyxComponentTokens(
+            navItemShape = RoundedCornerShape(KovelyxTokens.Radius.xl),
+            navIconSize = KovelyxTokens.Icon.xl,
             navItemMaxWidth = 150.dp,
             sheetMaxWidth = 520.dp,
             dialogMaxWidth = 460.dp,
-            chipHorizontalPadding = NuvioTokens.Space.s14,
-            chipVerticalPadding = NuvioTokens.Space.s8,
-            posterRadius = NuvioTokens.Radius.poster,
-            avatarSize = NuvioTokens.Space.s48,
+            chipHorizontalPadding = KovelyxTokens.Space.s14,
+            chipVerticalPadding = KovelyxTokens.Space.s8,
+            posterRadius = KovelyxTokens.Radius.poster,
+            avatarSize = KovelyxTokens.Space.s48,
             playerPanelMaxWidth = 600.dp,
         ),
     )

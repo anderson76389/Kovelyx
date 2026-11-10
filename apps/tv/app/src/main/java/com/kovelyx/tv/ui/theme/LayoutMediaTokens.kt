@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class NuvioLayoutTokens(
+data class KovelyxLayoutTokens(
     val tvSafeHorizontal: Dp,
     val tvSafeVertical: Dp,
     val compactSafeHorizontal: Dp,
@@ -28,8 +28,8 @@ data class KovelyxMediaTokens(
     val playerOverlayGradientStops: List<Float>
 )
 
-object NuvioLayout {
-    val tokens = NuvioLayoutTokens(
+object KovelyxLayout {
+    val tokens = KovelyxLayoutTokens(
         tvSafeHorizontal = 48.dp,
         tvSafeVertical = 24.dp,
         compactSafeHorizontal = 32.dp,

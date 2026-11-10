@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioTheme
+import com.kovelyx.app.core.ui.KovelyxTheme
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -49,7 +49,7 @@ class AvatarPickerTest {
                 LocalDensity provides Density(size.density),
                 LocalLayoutDirection provides direction.value,
             ) {
-                NuvioTheme {
+                KovelyxTheme {
                     Box(Modifier.width(size.width.dp)) {
                         AvatarPicker(
                             avatars = List(size.columns + 1) { index ->

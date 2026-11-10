@@ -17,12 +17,12 @@ internal expect fun nuvioBottomNavigationBarInsets(): WindowInsets
 @Composable
 internal expect fun platformPhysicalTopInset(): Dp
 
-internal val LocalNuvioBottomNavigationOverlayPadding = staticCompositionLocalOf { 0.dp }
+internal val LocalKovelyxBottomNavigationOverlayPadding = staticCompositionLocalOf { 0.dp }
 
 internal val LocalBottomInsetsConsumed = staticCompositionLocalOf { false }
 
-/** CompositionLocal providing the shared [NuvioNavBarScrollState] so child screens can attach the nestedScrollConnection. */
-val LocalNuvioNavBarScrollState = staticCompositionLocalOf<NuvioNavBarScrollState?> { null }
+/** CompositionLocal providing the shared [KovelyxNavBarScrollState] so child screens can attach the nestedScrollConnection. */
+val LocalKovelyxNavBarScrollState = staticCompositionLocalOf<KovelyxNavBarScrollState?> { null }
 
 @Composable
 internal fun nuvioSafeBottomPadding(extra: Dp = 0.dp): Dp {
@@ -31,6 +31,6 @@ internal fun nuvioSafeBottomPadding(extra: Dp = 0.dp): Dp {
 		.asPaddingValues()
 		.calculateBottomPadding()
 	return navigationBarBottom.coerceAtLeast(nuvioPlatformExtraBottomPadding) +
-		LocalNuvioBottomNavigationOverlayPadding.current +
+		LocalKovelyxBottomNavigationOverlayPadding.current +
 		extra
 }

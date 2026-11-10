@@ -24,7 +24,7 @@ internal actual val floatingNavigationGlowSupported: Boolean
 internal actual fun FloatingNavigationBar(
     items: List<FloatingNavigationItem>,
     modifier: Modifier,
-    scrollState: NuvioNavBarScrollState?,
+    scrollState: KovelyxNavBarScrollState?,
     hazeState: HazeState?,
     contentPadding: PaddingValues,
     compactSize: Boolean,
@@ -34,12 +34,12 @@ internal actual fun FloatingNavigationBar(
     val showGlow = !floatingNavigationGlowSupported || glowEnabled
     val glowStrength by animateFloatAsState(
         targetValue = if (showGlow) 1f else 0f,
-        animationSpec = tween(420, easing = NuvioTokens.Motion.standard),
+        animationSpec = tween(420, easing = KovelyxTokens.Motion.standard),
         label = "nav_glow_strength",
     )
     val labelFraction by animateFloatAsState(
         targetValue = scrollState?.labelVisibility ?: 1f,
-        animationSpec = tween(NuvioTokens.Motion.sheetEnterMillis, easing = NuvioTokens.Motion.standard),
+        animationSpec = tween(KovelyxTokens.Motion.sheetEnterMillis, easing = KovelyxTokens.Motion.standard),
         label = "jelly_labels",
     )
     val trackHeight = 48.dp + (if (compactSize) 16.dp else 20.dp) * density.fontScale * labelFraction

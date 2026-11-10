@@ -2,7 +2,7 @@ package com.kovelyx.tv.ui.components
 
 import com.kovelyx.tv.ui.screens.home.shuffleFocusKey
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,7 +64,7 @@ fun GridContinueWatchingSection(
     blurUnwatchedEpisodes: Boolean = false,
     useEpisodeThumbnails: Boolean = true,
     cardStyle: ContinueWatchingCardStyle = ContinueWatchingCardStyle.CARD,
-    cornerRadius: Dp = NuvioTheme.radii.md,
+    cornerRadius: Dp = KovelyxTheme.radii.md,
     posterCardWidth: Dp? = null,
     posterCardHeight: Dp? = null
 ) {
@@ -96,13 +96,13 @@ fun GridContinueWatchingSection(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = NuvioTheme.spacing.xl, bottom = NuvioTheme.spacing.md)
+                .padding(top = KovelyxTheme.spacing.xl, bottom = KovelyxTheme.spacing.md)
         ) {
             Column {
                 Text(
                     text = title ?: stringResource(R.string.continue_watching),
                     style = MaterialTheme.typography.headlineMedium,
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
             }
         }
@@ -132,8 +132,8 @@ fun GridContinueWatchingSection(
                         ?: FocusRequester.Default
                 }
                 .focusGroup(),
-            contentPadding = PaddingValues(horizontal = 36.dp, vertical = NuvioTheme.spacing.none),
-            horizontalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.md)
+            contentPadding = PaddingValues(horizontal = 36.dp, vertical = KovelyxTheme.spacing.none),
+            horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
             itemsIndexed(
                 items = items,

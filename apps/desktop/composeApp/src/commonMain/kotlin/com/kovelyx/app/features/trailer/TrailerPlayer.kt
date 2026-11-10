@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioLoadingIndicator
+import com.kovelyx.app.core.ui.KovelyxLoadingIndicator
 import com.kovelyx.app.features.player.EnterImmersivePlayerMode
 import com.kovelyx.app.features.player.PlatformPlayerSurface
 import com.kovelyx.app.features.player.PlayerControlsAction
@@ -62,7 +62,7 @@ internal fun TrailerPlayer(
         }
         when {
             error == null && (isLoading || source != null && state.snapshot.isLoading) -> {
-                NuvioLoadingIndicator()
+                KovelyxLoadingIndicator()
             }
             error != null -> Column(
                 modifier = Modifier.padding(24.dp),

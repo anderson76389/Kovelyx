@@ -6,20 +6,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.kovelyx.app.core.ui.NuvioToastController
+import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.player.ExternalPlayerIntentResult
 import com.kovelyx.app.features.player.ExternalPlayerPlatform
 import com.kovelyx.app.features.player.PlayerLaunch
 import com.kovelyx.app.features.player.PlayerLaunchStore
 import com.kovelyx.app.features.player.PlayerScreen
 import com.kovelyx.app.features.watchprogress.ResumePromptRepository
-import com.kovelyx.app.navigation.NuvioNavigator
+import com.kovelyx.app.navigation.KovelyxNavigator
 import com.kovelyx.app.navigation.PlayerRoute
 
 @Composable
 internal fun PlayerDestination(
     route: PlayerRoute,
-    navController: NuvioNavigator,
+    navController: KovelyxNavigator,
     externalPlayerId: String?,
     externalPlayerNotConfiguredText: String,
     externalPlayerFailedText: String,
@@ -108,16 +108,16 @@ internal fun PlayerDestination(
                 is ExternalPlayerIntentResult.Success -> {
                     val launched = launchExternalPlayer(intentResult)
                     if (!launched) {
-                        NuvioToastController.show(externalPlayerFailedText)
+                        KovelyxToastController.show(externalPlayerFailedText)
                     } else if (externalPlayerId == "infuse") {
                         onBack()
                     }
                 }
                 ExternalPlayerIntentResult.NotConfigured -> {
-                    NuvioToastController.show(externalPlayerNotConfiguredText)
+                    KovelyxToastController.show(externalPlayerNotConfiguredText)
                 }
                 ExternalPlayerIntentResult.Failed -> {
-                    NuvioToastController.show(externalPlayerFailedText)
+                    KovelyxToastController.show(externalPlayerFailedText)
                 }
             }
         },

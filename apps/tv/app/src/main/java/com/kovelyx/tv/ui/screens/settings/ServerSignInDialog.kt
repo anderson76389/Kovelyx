@@ -24,9 +24,9 @@ import com.kovelyx.tv.R
 import com.kovelyx.tv.data.mediaserver.ServerConnection
 import com.kovelyx.tv.data.mediaserver.ServerFailure
 import com.kovelyx.tv.data.mediaserver.ServerProvider
-import com.kovelyx.tv.ui.components.NuvioDialog
+import com.kovelyx.tv.ui.components.KovelyxDialog
 import com.kovelyx.tv.ui.screens.account.InputField
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 internal data class ServerSignInRequest(
     val provider: ServerProvider,
@@ -58,7 +58,7 @@ internal fun ServerSignInDialog(
 
     LaunchedEffect(Unit) { viewModel.resetSignIn() }
 
-    NuvioDialog(
+    KovelyxDialog(
         onDismiss = { if (!state.connecting) onDismiss() },
         title = stringResource(R.string.servers_sign_in_title, provider.displayName),
         subtitle = stringResource(R.string.servers_sign_in_subtitle, provider.displayName),
@@ -99,7 +99,7 @@ internal fun ServerSignInDialog(
             Text(
                 text = failure.signInMessage(provider),
                 style = MaterialTheme.typography.bodySmall,
-                color = NuvioTheme.colors.Error
+                color = KovelyxTheme.colors.Error
             )
         }
         SettingsDialogActionRow {
@@ -122,12 +122,12 @@ internal fun ServerSignInDialog(
 private fun SignInField(label: String, field: @Composable () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(NuvioTheme.spacing.xs)
+        verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs)
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = NuvioTheme.colors.TextSecondary
+            color = KovelyxTheme.colors.TextSecondary
         )
         field()
     }

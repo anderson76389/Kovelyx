@@ -7,8 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.kovelyx.app.core.ui.NuvioPrimaryButton
-import com.kovelyx.app.core.ui.NuvioSurfaceCard
+import com.kovelyx.app.core.ui.KovelyxPrimaryButton
+import com.kovelyx.app.core.ui.KovelyxSurfaceCard
 
 @Composable
 fun HomeEmptyStateCard(
@@ -18,7 +18,7 @@ fun HomeEmptyStateCard(
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {
-    NuvioSurfaceCard(modifier = modifier) {
+    KovelyxSurfaceCard(modifier = modifier) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -32,7 +32,7 @@ fun HomeEmptyStateCard(
         )
         if (actionLabel != null && onActionClick != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            NuvioPrimaryButton(
+            KovelyxPrimaryButton(
                 text = actionLabel,
                 onClick = onActionClick,
             )

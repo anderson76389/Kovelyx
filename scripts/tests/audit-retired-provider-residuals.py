@@ -39,17 +39,21 @@ def scan(platform: str) -> tuple[int, list[tuple[str, int]]]:
     found: list[tuple[str, int]] = []
     source = SOURCES[platform]
     for file in source.rglob("*"):
-        if not file.is_file() or file.suffix not in (".kt", ".java", ".xml", ".properties", ".json", ".kts"):
+        if not file.is_file() or file.suffix not in (".kt", ".java", ".xml", ".properties", ".json", ".kts", ".pro", ".txt"):
             continue
         if any(part in SKIP_COMPONENTS for part in file.relative_to(source).parts):
             continue
         count = len(PATTERN.findall(file.read_text(encoding="utf-8", errors="replace")))
         if count:
             found.append((file.relative_to(ROOT).as_posix(), count))
-    build = BUILD_FILES[platform]
-    count = len(PATTERN.findall(build.read_text(encoding="utf-8", errors="replace")))
-    if count:
-        found.append((build.relative_to(ROOT).as_posix(), count))
+    app = ROOT / "apps" / {"android": "mobile", "windows": "desktop", "android-tv": "tv"}[platform]
+    additional = [BUILD_FILES[platform]] + list(app.rglob("proguard-rules.pro"))
+    if platform != "android-tv":
+        additional += list((app / "androidApp/src/main").glob("*-prof.txt"))
+    for build in additional:
+        count = len(PATTERN.findall(build.read_text(encoding="utf-8", errors="replace")))
+        if count:
+            found.append((build.relative_to(ROOT).as_posix(), count))
     return sum(n for _, n in found), sorted(found, key=lambda x: (-x[1], x[0]))
 
 
@@ -59,7 +63,7 @@ def main() -> None:
                         help="Fail when a retired account provider is reintroduced")
     args = parser.parse_args()
     remaining = 0
-    print("Audit des fournisseurs de compte retirés (production + Gradle) :")
+    print("Audit des fournisseurs de compte retirés (production + Gradle + profils + ProGuard) :")
     for platform in SOURCES:
         occurrences, files = scan(platform)
         remaining += occurrences

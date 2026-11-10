@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.screens
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -84,7 +84,7 @@ fun ExperienceModeSelectionScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 64.dp, vertical = NuvioTheme.spacing.xxxl),
+            .padding(horizontal = 64.dp, vertical = KovelyxTheme.spacing.xxxl),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -94,13 +94,13 @@ fun ExperienceModeSelectionScreen(
             Text(
                 text = stringResource(R.string.experience_mode_choose_title),
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                color = NuvioTheme.colors.TextPrimary
+                color = KovelyxTheme.colors.TextPrimary
             )
-            Spacer(modifier = Modifier.height(NuvioTheme.spacing.md))
+            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
             Text(
                 text = stringResource(R.string.experience_mode_choose_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
-                color = NuvioTheme.colors.TextSecondary
+                color = KovelyxTheme.colors.TextSecondary
             )
             Spacer(modifier = Modifier.height(36.dp))
             Row(
@@ -141,50 +141,50 @@ private fun ExperienceModeCard(
         onClick = onClick,
         modifier = modifier.height(210.dp),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = NuvioTheme.colors.BackgroundCard,
-            focusedContainerColor = NuvioTheme.colors.FocusBackground
+            containerColor = KovelyxTheme.colors.BackgroundCard,
+            focusedContainerColor = KovelyxTheme.colors.FocusBackground
         ),
         border = ClickableSurfaceDefaults.border(
             border = Border(
-                border = BorderStroke(NuvioTheme.spacing.hairline, NuvioTheme.colors.Border),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = BorderStroke(KovelyxTheme.spacing.hairline, KovelyxTheme.colors.Border),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             ),
             focusedBorder = Border(
-                border = NuvioTheme.focusRing.border(NuvioTheme.spacing.xxs),
-                shape = RoundedCornerShape(NuvioTheme.radii.md)
+                border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.radii.md)
             )
         ),
-        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+        shape = ClickableSurfaceDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
         scale = ClickableSurfaceDefaults.scale(focusedScale = 1f)
     ) {
         Card(
             onClick = onClick,
             colors = CardDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
-            shape = CardDefaults.shape(RoundedCornerShape(NuvioTheme.radii.md)),
+            shape = CardDefaults.shape(RoundedCornerShape(KovelyxTheme.radii.md)),
             scale = CardDefaults.scale(focusedScale = 1f)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(NuvioTheme.spacing.xl),
+                    .padding(KovelyxTheme.spacing.xl),
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = NuvioTheme.colors.TextSecondary
+                    tint = KovelyxTheme.colors.TextSecondary
                 )
                 Spacer(modifier = Modifier.height(18.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = NuvioTheme.colors.TextPrimary
+                    color = KovelyxTheme.colors.TextPrimary
                 )
-                Spacer(modifier = Modifier.height(NuvioTheme.spacing.sm))
+                Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = NuvioTheme.colors.TextSecondary
+                    color = KovelyxTheme.colors.TextSecondary
                 )
             }
         }

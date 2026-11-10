@@ -1,6 +1,6 @@
 package com.kovelyx.tv.ui.components
 
-import com.kovelyx.tv.ui.theme.NuvioTheme
+import com.kovelyx.tv.ui.theme.KovelyxTheme
 import com.kovelyx.tv.ui.theme.accentBrush
 
 import androidx.compose.animation.core.CubicBezierEasing
@@ -31,7 +31,7 @@ fun LoadingIndicator(
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified
 ) {
-    val brush = if (color == Color.Unspecified) NuvioTheme.palette.accentBrush() else SolidColor(color)
+    val brush = if (color == Color.Unspecified) KovelyxTheme.palette.accentBrush() else SolidColor(color)
     val frame = rememberInfiniteTransition(label = "loading_indicator").animateFloat(
         initialValue = 0f,
         targetValue = 60f,
@@ -44,7 +44,7 @@ fun LoadingIndicator(
     ) {
         Spacer(
             modifier = Modifier
-                .size(NuvioTheme.spacing.xxxl)
+                .size(KovelyxTheme.spacing.xxxl)
                 .drawWithCache {
                     val scale = size.minDimension * 0.75f / 350f
                     val center = Offset(size.width / 2f, size.height / 2f)
