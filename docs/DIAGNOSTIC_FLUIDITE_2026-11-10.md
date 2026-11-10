@@ -14,13 +14,13 @@ Les six dumps `gfxinfo` du [comparatif 42837729850](https://github.com/anderson7
 
 Les phases ne sont pas indépendantes : la médiane de leur somme n’est pas la somme de leurs médianes. La phase après SwapBuffers inclut de la synchronisation et de la présentation ; elle n’est pas une mesure du seul temps d’exécution GPU.
 
-Les journaux du workflow confirment `-gpu swiftshader_indirect` et `SwiftShader Device (Subzero)`. Il s’agit d’un GPU logiciel. Les compteurs indiquent également zéro upload de bitmap lent et beaucoup de commandes de dessin lentes. Cela pointe surtout vers le chemin de rendu/présentation de cet environnement ; ce n’est pas une preuve qu’un composant particulier de l’application est responsable sur une TV physique. Les valeurs 4950 ms de l’histogramme GPU ne servent pas de mesure de durée du thread UI.
+Les journaux du workflow confirment `-gpu swiftshader_indirect` et `SwiftShader Device (Subzero)`. Il s’agit d’un GPU logiciel. Les compteurs indiquent zéro upload de bitmap lent sur cinq passages et un sur le sixième, contre 51 à 63 commandes de dessin lentes par passage. Cela pointe surtout vers le chemin de rendu/présentation de cet environnement ; ce n’est pas une preuve qu’un composant particulier de l’application est responsable sur une TV physique. Les valeurs 4950 ms de l’histogramme GPU ne servent pas de mesure de durée du thread UI.
 
 Les résultats ne justifient pas à eux seuls le retrait d’animations, de flou ou une réécriture du défilement. Aucune modification visuelle n’est introduite sans bénéfice mesuré. [Décomposition complète](TV_FRAME_PHASES_2026-11-10.json).
 
 ## Test de lecture de trente minutes
 
-Le workflow `tv-playback-soak.yml` génère localement une vidéo H264/AAC 1280×720 à 30 images/s pendant 30 secondes et vérifie son empreinte avant de l’utiliser dans une liste de trois épisodes, répétée pendant une session de 1800 secondes.
+Le scénario Kotlin est conservé dans `scripts/tests/fixtures/tv/Media3PlaybackSoakTest.kt` et copié dans le module Android uniquement dans ce job. Le workflow `tv-playback-soak.yml` génère localement une vidéo H264/AAC 1280×720 à 30 images/s pendant 30 secondes et vérifie son empreinte avant de l’utiliser dans une liste de trois épisodes, répétée pendant une session de 1800 secondes.
 
 Le test utilise le moteur Media3/AAR corrigé et le chemin de contrôle de chargement Kovelyx avec allocateur natif et budget de mémoire par défaut du mode performance. Il exerce six pauses/reprises de cinq secondes, six déplacements à 15 secondes et cinq passages explicites à l’épisode suivant. Des images décodées doivent continuer à être produites entre les relevés.
 

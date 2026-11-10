@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'apps/tv/app/src/androidTest/java/com/kovelyx/tv/ui/screens/player/Media3PlaybackSoakTest.kt'
+      - 'scripts/tests/fixtures/tv/Media3PlaybackSoakTest.kt'
       - 'scripts/tests/tv-playback-soak.sh'
       - '.github/workflows/tv-playback-soak.yml'
   workflow_dispatch:
@@ -41,6 +41,7 @@ jobs:
           cat "$assets/playback-soak.sha256"
       - name: Compiler le moteur TV et le test de lecture prolongée
         run: |
+          cp scripts/tests/fixtures/tv/Media3PlaybackSoakTest.kt apps/tv/app/src/androidTest/java/com/kovelyx/tv/ui/screens/player/Media3PlaybackSoakTest.kt
           chmod +x apps/tv/gradlew
           ./apps/tv/gradlew -p apps/tv :app:assembleFullDebug :app:assembleFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
       - name: Lecture réelle de trente minutes avec mesures CPU et PSS
