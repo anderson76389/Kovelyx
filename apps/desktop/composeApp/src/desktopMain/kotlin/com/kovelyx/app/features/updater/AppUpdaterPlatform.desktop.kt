@@ -2,6 +2,9 @@ package com.kovelyx.app.features.updater
 
 import com.kovelyx.app.core.build.AppVersionConfig
 import com.kovelyx.app.core.storage.DesktopStorage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -36,6 +39,27 @@ private val desktopUpdaterHttpClient: HttpClient = HttpClient.newBuilder()
     .build()
 
 actual object AppUpdaterPlatform {
+    private val updateFilesMutex = Mutex()
+
+    suspend fun onWindowReady() {
+        withContext(Dispatchers.IO) {
+            updateFilesMutex.withLock {
+                runCatching {
+                    DesktopUpdateCacheMaintenance.clean(updatesDir(), currentVersionName)
+                }
+            }
+        }
+        if (!isPortableWindows) return
+        delay(30_000)
+        val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+            ?: ProcessHandle.current().info().command().orElse(null) ?: return
+        val install = File(launcher).parentFile ?: return
+        repeat(2) { pass ->
+            if (pass > 0) delay(300_000)
+            withContext(Dispatchers.IO) { runCatching { PortableBackupMaintenance.clean(install) } }
+        }
+    }
+
     private val currentOs: DesktopUpdaterOs = DesktopUpdaterOs.current()
     private val store = DesktopStorage.store(desktopUpdaterPreferencesName)
     actual val isDebugBuild: Boolean = false
@@ -107,76 +131,78 @@ actual object AppUpdaterPlatform {
         assetName: String,
         onProgress: (downloadedBytes: Long, totalBytes: Long?) -> Unit,
     ): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            // Do not discard the previous verified installer until the new one
-            // has been fully received and SHA-256 checked.
-            val safeName = assetName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
-            val destination = File(updatesDir(), safeName)
-            val tempFile = File(updatesDir(), "$safeName.part")
+        updateFilesMutex.withLock {
+            runCatching {
+                // Do not discard the previous verified installer until the new one
+                // has been fully received and SHA-256 checked.
+                val safeName = assetName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+                val destination = File(updatesDir(), safeName)
+                val tempFile = File(updatesDir(), "$safeName.part")
 
-            val releaseAsset = URI(assetUrl)
-            check(isOfficialKovelyxReleaseAsset(releaseAsset, safeName)) {
-                "Le fichier de mise à jour ne provient pas des Releases officielles de Kovelyx."
-            }
-            val expectedSha256 = fetchReleaseChecksum(releaseAsset, safeName)
-            val digest = MessageDigest.getInstance("SHA-256")
-            val request = HttpRequest.newBuilder()
-                .uri(releaseAsset)
-                .timeout(Duration.ofMinutes(10))
-                .GET()
-                .build()
-            val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofInputStream())
-            if (response.statusCode() !in 200..299) {
-                error(runBlocking { getString(Res.string.updates_download_failed_http, response.statusCode()) })
-            }
+                val releaseAsset = URI(assetUrl)
+                check(isOfficialKovelyxReleaseAsset(releaseAsset, safeName)) {
+                    "Le fichier de mise à jour ne provient pas des Releases officielles de Kovelyx."
+                }
+                val expectedSha256 = fetchReleaseChecksum(releaseAsset, safeName)
+                val digest = MessageDigest.getInstance("SHA-256")
+                val request = HttpRequest.newBuilder()
+                    .uri(releaseAsset)
+                    .timeout(Duration.ofMinutes(10))
+                    .GET()
+                    .build()
+                val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofInputStream())
+                if (response.statusCode() !in 200..299) {
+                    error(runBlocking { getString(Res.string.updates_download_failed_http, response.statusCode()) })
+                }
 
-            val totalBytes = response.headers().firstValue("Content-Length").orElse(null)
-                ?.toLongOrNull()
-                ?.takeIf { it > 0L }
-            var downloadedBytes = 0L
-            try {
-                response.body()?.use { input ->
-                    FileOutputStream(tempFile).use { output ->
-                        val buffer = ByteArray(64 * 1024)
-                        var lastProgressBytes = 0L
-                        val progressStepBytes = maxOf(1024L * 1024L, (totalBytes ?: 0L) / 100L)
-                        while (true) {
-                            val read = input.read(buffer)
-                            if (read <= 0) break
-                            output.write(buffer, 0, read)
-                            digest.update(buffer, 0, read)
-                            downloadedBytes += read.toLong()
-                            if (downloadedBytes - lastProgressBytes >= progressStepBytes) {
-                                lastProgressBytes = downloadedBytes
+                val totalBytes = response.headers().firstValue("Content-Length").orElse(null)
+                    ?.toLongOrNull()
+                    ?.takeIf { it > 0L }
+                var downloadedBytes = 0L
+                try {
+                    response.body()?.use { input ->
+                        FileOutputStream(tempFile).use { output ->
+                            val buffer = ByteArray(64 * 1024)
+                            var lastProgressBytes = 0L
+                            val progressStepBytes = maxOf(1024L * 1024L, (totalBytes ?: 0L) / 100L)
+                            while (true) {
+                                val read = input.read(buffer)
+                                if (read <= 0) break
+                                output.write(buffer, 0, read)
+                                digest.update(buffer, 0, read)
+                                downloadedBytes += read.toLong()
+                                if (downloadedBytes - lastProgressBytes >= progressStepBytes) {
+                                    lastProgressBytes = downloadedBytes
+                                    onProgress(downloadedBytes, totalBytes)
+                                }
+                            }
+                            if (downloadedBytes > lastProgressBytes) {
                                 onProgress(downloadedBytes, totalBytes)
                             }
+                            output.flush()
                         }
-                        if (downloadedBytes > lastProgressBytes) {
-                            onProgress(downloadedBytes, totalBytes)
-                        }
-                        output.flush()
+                    } ?: error(runBlocking { getString(Res.string.updates_empty_download_body) })
+
+                    if (totalBytes != null && downloadedBytes != totalBytes) {
+                        error(runBlocking { getString(Res.string.updates_download_failed) })
                     }
-                } ?: error(runBlocking { getString(Res.string.updates_empty_download_body) })
+                    val checksum = digest.digest().joinToString("") { "%02x".format(it) }
+                    check(checksum.equals(expectedSha256, ignoreCase = true)) {
+                        "Empreinte SHA-256 invalide : mise à jour annulée."
+                    }
 
-                if (totalBytes != null && downloadedBytes != totalBytes) {
-                    error(runBlocking { getString(Res.string.updates_download_failed) })
+                    if (!tempFile.renameTo(destination)) {
+                        tempFile.copyTo(destination, overwrite = true)
+                        tempFile.delete()
+                    }
+                    // Only verified artifacts are eligible for deletion. Preserve logs,
+                    // restore scripts and any in-progress .part downloads.
+                    pruneOldVerifiedInstallers(updatesDir(), keep = destination)
+                    destination.absolutePath
+                } catch (t: Throwable) {
+                    if (tempFile.exists()) tempFile.delete()
+                    throw t
                 }
-                val checksum = digest.digest().joinToString("") { "%02x".format(it) }
-                check(checksum.equals(expectedSha256, ignoreCase = true)) {
-                    "Empreinte SHA-256 invalide : mise à jour annulée."
-                }
-
-                if (!tempFile.renameTo(destination)) {
-                    tempFile.copyTo(destination, overwrite = true)
-                    tempFile.delete()
-                }
-                // Only verified artifacts are eligible for deletion. Preserve logs,
-                // restore scripts and any in-progress .part downloads.
-                pruneOldVerifiedInstallers(updatesDir(), keep = destination)
-                destination.absolutePath
-            } catch (t: Throwable) {
-                if (tempFile.exists()) tempFile.delete()
-                throw t
             }
         }
     }

@@ -5,6 +5,8 @@ on:
     paths:
       - 'services/kovelyx-cloudflare/**'
       - 'apps/**/core/cloud/**'
+      - 'apps/**/features/updater/**'
+      - 'apps/tv/app/src/full/java/com/kovelyx/tv/updater/**'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/sync/**'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/data/repository/WatchProgressRepositoryImpl.kt'
       - 'scripts/configure-cloud-build.py'
@@ -14,6 +16,8 @@ on:
     paths:
       - 'services/kovelyx-cloudflare/**'
       - 'apps/**/core/cloud/**'
+      - 'apps/**/features/updater/**'
+      - 'apps/tv/app/src/full/java/com/kovelyx/tv/updater/**'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/core/sync/**'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/data/repository/WatchProgressRepositoryImpl.kt'
       - 'scripts/configure-cloud-build.py'

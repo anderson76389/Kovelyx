@@ -2,11 +2,17 @@ package com.kovelyx.app.features.updater
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -37,9 +43,31 @@ object AndroidAppUpdaterPlatform {
         .build()
 
     private var appContext: Context? = null
+    private val updateFilesMutex = Mutex()
+    private val cleanupScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var cleanupScheduled = false
 
+    @Synchronized
     fun initialize(context: Context) {
         appContext = context.applicationContext
+        if (!cleanupScheduled) {
+            cleanupScheduled = true
+            cleanupScope.launch {
+                updateFilesMutex.withLock {
+                    runCatching { cleanInstalledUpdateFiles(context.applicationContext) }
+                }
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    internal fun cleanInstalledUpdateFiles(context: Context): Long {
+        val installed = context.packageManager.getPackageInfo(context.packageName, 0)
+        fun version(info: PackageInfo): Long = if (Build.VERSION.SDK_INT >= 28) info.longVersionCode else info.versionCode.toLong()
+        return UpdateCacheMaintenance.clean(File(context.cacheDir, "updates"), isAlreadyInstalled = { file ->
+            val archive = context.packageManager.getPackageArchiveInfo(file.absolutePath, 0)
+            if (archive?.packageName == context.packageName) version(archive) <= version(installed) else null
+        })
     }
 
     fun getSupportedAbis(): List<String> = Build.SUPPORTED_ABIS?.toList().orEmpty()
@@ -73,72 +101,74 @@ object AndroidAppUpdaterPlatform {
         assetName: String,
         onProgress: (downloadedBytes: Long, totalBytes: Long?) -> Unit,
     ): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            val context = requireContext()
-            val safeName = assetName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
-            val expectedSha256 = fetchReleaseChecksum(assetUrl, safeName)
-            val dir = File(context.cacheDir, "updates").apply { mkdirs() }
-            val destination = File(dir, safeName)
-            val temporary = File(dir, "$safeName.part")
-            temporary.delete()
-            val digest = java.security.MessageDigest.getInstance("SHA-256")
-            try {
-                val request = Request.Builder().url(assetUrl).get().build()
-                httpClient.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        error(runBlocking { getString(Res.string.updates_download_failed_http, response.code) })
-                    }
-                    val body = response.body ?: error(runBlocking { getString(Res.string.updates_empty_download_body) })
-                    val total = body.contentLength().takeIf { it > 0L }
-                    var downloaded = 0L
-                    body.byteStream().use { input ->
-                        FileOutputStream(temporary).use { output ->
-                            // A 64 KiB buffer cuts reads and digest calls by 8x vs the old 8 KiB buffer.
-                            val buffer = ByteArray(64 * 1024)
-                            var lastProgressBytes = 0L
-                            val progressStepBytes = maxOf(1024L * 1024L, (total ?: 0L) / 100L)
-                            while (true) {
-                                currentCoroutineContext().ensureActive()
-                                val read = input.read(buffer)
-                                currentCoroutineContext().ensureActive()
-                                if (read < 0) break
-                                if (read == 0) continue
-                                output.write(buffer, 0, read)
-                                digest.update(buffer, 0, read)
-                                downloaded += read.toLong()
-                                if (downloaded - lastProgressBytes >= progressStepBytes) {
-                                    lastProgressBytes = downloaded
-                                    onProgress(downloaded, total)
+        updateFilesMutex.withLock {
+            runCatching {
+                val context = requireContext()
+                val safeName = assetName.replace(Regex("[^a-zA-Z0-9._-]"), "_")
+                val expectedSha256 = fetchReleaseChecksum(assetUrl, safeName)
+                val dir = File(context.cacheDir, "updates").apply { mkdirs() }
+                val destination = File(dir, safeName)
+                val temporary = File(dir, "$safeName.part")
+                temporary.delete()
+                val digest = java.security.MessageDigest.getInstance("SHA-256")
+                try {
+                    val request = Request.Builder().url(assetUrl).get().build()
+                    httpClient.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            error(runBlocking { getString(Res.string.updates_download_failed_http, response.code) })
+                        }
+                        val body = response.body ?: error(runBlocking { getString(Res.string.updates_empty_download_body) })
+                        val total = body.contentLength().takeIf { it > 0L }
+                        var downloaded = 0L
+                        body.byteStream().use { input ->
+                            FileOutputStream(temporary).use { output ->
+                                // A 64 KiB buffer cuts reads and digest calls by 8x vs the old 8 KiB buffer.
+                                val buffer = ByteArray(64 * 1024)
+                                var lastProgressBytes = 0L
+                                val progressStepBytes = maxOf(1024L * 1024L, (total ?: 0L) / 100L)
+                                while (true) {
+                                    currentCoroutineContext().ensureActive()
+                                    val read = input.read(buffer)
+                                    currentCoroutineContext().ensureActive()
+                                    if (read < 0) break
+                                    if (read == 0) continue
+                                    output.write(buffer, 0, read)
+                                    digest.update(buffer, 0, read)
+                                    downloaded += read.toLong()
+                                    if (downloaded - lastProgressBytes >= progressStepBytes) {
+                                        lastProgressBytes = downloaded
+                                        onProgress(downloaded, total)
+                                    }
                                 }
+                                if (downloaded > lastProgressBytes) onProgress(downloaded, total)
+                                output.flush()
                             }
-                            if (downloaded > lastProgressBytes) onProgress(downloaded, total)
-                            output.flush()
+                        }
+                        check(downloaded > 0 && (total == null || downloaded == total)) {
+                            "Téléchargement incomplet : l’installation ne sera pas lancée."
                         }
                     }
-                    check(downloaded > 0 && (total == null || downloaded == total)) {
-                        "Téléchargement incomplet : l’installation ne sera pas lancée."
+                    val sha256 = digest.digest().joinToString("") { "%02x".format(it) }
+                    check(sha256.equals(expectedSha256, ignoreCase = true)) {
+                        "Empreinte SHA-256 différente de la Release officielle Kovelyx."
                     }
-                }
-                val sha256 = digest.digest().joinToString("") { "%02x".format(it) }
-                check(sha256.equals(expectedSha256, ignoreCase = true)) {
-                    "Empreinte SHA-256 différente de la Release officielle Kovelyx."
-                }
-                if (destination.exists()) destination.delete()
-                if (!temporary.renameTo(destination)) {
-                    temporary.copyTo(destination, overwrite = true)
+                    if (destination.exists()) destination.delete()
+                    if (!temporary.renameTo(destination)) {
+                        temporary.copyTo(destination, overwrite = true)
+                        temporary.delete()
+                    }
+                    // The APK lives in a disposable updater-only cache, not user data.
+                    // Reclaim older verified APKs only AFTER this download was validated.
+                    dir.listFiles()?.forEach { old ->
+                        if (old != destination && old.isFile &&
+                            old.name.startsWith("Kovelyx-") &&
+                            old.name.endsWith(".apk", ignoreCase = true)
+                        ) old.delete()
+                    }
+                    destination.absolutePath
+                } finally {
                     temporary.delete()
                 }
-                // The APK lives in a disposable updater-only cache, not user data.
-                // Reclaim older verified APKs only AFTER this download was validated.
-                dir.listFiles()?.forEach { old ->
-                    if (old != destination && old.isFile &&
-                        old.name.startsWith("Kovelyx-") &&
-                        old.name.endsWith(".apk", ignoreCase = true)
-                    ) old.delete()
-                }
-                destination.absolutePath
-            } finally {
-                temporary.delete()
             }
         }
     }
