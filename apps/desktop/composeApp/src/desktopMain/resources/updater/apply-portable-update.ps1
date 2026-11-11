@@ -46,6 +46,7 @@ try {
 
     Rename-Item -LiteralPath $InstallDir -NewName (Split-Path -Leaf $backup)
     try {
+        [System.IO.File]::WriteAllText((Join-Path $backup '.kovelyx-update-owner'), [System.IO.Path]::GetFullPath($InstallDir))
         Move-Item -LiteralPath $newDir -Destination $InstallDir
         $swapped = $true
     }

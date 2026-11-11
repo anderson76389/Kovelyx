@@ -49,6 +49,9 @@ class UpdateViewModel @Inject constructor(
     private var lastUpdateCheckAtMs = 0L
 
     init {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching { apkDownloader.cleanInstalledUpdateFiles(context) }
+        }
         viewModelScope.launch {
             val enabled = updatePreferences.updateBannerEnabled.first()
             val channel = updatePreferences.getOrInitializeUpdateChannel()

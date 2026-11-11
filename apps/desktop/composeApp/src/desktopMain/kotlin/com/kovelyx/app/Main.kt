@@ -227,6 +227,9 @@ fun main(args: Array<String>) {
             }
 
             LaunchedEffect(window) {
+                com.kovelyx.app.features.updater.AppUpdaterPlatform.onWindowReady()
+            }
+            LaunchedEffect(window) {
                 applyNativeDesktopWindowChrome(window)
                 installLinuxExtendedMouseButtons()
                 // Windows fullscreen is emulated natively and isn't reflected by
