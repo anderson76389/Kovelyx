@@ -12,7 +12,7 @@ Les six dumps `gfxinfo` du [comparatif 42837729850](https://github.com/anderson7
 | Soumission du dessin | 1,65–2,35 ms |
 | Après SwapBuffers jusqu’à FrameCompleted | 21,1–26,2 ms |
 
-Les phases ne sont pas indépendantes : la médiane de leur somme n’est pas la somme de leurs médianes. La phase après SwapBuffers inclut de la synchronisation et de la présentation ; elle n’est pas une mesure du seul temps d’exécution GPU.
+Ces intervalles sont des durées murales entre jalons, pas des compteurs de temps CPU. Les phases ne sont pas indépendantes : la médiane de leur somme n’est pas la somme de leurs médianes. La phase après SwapBuffers inclut de la synchronisation et de la présentation ; elle n’est pas une mesure du seul temps d’exécution GPU.
 
 Les journaux du workflow confirment `-gpu swiftshader_indirect` et `SwiftShader Device (Subzero)`. Il s’agit d’un GPU logiciel. Les compteurs indiquent zéro upload de bitmap lent sur cinq passages et un sur le sixième, contre 51 à 63 commandes de dessin lentes par passage. Cela pointe surtout vers le chemin de rendu/présentation de cet environnement ; ce n’est pas une preuve qu’un composant particulier de l’application est responsable sur une TV physique. Les valeurs 4950 ms de l’histogramme GPU ne servent pas de mesure de durée du thread UI.
 
@@ -28,4 +28,36 @@ Chaque minute : PSS totale, PSS native/Java, tas natif, CPU du processus mesuré
 
 Ce test est exécuté explicitement par le workflow long ; il n’allonge pas involontairement les suites générales. Le workflow exige un rapport `passed=true`, au moins 1800 secondes et des images réellement décodées : une absence de test ou une simple attente ne compte pas comme succès.
 
-Limites : APK d’instrumentation non minifiée, surface de sortie privée continuellement vidée, vidéo locale 720p et contrôles exercés par API. Cela ne certifie pas les boutons de l’interface du lecteur, une lecture 4K/Dolby Vision, le réseau des extensions ni une TV physique. Aucune donnée utilisateur ni clé de publication n’est employée. Les résultats seront ajoutés après l’exécution réelle ; la présence du test ne vaut pas réussite.
+Limites : APK d’instrumentation non minifiée, surface de sortie privée continuellement vidée, vidéo locale 720p et contrôles exercés par API. Cela ne certifie pas les boutons de l’interface du lecteur, une lecture 4K/Dolby Vision, le réseau des extensions ni une TV physique. Aucune donnée utilisateur ni clé de publication n’est employée.
+
+## Résultats de l’exécution du 10 novembre, bilan finalisé le 11 novembre 2026
+
+La [PR #111](https://github.com/anderson76389/Kovelyx/pull/111) est fusionnée en `149eb433d6c72e846529348118b1ad9ca5982958`. La révision testée `e9ac1d9f1a412c9045f629dd7e2939bde6fd034b` a passé les quatre tests du parseur, la vérification des workflows, la compilation Android et le scénario long. [Exécution et artefact source](https://github.com/anderson76389/Kovelyx/actions/runs/42884831186).
+
+| Contrôle | Résultat mesuré |
+|---|---:|
+| Durée de la session, pauses comprises | 1 800,132 secondes |
+| Images reçues sur la surface | 52 988 |
+| Relevés de ressources | 31 |
+| Pauses/reprises de 5 secondes, position stable vérifiée | 6 |
+| Déplacements à 15 secondes, position vérifiée | 6 |
+| Passages explicites à l’épisode suivant, index vérifié | 5 |
+| PSS initiale avant remplissage des buffers | 104 362 Kio — 101,9 Mio |
+| PSS de référence après échauffement | 130 095 Kio — 127,0 Mio |
+| Médiane des cinq derniers relevés PSS | 132 429 Kio — 129,3 Mio |
+| PSS finale et pic échantillonné | 134 112 Kio — 131,0 Mio |
+| Hausse médiane après échauffement | +2 334 Kio — +2,28 Mio |
+| CPU médian du processus après cinq minutes | 6,49 % d’un cœur |
+| CPU médian pendant les six pauses | 0,62 % d’un cœur |
+
+La référence d’échauffement est la médiane supérieure des relevés entre 5 et 10 minutes ; elle est comparée à la médiane des cinq derniers relevés. Le CPU principal est la médiane des intervalles de relève après 5 minutes, pauses comprises. Les pauses ont aussi leur propre intervalle de 5 secondes. Le compteur d’images compte celles acquises sur la surface privée et ne mesure pas la fluidité du téléviseur.
+
+Le rapport confirme `passed=true`. Aucun marqueur `FATAL EXCEPTION`, `Fatal signal` ou `ANR in` n’a été trouvé dans le logcat conservé. La petite hausse PSS reste mesurée et ne prouve pas l’absence de toute fuite sur des durées plus longues ou d’autres usages. Il n’existe pas de comparaison CPU avant/après sur ce scénario ; aucun gain de CPU n’en est déduit.
+
+[Données complètes des 31 relevés et des actions](TV_PLAYBACK_30MIN_2026-11-10.json).
+
+## Portée de l’intégration
+
+Les changements concernent les outils de diagnostic et leurs résultats. Les fichiers de production des applications et les effets visuels ne sont pas modifiés ; ce travail ne nécessite pas de nouvelle APK. La version applicative publiée à l’issue de ce travail reste [v1.1.1117](https://github.com/anderson76389/Kovelyx/releases/tag/v1.1.1117).
+
+Références de méthode : [SwiftShader, rendu sur CPU](https://github.com/google/swiftshader), [Android dumpsys et framestats](https://developer.android.com/tools/dumpsys), [jalons FrameMetrics](https://developer.android.com/reference/android/view/FrameMetrics).
