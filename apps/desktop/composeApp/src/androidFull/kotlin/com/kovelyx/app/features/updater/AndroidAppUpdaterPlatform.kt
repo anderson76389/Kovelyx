@@ -2,6 +2,7 @@ package com.kovelyx.app.features.updater
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Build
