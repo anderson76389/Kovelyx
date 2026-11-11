@@ -1,0 +1,462 @@
+{
+  "passed": true,
+  "scenario": "30-minute local H264 720p30 engine session, 3 playlist episodes",
+  "limitations": "Unminified instrumentation; private output surface; not full player UI, physical TV, 4K or remote addons",
+  "fixture_sha256": "a9177370b3ab137dbd5a6cc27e6bb6de52a58960393c24931a9b4e099265dda1",
+  "fixture_bytes": 20916289,
+  "configured_seconds": 1800,
+  "samples": [
+    {
+      "elapsed_ms": 0,
+      "pss_kib": 104362,
+      "native_pss_kib": 11410,
+      "java_pss_kib": 26395,
+      "native_heap_bytes": 49832016,
+      "decoded_frames": 3,
+      "cpu_percent_one_core": 51.61290322580645,
+      "episode": 0,
+      "position_ms": 11,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 60156,
+      "pss_kib": 118533,
+      "native_pss_kib": 41850,
+      "java_pss_kib": 6297,
+      "native_heap_bytes": 49929920,
+      "decoded_frames": 1805,
+      "cpu_percent_one_core": 8.354683081018134,
+      "episode": 2,
+      "position_ms": 105,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 120219,
+      "pss_kib": 121383,
+      "native_pss_kib": 42914,
+      "java_pss_kib": 7013,
+      "native_heap_bytes": 52035040,
+      "decoded_frames": 3606,
+      "cpu_percent_one_core": 7.1130028581087315,
+      "episode": 1,
+      "position_ms": 163,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 180033,
+      "pss_kib": 121699,
+      "native_pss_kib": 45486,
+      "java_pss_kib": 4449,
+      "native_heap_bytes": 54179312,
+      "decoded_frames": 5252,
+      "cpu_percent_one_core": 7.2081607328600885,
+      "episode": 2,
+      "position_ms": 25032,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 240083,
+      "pss_kib": 125287,
+      "native_pss_kib": 47190,
+      "java_pss_kib": 5969,
+      "native_heap_bytes": 56311008,
+      "decoded_frames": 7053,
+      "cpu_percent_one_core": 7.455034043886114,
+      "episode": 1,
+      "position_ms": 15018,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 300241,
+      "pss_kib": 130095,
+      "native_pss_kib": 50202,
+      "java_pss_kib": 7669,
+      "native_heap_bytes": 59157584,
+      "decoded_frames": 8841,
+      "cpu_percent_one_core": 7.218534164822638,
+      "episode": 1,
+      "position_ms": 0,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 360140,
+      "pss_kib": 130594,
+      "native_pss_kib": 51505,
+      "java_pss_kib": 7005,
+      "native_heap_bytes": 59206528,
+      "decoded_frames": 10635,
+      "cpu_percent_one_core": 6.913159082927808,
+      "episode": 2,
+      "position_ms": 29738,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 420204,
+      "pss_kib": 130134,
+      "native_pss_kib": 50349,
+      "java_pss_kib": 7589,
+      "native_heap_bytes": 59277904,
+      "decoded_frames": 12435,
+      "cpu_percent_one_core": 6.505501936435729,
+      "episode": 1,
+      "position_ms": 29778,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 480012,
+      "pss_kib": 127266,
+      "native_pss_kib": 50829,
+      "java_pss_kib": 4377,
+      "native_heap_bytes": 59336112,
+      "decoded_frames": 14081,
+      "cpu_percent_one_core": 6.71131142455705,
+      "episode": 0,
+      "position_ms": 24643,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 540062,
+      "pss_kib": 128460,
+      "native_pss_kib": 50495,
+      "java_pss_kib": 5929,
+      "native_heap_bytes": 59415360,
+      "decoded_frames": 15881,
+      "cpu_percent_one_core": 6.481023510403271,
+      "episode": 2,
+      "position_ms": 15018,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 600217,
+      "pss_kib": 124584,
+      "native_pss_kib": 50588,
+      "java_pss_kib": 3415,
+      "native_heap_bytes": 59471072,
+      "decoded_frames": 17669,
+      "cpu_percent_one_core": 6.298301788737825,
+      "episode": 2,
+      "position_ms": 0,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 660127,
+      "pss_kib": 131194,
+      "native_pss_kib": 51074,
+      "java_pss_kib": 7095,
+      "native_heap_bytes": 59556400,
+      "decoded_frames": 19463,
+      "cpu_percent_one_core": 7.3449255977261325,
+      "episode": 0,
+      "position_ms": 29748,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 720186,
+      "pss_kib": 131693,
+      "native_pss_kib": 50742,
+      "java_pss_kib": 7811,
+      "native_heap_bytes": 59630816,
+      "decoded_frames": 21263,
+      "cpu_percent_one_core": 6.3509629424693745,
+      "episode": 2,
+      "position_ms": 29777,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 780238,
+      "pss_kib": 131405,
+      "native_pss_kib": 51214,
+      "java_pss_kib": 6987,
+      "native_heap_bytes": 59696528,
+      "decoded_frames": 22917,
+      "cpu_percent_one_core": 7.171531852282429,
+      "episode": 1,
+      "position_ms": 24886,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 840036,
+      "pss_kib": 131645,
+      "native_pss_kib": 50902,
+      "java_pss_kib": 7651,
+      "native_heap_bytes": 59799120,
+      "decoded_frames": 24713,
+      "cpu_percent_one_core": 6.734430354600536,
+      "episode": 0,
+      "position_ms": 15029,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 900193,
+      "pss_kib": 129506,
+      "native_pss_kib": 50984,
+      "java_pss_kib": 5374,
+      "native_heap_bytes": 59853600,
+      "decoded_frames": 26498,
+      "cpu_percent_one_core": 6.2985129675266975,
+      "episode": 0,
+      "position_ms": 0,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 960098,
+      "pss_kib": 129122,
+      "native_pss_kib": 51464,
+      "java_pss_kib": 4650,
+      "native_heap_bytes": 59923760,
+      "decoded_frames": 28292,
+      "cpu_percent_one_core": 6.668338767661567,
+      "episode": 1,
+      "position_ms": 29753,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1020154,
+      "pss_kib": 129379,
+      "native_pss_kib": 51128,
+      "java_pss_kib": 5174,
+      "native_heap_bytes": 59980336,
+      "decoded_frames": 30093,
+      "cpu_percent_one_core": 6.847630612213529,
+      "episode": 0,
+      "position_ms": 29800,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1080211,
+      "pss_kib": 131351,
+      "native_pss_kib": 51608,
+      "java_pss_kib": 6554,
+      "native_heap_bytes": 60068096,
+      "decoded_frames": 31747,
+      "cpu_percent_one_core": 6.7424710284447995,
+      "episode": 2,
+      "position_ms": 24913,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1140020,
+      "pss_kib": 131906,
+      "native_pss_kib": 51291,
+      "java_pss_kib": 7546,
+      "native_heap_bytes": 60177360,
+      "decoded_frames": 33541,
+      "cpu_percent_one_core": 6.473986525632749,
+      "episode": 1,
+      "position_ms": 15018,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1200175,
+      "pss_kib": 130009,
+      "native_pss_kib": 51363,
+      "java_pss_kib": 5458,
+      "native_heap_bytes": 60230896,
+      "decoded_frames": 35329,
+      "cpu_percent_one_core": 6.101751739166876,
+      "episode": 1,
+      "position_ms": 0,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1260078,
+      "pss_kib": 129875,
+      "native_pss_kib": 51843,
+      "java_pss_kib": 4950,
+      "native_heap_bytes": 60294192,
+      "decoded_frames": 37123,
+      "cpu_percent_one_core": 6.0419070553019285,
+      "episode": 2,
+      "position_ms": 29740,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1320128,
+      "pss_kib": 130383,
+      "native_pss_kib": 51532,
+      "java_pss_kib": 5506,
+      "native_heap_bytes": 60379216,
+      "decoded_frames": 38924,
+      "cpu_percent_one_core": 5.648718855192978,
+      "episode": 1,
+      "position_ms": 29787,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1380189,
+      "pss_kib": 132183,
+      "native_pss_kib": 51996,
+      "java_pss_kib": 6690,
+      "native_heap_bytes": 60455808,
+      "decoded_frames": 40577,
+      "cpu_percent_one_core": 6.239555329506648,
+      "episode": 0,
+      "position_ms": 24889,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1440241,
+      "pss_kib": 132611,
+      "native_pss_kib": 51680,
+      "java_pss_kib": 7534,
+      "native_heap_bytes": 60560496,
+      "decoded_frames": 42378,
+      "cpu_percent_one_core": 6.368702189395938,
+      "episode": 2,
+      "position_ms": 15018,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1500142,
+      "pss_kib": 130771,
+      "native_pss_kib": 51752,
+      "java_pss_kib": 5490,
+      "native_heap_bytes": 60615376,
+      "decoded_frames": 44158,
+      "cpu_percent_one_core": 5.989999831646998,
+      "episode": 2,
+      "position_ms": 0,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1560042,
+      "pss_kib": 130189,
+      "native_pss_kib": 51832,
+      "java_pss_kib": 4954,
+      "native_heap_bytes": 60676240,
+      "decoded_frames": 45952,
+      "cpu_percent_one_core": 6.065318818040436,
+      "episode": 0,
+      "position_ms": 29756,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1620096,
+      "pss_kib": 131533,
+      "native_pss_kib": 52328,
+      "java_pss_kib": 5662,
+      "native_heap_bytes": 60755072,
+      "decoded_frames": 47754,
+      "cpu_percent_one_core": 5.9898555179834,
+      "episode": 2,
+      "position_ms": 29801,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1680158,
+      "pss_kib": 132429,
+      "native_pss_kib": 51988,
+      "java_pss_kib": 6882,
+      "native_heap_bytes": 60832032,
+      "decoded_frames": 49407,
+      "cpu_percent_one_core": 6.797421229456098,
+      "episode": 1,
+      "position_ms": 24922,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1740226,
+      "pss_kib": 133157,
+      "native_pss_kib": 52124,
+      "java_pss_kib": 7606,
+      "native_heap_bytes": 60925056,
+      "decoded_frames": 51208,
+      "cpu_percent_one_core": 7.3274867297484425,
+      "episode": 0,
+      "position_ms": 15018,
+      "playing": true
+    },
+    {
+      "elapsed_ms": 1800132,
+      "pss_kib": 134112,
+      "native_pss_kib": 52600,
+      "java_pss_kib": 7966,
+      "native_heap_bytes": 60978544,
+      "decoded_frames": 52988,
+      "cpu_percent_one_core": 6.903529332411514,
+      "episode": 2,
+      "position_ms": 14272,
+      "playing": true
+    }
+  ],
+  "events": [
+    {
+      "action": "pause-resume",
+      "elapsed_ms": 120219,
+      "pause_cpu_percent_one_core": 0.94
+    },
+    {
+      "action": "seek-15s",
+      "elapsed_ms": 240083
+    },
+    {
+      "action": "next-episode",
+      "elapsed_ms": 300241
+    },
+    {
+      "action": "pause-resume",
+      "elapsed_ms": 420204,
+      "pause_cpu_percent_one_core": 0.619876024795041
+    },
+    {
+      "action": "seek-15s",
+      "elapsed_ms": 540062
+    },
+    {
+      "action": "next-episode",
+      "elapsed_ms": 600217
+    },
+    {
+      "action": "pause-resume",
+      "elapsed_ms": 720186,
+      "pause_cpu_percent_one_core": 0.62
+    },
+    {
+      "action": "seek-15s",
+      "elapsed_ms": 840036
+    },
+    {
+      "action": "next-episode",
+      "elapsed_ms": 900193
+    },
+    {
+      "action": "pause-resume",
+      "elapsed_ms": 1020154,
+      "pause_cpu_percent_one_core": 0.66
+    },
+    {
+      "action": "seek-15s",
+      "elapsed_ms": 1140020
+    },
+    {
+      "action": "next-episode",
+      "elapsed_ms": 1200175
+    },
+    {
+      "action": "pause-resume",
+      "elapsed_ms": 1320128,
+      "pause_cpu_percent_one_core": 0.5798840231953609
+    },
+    {
+      "action": "seek-15s",
+      "elapsed_ms": 1440241
+    },
+    {
+      "action": "next-episode",
+      "elapsed_ms": 1500142
+    },
+    {
+      "action": "pause-resume",
+      "elapsed_ms": 1620096,
+      "pause_cpu_percent_one_core": 0.5998800239952009
+    },
+    {
+      "action": "seek-15s",
+      "elapsed_ms": 1740226
+    }
+  ],
+  "elapsed_ms": 1800132,
+  "pss_growth_after_warmup_kib": 2334,
+  "peak_pss_kib": 134112,
+  "decoded_frames": 52988
+}
