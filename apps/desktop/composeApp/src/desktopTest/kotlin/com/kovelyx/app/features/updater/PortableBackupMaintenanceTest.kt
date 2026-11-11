@@ -39,6 +39,28 @@ class PortableBackupMaintenanceTest {
         } finally { home.deleteRecursively() }
     }
 
+    @Test fun linkedRuntimeCannotDeleteExternalFiles() {
+        val home = Files.createTempDirectory("kovelyx-portable-link").toFile()
+        try {
+            val install = File(home,"Kovelyx").apply { mkdirs() }
+            File(install,"Kovelyx.portable").writeText("")
+            File(install,"Kovelyx.exe").writeText("current")
+            val dir = File(home,".kovelyx-previous-" + "b".repeat(32)).apply { mkdirs() }
+            File(dir,"app").mkdirs()
+            File(dir,"app/Kovelyx.cfg").writeText("app.mainclass=com.kovelyx.app.MainKt")
+            File(dir,"Kovelyx.portable").writeText("")
+            File(dir,".kovelyx-update-owner").writeText(install.canonicalPath)
+            val outside = File(home,"personal").apply { mkdirs() }
+            val binary = File(outside,"user.dll").apply { writeText("personal binary") }
+            // Windows runners may deny creating symlinks; the cleanup is still
+            // exercised by the other filesystem tests on that platform.
+            if (runCatching { Files.createSymbolicLink(File(dir,"runtime").toPath(),outside.toPath()) }.isSuccess) {
+                assertEquals(0L, PortableBackupMaintenance.clean(install))
+                assertEquals("personal binary", binary.readText())
+            }
+        } finally { home.deleteRecursively() }
+    }
+
     @Test fun unconfirmedLegacyAndOtherInstallationsKeepRollback() {
         val home = Files.createTempDirectory("kovelyx-rollback").toFile()
         try {

@@ -45,18 +45,14 @@ actual object AppUpdaterPlatform {
         withContext(Dispatchers.IO) {
             updateFilesMutex.withLock {
                 runCatching {
-                    UpdateCacheMaintenance.clean(updatesDir(), isAlreadyInstalled = { file ->
-                        val version = Regex("-v([0-9]+\\.[0-9]+\\.[0-9]+(?:-(?:alpha|beta|rc)(?:\\.[0-9]+)?)?)(?:-|\\.)")
-                            .find(file.name)?.groupValues?.get(1)
-                        if (VersionUtils.parse(version) != null && VersionUtils.parse(currentVersionName) != null)
-                            !VersionUtils.isRemoteNewer(version, currentVersionName) else null
-                    })
+                    DesktopUpdateCacheMaintenance.clean(updatesDir(), currentVersionName)
                 }
             }
         }
         if (!isPortableWindows) return
         delay(30_000)
-        val launcher = System.getProperty("jpackage.app-path") ?: return
+        val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
+            ?: ProcessHandle.current().info().command().orElse(null) ?: return
         val install = File(launcher).parentFile ?: return
         repeat(2) { pass ->
             if (pass > 0) delay(300_000)
