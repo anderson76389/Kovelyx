@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Separate UI CPU time from render/presentation waits in Android framestats.
+"""Separate UI-phase elapsed time from render/presentation waits in Android framestats.
 
 Uses named timestamps, ignores unsupported GPU histogram buckets and rejects
 incomplete/sentinel rows. This does not identify an individual Compose node.
