@@ -1,6 +1,9 @@
 package com.kovelyx.app.features.updater
 
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.Locale
 
 /** Only the updater's private directory; never an app-data or media tree. */
@@ -13,13 +16,17 @@ internal object UpdateCacheMaintenance {
         isAlreadyInstalled: (File) -> Boolean?,
         nowMs: Long = System.currentTimeMillis(),
     ): Long {
+        // Windows canonicalFile does not reliably resolve symbolic links/junctions.
+        fun linked(file: File): Boolean = Files.isSymbolicLink(file.toPath()) ||
+            Files.readAttributes(file.toPath(), BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS).isOther
         if (directory.name != "updates" || !directory.isDirectory) return 0L
+        if (runCatching { linked(directory) }.getOrDefault(true)) return 0L
         val root = runCatching { directory.canonicalFile }.getOrNull() ?: return 0L
         if (root.name != "updates" || root.parentFile != directory.parentFile?.canonicalFile) return 0L
         var deletedBytes = 0L
         for (file in directory.listFiles().orEmpty()) {
             runCatching {
-                if (!file.isFile || file.canonicalFile != File(root, file.name)) return@runCatching
+                if (!file.isFile || linked(file) || file.canonicalFile != File(root, file.name)) return@runCatching
                 val name = file.name.lowercase(Locale.ROOT)
                 val owned = name.startsWith("kovelyx-") || name.startsWith("nuvio-") || name.startsWith("nuvio_")
                 if (!owned) return@runCatching

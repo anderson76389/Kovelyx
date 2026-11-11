@@ -48,6 +48,20 @@ class UpdateCacheMaintenanceTest {
         } finally { home.deleteRecursively() }
     }
 
+    @Test fun linkedUpdateRootCannotCleanAnotherDirectory() {
+        val home = Files.createTempDirectory("kovelyx-storage-root-link").toFile()
+        try {
+            val external = File(home,"personal/updates").apply { mkdirs() }
+            val archive = File(external,"Kovelyx-personal.apk").apply { writeText("personal") }
+            val parent = File(home,"app-cache").apply { mkdirs() }
+            val link = File(parent,"updates")
+            if (runCatching { Files.createSymbolicLink(link.toPath(),external.toPath()) }.isSuccess) {
+                assertEquals(0L, UpdateCacheMaintenance.clean(link, { true }))
+                assertEquals("personal", archive.readText())
+            }
+        } finally { home.deleteRecursively() }
+    }
+
     @Test fun directoriesOtherProductsAndSymbolicLinksArePreserved() {
         val home = Files.createTempDirectory("kovelyx-storage-links").toFile()
         try {
