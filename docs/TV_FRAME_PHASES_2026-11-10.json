@@ -1,0 +1,167 @@
+{
+  "source_workflow": 42837729850,
+  "renderer": "SwiftShader software GPU, confirmed in workflow log",
+  "limitations": [
+    "Guest navigation only",
+    "Not physical-TV GPU measurements",
+    "after_swap includes synchronization/presentation; it is not pure GPU execution time"
+  ],
+  "samples": {
+    "0-baseline": {
+      "valid_frames": 72,
+      "rejected_frames": 0,
+      "phases": {
+        "total": {
+          "p50_ms": 34.432,
+          "p95_ms": 66.817
+        },
+        "ui": {
+          "p50_ms": 2.738,
+          "p95_ms": 4.321
+        },
+        "render_queue": {
+          "p50_ms": 0.685,
+          "p95_ms": 16.187
+        },
+        "draw_submission": {
+          "p50_ms": 2.227,
+          "p95_ms": 12.63
+        },
+        "after_swap": {
+          "p50_ms": 22.813,
+          "p95_ms": 39.08
+        }
+      }
+    },
+    "1-candidate": {
+      "valid_frames": 72,
+      "rejected_frames": 0,
+      "phases": {
+        "total": {
+          "p50_ms": 35.082,
+          "p95_ms": 80.018
+        },
+        "ui": {
+          "p50_ms": 2.552,
+          "p95_ms": 4.139
+        },
+        "render_queue": {
+          "p50_ms": 1.979,
+          "p95_ms": 20.91
+        },
+        "draw_submission": {
+          "p50_ms": 2.345,
+          "p95_ms": 9.756
+        },
+        "after_swap": {
+          "p50_ms": 21.06,
+          "p95_ms": 36.422
+        }
+      }
+    },
+    "2-candidate": {
+      "valid_frames": 71,
+      "rejected_frames": 1,
+      "phases": {
+        "total": {
+          "p50_ms": 34.958,
+          "p95_ms": 83.533
+        },
+        "ui": {
+          "p50_ms": 2.679,
+          "p95_ms": 6.126
+        },
+        "render_queue": {
+          "p50_ms": 1.21,
+          "p95_ms": 17.491
+        },
+        "draw_submission": {
+          "p50_ms": 2.131,
+          "p95_ms": 6.457
+        },
+        "after_swap": {
+          "p50_ms": 21.833,
+          "p95_ms": 36.602
+        }
+      }
+    },
+    "3-baseline": {
+      "valid_frames": 68,
+      "rejected_frames": 3,
+      "phases": {
+        "total": {
+          "p50_ms": 35.504,
+          "p95_ms": 66.803
+        },
+        "ui": {
+          "p50_ms": 2.715,
+          "p95_ms": 3.765
+        },
+        "render_queue": {
+          "p50_ms": 0.87,
+          "p95_ms": 16.232
+        },
+        "draw_submission": {
+          "p50_ms": 1.69,
+          "p95_ms": 8.71
+        },
+        "after_swap": {
+          "p50_ms": 26.174,
+          "p95_ms": 37.183
+        }
+      }
+    },
+    "4-baseline": {
+      "valid_frames": 70,
+      "rejected_frames": 2,
+      "phases": {
+        "total": {
+          "p50_ms": 34.806,
+          "p95_ms": 52.561
+        },
+        "ui": {
+          "p50_ms": 2.596,
+          "p95_ms": 6.256
+        },
+        "render_queue": {
+          "p50_ms": 1.471,
+          "p95_ms": 17.275
+        },
+        "draw_submission": {
+          "p50_ms": 1.649,
+          "p95_ms": 9.849
+        },
+        "after_swap": {
+          "p50_ms": 22.084,
+          "p95_ms": 36.057
+        }
+      }
+    },
+    "5-candidate": {
+      "valid_frames": 72,
+      "rejected_frames": 0,
+      "phases": {
+        "total": {
+          "p50_ms": 35.299,
+          "p95_ms": 86.363
+        },
+        "ui": {
+          "p50_ms": 2.587,
+          "p95_ms": 5.447
+        },
+        "render_queue": {
+          "p50_ms": 0.711,
+          "p95_ms": 15.842
+        },
+        "draw_submission": {
+          "p50_ms": 1.929,
+          "p95_ms": 9.784
+        },
+        "after_swap": {
+          "p50_ms": 21.131,
+          "p95_ms": 36.777
+        }
+      }
+    }
+  }
+}
