@@ -10,6 +10,7 @@ on:
       - 'scripts/generate-windows-icon.py'
       - 'scripts/generate-compose-brand.py'
       - 'scripts/publish-verified-preview.py'
+      - 'scripts/package-linux-release.sh'
       - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/linux.yml'
   pull_request:
@@ -19,6 +20,7 @@ on:
       - 'vendor/engine/**'
       - 'scripts/desktop-release-version.py'
       - 'scripts/publish-verified-preview.py'
+      - 'scripts/package-linux-release.sh'
       - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/linux.yml'
   workflow_dispatch:
