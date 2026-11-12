@@ -22,7 +22,7 @@ jobs:
             const {owner,repo}=context.repo;
             const runs=await github.paginate(github.rest.actions.listWorkflowRuns,{
               owner,repo,workflow_id:'cloudflare-backup.yml',per_page:100
-            },response=>response.data);
+            },response=>response.data.workflow_runs);
             const real=runs.filter(x=>x.event!=='pull_request' && x.status==='completed')
               .sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
             if(!real.length)core.setFailed('Aucune sauvegarde de production exécutée.');
@@ -37,7 +37,7 @@ jobs:
                 if(age>48)core.setFailed('Dernière sauvegarde D1 réussie trop ancienne : '+Math.floor(age)+' h.');
                 const artifacts=await github.paginate(github.rest.actions.listWorkflowRunArtifacts,{
                   owner,repo,run_id:good.id,per_page:100
-                },response=>response.data);
+                },response=>response.data.artifacts);
                 const valid=artifacts.some(a=>!a.expired&&
                   a.name.startsWith('kovelyx-d1-encrypted-backup-')&&a.size_in_bytes>1024);
                 if(!valid)core.setFailed('Dernier artifact D1 chiffré manquant, vide ou expiré.');
