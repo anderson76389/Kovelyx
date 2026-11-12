@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/full-repository-independence-audit.yml'
+      - 'services/kovelyx-cloudflare/tests/portable-d1-migration-e2e.mjs'
       - 'scripts/tests/scan_all_independence.py'
       - 'scripts/tests/test_scan_all_independence.py'
   pull_request:
