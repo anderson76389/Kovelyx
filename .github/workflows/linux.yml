@@ -37,7 +37,7 @@ concurrency:
 jobs:
   linux:
     name: Linux x86-64 - compiler et verifier les trois paquets
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash apps/desktop/scripts/linux/install-desktop-build-dependencies.sh rpm rpm2cpio cpio fakeroot libfuse2 file desktop-file-utils
+          bash apps/desktop/scripts/linux/install-desktop-build-dependencies.sh rpm rpm2cpio cpio fakeroot libfuse2t64 file desktop-file-utils libunwind-dev
           bash apps/desktop/scripts/linux/test-linux-deb-tools.sh
           bash scripts/tests/test-linux-shortcut.sh
       - name: Recuperer AppImageTool x86-64
