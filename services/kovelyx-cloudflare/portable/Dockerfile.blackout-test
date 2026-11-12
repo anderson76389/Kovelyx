@@ -1,0 +1,9 @@
+FROM node:22-bookworm-slim
+# Used only to test portable recovery in an isolated network namespace.
+# Dependencies are installed when the image is built; the actual tests run
+# with Docker --network none and with a non-root, unprivileged user.
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y python3 ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+ENV WRANGLER_SEND_METRICS=false
+WORKDIR /workspace/services/kovelyx-cloudflare
