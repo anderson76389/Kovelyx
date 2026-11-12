@@ -46,7 +46,7 @@ test("portable Better Auth and profile sync survive restart",{timeout:90000},asy
   }
   async function call(path,method="GET",body=null,token=null){
     const headers={accept:"application/json"};
-    if(body)headers["content-type"]="application/json";
+    if(body){headers["content-type"]="application/json";headers.origin=base;}
     if(token)headers.authorization="Bearer "+token;
     const r=await fetch(base+path,{method,headers,
       body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(8000)});
