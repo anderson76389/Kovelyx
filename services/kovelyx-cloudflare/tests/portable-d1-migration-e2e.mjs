@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {test} from "node:test";
 import {spawn,spawnSync} from "node:child_process";
 import {createServer} from "node:net";
-import {mkdtempSync,readFileSync,writeFileSync,rmSync,existsSync} from "node:fs";
+import {mkdtempSync,readFileSync,writeFileSync,rmSync,existsSync,cpSync,symlinkSync,mkdirSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join,resolve} from "node:path";
 import {randomUUID,createHash} from "node:crypto";
@@ -28,8 +28,8 @@ async function freePort() {
   await new Promise(ok=>s.close(ok));
   return port;
 }
-function command(program,args,timeout=45000) {
-  const r=spawnSync(program,args,{cwd:root,encoding:"utf8",timeout,
+function command(program,args,timeout=45000,cwd=root) {
+  const r=spawnSync(program,args,{cwd,encoding:"utf8",timeout,
     env:{...process.env,WRANGLER_SEND_METRICS:"false"}});
   if(r.status!==0)throw Error(program+" "+args.slice(0,3).join(" ")+
     " failed (status "+r.status+"): "+(r.stderr||r.stdout).slice(-1800));
@@ -73,9 +73,15 @@ test("genuine local D1 SQL -> SQLite accounts, PINs, catalogue, media and librar
 },async()=>{
   const folder=mkdtempSync(join(tmpdir(),"kv-offline-proof-"));
   const id=randomUUID().replaceAll("-","");
-  const config="wrangler.audit.blackout."+id+".toml";
-  const configFile=join(root,config);
-  const persistence=join(folder,"d1"),sql=join(folder,"export.sql"),db=join(folder,"restored.sqlite");
+  const workspace=join(folder,"local-d1-worker");
+  mkdirSync(workspace,{recursive:true});
+  cpSync(join(root,"src"),join(workspace,"src"),{recursive:true});
+  cpSync(join(root,"migrations"),join(workspace,"migrations"),{recursive:true});
+  cpSync(join(root,"package.json"),join(workspace,"package.json"));
+  symlinkSync(join(root,"node_modules"),join(workspace,"node_modules"),"dir");
+  const config="wrangler.toml";
+  const configFile=join(workspace,config);
+  const sql=join(folder,"export.sql"),db=join(folder,"restored.sqlite");
   const secretPath=join(folder,"secret.txt");
   const secret="test-only-same-secret-"+randomUUID()+"-keep-out-of-production";
   writeFileSync(secretPath,secret,{mode:0o600});
@@ -89,13 +95,13 @@ test("genuine local D1 SQL -> SQLite accounts, PINs, catalogue, media and librar
   let worker,server,logs="";
   try{
     command("npx",["--no-install","wrangler","d1","migrations","apply","DB",
-      "--local","--persist-to",persistence,"--config",config],90000);
+      "--local","--config",config],90000,workspace);
     worker=spawn("npx",["--no-install","wrangler","dev","--local",
-      "--config",config,"--persist-to",persistence,
+      "--config",config,
       "--ip","127.0.0.1","--port",String(d1Port),
       "--var","BETTER_AUTH_SECRET:"+secret,
       "--var","KOVELYX_REGISTRATION_OPEN:true"],{
-      cwd:root,detached:true,stdio:["ignore","pipe","pipe"],
+      cwd:workspace,detached:true,stdio:["ignore","pipe","pipe"],
       env:{...process.env,WRANGLER_SEND_METRICS:"false"}
     });
     for(const stream of [worker.stdout,worker.stderr])
@@ -144,7 +150,7 @@ test("genuine local D1 SQL -> SQLite accounts, PINs, catalogue, media and librar
     },token)).status,201);
     await shutdown(worker);worker=null;
     command("npx",["--no-install","wrangler","d1","export","DB","--local",
-      "--persist-to",persistence,"--config",config,"--output",sql],90000);
+      "--config",config,"--output",sql],90000,workspace);
     assert.ok(existsSync(sql),"Wrangler must generate genuine D1 export");
     command("python3",["portable/prepare.py","--from-sql",sql,"--output",db]);
     server=spawn(process.execPath,["portable/server.mjs"],{
