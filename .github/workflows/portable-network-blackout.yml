@@ -1,0 +1,68 @@
+name: Prouver la reprise Kovelyx sans aucun réseau extérieur
+
+on:
+  pull_request:
+    paths:
+      - 'services/kovelyx-cloudflare/portable/**'
+      - 'services/kovelyx-cloudflare/tests/portable-*.mjs'
+      - '.github/workflows/portable-network-blackout.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/kovelyx-cloudflare/portable/**'
+      - 'services/kovelyx-cloudflare/tests/portable-*.mjs'
+      - '.github/workflows/portable-network-blackout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  blackout-proof:
+    name: Worker local D1 vers serveur autonome, Internet coupé
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/kovelyx-cloudflare/package-lock.json
+      - name: Installer les dépendances verrouillées AVANT coupure réseau
+        working-directory: services/kovelyx-cloudflare
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Construire l'image de test (hors phase isolée)
+        run: docker build --pull -f services/kovelyx-cloudflare/portable/Dockerfile.blackout-test -t kovelyx-blackout-test .
+      - name: Vérifier la migration d'une vraie base D1 sans connexion à Internet
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --network none \
+            --cap-drop ALL \
+            --security-opt no-new-privileges \
+            --pids-limit 512 \
+            --memory 3g \
+            --user "$(id -u):$(id -g)" \
+            --env HOME=/tmp \
+            --env npm_config_cache=/tmp/.npm \
+            --env WRANGLER_SEND_METRICS=false \
+            --tmpfs /tmp:rw,mode=1777,size=1g \
+            --mount "type=bind,src=$GITHUB_WORKSPACE,dst=/workspace" \
+            --workdir /workspace/services/kovelyx-cloudflare \
+            kovelyx-blackout-test sh -euc '
+              node -e "const i=require(\"node:os\").networkInterfaces(); if(Object.keys(i).some(x=>x!==\"lo\")) process.exit(2); console.log(\"PASS: only loopback network interface\")"
+              node --test tests/portable-sqlite.test.mjs
+              node --test tests/portable-server-e2e.mjs
+              node --test tests/portable-d1-migration-e2e.mjs
+            '
+      - name: Rédiger le résultat sans données privées
+        run: |
+          {
+            echo '### Indépendance du backend — scénario de coupure réelle'
+            echo '- Réseau du conteneur désactivé (--network none) : ni DNS externe, ni accès Nuvio, Cloudflare ou GitHub.'
+            echo '- Wrangler + D1 locaux, export SQL D1, import SQLite, serveur autonome et routes Better Auth vérifiés sur des données jetables.'
+            echo '- Conservation vérifiée : ancien Bearer, mot de passe, profils, PIN, bibliothèque, progression, vue, médias et catalogues.'
+            echo '- Cette démonstration ne prouve pas les binaires distribués ni la reprise de comptes réels sur les trois appareils.'
+          } >> "$GITHUB_STEP_SUMMARY"
