@@ -118,6 +118,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          chmod +x apps/desktop/scripts/linux/*.sh
           bash -n apps/desktop/scripts/linux/build-appimage.sh
           bash -n apps/desktop/scripts/linux/patch-linux-deb.sh
           bash -n apps/desktop/scripts/linux/patch-linux-rpm.sh
