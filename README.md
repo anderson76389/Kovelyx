@@ -1,6 +1,6 @@
 <div align="center">
 
-[**Télécharger la dernière version — Windows · Android · Android TV**](https://github.com/anderson76389/Kovelyx/releases/latest)
+[**Télécharger la dernière version — Windows · Linux · Android · Android TV**](https://github.com/anderson76389/Kovelyx/releases/latest)
 
 Les profils TV reçoivent les noms, photos et fonds du compte ; leur modification se fait sur Android mobile ou PC.
 
@@ -10,7 +10,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 
 ### Votre univers multimédia. Vos écrans. Vos choix.
 
-**Kovelyx** réunit découverte, bibliothèque, lecture et personnalisation dans trois applications conçues pour **Windows, Android et Android TV**.
+**Kovelyx** réunit découverte, bibliothèque, lecture et personnalisation dans quatre déclinaisons conçues pour **Windows, Linux, Android et Android TV**.
 
 [![Site officiel](https://img.shields.io/badge/SITE_OFFICIEL-DÉCOUVRIR-8656F4?style=for-the-badge&logo=googlechrome&logoColor=white)](https://anderson76389.github.io/Kovelyx/)
 [![Téléchargements](https://img.shields.io/badge/RELEASES-TÉLÉCHARGER-B784FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/anderson76389/Kovelyx/releases)
@@ -23,7 +23,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 
 ---
 
-## ✦ Trois expériences. Un seul univers.
+## ✦ Quatre plateformes. Un seul univers.
 
 <div align="center">
 
@@ -63,6 +63,14 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 </div>
 
 <div align="center">
+
+### 🐧 Linux — même application Desktop que Windows
+
+La version Linux utilise le **même code Compose Desktop et le même moteur multimédia** que Windows. Les nouvelles Releases vérifiées proposent **AppImage x86‑64** (distribution portable), **DEB amd64** (Debian/Ubuntu compatibles) et **RPM x86‑64** (Fedora et distributions compatibles). Pour chaque publication, les trois paquets Linux et leurs empreintes SHA‑256 proviennent **du même commit** que Windows, Android et TV ; l’absence d’un paquet Linux validé empêche la publication complète.
+
+**[Télécharger Kovelyx Linux dans les Releases](https://github.com/anderson76389/Kovelyx/releases/latest)** · [Guide Linux et limites](./apps/desktop/README.md#linux)
+
+*Compatibilité vérifiée sur Linux x86‑64 seulement : ARM64, systèmes 32 bits et autres architectures ne sont pas encore certifiés. Un lancement automatisé sous Xvfb ne remplace pas un essai sur votre distribution.*
 
 **[🌐 Accéder au site des applications](https://anderson76389.github.io/Kovelyx/) · [📦 Voir toutes les Releases](https://github.com/anderson76389/Kovelyx/releases)**
 
@@ -114,7 +122,7 @@ Le projet rassemble les sources de ses trois applications, l'infrastructure de c
 
 | Répertoire | Contenu |
 |:---|:---|
-| [apps/desktop](./apps/desktop/) | Application Windows / Compose |
+| [apps/desktop](./apps/desktop/) | Applications Windows et Linux / Compose Desktop |
 | [apps/mobile](./apps/mobile/) | Application Android mobile |
 | [apps/tv](./apps/tv/) | Application Android TV et TV Box |
 | [services/kovelyx-cloudflare](./services/kovelyx-cloudflare/) | Worker de comptes, base D1 et synchronisation |
