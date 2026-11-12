@@ -45,7 +45,7 @@ def collect(root, dest, tag):
         with result.open("rb") as f:
             digest = hashlib.file_digest(f, "sha256").hexdigest()
         result.with_name(public_name + ".sha256").write_text(
-            f"{digest}  {public_name}\\n", encoding="utf-8")
+            f"{digest}  {public_name}\n", encoding="utf-8")
         print(f"PASS: {source} -> {public_name}, sha256={digest}")
     assert len(list(dest.iterdir())) == 6
 
