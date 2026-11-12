@@ -5,7 +5,15 @@ on:
     branches: [main]
     paths:
       - 'apps/desktop/**'
+      - 'apps/mobile/**'
+      - 'apps/tv/**'
       - 'vendor/engine/**'
+      - 'scripts/media3/**'
+      - 'scripts/player/**'
+      - '.github/workflows/build.yml'
+      - '.github/workflows/windows.yml'
+      - '.github/workflows/publish-signed-android.yml'
+      - 'scripts/publish-unified-preview.sh'
       - 'scripts/desktop-release-version.py'
       - '.github/workflows/linux.yml'
       - 'scripts/publish-verified-preview.py'
