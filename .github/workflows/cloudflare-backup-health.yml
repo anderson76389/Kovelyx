@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: '15 6 * * *'
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cloudflare-backup-health.yml'
   workflow_run:
     workflows:
       - "Sauvegarder les comptes et médias D1 (copie chiffrée vérifiée)"
