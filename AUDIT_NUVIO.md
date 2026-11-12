@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4645
+Fichiers inspectés : 4657
 
 ## Inventaire des références à traiter
 
@@ -58,7 +58,7 @@ Fichiers inspectés : 4645
 - apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/DesktopCollectionImportBridge.kt:236 : /** Per-user URL registration, no administrator privileges, never claims nuvio:// or stremio://. */
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:384 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:387 : value.startsWith("nuvio://", ignoreCase = true) //
 - apps/desktop/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 

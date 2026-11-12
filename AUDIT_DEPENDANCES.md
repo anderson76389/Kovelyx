@@ -4,7 +4,7 @@ Rapport **indicatif** ; il ne certifie ni la compilation ni l'indépendance. Cer
 
 ## TV
 
-Fichiers texte examinés : **1394** ; références statiques à Nuvio/NuvioMedia : **17**.
+Fichiers texte examinés : **1396** ; références statiques à Nuvio/NuvioMedia : **17**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -61,7 +61,7 @@ Fichiers texte examinés : **1394** ; références statiques à Nuvio/NuvioMedia
 
 ## Android
 
-Fichiers texte examinés : **1449** ; références statiques à Nuvio/NuvioMedia : **23**.
+Fichiers texte examinés : **1451** ; références statiques à Nuvio/NuvioMedia : **23**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -124,7 +124,7 @@ Fichiers texte examinés : **1449** ; références statiques à Nuvio/NuvioMedia
 
 ## Windows
 
-Fichiers texte examinés : **1835** ; références statiques à Nuvio/NuvioMedia : **22**.
+Fichiers texte examinés : **1843** ; références statiques à Nuvio/NuvioMedia : **22**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
@@ -162,7 +162,7 @@ Fichiers texte examinés : **1835** ; références statiques à Nuvio/NuvioMedia
 ### Références à vérifier en priorité
 
 - `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/DesktopCollectionImportBridge.kt:236`
-- `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:384`
+- `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:387`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:25`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:33`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:49`
