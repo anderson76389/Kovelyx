@@ -224,7 +224,7 @@ export default {
     };
     const url = new URL(request.url);
     if (url.pathname === "/health")
-      return respond(jsonResponse({service:"Kovelyx Cloud",provider:"Cloudflare D1",status:"ok",version:"0.1.0"}));
+      return respond(jsonResponse({service:"Kovelyx Cloud",provider:env.KOVELYX_PROVIDER || "Cloudflare D1",status:"ok",version:"0.1.0"}));
     if (url.pathname === "/ready" && request.method === "GET")
       return respond(await productionReadiness(env));
     if (!env.DB) return respond(jsonResponse({error:"D1 non configuré"},503));
