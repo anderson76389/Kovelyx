@@ -18,6 +18,8 @@ on:
       - 'scripts/generate-compose-brand.py'
       - 'scripts/desktop-release-version.py'
       - 'scripts/publish-verified-preview.py'
+      - 'scripts/package-linux-release.sh'
+      - '.github/workflows/linux.yml'
       - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/windows.yml'
   pull_request:
