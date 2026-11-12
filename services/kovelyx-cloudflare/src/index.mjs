@@ -24,7 +24,7 @@ function makeAuth(request, env) {
   if (!env.BETTER_AUTH_SECRET || env.BETTER_AUTH_SECRET.length < 32)
     throw new Error("BETTER_AUTH_SECRET missing or too short");
   return betterAuth({
-    database: env.DB,
+    database: env.AUTH_DB ?? env.DB,
     baseURL: new URL(request.url).origin,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins: ["https://anderson76389.github.io", new URL(request.url).origin],
@@ -199,7 +199,7 @@ async function productionReadiness(env) {
     const pins=await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='kv_profile_pins'").first();
     if(!pins)return unavailable();
     return jsonResponse({
-      service:"Kovelyx Cloud",provider:"Cloudflare D1",
+      service:"Kovelyx Cloud",provider:env.KOVELYX_PROVIDER || "Cloudflare D1",
       status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES,catalogueSnapshotSchema:1,profilePinSchema:1
     });
   } catch {
