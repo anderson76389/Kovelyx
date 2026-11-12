@@ -429,7 +429,7 @@ jobs:
     needs: [tv, mobile]
     if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 120
     permissions:
       contents: write
       actions: read
