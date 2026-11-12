@@ -11,6 +11,7 @@ import time
 
 REPOSITORY = "anderson76389/Kovelyx"
 WINDOWS = "Kovelyx Windows - MSI et tests de packaging"
+LINUX = "Compiler Kovelyx Linux - DEB RPM et AppImage x86-64"
 FUNCTIONAL = "Tester les fonctions Kotlin Android TV et Android mobile"
 FRENCH = "Vérifier le français et les logos Windows Android et TV"
 ANDROID_JOB_NAMES = (
@@ -200,20 +201,21 @@ def main():
     jobs = api(f"actions/runs/{build_id}/jobs?per_page=100")["jobs"]
     if not android_jobs_succeeded(jobs):
         raise RuntimeError("Les deux builds Android doivent être validés sur le même commit")
-    deadline = time.monotonic() + 1800
+    deadline = time.monotonic() + 7200
     while True:
         runs = api(f"actions/runs?head_sha={sha}&per_page=100")["workflow_runs"]
-        proofs = [matching_run(runs, name, sha) for name in (WINDOWS, FUNCTIONAL, FRENCH)]
+        proofs = [matching_run(runs, name, sha) for name in (WINDOWS, FUNCTIONAL, FRENCH, LINUX)]
         failed = [r for r in proofs if r and r["status"] == "completed" and r["conclusion"] != "success"]
         if failed:
             raise RuntimeError("Publication bloquée : un contrôle du même commit a échoué")
         if all(r and r["status"] == "completed" and r["conclusion"] == "success" for r in proofs):
             break
         if time.monotonic() >= deadline:
-            raise RuntimeError("Publication bloquée : contrôles Windows et Android non terminés")
+            raise RuntimeError("Publication bloquée : contrôles Windows, Android et Linux non terminés")
         print("Attente des tests et du packaging du même commit…", flush=True)
         time.sleep(30)
     windows_id = proofs[0]["id"]
+    linux_id = proofs[3]["id"]
     version = subprocess.check_output(
         ["python3", "scripts/desktop-release-version.py", "--commit", sha], text=True
     ).strip()
@@ -225,6 +227,7 @@ def main():
             (build_id, "kovelyx-mobile-debug", "mobile"),
             (build_id, "kovelyx-tv-debug", "tv"),
             (windows_id, "Kovelyx-Windows-installers-experimental", "windows"),
+            (linux_id, "kovelyx-linux-official", "linux"),
         ):
             gh("run", "download", str(run), "--repo", REPOSITORY, "--name", artifact,
                "--dir", str(root / destination))
@@ -252,11 +255,27 @@ def main():
         verify_previous_public_signatures(root, tools, tag, certificates)
         for source_name, public_name in windows_package_names(sha, tag):
             shutil.copyfile(unique_file(root / "windows", source_name), output / public_name)
+        linux_names = (
+            f"Kovelyx-Linux-amd64-{tag}.deb",
+            f"Kovelyx-Linux-x86_64-{tag}.rpm",
+            f"Kovelyx-Linux-x86_64-{tag}.AppImage",
+        )
+        for name in linux_names:
+            binary = unique_file(root / "linux", name)
+            checksum = root / "linux" / (name + ".sha256")
+            if not checksum.is_file():
+                raise RuntimeError("Empreinte Linux manquante : " + name)
+            expected = checksum.read_text(encoding="utf-8").strip().split()
+            if len(expected) != 2 or expected[1] != name or expected[0] != digest(binary):
+                raise RuntimeError("Empreinte Linux incohérente : " + name)
+            shutil.copyfile(binary, output / name)
         for path in list(output.iterdir()):
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
         notes = root / "notes.md"
         notes.write_text(
-            "Kovelyx pour Windows, Android et Android TV.\n\n"
+            "Kovelyx pour Windows, Linux x86-64, Android et Android TV.\n\n"
+            "- Linux : AppImage, DEB (Debian/Ubuntu) et RPM (Fedora et compatibles), construits sur le même commit que Windows et les APK ; architectures ARM64 non encore certifiées.\n"
+            "- Les paquets Linux sont vérifiés par SHA-256, leurs métadonnées et leur démarrage sous Xvfb sur CI ; tester sur distributions physiques avant de déclarer la compatibilité complète.\n"
             "- Profils TV en consultation : noms, photos et fonds reçus du cloud. Modification sur Android mobile ou PC.\n"
             "- Politique de confidentialité, En savoir plus et Discord retirés de l’interface.\n"
             "- Connexions Trakt et MDBList : accès direct à la configuration si les clés manquent.\n"
@@ -277,7 +296,7 @@ def main():
         ensure_tag(tag, sha)
         if find_release(tag) is None:
             gh("release", "create", tag, "--repo", REPOSITORY, "--target", sha, "--draft",
-               *( ["--prerelease"] if preview else [] ), "--title", f"Kovelyx {version} — Windows, Android et TV",
+               *( ["--prerelease"] if preview else [] ), "--title", f"Kovelyx {version} — Windows, Linux, Android et TV",
                "--notes-file", str(notes))
         ref = api(f"git/ref/tags/{tag}")["object"]
         if ref["type"] == "tag":
