@@ -30,7 +30,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 <table align="center" width="100%">
   <thead>
     <tr>
-      <th align="center" colspan="3">
+      <th align="center" colspan="4">
         <img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration conceptuelle des applications Kovelyx" width="100%">
         <p><sub>Illustration conceptuelle, non issue d'une application installée.</sub></p>
       </th>
