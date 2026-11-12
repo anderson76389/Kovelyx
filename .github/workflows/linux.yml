@@ -5,6 +5,14 @@ on:
     branches: [main]
     paths:
       - 'apps/desktop/**'
+      - 'apps/mobile/**'
+      - 'apps/tv/**'
+      - 'scripts/media3/**'
+      - 'scripts/player/**'
+      - 'scripts/sign-ci-debug-apk.sh'
+      - 'scripts/publish-unified-preview.sh'
+      - '.github/workflows/build.yml'
+      - '.github/workflows/windows.yml'
       - 'vendor/engine/**'
       - 'scripts/desktop-release-version.py'
       - 'scripts/generate-windows-icon.py'
@@ -17,6 +25,14 @@ on:
     branches: [main]
     paths:
       - 'apps/desktop/**'
+      - 'apps/mobile/**'
+      - 'apps/tv/**'
+      - 'scripts/media3/**'
+      - 'scripts/player/**'
+      - 'scripts/sign-ci-debug-apk.sh'
+      - 'scripts/publish-unified-preview.sh'
+      - '.github/workflows/build.yml'
+      - '.github/workflows/windows.yml'
       - 'vendor/engine/**'
       - 'scripts/desktop-release-version.py'
       - 'scripts/publish-verified-preview.py'
@@ -101,6 +117,12 @@ jobs:
           python3 scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
           python3 scripts/generate-compose-brand.py --project apps/desktop
           test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
+
+      - name: Configurer la même URL de comptes que la version Windows
+        shell: bash
+        env:
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+        run: python3 scripts/configure-cloud-build.py --platform desktop
 
       - name: Préparer appimagetool
         shell: bash
