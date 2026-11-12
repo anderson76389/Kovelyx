@@ -106,6 +106,8 @@ L'infrastructure de comptes Kovelyx repose sur **Cloudflare Workers, D1 et Bette
 
 ---
 
+> **Autonomie du service de comptes :** un [mode de reprise hors Cloudflare avec Node.js et SQLite](./docs/PORTABILITE_BACKEND.md) est disponible pour les reconstructions privées. Son fonctionnement sur de vrais comptes et la bascule des trois applications nécessitent encore une validation de bout en bout.
+
 ## 🛠️ Code, tests et état technique
 
 Le projet rassemble les sources de ses trois applications, l'infrastructure de compte et les outils de compilation dans **un seul dépôt**.

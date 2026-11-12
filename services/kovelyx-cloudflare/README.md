@@ -1,5 +1,8 @@
 # Kovelyx Cloud — comptes et synchronisation Cloudflare
 
+> **Plan de secours autonome :** [backend portable Node.js + SQLite](../../docs/PORTABILITE_BACKEND.md). Il conserve les mêmes routes avec une base locale et peut importer un export D1 vérifié, mais exige de garder le secret Better Auth et de recompiler les clients avec l'URL du serveur de secours. Aucun déploiement ni bascule automatique n'est effectué.
+
+
 **Objectif :** proposer des comptes Kovelyx autonomes sur Cloudflare Workers + D1 + Better Auth, sans aucun serveur de comptes historique. Ce dossier contient un Worker Cloudflare, une base D1, les tables Better Auth et des endpoints de profils et synchronisation.
 
 ## Mise en production réelle (comptes existants préservés)

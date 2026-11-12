@@ -1,0 +1,44 @@
+name: Vérifier la reprise portable hors Cloudflare
+
+on:
+  pull_request:
+    paths:
+      - 'services/kovelyx-cloudflare/**'
+      - '.github/workflows/portable-backend.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'services/kovelyx-cloudflare/**'
+      - '.github/workflows/portable-backend.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable:
+    name: SQLite local, intégrité, authentification et reprise
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/kovelyx-cloudflare/package-lock.json
+      - name: Installer Better Auth sans changer le lockfile
+        working-directory: services/kovelyx-cloudflare
+        run: npm ci --ignore-scripts
+      - name: Vérifier la préparation SQLite et le refus d'écrasement
+        run: python3 -m unittest discover -s services/kovelyx-cloudflare/tests -p 'test_portable_backend.py' -v
+      - name: Vérifier les transactions D1 locales
+        working-directory: services/kovelyx-cloudflare
+        run: node --test tests/portable-sqlite.test.mjs
+      - name: Vérifier Better Auth, les profils, les PIN et la bibliothèque après redémarrage
+        working-directory: services/kovelyx-cloudflare
+        run: node --test tests/portable-server-e2e.mjs
+      - name: Résumé de la portée
+        run: |
+          echo 'Validation sur serveur Node local jetable, avec des comptes de test.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Aucune connexion Cloudflare ou clé réelle ; restauration du compte réel non certifiée.' >> "$GITHUB_STEP_SUMMARY"
