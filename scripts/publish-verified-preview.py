@@ -233,7 +233,7 @@ def main():
     jobs = api(f"actions/runs/{build_id}/jobs?per_page=100")["jobs"]
     if not android_jobs_succeeded(jobs):
         raise RuntimeError("Les deux builds Android doivent être validés sur le même commit")
-    deadline = time.monotonic() + 4500
+    deadline = time.monotonic() + 6000
     while True:
         runs = api(f"actions/runs?head_sha={sha}&per_page=100")["workflow_runs"]
         proofs = [matching_run(runs, name, sha) for name in (WINDOWS, LINUX, FUNCTIONAL, FRENCH)]
