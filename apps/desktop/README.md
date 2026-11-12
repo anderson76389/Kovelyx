@@ -1,10 +1,10 @@
-# Kovelyx pour Windows 10 et 11
+# Kovelyx pour Windows et Linux
 
-**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 est la seule version PC activement maintenue. Les versions Android mobile et Android TV sont maintenues dans ce même dépôt.
+**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Les versions desktop Windows x64 et Linux x86-64 partagent les mêmes sources Compose. Le support Linux est soumis à ses propres tests de packaging et de démarrage. Les versions Android mobile et Android TV sont maintenues dans ce même dépôt.
 
 ## Télécharger et tester
 
-[**Compilations Windows**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [Releases](https://github.com/anderson76389/Kovelyx/releases)
+[**Compilations Windows**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [**Compilations Linux**](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) · [Releases](https://github.com/anderson76389/Kovelyx/releases)
 
 Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-Windows-installers-experimental** :
 
@@ -14,6 +14,28 @@ Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-
 | `Kovelyx-Windows-….msi` | Installateur MSI Windows |
 | `Kovelyx-Windows-Portable-….zip` | Dossier portable à extraire entièrement, avec `Kovelyx.exe`, `app` et `runtime` |
 
+
+### Linux
+
+La version Linux repose sur la **version Windows/Compose Desktop**, pas sur un fork : interface, bibliothèque, profils et logique de lecture sont partagés, avec un pont vidéo Linux compilé sur le système.
+
+Dans les Releases officielles validées, choisir :
+- `Kovelyx-Linux-x86_64-v….AppImage` : Linux de bureau x86-64, rendre exécutable (`chmod +x`) et lancer ; certains systèmes nécessitent FUSE ou l'extraction AppImage
+- `Kovelyx-Linux-amd64-v….deb` : Debian/Ubuntu et distributions compatibles, installation par `sudo apt install ./Kovelyx-Linux-amd64-v….deb`
+- `Kovelyx-Linux-x86_64-v….rpm` : Fedora et distributions compatibles, installation avec `sudo dnf install ./Kovelyx-Linux-x86_64-v….rpm`
+
+Chaque fichier possède un `.sha256`. Les trois formats doivent provenir du **même commit que les APK Android/TV et les installateurs Windows** avant publication automatique. Pas de reconditionnement de binaires issus de Nuvio. Le workflow Linux compile le pont JNI avec les dépendances GTK, WebKit, X11 et libmpv, vérifie les paquets puis teste le démarrage de l'application réelle sous Xvfb.
+
+**Compatibilité réellement visée : Linux x86-64 avec les bibliothèques graphiques requises.** Linux ARM64, Linux 32 bits, systèmes musl/Alpine, Wayland pur sans XWayland et toutes les distributions existantes ne peuvent pas être annoncés comme testés. Un test graphique sur distribution réelle reste indispensable avant qualification stable.
+
+Pour compiler localement sous Linux avec Java 21, Gradle et les dépendances de `scripts/linux/install-desktop-build-dependencies.sh` :
+
+```bash
+cd apps/desktop
+./gradlew :composeApp:packageReleaseDeb :composeApp:packageReleaseRpm :composeApp:packageReleaseAppImage --no-daemon
+```
+
+La tâche AppImage requiert `APPIMAGETOOL` pointant vers un appimagetool exécutable. Les fichiers sont générés dans `composeApp/build/compose/binaries/`.
 
 ### Comptes et synchronisation
 
