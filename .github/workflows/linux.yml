@@ -1,0 +1,110 @@
+name: Compiler Kovelyx Linux - DEB RPM et AppImage x86-64
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - 'vendor/engine/**'
+      - 'scripts/desktop-release-version.py'
+      - '.github/workflows/linux.yml'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/verify_linux_release.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/desktop/**'
+      - '.github/workflows/linux.yml'
+      - 'scripts/publish-verified-preview.py'
+      - 'scripts/tests/verify_linux_release.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kovelyx-linux-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  linux:
+    name: Linux x86-64 - compiler et verifier les trois paquets
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bloquer les serveurs et depots Nuvio
+        shell: bash
+        run: |
+          set -euo pipefail
+          for domain in nuvio.tv api.nuvio.tv www.nuvio.tv auth.nuvio.tv cdn.nuvio.tv nuvioapp.space; do
+            printf '127.0.0.1 %s\n' "$domain" | sudo tee -a /etc/hosts >/dev/null
+          done
+          git config --global url."https://blocked-upstream.invalid/NuvioMedia/".insteadOf "https://github.com/NuvioMedia/"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Installer dependances Linux et outils de packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash apps/desktop/scripts/linux/install-desktop-build-dependencies.sh rpm rpm2cpio cpio fakeroot libfuse2 file desktop-file-utils
+          bash apps/desktop/scripts/linux/test-linux-deb-tools.sh
+          bash scripts/tests/test-linux-shortcut.sh
+      - name: Recuperer AppImageTool x86-64
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(uname -m)" == x86_64 ]]
+          mkdir -p "$RUNNER_TEMP/kovelyx-tools"
+          curl --fail --location --retry 3 --max-time 120 https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -o "$RUNNER_TEMP/kovelyx-tools/appimagetool"
+          test "$(stat -c %s "$RUNNER_TEMP/kovelyx-tools/appimagetool")" -gt 1000000
+          chmod +x "$RUNNER_TEMP/kovelyx-tools/appimagetool"
+          file "$RUNNER_TEMP/kovelyx-tools/appimagetool" | grep -E 'ELF.*x86-64'
+          echo "APPIMAGETOOL=$RUNNER_TEMP/kovelyx-tools/appimagetool" >> "$GITHUB_ENV"
+      - name: Configurer le backend optionnel et la version commune
+        env:
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/configure-cloud-build.py --platform desktop
+          version="$(python3 scripts/desktop-release-version.py)"
+          [[ "$version" =~ ^[0-9]+[.][0-9]+[.][0-9]+(-(alpha|beta|rc))?$ ]]
+          echo "KOVELYX_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Compiler Compose Desktop Linux
+        shell: bash
+        working-directory: apps/desktop
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :composeApp:packageReleaseDeb :composeApp:packageReleaseRpm :composeApp:packageReleaseAppImage --no-daemon --max-workers=2 --stacktrace "-Pnuvio.desktop.versionName=$KOVELYX_BUILD_VERSION" -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Verifier DEB RPM AppImage et empreintes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/kovelyx-linux-release"
+          python3 scripts/tests/verify_linux_release.py --source apps/desktop/composeApp/build/compose/binaries --dest "$RUNNER_TEMP/kovelyx-linux-release" --tag "v$KOVELYX_BUILD_VERSION"
+          dpkg-deb --info "$RUNNER_TEMP/kovelyx-linux-release/Kovelyx-Linux-amd64-v$KOVELYX_BUILD_VERSION.deb"
+          rpm -qpi "$RUNNER_TEMP/kovelyx-linux-release/Kovelyx-Linux-x86_64-v$KOVELYX_BUILD_VERSION.rpm"
+          (cd "$RUNNER_TEMP/kovelyx-linux-release" && sha256sum -c -- *.sha256)
+      - name: Tester demarrage de la vraie application Linux sous Xvfb
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash scripts/tests/linux-desktop-smoke.sh "$RUNNER_TEMP/kovelyx-linux-release/Kovelyx-Linux-amd64-v$KOVELYX_BUILD_VERSION.deb"
+      - name: Conserver les paquets verifies
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-linux-official
+          path: ${{ runner.temp }}/kovelyx-linux-release/
+          if-no-files-found: error
+          retention-days: 30
