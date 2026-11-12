@@ -416,12 +416,12 @@ jobs:
           retention-days: 7
 
   publish-verified-preview:
-    name: Publier les trois paquets vérifiés pour la bannière de mise à jour
+    name: Publier Windows Linux Android et TV sur un même commit vérifié
     # Publish the tested default-branch commit; GITHUB_TOKEN cannot grant workflow-write scope.
     needs: [tv, mobile]
     if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 150
     permissions:
       contents: write
       actions: read
