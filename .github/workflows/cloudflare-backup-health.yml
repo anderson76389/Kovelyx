@@ -1,0 +1,47 @@
+name: Surveillance des sauvegardes chiffrées D1 (sans données privées)
+on:
+  schedule:
+    - cron: '15 6 * * *'
+  workflow_dispatch: {}
+  workflow_run:
+    workflows:
+      - "Sauvegarder les comptes et médias D1 (copie chiffrée vérifiée)"
+    types: [completed]
+permissions:
+  actions: read
+  contents: read
+jobs:
+  freshness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Vérifier le dernier export chiffré sans télécharger le contenu privé
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo}=context.repo;
+            const runs=await github.paginate(github.rest.actions.listWorkflowRuns,{
+              owner,repo,workflow_id:'cloudflare-backup.yml',per_page:100
+            },response=>response.data);
+            const real=runs.filter(x=>x.event!=='pull_request' && x.status==='completed')
+              .sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at));
+            if(!real.length)core.setFailed('Aucune sauvegarde de production exécutée.');
+            else {
+              const latest=real[0];
+              const good=real.find(x=>x.conclusion==='success');
+              if(latest.conclusion!=='success')
+                core.setFailed('Dernière sauvegarde D1 en échec : consulter le workflow chiffré (aucun secret affiché).');
+              if(!good)core.setFailed('Aucune exécution D1 chiffrée validée.');
+              else {
+                const age=(Date.now()-Date.parse(good.created_at))/3600000;
+                if(age>48)core.setFailed('Dernière sauvegarde D1 réussie trop ancienne : '+Math.floor(age)+' h.');
+                const artifacts=await github.paginate(github.rest.actions.listWorkflowRunArtifacts,{
+                  owner,repo,run_id:good.id,per_page:100
+                },response=>response.data);
+                const valid=artifacts.some(a=>!a.expired&&
+                  a.name.startsWith('kovelyx-d1-encrypted-backup-')&&a.size_in_bytes>1024);
+                if(!valid)core.setFailed('Dernier artifact D1 chiffré manquant, vide ou expiré.');
+                core.info('Surveillance sans contenu privé : export validé='+good.id+
+                  ', ancienneté='+Math.round(age)+' h, artefact présent='+valid);
+              }
+            }
