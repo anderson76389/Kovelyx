@@ -5,7 +5,7 @@ import {createServer} from "node:net";
 import {mkdtempSync,writeFileSync,rmSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join,resolve} from "node:path";
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
 import {setTimeout as sleep} from "node:timers/promises";
 const root=resolve(new URL("../",import.meta.url).pathname);
 async function freePort(){
@@ -78,6 +78,39 @@ test("portable Better Auth and profile sync survive restart",{timeout:90000},asy
     assert.ok((await call("/v1/sync?profileId="+profileId,"GET",null,tvToken))
       .data.items.some(r=>r.itemKey===record.itemKey));
     assert.equal((await call("/v1/profile-pin","POST",{profileId,pin:"4321"},token)).status,201);
+    // GIF/photo transport uses the same atomic binary D1 batch as Cloudflare.
+    const image=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO9ASb8AAAAASUVORK5CYII=","base64");
+    const imagePath="/v1/profile-media?profileId="+profileId+"&kind=avatar";
+    const upload=await fetch(base+imagePath,{method:"PUT",
+      headers:{authorization:"Bearer "+token,origin:base,"if-match":"none","content-type":"image/png"},
+      body:image,signal:AbortSignal.timeout(8000)});
+    assert.equal(upload.status,201,"Private avatar upload");
+    const imageFromTv=await fetch(base+imagePath,{
+      headers:{authorization:"Bearer "+tvToken},signal:AbortSignal.timeout(8000)});
+    assert.equal(imageFromTv.status,200);
+    assert.deepEqual(Buffer.from(await imageFromTv.arrayBuffer()),image,
+      "Byte-identical profile image via a separate session");
+    // Published catalogue snapshot may only become visible once all chunks exist.
+    const snapshot=JSON.stringify({list:["Film é","Série 🎬"]});
+    const sha=createHash("sha256").update(snapshot).digest("hex");
+    const chunk={profileId,category:"catalogues",itemKey:"snapshot:collections:"+sha+":000000",
+      payload:{index:0,text:snapshot},revision:0,deleted:false};
+    assert.equal((await call("/v1/catalogue-chunk","POST",chunk,token)).status,201);
+    assert.equal((await call("/v1/catalogue-manifest","POST",{
+      profileId,kind:"collections",sha256:sha,parts:1,
+      utf8Bytes:Buffer.byteLength(snapshot),revision:0},token)).status,201);
+    const catalog=await call("/v1/sync?profileId="+profileId+
+      "&snapshotKind=collections&snapshotHash="+sha,"GET",null,tvToken);
+    assert.equal(catalog.status,200);
+    assert.equal(catalog.data.items[0].payload.text,snapshot);
+    const foreignEmail="other-"+randomUUID()+"@example.test";
+    assert.equal((await call("/api/auth/sign-up/email","POST",
+      {email:foreignEmail,name:"Other",password},null)).status,200);
+    const foreignLogin=await call("/api/auth/sign-in/email","POST",
+      {email:foreignEmail,password});
+    const foreignToken=foreignLogin.headers.get("set-auth-token")||foreignLogin.data.token;
+    assert.equal((await call("/v1/sync?profileId="+profileId,
+      "GET",null,foreignToken)).status,404,"Another account cannot read private data");
     await stop();await start();
     assert.equal((await call("/v1/profiles","GET",null,token)).data.profiles[0].id,profileId);
     assert.ok((await call("/v1/sync?profileId="+profileId,"GET",null,tvToken))
