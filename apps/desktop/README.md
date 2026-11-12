@@ -1,10 +1,10 @@
-# Kovelyx pour Windows 10 et 11
+# Kovelyx pour Windows et Linux
 
-**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Windows x64 est la seule version PC activement maintenue. Les versions Android mobile et Android TV sont maintenues dans ce même dépôt.
+**Votre univers multimédia, sur PC.** Kovelyx est une application open source développée avec Kotlin Multiplatform et Compose Desktop. Les versions Windows x64 et Linux x86_64 partagent le même code Compose Desktop et leur moteur natif spécifique. Les versions Android mobile et Android TV sont maintenues dans ce même dépôt.
 
 ## Télécharger et tester
 
-[**Compilations Windows**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [Releases](https://github.com/anderson76389/Kovelyx/releases)
+[**Compilations Windows**](https://github.com/anderson76389/Kovelyx/actions/workflows/windows.yml) · [**Compilations Linux**](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) · [Releases communes](https://github.com/anderson76389/Kovelyx/releases)
 
 Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-Windows-installers-experimental** :
 
@@ -15,6 +15,14 @@ Une compilation réussie fournit trois formats dans le même artefact **Kovelyx-
 | `Kovelyx-Windows-Portable-….zip` | Dossier portable à extraire entièrement, avec `Kovelyx.exe`, `app` et `runtime` |
 
 
+### Linux x86_64 — AppImage, DEB et RPM
+
+La version Linux est construite depuis le même module Compose que Windows, avec son moteur libmpv natif. Chaque nouvelle Release unifiée doit contenir les trois distributions Linux **AppImage, DEB et RPM**, et leurs empreintes SHA-256, en plus de Windows, Android et Android TV. Un échec Linux bloque la publication du commit, sans modifier les anciennes versions.
+
+Pour Debian/Ubuntu utiliser le DEB ; pour Fedora le RPM ; pour les distributions compatibles AppImage utiliser le fichier exécutable. **ARM64 n’est pas encore une architecture validée** et certaines bibliothèques système restent nécessaires.
+
+[**Guide complet Linux : téléchargement, installation et compilation**](../../docs/LINUX.md).
+
 ### Comptes et synchronisation
 
 **Paramètres → Suivi** contient les cartes **Trakt et MDBList**. Les cartes de connexion utilisent les flux d’autorisation des fournisseurs : code d’appareil, navigateur, synchronisation et déconnexion. Sous Windows, le navigateur par défaut est ouvert lorsque le fournisseur a réellement transmis son URL d'autorisation. Une carte dont l'identifiant OAuth est manquant est volontairement désactivée : afficher un formulaire fictif ne connecterait aucun compte.
@@ -23,11 +31,11 @@ Pour les distributions personnalisées, la configuration peut utiliser `TRAKT_CL
 
 **Compte Kovelyx :** la création d'un seul compte synchronisé entre Windows, Android et TV nécessite un serveur de comptes Kovelyx opérationnel. Le backend utilisé dépend du Worker Cloudflare configuré à la compilation. Le mode invité conserve les données locales ; il ne synchronise pas les profils entre appareils.
 
-Le **Setup.exe est autonome pour l'installation** : ce n'est pas un exécutable portable à lancer sans installation. Aucun fichier n'est annoncé disponible avant la réussite des vérifications et son enregistrement dans les artefacts.
+Le **Setup.exe Windows est autonome pour l'installation** : ce n'est pas un exécutable portable à lancer sans installation. Aucun fichier n'est annoncé disponible avant la réussite des vérifications et son enregistrement dans les artefacts.
 
 ## Photos et fonds de profil personnels
 
-Dans **Profils → Modifier / Ajouter** sur Windows :
+Dans **Profils → Modifier / Ajouter** sur Windows (et sur Linux après validation de la fonction) :
 
 1. Cliquer sur **Choisir une photo depuis mon PC** pour importer un avatar.
 2. Cliquer sur **Choisir un fond depuis mon PC** pour importer le fond de sélection de profil.
