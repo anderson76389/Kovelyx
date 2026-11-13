@@ -3,13 +3,14 @@
 # No user data/credentials. Requires dpkg-deb, xvfb-run, timeout and file.
 set -Eeuo pipefail
 
-if [[ $# -ne 2 ]]; then
-  echo "Usage: $0 <full-release.deb> <full-release.AppImage>" >&2
+if [[ $# -ne 3 ]]; then
+  echo "Usage: $0 <full-release.deb> <full-release.rpm> <full-release.AppImage>" >&2
   exit 2
 fi
 deb="$1"
-appimage="$2"
-[[ -s "$deb" && -s "$appimage" ]] || { echo "Missing Linux release package" >&2; exit 1; }
+rpm="$2"
+appimage="$3"
+[[ -s "$deb" && -s "$rpm" && -s "$appimage" ]] || { echo "Missing Linux release package" >&2; exit 1; }
 
 work="$(mktemp -d "${TMPDIR:-/tmp}/kovelyx-linux-smoke.XXXXXX")"
 trap 'rm -rf -- "$work"' EXIT
@@ -24,6 +25,24 @@ runtime="$work/deb/opt/kovelyx/lib/runtime"
 }
 file "$launcher" | grep -Eq 'ELF.*x86-64'
 test -s "$work/deb/opt/kovelyx/lib/Kovelyx.png"
+
+# Extract the genuine RPM to test its installed launcher and bundled runtime.
+# This checks package startup on the CI host; Fedora/RHEL compatibility still
+# needs a separate test on those distributions.
+mkdir -p "$work/rpm"
+rpm2cpio "$rpm" | (cd "$work/rpm" && cpio -idm --quiet)
+mapfile -d '' rpm_launchers < <(find "$work/rpm/opt" -type f -path '*/bin/Kovelyx' -print0)
+[[ "${#rpm_launchers[@]}" -eq 1 ]] || {
+  echo "RPM must contain exactly one Kovelyx launcher" >&2
+  exit 1
+}
+rpm_launcher="${rpm_launchers[0]}"
+rpm_app_root="$(dirname "$(dirname "$rpm_launcher")")"
+[[ -x "$rpm_launcher" && -d "$rpm_app_root/lib/runtime" ]] || {
+  echo "RPM missing executable or Java runtime" >&2
+  exit 1
+}
+file "$rpm_launcher" | grep -Eq 'ELF.*x86-64'
 
 # Real type-2 AppImage extraction, avoiding a FUSE/kernel dependency in CI.
 (
@@ -66,5 +85,6 @@ smoke() {
   echo "PASS: real $kind GUI survived 22-second startup under Xvfb"
 }
 smoke "DEB" "$launcher"
+smoke "RPM" "$rpm_launcher"
 smoke "AppImage" "$app_run"
 echo "LIMITS: this is a startup smoke, not a full video/codec/extension/sync test."
