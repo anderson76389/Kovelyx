@@ -45,6 +45,17 @@ class CloudflareTvDataSync @Inject constructor(
     private val preferences: CloudflareTvPreferencesSync,
     private val profileMedia: CloudflareTvProfileMediaSync
 ) {
+    private val health get() = com.kovelyx.maintenance.ui.SyncHealth
+    private fun healthKey(owner: String, profileId: Int) = "$owner:$profileId"
+    suspend fun diagnosticText(): String {
+        val account = CloudflareTvAccountClient.account ?: return "Mode local : aucun compte connecté"
+        val profile = profileManager.activeProfileId.value
+        val state = library.getSyncState(profile)
+        val pending = state.pendingUpsertKeys.size + state.pendingDeleteKeys.size
+        val watchPending = mutations.pendingProgressUpserts(profile).size + mutations.pendingProgressDeletes(profile).size +
+            mutations.pendingWatchedUpserts(profile).size + mutations.pendingWatchedDeletes(profile).size
+        return health.describe(healthKey(account.id, profile)) + "\nBibliothèque : $pending modification(s) en attente\nProgression et vu : $watchPending modification(s) en attente"
+    }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
     private val inFlight = ConcurrentHashMap.newKeySet<Int>()
@@ -73,6 +84,7 @@ class CloudflareTvDataSync @Inject constructor(
 
     fun request(profileId: Int) {
         if (!CloudflareTvAccountClient.enabled) return
+        CloudflareTvAccountClient.account?.let { health.queued(healthKey(it.id, profileId)) }
         if (!inFlight.add(profileId)) {
             rerunRequested.add(profileId)
             return
@@ -111,6 +123,9 @@ class CloudflareTvDataSync @Inject constructor(
     suspend fun synchronize(profileId: Int) = mutex.withLock {
         if (CloudflareTvAccountClient.account == null ||
             profileManager.activeProfileId.value != profileId) return@withLock
+        val diagnosticKey = healthKey(checkNotNull(CloudflareTvAccountClient.account).id, profileId)
+        val generation = health.started(diagnosticKey)
+        try {
         var imagesReady = true
         try { profileMedia.synchronize(reportFailure = true, includeImages = false) }
         catch (cancelled: CancellationException) { throw cancelled }
@@ -198,6 +213,12 @@ class CloudflareTvDataSync @Inject constructor(
         check(addonsReady) { "Extensions TV en attente" }
         check(catalogueReady) { "Catalogues TV en attente" }
         check(imagesReady) { "Images Cloudflare en attente" }
+        health.succeeded(diagnosticKey, generation)
+        } catch (cancelled: CancellationException) {
+            health.cancelled(diagnosticKey); throw cancelled
+        } catch (error: Exception) {
+            health.failed(diagnosticKey); throw error
+        } finally { health.cancelled(diagnosticKey) }
     }
 
     private fun revision(record: JSONObject?): Int = record?.optInt("revision") ?: 0

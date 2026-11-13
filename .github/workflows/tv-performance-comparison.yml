@@ -3,6 +3,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/tv/**'
       - 'scripts/tests/tv_compare_performance.py'
       - 'scripts/tests/download_tv_benchmark_apks.py'

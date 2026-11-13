@@ -3,6 +3,7 @@ name: Vérifier le français et les logos Windows Android et TV
 on:
   pull_request:
     paths:
+      - 'shared/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values/**'
       - 'apps/desktop/composeApp/src/commonMain/composeResources/values-fr/**'
       - 'apps/mobile/composeApp/src/commonMain/composeResources/values/**'
@@ -21,6 +22,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'scripts/tests/test_legacy_account_texts.py'
       - 'apps/**'
       - 'vendor/engine/**'

@@ -56,6 +56,11 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
         val extensionCookieJar: CookieJar = ExtensionCookieJar()
     }
 
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(base)
+        com.kovelyx.maintenance.android.AndroidMaintenance.startup(this)
+    }
+
     override fun onCreate() {
         super.onCreate()
         PluginRuntimeHooks.onApplicationCreate(this)

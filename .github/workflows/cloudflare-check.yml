@@ -3,6 +3,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'services/kovelyx-cloudflare/**'
       - 'apps/**/core/cloud/**'
       - 'apps/**/features/updater/**'
@@ -14,6 +15,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'services/kovelyx-cloudflare/**'
       - 'apps/**/core/cloud/**'
       - 'apps/**/features/updater/**'

@@ -3,6 +3,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'scripts/tests/test_updater_release_contract.py'
       - 'scripts/tests/test_updater_resource_contract.py'
       - 'scripts/publish-verified-preview.py'
@@ -19,6 +20,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'scripts/tests/test_updater_release_contract.py'
       - 'scripts/tests/test_updater_resource_contract.py'
       - 'scripts/publish-verified-preview.py'

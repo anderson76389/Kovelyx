@@ -3,6 +3,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/mobile-ota-upgrade-pr.yml'
       - 'scripts/tests/ota_in_place_upgrade.sh'
       - 'scripts/tests/prepare_ota_test_apks.sh'

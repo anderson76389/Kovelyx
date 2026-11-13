@@ -45,6 +45,20 @@ import kotlinx.serialization.json.put
  * a 409 leaves the local mutation pending for a fresh pull rather than overwriting blindly.
  */
 object CloudflareDataSync {
+    private val health get() = com.kovelyx.maintenance.ui.SyncHealth
+    private fun healthKey(owner: String, profileId: Int) = "$owner:$profileId"
+
+    fun diagnosticText(): String {
+        val user = AuthRepository.state.value as? AuthState.Authenticated
+            ?: return "Mode local : aucun compte connecté"
+        if (user.isAnonymous) return "Mode invité : aucune synchronisation cloud"
+        val profile = ProfileRepository.activeProfileId
+        val snapshot = LibraryRepository.cloudSnapshotForSync(profile)
+        val count = snapshot?.let { it.pendingUpsertKeys.size + it.pendingDeleteKeys.size }
+        return health.describe(healthKey(user.userId, profile)) + "\nBibliothèque : " +
+            (count?.let { "$it modification(s) en attente" } ?: "profil pas encore chargé") +
+            "\nLes autres catégories sont incluses dans le résultat global de synchronisation."
+    }
     private val log = Logger.withTag("KovelyxD1Sync")
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mutex = Mutex()
@@ -90,6 +104,7 @@ object CloudflareDataSync {
 
     fun request(profileId: Int) {
         if (!CloudflareAccountClient.enabled) return
+        (AuthRepository.state.value as? AuthState.Authenticated)?.let { health.queued(healthKey(it.userId, profileId)) }
         requests.trySend(profileId)
     }
 
@@ -97,6 +112,9 @@ object CloudflareDataSync {
         val account = AuthRepository.state.value as? AuthState.Authenticated ?: return@withLock
         if (account.isAnonymous || CloudflareAccountClient.currentSession?.userId != account.userId ||
             ProfileRepository.activeProfileId != profileId) return@withLock
+        val diagnosticKey = healthKey(account.userId, profileId)
+        val generation = health.started(diagnosticKey)
+        try {
         var cloudId = ProfileRepository.state.value.profiles
             .firstOrNull { it.profileIndex == profileId }?.id.orEmpty()
         if (cloudId.isBlank()) {
@@ -161,6 +179,14 @@ object CloudflareDataSync {
         check(addonsReady) { "Extensions en attente de synchronisation" }
         check(catalogueReady) { "Catalogues en attente de synchronisation" }
         check(profileImagesReady) { "Images de profil en attente de synchronisation" }
+        health.succeeded(diagnosticKey, generation)
+        } catch (cancelled: CancellationException) {
+            health.cancelled(diagnosticKey)
+            throw cancelled
+        } catch (error: Exception) {
+            health.failed(diagnosticKey)
+            throw error
+        } finally { health.cancelled(diagnosticKey) }
     }
 
     fun deleteProgress(profileId: Int, entries: Collection<WatchProgressEntry>) {

@@ -78,6 +78,7 @@ internal fun LazyListScope.advancedSettingsContent(
             }
         }
     }
+    item { MaintenanceSettingsContent() }
     item { DisplayRefreshChoice(isTablet) }
         if (onCheckForUpdatesClick != null) {
             item {

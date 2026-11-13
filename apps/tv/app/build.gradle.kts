@@ -320,6 +320,7 @@ android {
     sourceSets {
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
+            java.srcDirs(rootProject.file("../../shared/maintenance/kotlin"), rootProject.file("../../shared/maintenance-ui/kotlin"), rootProject.file("../../shared/maintenance-android/kotlin"))
         }
     }
 

@@ -3,6 +3,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'apps/mobile/**'
       - '.github/workflows/mobile-playback.yml'
   pull_request:

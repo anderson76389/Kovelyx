@@ -44,8 +44,11 @@ class AdvancedSettingsViewModel @Inject constructor(
     private val deviceLocalPlayerPreferences: DeviceLocalPlayerPreferences,
     private val sentrySettingsDataStore: SentrySettingsDataStore,
     private val imagePerformancePreferences: ImagePerformancePreferences,
+    private val maintenanceSync: com.kovelyx.tv.core.sync.CloudflareTvDataSync,
     private val appRestarter: AppRestarter
 ) : ViewModel() {
+    suspend fun maintenanceSyncText(): String = maintenanceSync.diagnosticText()
+
     private val _uiState = MutableStateFlow(AdvancedSettingsUiState())
     val uiState: StateFlow<AdvancedSettingsUiState> = _uiState.asStateFlow()
 

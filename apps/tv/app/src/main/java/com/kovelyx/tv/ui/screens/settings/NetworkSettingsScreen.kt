@@ -413,6 +413,14 @@ fun AdvancedSettingsContent(
             }
         }
 
+        item(key = "maintenance") {
+            androidx.compose.material3.MaterialTheme(colorScheme = androidx.compose.material3.darkColorScheme()) {
+                com.kovelyx.maintenance.android.AndroidMaintenancePanel(
+                    account = { com.kovelyx.tv.core.auth.CloudflareTvAccountClient.account?.let { com.kovelyx.tv.BuildConfig.KOVELYX_CLOUD_URL + "|" + it.id } ?: "guest" },
+                    readSync = { viewModel.maintenanceSyncText() },
+                )
+            }
+        }
         item(key = "experience_mode_settings") {
             SettingsGroupCard(
                 modifier = Modifier.fillMaxWidth(),

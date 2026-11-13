@@ -5,6 +5,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - '.github/workflows/build.yml'
       - 'apps/tv/**'
       - 'apps/mobile/**'
@@ -23,6 +24,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/tv/**'
       - 'apps/mobile/**'
       - 'apps/desktop/composeApp/Configuration/DesktopVersion.properties'
