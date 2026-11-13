@@ -108,7 +108,7 @@ class SettingsCatalogTest {
             isDebugBuild = false
         )
         assertFalse(categories.startsNewGroup(0))
-        assertTrue(categories.startsNewGroup(categories.indexOf(SettingsCategory.CONTENT_DISCOVERY)))
+        assertTrue(categories.startsNewGroup(categories.indexOf(SettingsCategory.PLAYBACK)))
     }
 
     @Test
