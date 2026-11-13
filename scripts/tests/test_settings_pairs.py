@@ -70,7 +70,7 @@ def main() -> None:
     for platform in ("desktop", "mobile"):
         check_platform(platform)
     mobile = (ROOT / "apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/features/settings/SettingsScreen.kt").read_text()
-    ensure(mobile.count("showNotificationsEntry = AppFeaturePolicy.notificationsEnabled") == 2,
+    ensure(mobile.count("showNotificationsEntry = SettingsPage.Notifications.isEnabledByPolicy()") == 2,
            "mobile: phone and tablet must respect notifications availability")
     print("PASS Windows + Linux + Android mobile: same logical settings pairs")
 
