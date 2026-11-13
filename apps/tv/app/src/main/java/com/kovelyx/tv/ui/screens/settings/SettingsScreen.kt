@@ -547,6 +547,12 @@ fun SettingsScreen(
                                     if (visibleCategories.startsNewGroup(index)) {
                                         SettingsTopBarDivider()
                                     }
+                                    // Non-focusable section label: D-pad focus remains on real tabs.
+                                    if (index == 0 || visibleCategories.startsNewGroup(index)) {
+                                        SettingsTopBarGroupLabel(
+                                            text = stringResource(section.category.group.titleRes)
+                                        )
+                                    }
                                     SettingsTopBarTab(
                                         title = section.title,
                                         icon = section.icon,
@@ -712,6 +718,12 @@ fun SettingsScreen(
                             Column {
                                 if (visibleCategories.startsNewGroup(index)) {
                                     SettingsRailDivider()
+                                }
+                                // Labels are not focus targets, preserving the existing rail index.
+                                if (index == 0 || visibleCategories.startsNewGroup(index)) {
+                                    SettingsRailGroupLabel(
+                                        text = stringResource(section.category.group.titleRes)
+                                    )
                                 }
                                 SettingsRailButton(
                                     onFocused = {
