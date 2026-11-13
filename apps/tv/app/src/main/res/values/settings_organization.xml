@@ -14,4 +14,19 @@
     <string name="settings_org_appearance_interface">INTERFACE AND NAVIGATION</string>
     <string name="settings_org_decoder_title">ENGINE AND COMPATIBILITY</string>
     <string name="settings_org_buffering_title">BUFFERING AND VIDEO CACHE</string>
+    <string name="settings_tv_group_you">ACCOUNT AND PROFILES</string>
+    <string name="settings_tv_group_look">APPEARANCE AND CUSTOMIZATION</string>
+    <string name="settings_tv_group_watch">CONTENT AND PLAYBACK</string>
+    <string name="settings_tv_group_services">SERVICES AND TRACKING</string>
+    <string name="settings_tv_group_system">SYSTEM AND ABOUT</string>
+    <string name="settings_tv_layout_pair_home">HOME AND CONTENT</string>
+    <string name="settings_tv_layout_pair_navigation">NAVIGATION AND CONTINUE WATCHING</string>
+    <string name="settings_tv_layout_pair_posters">POSTERS AND CARDS</string>
+    <string name="settings_tv_layout_pair_style">STYLE AND CUSTOM POSTERS</string>
+    <string name="settings_tv_layout_pair_details">DETAILS AND VIDEO LINKS</string>
+    <string name="settings_tv_playback_pair_player">PLAYER AND INTERFACE</string>
+    <string name="settings_tv_playback_pair_av">VIDEO AND AUDIO</string>
+    <string name="settings_tv_playback_pair_sources">SUBTITLES AND SOURCES</string>
+    <string name="settings_tv_playback_pair_next">UP NEXT AND SKIPPING</string>
+    <string name="settings_tv_playback_pair_network">NETWORK AND P2P</string>
 </resources>
