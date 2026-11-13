@@ -14,4 +14,8 @@
     <string name="settings_org_appearance_interface">INTERFACE AND NAVIGATION</string>
     <string name="settings_org_decoder_title">ENGINE AND COMPATIBILITY</string>
     <string name="settings_org_buffering_title">BUFFERING AND VIDEO CACHE</string>
+    <string name="settings_org_root_experience">APPEARANCE AND PLAYBACK</string>
+    <string name="settings_org_root_content">CONTENT AND INTEGRATIONS</string>
+    <string name="settings_org_root_activity">TRACKING AND NOTIFICATIONS</string>
+    <string name="settings_org_root_system">SYSTEM AND UPDATES</string>
 </resources>
