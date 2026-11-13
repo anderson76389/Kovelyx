@@ -31,7 +31,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
   <thead>
     <tr>
       <th align="center" colspan="4">
-        <img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration conceptuelle des applications Kovelyx" width="100%">
+        <img src="./assets/brand/kovelyx-platforms.svg" alt="Illustration conceptuelle des quatre plateformes Kovelyx : Windows, Linux, Android et Android TV" width="100%">
         <p><sub>Illustration conceptuelle, non issue d'une application installée.</sub></p>
       </th>
     </tr>
@@ -57,14 +57,14 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
     </tr>
     <tr>
       <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes"><strong>Télécharger Windows</strong></a></td>
-      <td align="center"><a href="https://github.com/anderson76389/Kovelyx/releases/latest"><strong>Télécharger Linux</strong></a></td>
+      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=linux#plateformes"><strong>Télécharger Linux</strong></a></td>
       <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes"><strong>Télécharger Android</strong></a></td>
       <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes"><strong>Télécharger Android TV</strong></a></td>
     </tr>
   </tbody>
 </table>
 
-**Linux :** sélectionnez AppImage pour une distribution compatible, DEB pour Debian/Ubuntu ou RPM pour Fedora et dérivées. Les paquets sont prévus pour les PC **Intel/AMD x86_64** ; ARM64 et les distributions non testées ne sont pas encore certifiés. [Guide Linux](./docs/LINUX.md).
+**🐧 Linux :** même interface de bureau que Windows, avec sa propre illustration ci-dessus. Sur le [site Kovelyx](https://anderson76389.github.io/Kovelyx/?plateforme=linux#plateformes), choisissez **AppImage**, **DEB** (Debian/Ubuntu) ou **RPM** (Fedora et dérivées), selon votre distribution. Chaque paquet publié possède son fichier SHA-256. Compatible **Intel/AMD x86_64** ; ARM64 et les distributions non testées ne sont pas encore certifiés. [Guide d'installation Linux](./docs/LINUX.md).
 
 </div>
 
@@ -169,7 +169,7 @@ Kovelyx dérive de logiciels sous **GNU GPLv3**. Les notices, crédits d'auteurs
 
 ### KOVELYX
 
-**Windows · Android · Android TV**
+**Windows · Linux · Android · Android TV**
 
 *Votre univers multimédia, sur tous vos écrans.*
 
