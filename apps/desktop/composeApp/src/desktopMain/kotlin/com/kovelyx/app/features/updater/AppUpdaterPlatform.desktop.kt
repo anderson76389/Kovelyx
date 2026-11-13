@@ -250,7 +250,7 @@ actual object AppUpdaterPlatform {
     private fun updatesDir(): File =
         File(DesktopStorage.rootDir.resolve("updates").also { it.createDirectories() }.toUri())
 
-    private fun pruneOldVerifiedInstallers(dirPath: File, keep: File) {
+    internal fun pruneOldVerifiedInstallers(dirPath: File, keep: File) {
         dirPath.listFiles()?.forEach { file ->
             if (file != keep && file.isFile &&
                 file.name.startsWith("Kovelyx-") &&
