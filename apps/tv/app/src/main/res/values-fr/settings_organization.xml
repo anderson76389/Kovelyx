@@ -14,4 +14,10 @@
     <string name="settings_org_appearance_interface">INTERFACE ET NAVIGATION</string>
     <string name="settings_org_decoder_title">MOTEUR ET COMPATIBILITÉ</string>
     <string name="settings_org_buffering_title">TAMPON ET CACHE VIDÉO</string>
+    <string name="settings_tv_group_account">COMPTE ET PROFILS</string>
+    <string name="settings_tv_group_appearance">APPARENCE ET AFFICHAGE</string>
+    <string name="settings_tv_group_playback_content">LECTURE ET CONTENU</string>
+    <string name="settings_tv_group_integrations_tracking">INTÉGRATIONS ET SUIVI</string>
+    <string name="settings_tv_group_system_about">SYSTÈME ET INFORMATIONS</string>
+    <string name="settings_tv_group_diagnostics">DIAGNOSTIC</string>
 </resources>
