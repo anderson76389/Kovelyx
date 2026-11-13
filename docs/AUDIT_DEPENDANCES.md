@@ -23,21 +23,21 @@ Fichiers texte examinés : **1396** ; références statiques à Nuvio/NuvioMedia
 | `.` | 20 |
 | `www.apache.org` | 19 |
 | `example.test` | 16 |
-| `cdn` | 16 |
+| `video.example.com` | 16 |
 | `127.0.0.1` | 16 |
 | `x` | 16 |
-| `video.example.com` | 16 |
+| `cdn` | 16 |
 | `schemas.android.com` | 15 |
-| `media.trakt.tv` | 14 |
 | `image` | 14 |
+| `media.trakt.tv` | 14 |
 | `simkl.com` | 13 |
 | `api.aioratings.com` | 13 |
 | `github.com` | 11 |
-| `image.tmdb.org` | 10 |
 | `localhost` | 10 |
+| `image.tmdb.org` | 10 |
+| `plugins.example` | 9 |
 | `stream.example` | 9 |
 | `192.168.1.10` | 9 |
-| `mdblist.com` | 9 |
 
 ### Références à vérifier en priorité
 
@@ -76,29 +76,38 @@ Fichiers texte examinés : **1454** ; références statiques à Nuvio/NuvioMedia
 | `original.com` | 20 |
 | `mdblist.com` | 18 |
 | `api.trakt.tv` | 16 |
-| `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
-| `api.ratingposterdb.com` | 12 |
+| `api.aioratings.com` | 13 |
 | `simkl.com` | 12 |
+| `plugins.example` | 12 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
-| `plugins.example` | 12 |
-| `postersplus.example.com` | 9 |
-| `img` | 9 |
+| `api.ratingposterdb.com` | 12 |
 | `pm` | 9 |
-| `catalog.example` | 8 |
+| `img` | 9 |
+| `postersplus.example.com` | 9 |
 | `trakt.tv` | 8 |
 | `api.mdblist.com` | 8 |
+| `catalog.example` | 8 |
 | `addon.example` | 7 |
-| `cdn.example` | 6 |
 | `www.youtube.com` | 6 |
-| `a.com` | 5 |
+| `cdn.example` | 6 |
 | `192.168.1.10` | 5 |
 | `media.example.test` | 5 |
+| `a.com` | 5 |
 
 ### Références à vérifier en priorité
 
 - `apps/mobile/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:108`
+- `apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:109`
+- `apps/mobile/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:153`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:158`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:46`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:61`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64`
+- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:25`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:33`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:49`
@@ -112,24 +121,15 @@ Fichiers texte examinés : **1454** ; références statiques à Nuvio/NuvioMedia
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:19`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:29`
 - `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:30`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:46`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:61`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:153`
-- `apps/mobile/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:158`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:108`
-- `apps/mobile/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:109`
-- `apps/mobile/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 
 ## Windows
 
-Fichiers texte examinés : **1847** ; références statiques à Nuvio/NuvioMedia : **22**.
+Fichiers texte examinés : **1844** ; références statiques à Nuvio/NuvioMedia : **22**.
 
 | Hôte extrait | Occurrences |
 | --- | ---: |
 | `example.com` | 183 |
-| `github.com` | 132 |
+| `github.com` | 126 |
 | `www.themoviedb.org` | 110 |
 | `example.test` | 80 |
 | `schemas.android.com` | 50 |
@@ -141,27 +141,35 @@ Fichiers texte examinés : **1847** ; références statiques à Nuvio/NuvioMedia
 | `simkl.com` | 16 |
 | `api.trakt.tv` | 16 |
 | `api.ratingposterdb.com` | 14 |
-| `api.aioratings.com` | 13 |
 | `backend.example.com` | 13 |
+| `api.aioratings.com` | 13 |
+| `plugins.example` | 12 |
 | `cdn.example.com` | 12 |
 | `media.trakt.tv` | 12 |
-| `plugins.example` | 12 |
 | `example.invalid` | 11 |
 | `trakt.tv` | 10 |
-| `postersplus.example.com` | 9 |
-| `img` | 9 |
 | `image.tmdb.org` | 9 |
 | `pm` | 9 |
+| `img` | 9 |
+| `postersplus.example.com` | 9 |
+| `api.mdblist.com` | 8 |
 | `example.org` | 8 |
 | `catalog.example` | 8 |
-| `api.mdblist.com` | 8 |
-| `addon.example` | 7 |
 | `media.w3.org` | 7 |
-| `btttr.cc` | 6 |
+| `addon.example` | 7 |
+| `developer.apple.com` | 6 |
 
 ### Références à vérifier en priorité
 
 - `apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19`
+- `apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:105`
+- `apps/desktop/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:153`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:158`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:46`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:61`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64`
+- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:25`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:33`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/deeplink/AppUrlBridgeTest.kt:49`
@@ -173,16 +181,8 @@ Fichiers texte examinés : **1847** ; références statiques à Nuvio/NuvioMedia
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:17`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:25`
 - `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/core/network/ServerDiscoveryPolicyTest.kt:27`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:46`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:61`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:153`
-- `apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/player/InfusePlaybackTest.kt:158`
 - `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/DesktopCollectionImportBridge.kt:236`
 - `apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:388`
-- `apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/core/network/ServerDiscovery.kt:105`
-- `apps/desktop/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106`
 
 ## Dépendances natives manquantes
 
