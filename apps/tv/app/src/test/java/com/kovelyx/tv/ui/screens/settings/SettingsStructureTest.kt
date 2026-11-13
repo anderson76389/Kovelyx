@@ -29,6 +29,41 @@ class SettingsStructureTest {
     }
 
     @Test
+    fun `playback settings display five coherent accordion pairs`() {
+        val items = visiblePlaybackSections(PlayerSettings(internalPlayerEngine = InternalPlayerEngine.EXOPLAYER))
+        assertEquals(
+            listOf(
+                com.kovelyx.tv.R.string.settings_tv_playback_pair_player,
+                com.kovelyx.tv.R.string.settings_tv_playback_pair_av,
+                com.kovelyx.tv.R.string.settings_tv_playback_pair_sources,
+                com.kovelyx.tv.R.string.settings_tv_playback_pair_next,
+                com.kovelyx.tv.R.string.settings_tv_playback_pair_network
+            ),
+            items.mapNotNull { it.pairHeadingRes }
+        )
+        assertEquals(10, items.size)
+        assertEquals(5, items.count { it.pairHeadingRes != null })
+    }
+
+    @Test
+    fun `layout settings use paired headings while keeping original focusable sections`() {
+        val items = visibleLayoutSections(essentialMode = false, focusedPosterHasOptions = true)
+        assertEquals(10, items.size)
+        assertEquals(
+            listOf(
+                com.kovelyx.tv.R.string.settings_tv_layout_pair_home,
+                com.kovelyx.tv.R.string.settings_tv_layout_pair_navigation,
+                com.kovelyx.tv.R.string.settings_tv_layout_pair_posters,
+                com.kovelyx.tv.R.string.settings_tv_layout_pair_style,
+                com.kovelyx.tv.R.string.settings_tv_layout_pair_details
+            ),
+            items.mapNotNull { it.pairHeadingRes }
+        )
+        assertEquals(null, LayoutSection.POSTER_CARD.pairHeadingRes)
+        assertEquals(null, PlaybackSection.P2P.pairHeadingRes)
+    }
+
+    @Test
     fun `buffer and network is only shown for exoplayer based engines`() {
         assertTrue(PlaybackSection.BUFFER_NETWORK in visiblePlaybackSections(PlayerSettings(internalPlayerEngine = InternalPlayerEngine.EXOPLAYER)))
         assertTrue(PlaybackSection.BUFFER_NETWORK in visiblePlaybackSections(PlayerSettings(internalPlayerEngine = InternalPlayerEngine.AUTO)))
