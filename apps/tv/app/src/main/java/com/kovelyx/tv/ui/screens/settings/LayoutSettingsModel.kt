@@ -32,6 +32,18 @@ internal enum class LayoutSection(
     STREAMS(R.string.layout_section_streams, R.string.layout_section_streams_desc, Icons.AutoMirrored.Filled.ViewList)
 }
 
+/** Named pairs in the TV layout accordion. Falls back to a heading for hidden poster options. */
+@get:StringRes
+internal val LayoutSection.pairHeadingRes: Int?
+    get() = when (this) {
+        LayoutSection.HOME_LAYOUT -> R.string.settings_tv_layout_pair_home
+        LayoutSection.SIDEBAR -> R.string.settings_tv_layout_pair_navigation
+        LayoutSection.FOCUSED_POSTER -> R.string.settings_tv_layout_pair_posters
+        LayoutSection.CARD_DEPTH -> R.string.settings_tv_layout_pair_style
+        LayoutSection.DETAIL_PAGE -> R.string.settings_tv_layout_pair_details
+        else -> null
+    }
+
 internal fun visibleLayoutSections(
     essentialMode: Boolean,
     focusedPosterHasOptions: Boolean
