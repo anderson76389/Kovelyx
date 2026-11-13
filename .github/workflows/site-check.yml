@@ -3,13 +3,18 @@ name: Tester le site Kovelyx
 on:
   push:
     branches: [main]
-    paths:
+    paths: &site_paths
+      - 'README.md'
+      - 'assets/brand/kovelyx-platforms.svg'
+      - 'assets/brand/kovelyx-banner.svg'
       - 'docs/index.html'
       - 'docs/site.css'
       - 'docs/site.js'
       - 'docs/brand/**'
       - '.github/workflows/site-check.yml'
       - 'scripts/test-site-downloads.cjs'
+  pull_request:
+    paths: *site_paths
   workflow_dispatch:
 
 permissions:
@@ -26,6 +31,24 @@ jobs:
         run: node --check docs/site.js
       - name: Tester les téléchargements Windows, Android et TV simulés
         run: node scripts/test-site-downloads.cjs
+      - name: Valider les illustrations SVG des quatre plateformes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+          files = ['assets/brand/kovelyx-banner.svg', 'assets/brand/kovelyx-platforms.svg', 'docs/brand/banner.svg']
+          for name in files:
+              root = ET.parse(name).getroot()
+              assert root.tag.endswith('svg'), name
+              assert root.attrib.get('viewBox'), 'SVG sans viewBox : ' + name
+              assert all(value in Path(name).read_text(encoding='utf-8') for value in ('Windows', 'Linux', 'Android')), name
+          readme = Path('README.md').read_text(encoding='utf-8')
+          assert 'plateforme=linux#plateformes' in readme
+          assert 'kovelyx-platforms.svg' in readme
+          page = Path('docs/index.html').read_text(encoding='utf-8')
+          assert 'id="kv-linux"' in page and 'data-platform="linux"' in page
+          print('OK : trois SVG et quatre plateformes dans le README et le site')
+          PY
       - name: Vérifier la page HTML et les liens internes
         shell: bash
         run: |
