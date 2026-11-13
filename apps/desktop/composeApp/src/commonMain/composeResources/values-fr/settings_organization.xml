@@ -14,4 +14,8 @@
     <string name="settings_org_appearance_interface">INTERFACE ET NAVIGATION</string>
     <string name="settings_org_decoder_title">MOTEUR ET COMPATIBILITÉ</string>
     <string name="settings_org_buffering_title">TAMPON ET CACHE VIDÉO</string>
+    <string name="settings_org_root_experience">APPARENCE ET LECTURE</string>
+    <string name="settings_org_root_content">CONTENUS ET INTÉGRATIONS</string>
+    <string name="settings_org_root_activity">SUIVI ET NOTIFICATIONS</string>
+    <string name="settings_org_root_system">SYSTÈME ET MISES À JOUR</string>
 </resources>
