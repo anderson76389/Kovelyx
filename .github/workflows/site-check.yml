@@ -3,7 +3,7 @@ name: Tester le site Kovelyx
 on:
   push:
     branches: [main]
-    paths: &site_paths
+    paths:
       - 'README.md'
       - 'assets/brand/kovelyx-platforms.svg'
       - 'assets/brand/kovelyx-banner.svg'
@@ -14,7 +14,16 @@ on:
       - '.github/workflows/site-check.yml'
       - 'scripts/test-site-downloads.cjs'
   pull_request:
-    paths: *site_paths
+    paths:
+      - 'README.md'
+      - 'assets/brand/kovelyx-platforms.svg'
+      - 'assets/brand/kovelyx-banner.svg'
+      - 'docs/index.html'
+      - 'docs/site.css'
+      - 'docs/site.js'
+      - 'docs/brand/**'
+      - '.github/workflows/site-check.yml'
+      - 'scripts/test-site-downloads.cjs'
   workflow_dispatch:
 
 permissions:
