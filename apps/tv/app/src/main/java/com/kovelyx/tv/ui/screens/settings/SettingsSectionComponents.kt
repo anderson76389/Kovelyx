@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -167,6 +168,24 @@ internal fun SettingsRailDivider() {
             .padding(start = SettingsRowContentInset, end = SettingsRowContentInset, bottom = 10.dp)
             .height(KovelyxTheme.spacing.hairline)
             .background(KovelyxTheme.colors.Border)
+    )
+}
+
+/**
+ * Compact group caption for Horizon's horizontal, remotely navigable rail.
+ * Plain Text: it never intercepts D-pad focus or changes the tab count.
+ */
+@Composable
+internal fun SettingsTopBarGroupHeading(text: String) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        color = KovelyxTheme.colors.TextTertiary,
+        fontSize = 10.sp,
+        maxLines = 2,
+        modifier = Modifier
+            .widthIn(max = 114.dp)
+            .padding(horizontal = KovelyxTheme.spacing.xxs)
     )
 }
 
