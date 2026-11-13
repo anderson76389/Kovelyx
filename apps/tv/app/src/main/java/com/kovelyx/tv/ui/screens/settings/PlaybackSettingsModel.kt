@@ -36,6 +36,18 @@ internal enum class PlaybackSection(
     P2P(R.string.settings_p2p_title, R.string.settings_p2p_subtitle, Icons.Default.Hub)
 }
 
+/** The first item of each logical settings pair, independent of the codec engine. */
+@get:StringRes
+internal val PlaybackSection.pairHeadingRes: Int?
+    get() = when (this) {
+        PlaybackSection.PLAYER -> R.string.settings_tv_playback_pair_player
+        PlaybackSection.VIDEO -> R.string.settings_tv_playback_pair_av
+        PlaybackSection.SUBTITLES -> R.string.settings_tv_playback_pair_sources
+        PlaybackSection.UP_NEXT -> R.string.settings_tv_playback_pair_next
+        PlaybackSection.BUFFER_NETWORK -> R.string.settings_tv_playback_pair_network
+        else -> null
+    }
+
 internal fun visiblePlaybackSections(settings: PlayerSettings): List<PlaybackSection> =
     PlaybackSection.entries.filter { section ->
         section != PlaybackSection.BUFFER_NETWORK || settings.usesExoPlayerEngine
