@@ -710,8 +710,13 @@ fun SettingsScreen(
                             key = { _, section -> section.category }
                         ) { index, section ->
                             Column {
-                                if (visibleCategories.startsNewGroup(index)) {
-                                    SettingsRailDivider()
+                                if (visibleCategories.startsLabeledGroup(index)) {
+                                    if (visibleCategories.startsNewGroup(index)) {
+                                        SettingsRailDivider()
+                                    }
+                                    SettingsRailGroupHeading(
+                                        text = stringResource(section.category.group.titleRes)
+                                    )
                                 }
                                 SettingsRailButton(
                                     onFocused = {
