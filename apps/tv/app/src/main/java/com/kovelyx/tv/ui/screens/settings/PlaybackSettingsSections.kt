@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import com.kovelyx.tv.R
 import com.kovelyx.tv.data.local.PlayerSettings
 import com.kovelyx.tv.ui.components.P2pConsentDialog
 
