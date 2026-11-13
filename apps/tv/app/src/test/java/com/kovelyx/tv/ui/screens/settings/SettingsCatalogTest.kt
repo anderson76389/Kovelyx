@@ -110,6 +110,51 @@ class SettingsCatalogTest {
         assertTrue(categories.startsNewGroup(categories.indexOf(SettingsCategory.CONTENT_DISCOVERY)))
     }
 
+    @Test
+    fun `television categories remain grouped as five coherent pairs`() {
+        val expectedPairs = listOf(
+            listOf(SettingsCategory.ACCOUNT, SettingsCategory.PROFILES),
+            listOf(SettingsCategory.APPEARANCE, SettingsCategory.LAYOUT),
+            listOf(SettingsCategory.CONTENT_DISCOVERY, SettingsCategory.PLAYBACK),
+            listOf(SettingsCategory.INTEGRATION, SettingsCategory.TRACKING),
+            listOf(SettingsCategory.ADVANCED, SettingsCategory.ABOUT)
+        )
+        val visible = visibleSettingsCategories(
+            isPrimaryProfile = true, isEssentialMode = false, isDebugBuild = false
+        )
+        assertEquals(expectedPairs.flatten(), visible)
+        assertEquals(expectedPairs.map { it[0] }, visible.indices
+            .filter { i -> i == 0 || visible.startsNewGroup(i) }
+            .map { visible[it] })
+        assertEquals(
+            listOf(
+                com.kovelyx.tv.R.string.settings_tv_group_you,
+                com.kovelyx.tv.R.string.settings_tv_group_look,
+                com.kovelyx.tv.R.string.settings_tv_group_watch,
+                com.kovelyx.tv.R.string.settings_tv_group_services,
+                com.kovelyx.tv.R.string.settings_tv_group_system
+            ),
+            expectedPairs.map { it[0].group.titleRes }
+        )
+    }
+
+    @Test
+    fun `all remote modes preserve navigation order without empty visual pairs`() {
+        allCombinations().forEach { visible ->
+            val regular = visible - SettingsCategory.DEBUG
+            assertEquals(regular.distinct(), regular)
+            val groups = regular.map { it.group }.distinct()
+            assertEquals(groups, regular.map { it.group }.fold(mutableListOf<SettingsRailGroup>()) { runs, group ->
+                if (runs.lastOrNull() != group) runs.add(group)
+                runs
+            })
+            // Secondary profiles cannot see account actions; this is intentional.
+            if (SettingsCategory.ACCOUNT !in regular) {
+                assertFalse(SettingsCategory.PROFILES in regular)
+            }
+        }
+    }
+
     private fun allCombinations(): List<List<SettingsCategory>> =
         listOf(true, false).flatMap { primary ->
             listOf(true, false).flatMap { essential ->

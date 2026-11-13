@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import com.kovelyx.tv.R
 import com.kovelyx.tv.data.local.PlayerSettings
 import com.kovelyx.tv.ui.components.P2pConsentDialog
 
@@ -49,6 +50,14 @@ internal fun PlaybackSettingsSections(
         ) {
             items(items = sections, key = { it.name }) { section ->
                 val expanded = section.name in expandedSections
+                val headingRes = section.pairHeadingRes
+                    ?: R.string.settings_tv_playback_pair_network.takeIf {
+                        section == PlaybackSection.P2P &&
+                            PlaybackSection.BUFFER_NETWORK !in sections
+                    }
+                if (headingRes != null) {
+                    SettingsSectionLabel(text = stringResource(headingRes))
+                }
                 SettingsCollapsibleSection(
                     title = stringResource(section.title),
                     description = stringResource(section.description),
