@@ -31,11 +31,11 @@ async function simulate(releases, options = {}) {
     if (!ids.has(id)) ids.set(id, element());
     return ids.get(id);
   };
-  const tabs = ["desktop", "android", "tv"].map(p => {
+  const tabs = ["desktop", "linux", "android", "tv"].map(p => {
     const node = element({platform: p});
     return node;
   });
-  const cards = ["desktop", "android", "tv"].map(platform => {
+  const cards = ["desktop", "linux", "android", "tv"].map(platform => {
     const card = element({releaseStatus: platform});
     const children = new Map();
     card.querySelector = selector => {
@@ -87,6 +87,20 @@ async function simulate(releases, options = {}) {
     // Un fichier sans correspondance GitHub, meme avec le bon nom, est ignore.
     published("malicious", "2026-10-16T10:00:00Z", [
       ["Kovelyx-Android-malicious.apk", 130000000, "https://untrusted.invalid/example.apk"]
+    ]),
+    published("v1.1.1144", "2026-11-13T10:00:00Z", [
+      ["Kovelyx-Linux-x86_64-v1.1.1144.AppImage"],
+      ["Kovelyx-Linux-x86_64-v1.1.1144.AppImage.sha256", 130],
+      ["Kovelyx-Linux-amd64-v1.1.1144.deb"],
+      ["Kovelyx-Linux-amd64-v1.1.1144.deb.sha256", 130],
+      ["Kovelyx-Linux-x86_64-v1.1.1144.rpm"],
+      ["Kovelyx-Linux-x86_64-v1.1.1144.rpm.sha256", 130]
+    ]),
+    // Publication plus récente mais incomplète : ne doit jamais éclipser la vraie Release Linux.
+    published("v1.1.1145", "2026-11-14T10:00:00Z", [
+      ["Kovelyx-Linux-x86_64-v1.1.1145.AppImage"],
+      ["Kovelyx-Linux-x86_64-v1.1.1145.AppImage.sha256", 130],
+      ["Kovelyx-Linux-amd64-v1.1.1145.deb"]
     ])
   ].reverse();
 
@@ -95,10 +109,24 @@ async function simulate(releases, options = {}) {
   assert.equal(result.byId("hero-android-download").href, origin + "/releases/download/android-preview-new/Kovelyx-Android-android-preview-new.apk");
   assert.equal(result.byId("hero-tv-download").href, origin + "/releases/download/tv-preview-new/Kovelyx-TV-tv-preview-new-universal.apk");
   assert.match(result.byId("panel-title").textContent, /Android TV/);
-  assert.equal(result.tabs[2].attributes["aria-selected"], "true");
-  assert.equal(result.cards[2].nodes.get(".release-link").href, result.byId("hero-tv-download").href);
-  assert.equal(result.cards[1].nodes.get(".release-link").href, result.byId("hero-android-download").href);
+  assert.equal(result.tabs[3].attributes["aria-selected"], "true");
+  assert.equal(result.cards[3].nodes.get(".release-link").href, result.byId("hero-tv-download").href);
+  assert.equal(result.cards[2].nodes.get(".release-link").href, result.byId("hero-android-download").href);
+  assert.equal(result.cards[1].nodes.get(".release-link").href, origin + "/releases/download/v1.1.1144/Kovelyx-Linux-x86_64-v1.1.1144.AppImage");
+  assert.equal(result.cards[1].nodes.get(".linux-deb-link").href, origin + "/releases/download/v1.1.1144/Kovelyx-Linux-amd64-v1.1.1144.deb");
+  assert.equal(result.cards[1].nodes.get(".linux-rpm-link").href, origin + "/releases/download/v1.1.1144/Kovelyx-Linux-x86_64-v1.1.1144.rpm");
+  assert.equal(result.byId("hero-linux-download").href, result.cards[1].nodes.get(".release-link").href);
 
+  const linux = await simulate(releases, {search: "?plateforme=linux"});
+  assert.equal(linux.tabs[1].attributes["aria-selected"], "true");
+  assert.match(linux.byId("panel-title").textContent, /Linux/);
+  assert.equal(linux.byId("platform-download").href, linux.byId("hero-linux-download").href);
+  assert.equal(linux.byId("platform-linux-deb").href, linux.cards[1].nodes.get(".linux-deb-link").href);
+  assert.equal(linux.byId("platform-linux-rpm").href, linux.cards[1].nodes.get(".linux-rpm-link").href);
+  assert.equal(linux.byId("platform-linux-deb").hidden, false);
+  assert.equal(linux.byId("platform-linux-rpm").hidden, false);
+  assert.equal(linux.byId("platform-msi").hidden, true);
+  assert.equal(linux.byId("platform-portable").hidden, true);
   const win = await simulate(releases);
   assert.equal(win.byId("platform-portable").href, origin + "/releases/download/v0.1.377-alpha/Kovelyx-Windows-Portable-v0.1.377-alpha.zip");
   assert.equal(win.byId("platform-msi").href, origin + "/releases/download/v0.1.377-alpha/Kovelyx-Windows-v0.1.377-alpha.msi");
@@ -112,10 +140,18 @@ async function simulate(releases, options = {}) {
   assert.match(signed.byId("hero-tv-download").href, /v1\.1\.1-beta\.1/);
 
   const missing = await simulate([]);
-  for (const id of ["hero-windows-download", "hero-android-download", "hero-tv-download"]) {
+  for (const id of ["hero-windows-download", "hero-linux-download", "hero-android-download", "hero-tv-download"]) {
     assert.equal(missing.byId(id).href, origin + "/releases");
   }
   assert.equal(missing.byId("platform-download").hidden, true);
+  const partial = await simulate([published("v1.1.1146", "2026-11-15T10:00:00Z", [
+    ["Kovelyx-Linux-x86_64-v1.1.1146.AppImage"],
+    ["Kovelyx-Linux-amd64-v1.1.1146.deb"],
+    ["Kovelyx-Linux-x86_64-v1.1.1146.rpm"]
+  ])], {search: "?plateforme=linux"});
+  assert.equal(partial.byId("hero-linux-download").href, origin + "/releases");
+  assert.equal(partial.byId("platform-download").hidden, true);
+  assert.equal(partial.byId("platform-linux-deb").hidden, true);
 
   const error = await simulate([], {error: true});
   assert.equal(error.byId("hero-android-download").href, origin + "/releases");
@@ -124,9 +160,9 @@ async function simulate(releases, options = {}) {
   // La page HTML ne doit pas conserver un APK/EXE obsolète si JavaScript échoue.
   const html = fs.readFileSync("docs/index.html", "utf8");
   assert(!/releases\/download\/|actions\/runs\/\d+\/artifacts/.test(html), "Lien fige ou artefact perime dans le HTML");
-  for (const tag of ["desktop", "android", "tv"]) {
+  for (const tag of ["desktop", "linux", "android", "tv"]) {
     assert(html.includes('data-release-status="' + tag + '"'), "Carte manquante: " + tag);
     assert(html.includes('data-platform="' + tag + '"'), "Onglet manquant: " + tag);
   }
-  console.log("OK : trois plateformes, liens directs, publications independantes, signatures futures, secours GitHub.");
+  console.log("OK : quatre plateformes, Linux AppImage/DEB/RPM complets avec SHA-256, lien direct, clavier, secours GitHub.");
 })().catch(error => {console.error(error); process.exitCode = 1;});
