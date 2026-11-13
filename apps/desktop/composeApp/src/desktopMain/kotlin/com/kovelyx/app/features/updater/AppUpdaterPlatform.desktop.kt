@@ -85,7 +85,10 @@ actual object AppUpdaterPlatform {
     // access to /app and the manifest grants no talk-name for the host Flatpak
     // service, so the update belongs to the user's store, not to this dialog.
     actual val isSupported: Boolean
-        get() = currentOs != DesktopUpdaterOs.UNKNOWN && linuxInstallMethod != LinuxInstallMethod.FLATPAK
+        get() = currentOs != DesktopUpdaterOs.UNKNOWN &&
+            linuxInstallMethod != LinuxInstallMethod.FLATPAK &&
+            (currentOs != DesktopUpdaterOs.LINUX ||
+                linuxUpdaterArchitectureSupported(System.getProperty("os.arch").orEmpty()))
 
     actual val releaseSource: AppUpdateReleaseSource = AppUpdateReleaseSource(
         owner = "anderson76389",
@@ -251,7 +254,7 @@ actual object AppUpdaterPlatform {
         dirPath.listFiles()?.forEach { file ->
             if (file != keep && file.isFile &&
                 file.name.startsWith("Kovelyx-") &&
-                file.extension.lowercase() in setOf("msi", "exe", "zip", "apk")
+                file.extension.lowercase(Locale.ROOT) in setOf("msi", "exe", "zip", "apk", "deb", "rpm", "appimage")
             ) {
                 file.delete()
             }
@@ -377,6 +380,7 @@ private enum class DesktopUpdaterOs {
                 fileExtensions = linuxUpdateFileExtensions(linuxInstallMethod),
                 preferredNameFragments = archFragments + listOf("linux"),
                 fallbackNameFragments = listOf("universal", "all"),
+                requiredNamePrefixes = listOf("Kovelyx-Linux-"),
             )
             UNKNOWN -> AppUpdateAssetSelector(fileExtensions = emptyList())
         }
@@ -432,6 +436,11 @@ private const val appImageExitWaitTicks = 100
 // A release carries every Linux format at once, so the extension list has to be
 // the one the running install can actually consume. An unresolved install keeps
 // the previous list, leaving source and tarball builds no worse off than before.
+// The official Linux artifacts are x86-64 only; never offer an x86-64 installer
+// on ARM, 32-bit x86 or another architecture just because an extension matches.
+internal fun linuxUpdaterArchitectureSupported(arch: String): Boolean =
+    arch.trim().lowercase(Locale.ROOT) in setOf("amd64", "x86_64", "x64")
+
 internal fun linuxUpdateFileExtensions(method: LinuxInstallMethod): List<String> = when (method) {
     LinuxInstallMethod.APP_IMAGE -> listOf(".AppImage")
     LinuxInstallMethod.RPM -> listOf(".rpm")
@@ -537,6 +546,8 @@ internal fun appImageReplaceScript(
         append("while [ \$i -lt $appImageExitWaitTicks ] && kill -0 $currentPid 2>/dev/null; do ")
         append("sleep 0.1; i=\$((i+1)); ")
         append("done; ")
+        // Never replace a running AppImage when the app did not exit in time.
+        append("if kill -0 $currentPid 2>/dev/null; then rm -f -- $stage; xdg-open $downloaded; exit 0; fi; ")
         append("if mv -f -- $target $backup; then ")
         append("if mv -f -- $stage $target; then rm -f -- $downloaded; exec $target; ")
         append("else mv -f -- $backup $target; xdg-open $downloaded; fi; ")
