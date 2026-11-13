@@ -94,6 +94,15 @@ fun LayoutSettingsContent(
                 ) {
                     items(items = sections, key = { it.name }) { section ->
                         val expanded = section.name in expandedSections
+                        // Non-focusable heading; each existing accordion keeps its stable key.
+                        val headingRes = section.pairHeadingRes
+                            ?: R.string.settings_tv_layout_pair_posters.takeIf {
+                                section == LayoutSection.POSTER_CARD &&
+                                    LayoutSection.FOCUSED_POSTER !in sections
+                            }
+                        if (headingRes != null) {
+                            SettingsSectionLabel(text = stringResource(headingRes))
+                        }
                         SettingsCollapsibleSection(
                             title = stringResource(section.title),
                             description = stringResource(section.description),
