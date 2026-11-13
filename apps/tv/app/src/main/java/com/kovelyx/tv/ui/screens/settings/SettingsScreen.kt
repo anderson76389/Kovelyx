@@ -544,8 +544,13 @@ fun SettingsScreen(
                                 key = { _, section -> section.category }
                             ) { index, section ->
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    if (visibleCategories.startsNewGroup(index)) {
-                                        SettingsTopBarDivider()
+                                    if (visibleCategories.startsLabeledGroup(index)) {
+                                        if (visibleCategories.startsNewGroup(index)) {
+                                            SettingsTopBarDivider()
+                                        }
+                                        SettingsTopBarGroupHeading(
+                                            text = stringResource(section.category.group.titleRes)
+                                        )
                                     }
                                     SettingsTopBarTab(
                                         title = section.title,
