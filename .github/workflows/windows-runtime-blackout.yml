@@ -47,112 +47,18 @@ jobs:
           "KOVELYX_RELEASE_TAG=$($release.tag_name)" >> $env:GITHUB_ENV
           $dest = Join-Path $env:RUNNER_TEMP 'kovelyx-portable-apk-independent'
           New-Item -Path $dest -ItemType Directory -Force | Out-Null
-          & gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY `
-            --pattern 'Kovelyx-Windows-Portable-*.zip' `
-            --pattern 'Kovelyx-Windows-Portable-*.zip.sha256' --dir $dest
+          & gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY --pattern 'Kovelyx-Windows-Portable-*.zip' --pattern 'Kovelyx-Windows-Portable-*.zip.sha256' --dir $dest
           if ($LASTEXITCODE -ne 0) { throw 'Echec du telechargement de la Release.' }
           $zip = @(Get-ChildItem $dest -Filter '*.zip')
           if ($zip.Count -ne 1) { throw "Archive Windows ambiguë : $($zip.Count)" }
           $checksum = Join-Path $dest ($zip[0].Name + '.sha256')
           if (-not (Test-Path -LiteralPath $checksum)) { throw 'Empreinte publique Windows absente.' }
           $line = (Get-Content -LiteralPath $checksum -Raw).Trim()
-          if ($line -notmatch '^([a-fA-F0-9]{64})\s+\*?(.+)
-      - name: Bloquer les domaines historiques Nuvio mais garder GitHub accessible
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $hostsFile = Join-Path $env:WINDIR 'System32\drivers\etc\hosts'
-          foreach ($domain in @('nuvio.tv', 'www.nuvio.tv', 'api.nuvio.tv', 'auth.nuvio.tv', 'cdn.nuvio.tv', 'nuvioapp.space', 'api-two.nuvioapp.space')) {
-            Add-Content -LiteralPath $hostsFile -Value "127.0.0.1 $domain"
-            Add-Content -LiteralPath $hostsFile -Value "::1 $domain"
-          }
-          ipconfig /flushdns | Out-Null
-          $nuvio = @([System.Net.Dns]::GetHostAddresses('api.nuvio.tv') | ForEach-Object { $_.ToString() })
-          if (@($nuvio | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -ne 0) { throw "Blocage Nuvio non applique : $nuvio" }
-          $legacySpace = @([System.Net.Dns]::GetHostAddresses('api-two.nuvioapp.space') | ForEach-Object { $_.ToString() })
-          if (@($legacySpace | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -ne 0) { throw "Blocage nuvioapp.space non applique : $legacySpace" }
-          $github = @([System.Net.Dns]::GetHostAddresses('api.github.com') | ForEach-Object { $_.ToString() })
-          if (@($github | Where-Object { $_ -notin @('127.0.0.1', '::1') }).Count -lt 1) { throw 'GitHub inaccessible ou bloque.' }
-          'Blocage de api.nuvio.tv effectif, resolution DNS GitHub disponible.' >> $env:GITHUB_STEP_SUMMARY
-      - name: Lancer le programme Windows reel depuis la Release
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $extract = Join-Path $env:RUNNER_TEMP 'kovelyx-desktop-runtime'
-          Expand-Archive -LiteralPath $env:KOVELYX_ARCHIVE -DestinationPath $extract -Force
-          $exe = Get-ChildItem -LiteralPath $extract -Recurse -File -Filter '*.exe' |
-            Where-Object { $_.Name -match '^Kovelyx[.]exe$' } |
-            Select-Object -First 1
-          if (-not $exe) { throw 'Kovelyx.exe absent de la distribution portable.' }
-          "EXE teste : $($exe.FullName)" >> $env:GITHUB_STEP_SUMMARY
-          $binaryHash = (Get-FileHash -LiteralPath $exe.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-          "SHA256 executable : $binaryHash" >> $env:GITHUB_STEP_SUMMARY
-          $launcher = Start-Process -FilePath $exe.FullName -WorkingDirectory $exe.Directory.FullName -PassThru
-          Start-Sleep -Seconds 25
-          $running = @(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith($extract, [StringComparison]::OrdinalIgnoreCase) })
-          if ($running.Count -lt 1) {
-            $launcher.Refresh()
-            throw "Kovelyx ne tourne plus apres le demarrage (code : $($launcher.ExitCode)). Test runtime echoue."
-          }
-          "Kovelyx portable : processus actif apres 25 secondes avec Nuvio bloque." >> $env:GITHUB_STEP_SUMMARY
-          # Baseline memory samples on the REAL published executable, not a build stub.
-          # No process memory content, command line or private credentials are collected.
-          $memorySamples = @()
-          foreach ($phase in @('startup', 'after-idle')) {
-            foreach ($item in $running) {
-              $proc = Get-Process -Id $item.ProcessId -ErrorAction SilentlyContinue
-              if ($proc) {
-                $memorySamples += [pscustomobject]@{
-                  phase = $phase
-                  process = $proc.ProcessName
-                  workingSetBytes = [long]$proc.WorkingSet64
-                  privateBytes = [long]$proc.PrivateMemorySize64
-                }
-              }
-            }
-            if ($phase -eq 'startup') { Start-Sleep -Seconds 5 }
-          }
-          $memoryFile = Join-Path $env:RUNNER_TEMP 'kovelyx-windows-memory.json'
-          $memorySamples | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $memoryFile -Encoding UTF8
-          $log = Join-Path $env:RUNNER_TEMP 'kovelyx-windows-runtime.txt'
-          @(
-            "Release: $env:KOVELYX_RELEASE_TAG",
-            "Executable: $($exe.FullName)",
-            "SHA256: $binaryHash",
-            "Nuvio: DNS redirige vers boucle locale",
-            "Processes: $($running.Count)",
-            "Limites: navigation UI, codecs et services distants non exerces"
-          ) | Set-Content -LiteralPath $log -Encoding UTF8
-          try {
-            Add-Type -AssemblyName System.Windows.Forms
-            Add-Type -AssemblyName System.Drawing
-            $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-            $bmp = New-Object System.Drawing.Bitmap($bounds.Width, $bounds.Height)
-            $g = [System.Drawing.Graphics]::FromImage($bmp)
-            $g.CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
-            $bmp.Save((Join-Path $env:RUNNER_TEMP 'kovelyx-windows-runtime.png'))
-            $g.Dispose()
-            $bmp.Dispose()
-          } catch {
-            Write-Warning "Capture Windows non disponible sur le runner : $($_.Exception.Message)"
-          }
-          foreach ($item in $running) { Stop-Process -Id $item.ProcessId -Force -ErrorAction SilentlyContinue }
-      - name: Sauvegarder le journal et la capture Windows
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: kovelyx-windows-nuvio-blackout-runtime
-          path: |
-            ${{ runner.temp }}/kovelyx-windows-runtime.txt
-            ${{ runner.temp }}/kovelyx-windows-runtime.png
-            ${{ runner.temp }}/kovelyx-windows-memory.json
-          if-no-files-found: ignore
-          retention-days: 21
-) { throw 'Format SHA-256 invalide.' }
-          $expectedHash = $Matches[1].ToLowerInvariant()
-          if ($Matches[2].TrimStart('./') -ne $zip[0].Name) { throw 'Nom du ZIP different de son empreinte.' }
+          $parts = $line -split '\s+', 2
+          if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[0-9a-fA-F]{64}$') { throw 'Format SHA-256 invalide.' }
+          if ($parts[1] -ne $zip[0].Name) { throw 'Nom du ZIP different de son empreinte.' }
           $sha = (Get-FileHash -LiteralPath $zip[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($sha -ne $expectedHash) { throw 'SHA-256 Windows : fichier corrompu ou different de la Release.' }
+          if ($sha -ne $parts[0].ToLowerInvariant()) { throw 'SHA-256 Windows invalide.' }
           "KOVELYX_ARCHIVE=$($zip[0].FullName)" >> $env:GITHUB_ENV
           "SHA256 portable Windows verifie : $sha" >> $env:GITHUB_STEP_SUMMARY
       - name: Bloquer les domaines historiques Nuvio mais garder GitHub accessible
