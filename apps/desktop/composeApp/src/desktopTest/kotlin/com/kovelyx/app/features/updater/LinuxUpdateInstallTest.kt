@@ -11,20 +11,20 @@ class LinuxUpdateInstallTest {
 
     // The asset names of a real release, in the order the GitHub API returns them.
     private val releaseAssets = listOf(
-        asset("Nuvio-Linux-x86_64-0.1.22-alpha.AppImage"),
-        asset("Nuvio-Linux-x86_64-0.1.22-alpha.AppImage.zsync"),
-        asset("Nuvio-Linux-x86_64-0.1.22-alpha.deb"),
-        asset("Nuvio-Linux-x86_64-0.1.22-alpha.flatpak"),
-        asset("Nuvio-Linux-x86_64-0.1.22-alpha.rpm"),
-        asset("Nuvio-macOS-arm64-0.1.22-alpha.dmg"),
-        asset("Nuvio-macOS-x86_64-0.1.22-alpha.dmg"),
-        asset("Nuvio-Windows-x64-0.1.22-alpha.msi"),
+        asset("Kovelyx-Linux-x86_64-v1.1.1137.AppImage"),
+        asset("Kovelyx-Linux-x86_64-v1.1.1137.AppImage.sha256"),
+        asset("Kovelyx-Linux-amd64-v1.1.1137.deb"),
+        asset("Kovelyx-Linux-x86_64-v1.1.1137.flatpak"),
+        asset("Kovelyx-Linux-x86_64-v1.1.1137.rpm"),
+        asset("Kovelyx-macOS-arm64-v1.1.1137.dmg"),
+        asset("Kovelyx-macOS-x86_64-v1.1.1137.dmg"),
+        asset("Kovelyx-Windows-v1.1.1137.msi"),
     )
 
     @Test
     fun `rpm install is offered the rpm asset`() {
         assertEquals(
-            "Nuvio-Linux-x86_64-0.1.22-alpha.rpm",
+            "Kovelyx-Linux-x86_64-v1.1.1137.rpm",
             selectFor(LinuxInstallMethod.RPM)?.name,
         )
     }
@@ -32,7 +32,7 @@ class LinuxUpdateInstallTest {
     @Test
     fun `deb install is offered the deb asset`() {
         assertEquals(
-            "Nuvio-Linux-x86_64-0.1.22-alpha.deb",
+            "Kovelyx-Linux-amd64-v1.1.1137.deb",
             selectFor(LinuxInstallMethod.DEB)?.name,
         )
     }
@@ -40,9 +40,38 @@ class LinuxUpdateInstallTest {
     @Test
     fun `app image install is offered the image itself and never its zsync file`() {
         assertEquals(
-            "Nuvio-Linux-x86_64-0.1.22-alpha.AppImage",
+            "Kovelyx-Linux-x86_64-v1.1.1137.AppImage",
             selectFor(LinuxInstallMethod.APP_IMAGE)?.name,
         )
+    }
+
+    @Test
+    fun `only published x86_64 Linux packages are eligible for updates`() {
+        for (arch in listOf("x86_64", "amd64", "x64")) {
+            assertTrue(linuxUpdaterArchitectureSupported(arch))
+        }
+        for (arch in listOf("aarch64", "arm64", "armv7l", "i686", "riscv64", "")) {
+            assertFalse(linuxUpdaterArchitectureSupported(arch))
+        }
+    }
+
+    @Test
+    fun `real Linux selector refuses another project and checksum files`() {
+        if (System.getProperty("os.name").contains("linux", ignoreCase = true)) {
+            assertEquals(listOf("Kovelyx-Linux-"), AppUpdaterPlatform.assetSelector.requiredNamePrefixes)
+        }
+        val mixed = listOf(
+            asset("Other-Linux-x86_64-v1.1.1137.AppImage"),
+            asset("Kovelyx-Linux-x86_64-v1.1.1137.AppImage.sha256"),
+        ) + releaseAssets
+        val chosen = selectBestUpdateAsset(
+            mixed, AppUpdateAssetSelector(
+                fileExtensions = listOf(".AppImage"),
+                preferredNameFragments = listOf("x86_64", "Linux"),
+                requiredNamePrefixes = listOf("Kovelyx-Linux-"),
+            )
+        )
+        assertEquals("Kovelyx-Linux-x86_64-v1.1.1137.AppImage", chosen?.name)
     }
 
     @Test
@@ -203,6 +232,19 @@ class LinuxUpdateInstallTest {
     }
 
     @Test
+    fun `app image replacement aborts before rename if old process is still alive`() {
+        val script = appImageReplaceScript(
+            downloadedPath = "/tmp/updates/Kovelyx-new.AppImage",
+            appImagePath = "/home/user/Kovelyx.AppImage",
+            currentPid = 4242L,
+        )
+        val guard = script.indexOf("if kill -0 4242 2>/dev/null; then")
+        val rename = script.indexOf("if mv -f --")
+        assertTrue(guard >= 0 && rename > guard, "Old process must stop before any rename")
+        assertTrue(script.contains("rm -f -- '/home/user/Kovelyx.AppImage.kovelyx-staged-4242'"))
+    }
+
+    @Test
     fun `an app image with no known path falls back to the desktop handler`() {
         val command = linuxInstallerCommand(
             method = LinuxInstallMethod.APP_IMAGE,
@@ -233,6 +275,7 @@ class LinuxUpdateInstallTest {
                 fileExtensions = linuxUpdateFileExtensions(method),
                 preferredNameFragments = listOf("x64", "x86_64", "amd64", "linux"),
                 fallbackNameFragments = listOf("universal", "all"),
+                requiredNamePrefixes = listOf("Kovelyx-Linux-"),
             ),
         )
 
