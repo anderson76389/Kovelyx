@@ -475,3 +475,29 @@ body{background:radial-gradient(ellipse 60% 630px at 50% 0,rgba(114,65,204,.10),
   .button:hover,.release-card:hover{transform:none}
 }
 
+/* Quatrième plateforme : mêmes cartes, illustration PC et boutons Linux cohérents. */
+.hero-download-actions{grid-template-columns:repeat(4,minmax(0,1fr));width:min(100%,980px)}
+.platform-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+.release-items,.release-items:has([data-release-status="android"]){grid-template-columns:repeat(4,minmax(0,1fr))}
+.release-card .linux-deb-link,.release-card .linux-rpm-link{display:inline-flex;align-items:center;gap:6px;padding:8px 0;color:#d5c2f3;font-size:12px;text-decoration:none}
+.release-card .linux-deb-link:hover,.release-card .linux-rpm-link:hover{text-decoration:underline}
+.release-card .linux-deb-link .action-icon,.release-card .linux-rpm-link .action-icon{width:14px;height:14px}
+.release-card .linux-deb-link[hidden],.release-card .linux-rpm-link[hidden]{display:none}
+.device-os-badge{display:none}
+.device.desktop.linux .device-os-badge{position:absolute;display:inline-flex;align-items:center;gap:6px;right:15px;top:14px;z-index:2;border:1px solid #bda0f966;border-radius:20px;background:#17112bcf;color:#e7d8ff;padding:6px 10px;font-size:10px;font-weight:800;letter-spacing:.11em}
+.device.desktop.linux .device-os-badge .platform-icon{width:17px;height:17px}
+@media(max-width:1100px){
+  .hero-download-actions{grid-template-columns:repeat(2,minmax(0,1fr));max-width:660px}
+  .release-items,.release-items:has([data-release-status="android"]){grid-template-columns:repeat(2,minmax(0,1fr))}
+  .release-card:last-child{grid-column:auto}
+}
+@media(max-width:710px){
+  .hero-download-actions{grid-template-columns:1fr;max-width:430px}
+  .platform-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .platform-tabs button{font-size:10px;padding:10px 4px;gap:5px}
+  .release-items,.release-items:has([data-release-status="android"]){grid-template-columns:1fr}
+}
+@media(max-width:380px){
+  .platform-tabs button{font-size:9px;padding:10px 2px}
+  .platform-tabs button .platform-icon{width:21px;height:21px}
+}

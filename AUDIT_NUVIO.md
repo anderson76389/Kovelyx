@@ -3,7 +3,7 @@
 Rapport statique généré sur le dépôt Kovelyx. Une occurrence ne prouve pas un appel réseau ;
 un symbole de package historique ne prouve pas une dépendance de service.
 
-Fichiers inspectés : 4657
+Fichiers inspectés : 4661
 
 ## Inventaire des références à traiter
 
@@ -58,7 +58,7 @@ Fichiers inspectés : 4657
 - apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:64 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/commonTest/kotlin/com/kovelyx/app/features/simkl/SimklPkceTest.kt:68 : parseSimklAuthCallback("nuvio://auth/simkl
 - apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/DesktopCollectionImportBridge.kt:236 : /** Per-user URL registration, no administrator privileges, never claims nuvio:// or stremio://. */
-- apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:387 : value.startsWith("nuvio://", ignoreCase = true) //
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/Main.kt:388 : value.startsWith("nuvio://", ignoreCase = true) //
 - apps/desktop/composeApp/src/iosMain/kotlin/com/kovelyx/app/features/player/ExternalPlayerPlatform.ios.kt:106 : NSURL.URLWithString("$scheme://") 
 - apps/desktop/iosApp/DownloadsWidgetExtension/DownloadsLiveActivityWidget.swift:19 : private let downloadsUrl = URL(string: "nuvio://downloads")
 
@@ -83,7 +83,7 @@ Fichiers inspectés : 4657
 - apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:158 : "https://nuvio.tv.example.org",
 - apps/tv/app/src/test/java/com/kovelyx/tv/data/remote/ServerDiscoveryPolicyTest.kt:160 : "https://anothernuvio.tv"
 
-### Configuration générale (24 correspondances)
+### Configuration générale (25 correspondances)
 
 - apps/tv/app/src/main/java/com/kovelyx/tv/core/torrent/TorrentService.kt:318 : val stateDirectory = File(context.noBackupFilesDir, "nuvio-engine/state")
 - apps/tv/app/src/main/java/com/kovelyx/tv/core/torrent/TorrentService.kt:319 : val cacheDirectory = File(context.cacheDir, "nuvio-engine")
@@ -105,6 +105,7 @@ Fichiers inspectés : 4657
 - apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/p2p/P2pStreamingEngine.desktop.kt:310 : val stateDirectory = DesktopStorage.rootDir.resolve("nuvio-engine/state").toFile()
 - apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/p2p/P2pStreamingEngine.desktop.kt:311 : val cacheDirectory = DesktopStorage.cacheDir.resolve("nuvio-engine").toFile()
 - apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/settings/DiscordRichPresenceStorage.desktop.kt:11 : private val store = DesktopStorage.store("nuvio_discord_rich_presence")
+- apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/settings/MaintenanceSettingsContent.desktop.kt:36 : "torrent" to File(cache, "nuvio-engine/payload")),
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/kovelyx/app/features/p2p/DesktopEngineTest.kt:79 : val root = Files.createTempDirectory("nuvio-engine-desktop-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/kovelyx/app/features/p2p/DesktopEngineTest.kt:99 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
 - apps/desktop/composeApp/src/desktopTest/kotlin/com/kovelyx/app/features/p2p/DesktopEngineTest.kt:115 : val cacheDirectory = Files.createTempDirectory("nuvio-engine-cache-").toFile()
@@ -120,7 +121,7 @@ Fichiers inspectés : 4657
 
 - apps/tv : 10 lignes.
 - apps/mobile : 1774 lignes.
-- apps/desktop : 1921 lignes.
+- apps/desktop : 1909 lignes.
 
 ## Variables héritées (ne pas renommer sans migrer les consommateurs)
 

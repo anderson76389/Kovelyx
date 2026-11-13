@@ -13,10 +13,13 @@
     desktop: /^Kovelyx-Windows-Setup-.+\.exe$/i,
     windowsMsi: /^Kovelyx-Windows-.+\.msi$/i,
     windowsZip: /^Kovelyx-Windows-Portable-.+\.zip$/i,
+    linux: /^Kovelyx-Linux-x86_64-v.+\.AppImage$/i,
+    linuxDeb: /^Kovelyx-Linux-amd64-v.+\.deb$/i,
+    linuxRpm: /^Kovelyx-Linux-x86_64-v.+\.rpm$/i,
     android: /^Kovelyx-(?:Android|Mobile)-.+\.apk$/i,
     tv: /^Kovelyx-(?:TV|Android-TV|AndroidTV)-.+\.apk$/i
   };
-  const platformOrder = ["desktop", "android", "tv"];
+  const platformOrder = ["desktop", "linux", "android", "tv"];
   const config = {
     desktop: {
       label: "01 / WINDOWS",
@@ -26,8 +29,16 @@
       device: "desktop",
       button: "Télécharger Windows EXE"
     },
+    linux: {
+      label: "02 / LINUX",
+      title: "Kovelyx pour Linux.",
+      desc: "La même application de bureau que sur Windows, adaptée à Linux x86_64. Choisissez AppImage, DEB (Debian/Ubuntu) ou RPM (Fedora et dérivées) selon votre distribution.",
+      tags: ["Linux x86_64", "AppImage", "DEB · RPM"],
+      device: "desktop linux",
+      button: "Télécharger Linux AppImage"
+    },
     android: {
-      label: "02 / ANDROID MOBILE",
+      label: "03 / ANDROID MOBILE",
       title: "Kovelyx pour Android.",
       desc: "Pour téléphone ou tablette Android 7 et versions ultérieures. APK distinct de la version télévision ; installation et fonctions encore en test.",
       tags: ["Android 7+", "Téléphones et tablettes", "APK"],
@@ -35,7 +46,7 @@
       button: "Télécharger l'APK Android"
     },
     tv: {
-      label: "03 / ANDROID TV",
+      label: "04 / ANDROID TV",
       title: "Kovelyx pour Android TV.",
       desc: "Pour Android TV, Google TV et TV Box Android compatibles, avec une interface conçue pour la télécommande. APK séparé de la version mobile.",
       tags: ["Android TV / Google TV", "TV Box", "Télécommande"],
@@ -47,9 +58,9 @@
   const $ = id => document.getElementById(id);
   const tabs = [...document.querySelectorAll('[role="tab"][data-platform]')];
   const releaseCards = [...document.querySelectorAll("[data-release-status]")];
-  const versions = {desktop: null, android: null, tv: null};
+  const versions = {desktop: null, linux: null, android: null, tv: null};
   let availabilityState = "loading";
-  // Liens du README : ?plateforme=desktop|android|tv#plateformes.
+  // Liens du README : ?plateforme=desktop|linux|android|tv#plateformes.
   const requestedPlatform = new URLSearchParams(window.location.search).get("plateforme");
   let currentPlatform = platformOrder.includes(requestedPlatform) ? requestedPlatform : "desktop";
 
@@ -72,6 +83,20 @@
   function findForPlatform(releases, platform) {
     for (const release of releases) {
       if (release.draft || !Array.isArray(release.assets)) continue;
+      if (platform === "linux") {
+        const appimage = findAsset(release, patterns.linux);
+        const deb = findAsset(release, patterns.linuxDeb);
+        const rpm = findAsset(release, patterns.linuxRpm);
+        const hasChecksum = asset => release.assets.some(file =>
+          file.name === asset.name + ".sha256" && file.state === "uploaded" &&
+          Number.isFinite(file.size) && file.size > 0 &&
+          validDownload.test(file.browser_download_url || ""));
+        // Ne pas proposer de Release Linux partielle ou privée de ses SHA-256.
+        if (appimage && deb && rpm && [appimage, deb, rpm].every(hasChecksum)) {
+          return {release, asset: appimage, extras: {appimage, deb, rpm}};
+        }
+        continue;
+      }
       // Préférer l'installateur EXE au MSI pour Windows. Ne jamais confondre APK TV et mobile.
       let asset = findAsset(release, patterns[platform]);
       if (platform === "desktop" && !asset) asset = findAsset(release, patterns.windowsMsi);
@@ -102,7 +127,7 @@
   // Les libellés proviennent exclusivement de constantes locales ; aucune donnée externe n'est insérée en HTML.
   function setActionLabel(node, label, platform, isDownload = true) {
     if (!node) return;
-    const symbols = {desktop: "kv-windows", android: "kv-android", tv: "kv-tv"};
+    const symbols = {desktop: "kv-windows", linux: "kv-linux", android: "kv-android", tv: "kv-tv"};
     const platformIcon = symbols[platform];
     const icon = name => '<svg class="action-icon" aria-hidden="true" focusable="false"><use href="#' + name + '"></use></svg>';
     const platformSVG = platformIcon ? '<svg class="platform-icon action-platform-icon" aria-hidden="true" focusable="false"><use href="#' + platformIcon + '"></use></svg>' : "";
@@ -119,6 +144,7 @@
   function updateHero() {
     const items = [
       ["hero-windows-download", "desktop", "Télécharger Windows EXE"],
+      ["hero-linux-download", "linux", "Télécharger Linux AppImage"],
       ["hero-android-download", "android", "Télécharger Android APK"],
       ["hero-tv-download", "tv", "Télécharger Android TV APK"]
     ];
@@ -126,7 +152,7 @@
       const match = versions[platform];
       const title = match && platform === "desktop" && /\.msi$/i.test(match.asset.name)
         ? "Télécharger Windows MSI" : text;
-      safeLink($(id), match, title, "Voir les Releases " + (platform === "desktop" ? "Windows" : platform === "android" ? "Android" : "TV"), platform);
+      safeLink($(id), match, title, "Voir les Releases " + (platform === "desktop" ? "Windows" : platform === "linux" ? "Linux" : platform === "android" ? "Android" : "TV"), platform);
     }
     const note = $("hero-download-note");
     if (note) {
@@ -164,6 +190,8 @@
     const disabled = $("download-disabled");
     const portable = $("platform-portable");
     const msi = $("platform-msi");
+    const linuxDeb = $("platform-linux-deb");
+    const linuxRpm = $("platform-linux-rpm");
     const release = $("platform-release");
     if (release) release.href = match ? match.release.html_url : releasesPage;
     if (portable) {
@@ -177,6 +205,17 @@
       msi.hidden = !asset;
       if (asset) { msi.href = asset.browser_download_url; msi.setAttribute("rel","noopener noreferrer"); }
       else msi.removeAttribute("href");
+    }
+    for (const [node, asset] of [
+      [linuxDeb, platform === "linux" ? match?.extras?.deb : null],
+      [linuxRpm, platform === "linux" ? match?.extras?.rpm : null]
+    ]) {
+      if (!node) continue;
+      node.hidden = !asset;
+      if (asset) {
+        node.href = asset.browser_download_url;
+        node.setAttribute("rel", "noopener noreferrer");
+      } else node.removeAttribute("href");
     }
     if (match) {
       primary.hidden = false;
@@ -205,12 +244,16 @@
       const more = card.querySelector(".release-more");
       const portable = card.querySelector(".portable-link");
       const msi = card.querySelector(".msi-link");
+      const linuxDeb = card.querySelector(".linux-deb-link");
+      const linuxRpm = card.querySelector(".linux-rpm-link");
       if (status) status.textContent = versionStatus(match);
       if (name) name.textContent = match ? match.asset.name : "Fichier en cours de vérification";
-      safeLink(action, match, "Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : "APK"), "Voir les Releases", platform);
+      safeLink(action, match, "Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : platform === "linux" ? "AppImage" : "APK"), "Voir les Releases", platform);
       if (more) more.href = match ? match.release.html_url : releasesPage;
       for (const [node, asset] of [[portable, match?.extras?.portable],
-                                  [msi, platform === "desktop" && /\.exe$/i.test(match?.asset.name || "") ? match?.extras?.msi : null]]) {
+                                  [msi, platform === "desktop" && /\.exe$/i.test(match?.asset.name || "") ? match?.extras?.msi : null],
+                                  [linuxDeb, platform === "linux" ? match?.extras?.deb : null],
+                                  [linuxRpm, platform === "linux" ? match?.extras?.rpm : null]]) {
         if (node) {
           node.hidden = !asset;
           if (asset) node.href = asset.browser_download_url;
@@ -226,7 +269,7 @@
     const mode = $("release-loading");
     if (mode) {
       mode.textContent = availabilityState === "loaded"
-        ? "Fichiers vérifiés parmi les Releases GitHub ; les trois versions sont suivies indépendamment."
+        ? "Fichiers vérifiés parmi les Releases GitHub ; les quatre plateformes sont suivies indépendamment."
         : availabilityState === "error"
           ? "Impossible de consulter les Releases en direct. Les liens ouvrent la liste GitHub officielle."
           : "Recherche des dernières Releases…";
