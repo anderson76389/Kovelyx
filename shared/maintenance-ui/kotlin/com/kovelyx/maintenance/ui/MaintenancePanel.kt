@@ -62,7 +62,7 @@ fun MaintenancePanel(
         Text("Synchronisation du profil actif", style = MaterialTheme.typography.titleMedium)
         Text(sync, style = MaterialTheme.typography.bodySmall)
         Text("Sauvegarde chiffrée par mot de passe", style = MaterialTheme.typography.titleMedium)
-        Text("Bibliothèque, progression, profils, extensions et réglages locaux. Les sessions de connexion, PIN, caches, fichiers de plugins exécutables et vidéos téléchargées sont exclus. Restauration sur le même compte et le même type d'application. Garde ton mot de passe : il ne peut pas être récupéré. Mets la lecture en pause et évite les modifications pendant la sauvegarde.", style = MaterialTheme.typography.bodySmall)
+        Text("Bibliothèque, progression, profils, extensions et réglages locaux. Les sessions de connexion, connexions aux serveurs multimédias, PIN, caches, fichiers de plugins exécutables et vidéos téléchargées sont exclus. Restauration sur le même compte et le même type d'application. Garde ton mot de passe : il ne peut pas être récupéré. Mets la lecture en pause et évite les modifications pendant la sauvegarde.", style = MaterialTheme.typography.bodySmall)
         OutlinedTextField(value = password, onValueChange = { password = it.take(256) },
             label = { Text("Mot de passe (12 caractères minimum)") }, enabled = !busy,
             visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())

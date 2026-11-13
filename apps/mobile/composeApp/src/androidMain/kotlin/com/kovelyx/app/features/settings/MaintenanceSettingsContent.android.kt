@@ -10,7 +10,7 @@ import com.kovelyx.maintenance.android.AndroidMaintenancePanel
 internal actual fun MaintenanceSettingsContent() {
     AndroidMaintenancePanel(account = {
         when (val auth = AuthRepository.state.value) {
-            is AuthState.Authenticated -> if (auth.isAnonymous) "guest" else com.kovelyx.app.core.cloud.CloudflareConfig.URL + "|" + auth.userId
+            is AuthState.Authenticated -> if (auth.isAnonymous) "guest" else auth.userId
             AuthState.Unauthenticated -> "guest"
             else -> error("Compte en cours de chargement")
         }

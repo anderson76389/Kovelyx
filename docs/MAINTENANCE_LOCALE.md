@@ -19,11 +19,11 @@ Le nombre de mutations de bibliothèque vient de la file réelle. La TV compte a
 1. Mettre la lecture en pause et éviter les modifications de réglages ou profils pendant l'opération.
 2. Choisir un mot de passe d'au moins 12 caractères, le confirmer, puis créer un fichier `.kovbackup` avec le sélecteur système.
 3. Conserver le fichier sur un support distinct de l'appareil, avec le mot de passe séparément.
-4. Pour restaurer, se connecter au même compte sur le même serveur et utiliser le même type d'application. Les sauvegardes invitées restent distinctes des comptes connectés.
+4. Pour restaurer, se connecter au même compte et utiliser le même type d'application. L’identifiant du compte doit être conservé lors d’une migration du serveur. Les sauvegardes invitées restent distinctes des comptes connectés.
 5. Saisir le mot de passe, confirmer la restauration puis sélectionner le fichier. L'application valide entièrement l'archive avant de préparer une modification.
 6. Fermer complètement Kovelyx puis le relancer. Avant le redémarrage, la restauration peut encore être annulée depuis les paramètres.
 
-Le contenu comprend les préférences locales, bibliothèques, progression, statuts vus, profils, configuration des extensions et médias privés de profil dans les dossiers pris en charge. Les sessions et jetons de connexion, caches de PIN, identifiants des files de synchronisation, téléchargements vidéo, caches et fichiers exécutables de plugins sont exclus. Les plugins exécutables doivent être réinstallés si leurs fichiers ne sont plus présents. Les sauvegardes de l'application ne remplacent pas les sauvegardes du serveur de comptes.
+Le contenu comprend les préférences locales, bibliothèques, progression, statuts vus, profils, configuration des extensions et médias privés de profil dans les dossiers pris en charge. Les sessions et jetons de connexion, connexions aux serveurs multimédias, configuration de connexion au backend, caches de PIN, identifiants des files de synchronisation, téléchargements vidéo, caches et fichiers exécutables de plugins sont exclus. Les plugins exécutables doivent être réinstallés si leurs fichiers ne sont plus présents. Les sauvegardes de l'application ne remplacent pas les sauvegardes du serveur de comptes.
 
 Les données remplacées correspondent aux fichiers présents dans l'archive. Les fichiers personnels extérieurs à ces dossiers ne sont pas modifiés. Les règles habituelles de synchronisation reprennent après restauration ; une sauvegarde locale n'est pas un retour à une date précédente de la base distante. Les références absolues aux médias peuvent nécessiter une nouvelle sélection si le chemin du dossier utilisateur change sur un autre ordinateur.
 
@@ -33,6 +33,6 @@ La restauration prépare un journal local et une copie des fichiers précédents
 
 ## Vérification
 
-Les sources communes se trouvent dans `shared/maintenance*`. Le workflow `maintenance-safety.yml` teste le même moteur sur Windows et Linux, y compris mots de passe incorrects, autres comptes/serveurs/types d'application, fichiers tronqués/altérés, doublons, sorties de dossiers, liens symboliques, restauration interrompue, rollback et nettoyage différé. Un scénario de 24 Mio vérifie le traitement en flux avec un tas JVM limité à 64 Mio.
+Les sources communes se trouvent dans `shared/maintenance*`. Le workflow `maintenance-safety.yml` teste le même moteur sur Windows et Linux, y compris mots de passe incorrects, autres comptes/types d'application, fichiers tronqués/altérés, doublons, sorties de dossiers, liens symboliques, restauration interrompue, rollback et nettoyage différé. Un scénario de 24 Mio vérifie le traitement en flux avec un tas JVM limité à 64 Mio.
 
 Les compilations et suites Kotlin des trois applications, la synchronisation Worker/D1, les lecteurs et les mises à jour sont des contrôles complémentaires. Les essais sur émulateur ne certifient pas tous les matériels physiques, fournisseurs de fichiers, codecs ou services externes. Aucun test fini ne peut prouver l'absence de toute fuite ou garantir que des services tiers fonctionneront éternellement.

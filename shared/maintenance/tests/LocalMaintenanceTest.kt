@@ -11,7 +11,7 @@ import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
 private val password = "Mot de passe de test 2026!".toCharArray()
-private val scope = maintenanceScope("mobile", "server|account-a")
+private val scope = maintenanceScope("mobile", "account-a")
 private var passed = 0
 private fun test(name: String, action: () -> Unit) {
     try { action(); passed++; println("PASS $name") }
@@ -120,9 +120,15 @@ fun main() {
         refused { f.stage(bytes, secret = "un autre mot de passe".toCharArray()) }
         check(File(f.data, "a.properties").readText() == "current" && f.engine.hasPendingRestore())
     } }
-    test("another account refused") { Fixture().use { f -> f.put("a.properties", "old"); refused { f.stage(f.backup(), maintenanceScope("mobile", "server|account-b")) }; check(!f.engine.hasPendingRestore()) } }
-    test("another application kind refused") { Fixture().use { f -> f.put("a.properties", "old"); refused { f.stage(f.backup(), maintenanceScope("tv", "server|account-a")) } } }
-    test("another backend refused") { Fixture().use { f -> f.put("a.properties", "old"); refused { f.stage(f.backup(), maintenanceScope("mobile", "other-server|account-a")) } } }
+    test("another account refused") { Fixture().use { f -> f.put("a.properties", "old"); refused { f.stage(f.backup(), maintenanceScope("mobile", "account-b")) }; check(!f.engine.hasPendingRestore()) } }
+    test("another application kind refused") { Fixture().use { f -> f.put("a.properties", "old"); refused { f.stage(f.backup(), maintenanceScope("tv", "account-a")) } } }
+    test("same logical account restores with a fresh device session") { Fixture().use { f ->
+        val file = f.put("a.properties", "saved")
+        val bytes = f.backup(); file.writeText("current")
+        f.engine.stage(bytes.inputStream(), password, maintenanceScope("mobile", "account-a"), "fresh-session")
+        check(f.engine.startup("fresh-session") == "Sauvegarde restaurée")
+        check(file.readText() == "saved")
+    } }
     test("account switch after staging refuses writes") { Fixture().use { f ->
         val file = f.put("a.properties", "old"); val bytes = f.backup(); file.writeText("current"); f.stage(bytes)
         check(f.engine.startup("session-b")!!.contains("refusée")); check(file.readText() == "current")
@@ -194,7 +200,7 @@ fun main() {
         check(outside.readText() == "private")
     } }
     test("preference policy excludes sessions credentials downloads and stale outboxes") {
-        for (name in listOf("nuvio_auth.xml", "kovelyx_secure_cloudflare_auth.xml", "kovelyx_cloudflare_session.xml", "nuvio_sync_client_identity.xml", "downloads.preferences_pb", "profile_1_credentials.xml", "profile_pin.xml", "watch_state_pending_mutations.preferences_pb")) check(!maintenancePreferenceAllowed(name))
+        for (name in listOf("nuvio_auth.xml", "nuvio_servers.xml", "media_servers.xml", "server_configuration.xml", "server_credentials.properties", "kovelyx_secure_cloudflare_auth.xml", "kovelyx_cloudflare_session.xml", "nuvio_sync_client_identity.xml", "downloads.preferences_pb", "profile_1_credentials.xml", "profile_pin.xml", "watch_state_pending_mutations.preferences_pb")) check(!maintenancePreferenceAllowed(name))
         for (name in listOf("nuvio_library.properties", "profile_settings.preferences_pb", "nuvio_avatars.xml", "nuvio_plugins.xml", "nuvio_watch_progress.xml")) check(maintenancePreferenceAllowed(name))
     }
     println("$passed maintenance checks passed")

@@ -3,7 +3,6 @@ package com.kovelyx.app.features.settings
 import androidx.compose.runtime.Composable
 import com.kovelyx.app.core.auth.AuthRepository
 import com.kovelyx.app.core.auth.AuthState
-import com.kovelyx.app.core.cloud.CloudflareConfig
 import com.kovelyx.app.core.cloud.CloudflareDataSync
 import com.kovelyx.app.core.storage.DesktopStorage
 import com.kovelyx.maintenance.*
@@ -37,7 +36,7 @@ internal object DesktopMaintenance {
             "torrent" to File(cache, "nuvio-engine/payload")),
         isSymbolicLink = { Files.isSymbolicLink(it.toPath()) })
     private fun account(): String = when (val auth = AuthRepository.state.value) {
-        is AuthState.Authenticated -> if (auth.isAnonymous) "guest" else CloudflareConfig.URL + "|" + auth.userId
+        is AuthState.Authenticated -> if (auth.isAnonymous) "guest" else auth.userId
         AuthState.Unauthenticated -> "guest"
         else -> error("Compte en cours de chargement")
     }

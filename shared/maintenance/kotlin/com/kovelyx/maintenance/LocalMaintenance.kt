@@ -188,7 +188,7 @@ class LocalMaintenance(
             plain.outputStream().use { out ->
                 while (true) {
                     val size = encrypted.readInt(); require(size in 0..65536)
-                    total += size; require(total <= MAX_BYTES + 1024 * 1024)
+                    total += size; require(total <= MAX_BYTES + 16 * 1024 * 1024)
                     val sealed = ByteArray(size + 16).also(encrypted::readFully)
                     val chunk = chunkCipher(Cipher.DECRYPT_MODE, secret, iv, sequence++, size).doFinal(sealed)
                     if (size == 0) { require(encrypted.read() == -1); break }
@@ -301,6 +301,6 @@ fun maintenanceScope(platform: String, account: String): String =
 /** Excludes device-bound keys, login sessions, downloads and stale outboxes. */
 fun maintenancePreferenceAllowed(path: String): Boolean {
     val name = path.lowercase()
-    return listOf("auth", "session", "credential", "token", "pin", "sync_identity", "sync_client", "pending_mutation", "download", "updater")
+    return listOf("auth", "session", "credential", "token", "pin", "nuvio_servers", "media_servers", "server_configuration", "sync_identity", "sync_client", "pending_mutation", "download", "updater")
         .none(name::contains) && !name.endsWith(".bak")
 }
