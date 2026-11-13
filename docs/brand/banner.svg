@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="520" viewBox="0 0 1440 520" role="img" aria-labelledby="title subtitle">
-<title id="title">Kovelyx — Votre univers multimédia</title><desc id="subtitle">Identité graphique Kovelyx violet nuit avec interfaces conceptuelles Windows, Android et Android TV. Visuels illustratifs, non contractuels.</desc>
+<title id="title">Kovelyx — Votre univers multimédia</title><desc id="subtitle">Identité graphique Kovelyx violet nuit avec interfaces conceptuelles Windows, Linux, Android et Android TV. Visuels illustratifs, non contractuels.</desc>
 <defs>
 <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101126"/><stop offset=".55" stop-color="#070916"/><stop offset="1" stop-color="#140D2F"/></linearGradient>
 <linearGradient id="textGrad" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#EAD3FF"/><stop offset=".45" stop-color="#B378FF"/><stop offset="1" stop-color="#7C72FF"/></linearGradient>
@@ -22,9 +22,10 @@
 <text x="83" y="307" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#D6CDEB" letter-spacing=".7">Votre univers multimédia, sur tous vos écrans.</text>
 <path d="M83 340H590" stroke="#9C79DF" stroke-opacity=".3"/>
 <g font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="700" fill="#E2D4FF">
-<rect x="83" y="368" width="145" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="104" cy="389" r="4.5" fill="#C6A1FF"/><text x="118" y="395">WINDOWS</text>
-<rect x="241" y="368" width="146" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="262" cy="389" r="4.5" fill="#C6A1FF"/><text x="276" y="395">ANDROID</text>
-<rect x="400" y="368" width="178" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="421" cy="389" r="4.5" fill="#C6A1FF"/><text x="435" y="395">ANDROID TV</text>
+<rect x="83" y="368" width="138" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="104" cy="389" r="4.5" fill="#C6A1FF"/><text x="118" y="395">WINDOWS</text>
+<rect x="229" y="368" width="112" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="250" cy="389" r="4.5" fill="#C6A1FF"/><text x="264" y="395">LINUX</text>
+<rect x="349" y="368" width="140" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="370" cy="389" r="4.5" fill="#C6A1FF"/><text x="384" y="395">ANDROID</text>
+<rect x="497" y="368" width="168" height="43" rx="21" fill="#211A38" stroke="#A17CE9" stroke-opacity=".55"/><circle cx="518" cy="389" r="4.5" fill="#C6A1FF"/><text x="532" y="395">ANDROID TV</text>
 </g>
 <text x="83" y="455" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="600" letter-spacing="2" fill="#9F96C4">CODE OUVERT  •  SOURCES PERSONNALISABLES</text>
 <g filter="url(#shadow)">
