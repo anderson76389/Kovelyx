@@ -1,82 +1,91 @@
-# 🐧 Kovelyx sur Linux
+# Kovelyx sur Linux — même application PC que Windows
 
-L'objectif Linux est de proposer **une AppImage portable x86-64**, ainsi que des **paquets DEB (Debian/Ubuntu) et RPM (Fedora)**. La version AppImage évite de conserver un dossier de nombreux fichiers à côté du programme. La version Linux est **expérimentale** : sa compilation AppImage et sa structure ont été vérifiées sur Ubuntu 24.04 en CI, mais la lecture vidéo et la compatibilité avec plusieurs distributions doivent encore être testées.
+La version Linux utilise les **mêmes sources Kotlin Multiplatform / Compose Desktop**
+que Windows : interface, bibliothèque, profils, moteur de lecture et synchronisation.
+Les composants natifs du lecteur sont compilés pour Linux (JNI + libmpv) ;
+les sources du moteur sont conservées dans le dépôt.
 
-## Fichier principal
+## Formats de téléchargement
 
-`Kovelyx-Linux-x86_64-<commit>.AppImage` — téléchargement depuis le [workflow Linux](https://github.com/anderson76389/Kovelyx/actions/workflows/linux.yml) **uniquement si l'exécution est verte et qu'un artefact existe**. [Première AppImage contrôlée par le pipeline](https://github.com/anderson76389/Kovelyx/actions/runs/38510728469/artifacts/11869259804).
+Sur [Releases](https://github.com/anderson76389/Kovelyx/releases/latest), chaque nouvelle
+version intégrant Linux contient trois fichiers **Linux x86_64**, avec un
+fichier SHA-256 distinct pour chacun :
 
-1. Ouvrir le dernier workflow Linux **réussi**, puis télécharger son artefact `Kovelyx-Linux-AppImage-experimental`.
-2. Décompresser **l'archive GitHub Actions** (elle contient l'AppImage et son fichier SHA256). L'AppImage elle-même ne doit pas être décompressée manuellement.
-3. Dans un terminal :
-   ```bash
-   chmod +x Kovelyx-Linux-x86_64-*.AppImage
-   ./Kovelyx-Linux-x86_64-*.AppImage
-   ```
-4. Vérifier l'empreinte du fichier téléchargé avec `sha256sum -c *.sha256`, depuis le dossier qui contient les deux fichiers.
+| Fichier | Distribution |
+|---|---|
+| Kovelyx-Linux-x86_64-vVERSION.AppImage | Linux x86_64 compatible avec AppImage |
+| Kovelyx-Linux-amd64-vVERSION.deb | Debian/Ubuntu et dérivées compatibles (amd64) |
+| Kovelyx-Linux-x86_64-vVERSION.rpm | Fedora et dérivées compatibles (x86_64) |
 
-**Compatibilité :** version **x86-64** uniquement. Aucun build ARM64 n'est encore validé. Une AppImage contient le lanceur, l'application et le runtime Java, **mais ne promet pas d'embarquer toutes les bibliothèques du système**.
+Les paquets sont prévus pour **x86_64 (Intel/AMD 64 bits)**. Ce ne sont pas
+des binaires ARM64/aarch64 : Raspberry Pi et certains PC ARM nécessitent un
+autre build natif. La compatibilité dépend aussi de glibc, du serveur graphique
+(X11/Wayland/XWayland), des codecs, du pilote GPU et des bibliothèques du système.
 
-## Installations natives DEB et RPM
+**Le runtime Java est inclus.** Les bibliothèques GTK, WebKitGTK 4.1,
+libmpv, GStreamer et leurs codecs restent des dépendances Linux à installer
+avec le gestionnaire de paquets. DEB et RPM déclarent leurs dépendances ;
+un AppImage n'est pas forcément totalement autonome pour l'audio/vidéo.
 
-Le workflow [Linux](../.github/workflows/linux.yml) comporte également un **job de compilation distinct** pour les paquets `Kovelyx-Linux-amd64-<commit>.deb` et `Kovelyx-Linux-x86_64-<commit>.rpm`. Il n'existe aucun paquet à télécharger tant que ce job n'a pas réussi et publié l'artefact `Kovelyx-Linux-Packages-experimental`.
+## Installation
 
-Sur Ubuntu ou Debian x86-64 :
+Vérifier l'empreinte SHA-256 du fichier téléchargé :
 
-```bash
-sudo apt install ./Kovelyx-Linux-amd64-*.deb
-```
+    sha256sum -c Kovelyx-Linux-x86_64-vVERSION.AppImage.sha256
 
-Sur Fedora x86-64 :
+AppImage :
 
-```bash
-sudo dnf install ./Kovelyx-Linux-x86_64-*.rpm
-```
+    chmod +x Kovelyx-Linux-x86_64-vVERSION.AppImage
+    ./Kovelyx-Linux-x86_64-vVERSION.AppImage
 
-Ces commandes installent **un paquet vérifié provenant du dépôt Kovelyx**, et demandent les droits nécessaires à l'installation. Les bibliothèques système indiquées comme dépendances doivent être satisfaites par le gestionnaire de paquets. Les autres distributions Linux ne sont pas automatiquement prises en charge.
+Debian/Ubuntu :
 
-## Dépendances et limitations Linux
+    sudo apt install ./Kovelyx-Linux-amd64-vVERSION.deb
 
-Le lecteur d'origine utilise notamment **libmpv**, **GTK 3**, **WebKit2GTK 4.1**, **X11** et des bibliothèques vidéo. Suivant la distribution, ces bibliothèques peuvent être absentes ou avoir des noms différents.
+Fedora :
 
-Sur Ubuntu/Debian, installer les dépendances compatibles disponibles auprès de la distribution et vérifier les erreurs de chargement ; ne téléchargez jamais des `.so` inconnues depuis un site arbitraire. Le [script de dépendances de compilation](../apps/desktop/scripts/linux/install-desktop-build-dependencies.sh) sert au développeur : il installe aussi les en-têtes et outils C++ et n'est **pas** requis en entier pour les utilisateurs.
+    sudo dnf install ./Kovelyx-Linux-x86_64-vVERSION.rpm
 
-Le rendu vidéo intégré s'appuie sur des composants liés à X11 : le comportement sous **Wayland pur** n'est pas encore certifié. Un environnement XWayland peut être nécessaire. Fedora, Arch, Ubuntu, Debian et les autres distributions doivent être testées individuellement.
+Remplacer VERSION par le numéro réel de la Release. Ne pas installer DEB
+et RPM simultanément : choisir le format adapté au système.
 
-## Compilation
+## Compilation depuis les sources (Linux x86_64)
 
-Depuis Linux x86-64, avec **JDK 21** et toutes les dépendances C++ natives :
+Prérequis : JDK 21, Android SDK/Gradle si demandé, Python 3.12, compilateur
+C++, pkg-config, libmpv-dev, WebKitGTK 4.1-dev, GTK 3, X11, rpm, fakeroot,
+cpio et appimagetool.
 
-```bash
-git clone https://github.com/anderson76389/Kovelyx.git
-cd Kovelyx
-bash apps/desktop/scripts/linux/install-desktop-build-dependencies.sh
-python3 -m pip install Pillow==11.3.0
-python3 scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
-cd apps/desktop
-chmod +x gradlew
-# Prérequis : appimagetool exécutable et vérifié via SHA256
-APPIMAGETOOL=/chemin/absolu/vers/appimagetool-x86_64.AppImage ./gradlew :composeApp:packageReleaseAppImage --no-daemon
-```
+Le workflow [Kovelyx Linux](../.github/workflows/linux.yml) installe les
+dépendances et lance les tests et tâches de packaging sur Ubuntu :
 
-La commande d'installation des dépendances demande les droits administrateur, **pas le lancement du logiciel**. Pour reproduire précisément la compilation automatisée, lire [`linux.yml`](../.github/workflows/linux.yml).
+    cd apps/desktop
+    ./gradlew :composeApp:desktopTest \
+      :composeApp:packageReleaseDeb \
+      :composeApp:packageReleaseRpm \
+      :composeApp:packageReleaseAppImage \
+      -Pnuvio.desktop.versionName=VERSION --no-daemon
 
-## Aide au diagnostic
+La propriété Gradle porte un ancien nom technique conservé pour compatibilité
+avec les binaires et scripts ; ce n'est pas une API Nuvio.
 
-| Symptôme | À vérifier |
-|:--|:--|
-| `Permission denied` | `chmod +x` sur le fichier AppImage |
-| Bibliothèque `libmpv` ou `webkit` introuvable | Paquet natif disponible dans la distribution |
-| Fenêtre sans vidéo | Pilote graphique, X11/XWayland, journaux du lecteur |
-| `exec format error` | Architecture du PC (x86-64 obligatoire) |
-| L'AppImage ne démarre pas | Journal du terminal, distribution et version |
+## Publications futures sans casser les autres versions
 
-Signaler les erreurs dans les [Issues Kovelyx](https://github.com/anderson76389/Kovelyx/issues) avec la distribution, sa version, le type de session (X11/Wayland), la version du noyau, le processeur et les journaux expurgés de toute donnée sensible.
+Le workflow Linux génère AppImage, DEB, RPM et leurs tests, puis un artefact
+vérifié lié au commit. Le script
+[scripts/publish-verified-preview.py](../scripts/publish-verified-preview.py)
+attend désormais les quatre preuves du **même commit** : Windows, Linux,
+Android et Android TV, plus les contrôles fonctionnels.
 
-## Tests et vérification des paquets
+Une nouvelle Release doit donc contenir les quatre plateformes ou être
+bloquée. Les anciennes Releases ne sont pas modifiées par ce changement.
+Les paquets installés n'ont pas encore de mise à jour automatique Linux
+éprouvée ; consulter les Releases pour les remplacer.
 
-Le pipeline contrôle les noms de paquets, les architectures amd64/x86_64, le mainteneur et l'éditeur affichés, les raccourcis Linux et les dépendances déclarées. Il produit des empreintes SHA-256. Ces contrôles de structure ne garantissent pas que l'interface et la lecture fonctionnent sur tous les PC.
+## Tests manuels avant version stable
 
-## Attention
-
-Linux **n'exécute pas les .exe Windows nativement**. Le format à fichier unique conseillé est l'**AppImage** ; les installateurs Windows et Linux ne sont pas interchangeables.
+Les tests de compilation et de métadonnées ne prouvent pas la lecture de
+chaque vidéo. Tester Ubuntu, Debian, Fedora : démarrage et fermeture,
+pochettes, lecteurs audio/vidéo, sous-titres, catalogues et extensions,
+profils, stockage, veille et consommation RAM/CPU. Sur Wayland, certains
+composants peuvent utiliser XWayland. Pour un compte synchronisé, fournir
+un backend Kovelyx HTTPS opérationnel, sans dépendance à Nuvio.

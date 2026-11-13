@@ -14,6 +14,49 @@ SPEC.loader.exec_module(PREVIEW)
 
 
 class VerifiedPreviewTests(unittest.TestCase):
+    def test_linux_release_requires_three_real_versioned_packages(self):
+        import hashlib
+        tag = "v1.1.1148"
+        names = PREVIEW.linux_package_names(tag)
+        self.assertEqual(names, (
+            "Kovelyx-Linux-x86_64-v1.1.1148.AppImage",
+            "Kovelyx-Linux-amd64-v1.1.1148.deb",
+            "Kovelyx-Linux-x86_64-v1.1.1148.rpm",
+        ))
+        with tempfile.TemporaryDirectory() as folder:
+            dest = Path(folder)
+            payloads = [
+                b"\x7fELF", b"!<arch>\n", b"\xed\xab\xee\xdb"
+            ]
+            for name, header in zip(names, payloads):
+                payload = header + b"k" * 1_000_001
+                (dest / name).write_bytes(payload)
+                (dest / (name + ".sha256")).write_text(
+                    hashlib.sha256(payload).hexdigest() + "  " + name + "\n",
+                    encoding="utf-8")
+            actual = PREVIEW.verify_linux_artifacts(dest, tag)
+            self.assertEqual([path.name for path in actual], sorted(names))
+            (dest / (names[0] + ".sha256")).write_text("0" * 64 + "  " + names[0] + "\n")
+            with self.assertRaisesRegex(RuntimeError, "Empreinte Linux"):
+                PREVIEW.verify_linux_artifacts(dest, tag)
+            (dest / (names[0] + ".sha256")).write_text(
+                hashlib.sha256((dest / names[0]).read_bytes()).hexdigest() + "  " + names[0] + "\n")
+            (dest / "unexpected.bin").write_bytes(b"rogue")
+            with self.assertRaisesRegex(RuntimeError, "incomplets ou inattendus"):
+                PREVIEW.verify_linux_artifacts(dest, tag)
+
+    def test_linux_ci_identity_matches_publishing_gate(self):
+        workflow = (Path(__file__).resolve().parents[2] / ".github/workflows/linux.yml").read_text()
+        self.assertIn("name: " + PREVIEW.LINUX, workflow)
+        self.assertIn("name: " + PREVIEW.LINUX_JOB, workflow)
+        self.assertIn("name: kovelyx-linux-packages", workflow)
+        self.assertIn("packageReleaseAppImage", workflow)
+        self.assertIn("packageReleaseDeb", workflow)
+        self.assertIn("packageReleaseRpm", workflow)
+        publisher = (Path(__file__).resolve().parents[1] / "publish-verified-preview.py").read_text()
+        self.assertIn("(WINDOWS, LINUX, FUNCTIONAL, FRENCH)", publisher)
+        self.assertIn('verify_linux_artifacts(root / "linux", tag)', publisher)
+
     def test_real_optimized_workflow_jobs_match_the_publication_gate(self):
         import re
         workflow = (Path(__file__).resolve().parents[2] / ".github/workflows/build.yml").read_text()

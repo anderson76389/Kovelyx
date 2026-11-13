@@ -27,7 +27,7 @@ cat > "$package_root/DEBIAN/control" <<'CONTROL'
 Package: kovelyx-test
 Version: 1.0-1
 Architecture: all
-Maintainer: Kovelyx Packaging Tests <tests@example.invalid>
+Maintainer: Kovelyx <anderson76389@users.noreply.github.com>
 Depends: libmpv2 (>= 0.35),
  libwebkit2gtk-4.1-0 | kovelyx-webkit-fallback,
  libxcomposite1,

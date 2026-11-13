@@ -19,13 +19,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Local, private Windows images. This does NOT upload photographs to Legacy.
+ * Local private Windows/Linux images. This does NOT upload photographs to a legacy service.
  * The file chooser accepts common raster formats, validates decoded dimensions
- * and stores an unchanged copy inside %APPDATA%/Kovelyx/profile-media.
+ * and stores an unchanged copy inside the platform-specific Kovelyx/profile-media directory.
  */
 internal actual object ProfileLocalImages {
     actual val supported: Boolean =
-        System.getProperty("os.name").orEmpty().startsWith("Windows", ignoreCase = true)
+        System.getProperty("os.name").orEmpty().let { os ->
+            os.startsWith("Windows", ignoreCase = true) || os.startsWith("Linux", ignoreCase = true)
+        }
 
     private val imageDir: Path
         get() = DesktopStorage.rootDir.resolve("profile-media").toAbsolutePath().normalize()

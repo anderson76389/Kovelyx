@@ -15,6 +15,8 @@ on:
       - 'scripts/desktop-release-version.py'
       - 'scripts/sign-ci-debug-apk.sh'
       - 'scripts/publish-verified-preview.py'
+      - 'scripts/package-linux-release.sh'
+      - '.github/workflows/linux.yml'
       - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/publish-signed-android.yml'
       - 'scripts/publish-unified-preview.sh'
@@ -31,6 +33,8 @@ on:
       - 'scripts/desktop-release-version.py'
       - 'scripts/sign-ci-debug-apk.sh'
       - 'scripts/publish-verified-preview.py'
+      - 'scripts/package-linux-release.sh'
+      - '.github/workflows/linux.yml'
       - 'scripts/tests/test_verified_preview.py'
       - '.github/workflows/publish-signed-android.yml'
   workflow_dispatch:
@@ -86,6 +90,8 @@ jobs:
               - 'scripts/desktop-release-version.py'
               - 'scripts/sign-ci-debug-apk.sh'
               - 'scripts/publish-verified-preview.py'
+              - 'scripts/package-linux-release.sh'
+              - '.github/workflows/linux.yml'
               - 'scripts/tests/test_verified_preview.py'
               - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
@@ -101,6 +107,8 @@ jobs:
               - 'scripts/desktop-release-version.py'
               - 'scripts/sign-ci-debug-apk.sh'
               - 'scripts/publish-verified-preview.py'
+              - 'scripts/package-linux-release.sh'
+              - '.github/workflows/linux.yml'
               - 'scripts/tests/test_verified_preview.py'
               - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
@@ -416,12 +424,12 @@ jobs:
           retention-days: 7
 
   publish-verified-preview:
-    name: Publier les trois paquets vérifiés pour la bannière de mise à jour
+    name: Publier les quatre plateformes vérifiées pour la bannière de mise à jour
     # Publish the tested default-branch commit; GITHUB_TOKEN cannot grant workflow-write scope.
     needs: [tv, mobile]
     if: ${{ github.event_name == 'push' && github.repository == 'anderson76389/Kovelyx' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 120
     permissions:
       contents: write
       actions: read

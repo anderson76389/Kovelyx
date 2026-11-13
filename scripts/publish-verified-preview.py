@@ -11,6 +11,8 @@ import time
 
 REPOSITORY = "anderson76389/Kovelyx"
 WINDOWS = "Kovelyx Windows - MSI et tests de packaging"
+LINUX = "Kovelyx Linux - packages et tests"
+LINUX_JOB = "Compiler Kovelyx Linux x86_64 - AppImage DEB RPM"
 FUNCTIONAL = "Tester les fonctions Kotlin Android TV et Android mobile"
 FRENCH = "Vérifier le français et les logos Windows Android et TV"
 ANDROID_JOB_NAMES = (
@@ -50,6 +52,37 @@ def unique_file(root, pattern):
         raise RuntimeError(f"Un paquet complet unique est requis : {pattern}")
     return files[0]
 
+
+
+def linux_package_names(tag):
+    return (
+        f"Kovelyx-Linux-x86_64-{tag}.AppImage",
+        f"Kovelyx-Linux-amd64-{tag}.deb",
+        f"Kovelyx-Linux-x86_64-{tag}.rpm",
+    )
+
+
+def verify_linux_artifacts(directory, tag):
+    """Fail closed on missing, unexpected, corrupt or mismatched Linux packages."""
+    names = set(linux_package_names(tag))
+    expected = names | {name + ".sha256" for name in names}
+    files = {path.name: path for path in directory.rglob("*") if path.is_file()}
+    if set(files) != expected:
+        raise RuntimeError(f"Artefacts Linux incomplets ou inattendus: {set(files) ^ expected}")
+    for name in names:
+        path = files[name]
+        if path.stat().st_size < 1_000_000:
+            raise RuntimeError("Paquet Linux tronqué : " + name)
+        checksum = files[name + ".sha256"].read_text(encoding="utf-8").strip()
+        if checksum != f"{digest(path)}  {name}":
+            raise RuntimeError("Empreinte Linux invalide : " + name)
+        if name.endswith(".AppImage") and path.open("rb").read(4) != b"\x7fELF":
+            raise RuntimeError("En-tête AppImage incorrect")
+        if name.endswith(".deb") and path.open("rb").read(8) != b"!<arch>\n":
+            raise RuntimeError("En-tête Debian incorrect")
+        if name.endswith(".rpm") and path.open("rb").read(4) != b"\xed\xab\xee\xdb":
+            raise RuntimeError("En-tête RPM incorrect")
+    return [files[name] for name in sorted(names)]
 
 def windows_package_names(sha, tag):
     """CI artifacts use the source SHA; public updater assets use the version tag."""
@@ -200,20 +233,24 @@ def main():
     jobs = api(f"actions/runs/{build_id}/jobs?per_page=100")["jobs"]
     if not android_jobs_succeeded(jobs):
         raise RuntimeError("Les deux builds Android doivent être validés sur le même commit")
-    deadline = time.monotonic() + 1800
+    deadline = time.monotonic() + 6000
     while True:
         runs = api(f"actions/runs?head_sha={sha}&per_page=100")["workflow_runs"]
-        proofs = [matching_run(runs, name, sha) for name in (WINDOWS, FUNCTIONAL, FRENCH)]
+        proofs = [matching_run(runs, name, sha) for name in (WINDOWS, LINUX, FUNCTIONAL, FRENCH)]
         failed = [r for r in proofs if r and r["status"] == "completed" and r["conclusion"] != "success"]
         if failed:
             raise RuntimeError("Publication bloquée : un contrôle du même commit a échoué")
         if all(r and r["status"] == "completed" and r["conclusion"] == "success" for r in proofs):
+            linux_jobs = api(f"actions/runs/{proofs[1]['id']}/jobs?per_page=100")["jobs"]
+            if not any(job.get("name") == LINUX_JOB and job.get("conclusion") == "success" for job in linux_jobs):
+                raise RuntimeError("La construction Linux complète n'a pas réussi")
             break
         if time.monotonic() >= deadline:
-            raise RuntimeError("Publication bloquée : contrôles Windows et Android non terminés")
+            raise RuntimeError("Publication bloquée : contrôles Windows, Linux et Android non terminés")
         print("Attente des tests et du packaging du même commit…", flush=True)
         time.sleep(30)
     windows_id = proofs[0]["id"]
+    linux_id = proofs[1]["id"]
     version = subprocess.check_output(
         ["python3", "scripts/desktop-release-version.py", "--commit", sha], text=True
     ).strip()
@@ -225,6 +262,7 @@ def main():
             (build_id, "kovelyx-mobile-debug", "mobile"),
             (build_id, "kovelyx-tv-debug", "tv"),
             (windows_id, "Kovelyx-Windows-installers-experimental", "windows"),
+            (linux_id, "kovelyx-linux-packages", "linux"),
         ):
             gh("run", "download", str(run), "--repo", REPOSITORY, "--name", artifact,
                "--dir", str(root / destination))
@@ -252,11 +290,16 @@ def main():
         verify_previous_public_signatures(root, tools, tag, certificates)
         for source_name, public_name in windows_package_names(sha, tag):
             shutil.copyfile(unique_file(root / "windows", source_name), output / public_name)
+        for linux_file in verify_linux_artifacts(root / "linux", tag):
+            shutil.copyfile(linux_file, output / linux_file.name)
         for path in list(output.iterdir()):
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
         notes = root / "notes.md"
         notes.write_text(
-            "Kovelyx pour Windows, Android et Android TV.\n\n"
+            "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n"
+            "- Linux : AppImage (distributions compatibles), DEB (Debian/Ubuntu), RPM (Fedora et dérivées).\n"
+            "- Le runtime Java est inclus ; libmpv, WebKitGTK et les codecs Linux sont des dépendances système.\n"
+            "- Les paquets Linux proviennent des mêmes sources Compose Desktop que Windows, avec un build natif et des tests propres.\n"
             "- Profils TV en consultation : noms, photos et fonds reçus du cloud. Modification sur Android mobile ou PC.\n"
             "- Politique de confidentialité, En savoir plus et Discord retirés de l’interface.\n"
             "- Connexions Trakt et MDBList : accès direct à la configuration si les clés manquent.\n"
@@ -272,12 +315,12 @@ def main():
             "- Android TV : test réel du mode invité et de la télécommande Google TV ; correction des tests précédemment ignorés.\n"
             "- Profils protégés par PIN : nécessitent la migration D1 0005 sur le Worker Cloudflare ; un APK seul ne modifie pas la base.\n"
             "- Regroupement des envois TV, quatre requêtes de manifeste au maximum et reprise des suppressions.\n\n"
-            f"Sources : `{sha}`. Paquets et tests automatiques vérifiés sur le même commit. "
+            f"Sources : `{sha}`. Paquets Windows, Linux, Android et TV testés et vérifiés sur le même commit. "
             "Les usages sur appareils physiques restent à valider.\n", encoding="utf-8")
         ensure_tag(tag, sha)
         if find_release(tag) is None:
             gh("release", "create", tag, "--repo", REPOSITORY, "--target", sha, "--draft",
-               *( ["--prerelease"] if preview else [] ), "--title", f"Kovelyx {version} — Windows, Android et TV",
+               *( ["--prerelease"] if preview else [] ), "--title", f"Kovelyx {version} — Windows, Linux, Android et TV",
                "--notes-file", str(notes))
         ref = api(f"git/ref/tags/{tag}")["object"]
         if ref["type"] == "tag":
