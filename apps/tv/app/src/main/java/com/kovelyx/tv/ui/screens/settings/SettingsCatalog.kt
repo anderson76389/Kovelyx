@@ -1,5 +1,8 @@
 package com.kovelyx.tv.ui.screens.settings
 
+import androidx.annotation.StringRes
+import com.kovelyx.tv.R
+
 internal enum class SettingsRailGroup {
     YOU,
     LOOK,
@@ -7,6 +10,17 @@ internal enum class SettingsRailGroup {
     SERVICES,
     SYSTEM
 }
+
+/** Visual-only headings: the categories, saved selections and focus order are unchanged. */
+@get:StringRes
+internal val SettingsRailGroup.titleRes: Int
+    get() = when (this) {
+        SettingsRailGroup.YOU -> R.string.settings_tv_group_you
+        SettingsRailGroup.LOOK -> R.string.settings_tv_group_look
+        SettingsRailGroup.WATCH -> R.string.settings_tv_group_watch
+        SettingsRailGroup.SERVICES -> R.string.settings_tv_group_services
+        SettingsRailGroup.SYSTEM -> R.string.settings_tv_group_system
+    }
 
 internal enum class SettingsCategory(val group: SettingsRailGroup) {
     ACCOUNT(SettingsRailGroup.YOU),
