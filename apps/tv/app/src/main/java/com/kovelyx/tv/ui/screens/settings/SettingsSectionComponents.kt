@@ -136,6 +136,29 @@ internal fun SettingsNote(
     )
 }
 
+/**
+ * A non-focusable rail heading. It does not add a D-pad destination, so
+ * the existing remembered category and scroll-to-focus logic stay intact.
+ */
+@Composable
+internal fun SettingsRailGroupHeading(text: String) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        color = KovelyxTheme.colors.TextTertiary,
+        letterSpacing = 0.8.sp,
+        maxLines = 2,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = SettingsRowContentInset,
+                end = SettingsRowContentInset,
+                top = KovelyxTheme.spacing.xs,
+                bottom = KovelyxTheme.spacing.xxs
+            )
+    )
+}
+
 @Composable
 internal fun SettingsRailDivider() {
     Box(
