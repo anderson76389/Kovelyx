@@ -174,14 +174,15 @@ jobs:
             apps/desktop/composeApp/build/compose/release-appimages \
             "$RUNNER_TEMP/kovelyx-linux"
 
-      - name: Exécuter les véritables versions DEB et AppImage sous Xvfb
+      - name: Exécuter les véritables versions DEB, RPM et AppImage sous Xvfb
         shell: bash
-        timeout-minutes: 5
+        timeout-minutes: 6
         run: |
           set -euo pipefail
           bash -n scripts/tests/linux-release-smoke.sh
           bash scripts/tests/linux-release-smoke.sh \
             "$RUNNER_TEMP/kovelyx-linux/Kovelyx-Linux-amd64-v$KOVELYX_BUILD_VERSION.deb" \
+            "$RUNNER_TEMP/kovelyx-linux/Kovelyx-Linux-x86_64-v$KOVELYX_BUILD_VERSION.rpm" \
             "$RUNNER_TEMP/kovelyx-linux/Kovelyx-Linux-x86_64-v$KOVELYX_BUILD_VERSION.AppImage"
 
       - name: Publier les trois paquets testés dans les artefacts du commit

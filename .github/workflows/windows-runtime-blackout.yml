@@ -47,13 +47,20 @@ jobs:
           "KOVELYX_RELEASE_TAG=$($release.tag_name)" >> $env:GITHUB_ENV
           $dest = Join-Path $env:RUNNER_TEMP 'kovelyx-portable-apk-independent'
           New-Item -Path $dest -ItemType Directory -Force | Out-Null
-          & gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY --pattern 'Kovelyx-Windows-Portable-*.zip' --dir $dest
+          & gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY --pattern 'Kovelyx-Windows-Portable-*.zip' --pattern 'Kovelyx-Windows-Portable-*.zip.sha256' --dir $dest
           if ($LASTEXITCODE -ne 0) { throw 'Echec du telechargement de la Release.' }
           $zip = @(Get-ChildItem $dest -Filter '*.zip')
           if ($zip.Count -ne 1) { throw "Archive Windows ambiguë : $($zip.Count)" }
-          "KOVELYX_ARCHIVE=$($zip[0].FullName)" >> $env:GITHUB_ENV
+          $checksum = Join-Path $dest ($zip[0].Name + '.sha256')
+          if (-not (Test-Path -LiteralPath $checksum)) { throw 'Empreinte publique Windows absente.' }
+          $line = (Get-Content -LiteralPath $checksum -Raw).Trim()
+          $parts = $line -split '\s+', 2
+          if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[0-9a-fA-F]{64}$') { throw 'Format SHA-256 invalide.' }
+          if ($parts[1] -ne $zip[0].Name) { throw 'Nom du ZIP different de son empreinte.' }
           $sha = (Get-FileHash -LiteralPath $zip[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-          "SHA256 portable Windows : $sha" >> $env:GITHUB_STEP_SUMMARY
+          if ($sha -ne $parts[0].ToLowerInvariant()) { throw 'SHA-256 Windows invalide.' }
+          "KOVELYX_ARCHIVE=$($zip[0].FullName)" >> $env:GITHUB_ENV
+          "SHA256 portable Windows verifie : $sha" >> $env:GITHUB_STEP_SUMMARY
       - name: Bloquer les domaines historiques Nuvio mais garder GitHub accessible
         shell: pwsh
         run: |
