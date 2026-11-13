@@ -21,8 +21,8 @@ class SettingsCatalogTest {
                 SettingsCategory.PROFILES,
                 SettingsCategory.APPEARANCE,
                 SettingsCategory.LAYOUT,
-                SettingsCategory.CONTENT_DISCOVERY,
                 SettingsCategory.PLAYBACK,
+                SettingsCategory.CONTENT_DISCOVERY,
                 SettingsCategory.INTEGRATION,
                 SettingsCategory.TRACKING,
                 SettingsCategory.ADVANCED,
@@ -90,9 +90,10 @@ class SettingsCatalogTest {
         assertEquals(
             listOf(
                 SettingsCategory.APPEARANCE,
-                SettingsCategory.CONTENT_DISCOVERY,
+                SettingsCategory.PLAYBACK,
                 SettingsCategory.INTEGRATION,
-                SettingsCategory.ADVANCED
+                SettingsCategory.ADVANCED,
+                SettingsCategory.DEBUG
             ),
             dividerBefore
         )
@@ -108,6 +109,52 @@ class SettingsCatalogTest {
         )
         assertFalse(categories.startsNewGroup(0))
         assertTrue(categories.startsNewGroup(categories.indexOf(SettingsCategory.CONTENT_DISCOVERY)))
+    }
+
+    @Test
+    fun `every ordinary TV rail group has exactly two coherent destinations`() {
+        val groups = visibleSettingsCategories(
+            isPrimaryProfile = true,
+            isEssentialMode = false,
+            isDebugBuild = false
+        ).groupBy { it.group }
+
+        assertEquals(
+            listOf(SettingsCategory.ACCOUNT, SettingsCategory.PROFILES),
+            groups[SettingsRailGroup.YOU]
+        )
+        assertEquals(
+            listOf(SettingsCategory.APPEARANCE, SettingsCategory.LAYOUT),
+            groups[SettingsRailGroup.LOOK]
+        )
+        assertEquals(
+            listOf(SettingsCategory.PLAYBACK, SettingsCategory.CONTENT_DISCOVERY),
+            groups[SettingsRailGroup.WATCH]
+        )
+        assertEquals(
+            listOf(SettingsCategory.INTEGRATION, SettingsCategory.TRACKING),
+            groups[SettingsRailGroup.SERVICES]
+        )
+        assertEquals(
+            listOf(SettingsCategory.ADVANCED, SettingsCategory.ABOUT),
+            groups[SettingsRailGroup.SYSTEM]
+        )
+        assertFalse(groups.containsKey(SettingsRailGroup.DIAGNOSTICS))
+    }
+
+    @Test
+    fun `group labels do not introduce additional focusable categories`() {
+        allCombinations().forEach { categories ->
+            val headingAt = categories.indices.filter(categories::startsLabeledGroup)
+            val groups = categories.map { it.group }.distinct()
+            assertEquals(groups.size, headingAt.size)
+            assertEquals(categories.indices.filter(categories::startsNewGroup).size + 1, headingAt.size)
+            assertTrue(categories.startsLabeledGroup(0))
+            if (SettingsCategory.DEBUG in categories) {
+                assertEquals(SettingsRailGroup.DIAGNOSTICS, SettingsCategory.DEBUG.group)
+                assertTrue(categories.startsNewGroup(categories.indexOf(SettingsCategory.DEBUG)))
+            }
+        }
     }
 
     private fun allCombinations(): List<List<SettingsCategory>> =
