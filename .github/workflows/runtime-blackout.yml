@@ -73,11 +73,17 @@ jobs:
           test -n "$tag" || { echo "::error::Aucune Release APK Kovelyx pour $RELEASE_PREFIX"; exit 1; }
           echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
           mkdir -p /tmp/kovelyx-runtime-apk
-          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern "$APK_GLOB" --dir /tmp/kovelyx-runtime-apk
+          # Le test doit installer des octets dont le SHA-256 correspond à
+          # l'empreinte publiée, pas simplement un fichier portant le bon nom.
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$APK_GLOB" --pattern "$APK_GLOB.sha256" --dir /tmp/kovelyx-runtime-apk
           count="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' | wc -l)"
           [[ "$count" == 1 ]] || { echo "::error::Un seul APK attendu : $count"; exit 1; }
-          unzip -tq "$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)" >/dev/null
-          echo "Version testee : $tag" >> "$GITHUB_STEP_SUMMARY"
+          apk="$(find /tmp/kovelyx-runtime-apk -type f -name '*.apk' -print -quit)"
+          test -s "$apk.sha256" || { echo "::error::Empreinte publique APK absente"; exit 1; }
+          (cd /tmp/kovelyx-runtime-apk && sha256sum --check -- "$(basename "$apk").sha256")
+          unzip -tq "$apk" >/dev/null
+          echo "Version testee et SHA-256 valide : $tag" >> "$GITHUB_STEP_SUMMARY"
       - name: Installer un DNS local qui bloque les anciens domaines Nuvio
         shell: bash
         run: |
