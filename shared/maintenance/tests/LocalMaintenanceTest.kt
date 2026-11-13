@@ -23,7 +23,7 @@ private class Fixture : AutoCloseable {
     val data = File(folder, "data").apply { mkdirs() }
     val work = File(folder, "work")
     val cache = File(folder, "cache").apply { mkdirs() }
-    val engine = LocalMaintenance(work, mapOf("prefs" to data), { root, path -> root == "prefs" && path.endsWith(".properties") }, mapOf("images" to cache))
+    val engine = LocalMaintenance(work, mapOf("prefs" to data), { root, path -> root == "prefs" && path.endsWith(".properties") }, mapOf("images" to cache), isSymbolicLink = { Files.isSymbolicLink(it.toPath()) })
     fun put(path: String, value: String): File = File(data, path).apply { parentFile.mkdirs(); writeText(value) }
     fun backup(): ByteArray = ByteArrayOutputStream().also { engine.export(it, password, scope) }.toByteArray()
     fun stage(bytes: ByteArray, owner: String = scope, secret: CharArray = password) = engine.stage(bytes.inputStream(), secret, owner, "session-a")
@@ -79,6 +79,40 @@ fun main() {
         val file = f.put("a.properties", ""); file.writeBytes(data)
         val backup = f.backup(); file.writeText("changed"); f.stage(backup); f.engine.startup("session-a")
         check(file.readBytes().contentEquals(data))
+    } }
+    test("concurrent writes to an already-exported preference refuse the backup") { Fixture().use { f ->
+        val first = f.put("a.properties", "before")
+        f.put("b.properties", "x".repeat(200000))
+        var changed = false
+        val out = object : ByteArrayOutputStream() {
+            override fun write(buffer: ByteArray, offset: Int, count: Int) {
+                super.write(buffer, offset, count)
+                if (!changed && size() > 65536) {
+                    changed = true; first.writeText("changed"); first.setLastModified(System.currentTimeMillis() + 5000)
+                }
+            }
+        }
+        refused { f.engine.export(out, password, scope) }; check(changed)
+    } }
+    test("large backup streams within a 64-MiB heap") { Fixture().use { f ->
+        val file = f.put("large.properties", "")
+        val block = ByteArray(65536) { (it * 29).toByte() }
+        file.outputStream().use { out -> repeat(384) { out.write(block) } }
+        fun digest(file: File): String {
+            val hash = MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val buffer = ByteArray(65536)
+                while (true) { val n = input.read(buffer); if (n < 0) break; hash.update(buffer, 0, n) }
+            }
+            return hash.digest().joinToString("") { "%02x".format(it) }
+        }
+        val before = digest(file)
+        val archive = File(f.folder, "backup.kovbackup")
+        archive.outputStream().use { f.engine.export(it, password, scope) }
+        file.writeText("current")
+        archive.inputStream().use { f.engine.stage(it, password, scope, "session-a") }
+        f.engine.startup("session-a")
+        check(digest(file) == before && file.length() == 24L * 1024 * 1024)
     } }
     test("wrong password keeps existing data and previous valid pending restore") { Fixture().use { f ->
         f.put("a.properties", "old"); val bytes = f.backup(); f.stage(bytes)
@@ -150,7 +184,7 @@ fun main() {
     test("symlinks never escape an approved cache root") { Fixture().use { f ->
         val outside = f.put("a.properties", "private")
         Files.createSymbolicLink(File(f.cache, "link").toPath(), outside.toPath())
-        f.engine.scheduleCacheClear("images"); refused { f.engine.startup("session-a") }
+        f.engine.scheduleCacheClear("images"); check(f.engine.startup("session-a")!!.contains("Nettoyage incomplet"))
         check(outside.readText() == "private")
     } }
     test("restoration symlink refused") { Fixture().use { f ->

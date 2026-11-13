@@ -79,6 +79,7 @@ jobs:
         with:
           filters: |
             tv:
+              - 'shared/**'
               - 'apps/tv/**'
               - 'apps/mobile/**'
               - 'apps/desktop/**'
@@ -94,6 +95,7 @@ jobs:
               - '.github/workflows/publish-unified-preview.yml'
               - '.github/workflows/build.yml'
             mobile:
+              - 'shared/**'
               - 'apps/tv/**'
               - 'apps/mobile/**'
               - 'apps/desktop/**'

@@ -34,7 +34,8 @@ internal object DesktopMaintenance {
             else -> false
         } },
         mapOf("images" to File(cache, "image_cache"), "gifs" to File(cache, "gif-cache"),
-            "torrent" to File(cache, "nuvio-engine/payload")))
+            "torrent" to File(cache, "nuvio-engine/payload")),
+        isSymbolicLink = { Files.isSymbolicLink(it.toPath()) })
     private fun account(): String = when (val auth = AuthRepository.state.value) {
         is AuthState.Authenticated -> if (auth.isAnonymous) "guest" else CloudflareConfig.URL + "|" + auth.userId
         AuthState.Unauthenticated -> "guest"

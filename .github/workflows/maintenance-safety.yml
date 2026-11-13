@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 3 -o "$RUNNER_TEMP/kotlin.zip" https://github.com/JetBrains/kotlin/releases/download/v2.2.21/kotlin-compiler-2.2.21.zip
+          curl --fail --location --retry 5 --retry-all-errors --retry-delay 2 -o "$RUNNER_TEMP/kotlin.zip" https://github.com/JetBrains/kotlin/releases/download/v2.2.21/kotlin-compiler-2.2.21.zip
           echo "a623871f1cd9c938946948b70ef9170879f0758043885bbd30c32f024e511714  $RUNNER_TEMP/kotlin.zip" | sha256sum -c -
           unzip -q "$RUNNER_TEMP/kotlin.zip" -d "$RUNNER_TEMP/kotlin"
       - name: Tester le moteur exact livré aux trois applications
@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           compiler="$RUNNER_TEMP/kotlin/kotlinc/bin/kotlinc"
           "$compiler" shared/maintenance/kotlin/com/kovelyx/maintenance/LocalMaintenance.kt shared/maintenance/tests/LocalMaintenanceTest.kt -include-runtime -d "$RUNNER_TEMP/maintenance-tests.jar"
-          java -Xmx192m -jar "$RUNNER_TEMP/maintenance-tests.jar"
+          java -Xmx64m -jar "$RUNNER_TEMP/maintenance-tests.jar"
       - name: Tester les diagnostics de synchronisation
         shell: bash
         run: |

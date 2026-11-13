@@ -15,6 +15,7 @@ class LocalMaintenance(
     private val roots: Map<String, File>,
     private val allowed: (String, String) -> Boolean,
     private val caches: Map<String, File> = emptyMap(),
+    private val isSymbolicLink: (File) -> Boolean,
 ) {
     companion object {
         private const val MAGIC = "KOVELYX-BACKUP-1"
@@ -25,7 +26,8 @@ class LocalMaintenance(
     }
     private val pending get() = File(workspace, "pending")
     private fun local(file: File): File {
-        require(file.absoluteFile == file.canonicalFile) { "Chemin ou lien non autorisé" }
+        require(file.absoluteFile == file.canonicalFile &&
+            generateSequence(file.absoluteFile) { it.parentFile }.none(isSymbolicLink)) { "Chemin ou lien non autorisé" }
         return file
     }
     private fun target(root: String, path: String): File {
@@ -132,16 +134,17 @@ class LocalMaintenance(
             }
         }
         require(entries.isNotEmpty()) { "Aucune donnée à sauvegarder" }
-        require(entries.sumOf { it.third.length() } <= MAX_BYTES)
+        val stamps = entries.map { it.third.length() to it.third.lastModified() }
+        require(stamps.sumOf { it.first } <= MAX_BYTES)
         val salt = ByteArray(16).also(SecureRandom()::nextBytes)
         val iv = ByteArray(4).also(SecureRandom()::nextBytes)
         val header = DataOutputStream(output)
         header.writeUTF(MAGIC); header.write(salt); header.write(iv); header.flush()
         DataOutputStream(SealedOutput(output, key(password, salt), iv)).use { data ->
             data.writeUTF(scope); data.writeInt(entries.size)
-            entries.forEach { (name, path, file) ->
-                val size = file.length()
-                val stamp = file.lastModified()
+            entries.forEachIndexed { index, (name, path, file) ->
+                val (size, stamp) = stamps[index]
+                require(file.length() == size && file.lastModified() == stamp) { "Données modifiées pendant la sauvegarde, réessaie" }
                 data.writeUTF(name); data.writeUTF(path); data.writeLong(size)
                 file.inputStream().use { input ->
                     copyExact(input, data, size)
@@ -151,6 +154,17 @@ class LocalMaintenance(
                     "Données modifiées pendant la sauvegarde, réessaie"
                 }
             }
+            entries.forEachIndexed { index, entry ->
+                require(entry.third.length() == stamps[index].first && entry.third.lastModified() == stamps[index].second) {
+                    "Données modifiées pendant la sauvegarde, réessaie"
+                }
+            }
+            val current = mutableSetOf<Pair<String, String>>()
+            roots.forEach { (name, root) -> walk(root) { file ->
+                val path = file.relativeTo(root).invariantSeparatorsPath
+                if (allowed(name, path)) current.add(name to path)
+            } }
+            require(current == entries.map { it.first to it.second }.toSet()) { "Données modifiées pendant la sauvegarde, réessaie" }
         }
     }
 
@@ -246,8 +260,9 @@ class LocalMaintenance(
             val flag = local(File(workspace, "clear-$key"))
             if (flag.exists()) {
                 // Symlinks and directories outside the explicit cache roots are never followed.
-                walk(root) { check(it.delete()) }
-                flag.delete()
+                try { walk(root) { check(it.delete()) } }
+                catch (_: Exception) { result = listOfNotNull(result, "Nettoyage incomplet : un fichier temporaire est inaccessible").joinToString("\n") }
+                finally { flag.delete() }
             }
         }
         return result

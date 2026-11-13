@@ -32,6 +32,7 @@ object AndroidMaintenance {
         mapOf("images" to File(context.cacheDir.canonicalFile, "image_cache"),
             "video" to File(context.cacheDir.canonicalFile, "nuvio_vod_cache"),
             "torrent" to File(context.cacheDir.canonicalFile, "nuvio-engine/payload")),
+        isSymbolicLink = { it.absoluteFile != it.canonicalFile },
     )
     // Changes to any account/session file between staging and process restart reject the restore.
     fun identity(context: Context): String {
@@ -48,13 +49,24 @@ object AndroidMaintenance {
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
     fun startup(context: Context) {
-        val result = engine(context).startup(identity(context))
+        val instance = engine(context)
+        if (instance.hasPendingRestore()) {
+            // SharedPreferences normally prefers its .bak after a killed write. Recover it
+            // before taking rollback copies, without initializing an in-memory preferences cache.
+            val directory = File(File(context.applicationInfo.dataDir).canonicalFile, "shared_prefs")
+            directory.listFiles().orEmpty().filter { it.name.endsWith(".xml.bak") && maintenancePreferenceAllowed(it.name.removeSuffix(".bak")) }.forEach { backup ->
+                val target = File(directory, backup.name.removeSuffix(".bak"))
+                require(backup.absoluteFile == backup.canonicalFile && target.absoluteFile == target.canonicalFile)
+                check(backup.renameTo(target)) { "Récupération des préférences interrompues impossible" }
+            }
+        }
+        val result = instance.startup(identity(context))
         if (result != null) File(workspace(context).apply { mkdirs() }, "notice").writeText(result)
     }
     private fun flushPreferences(context: Context) {
         File(File(context.applicationInfo.dataDir).canonicalFile, "shared_prefs").listFiles().orEmpty()
-            .filter { it.name.endsWith(".xml") && maintenancePreferenceAllowed(it.name) }
-            .forEach { check(context.getSharedPreferences(it.name.removeSuffix(".xml"), Context.MODE_PRIVATE).edit().commit()) }
+            .map { it.name.removeSuffix(".bak") }.filter { it.endsWith(".xml") && maintenancePreferenceAllowed(it) }.distinct()
+            .forEach { check(context.getSharedPreferences(it.removeSuffix(".xml"), Context.MODE_PRIVATE).edit().commit()) }
     }
     suspend fun report(context: Context): MaintenanceReport = withContext(Dispatchers.IO) {
         val engine = engine(context)
