@@ -20,6 +20,7 @@ on:
       - 'scripts/publish-verified-preview.py'
       - 'scripts/package-linux-release.sh'
       - 'scripts/tests/test_verified_preview.py'
+      - 'scripts/tests/linux-release-smoke.sh'
       - '.github/workflows/linux.yml'
   pull_request:
     branches: [main]
@@ -38,6 +39,7 @@ on:
       - 'scripts/publish-verified-preview.py'
       - 'scripts/package-linux-release.sh'
       - 'scripts/tests/test_verified_preview.py'
+      - 'scripts/tests/linux-release-smoke.sh'
       - '.github/workflows/linux.yml'
   workflow_dispatch:
 
@@ -171,6 +173,16 @@ jobs:
             apps/desktop/composeApp/build/compose/binaries/main-release \
             apps/desktop/composeApp/build/compose/release-appimages \
             "$RUNNER_TEMP/kovelyx-linux"
+
+      - name: Exécuter les véritables versions DEB et AppImage sous Xvfb
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          bash -n scripts/tests/linux-release-smoke.sh
+          bash scripts/tests/linux-release-smoke.sh \
+            "$RUNNER_TEMP/kovelyx-linux/Kovelyx-Linux-amd64-v$KOVELYX_BUILD_VERSION.deb" \
+            "$RUNNER_TEMP/kovelyx-linux/Kovelyx-Linux-x86_64-v$KOVELYX_BUILD_VERSION.AppImage"
 
       - name: Publier les trois paquets testés dans les artefacts du commit
         uses: actions/upload-artifact@v4
