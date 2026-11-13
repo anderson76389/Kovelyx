@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/prove-upstream-independence.yml'
       - 'services/kovelyx-cloudflare/tests/portable-d1-migration-e2e.mjs'
       - 'scripts/tests/verify-upstream-independence.py'
@@ -15,6 +16,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/prove-upstream-independence.yml'
       - 'scripts/tests/verify-upstream-independence.py'
       - 'scripts/tests/test_cloudflare_legacy_boundaries.py'

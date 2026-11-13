@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'apps/desktop/composeApp/src/fullCommonMain/kotlin/com/kovelyx/app/features/plugins/**'
       - 'apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/plugins/**'
       - 'apps/desktop/composeApp/src/desktopTest/kotlin/com/kovelyx/app/features/plugins/**'

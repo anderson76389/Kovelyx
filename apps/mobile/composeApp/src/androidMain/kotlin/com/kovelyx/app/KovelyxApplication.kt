@@ -23,6 +23,11 @@ import com.kovelyx.app.core.poster.CustomPosterFallbackInterceptor
  * before MainActivity.onCreate, and interceptors registered later are ignored.
  */
 class KovelyxApplication : Application(), SingletonImageLoader.Factory, Configuration.Provider {
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(base)
+        com.kovelyx.maintenance.android.AndroidMaintenance.startup(this)
+    }
+
     override val workManagerConfiguration: Configuration by lazy {
         Configuration.Builder().setWorkerFactory(KovelyxUpgradeWorkerFactory()).build()
     }

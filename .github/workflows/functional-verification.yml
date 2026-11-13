@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'apps/**'
       - 'vendor/engine/**'
       - 'scripts/**'
@@ -15,6 +16,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'scripts/tests/test_upstream_deletion_local_sources.py'
       - 'apps/tv/**'
       - 'apps/mobile/**'

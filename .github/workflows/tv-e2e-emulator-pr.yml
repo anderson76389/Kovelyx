@@ -3,6 +3,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/android-tv-smoke.yml'
       - '.github/workflows/tv-e2e-emulator-pr.yml'
       - 'apps/tv/app/src/main/**'

@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/audit-packaged-binaries.yml'
       - 'scripts/tests/audit-packaged-binaries.py'
       - 'apps/**/libs/**'

@@ -4,12 +4,14 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/mobile/**'
       - 'apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/features/watchprogress/**'
       - '.github/workflows/mobile-regression-guard.yml'
   push:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/mobile/**'
       - '.github/workflows/mobile-regression-guard.yml'
   workflow_dispatch:

@@ -95,6 +95,7 @@ fun main(args: Array<String>) {
         }
     }) return
     Runtime.getRuntime().addShutdownHook(Thread { instance.close() })
+    com.kovelyx.app.features.settings.DesktopMaintenance.startup()
     DesktopCollectionImportBridge.start()
     DesktopCollectionImportBridge.registerWindowsProtocol()
 

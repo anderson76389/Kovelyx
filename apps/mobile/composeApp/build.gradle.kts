@@ -429,9 +429,12 @@ kotlin {
     
     sourceSets {
         val commonMain by getting {
+            kotlin.srcDir(rootProject.file("../../shared/maintenance-ui/kotlin"))
             kotlin.srcDir(generatedRuntimeConfigDir)
         }
         androidMain {
+            kotlin.srcDir(rootProject.file("../../shared/maintenance/kotlin"))
+            kotlin.srcDir(rootProject.file("../../shared/maintenance-android/kotlin"))
             kotlin.srcDir(project.file(androidDistributionSourceDir))
             if (androidDistribution == "full") {
                 kotlin.srcDir(fullCommonSourceDir)

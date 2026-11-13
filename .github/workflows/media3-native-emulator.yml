@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'scripts/tests/mobile-playback-nuvio-blackout.sh'
       - 'scripts/tests/tv-media3-native-instrumentation.sh'
       - '.github/workflows/media3-native-emulator.yml'

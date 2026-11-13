@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/mobile/**'
       - 'apps/tv/app/src/main/res/values/strings.xml'
       - 'apps/tv/app/src/main/res/values-fr/strings.xml'
@@ -18,6 +19,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/mobile/**'
       - 'scripts/audit-kovelyx-android.py'
       - 'scripts/audit-mobile-independence.py'

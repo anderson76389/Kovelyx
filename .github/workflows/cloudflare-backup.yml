@@ -8,6 +8,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/cloudflare-backup.yml'
       - 'services/kovelyx-cloudflare/scripts/backup-remote.py'
       - 'services/kovelyx-cloudflare/scripts/backup_validation.py'

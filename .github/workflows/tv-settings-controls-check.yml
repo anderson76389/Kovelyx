@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/tv/**'
       - '.github/workflows/tv-settings-controls-check.yml'
   workflow_dispatch:

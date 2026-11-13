@@ -3,11 +3,12 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'apps/mobile/**'
       - '.github/workflows/mobile-playback.yml'
   pull_request:
     branches: [main]
-    paths: ['.github/workflows/mobile-playback.yml', 'apps/mobile/**']
+    paths: ['shared/**', '.github/workflows/mobile-playback.yml', 'apps/mobile/**']
   workflow_dispatch:
 permissions:
   contents: read

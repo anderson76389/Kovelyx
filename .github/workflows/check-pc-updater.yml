@@ -3,6 +3,7 @@ name: Vérifier les mises à jour Kovelyx Windows
 on:
   pull_request:
     paths:
+      - 'shared/**'
       - '.github/workflows/windows.yml'
       - '.github/workflows/publish-windows-preview.yml'
       - '.github/workflows/check-pc-updater.yml'

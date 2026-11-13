@@ -4,6 +4,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - 'apps/desktop/**'
       - '!apps/desktop/**/*.md'
       - 'apps/mobile/**'
@@ -25,6 +26,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/desktop/**'
       - 'vendor/engine/**'
       - 'scripts/player/**'

@@ -5,6 +5,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'shared/**'
       - '.github/workflows/import-sources.yml'
       - 'docs/PROVENANCE.md'
       - 'apps/tv/.kovelyx-source.txt'

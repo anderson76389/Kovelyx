@@ -5,6 +5,7 @@ on:
   push:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
+      - 'shared/**'
       - '.github/workflows/build.yml'
       - 'apps/tv/**'
       - 'apps/mobile/**'
@@ -25,6 +26,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'shared/**'
       - 'apps/tv/**'
       - 'apps/mobile/**'
       - 'apps/desktop/composeApp/Configuration/DesktopVersion.properties'
@@ -81,6 +83,7 @@ jobs:
         with:
           filters: |
             tv:
+              - 'shared/**'
               - 'apps/tv/**'
               - 'apps/mobile/**'
               - 'apps/desktop/**'
@@ -98,6 +101,7 @@ jobs:
               - '.github/workflows/publish-unified-preview.yml'
               - '.github/workflows/build.yml'
             mobile:
+              - 'shared/**'
               - 'apps/tv/**'
               - 'apps/mobile/**'
               - 'apps/desktop/**'
