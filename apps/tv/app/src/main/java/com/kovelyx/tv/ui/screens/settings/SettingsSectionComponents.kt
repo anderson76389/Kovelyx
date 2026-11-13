@@ -136,6 +136,30 @@ internal fun SettingsNote(
     )
 }
 
+/** Informational headings only: never intercept D-pad focus or touch actions. */
+@Composable
+internal fun SettingsRailGroupLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        letterSpacing = 0.7.sp,
+        color = KovelyxTheme.colors.TextTertiary,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = SettingsRowContentInset, end = 4.dp, top = 4.dp, bottom = 4.dp)
+    )
+}
+
+@Composable
+internal fun SettingsTopBarGroupLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelSmall,
+        color = KovelyxTheme.colors.TextTertiary,
+        modifier = Modifier.padding(start = 2.dp, end = 6.dp)
+    )
+}
+
 @Composable
 internal fun SettingsRailDivider() {
     Box(
