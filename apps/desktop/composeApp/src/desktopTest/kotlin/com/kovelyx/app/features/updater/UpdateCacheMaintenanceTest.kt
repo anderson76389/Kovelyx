@@ -48,6 +48,31 @@ class UpdateCacheMaintenanceTest {
         } finally { home.deleteRecursively() }
     }
 
+    @Test fun linuxUpdaterKeepsNewestVerifiedPackageAndPreservesUnrelatedFiles() {
+        val home = Files.createTempDirectory("kovelyx-linux-updater").toFile()
+        try {
+            val updates = File(home, "updates").apply { mkdirs() }
+            fun put(name: String) = File(updates, name).apply { writeText("owned-data") }
+            val current = put("Kovelyx-Linux-x86_64-v1.1.1200.AppImage")
+            val previousImage = put("Kovelyx-Linux-x86_64-v1.1.1199.AppImage")
+            val oldDeb = put("Kovelyx-Linux-amd64-v1.1.1199.deb")
+            val oldRpm = put("Kovelyx-Linux-x86_64-v1.1.1199.rpm")
+            val windows = put("Kovelyx-Windows-v1.1.1199.msi")
+            val inProgress = put("Kovelyx-Linux-x86_64-v1.1.1201.AppImage.part")
+            val userNotes = put("notes.txt")
+            val thirdParty = put("Other-Linux-x86_64-v1.1.1200.AppImage")
+            AppUpdaterPlatform.pruneOldVerifiedInstallers(updates, keep = current)
+            for (old in listOf(previousImage, oldDeb, oldRpm, windows)) {
+                assertFalse(old.exists(), old.name)
+            }
+            for (retained in listOf(current, inProgress, userNotes, thirdParty)) {
+                assertEquals("owned-data", retained.readText(), retained.name)
+            }
+        } finally {
+            home.deleteRecursively()
+        }
+    }
+
     @Test fun linkedUpdateRootCannotCleanAnotherDirectory() {
         val home = Files.createTempDirectory("kovelyx-storage-root-link").toFile()
         try {
