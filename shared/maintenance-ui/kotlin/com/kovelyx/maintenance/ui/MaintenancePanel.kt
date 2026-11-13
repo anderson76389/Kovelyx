@@ -1,10 +1,12 @@
 package com.kovelyx.maintenance.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -65,10 +67,10 @@ fun MaintenancePanel(
         Text("Bibliothèque, progression, profils, extensions et réglages locaux. Les sessions de connexion, connexions aux serveurs multimédias, PIN, caches, fichiers de plugins exécutables et vidéos téléchargées sont exclus. Restauration sur le même compte et le même type d'application. Garde ton mot de passe : il ne peut pas être récupéré. Mets la lecture en pause et évite les modifications pendant la sauvegarde.", style = MaterialTheme.typography.bodySmall)
         OutlinedTextField(value = password, onValueChange = { password = it.take(256) },
             label = { Text("Mot de passe (12 caractères minimum)") }, enabled = !busy,
-            visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
+            visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false), singleLine = true, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(value = confirmation, onValueChange = { confirmation = it.take(256) },
             label = { Text("Confirmer pour créer une sauvegarde") }, enabled = !busy,
-            visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth())
+            visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false), singleLine = true, modifier = Modifier.fillMaxWidth())
         Button(enabled = !busy && password.length >= 12 && password == confirmation, onClick = {
             val secret = password.toCharArray(); password = ""; confirmation = ""
             run { try { export(secret) } finally { secret.fill('\u0000') } }
