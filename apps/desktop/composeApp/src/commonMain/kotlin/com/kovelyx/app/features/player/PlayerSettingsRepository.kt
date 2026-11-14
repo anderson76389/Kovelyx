@@ -335,8 +335,6 @@ object PlayerSettingsRepository {
                 ?: SubtitleStyleState.DEFAULT.bold,
             fontFamily = PlayerSettingsStorage.loadSubtitleFontFamily()?.takeIf(SubtitleFontChoice::isValid)
                 ?: SubtitleFontChoice.DEFAULT,
-            fontFamily = PlayerSettingsStorage.loadSubtitleFontFamily()?.takeIf(SubtitleFontChoice::isValid)
-                ?: SubtitleFontChoice.DEFAULT,
             fontSizeSp = (PlayerSettingsStorage.loadSubtitleFontSizeSp()
                 ?: SubtitleStyleState.DEFAULT.fontSizeSp).coerceIn(subtitleFontSizeRangeSp),
             bottomOffset = PlayerSettingsStorage.loadSubtitleBottomOffset()
@@ -629,7 +627,6 @@ object PlayerSettingsRepository {
         PlayerSettingsStorage.saveSubtitleOutlineEnabled(normalized.outlineEnabled)
         PlayerSettingsStorage.saveSubtitleOutlineWidth(normalized.outlineWidth)
         PlayerSettingsStorage.saveSubtitleBold(normalized.bold)
-        PlayerSettingsStorage.saveSubtitleFontFamily(normalized.fontFamily)
         PlayerSettingsStorage.saveSubtitleFontFamily(normalized.fontFamily)
         PlayerSettingsStorage.saveSubtitleFontSizeSp(normalized.fontSizeSp)
         PlayerSettingsStorage.saveSubtitleBottomOffset(normalized.bottomOffset)
