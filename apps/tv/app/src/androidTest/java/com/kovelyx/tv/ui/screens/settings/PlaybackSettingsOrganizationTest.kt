@@ -48,6 +48,43 @@ class PlaybackSettingsOrganizationTest {
     }
 
     @Test
+    fun everyVisiblePlaybackSectionOpensAndClosesWithRemoteAction() {
+        val settings = PlayerSettings()
+        setSections(settings)
+        // Exercise all ten production sections and their actual Compose click handlers.
+        // Do not touch the persistent settings repository or the real user's account.
+        visiblePlaybackSections(settings).forEach { section ->
+            expand(section)
+            composeRule.onNode(
+                hasClickAction() and
+                    hasText(context.getString(section.title)) and
+                    hasText(context.getString(R.string.layout_open)) and
+                    hasAnyAncestor(hasTestTag(PlaybackSettingsTestTags.section(section)))
+            ).assertExists()
+            collapse(section)
+            composeRule.onNode(
+                hasClickAction() and
+                    hasText(context.getString(section.title)) and
+                    hasText(context.getString(R.string.layout_closed)) and
+                    hasAnyAncestor(hasTestTag(PlaybackSettingsTestTags.section(section)))
+            ).assertExists()
+        }
+    }
+
+    @Test
+    fun mpvOnlyModeStillOpensEveryAvailablePlaybackSection() {
+        val settings = PlayerSettings(internalPlayerEngine = InternalPlayerEngine.MVP_PLAYER)
+        setSections(settings)
+        visiblePlaybackSections(settings).forEach { section ->
+            expand(section)
+            collapse(section)
+        }
+        composeRule.onNodeWithTag(
+            PlaybackSettingsTestTags.section(PlaybackSection.BUFFER_NETWORK)
+        ).assertDoesNotExist()
+    }
+
+    @Test
     fun frameRateAndDolbyVisionLiveUnderVideo() {
         setSections()
 
