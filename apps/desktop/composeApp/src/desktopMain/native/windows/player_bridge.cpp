@@ -3079,6 +3079,20 @@ Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setSubtitleDelay
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setSubtitleFont(
+    JNIEnv *env, jobject, jlong handle, jstring family, jstring fontDirectory,
+    jboolean forceOverride
+) {
+    auto player = playerFromHandle(handle);
+    if (!player) return;
+    player->setSubtitleFont(
+        jstringToUtf8(env, family),
+        jstringToUtf8(env, fontDirectory),
+        forceOverride == JNI_TRUE
+    );
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_applySubtitleStyle(
     JNIEnv *env,
     jobject,
