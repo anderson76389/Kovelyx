@@ -65,11 +65,7 @@ jobs:
           disk-size: 6144M
           disable-animations: true
           script: |
-            cd apps/tv
-            ./gradlew :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 \
-              -Pkotlin.compiler.execution.strategy=in-process \
-              -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" \
-              -Pandroid.testInstrumentationRunnerArguments.class=com.kovelyx.tv.ui.screens.settings.SettingsRailRemoteNavigationTest,com.kovelyx.tv.ui.screens.settings.PlaybackSettingsOrganizationTest,com.kovelyx.tv.ui.screens.settings.TrackingSettingsOverviewTest
+            bash -c 'cd apps/tv && ./gradlew :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class=com.kovelyx.tv.ui.screens.settings.SettingsRailRemoteNavigationTest,com.kovelyx.tv.ui.screens.settings.PlaybackSettingsOrganizationTest,com.kovelyx.tv.ui.screens.settings.TrackingSettingsOverviewTest'
       - name: Conserver les rapports
         if: always()
         uses: actions/upload-artifact@v4
