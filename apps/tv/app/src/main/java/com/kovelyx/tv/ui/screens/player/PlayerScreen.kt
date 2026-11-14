@@ -13,6 +13,7 @@ import com.kovelyx.tv.ui.theme.accentBrush
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import com.kovelyx.tv.data.local.SubtitleFontStore
 import android.view.ViewGroup
 import androidx.annotation.RawRes
 import androidx.activity.compose.BackHandler
@@ -2049,11 +2050,7 @@ private fun PlayerView.applySubtitleStyleIfNeeded(
         setFixedTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, scaledFontSize)
         setApplyEmbeddedFontSizes(false)
 
-        val typeface = if (subtitleStyle.bold) {
-            android.graphics.Typeface.DEFAULT_BOLD
-        } else {
-            android.graphics.Typeface.DEFAULT
-        }
+        val typeface = SubtitleFontStore.resolve(context, subtitleStyle.fontFamily, subtitleStyle.bold)
 
         val edgeType = if (subtitleStyle.outlineEnabled) {
             androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE
