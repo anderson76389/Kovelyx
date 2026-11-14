@@ -23,6 +23,7 @@ import com.kovelyx.app.features.player.SUBTITLE_DELAY_MIN_MS
 import com.kovelyx.app.features.player.SubtitleColorSwatches
 import com.kovelyx.app.features.player.SubtitleOutlineColorSwatches
 import com.kovelyx.app.features.player.SubtitleStyleState
+import com.kovelyx.app.features.player.DesktopSubtitleFontStore
 import com.kovelyx.app.features.player.SubtitleTrack
 import com.kovelyx.app.features.player.inferForcedSubtitleTrack
 import com.kovelyx.app.features.player.toStorageHexString
