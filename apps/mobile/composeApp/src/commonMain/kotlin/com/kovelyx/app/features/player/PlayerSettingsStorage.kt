@@ -55,8 +55,6 @@ internal expect object PlayerSettingsStorage {
     fun saveSubtitleBold(enabled: Boolean)
     fun loadSubtitleFontFamily(): String?
     fun saveSubtitleFontFamily(family: String)
-    fun loadSubtitleFontFamily(): String?
-    fun saveSubtitleFontFamily(family: String)
     fun loadSubtitleFontSizeSp(): Int?
     fun saveSubtitleFontSizeSp(fontSizeSp: Int)
     fun loadSubtitleBottomOffset(): Int?
