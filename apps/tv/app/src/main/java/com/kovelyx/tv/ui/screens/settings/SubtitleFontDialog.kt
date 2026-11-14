@@ -4,6 +4,10 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.kovelyx.tv.data.local.SubtitleFontStore
@@ -16,9 +20,10 @@ internal fun SubtitleFontDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            runCatching { SubtitleFontStore.import(context, uri) }
+        if (uri != null) scope.launch {
+            runCatching { withContext(Dispatchers.IO) { SubtitleFontStore.import(context, uri) } }
                 .onSuccess(onSelected)
                 .onFailure { error ->
                     Toast.makeText(context, error.message ?: "Police invalide", Toast.LENGTH_LONG).show()
