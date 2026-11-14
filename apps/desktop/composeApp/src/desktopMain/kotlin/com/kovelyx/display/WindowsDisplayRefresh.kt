@@ -16,6 +16,7 @@ import javax.swing.Timer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
@@ -42,6 +43,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
     // synchronous native work on the Swing/Compose event dispatch thread.
     private data class RefreshRequest(val windowPointer: Pointer, val changeMode: Boolean)
     private val requests = Channel<RefreshRequest>(Channel.CONFLATED)
+    private val pendingExplicitModeChange = AtomicBoolean(false)
     private val settle = Timer(150) { requestRefresh() }.apply { isRepeats = false }
     private val movement = object : ComponentAdapter() {
         override fun componentMoved(event: ComponentEvent) { settle.restart() }
@@ -71,7 +73,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             // A single background worker coalesces move/focus events. It owns all
             // cached native mode structures, so monitor changes cannot race.
             scope.launch(Dispatchers.IO) {
-                for (request in requests) apply(request.windowPointer, request.changeMode)
+                for (request in requests) apply(request.windowPointer, pendingExplicitModeChange.getAndSet(false))
             }
             scope.launch {
                 DisplayRefreshSettings.state.map { it.minimum to it.maximum }
@@ -90,6 +92,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
         // AWT native peer access belongs to the EDT. The expensive Win32
         // enumeration is performed later by a single IO worker.
         val pointer = runCatching { Native.getWindowPointer(window) }.getOrNull() ?: return
+        if (changeMode) pendingExplicitModeChange.set(true)
         requests.trySend(RefreshRequest(pointer, changeMode))
     }
 
