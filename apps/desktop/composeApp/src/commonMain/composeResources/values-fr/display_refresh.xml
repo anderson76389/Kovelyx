@@ -9,4 +9,6 @@
     <string name="display_refresh_pending">Détection des modes de l’écran…</string>
     <string name="display_refresh_range">Plage choisie : %1$d–%2$d Hz</string>
     <string name="display_refresh_adjust_bounds">Si nécessaire, l’autre borne s’ajuste pour garder une plage valide. Ce réglage concerne cet appareil.</string>
+    <string name="display_refresh_windows_permission">Autoriser Kovelyx à modifier la fréquence de l’écran Windows</string>
+    <string name="display_refresh_windows_warning">Désactivé par défaut pour éviter les écrans noirs temporaires et les ralentissements du PC. Laissez désactivé pour la lecture normale et réglez la fréquence dans les Paramètres Windows. L’activation autorise un changement global de mode lorsque vous modifiez la plage.</string>
 </resources>
