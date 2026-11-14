@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 enum class MdbListAuthError {
     MISSING_CLIENT_ID,
+    INVALID_CLIENT,
     INVALID_RESPONSE,
     INSUFFICIENT_SCOPE,
     CODE_EXPIRED,
