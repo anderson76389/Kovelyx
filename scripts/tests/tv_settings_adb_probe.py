@@ -108,8 +108,11 @@ class Probe:
                 continue
             score = 0
             if rail:
-                # Rail is normally at the left; Horizon theme places it at top.
-                score = min(x1, self.screen_width - x2) if y1 > .25 * self.screen_height else 0
+                # Exclude option controls in the content pane. Categories only
+                # occupy the left rail or the Horizon top rail.
+                if x1 > self.screen_width * .36 and y1 > self.screen_height * .28:
+                    continue
+                score = min(x1 / self.screen_width, y1 / self.screen_height)
             choices.append((score, anchor))
         if not choices:
             return None
@@ -172,8 +175,18 @@ class Probe:
                       if self.target(root, names, rail=True) is not None), None)
         if first is None:
             raise AssertionError("Aucune rubrique de paramètres accessible")
-        rect = self.bounds(first)
-        horizontal = rect[1] < self.screen_height * .22
+        rail_centers = []
+        for _, names, _ in CATEGORIES:
+            anchor = self.target(root, names, rail=True)
+            if anchor is not None:
+                x1, y1, x2, y2 = self.bounds(anchor)
+                rail_centers.append(((x1 + x2) / 2, (y1 + y2) / 2))
+        if len(rail_centers) >= 2:
+            xs, ys = zip(*rail_centers)
+            horizontal = max(xs) - min(xs) > max(ys) - min(ys)
+        else:
+            rect = self.bounds(first)
+            horizontal = rect[1] < self.screen_height * .22
         self.report["layout"] = "horizontal / Horizon" if horizontal else "vertical"
         # Start at the beginning of the rail; only scroll the rail, not the options.
         for _ in range(5):
