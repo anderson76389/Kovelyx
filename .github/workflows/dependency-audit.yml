@@ -39,7 +39,7 @@ jobs:
           test -s docs/AUDIT_NUVIO.md
           echo "### Références aux services Nuvio encore présentes" >> "$GITHUB_STEP_SUMMARY"
           grep -E 'Fichiers texte examinés' docs/AUDIT_DEPENDANCES.md >> "$GITHUB_STEP_SUMMARY" || true
-       - name: Conserver les rapports sans nouveau commit sur main
+      - name: Conserver les rapports sans nouveau commit sur main
         uses: actions/upload-artifact@v4
         with:
           name: kovelyx-audit-dependances-${{ github.sha }}
