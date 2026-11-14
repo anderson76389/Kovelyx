@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.kovelyx.tv.data.local.MpvHardwareDecodeMode
 import com.kovelyx.tv.data.local.SubtitleStyleSettings
+import com.kovelyx.tv.data.local.SubtitleFontStore
 import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.Utils
 import java.util.Locale
@@ -434,6 +435,12 @@ class KovelyxMpvSurfaceView @JvmOverloads constructor(
             // In background-box mode, sub-shadow-offset controls the box padding/margin
             val shadowOffset = if (backgroundAlpha > 0) 5.0 else 0.0
 
+            val family = when (style.fontFamily) {
+                SubtitleFontStore.SERIF -> "serif"
+                SubtitleFontStore.MONOSPACE -> "monospace"
+                else -> "sans-serif"
+            }
+            mpv.setPropertyString("sub-font", family)
             mpv.setPropertyDouble("sub-scale", scale)
             mpv.setPropertyBoolean("sub-bold", style.bold)
             mpv.setPropertyDouble("sub-outline-size", outlineSize)
