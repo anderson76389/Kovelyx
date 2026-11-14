@@ -42,6 +42,7 @@ internal object SubtitleFontStore {
     }
 
     fun fontName(context: Context, choice: String): String = when (choice) {
+        DEFAULT -> "Roboto" // Preserve the TV player's previous default
         SERIF -> "serif"
         MONOSPACE -> "monospace"
         else -> file(context, choice)?.let(::sfntFamilyName) ?: "sans-serif"
