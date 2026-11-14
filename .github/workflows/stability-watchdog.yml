@@ -1,0 +1,145 @@
+name: Surveiller la stabilite Kovelyx sans compilation
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/stability-watchdog.yml'
+  pull_request:
+    paths:
+      - '.github/workflows/stability-watchdog.yml'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+
+concurrency:
+  group: kovelyx-stability-watchdog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  readonly:
+    name: Releases, sauvegardes et protection GitHub (lecture seule)
+    if: github.repository == 'anderson76389/Kovelyx'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Controler les 4 plateformes sans telecharger les installateurs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const errors = [], warnings = [], passed = [];
+            const latest = (await github.rest.repos.getLatestRelease({owner, repo})).data;
+            const tag = latest.tag_name;
+            if (!/^v\d+\.\d+\.\d+$/.test(tag) || latest.draft || latest.prerelease) {
+              errors.push('La derniere Release stable possede un tag ou statut inattendu');
+            }
+            const packages = [
+              `Kovelyx-Android-${tag}.apk`,
+              `Kovelyx-TV-${tag}-universal.apk`,
+              `Kovelyx-Windows-Setup-${tag}.exe`,
+              `Kovelyx-Windows-${tag}.msi`,
+              `Kovelyx-Windows-Portable-${tag}.zip`,
+              `Kovelyx-Linux-x86_64-${tag}.AppImage`,
+              `Kovelyx-Linux-amd64-${tag}.deb`,
+              `Kovelyx-Linux-x86_64-${tag}.rpm`
+            ];
+            const assets = new Map(latest.assets.map(a => [a.name, a]));
+            for (const name of packages) {
+              const binary = assets.get(name), checksum = assets.get(name + '.sha256');
+              if (!binary || binary.size < 1000000 || !checksum || checksum.size < 64 || checksum.size > 2048) {
+                errors.push('Installateur ou empreinte absent(e) / anormal(e) : ' + name);
+              } else if (binary.digest && !/^sha256:[0-9a-f]{64}$/.test(binary.digest)) {
+                errors.push('Empreinte API GitHub mal formee : ' + name);
+              }
+            }
+            if (!errors.length) passed.push('8 installateurs et 8 fichiers SHA-256 presents');
+            const ref = (await github.rest.git.getRef({owner, repo, ref: 'tags/' + tag})).data.object;
+            if (ref.type !== 'commit') {
+              warnings.push('Tag annote : verifier manuellement le commit pointe');
+            } else if (ref.sha !== latest.target_commitish) {
+              errors.push('Le tag ne pointe pas sur le commit annonce dans la Release');
+            } else {
+              passed.push('Provenance de la derniere Release : tag et commit identiques');
+            }
+            const branch = (await github.rest.repos.getBranch({owner, repo, branch: 'main'})).data;
+            if (!branch.protected) warnings.push('main non protegee : activer une ruleset / protection via Settings > Rules > Rulesets');
+            else passed.push('Branche main protegee');
+            if (branch.commit.sha !== latest.target_commitish) {
+              warnings.push('main a evolue depuis la derniere Release : verifier les tests et la prochaine publication');
+            }
+            const vault = (await github.rest.repos.getReleaseByTag({owner, repo, tag: 'native-vault-v1'})).data;
+            if (!vault.assets.some(a => a.name === 'Kovelyx-source-and-native-snapshot.zip' && a.size > 1000000)) {
+              errors.push('Archive native de recuperation absente');
+            } else {
+              passed.push('Archive native de recuperation presente');
+            }
+            const runs = (await github.rest.actions.listWorkflowRuns({
+              owner, repo, workflow_id: 'cloudflare-backup.yml', per_page: 50
+            })).data.workflow_runs.filter(r => r.event !== 'pull_request' && r.status === 'completed');
+            runs.sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+            if (!runs.length || runs[0].conclusion !== 'success') {
+              errors.push('Dernier export D1 de production absent ou en echec');
+            } else {
+              const ageHours = (Date.now() - Date.parse(runs[0].created_at)) / 3600000;
+              if (ageHours > 72) errors.push('Dernier export D1 chiffre age de plus de 72 h');
+              const artifacts = (await github.rest.actions.listWorkflowRunArtifacts({
+                owner, repo, run_id: runs[0].id, per_page: 100
+              })).data.artifacts;
+              if (!artifacts.some(a => !a.expired && a.size_in_bytes > 1024 &&
+                 a.name === 'kovelyx-d1-encrypted-backup-' + runs[0].id)) {
+                errors.push('Archive chiffree D1 manquante ou expiree');
+              } else if (ageHours <= 72) {
+                passed.push('Export D1 recent et archive chiffree disponible');
+              }
+            }
+            const prs = (await github.rest.pulls.list({owner, repo, state: 'open', per_page: 100})).data;
+            const stale = prs.filter(p => (Date.now() - Date.parse(p.updated_at)) > 30 * 86400000);
+            if (stale.length) warnings.push(stale.length + ' PR non fusionnees et sans activite depuis 30 jours : examiner sans fusion automatique');
+            const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+            const section = (title, values) => '### ' + title + '\n' +
+              (values.length ? values.map(v => '- ' + esc(v)).join('\n') : '- Aucune') + '\n\n';
+            await core.summary.addHeading('Kovelyx : controle de durabilite')
+              .addRaw('Derniere Release : ' + esc(tag) + ' — verification en lecture seule, aucun compte modifie.\n\n')
+              .addRaw(section('Controles reussis', passed))
+              .addRaw(section('Points a traiter', warnings))
+              .addRaw(section('Erreurs bloquantes', errors))
+              .addRaw('Ce controle ne remplace pas un test sur appareils, une restauration avec la cle privee, ni une inspection du trafic reel.')
+              .write();
+            for (const warning of warnings) core.warning(warning);
+            if (errors.length) core.setFailed(errors.join(' | '));
+
+      - name: Verifier le backend Cloudflare et les migrations en lecture seule
+        if: ${{ github.event_name != 'pull_request' }}
+        shell: bash
+        env:
+          KOVELYX_CLOUDFLARE_URL: ${{ vars.KOVELYX_CLOUDFLARE_URL || 'https://kovelyx-cloud.mailpromahe.workers.dev' }}
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error --retry 2 --max-time 20 \
+            --header 'Accept: application/json' \
+            "${KOVELYX_CLOUDFLARE_URL%/}/ready" -o "$RUNNER_TEMP/kovelyx-ready.json"
+          python3 - "$RUNNER_TEMP/kovelyx-ready.json" <<'PY'
+          import json
+          import sys
+          with open(sys.argv[1], encoding='utf-8') as source:
+              data = json.load(source)
+          expected = {
+              'service': 'Kovelyx Cloud',
+              'status': 'ok',
+              'provider': 'Cloudflare D1',
+              'schema': '0004_profile_media_gifs',
+              'catalogueSnapshotSchema': 1,
+              'profilePinSchema': 1,
+          }
+          for key, value in expected.items():
+              if data.get(key) != value:
+                  raise SystemExit('Schema/etat non confirme : ' + key)
+          print('Worker en lecture seule : D1 0004, PIN 0005, catalogues OK')
+          PY
+          echo 'Worker, migrations D1 0004/0005 et catalogues confirmes par /ready.' >> "$GITHUB_STEP_SUMMARY"
