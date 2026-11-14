@@ -1287,6 +1287,13 @@ public:
         }
     }
 
+    void setSubtitleFont(const std::string &family, const std::string &fontDirectory, bool forceOverride) {
+        // Font files are copied into a dedicated app-private directory, never fetched remotely.
+        if (!fontDirectory.empty()) setStringProperty("sub-fonts-dir", fontDirectory);
+        setStringProperty("sub-font", family.empty() ? "sans-serif" : family);
+        if (forceOverride) setStringProperty("sub-ass-override", "force");
+    }
+
     void setSubtitleDelayMs(int delayMs) {
         std::lock_guard<std::mutex> lock(mpvMutex);
         if (!mpv) return;
