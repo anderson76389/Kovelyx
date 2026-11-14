@@ -1938,6 +1938,17 @@ JNIEXPORT void JNICALL NP(setSubtitleDelayMs)(JNIEnv *, jobject, jlong handle, j
     if (p) mpvSetDouble(p->mpv, "sub-delay", delayMs / 1000.0);
 }
 
+JNIEXPORT void JNICALL NP(setSubtitleFont)(
+    JNIEnv *env, jobject, jlong handle, jstring family, jstring fontDirectory, jboolean forceOverride) {
+    Player *p = asPlayer(handle);
+    if (!p || !p->mpv) return;
+    const std::string name = jstringToUtf8(env, family);
+    const std::string directory = jstringToUtf8(env, fontDirectory);
+    if (!directory.empty()) mpv_set_property_string(p->mpv, "sub-fonts-dir", directory.c_str());
+    mpv_set_property_string(p->mpv, "sub-font", name.empty() ? "sans-serif" : name.c_str());
+    if (forceOverride == JNI_TRUE) mpv_set_property_string(p->mpv, "sub-ass-override", "force");
+}
+
 JNIEXPORT void JNICALL NP(applySubtitleStyle)(
     JNIEnv *env, jobject, jlong handle, jstring textColor, jstring /*backgroundColor*/,
     jstring outlineColor, jfloat outlineSize, jboolean bold, jfloat fontSize, jint subPos,
