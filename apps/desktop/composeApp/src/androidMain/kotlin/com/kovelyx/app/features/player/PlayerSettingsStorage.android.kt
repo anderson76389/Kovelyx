@@ -45,7 +45,6 @@ actual object PlayerSettingsStorage {
     private const val subtitleOutlineWidthKey = "subtitle_outline_width"
     private const val subtitleBoldKey = "subtitle_bold"
     private const val subtitleFontFamilyKey = "subtitle_font_family"
-    private const val subtitleFontFamilyKey = "subtitle_font_family"
     private const val subtitleFontSizeSpKey = "subtitle_font_size_sp"
     private const val subtitleBottomOffsetKey = "subtitle_bottom_offset"
     private const val subtitleStripSdhKey = "subtitle_strip_sdh"
@@ -564,12 +563,6 @@ actual object PlayerSettingsStorage {
         preferences?.edit()?.putString(ProfileScopedKey.of(subtitleFontFamilyKey), family)?.apply()
     }
 
-    actual fun loadSubtitleFontFamily(): String? =
-        preferences?.getString(ProfileScopedKey.of(subtitleFontFamilyKey), null)
-
-    actual fun saveSubtitleFontFamily(family: String) {
-        preferences?.edit()?.putString(ProfileScopedKey.of(subtitleFontFamilyKey), family)?.apply()
-    }
 
     actual fun loadSubtitleFontSizeSp(): Int? =
         preferences?.let { sharedPreferences ->
