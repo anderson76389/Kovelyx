@@ -203,8 +203,11 @@ fun main(args: Array<String>) {
                     window.requestFocus()
                     link?.takeIf { it != "kovelyx://" }?.let(::handleAppUrl)
                 }
-                val refresh = com.kovelyx.display.WindowsDisplayRefresh(window)
-                onDispose { refresh.close(); com.kovelyx.app.features.notifications.EpisodeReleaseNotificationPlatform.close() }
+                // Windows must never enumerate or switch OS-wide display modes on
+                // window focus/movement. Those operations can stall the desktop and
+                // make the monitor briefly go black. Follow the refresh rate chosen
+                // by Windows instead; leave saved preferences untouched.
+                onDispose { com.kovelyx.app.features.notifications.EpisodeReleaseNotificationPlatform.close() }
             }
             // Setting the AWT backgrounds on every Compose recomposition triggers
             // needless heavyweight window invalidations on Windows during playback.
