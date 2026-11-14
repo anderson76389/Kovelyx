@@ -10,6 +10,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.*
@@ -42,17 +43,40 @@ internal fun DisplayRefreshChoice(isTablet: Boolean) {
                 Text(stringResource(Res.string.display_refresh_description), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            if (state.requiresSystemModeConsent) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        stringResource(Res.string.display_refresh_windows_permission),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Switch(
+                        checked = state.systemModeConsentGranted,
+                        onCheckedChange = DisplayRefreshSettings::setSystemModeConsent,
+                    )
+                }
+                Text(
+                    stringResource(Res.string.display_refresh_windows_warning),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             SettingsGroupDivider(isTablet)
             SettingsNavigationRow(
                 title = stringResource(Res.string.display_refresh_minimum), description = null, isTablet = isTablet,
-                enabled = state.available.isNotEmpty(),
+                enabled = state.available.isNotEmpty() && state.systemModeConsentGranted,
                 trailingContent = { Text("${state.minimum} Hz") },
                 onClick = { if (state.available.isNotEmpty()) editingMinimum = true },
             )
             SettingsGroupDivider(isTablet)
             SettingsNavigationRow(
                 title = stringResource(Res.string.display_refresh_maximum), description = null, isTablet = isTablet,
-                enabled = state.available.isNotEmpty(),
+                enabled = state.available.isNotEmpty() && state.systemModeConsentGranted,
                 trailingContent = { Text("${state.maximum} Hz") },
                 onClick = { if (state.available.isNotEmpty()) editingMinimum = false },
             )
@@ -62,7 +86,7 @@ internal fun DisplayRefreshChoice(isTablet: Boolean) {
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(stringResource(Res.string.display_refresh_adjust_bounds), style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (state.actual != null && !state.appliedInRange) Text(stringResource(Res.string.display_refresh_unavailable),
+                if (state.actual != null && state.systemModeConsentGranted && !state.appliedInRange) Text(stringResource(Res.string.display_refresh_unavailable),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             }
         }
