@@ -100,6 +100,7 @@ internal object NativePlayerBridge {
     external fun setMacosWindowFullscreen(windowViewPtr: Long, fullscreen: Boolean)
 
     external fun setSubtitleDelayMs(handle: Long, delayMs: Int)
+    external fun setSubtitleFont(handle: Long, family: String, fontDirectory: String, forceOverride: Boolean)
     external fun applySubtitleStyle(
         handle: Long,
         textColor: String,
