@@ -1421,6 +1421,7 @@ private class KovelyxLibmpvView(
     override fun initOptions() {
         setVo(videoOutput.mpvValue)
         mpv.setOptionString("profile", "fast")
+        mpv.setOptionString("sub-fonts-dir", java.io.File(context.filesDir, "subtitle-fonts").absolutePath)
         mpv.setOptionString("hwdec", if (hardwareDecodingEnabled) "auto" else "no")
         if (yuv420pEnabled) {
             mpv.setOptionString("vf", "format=yuv420p")
@@ -1741,7 +1742,8 @@ private class KovelyxLibmpvView(
 
             override fun applySubtitleStyle(style: SubtitleStyleState) {
                 executeMpv {
-                    mpv.setPropertyString("sub-ass-override", "no")
+                    mpv.setPropertyString("sub-font", AndroidSubtitleFontStore.fontName(context, style.fontFamily))
+                    mpv.setPropertyString("sub-ass-override", if (style.fontFamily == SubtitleFontChoice.DEFAULT) "no" else "force")
                     mpv.setPropertyString("sub-color", style.textColor.toMpvColor())
                     mpv.setPropertyString("sub-back-color", style.backgroundColor.toMpvColor())
                     mpv.setPropertyString("sub-outline-color", style.outlineColor.toMpvColor())
@@ -2111,7 +2113,7 @@ private fun PlayerView.applySubtitleStyle(style: SubtitleStyleState, pipScale: F
                 android.graphics.Color.TRANSPARENT,
                 if (style.outlineEnabled) CaptionStyleCompat.EDGE_TYPE_OUTLINE else CaptionStyleCompat.EDGE_TYPE_NONE,
                 style.outlineColor.toArgb(),
-                if (style.bold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT,
+                AndroidSubtitleFontStore.typeface(context, style.fontFamily, style.bold),
             )
         )
         setFixedTextSize(TypedValue.COMPLEX_UNIT_SP, style.fontSizeSp.toFloat() * pipScale)
