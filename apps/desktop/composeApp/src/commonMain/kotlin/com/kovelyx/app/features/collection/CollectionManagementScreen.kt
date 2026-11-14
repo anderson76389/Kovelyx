@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -77,6 +78,18 @@ fun CollectionManagementScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var importText by remember { mutableStateOf("") }
     var importError by remember { mutableStateOf<String?>(null) }
+    var mergeImport by remember { mutableStateOf(true) }
+    var fileSummary by remember { mutableStateOf<String?>(null) }
+    val pickCollectionFile = rememberCollectionFilePicker(
+        onSelected = { text ->
+            importText = text
+            val result = CollectionRepository.validateJson(text)
+            importError = result.error
+            fileSummary = if (result.valid) "${result.collectionCount} catégories · ${result.folderCount} dossiers" else null
+            showImportDialog = true
+        },
+        onError = { importError = it; showImportDialog = true },
+    )
     var showDeleteConfirm by remember { mutableStateOf<String?>(null) }
     var showCopyError by remember { mutableStateOf(false) }
 
@@ -194,11 +207,16 @@ fun CollectionManagementScreen(
             onTextChange = {
                 importText = it
                 importError = null
+                fileSummary = null
             },
             onConfirm = {
                 val result = CollectionRepository.validateJson(importText)
                 if (result.valid) {
-                    CollectionRepository.importFromJson(importText)
+                    val imported = runCatching { CollectionRepository.importFromJson(importText, merge = mergeImport).getOrThrow() }
+                    if (imported.isFailure) {
+                        importError = "Import impossible. Vérifie le fichier et réessaie."
+                        return@ImportDialog
+                    }
                     showImportDialog = false
                     importText = ""
                     importError = null
@@ -206,6 +224,10 @@ fun CollectionManagementScreen(
                     importError = result.error
                 }
             },
+            onPickFile = if (collectionFilePickerAvailable) pickCollectionFile else null,
+            fileSummary = fileSummary,
+            mergeImport = mergeImport,
+            onMergeChange = { mergeImport = it },
             onDismiss = {
                 showImportDialog = false
                 importText = ""
@@ -386,13 +408,29 @@ private fun ImportDialog(
     onTextChange: (String) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    onPickFile: (() -> Unit)?,
+    fileSummary: String?,
+    mergeImport: Boolean,
+    onMergeChange: (Boolean) -> Unit,
 ) {
     DialogSurface(
         onDismissRequest = onDismiss,
         title = stringResource(Res.string.collections_import_header),
         message = stringResource(Res.string.collections_import_paste_description),
     ) {
-        OutlinedTextField(
+        if (onPickFile != null) {
+            KovelyxPrimaryButton(text = "Choisir un fichier JSON", onClick = onPickFile)
+            Spacer(Modifier.height(12.dp))
+        }
+        fileSummary?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = mergeImport, onCheckedChange = onMergeChange)
+            Text("Conserver les autres collections (mêmes catégories remplacées)", style = MaterialTheme.typography.bodyMedium)
+        }
+        if (!mergeImport) Text("L’import remplacera toutes les collections de ce profil.", color = MaterialTheme.colorScheme.error)
+        Text("Les catalogues d’extensions nécessitent une extension compatible installée. MDBList ne les fournit pas.", style = MaterialTheme.typography.bodySmall)
+        Spacer(Modifier.height(8.dp))
+        if (fileSummary == null) OutlinedTextField(
             value = importText,
             onValueChange = onTextChange,
             modifier = Modifier

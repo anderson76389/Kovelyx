@@ -11,6 +11,17 @@ import org.junit.Test
 
 class MdbListAuthRepositoryTest {
     @Test
+    fun `rejected OAuth client explains device app configuration`() = runTest {
+        for (code in listOf("invalid_client", "unauthorized_client", "unsupported_grant_type")) {
+            val harness = MdbListTestHarness()
+            harness.reply(status = 400, body = "{\"error\":\"$code\"}")
+            val error = expectMdbListFailure<MdbListAuthException> { harness.auth.startDeviceAuthorization() }
+            assertEquals(MdbListAuthError.INVALID_CLIENT, error.error)
+            assertNull(harness.store.state.value.session)
+        }
+    }
+
+    @Test
     fun `device flow uses form encoded public client and stores both verification links`() = runTest {
         val harness = MdbListTestHarness()
         val session = harness.pending()

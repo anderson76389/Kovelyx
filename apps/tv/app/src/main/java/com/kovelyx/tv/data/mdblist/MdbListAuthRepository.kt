@@ -149,8 +149,8 @@ class MdbListAuthRepository(
         }
     }
 
-    private suspend fun oauth(path: String, fields: Map<String, String>, scope: MdbListAuthScope) =
-        http.execute(
+    private suspend fun oauth(path: String, fields: Map<String, String>, scope: MdbListAuthScope): MdbListHttpResponse {
+        val response = http.execute(
             MdbListHttpRequest(
                 method = MdbListHttpMethod.POST,
                 path = path,
@@ -159,6 +159,11 @@ class MdbListAuthRepository(
             ),
             checkScope = { store.checkScope(scope) }
         )
+        if (response.status !in 200..299 && response.errorCode() in setOf("invalid_client", "unauthorized_client", "unsupported_grant_type")) {
+            throw MdbListAuthException(MdbListAuthError.INVALID_CLIENT)
+        }
+        return response
+    }
 
     private fun tokensFrom(response: MdbListHttpResponse, previousRefreshToken: String? = null): MdbListTokens {
         val payload = decode<MdbListTokenResponse>(response.body)

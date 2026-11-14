@@ -202,7 +202,7 @@ object FolderDetailRepository {
                             sourceKey = source.catalogRouteKey(),
                             manifestUrl = addon?.manifestUrl,
                             type = catalogSource.type,
-                            catalogId = catalogSource.catalogId,
+                            catalogId = catalog?.id ?: catalogSource.catalogId,
                             genre = catalogSource.genre,
                             supportsPagination = catalog?.supportsPagination() == true,
                             isLoading = true,

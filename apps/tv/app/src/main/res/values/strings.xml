@@ -3383,4 +3383,5 @@
     <string name="autosync_toast_failed_unsupported">Sync failed: Auto Sync doesn\'t support this subtitle format.</string>
     <string name="autosync_label_synced">Auto synced</string>
     <string name="profile_media_sync_pending">Picture kept on this device. Synchronization pending: %1$s</string>
+    <string name="mdblist_invalid_client">MDBList rejected the OAuth application. Use the client ID of a Device Code app from mdblist.com/developer/, not your API key.</string>
 </resources>

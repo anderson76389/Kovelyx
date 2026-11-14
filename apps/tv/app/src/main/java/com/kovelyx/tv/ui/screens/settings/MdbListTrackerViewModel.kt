@@ -230,6 +230,7 @@ class MdbListTrackerViewModel @Inject constructor(
         if (this is MdbListAuthException) error.message() else toMdbListSyncError().message()
 
     private fun MdbListAuthError.message(): String = context.getString(when (this) {
+        MdbListAuthError.INVALID_CLIENT -> R.string.mdblist_invalid_client
         MdbListAuthError.MISSING_CLIENT_ID -> R.string.mdblist_missing_client
         MdbListAuthError.INVALID_RESPONSE -> R.string.mdblist_invalid_response
         MdbListAuthError.INSUFFICIENT_SCOPE -> R.string.mdblist_insufficient_scope
