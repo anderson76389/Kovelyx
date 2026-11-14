@@ -7,7 +7,6 @@ import androidx.compose.ui.configureSwingGlobalsForCompose
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -207,11 +206,15 @@ fun main(args: Array<String>) {
                 val refresh = com.kovelyx.display.WindowsDisplayRefresh(window)
                 onDispose { refresh.close(); com.kovelyx.app.features.notifications.EpisodeReleaseNotificationPlatform.close() }
             }
-            SideEffect {
+            // Setting the AWT backgrounds on every Compose recomposition triggers
+            // needless heavyweight window invalidations on Windows during playback.
+            // The native chrome colour does not vary with Compose state.
+            DisposableEffect(window) {
                 window.background = KovelyxDesktopNativeBackground
                 window.rootPane.background = KovelyxDesktopNativeBackground
                 window.contentPane.background = KovelyxDesktopNativeBackground
                 (window.contentPane as? JComponent)?.isOpaque = true
+                onDispose { }
             }
             LaunchedEffect(window, appIconState.selected) {
                 val backgroundSuffix = "-transparent"
