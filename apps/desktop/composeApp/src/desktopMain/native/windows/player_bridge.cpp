@@ -1287,6 +1287,15 @@ public:
         }
     }
 
+    void setSubtitleFont(const std::string &family, const std::string &fontDirectory, bool forceOverride) {
+        // Font files are copied into a dedicated app-private directory, never fetched remotely.
+        if (!fontDirectory.empty()) setStringProperty("sub-fonts-dir", fontDirectory);
+        setStringProperty("sub-font", family.empty() ? "sans-serif" : family);
+        // Restore the previous libass behavior when returning to the default font.
+        // applySubtitleStyle caches the mode, so it will not necessarily update this on its own.
+        setStringProperty("sub-ass-override", forceOverride || !appliedSubtitleUseLibass ? "force" : "scale");
+    }
+
     void setSubtitleDelayMs(int delayMs) {
         std::lock_guard<std::mutex> lock(mpvMutex);
         if (!mpv) return;
@@ -3069,6 +3078,20 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setSubtitleDelayMs(JNIEnv *, jobject, jlong handle, jint delayMs) {
     auto player = playerFromHandle(handle);
     if (player) player->setSubtitleDelayMs(delayMs);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setSubtitleFont(
+    JNIEnv *env, jobject, jlong handle, jstring family, jstring fontDirectory,
+    jboolean forceOverride
+) {
+    auto player = playerFromHandle(handle);
+    if (!player) return;
+    player->setSubtitleFont(
+        jstringToUtf8(env, family),
+        jstringToUtf8(env, fontDirectory),
+        forceOverride == JNI_TRUE
+    );
 }
 
 extern "C" JNIEXPORT void JNICALL

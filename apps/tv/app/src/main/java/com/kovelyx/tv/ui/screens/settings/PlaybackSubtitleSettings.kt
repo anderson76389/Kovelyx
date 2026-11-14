@@ -10,6 +10,7 @@ import com.kovelyx.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.kovelyx.tv.data.local.LibassRenderType
 import com.kovelyx.tv.data.local.PlayerPreference
 import com.kovelyx.tv.data.local.PlayerSettings
+import com.kovelyx.tv.data.local.SubtitleFontStore
 import com.kovelyx.tv.data.local.SubtitleLanguageOption
 import com.kovelyx.tv.data.local.SubtitleStyleSettings
 import com.kovelyx.tv.data.local.displayName
@@ -93,6 +94,13 @@ internal fun PlaybackSubtitlesSection(
     )
 
     SettingsSectionLabel(text = stringResource(R.string.sub_style_label))
+    SettingsActionRow(
+        title = "Police des sous-titres",
+        subtitle = "Par défaut, sans empattement, serif, monospace ou .ttf/.otf local (10 Mo max.)",
+        value = SubtitleFontStore.label(style.fontFamily),
+        onClick = { onOpenDialog(PlaybackDialog.SUBTITLE_FONT) },
+        enabled = enabled
+    )
     SliderSettingsItem(
         title = stringResource(R.string.sub_size),
         value = style.size,
@@ -213,6 +221,14 @@ internal fun SubtitleSettingsDialogs(
 ) {
     val style = settings.subtitleStyle
     when (dialog) {
+        PlaybackDialog.SUBTITLE_FONT -> SubtitleFontDialog(
+            selected = style.fontFamily,
+            onSelected = { choice ->
+                onUpdate { setSubtitleFontFamily(choice) }
+                onDismiss()
+            },
+            onDismiss = onDismiss
+        )
         PlaybackDialog.SUBTITLE_LANGUAGE -> LanguageSelectionDialog(
             title = stringResource(R.string.sub_preferred_lang),
             selectedLanguage = when {

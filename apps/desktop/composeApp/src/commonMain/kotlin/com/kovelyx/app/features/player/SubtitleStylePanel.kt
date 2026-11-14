@@ -20,6 +20,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material3.Icon
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -74,6 +80,7 @@ fun SubtitleStylePanel(
     onAutoSyncReload: () -> Unit,
 ) {
     val sectionGap = if (isCompact) 12.dp else 16.dp
+    var fontDialogOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -116,6 +123,13 @@ fun SubtitleStylePanel(
                 onIncrease = {
                     onStyleChanged(style.copy(fontSizeSp = (style.fontSizeSp + 2).coerceAtMost(subtitleFontSizeRangeSp.last)))
                 },
+            )
+        }
+
+        SubtitleStyleSection(title = "Police des sous-titres") {
+            SubtitleTextAction(
+                label = SubtitleFontChoice.label(style.fontFamily),
+                onClick = { fontDialogOpen = true },
             )
         }
 
@@ -194,6 +208,37 @@ fun SubtitleStylePanel(
         SubtitleResetAction(
             label = stringResource(Res.string.compose_player_reset_defaults),
             onClick = { onStyleChanged(SubtitleStyleState.DEFAULT) },
+        )
+    }
+
+    if (fontDialogOpen) {
+        AlertDialog(
+            onDismissRequest = { fontDialogOpen = false },
+            title = { Text("Police des sous-titres") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    listOf(
+                        SubtitleFontChoice.DEFAULT,
+                        SubtitleFontChoice.SANS_SERIF,
+                        SubtitleFontChoice.SERIF,
+                        SubtitleFontChoice.MONOSPACE,
+                    ).forEach { choice ->
+                        SubtitleTextAction(
+                            label = (if (style.fontFamily == choice) "✓ " else "") + SubtitleFontChoice.label(choice),
+                            onClick = { onStyleChanged(style.copy(fontFamily = choice)); fontDialogOpen = false }
+                        )
+                    }
+                    if (SubtitleFontChoice.isCustom(style.fontFamily)) {
+                        SubtitleTextAction(label = "✓ Police importée", onClick = { fontDialogOpen = false })
+                    }
+                    SubtitleFontImportButton(onImported = { imported ->
+                        onStyleChanged(style.copy(fontFamily = imported))
+                        fontDialogOpen = false
+                    })
+                    Text(".ttf ou .otf, jusqu'à 10 Mo. Police conservée sur cet appareil.")
+                }
+            },
+            confirmButton = { TextButton(onClick = { fontDialogOpen = false }) { Text("Terminé") } },
         )
     }
 }

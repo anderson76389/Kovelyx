@@ -266,6 +266,10 @@ class PlaybackSettingsViewModel @Inject constructor(
         playerSettingsDataStore.setSubtitleStripSdh(enabled)
     }
 
+    suspend fun setSubtitleFontFamily(choice: String) {
+        playerSettingsDataStore.setSubtitleFontFamily(choice)
+    }
+
     suspend fun setSubtitleSize(size: Int) {
         playerSettingsDataStore.setSubtitleSize(size)
     }

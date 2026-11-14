@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.SurfaceHolder
 import com.kovelyx.tv.data.local.MpvHardwareDecodeMode
 import com.kovelyx.tv.data.local.SubtitleStyleSettings
+import com.kovelyx.tv.data.local.SubtitleFontStore
 import `is`.xyz.mpv.BaseMPVView
 import `is`.xyz.mpv.Utils
 import java.util.Locale
@@ -434,6 +435,12 @@ class KovelyxMpvSurfaceView @JvmOverloads constructor(
             // In background-box mode, sub-shadow-offset controls the box padding/margin
             val shadowOffset = if (backgroundAlpha > 0) 5.0 else 0.0
 
+            mpv.setPropertyString("sub-font", SubtitleFontStore.fontName(context, style.fontFamily))
+            if (style.fontFamily != SubtitleFontStore.DEFAULT) {
+                mpv.setPropertyString("sub-ass-override", "force")
+            } else {
+                mpv.setPropertyString("sub-ass-override", "no")
+            }
             mpv.setPropertyDouble("sub-scale", scale)
             mpv.setPropertyBoolean("sub-bold", style.bold)
             mpv.setPropertyDouble("sub-outline-size", outlineSize)
@@ -662,6 +669,7 @@ class KovelyxMpvSurfaceView @JvmOverloads constructor(
         mpv.setOptionString("sub-ass-override", "no")
         mpv.setOptionString("sub-codepage", "auto:utf-8")
         mpv.setOptionString("sub-font", "Roboto")
+        mpv.setOptionString("sub-fonts-dir", SubtitleFontStore.fontsDirectory(context))
         mpv.setOptionString("sub-use-margins", "yes")
         mpv.setOptionString("sub-ass-force-margins", "yes")
         mpv.setOptionString(

@@ -144,6 +144,7 @@ data class SubtitleStyleSettings(
     val useForcedSubtitles: Boolean = true,
     val showOnlyPreferredLanguages: Boolean = false,
     val stripSdh: Boolean = true,
+    val fontFamily: String = SubtitleFontStore.DEFAULT,
     val size: Int = 120, // Percentage (50-200)
     val verticalOffset: Int = 5, // Percentage from bottom (-20 to 50)
     val bold: Boolean = false,
@@ -578,6 +579,7 @@ class PlayerSettingsDataStore @Inject constructor(
     private val subtitleUseForcedSubtitlesKey = booleanPreferencesKey("subtitle_use_forced_subtitles")
     private val subtitleShowOnlyPreferredLanguagesKey = booleanPreferencesKey("subtitle_show_only_preferred_languages")
     private val subtitleStripSdhKey = booleanPreferencesKey("subtitle_strip_sdh")
+    private val subtitleFontFamilyKey = stringPreferencesKey("subtitle_font_family")
     private val subtitleSizeKey = intPreferencesKey("subtitle_size")
     private val subtitleVerticalOffsetKey = intPreferencesKey("subtitle_vertical_offset")
     private val subtitleBoldKey = booleanPreferencesKey("subtitle_bold")
@@ -1014,6 +1016,8 @@ class PlayerSettingsDataStore @Inject constructor(
                             prefs[subtitleSecondaryLanguageKey]?.let(::normalizeSelectableLanguageCode) == SUBTITLE_LANGUAGE_FORCED,
                         showOnlyPreferredLanguages = prefs[subtitleShowOnlyPreferredLanguagesKey] ?: false,
                         stripSdh = prefs[subtitleStripSdhKey] ?: false,
+                        fontFamily = prefs[subtitleFontFamilyKey]?.takeIf(SubtitleFontStore::isSupportedChoice)
+                            ?: SubtitleFontStore.DEFAULT,
                         size = prefs[subtitleSizeKey] ?: 100,
                         verticalOffset = prefs[subtitleVerticalOffsetKey] ?: 5,
                         bold = prefs[subtitleBoldKey] ?: false,
@@ -1557,6 +1561,10 @@ class PlayerSettingsDataStore @Inject constructor(
             if (normalizedLanguage != null) prefs[subtitleSecondaryLanguageKey] = normalizedLanguage
             else prefs.remove(subtitleSecondaryLanguageKey)
         }
+    }
+    suspend fun setSubtitleFontFamily(choice: String) {
+        require(SubtitleFontStore.isSupportedChoice(choice)) { "Police inconnue" }
+        store().edit { it[subtitleFontFamilyKey] = choice }
     }
     suspend fun setSubtitleSize(size: Int) { store().edit { it[subtitleSizeKey] = size.coerceIn(50, 200) } }
     suspend fun setSubtitleVerticalOffset(offset: Int) { store().edit { it[subtitleVerticalOffsetKey] = offset.coerceIn(-20, 50) } }

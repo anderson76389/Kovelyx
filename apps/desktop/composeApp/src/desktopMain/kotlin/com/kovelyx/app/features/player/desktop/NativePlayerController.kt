@@ -23,6 +23,7 @@ import com.kovelyx.app.features.player.SUBTITLE_DELAY_MIN_MS
 import com.kovelyx.app.features.player.SubtitleColorSwatches
 import com.kovelyx.app.features.player.SubtitleOutlineColorSwatches
 import com.kovelyx.app.features.player.SubtitleStyleState
+import com.kovelyx.app.features.player.DesktopSubtitleFontStore
 import com.kovelyx.app.features.player.SubtitleTrack
 import com.kovelyx.app.features.player.inferForcedSubtitleTrack
 import com.kovelyx.app.features.player.toStorageHexString
@@ -1101,6 +1102,15 @@ internal class NativePlayerController(
             useLibass = useLibass,
             stripSdh = style.stripSdh,
         )
+        // The macOS bridge does not export this JNI method; do not break its player.
+        if (DesktopHostOs.current == DesktopHostOs.WINDOWS || DesktopHostOs.current == DesktopHostOs.LINUX) {
+            NativePlayerBridge.setSubtitleFont(
+                handle,
+                DesktopSubtitleFontStore.fontName(style.fontFamily),
+                DesktopSubtitleFontStore.fontsDirectory(),
+                style.fontFamily != com.kovelyx.app.features.player.SubtitleFontChoice.DEFAULT,
+            )
+        }
     }
 
     private fun decodeTracks(readJson: (Long) -> String): List<NativeMpvTrack> {
