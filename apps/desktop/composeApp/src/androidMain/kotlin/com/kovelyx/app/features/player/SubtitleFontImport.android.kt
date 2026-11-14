@@ -31,6 +31,12 @@ internal object AndroidSubtitleFontStore {
             .takeIf { it.isFile && it.length() in 4..MAX_BYTES }
     }
 
+    fun fontName(context: Context, choice: String): String = when (choice) {
+        SubtitleFontChoice.SERIF -> "serif"
+        SubtitleFontChoice.MONOSPACE -> "monospace"
+        else -> file(context, choice)?.let(::sfntFamilyName) ?: "sans-serif"
+    }
+
     fun typeface(context: Context, choice: String, bold: Boolean): Typeface {
         val base = when (choice) {
             SubtitleFontChoice.SANS_SERIF -> Typeface.create("sans-serif", Typeface.NORMAL)
