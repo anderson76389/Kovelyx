@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent
 import javax.swing.Timer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
@@ -37,12 +38,16 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
     private var observedMode: DisplayModeSpec? = null
     private var cachedModes = emptyList<Pair<DisplayModeSpec, Memory>>()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    private val settle = Timer(150) { apply() }.apply { isRepeats = false }
+    // EnumDisplaySettingsW can enumerate hundreds of monitor modes. Never run that
+    // synchronous native work on the Swing/Compose event dispatch thread.
+    private data class RefreshRequest(val windowPointer: Pointer, val changeMode: Boolean)
+    private val requests = Channel<RefreshRequest>(Channel.CONFLATED)
+    private val settle = Timer(150) { requestRefresh() }.apply { isRepeats = false }
     private val movement = object : ComponentAdapter() {
         override fun componentMoved(event: ComponentEvent) { settle.restart() }
     }
     private val focus = object : WindowAdapter() {
-        override fun windowGainedFocus(event: WindowEvent) { apply() }
+        override fun windowGainedFocus(event: WindowEvent) { requestRefresh() }
     }
 
     init {
@@ -63,7 +68,15 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             )
             window.addComponentListener(movement)
             window.addWindowFocusListener(focus)
-            scope.launch { DisplayRefreshSettings.state.map { it.minimum to it.maximum }.distinctUntilChanged().drop(1).collect { apply(changeMode = true) } }
+            // A single background worker coalesces move/focus events. It owns all
+            // cached native mode structures, so monitor changes cannot race.
+            scope.launch(Dispatchers.IO) {
+                for (request in requests) apply(request.windowPointer, request.changeMode)
+            }
+            scope.launch {
+                DisplayRefreshSettings.state.map { it.minimum to it.maximum }
+                    .distinctUntilChanged().drop(1).collect { requestRefresh(changeMode = true) }
+            }
             settle.start()
         }
     }
@@ -72,11 +85,18 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
     private fun Memory.spec(id: Int = -1) = DisplayModeSpec(id, getInt(172), getInt(176), when (val rate = getInt(184)) { 23, 29, 47, 59, 95, 119, 143 -> (rate + 1) / 1.001f; else -> rate.toFloat() })
     private fun current(device: String): Memory? = modeMemory().takeIf { api?.EnumDisplaySettingsW(WString(device), -1, it) == true }
 
-    private fun apply(changeMode: Boolean = false) {
+    private fun requestRefresh(changeMode: Boolean = false) {
+        if (api == null || !window.isDisplayable) return
+        // AWT native peer access belongs to the EDT. The expensive Win32
+        // enumeration is performed later by a single IO worker.
+        val pointer = runCatching { Native.getWindowPointer(window) }.getOrNull() ?: return
+        requests.trySend(RefreshRequest(pointer, changeMode))
+    }
+
+    private fun apply(windowPointer: Pointer, changeMode: Boolean = false) {
         val api = api ?: return
-        if (!window.isDisplayable) return
         runCatching {
-            val monitor = api.MonitorFromWindow(Native.getWindowPointer(window), 2) ?: return
+            val monitor = api.MonitorFromWindow(windowPointer, 2) ?: return
             val info = Memory(104).apply { clear(); setInt(0, 104) }
             if (!api.GetMonitorInfoW(monitor, info)) return
             val device = info.getWideString(40)
@@ -116,6 +136,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
 
     override fun close() {
         settle.stop()
+        requests.close()
         scope.cancel()
         window.removeComponentListener(movement)
         window.removeWindowFocusListener(focus)
