@@ -81,6 +81,7 @@ contenant des téléchargements ou données utilisateur sans preuve.
 - Conserver la politique **4 premières + 4 dernières Releases** et l'archive
   native séparée ; ne jamais effacer automatiquement les tags utilisés par
   l'application, ni remplacer une Release déjà distribuée.
+- Les nouveaux rapports de dépendances sont conservés comme **artifacts GitHub Actions** pendant 30 jours sans créer de commit automatique ; les copies présentes dans `docs/` peuvent être historiques.
 - Examiner les PR ouvertes anciennes **individuellement** : ne pas fusionner
   des corrections datant d'une ancienne architecture sans tests comparatifs.
 - Après validation, éviter les nouvelles fonctionnalités : n'accepter que
