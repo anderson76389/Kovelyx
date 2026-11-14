@@ -43,6 +43,15 @@ jobs:
         shell: bash
         run: |
           ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Activer KVM pour l'émulateur Google TV
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            ls -l /dev/kvm
+          else
+            echo "::warning::/dev/kvm indisponible sur ce runner; émulation logicielle plus lente"
+          fi
       - name: Exécuter les vrais contrôles des paramètres sur Google TV avec télécommande
         uses: reactivecircus/android-emulator-runner@v2
         with:
