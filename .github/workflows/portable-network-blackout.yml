@@ -1,6 +1,9 @@
 name: Prouver la reprise Kovelyx sans aucun réseau extérieur
 
 on:
+  # Monthly portable recovery check even when no backend source changed.
+  schedule:
+    - cron: '41 5 2 * *'
   pull_request:
     paths:
       - 'services/kovelyx-cloudflare/portable/**'
