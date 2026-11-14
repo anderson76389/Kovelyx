@@ -57,7 +57,6 @@ data class SubtitleStyleState(
     val outlineWidth: Int = 2,
     val bold: Boolean = false,
     val fontFamily: String = "default",
-    val fontFamily: String = "default",
     val fontSizeSp: Int = 18,
     val bottomOffset: Int = 20,
     val stripSdh: Boolean = false,
