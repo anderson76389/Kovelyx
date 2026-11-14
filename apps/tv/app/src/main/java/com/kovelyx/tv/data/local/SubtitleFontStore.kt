@@ -41,6 +41,14 @@ internal object SubtitleFontStore {
         return candidate.takeIf { it.isFile && it.length() in 4..MAX_BYTES }
     }
 
+    fun fontName(context: Context, choice: String): String = when (choice) {
+        SERIF -> "serif"
+        MONOSPACE -> "monospace"
+        else -> file(context, choice)?.let(::sfntFamilyName) ?: "sans-serif"
+    }
+
+    fun fontsDirectory(context: Context): String = directory(context).absolutePath
+
     fun resolve(context: Context, choice: String, bold: Boolean): Typeface {
         val base = when (choice) {
             SANS_SERIF -> Typeface.create("sans-serif", Typeface.NORMAL)
