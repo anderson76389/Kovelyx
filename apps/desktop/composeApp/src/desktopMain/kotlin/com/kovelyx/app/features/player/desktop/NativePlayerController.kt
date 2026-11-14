@@ -1102,12 +1102,15 @@ internal class NativePlayerController(
             useLibass = useLibass,
             stripSdh = style.stripSdh,
         )
-        NativePlayerBridge.setSubtitleFont(
-            handle,
-            DesktopSubtitleFontStore.fontName(style.fontFamily),
-            DesktopSubtitleFontStore.fontsDirectory(),
-            style.fontFamily != com.kovelyx.app.features.player.SubtitleFontChoice.DEFAULT,
-        )
+        // The macOS bridge does not export this JNI method; do not break its player.
+        if (DesktopHostOs.current == DesktopHostOs.WINDOWS || DesktopHostOs.current == DesktopHostOs.LINUX) {
+            NativePlayerBridge.setSubtitleFont(
+                handle,
+                DesktopSubtitleFontStore.fontName(style.fontFamily),
+                DesktopSubtitleFontStore.fontsDirectory(),
+                style.fontFamily != com.kovelyx.app.features.player.SubtitleFontChoice.DEFAULT,
+            )
+        }
     }
 
     private fun decodeTracks(readJson: (Long) -> String): List<NativeMpvTrack> {
