@@ -11,6 +11,7 @@ on:
       - 'apps/tv/app/src/androidTest/**'
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/core/sync/CloudflareTvProfileSharingSecurityTest.kt'
       - 'scripts/tests/tv_guest_smoke.py'
+      - 'scripts/tests/tv_settings_adb_probe.py'
       - 'scripts/tests/tv_long_session_probe.py'
       - 'scripts/tests/ota_in_place_upgrade.sh'
       - 'scripts/tests/prepare_ota_test_apks.sh'
@@ -30,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Valider la syntaxe Python avant de démarrer l'émulateur
         run: |
-          python3 -m py_compile scripts/tests/tv_guest_smoke.py scripts/tests/tv_emulator_memory_probe.py scripts/tests/tv_long_session_probe.py
+          python3 -m py_compile scripts/tests/tv_guest_smoke.py scripts/tests/tv_emulator_memory_probe.py scripts/tests/tv_long_session_probe.py scripts/tests/tv_settings_adb_probe.py
       - name: Télécharger l'APK TV construite depuis le commit à tester
         shell: bash
         env:
@@ -137,6 +138,7 @@ jobs:
             sleep 20
             adb shell pidof com.kovelyx.tv.debug
             python3 scripts/tests/tv_guest_smoke.py
+            python3 scripts/tests/tv_settings_adb_probe.py --output /tmp/kovelyx-tv-settings-audit
             adb shell input keyevent KEYCODE_DPAD_DOWN
             adb shell input keyevent KEYCODE_DPAD_RIGHT
             adb shell input keyevent KEYCODE_DPAD_CENTER
@@ -164,6 +166,7 @@ jobs:
             /tmp/kovelyx-guest.xml
             /tmp/kv-ui.xml
             /tmp/kv-tv-logcat.txt
+            /tmp/kovelyx-tv-settings-audit/
             /tmp/kovelyx-tv-memory/
             /tmp/kovelyx-tv-endurance/
           if-no-files-found: ignore
