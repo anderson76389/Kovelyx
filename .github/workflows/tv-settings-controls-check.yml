@@ -43,6 +43,29 @@ jobs:
         shell: bash
         run: |
           ./gradlew :app:assembleFullDebug --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m"
+      - name: Activer KVM pour l'émulateur Google TV
+        shell: bash
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            ls -l /dev/kvm
+          else
+            echo "::warning::/dev/kvm indisponible sur ce runner; émulation logicielle plus lente"
+          fi
+      - name: Exécuter les vrais contrôles des paramètres sur Google TV avec télécommande
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google-tv
+          arch: x86
+          profile: tv_1080p
+          cores: 2
+          ram-size: 2048M
+          heap-size: 512M
+          disk-size: 6144M
+          disable-animations: true
+          script: |
+            bash -c 'cd apps/tv && ./gradlew :app:connectedFullDebugAndroidTest --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process -Dorg.gradle.jvmargs="-Xmx5g -XX:MaxMetaspaceSize=768m" -Pandroid.testInstrumentationRunnerArguments.class=com.kovelyx.tv.ui.screens.settings.SettingsRailRemoteNavigationTest,com.kovelyx.tv.ui.screens.settings.PlaybackSettingsOrganizationTest,com.kovelyx.tv.ui.screens.settings.TrackingSettingsOverviewTest'
       - name: Conserver les rapports
         if: always()
         uses: actions/upload-artifact@v4
@@ -50,5 +73,7 @@ jobs:
           name: verification-parametres-kovelyx-tv
           path: |
             apps/tv/app/build/reports/tests/testFullDebugUnitTest/
+            apps/tv/app/build/reports/androidTests/connected/
+            apps/tv/app/build/outputs/androidTest-results/connected/
             apps/tv/app/build/outputs/apk/full/debug/
           if-no-files-found: ignore

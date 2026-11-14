@@ -37,48 +37,38 @@ class TrackingSettingsOverviewTest {
         get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
-    fun providerRowsAreOrderedAndShowDisconnectedStatus() {
+    fun availableProviderRowsAreOrderedAndShowDisconnectedStatus() {
         setOverview()
 
         composeRule.onNodeWithTag(TrackingSettingsTestTags.TRAKT_PROVIDER).assertIsDisplayed()
-        composeRule.onNodeWithTag(TrackingSettingsTestTags.SIMKL_PROVIDER).assertIsDisplayed()
+        composeRule.onNodeWithTag(TrackingSettingsTestTags.SIMKL_PROVIDER).assertDoesNotExist()
         composeRule.onNodeWithTag(TrackingSettingsTestTags.MDBLIST_PROVIDER).assertIsDisplayed()
         composeRule.onAllNodesWithText(
             context.getString(R.string.tracking_status_disconnected)
-        ).assertCountEquals(3)
+        ).assertCountEquals(2)
 
         val traktTop = composeRule
             .onNodeWithTag(TrackingSettingsTestTags.TRAKT_PROVIDER)
             .fetchSemanticsNode()
             .boundsInRoot
             .top
-        val simklTop = composeRule
-            .onNodeWithTag(TrackingSettingsTestTags.SIMKL_PROVIDER)
-            .fetchSemanticsNode()
-            .boundsInRoot
-            .top
-
         val mdblistTop = composeRule.onNodeWithTag(TrackingSettingsTestTags.MDBLIST_PROVIDER)
             .fetchSemanticsNode().boundsInRoot.top
-        assertTrue(traktTop < simklTop)
-        assertTrue(simklTop < mdblistTop)
+        assertTrue(traktTop < mdblistTop)
     }
 
     @Test
-    fun connectedProviderRowsShowUsernamesAndStatus() {
+    fun connectedAvailableProviderRowsShowUsernamesAndStatus() {
         setOverview(
             traktState = TraktUiState(
                 mode = TraktConnectionMode.CONNECTED,
                 username = "trakt-user"
             ),
-            simklState = SimklSettingsUiState(
-                mode = SimklConnectionMode.CONNECTED,
-                username = "simkl-user"
-            ),
+            mdbListState = MdbListTrackerUiState(isConnected = true, username = "mdb-user"),
             trackingState = TrackingSettingsUiState(
                 connectedProviderIds = setOf(
                     TrackingProviderId.TRAKT,
-                    TrackingProviderId.SIMKL
+                    TrackingProviderId.MDBLIST
                 ),
                 isReady = true
             )
@@ -91,7 +81,7 @@ class TrackingSettingsOverviewTest {
             context.getString(R.string.trakt_connected_as, "trakt-user")
         ).assertIsDisplayed()
         composeRule.onNodeWithText(
-            context.getString(R.string.simkl_connected_as, "simkl-user")
+            context.getString(R.string.mdblist_connected_as, "mdb-user")
         ).assertIsDisplayed()
     }
 
@@ -163,7 +153,7 @@ class TrackingSettingsOverviewTest {
     }
 
     @Test
-    fun remoteFocusMovesFromTraktThroughSimklToMdbList() {
+    fun remoteFocusMovesFromTraktThroughCredentialsToMdbList() {
         lateinit var traktFocusRequester: FocusRequester
         composeRule.setContent {
             KovelyxTheme {
@@ -198,7 +188,7 @@ class TrackingSettingsOverviewTest {
 
         composeRule.onNodeWithTag(TrackingSettingsTestTags.TRAKT_PROVIDER)
             .assertIsFocused().performKeyInput { pressKey(Key.DirectionDown) }
-        composeRule.onNodeWithTag(TrackingSettingsTestTags.SIMKL_PROVIDER)
+        composeRule.onNodeWithText("Configurer mes clés Trakt")
             .assertIsFocused().performKeyInput { pressKey(Key.DirectionDown) }
         composeRule.onNodeWithTag(TrackingSettingsTestTags.MDBLIST_PROVIDER).assertIsFocused()
     }
