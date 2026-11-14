@@ -44,6 +44,9 @@ data class DisplayRefreshState(
     val available: Set<Int> = emptySet(),
     val actual: Int? = null,
     val playbackMode: DisplayModeSpec? = null,
+    /** Windows changes the entire monitor's mode, which can blank the display. */
+    val requiresSystemModeConsent: Boolean = false,
+    val systemModeConsentGranted: Boolean = true,
 ) {
     val appliedInRange: Boolean get() = actual?.let { it in minimum..maximum } == true
 }
@@ -53,6 +56,20 @@ open class DisplayRefreshController {
     private val mutable = MutableStateFlow(DisplayRefreshState())
     val state = mutable.asStateFlow()
     private var save: (Int, Int) -> Unit = { _, _ -> }
+    private var saveSystemModeConsent: (Boolean) -> Unit = {}
+    /** Changing Windows' actual display mode is opt-in; Android is unaffected. */
+    fun configureSystemModeConsent(required: Boolean, granted: Boolean = !required, persist: (Boolean) -> Unit = {}) {
+        saveSystemModeConsent = persist
+        mutable.value = mutable.value.copy(
+            requiresSystemModeConsent = required,
+            systemModeConsentGranted = if (required) granted else true,
+        )
+    }
+    fun setSystemModeConsent(granted: Boolean) {
+        if (!mutable.value.requiresSystemModeConsent || mutable.value.systemModeConsentGranted == granted) return
+        saveSystemModeConsent(granted)
+        mutable.value = mutable.value.copy(systemModeConsentGranted = granted)
+    }
     fun initialize(minimum: Int?, maximum: Int?, legacy: Int, persist: (Int, Int) -> Unit) {
         val restored = restoreDisplayRefreshRange(minimum, maximum, legacy)
         save = persist
