@@ -3,6 +3,10 @@ name: Tester les APK Kovelyx avec les DNS Nuvio interdits
 # Smoke tests d'execution reelle : catalogue et video avec API privee ne sont
 # pas certifies par ce test. Voir docs/PREUVE_INDEPENDANCE.md.
 on:
+  # Monthly check of the latest actually published Android and TV APKs;
+  # release events created with GITHUB_TOKEN do not always fire other workflows.
+  schedule:
+    - cron: '31 5 1 * *'
   push:
     branches: [main]
     paths:
