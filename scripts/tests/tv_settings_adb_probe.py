@@ -154,10 +154,15 @@ class Probe:
             self.report.setdefault("onboarding", []).append("advanced selected")
             return True
         if self.has_screen_label(root, LAYOUT_ONBOARDING):
-            # Layout defaults to Modern; its Continue button has initial focus.
-            self.key("KEYCODE_DPAD_CENTER")
-            time.sleep(3)
-            self.report.setdefault("onboarding", []).append("default layout confirmed")
+            # Compose may focus a preview card instead of Continue (confirmed
+            # on Google TV). Select the actual Continue button by its accessible
+            # label to avoid accidentally cycling layout options.
+            continue_button = self.target(root, LAYOUT_CONTINUE)
+            if continue_button is None:
+                raise AssertionError("Bouton Continuer introuvable sur le choix de disposition")
+            self.tap(continue_button)
+            time.sleep(2)
+            self.report.setdefault("onboarding", []).append("layout continue clicked")
             return True
         return False
 
