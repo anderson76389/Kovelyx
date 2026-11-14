@@ -1,6 +1,6 @@
 <resources>
     <string name="display_refresh_title">Display refresh rate</string>
-    <string name="display_refresh_description">Choose this device’s minimum and maximum refresh rates, up to 144 Hz. The highest supported mode within this range is requested without changing resolution. Videos keep their original frame rate. On Windows, the display changes only when you edit this setting; startup and shutdown do not change the monitor refresh rate.</string>
+    <string name="display_refresh_description">Choose this device’s minimum and maximum refresh rates, up to 144 Hz. The highest supported mode within this range is requested without changing resolution. Videos keep their original frame rate. On Windows, monitor refresh changes require separate explicit consent and are disabled by default. Startup and shutdown never change the monitor refresh rate.</string>
     <string name="display_refresh_unavailable">The current rate is outside the selected range. The display or system may limit it; unsupported modes are never forced.</string>
     <string name="display_refresh_minimum">Minimum</string>
     <string name="display_refresh_maximum">Maximum</string>
@@ -9,4 +9,6 @@
     <string name="display_refresh_pending">Detecting screen modes…</string>
     <string name="display_refresh_range">Selected range: %1$d–%2$d Hz</string>
     <string name="display_refresh_adjust_bounds">The other bound adjusts when needed to keep the range valid. This setting belongs to this device.</string>
+    <string name="display_refresh_windows_permission">Allow Kovelyx to change the Windows monitor refresh rate</string>
+    <string name="display_refresh_windows_warning">Off by default to prevent temporary black screens and whole-desktop stutters. Leave off for normal playback; change your monitor refresh rate in Windows Settings instead. Turning this on allows system-wide display mode changes when you edit the range.</string>
 </resources>

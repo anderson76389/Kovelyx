@@ -32,6 +32,38 @@ class DisplayRefreshPolicyTest {
         assertEquals(2, writes.size)
     }
 
+    @Test fun windowsModeChangesRequireSeparateConsentAndRemainOffByDefault() {
+        val state = DisplayRefreshController()
+        var persisted = false
+        var writes = 0
+        state.initialize(60, 120, 60) { _, _ -> writes++ }
+        state.configureSystemModeConsent(
+            required = true,
+            granted = false,
+            persist = { persisted = it },
+        )
+        assertTrue(state.state.value.requiresSystemModeConsent)
+        assertTrue(!state.state.value.systemModeConsentGranted)
+        // Existing refresh-range preferences alone cannot grant OS-wide mode changes.
+        assertEquals(0, writes)
+        assertTrue(!persisted)
+        state.setSystemModeConsent(true)
+        assertTrue(state.state.value.systemModeConsentGranted)
+        assertTrue(persisted)
+        state.setSystemModeConsent(false)
+        assertTrue(!state.state.value.systemModeConsentGranted)
+        assertTrue(!persisted)
+    }
+
+    @Test fun normalAndroidRefreshSettingsDoNotRequireWindowsConsent() {
+        val state = DisplayRefreshController()
+        state.initialize(60, 120, 60) { _, _ -> }
+        assertTrue(!state.state.value.requiresSystemModeConsent)
+        assertTrue(state.state.value.systemModeConsentGranted)
+        state.setSystemModeConsent(false)
+        assertTrue(state.state.value.systemModeConsentGranted)
+    }
+
     private val mode60 = DisplayModeSpec(1, 3840, 2160, 59.94f)
     private val mode90 = mode60.copy(id = 2, hertz = 90f)
     private val mode120 = mode60.copy(id = 3, hertz = 119.88f)

@@ -53,6 +53,14 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
                 store.getString("hertz")?.toIntOrNull() ?: 60) { minimum, maximum ->
                 store.putString("range", "$minimum:$maximum")
             }
+            // Windows mode changes affect the entire desktop and can trigger a black
+            // screen / GPU driver resynchronization. Existing preferences are NOT consent.
+            // Only a separate, explicit opt-in enables ChangeDisplaySettingsExW.
+            DisplayRefreshSettings.configureSystemModeConsent(
+                required = true,
+                granted = store.getBoolean("allow_system_mode_switch") == true,
+                persist = { allowed -> store.putBoolean("allow_system_mode_switch", allowed) },
+            )
             window.addComponentListener(movement)
             window.addWindowFocusListener(focus)
             scope.launch { DisplayRefreshSettings.state.map { it.minimum to it.maximum }.distinctUntilChanged().drop(1).collect { apply(changeMode = true) } }
@@ -90,7 +98,7 @@ internal class WindowsDisplayRefresh(private val window: Window) : AutoCloseable
             val modes = cachedModes
             val range = DisplayRefreshSettings.state.value
             val candidates = displayRefreshCandidates(modes.map { it.first }, currentMode, range.minimum, range.maximum)
-            for (choice in if (changeMode) candidates else emptyList()) {
+            for (choice in if (changeMode && range.systemModeConsentGranted) candidates else emptyList()) {
                 if (nominalRefreshRate(currentMode.hertz) == nominalRefreshRate(choice.hertz)) break
                 val memory = modes.first { it.first.id == choice.id }.second
                 memory.setInt(72, 0x00400000) // DM_DISPLAYFREQUENCY only: preserve resolution, position and colour depth.
