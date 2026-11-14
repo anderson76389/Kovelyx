@@ -30,6 +30,10 @@ CATEGORIES = (
     ("debug", ("Débogage", "Debug"), False),
 )
 NAV_SETTINGS = ("Paramètres", "Settings")
+EXPERIENCE_ONBOARDING = ("Choisissez votre expérience Kovelyx", "Choose your Kovelyx experience")
+LAYOUT_ONBOARDING = ("Bienvenue sur Kovelyx", "Welcome to Kovelyx")
+ADVANCED_MODE = ("Avancé", "Advanced")
+LAYOUT_CONTINUE = ("Continuer", "Continue")
 ANDROID_KEYS = ("KEYCODE_DPAD_LEFT", "KEYCODE_DPAD_DOWN")
 
 
@@ -85,6 +89,14 @@ class Probe:
     def label(self, node: ET.Element) -> str:
         return " ".join((node.get("text") or "", node.get("content-desc") or "")).strip()
 
+    def has_label(self, node: ET.Element, names: tuple[str, ...]) -> bool:
+        allowed = {name.casefold() for name in names}
+        return any((node.get(key) or "").strip().casefold() in allowed
+                   for key in ("text", "content-desc"))
+
+    def has_screen_label(self, root: ET.Element, names: tuple[str, ...]) -> bool:
+        return any(self.has_label(node, names) for node in self.nodes(root))
+
     def bounds(self, node: ET.Element):
         values = [int(n) for n in re.findall(r"\d+", node.get("bounds", ""))]
         return tuple(values) if len(values) == 4 else None
@@ -93,7 +105,7 @@ class Probe:
         parent = {child: ancestor for ancestor in root.iter() for child in ancestor}
         choices = []
         for node in self.nodes(root):
-            if not any(self.label(node).casefold() == name.casefold() for name in names):
+            if not self.has_label(node, names):
                 continue
             anchor = node
             while anchor in parent and anchor.get("clickable") != "true":
@@ -126,19 +138,54 @@ class Probe:
         self.verify_alive()
 
     def settings_page(self, root: ET.Element) -> bool:
-        found = 0
-        for _, names, _ in CATEGORIES:
-            if any(self.label(node).casefold() in {x.casefold() for x in names}
-                   for node in self.nodes(root)):
-                found += 1
+        found = sum(1 for _, names, _ in CATEGORIES if self.has_screen_label(root, names))
         return found >= 3
 
+    def complete_first_run(self, root: ET.Element) -> bool:
+        # Only during explicit first-run setup on a pristine CI emulator.
+        # --settings-open intentionally bypasses this on a configured Freebox.
+        if self.has_screen_label(root, EXPERIENCE_ONBOARDING):
+            # Essential has initial focus. Right + OK explicitly selects Advanced,
+            # revealing all settings in the test profile.
+            self.key("KEYCODE_DPAD_RIGHT")
+            time.sleep(.3)
+            self.key("KEYCODE_DPAD_CENTER")
+            time.sleep(3)
+            self.report.setdefault("onboarding", []).append("advanced selected")
+            return True
+        if self.has_screen_label(root, LAYOUT_ONBOARDING):
+            # Layout defaults to Modern; its Continue button has initial focus.
+            self.key("KEYCODE_DPAD_CENTER")
+            time.sleep(3)
+            self.report.setdefault("onboarding", []).append("default layout confirmed")
+            return True
+        return False
+
+    def save_failure_screen(self) -> None:
+        try:
+            self.adb("pull", "/sdcard/kv-settings-audit.xml",
+                     str(self.out / "last-ui.xml"))
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            pass
+        try:
+            self.adb("shell", "screencap", "-p", "/sdcard/kv-settings-failure.png")
+            self.adb("pull", "/sdcard/kv-settings-failure.png",
+                     str(self.out / "last-screen.png"))
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            pass
+
     def enter_settings(self):
-        for attempt in range(28):
+        setup_steps = 0
+        for attempt in range(42):
             self.verify_alive()
             page = self.dump()
             if self.settings_page(page):
                 return page
+            if self.complete_first_run(page):
+                setup_steps += 1
+                if setup_steps > 3:
+                    raise AssertionError("Boucle inattendue pendant le premier démarrage")
+                continue
             entry = self.target(page, NAV_SETTINGS)
             if entry is not None:
                 self.tap(entry)
@@ -146,8 +193,8 @@ class Probe:
                 if self.settings_page(page):
                     return page
             # Expand the app sidebar with DPAD_LEFT, then browse it with DPAD_DOWN.
-            self.key(ANDROID_KEYS[0] if attempt < 3 else ANDROID_KEYS[1])
-            time.sleep(.3)
+            self.key(ANDROID_KEYS[0] if attempt < 5 else ANDROID_KEYS[1])
+            time.sleep(.4)
         raise AssertionError("Impossible de trouver et ouvrir Paramètres via l'interface TV")
 
     def memory(self, name: str):
@@ -245,6 +292,7 @@ def main():
         probe.audit(args.settings_open)
     except Exception as exc:
         probe.report["errors"].append(str(exc))
+        probe.save_failure_screen()
     finally:
         (probe.out / "report.json").write_text(
             json.dumps(probe.report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
