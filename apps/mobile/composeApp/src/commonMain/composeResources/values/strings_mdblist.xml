@@ -51,4 +51,5 @@
     <string name="library_list_friends">Friends</string>
     <string name="library_list_private_description">Only you can see this list.</string>
     <string name="library_list_public_description">Anyone can see this list.</string>
+    <string name="settings_mdblist_invalid_client">MDBList rejected the OAuth application. Use the client ID of a Device Code app from mdblist.com/developer/, not your API key.</string>
 </resources>

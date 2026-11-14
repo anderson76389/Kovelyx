@@ -6,6 +6,7 @@ import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.StringResource
 
 internal fun MdbListAuthError.messageResource(): StringResource = when (this) {
+    MdbListAuthError.INVALID_CLIENT -> Res.string.settings_mdblist_invalid_client
     MdbListAuthError.MISSING_CLIENT_ID -> Res.string.settings_mdblist_missing_credentials
     MdbListAuthError.INVALID_RESPONSE -> Res.string.settings_mdblist_invalid_response
     MdbListAuthError.INSUFFICIENT_SCOPE -> Res.string.settings_mdblist_write_required

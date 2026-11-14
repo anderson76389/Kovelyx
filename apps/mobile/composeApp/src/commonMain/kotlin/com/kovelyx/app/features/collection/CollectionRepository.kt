@@ -135,14 +135,15 @@ object CollectionRepository {
         return mergedCollectionsJson().toString()
     }
 
-    fun importFromJson(jsonString: String): Result<List<Collection>> {
+    fun importFromJson(jsonString: String, merge: Boolean = false): Result<List<Collection>> {
         return runCatching {
-            val validation = validateJson(jsonString)
+            val payload = if (merge) mergeCollectionImportJson(exportToJson(), jsonString) else jsonString
+            val validation = validateJson(payload)
             if (!validation.valid) {
                 throw IllegalArgumentException(validation.error.orEmpty())
             }
-            rawCollectionsJson = json.parseToJsonElement(jsonString)
-            val imported = json.decodeFromString<List<Collection>>(jsonString).deduplicatedById()
+            rawCollectionsJson = json.parseToJsonElement(payload)
+            val imported = json.decodeFromString<List<Collection>>(payload).deduplicatedById()
             _collections.value = CollectionMobileSettingsRepository.applyToCollections(imported)
             persist()
             imported
@@ -343,3 +344,12 @@ private fun CollectionImportModelError.localizedMessage(): String =
                 getString(Res.string.collections_import_error_source_blank_fields, sourceIndex, folderTitle)
         }
     }
+
+/** Keep unknown schema fields and unrelated collections when importing a backup. */
+internal fun mergeCollectionImportJson(current: String, incoming: String): String {
+    val parser = Json { ignoreUnknownKeys = true }
+    val existing = parser.parseToJsonElement(current) as JsonArray
+    val additions = parser.parseToJsonElement(incoming) as JsonArray
+    val incomingIds = additions.map { (it as kotlinx.serialization.json.JsonObject)["id"] }.toSet()
+    return JsonArray(existing.filter { (it as kotlinx.serialization.json.JsonObject)["id"] !in incomingIds } + additions).toString()
+}
