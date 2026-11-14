@@ -1291,7 +1291,9 @@ public:
         // Font files are copied into a dedicated app-private directory, never fetched remotely.
         if (!fontDirectory.empty()) setStringProperty("sub-fonts-dir", fontDirectory);
         setStringProperty("sub-font", family.empty() ? "sans-serif" : family);
-        if (forceOverride) setStringProperty("sub-ass-override", "force");
+        // Restore the previous libass behavior when returning to the default font.
+        // applySubtitleStyle caches the mode, so it will not necessarily update this on its own.
+        setStringProperty("sub-ass-override", forceOverride || !appliedSubtitleUseLibass ? "force" : "scale");
     }
 
     void setSubtitleDelayMs(int delayMs) {
