@@ -1101,6 +1101,12 @@ internal class NativePlayerController(
             useLibass = useLibass,
             stripSdh = style.stripSdh,
         )
+        NativePlayerBridge.setSubtitleFont(
+            handle,
+            DesktopSubtitleFontStore.fontName(style.fontFamily),
+            DesktopSubtitleFontStore.fontsDirectory(),
+            style.fontFamily != com.kovelyx.app.features.player.SubtitleFontChoice.DEFAULT,
+        )
     }
 
     private fun decodeTracks(readJson: (Long) -> String): List<NativeMpvTrack> {
