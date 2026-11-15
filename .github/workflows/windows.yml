@@ -322,6 +322,48 @@ jobs:
           $exe = Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -Filter Kovelyx.exe | Select-Object -First 1
           if (-not $exe) { throw 'Application Windows à tester introuvable' }
           ./scripts/player/test-windows-playback.ps1 -AppRoot $exe.Directory.FullName -IncludeApplication
+      - name: Comparer la RAM des vrais EXE Windows (release précédente et candidat)
+        if: steps.native.outputs.available == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $release = & gh api "repos/$env:GITHUB_REPOSITORY/releases/latest" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or -not $release.tag_name) { throw 'Release de référence introuvable.' }
+          $tag = $release.tag_name
+          $folder = Join-Path $env:RUNNER_TEMP 'kovelyx-memory-baseline'
+          New-Item -ItemType Directory -Force -Path $folder | Out-Null
+          & gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern "Kovelyx-Windows-Portable-$tag.zip" --pattern "Kovelyx-Windows-Portable-$tag.zip.sha256" --dir $folder
+          if ($LASTEXITCODE -ne 0) { throw 'Téléchargement de référence échoué.' }
+          $zip = Join-Path $folder "Kovelyx-Windows-Portable-$tag.zip"
+          $checksum = "$zip.sha256"
+          if (-not (Test-Path -LiteralPath $zip) -or -not (Test-Path -LiteralPath $checksum)) { throw 'Archive ou SHA-256 manquant.' }
+          $line = (Get-Content -LiteralPath $checksum -Raw).Trim()
+          $parts = $line -split '\s+', 2
+          if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-fA-F0-9]{64}$' -or $parts[1].TrimStart('*') -ne (Split-Path -Leaf $zip)) {
+            throw 'Empreinte de référence mal formée.'
+          }
+          if (-not (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.Equals($parts[0], [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Empreinte de référence incorrecte.'
+          }
+          $extracted = Join-Path $folder 'extracted'
+          Expand-Archive -LiteralPath $zip -DestinationPath $extracted -Force
+          $baselineExe = @(Get-ChildItem -LiteralPath $extracted -Recurse -File -Filter 'Kovelyx.exe')
+          $candidateExe = @(Get-ChildItem -LiteralPath 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -File -Filter 'Kovelyx.exe')
+          if ($baselineExe.Count -ne 1 -or $candidateExe.Count -ne 1) { throw 'Ambiguïté des vrais exécutables Windows.' }
+          & ./scripts/tests/windows-memory-compare.ps1 -BaselineRoot $baselineExe[0].Directory.FullName -CandidateRoot $candidateExe[0].Directory.FullName
+          "Version baseline : $tag / candidat : $env:KOVELYX_BUILD_VERSION" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Archiver les mesures Windows de mémoire
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-memory-comparison
+          path: ${{ runner.temp }}/kovelyx-memory-comparison.json
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Conserver les preuves de lecture Windows
         if: always()
         uses: actions/upload-artifact@v4

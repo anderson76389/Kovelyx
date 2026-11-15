@@ -8,6 +8,28 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class DesktopUpdateCacheMaintenanceTest {
+    @Test fun twentySequentialWindowsAndLinuxInstallerUpdatesNeverAccumulateInManagedCache() {
+        val home = Files.createTempDirectory("kovelyx-updater-repeat").toFile()
+        try {
+            val updates = File(home, "updates").apply { mkdirs() }
+            val profile = File(home, "profile.json").apply { writeText("keep the user profile") }
+            repeat(20) { n ->
+                val version = "1.1.${1200 + n}"
+                val names = listOf(
+                    "Kovelyx-Windows-v$version.msi",
+                    "Kovelyx-Windows-Setup-v$version.exe",
+                    "Kovelyx-Linux-x86_64-v$version.AppImage",
+                    "Kovelyx-Linux-amd64-v$version.deb",
+                    "Kovelyx-Linux-x86_64-v$version.rpm",
+                )
+                names.forEach { File(updates, it).writeBytes(ByteArray(1024)) }
+                assertEquals(5L * 1024, DesktopUpdateCacheMaintenance.clean(updates, version))
+                assertTrue(updates.listFiles().orEmpty().isEmpty(), "Updater files left after $version")
+                assertEquals("keep the user profile", profile.readText())
+            }
+        } finally { home.deleteRecursively() }
+    }
+
     @Test fun publishedNamesCurrentVersionsAndLegacyMsiAreRecognized() {
         val home = Files.createTempDirectory("kovelyx-desktop-updates").toFile()
         try {
