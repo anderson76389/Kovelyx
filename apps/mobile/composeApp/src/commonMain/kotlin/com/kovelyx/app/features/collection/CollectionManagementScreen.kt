@@ -151,6 +151,15 @@ fun CollectionManagementScreen(
             }
         }
 
+        // Keep JSON import discoverable on phones, tablets and desktop.
+        // The former header icon remains as a shortcut.
+        item {
+            KovelyxPrimaryButton(
+                text = stringResource(Res.string.collections_import_json_button),
+                onClick = { showImportDialog = true },
+            )
+        }
+
         item {
             KovelyxPrimaryButton(
                 text = stringResource(Res.string.collections_new),
