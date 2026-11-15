@@ -24,9 +24,20 @@ internal object AppImageBackupMaintenance {
         val backup = File(parent, target.name + BACKUP_SUFFIX)
         val marker = File(parent, target.name + MARKER_SUFFIX)
 
-        fun regularOwnedFile(file: File): Boolean =
-            Files.isRegularFile(file.toPath(), LinkOption.NOFOLLOW_LINKS) &&
-                file.canonicalFile == file.absoluteFile
+        // Do not compare File.canonicalFile to File.absoluteFile: on Windows,
+        // temp directories can use aliases (such as 8.3 paths), causing a
+        // false rejection even for ordinary local files.
+        // Inspect each path component instead, rejecting actual symlinks.
+        fun regularOwnedFile(file: File): Boolean {
+            val path = file.toPath().toAbsolutePath().normalize()
+            if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) return false
+            var current = path
+            while (true) {
+                if (Files.isSymbolicLink(current)) return false
+                current = current.parent ?: break
+            }
+            return true
+        }
 
         return runCatching {
             // Reject symlinks (including an ancestor of the target), unexpected
