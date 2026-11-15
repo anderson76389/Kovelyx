@@ -3,6 +3,12 @@ package com.kovelyx.app.features.player
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -113,6 +119,7 @@ internal object DesktopSubtitleFontStore {
 @Composable
 internal actual fun SubtitleFontImportButton(onImported: (String) -> Unit) {
     val scope = rememberCoroutineScope()
+    var importError by remember { mutableStateOf<String?>(null) }
     Text(
         text = "Importer une police (.ttf / .otf)",
         modifier = Modifier.clickable {
@@ -126,8 +133,21 @@ internal actual fun SubtitleFontImportButton(onImported: (String) -> Unit) {
                     runCatching {
                         withContext(Dispatchers.IO) { DesktopSubtitleFontStore.importFile(source) }
                     }.onSuccess(onImported)
+                        .onFailure { error ->
+                            importError = error.message ?: "Impossible d'importer cette police"
+                        }
                 }
             }
         }.padding(vertical = 12.dp, horizontal = 8.dp)
     )
+    importError?.let { message ->
+        AlertDialog(
+            onDismissRequest = { importError = null },
+            title = { Text("Importation impossible") },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { importError = null }) { Text("OK") }
+            },
+        )
+    }
 }
