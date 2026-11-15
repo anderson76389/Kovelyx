@@ -340,59 +340,13 @@ jobs:
           $checksum = "$zip.sha256"
           if (-not (Test-Path -LiteralPath $zip) -or -not (Test-Path -LiteralPath $checksum)) { throw 'Archive ou SHA-256 manquant.' }
           $line = (Get-Content -LiteralPath $checksum -Raw).Trim()
-          $match = [regex]::Match($line, '^([a-fA-F0-9]{64})\s+\*?(.+)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-playback-proof
-          path: ${{ runner.temp }}/kovelyx-native-playback/
-          if-no-files-found: ignore
-          retention-days: 14
-      - name: Exécuter les tests unitaires des fonctions Desktop
-        if: steps.native.outputs.available == 'true'
-        working-directory: apps/desktop
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          & .\gradlew.bat :composeApp:desktopTest --no-configuration-cache --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
-          if ($LASTEXITCODE -ne 0) {
-            '### Tests Desktop en échec — distribution bloquée' >> $env:GITHUB_STEP_SUMMARY
-            exit $LASTEXITCODE
+          $parts = $line -split '\s+', 2
+          if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-fA-F0-9]{64}$' -or $parts[1].TrimStart('*') -ne (Split-Path -Leaf $zip)) {
+            throw 'Empreinte de référence mal formée.'
           }
-          '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
-
-      - name: Afficher les échecs des tests Desktop
-        if: failure()
-        shell: pwsh
-        run: |
-          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
-            [xml]$report = Get-Content $_.FullName -Raw
-            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
-              Write-Output $_.name
-              Write-Output $_.failure.InnerText
-            }
+          if (-not (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.Equals($parts[0], [StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Empreinte de référence incorrecte.'
           }
-      - name: Enregistrer les rapports des tests Windows
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-test-reports
-          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
-          if-no-files-found: ignore
-          retention-days: 14
-      - name: Sauvegarder les installateurs Windows generes (meme si un test echoue)
-        if: ${{ always() && steps.native.outputs.available == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Kovelyx-Windows-installers-experimental
-          path: dist/
-          # Le build peut echouer avant d'avoir produit les fichiers :
-          # conserver le vrai echec initial au lieu d'en creer un deuxieme.
-          if-no-files-found: warn
-          retention-days: 30
-)
-          if (-not $match.Success -or $match.Groups[2].Value -ne (Split-Path -Leaf $zip)) { throw 'Empreinte de référence mal formée.' }
-          if (-not (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.Equals($match.Groups[1].Value, [StringComparison]::OrdinalIgnoreCase)) { throw 'Empreinte de référence incorrecte.' }
           $extracted = Join-Path $folder 'extracted'
           Expand-Archive -LiteralPath $zip -DestinationPath $extracted -Force
           $baselineExe = @(Get-ChildItem -LiteralPath $extracted -Recurse -File -Filter 'Kovelyx.exe')
