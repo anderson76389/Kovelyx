@@ -5,6 +5,7 @@ on:
     paths:
       - 'services/kovelyx-cloudflare/**'
       - '.github/workflows/portable-backend.yml'
+      - 'apps/tv/app/src/main/java/com/kovelyx/tv/data/local/SubtitleFontStore.kt'
   push:
     branches: [main]
     paths:
