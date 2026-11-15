@@ -9,6 +9,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'apps/desktop/composeApp/src/desktopMain/kotlin/com/kovelyx/app/features/player/SubtitleFontImport.desktop.kt'
       - '.github/workflows/windows-runtime-blackout.yml'
       - '.github/workflows/full-repository-independence-audit.yml'
   workflow_dispatch:
