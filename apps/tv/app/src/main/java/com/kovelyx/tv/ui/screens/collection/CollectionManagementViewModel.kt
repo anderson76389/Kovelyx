@@ -319,7 +319,9 @@ class CollectionManagementViewModel @Inject constructor(
 
     fun loadFromFile(context: android.content.Context) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoadingImport = true, importError = null) }
+            _uiState.update {
+                it.copy(isLoadingImport = true, importError = null, validationResult = null, validatedJson = null)
+            }
             try {
                 val content = withContext(Dispatchers.IO) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -362,9 +364,9 @@ class CollectionManagementViewModel @Inject constructor(
         val resolver = context.contentResolver
         val uri = android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI
         val projection = arrayOf(android.provider.MediaStore.Downloads._ID)
-        val selection = "${android.provider.MediaStore.Downloads.DISPLAY_NAME} = ?"
-        val selectionArgs = arrayOf("nuvio-collections.json")
-        return resolver.query(uri, projection, selection, selectionArgs, null)?.use { cursor ->
+        val selection = "${android.provider.MediaStore.Downloads.DISPLAY_NAME} IN (?, ?)"
+        val selectionArgs = arrayOf("kovelyx-collections.json", "nuvio-collections.json")
+        return resolver.query(uri, projection, selection, selectionArgs, "${android.provider.MediaStore.Downloads.DATE_ADDED} DESC")?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(android.provider.MediaStore.Downloads._ID))
                 val fileUri = android.content.ContentUris.withAppendedId(uri, id)
@@ -377,7 +379,10 @@ class CollectionManagementViewModel @Inject constructor(
         val downloadsDir = android.os.Environment.getExternalStoragePublicDirectory(
             android.os.Environment.DIRECTORY_DOWNLOADS
         )
-        val file = java.io.File(downloadsDir, "nuvio-collections.json")
-        return if (file.exists()) file.inputStream().use(::readCollectionsJson) else null
+        return listOf("kovelyx-collections.json", "nuvio-collections.json")
+            .firstNotNullOfOrNull { name ->
+                val file = java.io.File(downloadsDir, name)
+                if (file.exists()) file.inputStream().use(::readCollectionsJson) else null
+            }
     }
 }
