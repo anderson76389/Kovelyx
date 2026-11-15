@@ -202,5 +202,72 @@ class VerifiedPreviewTests(unittest.TestCase):
                 PREVIEW.unique_file(root, "*.apk")
 
 
+    def test_final_release_requires_all_eight_packages_and_checksum_files(self):
+        tag = "v1.1.1164"
+        names = PREVIEW.expected_public_assets(tag)
+        self.assertEqual(len(names), 16)
+        self.assertEqual(len([n for n in names if n.endswith(".sha256")]), 8)
+        self.assertIn("Kovelyx-Windows-Portable-v1.1.1164.zip", names)
+        self.assertIn("Kovelyx-Linux-x86_64-v1.1.1164.AppImage", names)
+        self.assertIn("Kovelyx-TV-v1.1.1164-universal.apk.sha256", names)
+
+    def test_publication_fails_closed_on_missing_corrupt_or_wrong_commit_assets(self):
+        import hashlib
+        tag = "v1.1.1164"
+        sha = "a" * 40
+        names = PREVIEW.expected_public_assets(tag)
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder)
+            packages = sorted(n for n in names if not n.endswith(".sha256"))
+            for name in packages:
+                payload = (name + ":verified-by-test").encode("utf-8")
+                (output / name).write_bytes(payload)
+                (output / (name + ".sha256")).write_text(
+                    hashlib.sha256(payload).hexdigest() + "  " + name + "\n",
+                    encoding="utf-8")
+            def draft():
+                return {
+                    "tag_name": tag, "draft": True, "target_commitish": sha,
+                    "assets": [{
+                        "name": p.name, "state": "uploaded",
+                        "size": p.stat().st_size, "digest": "sha256:" + PREVIEW.digest(p),
+                    } for p in sorted(output.iterdir())],
+                }
+
+            PREVIEW.verify_uploaded_release_inventory(tag, sha, output, draft())
+
+            missing = draft()
+            missing["assets"].pop()
+            with self.assertRaisesRegex(RuntimeError, "Inventaire"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, missing)
+
+            wrong_commit = draft()
+            wrong_commit["target_commitish"] = "b" * 40
+            with self.assertRaisesRegex(RuntimeError, "commit"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, wrong_commit)
+
+            already_public = draft()
+            already_public["draft"] = False
+            with self.assertRaisesRegex(RuntimeError, "Brouillon"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, already_public)
+
+            wrong_digest = draft()
+            wrong_digest["assets"][0]["digest"] = "sha256:" + "0" * 64
+            with self.assertRaisesRegex(RuntimeError, "Empreinte GitHub"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, wrong_digest)
+
+            wrong_size = draft()
+            wrong_size["assets"][0]["size"] += 1
+            with self.assertRaisesRegex(RuntimeError, "Taille"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, wrong_size)
+
+            wrong_manifest_path = output / (packages[0] + ".sha256")
+            wrong_manifest_path.write_text("0" * 64 + "  " + packages[0] + "\n")
+            manifest_file = draft()
+            with self.assertRaisesRegex(RuntimeError, "mal associée"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, manifest_file)
+
+
+
 if __name__ == "__main__":
     unittest.main()

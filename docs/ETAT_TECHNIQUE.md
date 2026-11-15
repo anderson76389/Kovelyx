@@ -1,6 +1,8 @@
-# Kovelyx — État technique et indépendance
+# Kovelyx — État technique et indépendance (archive historique)
 
-_Mise à jour du 14 octobre 2026. Ce fichier distingue le code présent de ce qui est réellement utilisable._
+> **Attention : ce dossier documente l'état au 14 octobre 2026, pas la dernière Release.** Pour les informations de finalisation, les quatre plateformes, les vérifications actuelles et les limites des tests, lire le [dossier de finalisation](./FINALISATION.md). Les constats historiques ci-dessous ne doivent pas être présentés comme l'état du commit actuel.
+
+_Mise à jour historique du 14 octobre 2026. Ce fichier distingue le code présent à cette date de ce qui était alors utilisable._
 
 ## Définition de l'indépendance
 

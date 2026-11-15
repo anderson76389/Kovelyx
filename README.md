@@ -17,7 +17,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 
 [![Licence](https://img.shields.io/badge/LICENCE-GPLv3-33304A?style=for-the-badge)](./docs/PROVENANCE.md)
 
-<sub>Projet open source • Versions actuellement en préversion • Sources et builds hébergés dans ce dépôt</sub>
+<sub>Projet open source • Releases multiplateformes • Sources et builds hébergés dans ce dépôt</sub>
 
 </div>
 
@@ -74,7 +74,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
 
 </div>
 
-> **Important :** les fichiers proposés sont des **préversions expérimentales**, pas des versions stables certifiées. Pour les APK de test, la signature peut changer : une mise à jour par-dessus la précédente peut échouer. Sauvegardez vos données locales avant de remplacer ou désinstaller une application.
+> **Important :** les Releases unifiées font l'objet de contrôles automatiques de compilation, d'identité, de signature et d'empreintes SHA-256. Cela ne garantit pas l'absence de bugs sur les appareils physiques. **Mettez à jour par-dessus la version installée sans désinstaller** ; conservez une sauvegarde des données avant tout changement important. Voir le [dossier de finalisation et de maintenance](./docs/FINALISATION.md).
 
 ---
 
@@ -138,7 +138,7 @@ Le projet rassemble les sources de ses quatre versions, l'infrastructure de comp
 
 Le code peut être compilé avec les anciens domaines Nuvio bloqués dans les scénarios testés. En revanche, **une compilation réussie ne prouve pas que chaque bouton, addon, lecteur ou connexion externe fonctionne en situation réelle**. Les tests Kotlin Android/TV et plusieurs scénarios d'émulateur récents ont réussi ; ils ne remplacent pas la validation du lecteur, des sources et de la télécommande sur appareils physiques.
 
-**[Audit d'indépendance](./docs/CONTROLES_INDEPENDANCE.md) · [État technique](./docs/ETAT_TECHNIQUE.md) · [Tests manuels PC](./docs/TESTS_PC.md) · [Suivi GitHub Actions](https://github.com/anderson76389/Kovelyx/actions)**
+**[Dossier de finalisation](./docs/FINALISATION.md) · [Audit d'indépendance](./docs/CONTROLES_INDEPENDANCE.md) · [État technique historique](./docs/ETAT_TECHNIQUE.md) · [Tests manuels PC](./docs/TESTS_PC.md) · [Suivi GitHub Actions](https://github.com/anderson76389/Kovelyx/actions)**
 
 ## 🧭 Feuille de route
 
