@@ -2565,6 +2565,7 @@
     <string name="collections_delete_confirm_subtitle">This will permanently delete \"%1$s\". This cannot be undone.</string>
     <string name="collections_empty">No collections yet. Create one to organize your catalogs.</string>
     <string name="collections_new">New Collection</string>
+    <string name="collections_import_json_button">Import a JSON file</string>
     <string name="collections_import">Import</string>
     <string name="collections_export_file">Export File</string>
     <string name="collections_saved_downloads">Saved to Downloads</string>
@@ -2805,7 +2806,7 @@
     <string name="collections_editor_genre_required">Genre required</string>
     <string name="collections_editor_genre_optional">Genre filter available</string>
     <string name="collections_card_title">Collections</string>
-    <string name="collections_card_subtitle">Group catalogs into folders on your home screen</string>
+    <string name="collections_card_subtitle">Organize your collections and import JSON catalog backups</string>
     <string name="collections_tab_all">All</string>
     <string name="collections_tab_combined">Combined</string>
     <string name="collection_editor_remove_cd">Remove</string>

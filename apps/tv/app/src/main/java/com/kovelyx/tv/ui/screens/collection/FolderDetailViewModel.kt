@@ -277,10 +277,7 @@ class FolderDetailViewModel @Inject constructor(
             val sourceTabs = folder.sources.map { source ->
                 val (name, typeLabel, rawType) = when (source) {
                     is AddonCatalogCollectionSource -> {
-                        val addon = addons.find { it.id == source.addonId }
-                        val catalog = addon?.catalogs?.findCollectionCatalog(source.type, source.catalogId)
-                            ?: addon?.catalogs?.findCollectionCatalog(source.type, source.catalogId.substringBefore(","))
-                            ?: addons.firstNotNullOfOrNull { a -> a.catalogs.findCollectionCatalog(source.type, source.catalogId) }
+                        val catalog = addons.resolveCollectionAddonCatalog(source)?.catalog
                         val labels = buildAddonTabLabels(source, catalog?.name)
                         Triple(labels.first, labels.second, catalog?.apiType ?: source.type)
                     }
@@ -748,9 +745,9 @@ class FolderDetailViewModel @Inject constructor(
     private fun loadAddonCatalogForTab(tabIndex: Int, source: AddonCatalogCollectionSource) {
         viewModelScope.launch {
             val addons = addonRepository.getInstalledAddons().first().enabledAddons()
-            val addon = addons.find { it.id == source.addonId }
+            val resolved = addons.resolveCollectionAddonCatalog(source)
 
-            if (addon == null) {
+            if (resolved == null) {
                 _uiState.update { state ->
                     val tabs = state.tabs.toMutableList()
                     if (tabIndex < tabs.size) {
@@ -764,20 +761,7 @@ class FolderDetailViewModel @Inject constructor(
                 return@launch
             }
 
-            var catalog = addon.catalogs.findCollectionCatalog(source.type, source.catalogId)
-                ?: addon.catalogs.findCollectionCatalog(source.type, source.catalogId.substringBefore(","))
-            // If the catalog wasn't found in the declared addon, search all installed addons.
-            var effectiveAddon: com.kovelyx.tv.domain.model.Addon = addon
-            if (catalog == null) {
-                for (a in addons) {
-                    val match = a.catalogs.findCollectionCatalog(source.type, source.catalogId)
-                    if (match != null) {
-                        effectiveAddon = a
-                        catalog = match
-                        break
-                    }
-                }
-            }
+            val (effectiveAddon, catalog) = resolved
             val tab = _uiState.value.tabs.getOrNull(tabIndex)
             val catalogName = catalog?.name
                 ?: tab?.label?.takeIf { it.isNotBlank() }
@@ -791,9 +775,9 @@ class FolderDetailViewModel @Inject constructor(
                 addonBaseUrl = effectiveAddon.baseUrl,
                 addonId = effectiveAddon.id,
                 addonName = effectiveAddon.displayName,
-                catalogId = source.catalogId,
+                catalogId = catalog.id,
                 catalogName = catalogName,
-                type = catalog?.apiType ?: source.type,
+                type = catalog.apiType,
                 skip = 0,
                 skipStep = skipStep,
                 extraArgs = extraArgs,

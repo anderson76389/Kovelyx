@@ -295,6 +295,7 @@
     <string name="collections_import_header">Importer des collections</string>
     <string name="collections_import_json_placeholder">JSON</string>
     <string name="collections_import_paste_description">Collez le JSON de vos collections ci-dessous.</string>
+    <string name="collections_import_json_button">Importer un fichier JSON</string>
     <string name="collections_import">Importer</string>
     <string name="collections_new">Nouvelle collection</string>
     <string name="collections_pinned">Épinglé</string>
