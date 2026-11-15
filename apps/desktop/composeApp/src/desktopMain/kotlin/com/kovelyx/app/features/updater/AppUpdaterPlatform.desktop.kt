@@ -49,6 +49,17 @@ actual object AppUpdaterPlatform {
                 }
             }
         }
+        // A previous AppImage is retained for rollback during the update.
+        // Reclaim it only AFTER the new app survived window startup and only
+        // when our owned marker and two real ELF images are present.
+        if (currentOs == DesktopUpdaterOs.LINUX && linuxInstallMethod == LinuxInstallMethod.APP_IMAGE) {
+            delay(30_000)
+            val runningImage = System.getenv(appImageEnvName)?.takeIf { it.isNotBlank() } ?: return
+            withContext(Dispatchers.IO) {
+                runCatching { AppImageBackupMaintenance.clean(File(runningImage)) }
+            }
+            return
+        }
         if (!isPortableWindows) return
         delay(30_000)
         val launcher = System.getProperty("jpackage.app-path")?.takeIf { it.isNotBlank() }
@@ -538,6 +549,8 @@ internal fun appImageReplaceScript(
     val target = singleQuote(appImagePath)
     val stage = singleQuote("$appImagePath.kovelyx-staged-$currentPid")
     val backup = singleQuote("$appImagePath.kovelyx-previous")
+    val ownerMarker = singleQuote("$appImagePath.kovelyx-previous.owner")
+    val markerContent = singleQuote(AppImageBackupMaintenance.OWNER_MARKER_CONTENT)
     return buildString {
         // Stage an executable in the SAME folder as the target for atomic rename.
         // The existing AppImage remains intact if copying or renaming fails.
@@ -549,7 +562,10 @@ internal fun appImageReplaceScript(
         // Never replace a running AppImage when the app did not exit in time.
         append("if kill -0 $currentPid 2>/dev/null; then rm -f -- $stage; xdg-open $downloaded; exit 0; fi; ")
         append("if mv -f -- $target $backup; then ")
-        append("if mv -f -- $stage $target; then rm -f -- $downloaded; exec $target; ")
+        append("if mv -f -- $stage $target; then ")
+        // Never follow a stale marker symlink when declaring this backup ours.
+        append("rm -f -- $ownerMarker; printf '%s' $markerContent > $ownerMarker; ")
+        append("rm -f -- $downloaded; exec $target; ")
         append("else mv -f -- $backup $target; xdg-open $downloaded; fi; ")
         append("else rm -f -- $stage; xdg-open $downloaded; fi; ")
         append("else rm -f -- $stage; xdg-open $downloaded; fi")
