@@ -160,6 +160,53 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
           "Mises à jour sans désinstallation autorisées.", flush=True)
 
 
+
+def expected_public_assets(tag):
+    """Exactly eight installers and their eight SHA-256 manifests."""
+    packages = {
+        f"Kovelyx-Android-{tag}.apk",
+        f"Kovelyx-TV-{tag}-universal.apk",
+        f"Kovelyx-Windows-{tag}.msi",
+        f"Kovelyx-Windows-Setup-{tag}.exe",
+        f"Kovelyx-Windows-Portable-{tag}.zip",
+        *linux_package_names(tag),
+    }
+    return packages | {name + ".sha256" for name in packages}
+
+
+def verify_uploaded_release_inventory(tag, sha, output, release):
+    """Refuse to publish an incomplete or tampered GitHub draft Release.
+
+    GitHub's own SHA-256 digest and reported size must match every local
+    artifact. The separate .sha256 manifest must also name the right package.
+    """
+    expected = expected_public_assets(tag)
+    files = {p.name: p for p in output.iterdir() if p.is_file()}
+    if set(files) != expected:
+        raise RuntimeError("Fichiers de publication manquants ou inattendus")
+    if not release or release.get("tag_name") != tag or not release.get("draft"):
+        raise RuntimeError("Brouillon GitHub absent ou déjà rendu public")
+    if release.get("target_commitish") != sha:
+        raise RuntimeError("Release associée à un commit source incorrect")
+    assets = release.get("assets", [])
+    names = [asset.get("name") for asset in assets]
+    if len(names) != len(expected) or set(names) != expected:
+        raise RuntimeError("Inventaire GitHub incomplet, dupliqué ou inattendu")
+    by_name = {asset["name"]: asset for asset in assets}
+    for name in sorted(expected):
+        local = files[name]
+        asset = by_name[name]
+        if asset.get("state") != "uploaded" or asset.get("size") != local.stat().st_size:
+            raise RuntimeError("Taille ou état incorrect : " + name)
+        if asset.get("digest") != "sha256:" + digest(local):
+            raise RuntimeError("Empreinte GitHub différente : " + name)
+        if name.endswith(".sha256"):
+            package = files[name[:-7]]
+            expected_manifest = f"{digest(package)}  {package.name}\n"
+            if local.read_text(encoding="utf-8") != expected_manifest:
+                raise RuntimeError("Empreinte publique mal associée : " + name)
+
+
 def ensure_tag(tag, sha):
     # A draft release does not guarantee that the corresponding Git ref exists.
     existing = subprocess.run(["gh", "api", f"repos/{REPOSITORY}/git/ref/tags/{tag}"],
@@ -328,8 +375,8 @@ def main():
         if ref["sha"] != sha:
             raise RuntimeError("Le tag existant désigne un autre commit")
         release = wait_for_release(tag)
-        if not release["draft"] and not release["prerelease"]:
-            raise RuntimeError("Refus de modifier une version stable")
+        if not release["draft"]:
+            raise RuntimeError("Refus de modifier une Release déjà publiée")
         assets = {a["name"]: a for a in release["assets"]}
         for path in sorted(output.iterdir()):
             if path.name in assets:
@@ -337,6 +384,18 @@ def main():
                     raise RuntimeError("Un fichier publié différent existe déjà ; aucun écrasement")
             else:
                 gh("release", "upload", tag, str(path), "--repo", REPOSITORY)
+        # Re-read GitHub after upload: a successful command is not proof that
+        # every file is public, complete, and associated with the right commit.
+        # Give GitHub's API a short propagation window, but never publish a
+        # partially uploaded draft.
+        for attempt in range(8):
+            try:
+                verify_uploaded_release_inventory(tag, sha, output, find_release(tag))
+                break
+            except RuntimeError:
+                if attempt == 7:
+                    raise
+                time.sleep(4)
         gh("release", "edit", tag, "--repo", REPOSITORY, "--draft=false", f"--prerelease={str(preview).lower()}", f"--latest={str(not preview).lower()}")
         print(f"Release complète publiée : {tag}", flush=True)
         subprocess.run(["python3", "scripts/prune-releases.py"], check=True)
