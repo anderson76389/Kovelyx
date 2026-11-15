@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 # This measures only idle startup working set on a clean GitHub runner.
 # It cannot predict poster-heavy use or prolonged native-video playback.
 function Measure-Kovelyx([string]$Root, [string]$Label) {
-    $rootPath = [System.IO.Path]::GetFullPath($Root).TrimEnd([char]'\\', [char]'/')
+    $rootPath = [System.IO.Path]::GetFullPath($Root).TrimEnd([char]92, [char]47)
     $exe = Join-Path $rootPath 'Kovelyx.exe'
     if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw "$Label Kovelyx.exe absent: $exe" }
 
