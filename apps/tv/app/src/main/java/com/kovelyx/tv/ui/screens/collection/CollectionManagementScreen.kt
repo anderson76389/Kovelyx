@@ -239,7 +239,7 @@ fun CollectionManagementScreen(
                     }
                 }
                 KovelyxButton(onClick = { viewModel.showImportDialog() }) {
-                    Text(stringResource(R.string.collections_import))
+                    Text(stringResource(R.string.collections_import_json_button))
                 }
                 KovelyxButton(
                     onClick = {
