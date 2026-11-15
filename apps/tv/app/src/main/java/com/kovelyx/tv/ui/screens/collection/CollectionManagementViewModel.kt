@@ -238,7 +238,9 @@ class CollectionManagementViewModel @Inject constructor(
             _uiState.update { it.copy(importError = context.getString(R.string.web_import_enter_url)) }
             return
         }
-        _uiState.update { it.copy(isLoadingImport = true, importError = null) }
+        _uiState.update {
+            it.copy(isLoadingImport = true, importError = null, validationResult = null, validatedJson = null)
+        }
         viewModelScope.launch {
             try {
                 val client = okhttp3.OkHttpClient.Builder()
@@ -246,24 +248,31 @@ class CollectionManagementViewModel @Inject constructor(
                     .socketFactory(com.kovelyx.tv.core.network.NoDelaySocketFactory)
                     .build()
                 val request = okhttp3.Request.Builder().url(url).build()
-                val response = withContext(Dispatchers.IO) {
-                    client.newCall(request).execute()
+                val (httpStatus, body) = withContext(Dispatchers.IO) {
+                    client.newCall(request).execute().use { response ->
+                        val json = if (response.isSuccessful) {
+                            response.body?.byteStream()?.use(::readCollectionsJson) ?: ""
+                        } else null
+                        response.code to json
+                    }
                 }
-                if (!response.isSuccessful) {
+                if (httpStatus !in 200..299) {
                     _uiState.update {
                         it.copy(
                             isLoadingImport = false,
                             importError = context.getString(
                                 R.string.collections_import_failed_fetch_http,
-                                response.code
+                                httpStatus
                             )
                         )
                     }
                     return@launch
                 }
-                val body = response.body?.string() ?: ""
-                _uiState.update { it.copy(importText = body, isLoadingImport = false) }
-                validateJson(body)
+                val downloadedJson = body.orEmpty()
+                _uiState.update { it.copy(importText = downloadedJson, isLoadingImport = false) }
+                validateJson(downloadedJson)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -366,7 +375,7 @@ class CollectionManagementViewModel @Inject constructor(
         val projection = arrayOf(android.provider.MediaStore.Downloads._ID)
         val selection = "${android.provider.MediaStore.Downloads.DISPLAY_NAME} IN (?, ?)"
         val selectionArgs = arrayOf("kovelyx-collections.json", "nuvio-collections.json")
-        return resolver.query(uri, projection, selection, selectionArgs, "${android.provider.MediaStore.Downloads.DATE_ADDED} DESC")?.use { cursor ->
+        return resolver.query(uri, projection, selection, selectionArgs, "${android.provider.MediaStore.MediaColumns.DATE_ADDED} DESC")?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(android.provider.MediaStore.Downloads._ID))
                 val fileUri = android.content.ContentUris.withAppendedId(uri, id)
