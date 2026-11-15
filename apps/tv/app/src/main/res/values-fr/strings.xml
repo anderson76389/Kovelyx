@@ -1780,6 +1780,7 @@
     <string name="collections_header">Collections</string>
     <string name="collections_empty">Aucune collection pour le moment. Créez-en une pour organiser vos catalogues.</string>
     <string name="collections_new">Nouvelle collection</string>
+    <string name="collections_import_json_button">Importer un fichier JSON</string>
     <string name="collections_import">Importer</string>
     <string name="collections_export_file">Exporter le fichier</string>
     <string name="collections_saved_downloads">Enregistré dans le dossier Téléchargements</string>
