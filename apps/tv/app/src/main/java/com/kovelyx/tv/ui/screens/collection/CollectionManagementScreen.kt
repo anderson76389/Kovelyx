@@ -2,6 +2,8 @@ package com.kovelyx.tv.ui.screens.collection
 
 import com.kovelyx.tv.ui.theme.KovelyxTheme
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -113,6 +115,9 @@ fun CollectionManagementScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val jsonPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) viewModel.loadFromUri(uri)
+    }
 
     var lastFocusedId by rememberSaveable { mutableStateOf<String?>(null) }
     val itemFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
@@ -161,10 +166,13 @@ fun CollectionManagementScreen(
             isLoadingImport = uiState.isLoadingImport,
             onValidate = { viewModel.validateCurrentText() },
             onPickFile = {
-                scope.launch {
-                    viewModel.loadFromFile(context)
+                try {
+                    jsonPicker.launch(arrayOf("application/json", "text/plain", "application/octet-stream"))
+                } catch (_: android.content.ActivityNotFoundException) {
+                    viewModel.reportImportError("Aucun gestionnaire de fichiers disponible sur cette TV. Utilise une URL ou le dossier Téléchargements.")
                 }
             },
+            onPickDownloads = { viewModel.loadFromFile(context) },
             onConfirmImport = { viewModel.confirmImport() }
         )
         return
@@ -336,6 +344,7 @@ private fun ImportContent(
     isLoadingImport: Boolean,
     onValidate: () -> Unit,
     onPickFile: () -> Unit,
+    onPickDownloads: () -> Unit,
     onConfirmImport: () -> Unit
 ) {
     Column(
@@ -468,7 +477,9 @@ private fun ImportContent(
                             color = KovelyxTheme.colors.TextTertiary
                         )
                         Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
-                        KovelyxButton(onClick = onPickFile) { Text(stringResource(R.string.collections_load_file)) }
+                        KovelyxButton(onClick = onPickFile) { Text("Choisir un fichier JSON") }
+                        Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
+                        KovelyxButton(onClick = onPickDownloads) { Text("Ancienne sauvegarde dans Téléchargements") }
 
                         if (importText.isNotBlank()) {
                             Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
@@ -555,6 +566,12 @@ private fun ImportContent(
                             Text(
                                 text = stringResource(R.string.collections_valid_summary, validationResult.collectionCount, validationResult.folderCount),
                                 style = MaterialTheme.typography.bodyMedium,
+                                color = KovelyxTheme.colors.TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
+                            Text(
+                                text = "Les catalogues des extensions nécessitent une instance compatible installée sur Kovelyx. Les images externes ne sont pas automatiquement sauvegardées.",
+                                style = MaterialTheme.typography.bodySmall,
                                 color = KovelyxTheme.colors.TextSecondary
                             )
                             Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
