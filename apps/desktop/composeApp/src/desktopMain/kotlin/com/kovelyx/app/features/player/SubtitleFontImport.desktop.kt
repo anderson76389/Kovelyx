@@ -38,6 +38,35 @@ internal object DesktopSubtitleFontStore {
 
     fun fontsDirectory(): String = directory.absolutePath
 
+
+    /**
+     * Reuse identical app-private font files across imports and profiles.
+     * Never delete a previously imported font: another profile may still reference it.
+     */
+    internal fun findIdenticalImport(directory: File, imported: File): File? {
+        fun sha256(file: File): ByteArray {
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val bytes = ByteArray(8192)
+                while (true) {
+                    val count = input.read(bytes)
+                    if (count < 0) break
+                    digest.update(bytes, 0, count)
+                }
+            }
+            return digest.digest()
+        }
+        val checksum = sha256(imported)
+        return directory.listFiles()?.firstOrNull { existing ->
+            existing != imported && existing.isFile &&
+                existing.length() == imported.length() &&
+                SubtitleFontChoice.isValid("custom:${existing.name}") &&
+                runCatching {
+                    java.security.MessageDigest.isEqual(checksum, sha256(existing))
+                }.getOrDefault(false)
+        }
+    }
+
     fun importFile(source: File): String {
         val ext = when {
             source.name.endsWith(".ttf", true) -> ".ttf"
@@ -69,6 +98,10 @@ internal object DesktopSubtitleFontStore {
             }
             require(valid) { "Fichier de police invalide" }
             Font.createFont(Font.TRUETYPE_FONT, target)
+            findIdenticalImport(directory, target)?.let { duplicate ->
+                check(target.delete()) { "Impossible de supprimer la copie en double" }
+                return "custom:${duplicate.name}"
+            }
             return "custom:${target.name}"
         } catch (failure: Exception) {
             target.delete()
