@@ -26,7 +26,7 @@ function Measure-Kovelyx([string]$Root, [string]$Label) {
                 $_.ExecutablePath -and $_.ExecutablePath.StartsWith($rootPath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
             })
             if ($procs.Count -lt 1) {
-                throw "$Label: Kovelyx n'est plus actif au cours du test."
+                throw "${Label}: Kovelyx n'est plus actif au cours du test."
             }
             $ws = 0L
             $private = 0L
