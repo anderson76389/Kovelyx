@@ -213,11 +213,11 @@ fun CollectionManagementScreen(
                                     resolver.delete(
                                         existingUri,
                                         "${android.provider.MediaStore.Downloads.DISPLAY_NAME} = ?",
-                                        arrayOf("nuvio-collections.json")
+                                        arrayOf("kovelyx-collections.json")
                                     )
                                     // Write new file
                                     val values = android.content.ContentValues().apply {
-                                        put(android.provider.MediaStore.Downloads.DISPLAY_NAME, "nuvio-collections.json")
+                                        put(android.provider.MediaStore.Downloads.DISPLAY_NAME, "kovelyx-collections.json")
                                         put(android.provider.MediaStore.Downloads.MIME_TYPE, "application/json")
                                     }
                                     val uri = resolver.insert(existingUri, values)
@@ -479,7 +479,7 @@ private fun ImportContent(
                         Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
                         KovelyxButton(onClick = onPickFile) { Text("Choisir un fichier JSON") }
                         Spacer(modifier = Modifier.height(KovelyxTheme.spacing.sm))
-                        KovelyxButton(onClick = onPickDownloads) { Text("Ancienne sauvegarde dans Téléchargements") }
+                        KovelyxButton(onClick = onPickDownloads) { Text("Importer la sauvegarde depuis Téléchargements") }
 
                         if (importText.isNotBlank()) {
                             Spacer(modifier = Modifier.height(KovelyxTheme.spacing.md))
