@@ -3,6 +3,12 @@ package com.kovelyx.app.features.player
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -38,6 +44,35 @@ internal object DesktopSubtitleFontStore {
 
     fun fontsDirectory(): String = directory.absolutePath
 
+
+    /**
+     * Reuse identical app-private font files across imports and profiles.
+     * Never delete a previously imported font: another profile may still reference it.
+     */
+    internal fun findIdenticalImport(directory: File, imported: File): File? {
+        fun sha256(file: File): ByteArray {
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val bytes = ByteArray(8192)
+                while (true) {
+                    val count = input.read(bytes)
+                    if (count < 0) break
+                    digest.update(bytes, 0, count)
+                }
+            }
+            return digest.digest()
+        }
+        val checksum = sha256(imported)
+        return directory.listFiles()?.firstOrNull { existing ->
+            existing != imported && existing.isFile &&
+                existing.length() == imported.length() &&
+                SubtitleFontChoice.isValid("custom:${existing.name}") &&
+                runCatching {
+                    java.security.MessageDigest.isEqual(checksum, sha256(existing))
+                }.getOrDefault(false)
+        }
+    }
+
     fun importFile(source: File): String {
         val ext = when {
             source.name.endsWith(".ttf", true) -> ".ttf"
@@ -69,6 +104,10 @@ internal object DesktopSubtitleFontStore {
             }
             require(valid) { "Fichier de police invalide" }
             Font.createFont(Font.TRUETYPE_FONT, target)
+            findIdenticalImport(directory, target)?.let { duplicate ->
+                check(target.delete()) { "Impossible de supprimer la copie en double" }
+                return "custom:${duplicate.name}"
+            }
             return "custom:${target.name}"
         } catch (failure: Exception) {
             target.delete()
@@ -80,6 +119,7 @@ internal object DesktopSubtitleFontStore {
 @Composable
 internal actual fun SubtitleFontImportButton(onImported: (String) -> Unit) {
     val scope = rememberCoroutineScope()
+    var importError by remember { mutableStateOf<String?>(null) }
     Text(
         text = "Importer une police (.ttf / .otf)",
         modifier = Modifier.clickable {
@@ -93,8 +133,21 @@ internal actual fun SubtitleFontImportButton(onImported: (String) -> Unit) {
                     runCatching {
                         withContext(Dispatchers.IO) { DesktopSubtitleFontStore.importFile(source) }
                     }.onSuccess(onImported)
+                        .onFailure { error ->
+                            importError = error.message ?: "Impossible d'importer cette police"
+                        }
                 }
             }
         }.padding(vertical = 12.dp, horizontal = 8.dp)
     )
+    importError?.let { message ->
+        AlertDialog(
+            onDismissRequest = { importError = null },
+            title = { Text("Importation impossible") },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { importError = null }) { Text("OK") }
+            },
+        )
+    }
 }
