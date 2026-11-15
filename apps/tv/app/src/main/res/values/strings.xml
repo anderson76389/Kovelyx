@@ -2565,6 +2565,7 @@
     <string name="collections_delete_confirm_subtitle">This will permanently delete \"%1$s\". This cannot be undone.</string>
     <string name="collections_empty">No collections yet. Create one to organize your catalogs.</string>
     <string name="collections_new">New Collection</string>
+    <string name="collections_import_json_button">Import a JSON file</string>
     <string name="collections_import">Import</string>
     <string name="collections_export_file">Export File</string>
     <string name="collections_saved_downloads">Saved to Downloads</string>
