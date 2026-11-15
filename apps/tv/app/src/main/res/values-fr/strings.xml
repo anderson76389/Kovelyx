@@ -2006,7 +2006,7 @@
     <string name="collections_editor_genre_required">Genre requis</string>
     <string name="collections_editor_genre_optional">Filtre de genre disponible</string>
     <string name="collections_card_title">Collections</string>
-    <string name="collections_card_subtitle">Regroupez les catalogues dans des dossiers sur votre écran d’accueil</string>
+    <string name="collections_card_subtitle">Organisez vos collections et importez des catalogues JSON</string>
     <string name="collections_tab_all">Tout</string>
     <string name="collections_tab_combined">Combiné</string>
     <string name="collection_editor_remove_cd">Supprimer</string>
