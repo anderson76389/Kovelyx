@@ -31,6 +31,24 @@ class AppImageBackupMaintenanceTest {
         }
     }
 
+    @Test fun repeatedAppImageUpdatesNeverRetainPreviousExecutables() {
+        val home = Files.createTempDirectory("kovelyx-appimage-repeat").toFile()
+        try {
+            val app = File(home, "Kovelyx.AppImage").apply { writeBytes(elf) }
+            val backup = File(home, "Kovelyx.AppImage.kovelyx-previous")
+            val marker = File(home, "Kovelyx.AppImage.kovelyx-previous.owner")
+            repeat(20) {
+                backup.writeBytes(elf)
+                marker.writeText(AppImageBackupMaintenance.OWNER_MARKER_CONTENT)
+                assertEquals(elf.size.toLong(), AppImageBackupMaintenance.clean(app))
+                assertFalse(backup.exists())
+                assertFalse(marker.exists())
+            }
+            assertTrue(app.exists())
+            assertEquals(1, home.listFiles().orEmpty().size)
+        } finally { home.deleteRecursively() }
+    }
+
     @Test fun unmarkedInvalidAndUnrelatedBackupsAreNeverRemoved() {
         val home = Files.createTempDirectory("kovelyx-appimage-guard").toFile()
         try {
