@@ -11,6 +11,7 @@ import com.kovelyx.tv.domain.model.Collection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,22 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+
+internal const val MAX_COLLECTION_JSON_BYTES = 16 * 1024 * 1024
+
+/** No unbounded reads from document providers or local downloads. */
+internal fun readCollectionsJson(input: java.io.InputStream): String {
+    val output = java.io.ByteArrayOutputStream()
+    val buffer = ByteArray(8192)
+    while (true) {
+        val count = input.read(buffer)
+        if (count < 0) break
+        require(output.size() + count <= MAX_COLLECTION_JSON_BYTES) { "Fichier JSON trop volumineux (16 Mo maximum)." }
+        output.write(buffer, 0, count)
+    }
+    require(output.size() > 0) { "Fichier JSON vide." }
+    return output.toByteArray().decodeToString(throwOnInvalidSequence = true).removePrefix("\uFEFF")
+}
 
 enum class ImportMode { PASTE, FILE, URL }
 
@@ -118,13 +135,47 @@ class CollectionManagementViewModel @Inject constructor(
     }
 
     fun updateImportText(text: String) {
-        _uiState.update { it.copy(importText = text, importError = null) }
+        _uiState.update {
+            it.copy(importText = text, importError = null, validationResult = null, validatedJson = null)
+        }
+    }
+
+    fun reportImportError(message: String) {
+        _uiState.update {
+            it.copy(importError = message, isLoadingImport = false, validationResult = null, validatedJson = null)
+        }
+    }
+
+    /** Read a document explicitly selected by the user, not a hard-coded filename. */
+    fun loadFromUri(uri: android.net.Uri) {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(isLoadingImport = true, importError = null, validationResult = null, validatedJson = null)
+            }
+            try {
+                val content = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use(::readCollectionsJson)
+                        ?: error("Impossible d'ouvrir le fichier sélectionné.")
+                }
+                _uiState.update { it.copy(importText = content, isLoadingImport = false) }
+                validateJson(content)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (failure: Exception) {
+                reportImportError(failure.message ?: "Fichier JSON invalide ou illisible.")
+            }
+        }
     }
 
     fun importCollections() {
         val json = _uiState.value.importText.trim()
         if (json.isBlank()) {
             _uiState.update { it.copy(importError = context.getString(R.string.collections_import_paste_json_required)) }
+            return
+        }
+        val validation = collectionsDataStore.validateCollectionsJson(json)
+        if (!validation.valid) {
+            reportImportError(validation.error ?: "JSON de collections invalide.")
             return
         }
         val imported = collectionsDataStore.importFromJson(json)
@@ -233,6 +284,11 @@ class CollectionManagementViewModel @Inject constructor(
             _uiState.update { it.copy(importError = context.getString(R.string.collections_import_no_data)) }
             return
         }
+        val validation = collectionsDataStore.validateCollectionsJson(json)
+        if (!validation.valid) {
+            reportImportError(validation.error ?: "JSON de collections invalide.")
+            return
+        }
         val imported = collectionsDataStore.importFromJson(json)
         if (imported.isEmpty()) {
             _uiState.update { it.copy(importError = context.getString(R.string.collections_import_invalid_or_empty)) }
@@ -312,7 +368,7 @@ class CollectionManagementViewModel @Inject constructor(
             if (cursor.moveToFirst()) {
                 val id = cursor.getLong(cursor.getColumnIndexOrThrow(android.provider.MediaStore.Downloads._ID))
                 val fileUri = android.content.ContentUris.withAppendedId(uri, id)
-                resolver.openInputStream(fileUri)?.bufferedReader()?.readText()
+                resolver.openInputStream(fileUri)?.use(::readCollectionsJson)
             } else null
         }
     }
@@ -322,6 +378,6 @@ class CollectionManagementViewModel @Inject constructor(
             android.os.Environment.DIRECTORY_DOWNLOADS
         )
         val file = java.io.File(downloadsDir, "nuvio-collections.json")
-        return if (file.exists()) file.readText() else null
+        return if (file.exists()) file.inputStream().use(::readCollectionsJson) else null
     }
 }
