@@ -63,6 +63,35 @@ internal object SubtitleFontStore {
     }
 
     /** Copy at most 10 MiB from a document provider; verify SFNT header and Android parser. */
+
+    /**
+     * Reuse identical app-private font files across imports and profiles.
+     * Never delete a previously imported font: another profile may still reference it.
+     */
+    internal fun findIdenticalImport(directory: File, imported: File): File? {
+        fun sha256(file: File): ByteArray {
+            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            file.inputStream().use { input ->
+                val bytes = ByteArray(8192)
+                while (true) {
+                    val count = input.read(bytes)
+                    if (count < 0) break
+                    digest.update(bytes, 0, count)
+                }
+            }
+            return digest.digest()
+        }
+        val checksum = sha256(imported)
+        return directory.listFiles()?.firstOrNull { existing ->
+            existing != imported && existing.isFile &&
+                existing.length() == imported.length() &&
+                isSupportedChoice("custom:${existing.name}") &&
+                runCatching {
+                    java.security.MessageDigest.isEqual(checksum, sha256(existing))
+                }.getOrDefault(false)
+        }
+    }
+
     fun import(context: Context, uri: Uri): String {
         val resolver = context.contentResolver
         val name = resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
@@ -102,6 +131,10 @@ internal object SubtitleFontStore {
             }
             require(validHeader) { "Fichier de police invalide" }
             Typeface.createFromFile(file) // Reject corrupt files before saving the preference.
+            findIdenticalImport(dir, file)?.let { duplicate ->
+                check(file.delete()) { "Impossible de supprimer la copie en double" }
+                return "custom:${duplicate.name}"
+            }
             return "custom:${file.name}"
         } catch (failure: Exception) {
             file.delete()
