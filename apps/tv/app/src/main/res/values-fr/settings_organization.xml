@@ -24,9 +24,9 @@
     <string name="settings_tv_layout_pair_posters">AFFICHES ET CARTES</string>
     <string name="settings_tv_layout_pair_style">STYLE ET AFFICHES PERSONNALISÉES</string>
     <string name="settings_tv_layout_pair_details">FICHES ET LIENS VIDÉO</string>
-    <string name="settings_tv_playback_pair_player">LECTEUR ET INTERFACE</string>
-    <string name="settings_tv_playback_pair_av">VIDÉO ET AUDIO</string>
-    <string name="settings_tv_playback_pair_sources">SOUS-TITRES ET SOURCES</string>
+    <string name="settings_tv_playback_pair_player">LECTEUR ET SOURCES</string>
+    <string name="settings_tv_playback_pair_av">INTERFACE ET VIDÉO</string>
+    <string name="settings_tv_playback_pair_sources">AUDIO ET SOUS-TITRES</string>
     <string name="settings_tv_playback_pair_next">LECTURE SUIVANTE ET PASSAGES</string>
     <string name="settings_tv_playback_pair_network">RÉSEAU ET P2P</string>
 </resources>
