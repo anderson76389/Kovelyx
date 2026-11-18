@@ -6,10 +6,13 @@ import re
 import subprocess
 
 REPOSITORY = "anderson76389/Kovelyx"
+LEGACY_UPDATER_BRIDGE_TAG = "v1.1.1167"
 
 
 def is_native_archive(release):
-    return bool(re.fullmatch(r"native-vault-v[0-9]+", release.get("tag_name", "")))
+    return bool(re.fullmatch(r"native-vault-v[0-9]+", release.get("tag_name", ""))) or (
+        release.get("tag_name") == LEGACY_UPDATER_BRIDGE_TAG
+    )
 
 
 def obsolete_releases(releases):
@@ -18,7 +21,8 @@ def obsolete_releases(releases):
                        key=lambda r: (r["published_at"], r["id"]), reverse=True)
     # Retain the very first 4 and the most recent 4 releases. Their ranges
     # overlap naturally until at least 9 app releases have been published.
-    # The native vault is excluded from this quota and is never deleted here.
+    # Native vaults and the permanent 16-file updater bridge are excluded
+    # from this quota. Old clients MUST always reach the bridge Release.
     protected_ids = {r["id"] for r in published[:4] + published[-4:]}
     obsolete = [r for r in published if r["id"] not in protected_ids]
     # Empty abandoned drafts older than an already published release are obsolete too.
