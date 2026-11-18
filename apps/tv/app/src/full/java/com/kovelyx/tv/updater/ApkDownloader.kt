@@ -140,7 +140,7 @@ class ApkDownloader @Inject constructor(
     private fun fetchGitHubBundleDigest(uri: java.net.URI, name: String): String {
         val suffix = uri.path.removePrefix("/anderson76389/Kovelyx/releases/download/")
         val tag = suffix.substringBefore("/")
-        require(name == "Kovelyx-Android-$tag.zip" && suffix.substringAfter("/") == name) {
+        require(name == "Kovelyx-TV-$tag.zip" && suffix.substringAfter("/") == name) {
             "Le pack Android ne correspond pas à la version sélectionnée."
         }
         val request = Request.Builder()
@@ -155,7 +155,7 @@ class ApkDownloader @Inject constructor(
         val assets = JSONObject(responseData).getJSONArray("assets")
         val matches = (0 until assets.length()).map { assets.getJSONObject(it) }
             .filter { it.optString("name") == name }
-        check(matches.size == 1) { "Pack Android absent ou dupliqué." }
+        check(matches.size == 1) { "Pack TV absent ou dupliqué." }
         val digest = matches.single().optString("digest")
         check(digest.matches(Regex("sha256:[a-fA-F0-9]{64}"))) {
             "Empreinte SHA-256 officielle manquante."
