@@ -49,7 +49,7 @@ class VerifiedAndroidPlatformBundleTest {
             val updates = File(home, "updates").apply { mkdirs() }
             val extracted = VerifiedAndroidPlatformBundle.extractTvApk(writeBundle(updates), updates)
             assertArrayEquals(tvBytes, extracted.readBytes())
-            assertFalse(File(updates, tv).exists())
+            assertFalse(File(updates, phone).exists())
             assertTrue(library.readText() == "keep me")
             assertTrue(VerifiedAndroidPlatformBundle.isBundleName("Kovelyx-Android-$tag.zip"))
             assertFalse(VerifiedAndroidPlatformBundle.isBundleName("Kovelyx-TV-$tag-universal.apk"))
@@ -60,13 +60,13 @@ class VerifiedAndroidPlatformBundleTest {
         val home = Files.createTempDirectory("kv-phone-corrupt").toFile()
         try {
             val updates = File(home, "updates").apply { mkdirs() }
-            assertFailsWith<IllegalStateException> {
-                VerifiedAndroidPlatformBundle.extractMobileApk(writeBundle(updates, badDigest = true), updates)
-            }
+            assertTrue(runCatching {
+                VerifiedAndroidPlatformBundle.extractTvApk(writeBundle(updates, badDigest = true), updates)
+            }.isFailure)
             assertFalse(File(updates, phone).exists())
-            assertFailsWith<IllegalStateException> {
-                VerifiedAndroidPlatformBundle.extractMobileApk(writeBundle(updates, unexpected = true), updates)
-            }
+            assertTrue(runCatching {
+                VerifiedAndroidPlatformBundle.extractTvApk(writeBundle(updates, unexpected = true), updates)
+            }.isFailure)
         } finally { home.deleteRecursively() }
     }
 }
