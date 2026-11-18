@@ -8,6 +8,8 @@ import shutil
 import subprocess
 import tempfile
 import time
+import re
+import zipfile
 
 REPOSITORY = "anderson76389/Kovelyx"
 WINDOWS = "Kovelyx Windows - MSI et tests de packaging"
@@ -161,8 +163,94 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
 
 
 
+# The first compact Release MUST come after a full 16-asset bridge Release.
+# Old installed clients can still obtain that bridge via the legacy asset names,
+# then its updated updater can consume the new three archive format.
+BUNDLE_START_VERSION = (1, 1, 1168)
+
+
+def is_bundle_tag(tag):
+    match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)(?:-(?:alpha|beta|rc))?", tag)
+    if not match:
+        raise RuntimeError("Version de publication non reconnue pour les packs")
+    return tuple(map(int, match.groups())) >= BUNDLE_START_VERSION
+
+
+def platform_bundle_contents(tag):
+    return {
+        f"Kovelyx-Android-{tag}.zip": (
+            f"Kovelyx-Android-{tag}.apk",
+            f"Kovelyx-TV-{tag}-universal.apk",
+        ),
+        f"Kovelyx-Linux-{tag}.zip": linux_package_names(tag),
+        f"Kovelyx-Windows-{tag}.zip": (
+            f"Kovelyx-Windows-{tag}.msi",
+            f"Kovelyx-Windows-Setup-{tag}.exe",
+            f"Kovelyx-Windows-Portable-{tag}.zip",
+        ),
+    }
+
+
+def build_platform_bundles(installer_folder, output_folder, tag):
+    """Turn eight individually verified binaries into exactly three archives.
+
+    GitHub's SHA256 digest authenticates the entire published archive; every
+    archived installer has its own SHA256 in SHA256SUMS.txt. Nothing upstream,
+    including Nuvio, is fetched at runtime or at build time.
+    """
+    if not is_bundle_tag(tag):
+        raise RuntimeError("La version de transition conserve ses installateurs")
+    expected_installers = {n for items in platform_bundle_contents(tag).values() for n in items}
+    actual_installers = {p.name for p in installer_folder.iterdir() if p.is_file()
+                         and not p.name.endswith(".sha256")}
+    if actual_installers != expected_installers:
+        raise RuntimeError("Un des huit paquets internes est absent ou inattendu")
+    output_folder.mkdir(parents=True, exist_ok=False)
+    for archive_name, filenames in platform_bundle_contents(tag).items():
+        manifest = "".join(f"{digest(installer_folder / name)}  {name}\n"
+                           for name in sorted(filenames))
+        target = output_folder / archive_name
+        with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_STORED, allowZip64=True) as zipped:
+            for name in sorted(filenames):
+                source = installer_folder / name
+                if source.stat().st_size < 1_000_000:
+                    raise RuntimeError("Installateur interne tronqué : " + name)
+                zipped.write(source, arcname=name)
+            zipped.writestr("SHA256SUMS.txt", manifest)
+        verify_platform_bundle(target, filenames)
+    return output_folder
+
+
+def verify_platform_bundle(archive, filenames):
+    """Detect ZIP corruption, duplicate entries and mismatched inner packages."""
+    expected = set(filenames) | {"SHA256SUMS.txt"}
+    if archive.stat().st_size < 2_000_000:
+        raise RuntimeError("Archive de plateforme tronquée")
+    with zipfile.ZipFile(archive, "r") as zipped:
+        names = zipped.namelist()
+        if len(names) != len(expected) or set(names) != expected:
+            raise RuntimeError("Contenu archive inattendu ou dupliqué")
+        actual = zipped.read("SHA256SUMS.txt").decode("ascii")
+        lines = actual.splitlines()
+        if len(lines) != len(filenames):
+            raise RuntimeError("Manifeste de plateforme incomplet")
+        expected_lines = []
+        for name in sorted(filenames):
+            with zipped.open(name) as stream:
+                hasher = hashlib.sha256()
+                while block := stream.read(1024 * 1024):
+                    hasher.update(block)
+                if zipped.getinfo(name).file_size < 1_000_000:
+                    raise RuntimeError("Paquet compressé interne tronqué")
+                expected_lines.append(f"{hasher.hexdigest()}  {name}")
+        if lines != expected_lines:
+            raise RuntimeError("Empreintes du manifeste du pack invalides")
+
+
 def expected_public_assets(tag):
-    """Exactly eight installers and their eight SHA-256 manifests."""
+    """Sixteen files for the transition, then exactly three platform packs."""
+    if is_bundle_tag(tag):
+        return set(platform_bundle_contents(tag))
     packages = {
         f"Kovelyx-Android-{tag}.apk",
         f"Kovelyx-TV-{tag}-universal.apk",
@@ -205,6 +293,8 @@ def verify_uploaded_release_inventory(tag, sha, output, release):
             expected_manifest = f"{digest(package)}  {package.name}\n"
             if local.read_text(encoding="utf-8") != expected_manifest:
                 raise RuntimeError("Empreinte publique mal associée : " + name)
+        elif is_bundle_tag(tag):
+            verify_platform_bundle(local, platform_bundle_contents(tag)[name])
 
 
 def ensure_tag(tag, sha):
@@ -341,6 +431,10 @@ def main():
             shutil.copyfile(linux_file, output / linux_file.name)
         for path in list(output.iterdir()):
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
+        if is_bundle_tag(tag):
+            # The bridge version remains available for old updater binaries.
+            # Next versions contain three signed-and-hashed platform archives.
+            output = build_platform_bundles(output, root / "platform-bundles", tag)
         notes = root / "notes.md"
         notes.write_text(
             "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n"
