@@ -215,6 +215,59 @@ class LibraryDisplaySettingsTest {
         )
     }
 
+    @Test
+    fun `list section and media type survive serialized settings round trip`() {
+        val selected = LibraryDisplaySettingsUiState(
+            layoutMode = LibraryLayoutMode.VERTICAL,
+            sortOption = LibrarySortOption.TITLE_ASC,
+            selectedSectionKey = "watchlist",
+            selectedType = "movie",
+        )
+        assertEquals(selected, decodeLibraryDisplaySettings(encodeLibraryDisplaySettings(selected)))
+        val olderPayload = """{"layout_mode":"VERTICAL","sort_option":"TITLE_ASC"}"""
+        assertEquals(null, decodeLibraryDisplaySettings(olderPayload).selectedSectionKey)
+        assertEquals(null, decodeLibraryDisplaySettings(olderPayload).selectedType)
+    }
+
+    @Test
+    fun `vertical library filters by genre year and watched status with item counts`() {
+        val watchlist = LibrarySection(
+            type = "watchlist",
+            displayTitle = "Watchlist",
+            items = listOf(
+                item("alpha", releaseInfo = "2024").copy(genres = listOf("Drama")),
+                item("beta", releaseInfo = "2022").copy(genres = listOf("Drama")),
+                item("gamma", type = "series", releaseInfo = "2024").copy(genres = listOf("Action")),
+            ),
+        )
+        val byGenreYear = buildLibraryVerticalProjection(
+            sections = listOf(watchlist),
+            sourceMode = LibrarySourceMode.TRAKT,
+            selectedSectionKey = "watchlist",
+            selectedType = null,
+            sortOption = LibrarySortOption.TITLE_ASC,
+            selectedGenre = "Drama",
+            selectedYear = "2024",
+        )
+        assertEquals(listOf("alpha"), byGenreYear.entries.map { it.item.id })
+        assertEquals("Drama", byGenreYear.selectedGenre)
+        assertEquals("2024", byGenreYear.selectedYear)
+        assertEquals(1, byGenreYear.typeCounts["movie"])
+        assertEquals(1, byGenreYear.allTypesCount)
+
+        val unseen = buildLibraryVerticalProjection(
+            sections = listOf(watchlist),
+            sourceMode = LibrarySourceMode.TRAKT,
+            selectedSectionKey = "watchlist",
+            selectedType = "movie",
+            sortOption = LibrarySortOption.TITLE_ASC,
+            watchedFilter = LibraryWatchedFilter.UNWATCHED,
+            isWatched = { it.id == "alpha" },
+        )
+        assertEquals(listOf("beta"), unseen.entries.map { it.item.id })
+        assertEquals("movie", unseen.selectedType)
+    }
+
     private fun item(
         id: String,
         type: String = "movie",
