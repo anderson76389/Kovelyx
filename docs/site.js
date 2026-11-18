@@ -103,7 +103,7 @@
           Number.isFinite(file.size) && file.size > 0 &&
           validDownload.test(file.browser_download_url || ""));
         // Ne pas proposer de Release Linux partielle ou privée de ses SHA-256.
-        const directLinux = /^v1\.1\.(?:1169|11[7-9]\d|1[2-9]\d{2}|[2-9]\d{3})$/.test(tag);
+        const directLinux = tag.startsWith("v1.1.") && Number(tag.slice(5)) >= 1169;
         if ((directLinux && appimage && hasChecksum(appimage)) ||
             (appimage && deb && rpm && [appimage, deb, rpm].every(hasChecksum))) {
           return {release, asset: appimage, extras: {appimage, deb, rpm}};
