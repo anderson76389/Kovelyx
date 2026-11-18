@@ -28,7 +28,7 @@ Elle conserve les huit installateurs directs ainsi que leurs huit fichiers
 installateurs séparés. Elle inclut le nouvel updater capable de lire les ZIP
 spécifiques à chaque plateforme. Elle doit être conservée dans GitHub Releases même lorsque
 les anciens fichiers non indispensables sont purgés. Les versions antérieures
-passent d'abord par cette version, puis pourront recevoir les Releases à trois
+passent d'abord par cette version, puis pourront recevoir les Releases à quatre
 archives.
 
 Les Releases **v1.1.1166 et antérieures ne sont pas supprimées ni modifiées**
