@@ -5,7 +5,7 @@ import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.zip.ZipFile
 
-/** Extract only the signed mobile APK from the official three-platform Release pack. */
+/** Extract only the signed mobile APK from the official four-platform Release pack. */
 internal object VerifiedAndroidPlatformBundle {
     private val bundlePattern =
         Regex("""^Kovelyx-Android-(v[0-9]+\.[0-9]+\.[0-9]+(?:-(?:alpha|beta|rc))?)\.zip$""")
@@ -17,12 +17,11 @@ internal object VerifiedAndroidPlatformBundle {
         val tag = bundlePattern.matchEntire(bundle.name)?.groupValues?.get(1)
             ?: error("Archive Android Kovelyx non reconnue.")
         val mobileName = "Kovelyx-Android-$tag.apk"
-        val tvName = "Kovelyx-TV-$tag-universal.apk"
-        val expected = setOf(mobileName, tvName)
+        val expected = setOf(mobileName)
         directory.mkdirs()
         ZipFile(bundle).use { zip ->
             val names = zip.entries().asSequence().map { it.name }.toList()
-            check(names.size == 3 && names.toSet() == expected + "SHA256SUMS.txt") {
+            check(names.size == 2 && names.toSet() == expected + "SHA256SUMS.txt") {
                 "Archive Android incorrecte : fichiers internes inattendus."
             }
             val manifest = zip.getInputStream(zip.getEntry("SHA256SUMS.txt")).bufferedReader()
@@ -33,8 +32,8 @@ internal object VerifiedAndroidPlatformBundle {
                     ?: error("Manifeste SHA-256 de l'archive Android invalide.")
                 match.groupValues[2] to match.groupValues[1]
             }.toList()
-            check(checksums.size == 2 && checksums.map { it.first }.toSet() == expected) {
-                "Le manifeste ne correspond pas aux deux APK."
+            check(checksums.size == 1 && checksums.map { it.first }.toSet() == expected) {
+                "Le manifeste ne correspond pas à l'APK mobile."
             }
             val inner = zip.getEntry(mobileName) ?: error("APK téléphone absent.")
             check(inner.size in 1_000_000L..300_000_000L) { "Taille APK interne invalide." }
