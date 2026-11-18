@@ -3,6 +3,8 @@
 import hashlib
 import json
 import os
+import re
+import zipfile
 from pathlib import Path
 import shutil
 import subprocess
@@ -161,8 +163,81 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
 
 
 
+def three_bundle_release(tag):
+    """Bridge v1.1.1167 stays directly updatable from older apps.
+    
+    From v1.1.1168 onward, the bridged clients can install the three bundles.
+    Keep the v1.1.1167 direct APKs/Windows/Linux files as a permanent upgrade hop.
+    """
+    match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)(?:-(?:alpha|beta|rc))?", tag)
+    if not match:
+        raise RuntimeError("Tag de publication non reconnu")
+    return tuple(map(int, match.groups())) >= (1, 1, 1168)
+
+
+def platform_bundle_entries(tag):
+    return {
+        f"Kovelyx-Android-{tag}.zip": {
+            f"Kovelyx-Android-{tag}.apk", f"Kovelyx-TV-{tag}-universal.apk"},
+        f"Kovelyx-Windows-{tag}.zip": {
+            f"Kovelyx-Windows-{tag}.msi", f"Kovelyx-Windows-Setup-{tag}.exe",
+            f"Kovelyx-Windows-Portable-{tag}.zip"},
+        f"Kovelyx-Linux-{tag}.zip": set(linux_package_names(tag)),
+    }
+
+
+def create_platform_bundles(output, tag):
+    """Publish three archives, each containing ALL existing install formats.
+
+    The internal checksums are pinned by GitHub's digest of the outer ZIP and
+    are independently verified by each updater before installing its member.
+    """
+    expected_members = platform_bundle_entries(tag)
+    original_names = set().union(*expected_members.values())
+    if {p.name for p in output.iterdir() if p.is_file()} != original_names:
+        raise RuntimeError("Les huit installateurs requis ne sont pas présents avant regroupement")
+    for bundle_name, filenames in expected_members.items():
+        archive_path = output / bundle_name
+        expected_checksums = {name: digest(output / name) for name in filenames}
+        manifest = "".join(
+            f"{expected_checksums[name]}  {name}\n" for name in sorted(filenames))
+        with zipfile.ZipFile(archive_path, mode="w",
+                             compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
+            for name in sorted(filenames):
+                archive.write(output / name, arcname=name)
+            archive.writestr("SHA256SUMS.txt", manifest)
+        verify_platform_bundle(archive_path, filenames)
+    for filename in original_names:
+        (output / filename).unlink()
+    if set(p.name for p in output.iterdir()) != set(expected_members):
+        raise RuntimeError("Trois archives de plateforme exactement requises")
+
+
+def verify_platform_bundle(archive_path, expected_filenames):
+    with zipfile.ZipFile(archive_path, "r") as archive:
+        if set(archive.namelist()) != expected_filenames | {"SHA256SUMS.txt"}:
+            raise RuntimeError("Archive de plateforme incomplète ou contenant des éléments inattendus")
+        manifest = archive.read("SHA256SUMS.txt").decode("ascii")
+        lines = [line for line in manifest.splitlines() if line]
+        expected = [name for name in sorted(expected_filenames)]
+        if len(lines) != len(expected):
+            raise RuntimeError("Nombre d'empreintes internes incorrect")
+        for line, name in zip(lines, expected):
+            match = re.fullmatch(r"([0-9a-f]{64})  ([A-Za-z0-9._-]+)", line)
+            if not match or match.group(2) != name:
+                raise RuntimeError("Manifest interne de plateforme incorrect")
+            with archive.open(name) as payload:
+                checksum = hashlib.sha256()
+                for chunk in iter(lambda: payload.read(1024 * 1024), b""):
+                    checksum.update(chunk)
+            if checksum.hexdigest() != match.group(1):
+                raise RuntimeError("Archive de plateforme endommagée : " + name)
+
+
 def expected_public_assets(tag):
-    """Exactly eight installers and their eight SHA-256 manifests."""
+    """Bridge: 16 update-compatible assets; future releases: three archives."""
+    if three_bundle_release(tag):
+        return set(platform_bundle_entries(tag))
     packages = {
         f"Kovelyx-Android-{tag}.apk",
         f"Kovelyx-TV-{tag}-universal.apk",
@@ -200,7 +275,9 @@ def verify_uploaded_release_inventory(tag, sha, output, release):
             raise RuntimeError("Taille ou état incorrect : " + name)
         if asset.get("digest") != "sha256:" + digest(local):
             raise RuntimeError("Empreinte GitHub différente : " + name)
-        if name.endswith(".sha256"):
+        if three_bundle_release(tag):
+            verify_platform_bundle(local, platform_bundle_entries(tag)[name])
+        elif name.endswith(".sha256"):
             package = files[name[:-7]]
             expected_manifest = f"{digest(package)}  {package.name}\n"
             if local.read_text(encoding="utf-8") != expected_manifest:
@@ -339,11 +416,22 @@ def main():
             shutil.copyfile(unique_file(root / "windows", source_name), output / public_name)
         for linux_file in verify_linux_artifacts(root / "linux", tag):
             shutil.copyfile(linux_file, output / linux_file.name)
-        for path in list(output.iterdir()):
-            path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
+        if three_bundle_release(tag):
+            create_platform_bundles(output, tag)
+        else:
+            for path in list(output.iterdir()):
+                path.with_name(path.name + ".sha256").write_text(
+                    f"{digest(path)}  {path.name}\n", encoding="utf-8")
         notes = root / "notes.md"
         notes.write_text(
             "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n"
+            + ("**Trois téléchargements :** Android (mobile + TV), Windows (Setup + MSI + Portable), "
+               "Linux (AppImage + DEB + RPM). Chaque ZIP contient les empreintes internes vérifiées ; "
+               "choisissez votre installateur après extraction. Les versions précédentes conservent "
+               "leurs fichiers directs pour les mises à jour intégrées.\n\n"
+               if three_bundle_release(tag) else
+               "**Version de transition :** installeurs directs compatibles avec l'ancien système "
+               "de mise à jour. Les prochaines Releases proposeront trois archives.\n\n")
             "- Linux : AppImage (distributions compatibles), DEB (Debian/Ubuntu), RPM (Fedora et dérivées).\n"
             "- Le runtime Java est inclus ; libmpv, WebKitGTK et les codecs Linux sont des dépendances système.\n"
             "- Les paquets Linux proviennent des mêmes sources Compose Desktop que Windows, avec un build natif et des tests propres.\n"
