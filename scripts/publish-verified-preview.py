@@ -167,6 +167,32 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
 # Old installed clients can still obtain that bridge via the legacy asset names,
 # then its updated updater can consume the new three archive format.
 BUNDLE_START_VERSION = (1, 1, 1168)
+LEGACY_BRIDGE_TAG = "v1.1.1167"
+
+
+def require_legacy_bridge(release):
+    """New packs must never strand clients that only understand direct assets."""
+    if not release or release.get("tag_name") != LEGACY_BRIDGE_TAG or release.get("draft"):
+        raise RuntimeError("Version de transition v1.1.1167 absente ou non publiée")
+    assets = release.get("assets", [])
+    names = [item.get("name") for item in assets]
+    expected = {
+        f"Kovelyx-Android-{LEGACY_BRIDGE_TAG}.apk",
+        f"Kovelyx-TV-{LEGACY_BRIDGE_TAG}-universal.apk",
+        f"Kovelyx-Windows-{LEGACY_BRIDGE_TAG}.msi",
+        f"Kovelyx-Windows-Setup-{LEGACY_BRIDGE_TAG}.exe",
+        f"Kovelyx-Windows-Portable-{LEGACY_BRIDGE_TAG}.zip",
+        *linux_package_names(LEGACY_BRIDGE_TAG),
+    }
+    expected = expected | {name + ".sha256" for name in expected}
+    if len(names) != 16 or set(names) != expected:
+        raise RuntimeError("Version de transition v1.1.1167 incomplète")
+    if any(a.get("state") != "uploaded" or not a.get("digest", "").startswith("sha256:")
+           or a.get("size", 0) < 60 for a in assets):
+        raise RuntimeError("Version de transition non vérifiée sur GitHub")
+
+
+
 
 
 def is_bundle_tag(tag):
@@ -393,6 +419,10 @@ def main():
     ).strip()
     tag = "v" + version
     preview = version.endswith(("-alpha", "-beta", "-rc"))
+    if is_bundle_tag(tag):
+        # Fatal before fetching artifacts or creating a new tag: the bridge
+        # must already be public, complete and permanently retained.
+        require_legacy_bridge(find_release(LEGACY_BRIDGE_TAG))
     with tempfile.TemporaryDirectory(prefix="kovelyx-release-") as directory:
         root = Path(directory)
         for run, artifact, destination in (
