@@ -103,7 +103,15 @@ internal object AppUpdaterRepository {
                 }
                 AndroidApkReleaseFamily.ANY -> release.assets
             }
-            val asset = chooseBestApkAsset(candidates, supportedAbis) ?: return@firstNotNullOfOrNull null
+            // A v1.1.1167 bridge teaches installed clients to use the three
+            // OS packs without losing access to the old individual APK releases.
+            val asset = chooseBestApkAsset(candidates, supportedAbis)
+                ?: if (family != AndroidApkReleaseFamily.SIGNED) {
+                    candidates.firstOrNull {
+                        it.name == "Kovelyx-Android-${release.tagName}.zip"
+                    }
+                } else null
+                ?: return@firstNotNullOfOrNull null
             val tag = release.tagName?.takeIf { VersionUtils.parse(it) != null }
                 ?: release.name.orEmpty()
             AppUpdate(
