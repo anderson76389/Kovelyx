@@ -79,10 +79,10 @@ internal fun LibrarySavedControls(
                     .firstOrNull { section -> section.type == verticalProjection.selectedSectionKey }
                 KovelyxDropdownChip(
                     title = stringResource(Res.string.library_filter_list),
-                    label = selectedSection?.let { section -> localizedLibrarySectionTitle(section.type, section.displayTitle) }.orEmpty(),
+                    label = selectedSection?.displayTitle.orEmpty(),
                     selectedKey = verticalProjection.selectedSectionKey,
                     options = verticalProjection.availableSections.map { section ->
-                        KovelyxDropdownOption(key = section.type, label = localizedLibrarySectionTitle(section.type, section.displayTitle))
+                        KovelyxDropdownOption(key = section.type, label = section.displayTitle)
                     },
                     enabled = verticalProjection.availableSections.size > 1,
                     onSelected = { option -> onSectionSelected(option.key) },
