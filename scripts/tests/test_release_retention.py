@@ -47,6 +47,15 @@ class RetentionTests(unittest.TestCase):
         ]
         self.assertEqual({5, 6, 7, 8}, {r["id"] for r in prune.obsolete_releases(releases)})
 
+    def test_permanent_bridge_survives_more_than_eight_releases(self):
+        releases = self.app_releases(12) + [
+            dict(id=1167, tag_name="v1.1.1167", draft=False,
+                 published_at="2026-11-18T06:00:00Z")
+        ]
+        removed = prune.obsolete_releases(releases)
+        self.assertNotIn(1167, {r["id"] for r in removed})
+        self.assertEqual({5, 6, 7, 8}, {r["id"] for r in removed})
+
     def test_current_three_public_app_releases_and_native_vault_stay_intact(self):
         releases = [
             dict(id=438054302, tag_name="v1.1.1072", draft=False, published_at="2026-11-08T05:32:55Z"),
