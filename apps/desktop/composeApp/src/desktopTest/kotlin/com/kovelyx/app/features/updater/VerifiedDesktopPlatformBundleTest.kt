@@ -31,7 +31,9 @@ class VerifiedDesktopPlatformBundleTest {
         root: File, platform: String, files: List<String>, tamper: Boolean = false,
     ): File {
         val archive = File(root, "Kovelyx-$platform-$tag.zip")
-        val bodies = files.associateWith { ByteArray(1_000_009) { files.indexOf(it).toByte() } }
+        val bodies = files.mapIndexed { index, name ->
+            name to ByteArray(1_000_009) { index.toByte() }
+        }.toMap()
         ZipOutputStream(archive.outputStream()).use { zip ->
             for ((name, body) in bodies) {
                 zip.putNextEntry(ZipEntry(name))
