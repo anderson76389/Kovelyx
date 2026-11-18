@@ -29,8 +29,8 @@ class VerifiedAndroidPlatformBundleTest {
                 zip.closeEntry()
             }
             zip.putNextEntry(ZipEntry("SHA256SUMS.txt"))
-            val manifest = (if (badDigest) "0".repeat(64) else sha(mobileBytes)) +
-                "  $phone\n" + sha(tvBytes) + "  $tv\n"
+            val manifest = sha(mobileBytes) + "  $phone\n" +
+                (if (badDigest) "0".repeat(64) else sha(tvBytes)) + "  $tv\n"
             zip.write(manifest.toByteArray())
             zip.closeEntry()
             if (unexpected) {
