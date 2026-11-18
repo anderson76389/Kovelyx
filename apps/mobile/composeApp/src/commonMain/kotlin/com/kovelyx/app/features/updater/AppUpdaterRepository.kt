@@ -103,7 +103,16 @@ internal object AppUpdaterRepository {
                 }
                 AndroidApkReleaseFamily.ANY -> release.assets
             }
-            val asset = chooseBestApkAsset(candidates, supportedAbis) ?: return@firstNotNullOfOrNull null
+            // From v1.1.1168 onward a single Android ZIP contains distinct,
+            // independently signed phone and TV APKs. Older direct APKs remain
+            // selectable for a seamless upgrade to the bridge release.
+            val bundle = release.assets.firstOrNull {
+                it.name == "Kovelyx-Android-${release.tagName}.zip" &&
+                    (family == AndroidApkReleaseFamily.ANY ||
+                        family == AndroidApkReleaseFamily.DEBUG)
+            }
+            val asset = bundle ?: chooseBestApkAsset(candidates, supportedAbis)
+                ?: return@firstNotNullOfOrNull null
             val tag = release.tagName?.takeIf { VersionUtils.parse(it) != null }
                 ?: release.name.orEmpty()
             AppUpdate(
