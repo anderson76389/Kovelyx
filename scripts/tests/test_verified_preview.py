@@ -248,7 +248,7 @@ class VerifiedPreviewTests(unittest.TestCase):
             bundles = sorted(published.iterdir())
             self.assertEqual(len(bundles), 4)
             for bundle in bundles:
-                self.assertGreater(bundle.stat().st_size, 2_000_000)
+                self.assertGreater(bundle.stat().st_size, len(PREVIEW.platform_bundle_contents(tag)[bundle.name]) * 1_000_000)
                 PREVIEW.verify_platform_bundle(
                     bundle, PREVIEW.platform_bundle_contents(tag)[bundle.name]
                 )
