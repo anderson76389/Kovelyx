@@ -47,6 +47,7 @@ class SettingsNavigationCompatibilityTest {
     }
     @Test fun visualStreamSettingsKeepTheirAppearanceParent() {
         assertEquals(SettingsPage.Layout, SettingsPage.Streams.previousPage())
+        assertEquals(SettingsPage.Layout, SettingsPage.HoverPreview.previousPage())
         assertEquals(SettingsCategory.Look, SettingsPage.Streams.category)
     }
 }

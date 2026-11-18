@@ -80,6 +80,23 @@ def check_platform(platform: str) -> None:
     ensure("categoryLabels[page.category]" in search,
            f"{platform}: search ignores the destination group")
 
+    # All platforms group library-related layout options together.
+    layout_start = appearance.index("if (layoutOnly)")
+    layout = appearance[layout_start:]
+    layout_actions = ("onHomescreenClick", "onCollectionsClick",
+                      "onContinueWatchingClick", "onPosterCustomizationClick")
+    layout_positions = [layout.find("onClick = " + action) for action in layout_actions]
+    ensure(all(p >= 0 for p in layout_positions)
+           and layout_positions == sorted(layout_positions),
+           f"{platform}: home, collections, progress and posters are out of order")
+    if platform == "desktop":
+        ensure("onClick = onHoverPreviewClick" in layout,
+               "desktop: hover preview must be in the Layout page")
+        ensure("onClick = onHoverPreviewClick" not in appearance[:layout_start],
+               "desktop: hover preview still exposed in the appearance group")
+        ensure("    HoverPreview(" in model and "parentPage = Layout" in model,
+               "desktop: hover preview back navigation lost")
+
     for lang in ("values", "values-fr"):
         xml = (resources / lang / "settings_organization.xml").read_text(encoding="utf-8")
         for _, title, _ in GROUPS:
