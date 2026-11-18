@@ -25,6 +25,7 @@ import nuvio.composeapp.generated.resources.updates_downloaded_file_missing
 import nuvio.composeapp.generated.resources.updates_empty_download_body
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import org.jetbrains.compose.resources.getString
 import java.io.File
 import java.io.FileOutputStream
@@ -174,15 +175,26 @@ object AndroidAppUpdaterPlatform {
                         temporary.copyTo(destination, overwrite = true)
                         temporary.delete()
                     }
+                    val finalApk = if (VerifiedAndroidPlatformBundle.isBundleName(safeName)) {
+                        // ZIP never reaches the PackageInstaller: its exact internal
+                        // phone APK is extracted and checked against SHA256SUMS.txt.
+                        try {
+                            VerifiedAndroidPlatformBundle.extractMobileApk(destination, dir)
+                        } catch (error: Throwable) {
+                            destination.delete()
+                            throw error
+                        }.also { destination.delete() }
+                    } else destination
                     // The APK lives in a disposable updater-only cache, not user data.
                     // Reclaim older verified APKs only AFTER this download was validated.
                     dir.listFiles()?.forEach { old ->
-                        if (old != destination && old.isFile &&
+                        if (old != finalApk && old.isFile &&
                             old.name.startsWith("Kovelyx-") &&
-                            old.name.endsWith(".apk", ignoreCase = true)
+                            (old.name.endsWith(".apk", ignoreCase = true) ||
+                             VerifiedAndroidPlatformBundle.isBundleName(old.name))
                         ) old.delete()
                     }
-                    destination.absolutePath
+                    finalApk.absolutePath
                 } finally {
                     temporary.delete()
                 }
@@ -196,6 +208,9 @@ object AndroidAppUpdaterPlatform {
             uri.path.startsWith("/anderson76389/Kovelyx/releases/download/")) {
             "Fichier non officiel : cette mise à jour ne vient pas des Releases Kovelyx."
         }
+        if (VerifiedAndroidPlatformBundle.isBundleName(safeName)) {
+            return fetchGitHubBundleDigest(uri, safeName)
+        }
         val request = Request.Builder().url(assetUrl + ".sha256").get().build()
         val line = httpClient.newCall(request).execute().use { response ->
             check(response.isSuccessful) { "Empreinte SHA-256 indisponible (HTTP ${response.code})." }
@@ -208,6 +223,34 @@ object AndroidAppUpdaterPlatform {
         }
         return match.groupValues[1]
     }
+    private fun fetchGitHubBundleDigest(uri: java.net.URI, name: String): String {
+        // New Releases carry exactly three files, so the outer SHA-256 comes
+        // from GitHub's authenticated asset metadata rather than a sidecar.
+        val suffix = uri.path.removePrefix("/anderson76389/Kovelyx/releases/download/")
+        val tag = suffix.substringBefore("/")
+        require(name == "Kovelyx-Android-$tag.zip" && suffix.substringAfter("/") == name) {
+            "Nom ou version de l'archive Android incompatibles."
+        }
+        val apiUrl = "https://api.github.com/repos/anderson76389/Kovelyx/releases/tags/$tag"
+        val request = Request.Builder().url(apiUrl)
+            .header("Accept", "application/vnd.github+json")
+            .header("User-Agent", "Kovelyx-Mobile-Updater")
+            .get().build()
+        val data = httpClient.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Métadonnées officielles du pack indisponibles." }
+            response.body?.string() ?: error("Métadonnées du pack vides.")
+        }
+        val assets = JSONObject(data).getJSONArray("assets")
+        val matches = (0 until assets.length()).map { assets.getJSONObject(it) }
+            .filter { it.optString("name") == name }
+        check(matches.size == 1) { "Archive Android absente ou en double sur GitHub." }
+        val remoteDigest = matches.single().optString("digest")
+        check(remoteDigest.matches(Regex("sha256:[a-fA-F0-9]{64}"))) {
+            "Empreinte officielle du pack Android manquante."
+        }
+        return remoteDigest.removePrefix("sha256:")
+    }
+
     fun canRequestPackageInstalls(): Boolean {
         val context = appContext ?: return false
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
