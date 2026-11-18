@@ -1,6 +1,8 @@
 <div align="center">
 
-[**Télécharger la dernière version — Windows · Linux · Android · Android TV**](https://github.com/anderson76389/Kovelyx/releases/latest)
+**Trois choix de téléchargement :** [Windows](https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes) · [Linux](https://anderson76389.github.io/Kovelyx/?plateforme=linux#plateformes) · [Android (mobile et TV)](https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes)
+
+[Dernière Release officielle](https://github.com/anderson76389/Kovelyx/releases/latest) — Les fichiers individuels et les empreintes SHA-256 restent accessibles pour conserver les mises à jour intégrées ; l'APK TV est distinct de l'APK mobile.
 
 Les profils TV reçoivent les noms, photos et fonds du compte ; leur modification se fait sur Android mobile ou PC.
 
