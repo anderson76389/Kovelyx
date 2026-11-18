@@ -343,6 +343,18 @@ def main():
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
         notes = root / "notes.md"
         notes.write_text(
+            "## Trois téléchargements principaux\n\n"
+            f"1. **[Android — téléphone/tablette](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Android-{tag}.apk)**"
+            f" — pour TV/Google TV : [APK Android TV séparé](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-TV-{tag}-universal.apk).\n"
+            f"2. **[Linux — AppImage x86_64](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Linux-x86_64-{tag}.AppImage)**"
+            f" — autres distributions : [DEB](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Linux-amd64-{tag}.deb)"
+            f" ou [RPM](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Linux-x86_64-{tag}.rpm).\n"
+            f"3. **[Windows — installateur EXE](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Windows-Setup-{tag}.exe)**"
+            f" — autres méthodes : [MSI](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Windows-{tag}.msi)"
+            f" ou [ZIP portable](https://github.com/{REPOSITORY}/releases/download/{tag}/Kovelyx-Windows-Portable-{tag}.zip).\n\n"
+            "Les fichiers SHA-256 sont conservés pour sécuriser les mises à jour depuis l'application ; "
+            "les supprimer casserait les versions déjà installées.\n\n"
+            "## Notes de version\n\n"
             "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n"
             "- Linux : AppImage (distributions compatibles), DEB (Debian/Ubuntu), RPM (Fedora et dérivées).\n"
             "- Le runtime Java est inclus ; libmpv, WebKitGTK et les codecs Linux sont des dépendances système.\n"
