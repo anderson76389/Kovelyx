@@ -37,7 +37,7 @@ internal object VerifiedAndroidPlatformBundle {
                 "Le manifeste ne correspond pas aux deux APK."
             }
             val inner = zip.getEntry(mobileName) ?: error("APK téléphone absent.")
-            check(inner.size in 1_000_000..300_000_000) { "Taille APK interne invalide." }
+            check(inner.size in 1_000_000L..300_000_000L) { "Taille APK interne invalide." }
             val destination = File(directory, mobileName)
             val temporary = File(directory, "$mobileName.part")
             temporary.delete()
