@@ -198,15 +198,6 @@ internal fun LazyListScope.appearanceSettingsContent(
                         onClick = { showNavBarStyleSheet = true },
                     )
                 }
-                if (isDesktop) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_hover_preview),
-                        description = stringResource(Res.string.settings_appearance_hover_preview_description),
-                        isTablet = isTablet,
-                        onClick = onHoverPreviewClick,
-                    )
-                }
                 if (AppIconPlatform.isSupported) {
                     if (!isIos || liquidGlassNativeTabBarSupported) SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
@@ -320,17 +311,17 @@ internal fun LazyListScope.appearanceSettingsContent(
                 )
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_continue_watching),
-                    description = stringResource(Res.string.settings_appearance_continue_watching_description),
-                    isTablet = isTablet,
-                    onClick = onContinueWatchingClick,
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
                     title = stringResource(Res.string.collections_header),
                     description = stringResource(Res.string.settings_content_discovery_collections_description),
                     isTablet = isTablet,
                     onClick = onCollectionsClick,
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.compose_settings_page_continue_watching),
+                    description = stringResource(Res.string.settings_appearance_continue_watching_description),
+                    isTablet = isTablet,
+                    onClick = onContinueWatchingClick,
                 )
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
@@ -339,6 +330,15 @@ internal fun LazyListScope.appearanceSettingsContent(
                     isTablet = isTablet,
                     onClick = onPosterCustomizationClick,
                 )
+                if (isDesktop) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.compose_settings_page_hover_preview),
+                        description = stringResource(Res.string.settings_appearance_hover_preview_description),
+                        isTablet = isTablet,
+                        onClick = onHoverPreviewClick,
+                    )
+                }
             }
         }
     }
