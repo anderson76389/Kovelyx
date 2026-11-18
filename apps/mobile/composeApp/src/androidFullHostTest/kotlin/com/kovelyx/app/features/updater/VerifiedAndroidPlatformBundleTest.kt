@@ -24,14 +24,14 @@ class VerifiedAndroidPlatformBundleTest {
     private fun writeBundle(dir: File, badDigest: Boolean = false, unexpected: Boolean = false): File {
         val bundle = File(dir, "Kovelyx-Android-$tag.zip")
         ZipOutputStream(bundle.outputStream()).use { zip ->
-            for ((name, data) in listOf(phone to mobileBytes, tv to tvBytes)) {
+            for ((name, data) in listOf(phone to mobileBytes)) {
                 zip.putNextEntry(ZipEntry(name))
                 zip.write(data)
                 zip.closeEntry()
             }
             zip.putNextEntry(ZipEntry("SHA256SUMS.txt"))
             val manifest = (if (badDigest) "0".repeat(64) else sha(mobileBytes)) +
-                "  $phone\n" + sha(tvBytes) + "  $tv\n"
+                "  $phone\n"
             zip.write(manifest.toByteArray())
             zip.closeEntry()
             if (unexpected) {
@@ -53,7 +53,7 @@ class VerifiedAndroidPlatformBundleTest {
             assertFalse(File(updates, tv).exists())
             assertTrue(library.readText() == "keep me")
             assertTrue(VerifiedAndroidPlatformBundle.isBundleName("Kovelyx-Android-$tag.zip"))
-            assertFalse(VerifiedAndroidPlatformBundle.isBundleName("Kovelyx-TV-$tag-universal.apk"))
+            assertFalse(VerifiedAndroidPlatformBundle.isBundleName("Kovelyx-TV-$tag.zip"))
         } finally { home.deleteRecursively() }
     }
 
