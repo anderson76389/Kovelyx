@@ -167,6 +167,7 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
 # Old installed clients can still obtain that bridge via the legacy asset names,
 # then its updated updater can consume the new four archive format.
 BUNDLE_START_VERSION = (1, 1, 1168)
+DIRECT_INSTALLER_START_VERSION = (1, 1, 1169)
 LEGACY_BRIDGE_TAG = "v1.1.1167"
 
 
@@ -200,6 +201,51 @@ def is_bundle_tag(tag):
     if not match:
         raise RuntimeError("Version de publication non reconnue pour les packs")
     return tuple(map(int, match.groups())) >= BUNDLE_START_VERSION
+
+
+def is_direct_installer_tag(tag):
+    match = re.fullmatch(r"v(\d+)\.(\d+)\.(\d+)(?:-(?:alpha|beta|rc))?", tag)
+    if not match:
+        raise RuntimeError("Version directe de publication non reconnue")
+    return tuple(map(int, match.groups())) >= DIRECT_INSTALLER_START_VERSION
+
+
+def direct_installer_names(tag):
+    """One installable binary per platform; no archive to unpack."""
+    return (
+        f"Kovelyx-Android-{tag}.apk",
+        f"Kovelyx-TV-{tag}-universal.apk",
+        f"Kovelyx-Windows-Setup-{tag}.exe",
+        f"Kovelyx-Linux-x86_64-{tag}.AppImage",
+    )
+
+
+def build_direct_installer_release(source, destination, tag):
+    """Four binaries plus SHA-256 sidecars required by installed old updaters."""
+    if not is_direct_installer_tag(tag):
+        raise RuntimeError("Tag antérieur aux installateurs directs")
+    all_installers = {name for names in platform_bundle_contents(tag).values() for name in names}
+    actual = {p.name for p in source.iterdir() if p.is_file() and not p.name.endswith(".sha256")}
+    if actual != all_installers:
+        raise RuntimeError("Installateurs d'origine incomplets ou inattendus")
+    destination.mkdir(parents=True, exist_ok=False)
+    for name in direct_installer_names(tag):
+        binary = source / name
+        sidecar = source / (name + ".sha256")
+        if binary.stat().st_size < 1_000_000:
+            raise RuntimeError("Installateur direct tronqué : " + name)
+        header = binary.open("rb").read(4)
+        if name.endswith(".apk") and not header.startswith(b"PK"):
+            raise RuntimeError("APK direct invalide : " + name)
+        if name.endswith(".exe") and not header.startswith(b"MZ"):
+            raise RuntimeError("EXE direct invalide : " + name)
+        if name.endswith(".AppImage") and header != b"\x7fELF":
+            raise RuntimeError("AppImage direct invalide : " + name)
+        if sidecar.read_text(encoding="utf-8") != f"{digest(binary)}  {name}\n":
+            raise RuntimeError("Empreinte directe incorrecte : " + name)
+        shutil.copyfile(binary, destination / name)
+        shutil.copyfile(sidecar, destination / sidecar.name)
+    return destination
 
 
 def platform_bundle_contents(tag):
@@ -276,7 +322,10 @@ def verify_platform_bundle(archive, filenames):
 
 
 def expected_public_assets(tag):
-    """Sixteen files for the bridge, then four platform-specific packs."""
+    """Sixteen bridge assets, four ZIPs for 1168, then direct installers and checksums."""
+    if is_direct_installer_tag(tag):
+        names = set(direct_installer_names(tag))
+        return names | {name + ".sha256" for name in names}
     if is_bundle_tag(tag):
         return set(platform_bundle_contents(tag))
     packages = {
@@ -321,7 +370,7 @@ def verify_uploaded_release_inventory(tag, sha, output, release):
             expected_manifest = f"{digest(package)}  {package.name}\n"
             if local.read_text(encoding="utf-8") != expected_manifest:
                 raise RuntimeError("Empreinte publique mal associée : " + name)
-        elif is_bundle_tag(tag):
+        elif is_bundle_tag(tag) and not is_direct_installer_tag(tag):
             verify_platform_bundle(local, platform_bundle_contents(tag)[name])
 
 
@@ -463,12 +512,20 @@ def main():
             shutil.copyfile(linux_file, output / linux_file.name)
         for path in list(output.iterdir()):
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
-        if is_bundle_tag(tag):
-            # The bridge version remains available for old updater binaries.
-            # Next versions contain four signed-and-hashed platform archives.
+        if is_direct_installer_tag(tag):
+            output = build_direct_installer_release(output, root / "direct-installers", tag)
+        elif is_bundle_tag(tag):
             output = build_platform_bundles(output, root / "platform-bundles", tag)
         notes = root / "notes.md"
         bundle_notice = (
+            "### Téléchargements directs : sans ZIP à décompresser\\n"
+            "- Android mobile : APK directement installable.\\n"
+            "- Android TV : APK TV distinct directement installable.\\n"
+            "- Windows : installateur EXE directement exécutable.\\n"
+            "- Linux x86_64 : AppImage directement exécutable.\\n"
+            "Les quatre petits fichiers .sha256 associés servent aux anciennes versions "
+            "pour vérifier les mises à jour sans perdre les données.\\n\\n"
+        ) if is_direct_installer_tag(tag) else (
             "### Téléchargements : 4 packs seulement\n"
             "- Android mobile : un ZIP avec l'APK universel téléphone/tablette.\n"
             "- Android TV : un ZIP distinct avec l'APK universel TV.\n"
