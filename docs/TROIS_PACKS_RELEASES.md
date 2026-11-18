@@ -1,10 +1,11 @@
-# Kovelyx — trois fichiers par Release
+# Kovelyx — quatre téléchargements par Release
 
-À partir de **v1.1.1168**, une Release unifiée contient **exactement trois archives ZIP** :
+À partir de **v1.1.1168**, une Release unifiée contient **exactement quatre archives ZIP** :
 
 | Téléchargement | Contenu signé et vérifié | Installation manuelle |
 |---|---|---|
-| `Kovelyx-Android-vX.Y.Z.zip` | APK téléphone et APK Android TV | Décompresser et installer **uniquement** l'APK adapté à l'appareil |
+| `Kovelyx-Android-vX.Y.Z.zip` | APK universel téléphone et tablette | Décompresser et installer l'APK mobile |
+| `Kovelyx-TV-vX.Y.Z.zip` | APK universel Android TV | Décompresser et installer l'APK TV |
 | `Kovelyx-Linux-vX.Y.Z.zip` | AppImage, DEB et RPM x86_64 | Décompresser et choisir le format compatible avec la distribution |
 | `Kovelyx-Windows-vX.Y.Z.zip` | Installateur MSI, installateur EXE et ZIP portable | Décompresser ; pour une installation classique utiliser EXE ou MSI |
 
@@ -25,7 +26,7 @@ La Release **v1.1.1167 est une version de transition obligatoire**.
 Elle conserve les huit installateurs directs ainsi que leurs huit fichiers
 `.sha256` pour les versions de Kovelyx qui ne savent télécharger que des
 installateurs séparés. Elle inclut le nouvel updater capable de lire les ZIP
-multi-plateformes. Elle doit être conservée dans GitHub Releases même lorsque
+spécifiques à chaque plateforme. Elle doit être conservée dans GitHub Releases même lorsque
 les anciens fichiers non indispensables sont purgés. Les versions antérieures
 passent d'abord par cette version, puis pourront recevoir les Releases à trois
 archives.
@@ -35,10 +36,9 @@ par cette migration.
 
 ## Compromis technique
 
-Trois archives sont plus faciles à trouver, mais **elles ne sont pas plus
+Quatre archives sont plus faciles à trouver, mais **elles ne sont pas plus
 légères pour le téléchargement individuel** : télécharger le pack Windows
-télécharge le MSI, l'EXE et la version portable, et le pack Android télécharge
-les deux APK. L'updater extrait uniquement le bon installateur, puis supprime
+télécharge le MSI, l'EXE et la version portable, tandis que chaque pack Android ne contient qu'un seul APK adapté à son type d'appareil. L'updater extrait uniquement le bon installateur, puis supprime
 l'archive temporaire ; aucune bibliothèque, aucun profil ni sauvegarde ne
 sont supprimés.
 
