@@ -8,8 +8,8 @@ const origin = "https://github.com/anderson76389/Kovelyx";
 const published = (tag, publishedAt, assets) => ({
   tag_name: tag, published_at: publishedAt, prerelease: true, draft: false,
   html_url: origin + "/releases/tag/" + tag,
-  assets: assets.map(([name, size = 120000000, url]) => ({
-    name, size, state: "uploaded",
+  assets: assets.map(([name, size = 120000000, url, digest]) => ({
+    name, size, state: "uploaded", digest,
     browser_download_url: url || origin + "/releases/download/" + tag + "/" + name
   }))
 });
@@ -130,6 +130,34 @@ async function simulate(releases, options = {}) {
   const win = await simulate(releases);
   assert.equal(win.byId("platform-portable").href, origin + "/releases/download/v0.1.377-alpha/Kovelyx-Windows-Portable-v0.1.377-alpha.zip");
   assert.equal(win.byId("platform-msi").href, origin + "/releases/download/v0.1.377-alpha/Kovelyx-Windows-v0.1.377-alpha.msi");
+
+  // Nouvelle organisation : quatre ZIP officiels distincts avec empreintes
+  // GitHub, tout en gardant les anciens installateurs en repli.
+  const compactTag = "v1.1.1168";
+  const zipFiles = ["Windows", "Linux", "Android", "TV"].map(os => [
+    "Kovelyx-" + os + "-" + compactTag + ".zip", 120000000,
+    undefined, "sha256:" + "a".repeat(64)
+  ]);
+  const zipped = await simulate([
+    ...releases, published(compactTag, "2026-11-18T18:00:00Z", zipFiles)
+  ]);
+  for (const [platform, suffix] of [["desktop", "Windows"], ["linux", "Linux"],
+                                     ["android", "Android"], ["tv", "TV"]]) {
+    const expected = origin + "/releases/download/" + compactTag +
+      "/Kovelyx-" + suffix + "-" + compactTag + ".zip";
+    const id = {desktop: "hero-windows-download", linux: "hero-linux-download",
+                android: "hero-android-download", tv: "hero-tv-download"}[platform];
+    assert.equal(zipped.byId(id).href, expected, "archive distincte : " + platform);
+    assert.equal(zipped.cards.find(card => card.dataset.releaseStatus === platform)
+      .nodes.get(".release-link").href, expected);
+  }
+  assert.equal(zipped.byId("platform-msi").hidden, true,
+    "Ne pas proposer les anciens formats comme fichiers inclus dans un ZIP");
+  const altered = await simulate([published(compactTag, "2026-11-18T19:00:00Z", [
+    ["Kovelyx-TV-" + compactTag + ".zip", 120000000, undefined, "sha256:invalid"]
+  ])]);
+  assert.equal(altered.byId("hero-tv-download").href, origin + "/releases",
+    "Refuser un pack sans empreinte SHA-256 GitHub valide");
 
   const signed = await simulate([
     ...releases,
