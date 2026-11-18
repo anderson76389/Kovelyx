@@ -17,6 +17,10 @@ import org.jetbrains.compose.resources.getString
 import java.io.File
 import java.io.FileOutputStream
 import java.util.zip.ZipFile
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -113,8 +117,8 @@ actual object AppUpdaterPlatform {
         get() = if (isPortableWindows) {
             AppUpdateAssetSelector(
                 fileExtensions = listOf(".zip"),
-                preferredNameFragments = listOf("Kovelyx-Windows-Portable-"),
-                requiredNamePrefixes = listOf("Kovelyx-Windows-Portable-"),
+                preferredNameFragments = listOf("Kovelyx-Windows-Portable-", "Kovelyx-Windows-v"),
+                requiredNamePrefixes = listOf("Kovelyx-Windows-Portable-", "Kovelyx-Windows-v"),
             )
         } else {
             currentOs.assetSelector(linuxInstallMethod)
@@ -211,8 +215,22 @@ actual object AppUpdaterPlatform {
                     }
                     // Only verified artifacts are eligible for deletion. Preserve logs,
                     // restore scripts and any in-progress .part downloads.
-                    pruneOldVerifiedInstallers(updatesDir(), keep = destination)
-                    destination.absolutePath
+                    val finalInstaller = if (VerifiedDesktopPlatformBundle.isBundleName(safeName)) {
+                        try {
+                            VerifiedDesktopPlatformBundle.extract(
+                                destination,
+                                updatesDir(),
+                                isWindows = currentOs == DesktopUpdaterOs.WINDOWS,
+                                isWindowsPortable = isPortableWindows,
+                                linuxFormat = linuxInstallMethod.name,
+                            )
+                        } catch (error: Throwable) {
+                            destination.delete()
+                            throw error
+                        }.also { destination.delete() }
+                    } else destination
+                    pruneOldVerifiedInstallers(updatesDir(), keep = finalInstaller)
+                    finalInstaller.absolutePath
                 } catch (t: Throwable) {
                     if (tempFile.exists()) tempFile.delete()
                     throw t
@@ -240,7 +258,40 @@ actual object AppUpdaterPlatform {
         if (shouldExit) scheduleAppExit()
     }
 
+    private fun fetchGitHubBundleDigest(uri: URI, name: String): String {
+        val suffix = uri.path.removePrefix("/anderson76389/Kovelyx/releases/download/")
+        val tag = suffix.substringBefore("/")
+        require(suffix.substringAfter("/") == name && (
+            name == "Kovelyx-Windows-$tag.zip" || name == "Kovelyx-Linux-$tag.zip"
+        )) {
+            "L'archive de plateforme ne correspond pas à la Release officielle."
+        }
+        val request = HttpRequest.newBuilder()
+            .uri(URI("https://api.github.com/repos/anderson76389/Kovelyx/releases/tags/$tag"))
+            .header("Accept", "application/vnd.github+json")
+            .header("User-Agent", "Kovelyx-Desktop-Updater")
+            .timeout(Duration.ofSeconds(30)).GET().build()
+        val response = desktopUpdaterHttpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        check(response.statusCode() == 200) {
+            "Empreinte SHA-256 du pack indisponible sur GitHub."
+        }
+        val values = Json.parseToJsonElement(response.body()).jsonObject["assets"]?.jsonArray
+            ?: error("Archives non listées dans les métadonnées de Release.")
+        val matches = values.filter {
+            it.jsonObject["name"]?.jsonPrimitive?.content == name
+        }
+        check(matches.size == 1) { "Archive de plateforme absente ou dupliquée." }
+        val digest = matches.single().jsonObject["digest"]?.jsonPrimitive?.content.orEmpty()
+        check(digest.matches(Regex("sha256:[a-fA-F0-9]{64}"))) {
+            "Empreinte SHA-256 officielle manquante pour cette archive."
+        }
+        return digest.removePrefix("sha256:")
+    }
+
     private fun fetchReleaseChecksum(assetUrl: URI, assetName: String): String {
+        if (VerifiedDesktopPlatformBundle.isBundleName(assetName)) {
+            return fetchGitHubBundleDigest(assetUrl, assetName)
+        }
         val request = HttpRequest.newBuilder()
             .uri(URI(assetUrl.toASCIIString() + ".sha256"))
             .timeout(Duration.ofSeconds(30))
@@ -377,7 +428,7 @@ private enum class DesktopUpdaterOs {
         return when (this) {
             WINDOWS -> AppUpdateAssetSelector(
                 // Prefer the single-file installer; never accidentally choose Linux/ARM or checksum files.
-                fileExtensions = listOf(".exe", ".msi"),
+                fileExtensions = listOf(".exe", ".msi", ".zip"),
                 preferredNameFragments = listOf("Kovelyx-Windows-v") + archFragments + listOf("Kovelyx-Windows-Setup-", "windows"),
                 fallbackNameFragments = listOf("universal", "all"),
                 requiredNamePrefixes = listOf("Kovelyx-Windows-"),
@@ -388,7 +439,7 @@ private enum class DesktopUpdaterOs {
                 fallbackNameFragments = listOf("universal", "all"),
             )
             LINUX -> AppUpdateAssetSelector(
-                fileExtensions = linuxUpdateFileExtensions(linuxInstallMethod),
+                fileExtensions = linuxUpdateFileExtensions(linuxInstallMethod) + ".zip",
                 preferredNameFragments = archFragments + listOf("linux"),
                 fallbackNameFragments = listOf("universal", "all"),
                 requiredNamePrefixes = listOf("Kovelyx-Linux-"),
