@@ -202,6 +202,23 @@ class VerifiedPreviewTests(unittest.TestCase):
                 PREVIEW.unique_file(root, "*.apk")
 
 
+    def test_compact_release_requires_published_and_complete_bridge(self):
+        tag = "v1.1.1167"
+        names = PREVIEW.expected_public_assets(tag)
+        valid = {
+            "tag_name": tag, "draft": False,
+            "assets": [{
+                "name": name, "state": "uploaded", "size": 1024,
+                "digest": "sha256:" + "a" * 64,
+            } for name in names],
+        }
+        PREVIEW.require_legacy_bridge(valid)
+        for invalid in (None, dict(valid, draft=True),
+                        dict(valid, assets=valid["assets"][1:]),
+                        dict(valid, assets=[dict(valid["assets"][0], digest="")])):
+            with self.assertRaises(RuntimeError):
+                PREVIEW.require_legacy_bridge(invalid)
+
     def test_bridge_release_then_three_platform_bundles(self):
         self.assertFalse(PREVIEW.is_bundle_tag("v1.1.1166"))
         self.assertFalse(PREVIEW.is_bundle_tag("v1.1.1167"))
