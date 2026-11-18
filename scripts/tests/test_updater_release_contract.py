@@ -19,16 +19,17 @@ COMPACT_START = (1, 1, 1168)
 LEGACY_BRIDGE = "v1.1.1167"
 
 
-def check_three_platform_bundles(release: dict, versions: dict) -> None:
+def check_four_platform_bundles(release: dict, versions: dict) -> None:
     tag = release["tag_name"]
     names = {
         f"Kovelyx-Android-{tag}.zip",
+        f"Kovelyx-TV-{tag}.zip",
         f"Kovelyx-Linux-{tag}.zip",
         f"Kovelyx-Windows-{tag}.zip",
     }
     assets = release.get("assets", [])
-    assert len(assets) == 3 and {x["name"] for x in assets} == names, (
-        tag, "une version doit contenir exactement trois packs, aucun autre fichier"
+    assert len(assets) == 4 and {x["name"] for x in assets} == names, (
+        tag, "une version doit contenir exactement quatre packs, aucun autre fichier"
     )
     for asset in assets:
         name = asset["name"]
@@ -44,7 +45,7 @@ def check_three_platform_bundles(release: dict, versions: dict) -> None:
     legacy_assets = {a["name"] for a in versions[LEGACY_BRIDGE].get("assets", [])}
     assert all(file_for_tag(LEGACY_BRIDGE) in legacy_assets
                for file_for_tag in TRACKS.values()), "Bridge incomplet"
-    print(f"OK : {tag}, exactement trois packs validés par SHA-256 GitHub ; bridge préservé")
+    print(f"OK : {tag}, exactement quatre packs validés par SHA-256 GitHub ; bridge préservé")
 
 TRACKS = {
     "Windows installé (MSI)": lambda tag: f"Kovelyx-Windows-{tag}.msi",
@@ -101,7 +102,7 @@ def run() -> None:
     latest_tag = ordered[0]["tag_name"]
     print(f"Dernière Release numérotée : {latest_tag}")
     if tuple(map(int, SEMVER.fullmatch(latest_tag).groups()[:3])) >= COMPACT_START:
-        check_three_platform_bundles(
+        check_four_platform_bundles(
             ordered[0], {r.get("tag_name"): r for r in releases}
         )
     for label, file_for_tag in TRACKS.items():
