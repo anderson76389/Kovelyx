@@ -436,8 +436,23 @@ def main():
             # Next versions contain three signed-and-hashed platform archives.
             output = build_platform_bundles(output, root / "platform-bundles", tag)
         notes = root / "notes.md"
+        bundle_notice = (
+            "### Téléchargements : 3 packs seulement\n"
+            "- Android : un ZIP avec l'APK téléphone et l'APK TV.\n"
+            "- Linux : un ZIP avec AppImage, DEB et RPM.\n"
+            "- Windows : un ZIP avec MSI, EXE et version portable.\n"
+            "Chaque pack est couvert par le digest GitHub et chaque installateur "
+            "contient sa propre empreinte dans SHA256SUMS.txt.\n"
+            "Les applications mises à jour extraient uniquement le format nécessaire ; "
+            "le téléchargement du pack complet peut être plus volumineux.\n\n"
+        ) if is_bundle_tag(tag) else (
+            "### Version de transition\n"
+            "Cette Release contient volontairement les installateurs directs et "
+            "leurs SHA-256 pour permettre aux anciennes versions de migrer "
+            "vers les trois packs des prochaines Releases.\n\n"
+        )
         notes.write_text(
-            "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n"
+            "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n" + bundle_notice +
             "- Linux : AppImage (distributions compatibles), DEB (Debian/Ubuntu), RPM (Fedora et dérivées).\n"
             "- Le runtime Java est inclus ; libmpv, WebKitGTK et les codecs Linux sont des dépendances système.\n"
             "- Les paquets Linux proviennent des mêmes sources Compose Desktop que Windows, avec un build natif et des tests propres.\n"
