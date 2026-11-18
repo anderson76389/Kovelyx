@@ -93,7 +93,9 @@ internal fun LazyListScope.appearanceSettingsContent(
     onCollectionsClick: () -> Unit,
     onContinueWatchingClick: () -> Unit,
     onPosterCustomizationClick: () -> Unit,
+    layoutOnly: Boolean = false,
 ) {
+    if (!layoutOnly) {
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_appearance_section_theme),
@@ -229,6 +231,8 @@ internal fun LazyListScope.appearanceSettingsContent(
         }
     }
 
+    }
+    if (layoutOnly) {
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_appearance_section_home),
@@ -294,7 +298,8 @@ internal fun LazyListScope.appearanceSettingsContent(
                 )
             }
         }
-    }
+    }    }
+
 }
 
 private data class AppLanguageSheetOption(
