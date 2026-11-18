@@ -18,4 +18,11 @@
     <string name="settings_org_root_content">CONTENUS ET INTÉGRATIONS</string>
     <string name="settings_org_root_activity">SUIVI ET NOTIFICATIONS</string>
     <string name="settings_org_root_system">SYSTÈME ET MISES À JOUR</string>
+    <string name="settings_nav_group_you">Vous</string>
+    <string name="settings_nav_group_look">Apparence</string>
+    <string name="settings_nav_group_watch">Médias</string>
+    <string name="settings_nav_group_services">Services</string>
+    <string name="settings_nav_group_system">Système</string>
+    <string name="settings_nav_layout_title">Disposition</string>
+    <string name="settings_nav_layout_description">Accueil, affiches, détails, flux et navigation</string>
 </resources>
