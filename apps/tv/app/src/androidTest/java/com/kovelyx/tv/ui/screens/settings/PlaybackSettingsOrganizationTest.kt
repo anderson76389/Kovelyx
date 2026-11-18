@@ -112,6 +112,33 @@ class PlaybackSettingsOrganizationTest {
     }
 
     @Test
+    fun subtitleOutlineThicknessIsAvailableWhenEnabled() {
+        setSections(
+            PlayerSettings(
+                subtitleStyle = com.kovelyx.tv.data.local.SubtitleStyleSettings(
+                    outlineEnabled = true,
+                    outlineWidth = 3
+                )
+            )
+        )
+        expand(PlaybackSection.SUBTITLES)
+        assertRowCount(R.string.sub_outline_width, PlaybackSection.SUBTITLES, 1)
+    }
+
+    @Test
+    fun subtitleOutlineThicknessIsHiddenWhenOutlineDisabled() {
+        setSections(
+            PlayerSettings(
+                subtitleStyle = com.kovelyx.tv.data.local.SubtitleStyleSettings(
+                    outlineEnabled = false
+                )
+            )
+        )
+        expand(PlaybackSection.SUBTITLES)
+        assertRowCount(R.string.sub_outline_width, PlaybackSection.SUBTITLES, 0)
+    }
+
+    @Test
     fun externalPlayerOptionsOnlyAppearForExternalPlayers() {
         setSections(PlayerSettings(playerPreference = PlayerPreference.INTERNAL))
         expand(PlaybackSection.PLAYER)
