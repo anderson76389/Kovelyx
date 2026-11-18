@@ -165,7 +165,7 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
 
 # The first compact Release MUST come after a full 16-asset bridge Release.
 # Old installed clients can still obtain that bridge via the legacy asset names,
-# then its updated updater can consume the new three archive format.
+# then its updated updater can consume the new four archive format.
 BUNDLE_START_VERSION = (1, 1, 1168)
 LEGACY_BRIDGE_TAG = "v1.1.1167"
 
@@ -206,6 +206,8 @@ def platform_bundle_contents(tag):
     return {
         f"Kovelyx-Android-{tag}.zip": (
             f"Kovelyx-Android-{tag}.apk",
+        ),
+        f"Kovelyx-TV-{tag}.zip": (
             f"Kovelyx-TV-{tag}-universal.apk",
         ),
         f"Kovelyx-Linux-{tag}.zip": linux_package_names(tag),
@@ -218,7 +220,7 @@ def platform_bundle_contents(tag):
 
 
 def build_platform_bundles(installer_folder, output_folder, tag):
-    """Turn eight individually verified binaries into exactly three archives.
+    """Turn eight individually verified binaries into exactly four archives.
 
     GitHub's SHA256 digest authenticates the entire published archive; every
     archived installer has its own SHA256 in SHA256SUMS.txt. Nothing upstream,
@@ -274,7 +276,7 @@ def verify_platform_bundle(archive, filenames):
 
 
 def expected_public_assets(tag):
-    """Sixteen files for the transition, then exactly three platform packs."""
+    """Sixteen files for the bridge, then four platform-specific packs."""
     if is_bundle_tag(tag):
         return set(platform_bundle_contents(tag))
     packages = {
@@ -463,12 +465,13 @@ def main():
             path.with_name(path.name + ".sha256").write_text(f"{digest(path)}  {path.name}\n", encoding="utf-8")
         if is_bundle_tag(tag):
             # The bridge version remains available for old updater binaries.
-            # Next versions contain three signed-and-hashed platform archives.
+            # Next versions contain four signed-and-hashed platform archives.
             output = build_platform_bundles(output, root / "platform-bundles", tag)
         notes = root / "notes.md"
         bundle_notice = (
-            "### Téléchargements : 3 packs seulement\n"
-            "- Android : un ZIP avec l'APK téléphone et l'APK TV.\n"
+            "### Téléchargements : 4 packs seulement\n"
+            "- Android mobile : un ZIP avec l'APK universel téléphone/tablette.\n"
+            "- Android TV : un ZIP distinct avec l'APK universel TV.\n"
             "- Linux : un ZIP avec AppImage, DEB et RPM.\n"
             "- Windows : un ZIP avec MSI, EXE et version portable.\n"
             "Chaque pack est couvert par le digest GitHub et chaque installateur "
@@ -479,7 +482,7 @@ def main():
             "### Version de transition\n"
             "Cette Release contient volontairement les installateurs directs et "
             "leurs SHA-256 pour permettre aux anciennes versions de migrer "
-            "vers les trois packs des prochaines Releases.\n\n"
+            "vers les quatre packs des prochaines Releases.\n\n"
         )
         notes.write_text(
             "Kovelyx pour Windows, Linux x86_64, Android et Android TV.\n\n" + bundle_notice +
