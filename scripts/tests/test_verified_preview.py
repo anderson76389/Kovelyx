@@ -219,13 +219,14 @@ class VerifiedPreviewTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 PREVIEW.require_legacy_bridge(invalid)
 
-    def test_bridge_release_then_three_platform_bundles(self):
+    def test_bridge_release_then_four_platform_bundles(self):
         self.assertFalse(PREVIEW.is_bundle_tag("v1.1.1166"))
         self.assertFalse(PREVIEW.is_bundle_tag("v1.1.1167"))
         self.assertTrue(PREVIEW.is_bundle_tag("v1.1.1168"))
         self.assertEqual(len(PREVIEW.expected_public_assets("v1.1.1167")), 16)
         self.assertEqual(PREVIEW.expected_public_assets("v1.1.1168"), {
             "Kovelyx-Android-v1.1.1168.zip",
+            "Kovelyx-TV-v1.1.1168.zip",
             "Kovelyx-Linux-v1.1.1168.zip",
             "Kovelyx-Windows-v1.1.1168.zip",
         })
@@ -245,7 +246,7 @@ class VerifiedPreviewTests(unittest.TestCase):
                 (installers / name).write_bytes(bytes([index + 1]) * 1_000_001)
             published = PREVIEW.build_platform_bundles(installers, root / "bundles", tag)
             bundles = sorted(published.iterdir())
-            self.assertEqual(len(bundles), 3)
+            self.assertEqual(len(bundles), 4)
             for bundle in bundles:
                 self.assertGreater(bundle.stat().st_size, 2_000_000)
                 PREVIEW.verify_platform_bundle(
