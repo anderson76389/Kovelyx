@@ -159,6 +159,37 @@ async function simulate(releases, options = {}) {
   assert.equal(altered.byId("hero-tv-download").href, origin + "/releases",
     "Refuser un pack sans empreinte SHA-256 GitHub valide");
 
+  // Dès v1.1.1169, chaque plateforme doit télécharger un véritable installateur.
+  // Les sidecars SHA-256 assurent la compatibilité des mises à jour existantes.
+  const directTag = "v1.1.1169";
+  const directFiles = [
+    "Kovelyx-Windows-Setup-" + directTag + ".exe",
+    "Kovelyx-Linux-x86_64-" + directTag + ".AppImage",
+    "Kovelyx-Android-" + directTag + ".apk",
+    "Kovelyx-TV-" + directTag + "-universal.apk"
+  ];
+  const directAssets = directFiles.flatMap(name => [
+    [name, 120000000, undefined, "sha256:" + "b".repeat(64)],
+    [name + ".sha256", 102, undefined, "sha256:" + "c".repeat(64)]
+  ]);
+  const direct = await simulate([
+    ...releases,
+    published(compactTag, "2026-11-18T18:00:00Z", zipFiles),
+    published(directTag, "2026-11-18T19:00:00Z", directAssets)
+  ]);
+  for (const [id, index] of [
+    ["hero-windows-download", 0], ["hero-linux-download", 1],
+    ["hero-android-download", 2], ["hero-tv-download", 3]
+  ]) {
+    const url = direct.byId(id).href;
+    assert.equal(url, origin + "/releases/download/" + directTag + "/" + directFiles[index]);
+    assert(!url.endsWith(".zip"), "Aucun ZIP à décompresser : " + id);
+  }
+  assert.equal(direct.byId("platform-linux-deb").hidden, true);
+  assert.equal(direct.byId("platform-linux-rpm").hidden, true);
+  assert.equal(direct.byId("platform-msi").hidden, true);
+  assert.equal(direct.byId("platform-portable").hidden, true);
+
   const signed = await simulate([
     ...releases,
     published("v0.5.11-beta.1", "2026-10-18T10:00:00Z", [["Kovelyx-Android-v0.5.11-beta.1-universal.apk"]]),
