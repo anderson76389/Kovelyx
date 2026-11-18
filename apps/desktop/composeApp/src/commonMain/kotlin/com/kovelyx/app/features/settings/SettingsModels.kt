@@ -98,7 +98,7 @@ internal enum class SettingsPage(
     HoverPreview(
         titleRes = Res.string.compose_settings_page_hover_preview,
         category = SettingsCategory.Look,
-        parentPage = Layout,
+        parentPage = Appearance,
     ),
     Streams(
         titleRes = Res.string.settings_org_stream_presentation,
@@ -112,7 +112,7 @@ internal enum class SettingsPage(
     ),
     Notifications(
         titleRes = Res.string.compose_settings_page_notifications,
-        category = SettingsCategory.Look,
+        category = SettingsCategory.System,
         parentPage = Root,
     ),
     ContinueWatching(
