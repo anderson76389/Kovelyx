@@ -127,6 +127,24 @@ def check_tv_consistency() -> None:
     ensure("PLAYBACK(SettingsRailGroup.WATCH)" in tv, "Android TV: player misplaced")
     ensure("LAYOUT(SettingsRailGroup.LOOK)" in tv, "Android TV: layout misplaced")
     ensure("TRACKING(SettingsRailGroup.SERVICES)" in tv, "Android TV: tracking misplaced")
+    # TV is already aligned with the latest native TV rail; do not change
+    # its focus order for a cosmetic regrouping on phone and desktop.
+    expected = (
+        ("ACCOUNT", "PROFILES", "YOU"),
+        ("APPEARANCE", "LAYOUT", "LOOK"),
+        ("CONTENT_DISCOVERY", "PLAYBACK", "WATCH"),
+        ("INTEGRATION", "TRACKING", "SERVICES"),
+        ("ADVANCED", "ABOUT", "SYSTEM"),
+    )
+    for left, right, group in expected:
+        first = f"{left}(SettingsRailGroup.{group})"
+        second = f"{right}(SettingsRailGroup.{group})"
+        ensure(first in tv and second in tv and tv.index(first) < tv.index(second),
+               f"Android TV: pair {left}/{right} reversed")
+    ensure("SettingsCategory.DEBUG -> isDebugBuild && !isEssentialMode" in tv,
+           "Android TV: debug option visible in release builds")
+    ensure("SettingsCategory.EXPERIENCE -> false" in tv,
+           "Android TV: unsupported experience option visible")
     print("PASS TV: native remote-driven rail already has the same five groups")
 
 
