@@ -518,13 +518,13 @@ def main():
             output = build_platform_bundles(output, root / "platform-bundles", tag)
         notes = root / "notes.md"
         bundle_notice = (
-            "### Téléchargements directs : sans ZIP à décompresser\\n"
-            "- Android mobile : APK directement installable.\\n"
-            "- Android TV : APK TV distinct directement installable.\\n"
-            "- Windows : installateur EXE directement exécutable.\\n"
-            "- Linux x86_64 : AppImage directement exécutable.\\n"
+            "### Téléchargements directs : sans ZIP à décompresser\n"
+            "- Android mobile : APK directement installable.\n"
+            "- Android TV : APK TV distinct directement installable.\n"
+            "- Windows : installateur EXE directement exécutable.\n"
+            "- Linux x86_64 : AppImage directement exécutable.\n"
             "Les quatre petits fichiers .sha256 associés servent aux anciennes versions "
-            "pour vérifier les mises à jour sans perdre les données.\\n\\n"
+            "pour vérifier les mises à jour sans perdre les données.\n\n"
         ) if is_direct_installer_tag(tag) else (
             "### Téléchargements : 4 packs seulement\n"
             "- Android mobile : un ZIP avec l'APK universel téléphone/tablette.\n"
