@@ -28,6 +28,10 @@ jobs:
     name: Tous les tests Android Host (sans exclusions)
     runs-on: ubuntu-24.04
     timeout-minutes: 35
+    env:
+      # Robolectric fetches Android framework test JARs in the forked test JVM.
+      # Use canonical Maven Central instead of the intermittently failing repo1 mirror.
+      JAVA_TOOL_OPTIONS: "-Drobolectric.dependency.repo.url=https://repo.maven.apache.org/maven2"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

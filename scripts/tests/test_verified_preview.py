@@ -202,6 +202,96 @@ class VerifiedPreviewTests(unittest.TestCase):
                 PREVIEW.unique_file(root, "*.apk")
 
 
+    def test_compact_release_requires_published_and_complete_bridge(self):
+        tag = "v1.1.1167"
+        names = PREVIEW.expected_public_assets(tag)
+        valid = {
+            "tag_name": tag, "draft": False,
+            "assets": [{
+                "name": name, "state": "uploaded", "size": 1024,
+                "digest": "sha256:" + "a" * 64,
+            } for name in names],
+        }
+        PREVIEW.require_legacy_bridge(valid)
+        for invalid in (None, dict(valid, draft=True),
+                        dict(valid, assets=valid["assets"][1:]),
+                        dict(valid, assets=[dict(valid["assets"][0], digest="")])):
+            with self.assertRaises(RuntimeError):
+                PREVIEW.require_legacy_bridge(invalid)
+
+    def test_bridge_release_then_four_platform_bundles(self):
+        self.assertFalse(PREVIEW.is_bundle_tag("v1.1.1166"))
+        self.assertFalse(PREVIEW.is_bundle_tag("v1.1.1167"))
+        self.assertTrue(PREVIEW.is_bundle_tag("v1.1.1168"))
+        self.assertEqual(len(PREVIEW.expected_public_assets("v1.1.1167")), 16)
+        self.assertEqual(PREVIEW.expected_public_assets("v1.1.1168"), {
+            "Kovelyx-Android-v1.1.1168.zip",
+            "Kovelyx-TV-v1.1.1168.zip",
+            "Kovelyx-Linux-v1.1.1168.zip",
+            "Kovelyx-Windows-v1.1.1168.zip",
+        })
+
+    def test_compact_platform_archives_embed_verifiable_checksums(self):
+        import hashlib
+        import zipfile
+        tag = "v1.1.1168"
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            installers = root / "installers"
+            installers.mkdir()
+            for index, name in enumerate(sorted({
+                n for group in PREVIEW.platform_bundle_contents(tag).values() for n in group
+            })):
+                (installers / name).write_bytes(bytes([index + 1]) * 1_000_001)
+            published = PREVIEW.build_platform_bundles(installers, root / "bundles", tag)
+            bundles = sorted(published.iterdir())
+            self.assertEqual(len(bundles), 4)
+            for bundle in bundles:
+                self.assertGreater(bundle.stat().st_size, len(PREVIEW.platform_bundle_contents(tag)[bundle.name]) * 1_000_000)
+                PREVIEW.verify_platform_bundle(
+                    bundle, PREVIEW.platform_bundle_contents(tag)[bundle.name]
+                )
+
+            def release():
+                return {
+                    "tag_name": tag,
+                    "target_commitish": sha,
+                    "draft": True,
+                    "assets": [{
+                        "name": p.name,
+                        "state": "uploaded",
+                        "size": p.stat().st_size,
+                        "digest": "sha256:" + PREVIEW.digest(p),
+                    } for p in bundles],
+                }
+
+            PREVIEW.verify_uploaded_release_inventory(tag, sha, published, release())
+            incorrect = release()
+            incorrect["assets"][1]["digest"] = "sha256:" + "0" * 64
+            with self.assertRaisesRegex(RuntimeError, "Empreinte GitHub"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, published, incorrect)
+            changed = bundles[0]
+            with zipfile.ZipFile(changed, "a") as zipped:
+                zipped.writestr("unexpected.bin", b"not an installer")
+            with self.assertRaisesRegex(RuntimeError, "Contenu archive"):
+                PREVIEW.verify_platform_bundle(
+                    changed, PREVIEW.platform_bundle_contents(tag)[changed.name]
+                )
+
+    def test_compact_publisher_does_not_drop_unknown_or_missing_installers(self):
+        tag = "v1.1.1168"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            for name in sorted({
+                n for group in PREVIEW.platform_bundle_contents(tag).values() for n in group
+            })[:-1]:
+                (source / name).write_bytes(b"test" * 300_000)
+            with self.assertRaisesRegex(RuntimeError, "absent ou inattendu"):
+                PREVIEW.build_platform_bundles(source, root / "output", tag)
+
     def test_final_release_requires_all_eight_packages_and_checksum_files(self):
         tag = "v1.1.1164"
         names = PREVIEW.expected_public_assets(tag)

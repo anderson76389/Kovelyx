@@ -331,6 +331,19 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $release = & gh api "repos/$env:GITHUB_REPOSITORY/releases/latest" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0 -or -not $release.tag_name) { throw 'Release de référence introuvable.' }
+          # Compact three-pack Releases no longer expose the nested portable
+          # installer as a standalone asset. Keep the last verified direct
+          # package (the permanent v1.1.1167 bridge) as RAM baseline.
+          $original = "Kovelyx-Windows-Portable-$($release.tag_name).zip"
+          if (-not @($release.assets | Where-Object { $_.name -eq $original }).Count) {
+            $allReleases = & gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=100" | ConvertFrom-Json
+            $legacy = @($allReleases | Where-Object {
+              $t = $_.tag_name
+              @($_.assets | Where-Object { $_.name -eq "Kovelyx-Windows-Portable-$t.zip" }).Count -eq 1
+            } | Select-Object -First 1)
+            if ($legacy.Count -ne 1) { throw 'Release héritée pour comparer la RAM introuvable.' }
+            $release = $legacy[0]
+          }
           $tag = $release.tag_name
           $folder = Join-Path $env:RUNNER_TEMP 'kovelyx-memory-baseline'
           New-Item -ItemType Directory -Force -Path $folder | Out-Null
