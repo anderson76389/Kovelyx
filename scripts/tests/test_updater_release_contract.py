@@ -16,6 +16,7 @@ API = f"https://api.github.com/repos/{REPO}/releases?per_page=100"
 SEMVER = re.compile(r"^v(\d+)\.(\d+)\.(\d+)(?:-(alpha|beta|rc))?$")
 SHA_LINE = re.compile(r"^([a-fA-F0-9]{64})\s+\*?(.+)$")
 COMPACT_START = (1, 1, 1168)
+DIRECT_START = (1, 1, 1169)
 LEGACY_BRIDGE = "v1.1.1167"
 
 
@@ -46,6 +47,38 @@ def check_four_platform_bundles(release: dict, versions: dict) -> None:
     assert all(file_for_tag(LEGACY_BRIDGE) in legacy_assets
                for file_for_tag in TRACKS.values()), "Bridge incomplet"
     print(f"OK : {tag}, exactement quatre packs validés par SHA-256 GitHub ; bridge préservé")
+
+def check_direct_installers(release: dict, versions: dict) -> None:
+    tag = release["tag_name"]
+    binaries = {
+        f"Kovelyx-Android-{tag}.apk",
+        f"Kovelyx-TV-{tag}-universal.apk",
+        f"Kovelyx-Windows-Setup-{tag}.exe",
+        f"Kovelyx-Linux-x86_64-{tag}.AppImage",
+    }
+    expected = binaries | {name + ".sha256" for name in binaries}
+    assets = release.get("assets", [])
+    assert len(assets) == len(expected) and {a["name"] for a in assets} == expected, (
+        tag, "quatre installateurs directs et leurs 4 fichiers SHA-256 requis"
+    )
+    for asset in assets:
+        name = asset["name"]
+        assert asset.get("state") == "uploaded", (tag, name, "upload incomplet")
+        assert asset.get("size", 0) > (50 if name.endswith(".sha256") else 1_000_000), (
+            tag, name, "fichier absent ou tronqué"
+        )
+        assert re.fullmatch(r"sha256:[a-fA-F0-9]{64}", asset.get("digest", "")), (
+            tag, name, "empreinte officielle absente"
+        )
+        assert asset.get("browser_download_url") == (
+            f"https://github.com/{REPO}/releases/download/{tag}/{name}"
+        ), (tag, name, "URL incorrecte")
+    assert LEGACY_BRIDGE in versions, "Bridge v1.1.1167 supprimé"
+    bridge = {a["name"] for a in versions[LEGACY_BRIDGE].get("assets", [])}
+    assert all(file_for_tag(LEGACY_BRIDGE) in bridge
+               for file_for_tag in TRACKS.values()), "Bridge rétrocompatible incomplet"
+    print(f"OK : {tag}, quatre installateurs directs vérifiés (plus 4 SHA-256 rétrocompatibles)")
+
 
 TRACKS = {
     "Windows installé (MSI)": lambda tag: f"Kovelyx-Windows-{tag}.msi",
@@ -101,7 +134,12 @@ def run() -> None:
     ordered = [release for _, release in sorted(candidates, reverse=True, key=lambda row: row[0])]
     latest_tag = ordered[0]["tag_name"]
     print(f"Dernière Release numérotée : {latest_tag}")
-    if tuple(map(int, SEMVER.fullmatch(latest_tag).groups()[:3])) >= COMPACT_START:
+    latest_version = tuple(map(int, SEMVER.fullmatch(latest_tag).groups()[:3]))
+    if latest_version >= DIRECT_START:
+        check_direct_installers(
+            ordered[0], {r.get("tag_name"): r for r in releases}
+        )
+    elif latest_version >= COMPACT_START:
         check_four_platform_bundles(
             ordered[0], {r.get("tag_name"): r for r in releases}
         )

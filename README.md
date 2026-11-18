@@ -50,7 +50,7 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
       <td align="center">TV et TV Box · Android 7+</td>
     </tr>
     <tr>
-      <td align="center">EXE · MSI · ZIP portable</td>
+      <td align="center">EXE direct · sans ZIP</td>
       <td align="center">AppImage · DEB · RPM</td>
       <td align="center">APK universel</td>
       <td align="center">APK TV · télécommande</td>
@@ -64,11 +64,13 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
   </tbody>
 </table>
 
-**🐧 Linux :** même interface de bureau que Windows, avec sa propre illustration ci-dessus. Sur le [site Kovelyx](https://anderson76389.github.io/Kovelyx/?plateforme=linux#plateformes), choisissez **AppImage**, **DEB** (Debian/Ubuntu) ou **RPM** (Fedora et dérivées), selon votre distribution. Chaque paquet publié possède son fichier SHA-256. Compatible **Intel/AMD x86_64** ; ARM64 et les distributions non testées ne sont pas encore certifiés. [Guide d'installation Linux](./docs/LINUX.md).
+**🐧 Linux :** même interface de bureau que Windows. Depuis v1.1.1169, téléchargez **directement l’AppImage** sur le [site Kovelyx](https://anderson76389.github.io/Kovelyx/?plateforme=linux#plateformes), sans extraire de ZIP. Les anciens formats DEB/RPM restent disponibles dans les Releases historiques. Compatible **Intel/AMD x86_64**, avec certaines bibliothèques système ; ARM64 et les distributions non testées ne sont pas encore certifiés. [Guide d'installation Linux](./docs/LINUX.md).
 
 </div>
 
 <div align="center">
+
+**À partir de v1.1.1169 : 4 fichiers directement installables** — APK téléphone, APK TV, EXE Windows et AppImage Linux. Les petits fichiers `.sha256` à côté servent uniquement aux contrôles de mise à jour ; **ne les téléchargez pas pour installer Kovelyx**. [Détails et compatibilité des anciennes versions](./docs/TROIS_PACKS_RELEASES.md).
 
 **[🌐 Accéder au site des applications](https://anderson76389.github.io/Kovelyx/) · [📦 Voir toutes les Releases](https://github.com/anderson76389/Kovelyx/releases)**
 
