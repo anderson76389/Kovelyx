@@ -1,5 +1,30 @@
 # Kovelyx — téléchargements et publication GitHub
 
+## Trois choix de téléchargement
+
+Dans chaque nouvelle Release, choisir **un seul système** dans le tableau placé tout en haut des notes :
+
+| Choix | Téléchargement conseillé | Autres formats disponibles |
+| --- | --- | --- |
+| **Android** | APK mobile | APK Android TV / Google TV distincte |
+| **Linux x86_64** | AppImage | DEB (Debian/Ubuntu), RPM (Fedora) |
+| **Windows x64** | MSI | Assistant EXE, dossier portable ZIP |
+
+[**Ouvrir la dernière Release**](https://github.com/anderson76389/Kovelyx/releases/latest).
+
+**Pourquoi y a-t-il toujours plus de trois fichiers dans « Assets » ?**
+Les versions déjà installées choisissent directement leur propre format et
+vérifient son fichier `.sha256` sur GitHub. Android mobile et Android TV utilisent
+deux identités d'application distinctes ; on ne peut pas remplacer leurs APK par
+une APK unique sans casser la mise à jour. Linux nécessite ses formats natifs
+pour les utilisateurs Debian et RPM ; Windows conserve le mode portable.
+GitHub ne permet pas de cacher certains fichiers Assets à l'intérieur d'une
+Release standard. Réduire cette liste à trois ZIP maintenant casserait les
+mises à jour intégrées des versions précédentes. Les **trois lignes de
+téléchargement** constituent donc l'interface conseillée ; les installateurs
+d'origine restent disponibles pour tous les appareils. Ne jamais supprimer les
+empreintes ou les paquets requis par les anciens clients sans migration testée.
+
 Trois plateformes, **un seul dépôt** et des fichiers d’installation distincts : Windows x64, Android mobile et Android TV / TV Box.
 
 ## Téléchargements vérifiés dans GitHub Releases — 16 octobre 2026

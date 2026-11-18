@@ -202,6 +202,22 @@ class VerifiedPreviewTests(unittest.TestCase):
                 PREVIEW.unique_file(root, "*.apk")
 
 
+    def test_three_platform_download_rows_preserve_all_ota_assets(self):
+        tag = "v1.1.1167"
+        markdown = PREVIEW.primary_platform_downloads(tag)
+        self.assertEqual(markdown.count("| **Android** |"), 1)
+        self.assertEqual(markdown.count("| **Linux x86_64** |"), 1)
+        self.assertEqual(markdown.count("| **Windows x64** |"), 1)
+        self.assertIn("Android TV", markdown)
+        self.assertIn("Kovelyx-Windows-v1.1.1167.msi", markdown)
+        self.assertIn("Kovelyx-TV-v1.1.1167-universal.apk", markdown)
+        self.assertIn("Kovelyx-Linux-x86_64-v1.1.1167.AppImage", markdown)
+        self.assertIn(chr(10) + "| **Android**", markdown)
+        self.assertEqual(markdown.count("https://github.com/anderson76389/Kovelyx/releases/download/v1.1.1167/"), 8)
+        self.assertEqual(len(PREVIEW.expected_public_assets(tag)), 16)
+        with self.assertRaises(ValueError):
+            PREVIEW.primary_platform_downloads("../invalid")
+
     def test_final_release_requires_all_eight_packages_and_checksum_files(self):
         tag = "v1.1.1164"
         names = PREVIEW.expected_public_assets(tag)
