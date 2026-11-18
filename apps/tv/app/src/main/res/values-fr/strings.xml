@@ -602,6 +602,7 @@
     <string name="sub_outline">Contour</string>
     <string name="sub_outline_sub">Ajouter un contour autour du texte des sous-titres pour une meilleure visibilité</string>
     <string name="sub_outline_color">Couleur du contour</string>
+    <string name="sub_outline_width">Épaisseur du contour</string>
     <string name="sub_advanced_section">Rendu avancé des sous-titres</string>
     <string name="sub_libass">Utiliser libass pour les sous-titres ASS/SSA</string>
     <string name="sub_libass_sub">Expérimental : rendu ASS/SSA avancé (styles, positionnement, animations)</string>
