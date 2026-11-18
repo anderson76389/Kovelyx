@@ -24,16 +24,16 @@
     desktop: {
       label: "01 / WINDOWS",
       title: "Kovelyx pour Windows.",
-      desc: "Pour Windows 10 et 11 en 64 bits. Installateur EXE, MSI et version portable ZIP suivant les fichiers réellement disponibles.",
-      tags: ["Windows 10 / 11", "64 bits", "EXE · MSI · Portable"],
+      desc: "Pour Windows 10 et 11 en 64 bits. Téléchargez directement l'installateur EXE, sans archive ZIP à ouvrir.",
+      tags: ["Windows 10 / 11", "64 bits", "EXE direct"],
       device: "desktop",
       button: "Télécharger Windows EXE"
     },
     linux: {
       label: "02 / LINUX",
       title: "Kovelyx pour Linux.",
-      desc: "La même application de bureau que sur Windows, adaptée à Linux x86_64. Choisissez AppImage, DEB (Debian/Ubuntu) ou RPM (Fedora et dérivées) selon votre distribution.",
-      tags: ["Linux x86_64", "AppImage", "DEB · RPM"],
+      desc: "La même application de bureau que sur Windows, adaptée à Linux x86_64. Téléchargez l'AppImage directement, sans ZIP à extraire ; des bibliothèques système peuvent être nécessaires.",
+      tags: ["Linux x86_64", "AppImage", "Sans ZIP"],
       device: "desktop linux",
       button: "Télécharger Linux AppImage"
     },
@@ -84,8 +84,8 @@
     const osNames = {desktop: "Windows", linux: "Linux", android: "Android", tv: "TV"};
     for (const release of releases) {
       if (release.draft || !Array.isArray(release.assets)) continue;
-      // From v1.1.1168 onwards, one signed ZIP per OS. Legacy binary links
-      // remain available from the bridge release for older installed clients.
+      // v1.1.1168 uses ZIP platform packs; v1.1.1169+ provides direct
+      // APK, EXE and AppImage downloads. Keep legacy Releases as fallback.
       const tag = release.tag_name || "";
       const bundleName = "Kovelyx-" + osNames[platform] + "-" + tag + ".zip";
       const bundle = release.assets.find(asset =>
@@ -103,7 +103,9 @@
           Number.isFinite(file.size) && file.size > 0 &&
           validDownload.test(file.browser_download_url || ""));
         // Ne pas proposer de Release Linux partielle ou privée de ses SHA-256.
-        if (appimage && deb && rpm && [appimage, deb, rpm].every(hasChecksum)) {
+        const directLinux = /^v1\.1\.(?:1169|11[7-9]\d|1[2-9]\d{2}|[2-9]\d{3})$/.test(tag);
+        if ((directLinux && appimage && hasChecksum(appimage)) ||
+            (appimage && deb && rpm && [appimage, deb, rpm].every(hasChecksum))) {
           return {release, asset: appimage, extras: {appimage, deb, rpm}};
         }
         continue;
