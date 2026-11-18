@@ -38,30 +38,26 @@ Les profils TV reçoivent les noms, photos et fonds du compte ; leur modificatio
       </th>
     </tr>
     <tr>
-      <th align="center" width="25%">🖥️ Windows</th>
-      <th align="center" width="25%">🐧 Linux</th>
-      <th align="center" width="25%">📱 Android mobile</th>
-      <th align="center" width="25%">📺 Android TV</th>
+      <th align="center" width="33%">🖥️ Windows</th>
+      <th align="center" width="33%">🐧 Linux</th>
+      <th align="center" width="34%">📱 Android · 📺 Android TV</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td align="center">Windows 10/11 · x64</td>
       <td align="center">Linux x86_64 · distributions compatibles</td>
-      <td align="center">Téléphones et tablettes · Android 7+</td>
-      <td align="center">TV et TV Box · Android 7+</td>
+      <td align="center">Téléphones, tablettes, TV et TV Box · Android 7+</td>
     </tr>
     <tr>
       <td align="center">EXE · MSI · ZIP portable</td>
       <td align="center">AppImage · DEB · RPM</td>
-      <td align="center">APK universel</td>
-      <td align="center">APK TV · télécommande</td>
+      <td align="center">Deux APK séparés : mobile et TV/télécommande</td>
     </tr>
     <tr>
       <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=desktop#plateformes"><strong>Télécharger Windows</strong></a></td>
       <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=linux#plateformes"><strong>Télécharger Linux</strong></a></td>
-      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes"><strong>Télécharger Android</strong></a></td>
-      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes"><strong>Télécharger Android TV</strong></a></td>
+      <td align="center"><a href="https://anderson76389.github.io/Kovelyx/?plateforme=android#plateformes"><strong>Android mobile</strong></a> · <a href="https://anderson76389.github.io/Kovelyx/?plateforme=tv#plateformes"><strong>Android TV</strong></a></td>
     </tr>
   </tbody>
 </table>
