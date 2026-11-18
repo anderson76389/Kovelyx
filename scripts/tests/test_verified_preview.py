@@ -292,6 +292,50 @@ class VerifiedPreviewTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "absent ou inattendu"):
                 PREVIEW.build_platform_bundles(source, root / "output", tag)
 
+    def test_new_releases_use_four_direct_installers_with_legacy_checksum_sidecars(self):
+        import hashlib
+        tag = "v1.1.1169"
+        sha = "a" * 40
+        names = PREVIEW.direct_installer_names(tag)
+        self.assertEqual(set(names), {
+            f"Kovelyx-Android-{tag}.apk",
+            f"Kovelyx-TV-{tag}-universal.apk",
+            f"Kovelyx-Windows-Setup-{tag}.exe",
+            f"Kovelyx-Linux-x86_64-{tag}.AppImage",
+        })
+        self.assertEqual(PREVIEW.expected_public_assets(tag),
+                         set(names) | {name + ".sha256" for name in names})
+        self.assertEqual(len(PREVIEW.expected_public_assets("v1.1.1168")), 4)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            installers = root / "installers"
+            installers.mkdir()
+            for name in {n for group in PREVIEW.platform_bundle_contents(tag).values() for n in group}:
+                header = (b"PK\x03\x04" if name.endswith(".apk") else
+                          b"MZ" if name.endswith(".exe") else
+                          b"\x7fELF" if name.endswith(".AppImage") else b"DATA")
+                blob = header + b"x" * 1_000_001
+                (installers / name).write_bytes(blob)
+                (installers / (name + ".sha256")).write_text(
+                    hashlib.sha256(blob).hexdigest() + "  " + name + "\n", encoding="utf-8")
+            output = PREVIEW.build_direct_installer_release(installers, root / "direct", tag)
+            assets = list(output.iterdir())
+            self.assertEqual({p.name for p in assets}, PREVIEW.expected_public_assets(tag))
+            assert all(p.suffix != ".zip" for p in assets)
+            release = {
+                "tag_name": tag, "target_commitish": sha, "draft": True,
+                "assets": [{"name": p.name, "state": "uploaded",
+                            "size": p.stat().st_size,
+                            "digest": "sha256:" + PREVIEW.digest(p)} for p in assets],
+            }
+            PREVIEW.verify_uploaded_release_inventory(tag, sha, output, release)
+            release["assets"][0]["digest"] = "sha256:" + "0" * 64
+            with self.assertRaisesRegex(RuntimeError, "Empreinte GitHub"):
+                PREVIEW.verify_uploaded_release_inventory(tag, sha, output, release)
+            (installers / (names[0] + ".sha256")).write_text("corrupt\n", encoding="utf-8")
+            with self.assertRaisesRegex(RuntimeError, "Empreinte directe"):
+                PREVIEW.build_direct_installer_release(installers, root / "invalid", tag)
+
     def test_final_release_requires_all_eight_packages_and_checksum_files(self):
         tag = "v1.1.1164"
         names = PREVIEW.expected_public_assets(tag)
