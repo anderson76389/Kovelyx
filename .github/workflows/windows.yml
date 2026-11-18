@@ -334,15 +334,310 @@ jobs:
           $tag = $release.tag_name
           $folder = Join-Path $env:RUNNER_TEMP 'kovelyx-memory-baseline'
           New-Item -ItemType Directory -Force -Path $folder | Out-Null
-          & gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern "Kovelyx-Windows-Portable-$tag.zip" --pattern "Kovelyx-Windows-Portable-$tag.zip.sha256" --dir $folder
-          if ($LASTEXITCODE -ne 0) { throw 'Téléchargement de référence échoué.' }
-          $zip = Join-Path $folder "Kovelyx-Windows-Portable-$tag.zip"
-          $checksum = "$zip.sha256"
-          if (-not (Test-Path -LiteralPath $zip) -or -not (Test-Path -LiteralPath $checksum)) { throw 'Archive ou SHA-256 manquant.' }
-          $line = (Get-Content -LiteralPath $checksum -Raw).Trim()
-          $parts = $line -split '\s+', 2
-          if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-fA-F0-9]{64}$' -or $parts[1].TrimStart('*') -ne (Split-Path -Leaf $zip)) {
-            throw 'Empreinte de référence mal formée.'
+          $bundleName = "Kovelyx-Windows-$tag.zip"
+          $bundledAsset = @($release.assets | Where-Object { $_.name -eq $bundleName })
+          if ($bundledAsset.Count -eq 1) {
+            # Compact Releases contain the original portable ZIP nested in the
+            # authenticated Windows pack. Verify GitHub's SHA-256 and inner hash.
+            & gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern $bundleName --dir $folder
+            if ($LASTEXITCODE -ne 0) { throw 'Pack Windows de référence introuvable.' }
+            $outer = Join-Path $folder $bundleName
+            $expected = [string]$bundledAsset[0].digest
+            if ($expected -notmatch '^sha256:[a-fA-F0-9]{64}
+          Expand-Archive -LiteralPath $zip -DestinationPath $extracted -Force
+          $baselineExe = @(Get-ChildItem -LiteralPath $extracted -Recurse -File -Filter 'Kovelyx.exe')
+          $candidateExe = @(Get-ChildItem -LiteralPath 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -File -Filter 'Kovelyx.exe')
+          if ($baselineExe.Count -ne 1 -or $candidateExe.Count -ne 1) { throw 'Ambiguïté des vrais exécutables Windows.' }
+          & ./scripts/tests/windows-memory-compare.ps1 -BaselineRoot $baselineExe[0].Directory.FullName -CandidateRoot $candidateExe[0].Directory.FullName
+          "Version baseline : $tag / candidat : $env:KOVELYX_BUILD_VERSION" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Archiver les mesures Windows de mémoire
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-memory-comparison
+          path: ${{ runner.temp }}/kovelyx-memory-comparison.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Conserver les preuves de lecture Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-playback-proof
+          path: ${{ runner.temp }}/kovelyx-native-playback/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Exécuter les tests unitaires des fonctions Desktop
+        if: steps.native.outputs.available == 'true'
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\gradlew.bat :composeApp:desktopTest --no-configuration-cache --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
+          if ($LASTEXITCODE -ne 0) {
+            '### Tests Desktop en échec — distribution bloquée' >> $env:GITHUB_STEP_SUMMARY
+            exit $LASTEXITCODE
+          }
+          '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Afficher les échecs des tests Desktop
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
+            [xml]$report = Get-Content $_.FullName -Raw
+            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
+              Write-Output $_.name
+              Write-Output $_.failure.InnerText
+            }
+          }
+      - name: Enregistrer les rapports des tests Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-test-reports
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Sauvegarder les installateurs Windows generes (meme si un test echoue)
+        if: ${{ always() && steps.native.outputs.available == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-installers-experimental
+          path: dist/
+          # Le build peut echouer avant d'avoir produit les fichiers :
+          # conserver le vrai echec initial au lieu d'en creer un deuxieme.
+          if-no-files-found: warn
+          retention-days: 30
+) { throw 'Digest GitHub du pack absent.' }
+            if (-not (Get-FileHash -LiteralPath $outer -Algorithm SHA256).Hash.Equals($expected.Substring(7), [StringComparison]::OrdinalIgnoreCase)) {
+              throw 'Digest du pack Windows incorrect.'
+            }
+            $unpacked = Join-Path $folder 'pack'
+            Expand-Archive -LiteralPath $outer -DestinationPath $unpacked -Force
+            $zip = Join-Path $unpacked "Kovelyx-Windows-Portable-$tag.zip"
+            $manifest = Join-Path $unpacked 'SHA256SUMS.txt'
+            if (-not (Test-Path $zip) -or -not (Test-Path $manifest)) { throw 'Archive portable absente du pack.' }
+            $lines = @(Get-Content -LiteralPath $manifest)
+            $matching = @($lines | Where-Object { $_ -match [regex]::Escape((Split-Path -Leaf $zip)) + '
+          Expand-Archive -LiteralPath $zip -DestinationPath $extracted -Force
+          $baselineExe = @(Get-ChildItem -LiteralPath $extracted -Recurse -File -Filter 'Kovelyx.exe')
+          $candidateExe = @(Get-ChildItem -LiteralPath 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -File -Filter 'Kovelyx.exe')
+          if ($baselineExe.Count -ne 1 -or $candidateExe.Count -ne 1) { throw 'Ambiguïté des vrais exécutables Windows.' }
+          & ./scripts/tests/windows-memory-compare.ps1 -BaselineRoot $baselineExe[0].Directory.FullName -CandidateRoot $candidateExe[0].Directory.FullName
+          "Version baseline : $tag / candidat : $env:KOVELYX_BUILD_VERSION" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Archiver les mesures Windows de mémoire
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-memory-comparison
+          path: ${{ runner.temp }}/kovelyx-memory-comparison.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Conserver les preuves de lecture Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-playback-proof
+          path: ${{ runner.temp }}/kovelyx-native-playback/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Exécuter les tests unitaires des fonctions Desktop
+        if: steps.native.outputs.available == 'true'
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\gradlew.bat :composeApp:desktopTest --no-configuration-cache --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
+          if ($LASTEXITCODE -ne 0) {
+            '### Tests Desktop en échec — distribution bloquée' >> $env:GITHUB_STEP_SUMMARY
+            exit $LASTEXITCODE
+          }
+          '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Afficher les échecs des tests Desktop
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
+            [xml]$report = Get-Content $_.FullName -Raw
+            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
+              Write-Output $_.name
+              Write-Output $_.failure.InnerText
+            }
+          }
+      - name: Enregistrer les rapports des tests Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-test-reports
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Sauvegarder les installateurs Windows generes (meme si un test echoue)
+        if: ${{ always() && steps.native.outputs.available == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-installers-experimental
+          path: dist/
+          # Le build peut echouer avant d'avoir produit les fichiers :
+          # conserver le vrai echec initial au lieu d'en creer un deuxieme.
+          if-no-files-found: warn
+          retention-days: 30
+ })
+            if ($matching.Count -ne 1) { throw 'Empreinte de l’archive portable ambiguë.' }
+            $parts = $matching[0] -split '\s+', 2
+            if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-fA-F0-9]{64}
+          Expand-Archive -LiteralPath $zip -DestinationPath $extracted -Force
+          $baselineExe = @(Get-ChildItem -LiteralPath $extracted -Recurse -File -Filter 'Kovelyx.exe')
+          $candidateExe = @(Get-ChildItem -LiteralPath 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -File -Filter 'Kovelyx.exe')
+          if ($baselineExe.Count -ne 1 -or $candidateExe.Count -ne 1) { throw 'Ambiguïté des vrais exécutables Windows.' }
+          & ./scripts/tests/windows-memory-compare.ps1 -BaselineRoot $baselineExe[0].Directory.FullName -CandidateRoot $candidateExe[0].Directory.FullName
+          "Version baseline : $tag / candidat : $env:KOVELYX_BUILD_VERSION" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Archiver les mesures Windows de mémoire
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-memory-comparison
+          path: ${{ runner.temp }}/kovelyx-memory-comparison.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Conserver les preuves de lecture Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-playback-proof
+          path: ${{ runner.temp }}/kovelyx-native-playback/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Exécuter les tests unitaires des fonctions Desktop
+        if: steps.native.outputs.available == 'true'
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\gradlew.bat :composeApp:desktopTest --no-configuration-cache --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
+          if ($LASTEXITCODE -ne 0) {
+            '### Tests Desktop en échec — distribution bloquée' >> $env:GITHUB_STEP_SUMMARY
+            exit $LASTEXITCODE
+          }
+          '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Afficher les échecs des tests Desktop
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
+            [xml]$report = Get-Content $_.FullName -Raw
+            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
+              Write-Output $_.name
+              Write-Output $_.failure.InnerText
+            }
+          }
+      - name: Enregistrer les rapports des tests Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-test-reports
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Sauvegarder les installateurs Windows generes (meme si un test echoue)
+        if: ${{ always() && steps.native.outputs.available == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-installers-experimental
+          path: dist/
+          # Le build peut echouer avant d'avoir produit les fichiers :
+          # conserver le vrai echec initial au lieu d'en creer un deuxieme.
+          if-no-files-found: warn
+          retention-days: 30
+ -or $parts[1] -ne (Split-Path -Leaf $zip)) {
+              throw 'Manifeste Windows incorrect.'
+            }
+          } else {
+            & gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern "Kovelyx-Windows-Portable-$tag.zip" --pattern "Kovelyx-Windows-Portable-$tag.zip.sha256" --dir $folder
+            if ($LASTEXITCODE -ne 0) { throw 'Téléchargement de référence échoué.' }
+            $zip = Join-Path $folder "Kovelyx-Windows-Portable-$tag.zip"
+            $checksum = "$zip.sha256"
+            if (-not (Test-Path -LiteralPath $zip) -or -not (Test-Path -LiteralPath $checksum)) { throw 'Archive ou SHA-256 manquant.' }
+            $line = (Get-Content -LiteralPath $checksum -Raw).Trim()
+            $parts = $line -split '\s+', 2
+            if ($parts.Count -ne 2 -or $parts[0] -notmatch '^[a-fA-F0-9]{64}
+          Expand-Archive -LiteralPath $zip -DestinationPath $extracted -Force
+          $baselineExe = @(Get-ChildItem -LiteralPath $extracted -Recurse -File -Filter 'Kovelyx.exe')
+          $candidateExe = @(Get-ChildItem -LiteralPath 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -File -Filter 'Kovelyx.exe')
+          if ($baselineExe.Count -ne 1 -or $candidateExe.Count -ne 1) { throw 'Ambiguïté des vrais exécutables Windows.' }
+          & ./scripts/tests/windows-memory-compare.ps1 -BaselineRoot $baselineExe[0].Directory.FullName -CandidateRoot $candidateExe[0].Directory.FullName
+          "Version baseline : $tag / candidat : $env:KOVELYX_BUILD_VERSION" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Archiver les mesures Windows de mémoire
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-memory-comparison
+          path: ${{ runner.temp }}/kovelyx-memory-comparison.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Conserver les preuves de lecture Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-playback-proof
+          path: ${{ runner.temp }}/kovelyx-native-playback/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Exécuter les tests unitaires des fonctions Desktop
+        if: steps.native.outputs.available == 'true'
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          & .\gradlew.bat :composeApp:desktopTest --no-configuration-cache --no-daemon --max-workers=2 "-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION" "-Pnuvio.webview2.dir=$env:WEBVIEW_DIR"
+          if ($LASTEXITCODE -ne 0) {
+            '### Tests Desktop en échec — distribution bloquée' >> $env:GITHUB_STEP_SUMMARY
+            exit $LASTEXITCODE
+          }
+          '### Tests Desktop réussis (moteur, thèmes, lecteur, extensions, stockage : tests automatisés uniquement)' >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Afficher les échecs des tests Desktop
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem apps/desktop/composeApp/build/test-results/desktopTest -Filter '*.xml' -ErrorAction SilentlyContinue | ForEach-Object {
+            [xml]$report = Get-Content $_.FullName -Raw
+            $report.testsuite.testcase | Where-Object { $_.failure } | ForEach-Object {
+              Write-Output $_.name
+              Write-Output $_.failure.InnerText
+            }
+          }
+      - name: Enregistrer les rapports des tests Windows
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-test-reports
+          path: apps/desktop/composeApp/build/reports/tests/desktopTest/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Sauvegarder les installateurs Windows generes (meme si un test echoue)
+        if: ${{ always() && steps.native.outputs.available == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kovelyx-Windows-installers-experimental
+          path: dist/
+          # Le build peut echouer avant d'avoir produit les fichiers :
+          # conserver le vrai echec initial au lieu d'en creer un deuxieme.
+          if-no-files-found: warn
+          retention-days: 30
+ -or $parts[1].TrimStart('*') -ne (Split-Path -Leaf $zip)) {
+              throw 'Empreinte de référence mal formée.'
+            }
           }
           if (-not (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.Equals($parts[0], [StringComparison]::OrdinalIgnoreCase)) {
             throw 'Empreinte de référence incorrecte.'
