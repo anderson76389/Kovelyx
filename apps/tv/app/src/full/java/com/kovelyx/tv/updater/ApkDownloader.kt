@@ -7,6 +7,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
@@ -87,15 +88,26 @@ class ApkDownloader @Inject constructor(
                     temporary.copyTo(destinationFile, overwrite = true)
                     temporary.delete()
                 }
-                // Only remove older, disposable OTA APKs after the new APK's SHA-256
-                // was verified; downloaded films, accounts and profile media are untouched.
-                destinationFile.parentFile?.listFiles()?.forEach { old ->
-                    if (old != destinationFile && old.isFile &&
-                        old.name.startsWith("Kovelyx-TV-") &&
-                        old.name.endsWith(".apk", ignoreCase = true)
+                val finalApk = if (VerifiedAndroidPlatformBundle.isBundleName(destinationFile.name)) {
+                    try {
+                        VerifiedAndroidPlatformBundle.extractTvApk(
+                            destinationFile, destinationFile.parentFile
+                        )
+                    } catch (error: Throwable) {
+                        destinationFile.delete()
+                        throw error
+                    }.also { destinationFile.delete() }
+                } else destinationFile
+                // Only remove older disposable updates after the selected APK has
+                // been checked; downloaded films and account data are untouched.
+                finalApk.parentFile?.listFiles()?.forEach { old ->
+                    if (old != finalApk && old.isFile &&
+                        ((old.name.startsWith("Kovelyx-TV-") &&
+                          old.name.endsWith(".apk", ignoreCase = true)) ||
+                          VerifiedAndroidPlatformBundle.isBundleName(old.name))
                     ) old.delete()
                 }
-                destinationFile
+                finalApk
             } finally {
                 temporary.delete()
             }
@@ -109,6 +121,9 @@ class ApkDownloader @Inject constructor(
             downloadUri.path.startsWith("/anderson76389/Kovelyx/releases/download/")) {
             "Cette mise à jour ne vient pas des Releases officielles Kovelyx."
         }
+        if (VerifiedAndroidPlatformBundle.isBundleName(fileName)) {
+            return fetchGitHubBundleDigest(downloadUri, fileName)
+        }
         val request = Request.Builder().url(url + ".sha256").get().build()
         val line = okHttpClient.newCall(request).execute().use { response ->
             check(response.isSuccessful) { "Vérification SHA-256 indisponible (HTTP ${response.code})." }
@@ -120,5 +135,31 @@ class ApkDownloader @Inject constructor(
             "L'empreinte SHA-256 ne correspond pas au fichier sélectionné."
         }
         return match.groupValues[1]
+    }
+
+    private fun fetchGitHubBundleDigest(uri: java.net.URI, name: String): String {
+        val suffix = uri.path.removePrefix("/anderson76389/Kovelyx/releases/download/")
+        val tag = suffix.substringBefore("/")
+        require(name == "Kovelyx-Android-$tag.zip" && suffix.substringAfter("/") == name) {
+            "Le pack Android ne correspond pas à la version sélectionnée."
+        }
+        val request = Request.Builder()
+            .url("https://api.github.com/repos/anderson76389/Kovelyx/releases/tags/$tag")
+            .header("Accept", "application/vnd.github+json")
+            .header("User-Agent", "Kovelyx-TV-Updater")
+            .get().build()
+        val responseData = okHttpClient.newCall(request).execute().use { response ->
+            check(response.isSuccessful) { "Empreinte officielle du pack indisponible." }
+            response.body?.string() ?: error("Réponse GitHub vide.")
+        }
+        val assets = JSONObject(responseData).getJSONArray("assets")
+        val matches = (0 until assets.length()).map { assets.getJSONObject(it) }
+            .filter { it.optString("name") == name }
+        check(matches.size == 1) { "Pack Android absent ou dupliqué." }
+        val digest = matches.single().optString("digest")
+        check(digest.matches(Regex("sha256:[a-fA-F0-9]{64}"))) {
+            "Empreinte SHA-256 officielle manquante."
+        }
+        return digest.removePrefix("sha256:")
     }
 }
