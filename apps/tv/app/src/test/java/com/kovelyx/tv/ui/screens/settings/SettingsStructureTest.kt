@@ -14,11 +14,11 @@ class SettingsStructureTest {
         assertEquals(
             listOf(
                 PlaybackSection.PLAYER,
+                PlaybackSection.STREAM_SELECTION,
                 PlaybackSection.PLAYER_INTERFACE,
                 PlaybackSection.VIDEO,
                 PlaybackSection.AUDIO,
                 PlaybackSection.SUBTITLES,
-                PlaybackSection.STREAM_SELECTION,
                 PlaybackSection.UP_NEXT,
                 PlaybackSection.SKIP_SEGMENTS,
                 PlaybackSection.BUFFER_NETWORK,

@@ -14,6 +14,7 @@ import com.kovelyx.tv.data.local.SubtitleFontStore
 import com.kovelyx.tv.data.local.SubtitleLanguageOption
 import com.kovelyx.tv.data.local.SubtitleStyleSettings
 import com.kovelyx.tv.data.local.displayName
+import kotlin.math.roundToInt
 
 private val subtitleColors = listOf(
     Color.White,
@@ -132,6 +133,19 @@ internal fun PlaybackSubtitlesSection(
         title = stringResource(R.string.sub_text_color),
         currentColor = Color(style.textColor),
         onClick = { onOpenDialog(PlaybackDialog.SUBTITLE_TEXT_COLOR) },
+        enabled = enabled
+    )
+    SliderSettingsItem(
+        title = stringResource(R.string.subtitle_style_text_opacity),
+        value = (Color(style.textColor).alpha * 100f).roundToInt(),
+        valueText = "${(Color(style.textColor).alpha * 100f).roundToInt()}%",
+        minValue = 0,
+        maxValue = 100,
+        step = 10,
+        onValueChange = { opacity ->
+            val updatedColor = Color(style.textColor).copy(alpha = opacity / 100f).toArgb()
+            onUpdate { setSubtitleTextColor(updatedColor) }
+        },
         enabled = enabled
     )
     ColorSettingsItem(
@@ -259,7 +273,7 @@ internal fun SubtitleSettingsDialogs(
             colors = subtitleColors,
             selectedColor = Color(style.textColor),
             onColorSelected = { color ->
-                onUpdate { setSubtitleTextColor(color.toArgb()) }
+                onUpdate { setSubtitleTextColor(color.copy(alpha = Color(style.textColor).alpha).toArgb()) }
                 onDismiss()
             },
             onDismiss = onDismiss

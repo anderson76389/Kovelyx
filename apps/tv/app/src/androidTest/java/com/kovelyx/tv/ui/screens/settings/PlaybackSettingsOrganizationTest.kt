@@ -112,6 +112,15 @@ class PlaybackSettingsOrganizationTest {
     }
 
     @Test
+    fun subtitleTextOpacityIsAvailableUnderSubtitlesNotAudio() {
+        setSections(PlayerSettings())
+        expand(PlaybackSection.SUBTITLES)
+        expand(PlaybackSection.AUDIO)
+        assertRowCount(R.string.subtitle_style_text_opacity, PlaybackSection.SUBTITLES, 1)
+        assertRowCount(R.string.subtitle_style_text_opacity, PlaybackSection.AUDIO, 0)
+    }
+
+    @Test
     fun externalPlayerOptionsOnlyAppearForExternalPlayers() {
         setSections(PlayerSettings(playerPreference = PlayerPreference.INTERNAL))
         expand(PlaybackSection.PLAYER)
