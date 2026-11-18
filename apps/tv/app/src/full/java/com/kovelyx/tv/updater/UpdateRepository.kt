@@ -58,7 +58,7 @@ class UpdateRepository @Inject constructor(
                     (AbiSelector.chooseBestApkAsset(tvAssets)
                         ?: if (BuildConfig.IS_DEBUG_BUILD) {
                             release.assets.firstOrNull {
-                                it.name == "Kovelyx-Android-${release.tagName}.zip"
+                                it.name == "Kovelyx-TV-${release.tagName}.zip"
                             }
                         } else null)?.let { asset ->
                         release to asset
