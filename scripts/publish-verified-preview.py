@@ -252,7 +252,7 @@ def build_platform_bundles(installer_folder, output_folder, tag):
 def verify_platform_bundle(archive, filenames):
     """Detect ZIP corruption, duplicate entries and mismatched inner packages."""
     expected = set(filenames) | {"SHA256SUMS.txt"}
-    if archive.stat().st_size < 2_000_000:
+    if archive.stat().st_size < len(filenames) * 1_000_000:
         raise RuntimeError("Archive de plateforme tronquée")
     with zipfile.ZipFile(archive, "r") as zipped:
         names = zipped.namelist()
