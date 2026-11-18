@@ -108,7 +108,9 @@ internal fun LazyListScope.appearanceSettingsContent(
     onContinueWatchingClick: () -> Unit,
     onPosterCustomizationClick: () -> Unit,
     onHoverPreviewClick: () -> Unit,
+    layoutOnly: Boolean = false,
 ) {
+    if (!layoutOnly) {
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_appearance_section_theme),
@@ -302,7 +304,8 @@ internal fun LazyListScope.appearanceSettingsContent(
             }
         }
     }
-
+    }
+    if (layoutOnly) {
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_appearance_section_home),
@@ -368,6 +371,7 @@ internal fun LazyListScope.appearanceSettingsContent(
                 )
             }
         }
+    }
     }
 }
 

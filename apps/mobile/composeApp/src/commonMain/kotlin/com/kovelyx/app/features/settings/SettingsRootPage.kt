@@ -10,6 +10,7 @@ import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.Extension
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Link
@@ -64,6 +65,13 @@ import nuvio.composeapp.generated.resources.settings_org_section_interface
 import nuvio.composeapp.generated.resources.settings_org_section_content
 import nuvio.composeapp.generated.resources.settings_org_section_playback
 import nuvio.composeapp.generated.resources.settings_org_section_services
+import nuvio.composeapp.generated.resources.settings_nav_group_you
+import nuvio.composeapp.generated.resources.settings_nav_group_look
+import nuvio.composeapp.generated.resources.settings_nav_group_watch
+import nuvio.composeapp.generated.resources.settings_nav_group_services
+import nuvio.composeapp.generated.resources.settings_nav_group_system
+import nuvio.composeapp.generated.resources.settings_nav_layout_title
+import nuvio.composeapp.generated.resources.settings_nav_layout_description
 import nuvio.composeapp.generated.resources.settings_org_root_experience
 import nuvio.composeapp.generated.resources.settings_org_root_content
 import nuvio.composeapp.generated.resources.settings_org_root_activity
@@ -79,6 +87,7 @@ internal fun LazyListScope.settingsRootContent(
     isTablet: Boolean,
     onPlaybackClick: () -> Unit,
     onAppearanceClick: () -> Unit,
+    onLayoutClick: () -> Unit,
     onAdvancedClick: () -> Unit,
     onNotificationsClick: () -> Unit,
     onContentDiscoveryClick: () -> Unit,
@@ -91,18 +100,18 @@ internal fun LazyListScope.settingsRootContent(
     onAccountClick: () -> Unit,
     onSwitchProfileClick: (() -> Unit)? = null,
     showNotificationsEntry: Boolean = true,
-    showAccountSection: Boolean = true,
-    showGeneralSection: Boolean = true,
-    showAboutSection: Boolean = true,
-    showAdvancedSection: Boolean = true,
+    showYouSection: Boolean = true,
+    showLookSection: Boolean = true,
+    showWatchSection: Boolean = true,
+    showServicesSection: Boolean = true,
+    showSystemSection: Boolean = true,
     showSupportersContributorsPage: Boolean = true,
 ) {
-    if (showAccountSection) {
+    // Same group order as desktop; mobile keeps its dedicated version footer.
+    // Existing callbacks and saved settings remain unchanged.
+    if (showYouSection) {
         item {
-            SettingsSection(
-                title = stringResource(Res.string.compose_settings_root_account_section),
-                isTablet = isTablet,
-            ) {
+            SettingsSection(title = stringResource(Res.string.settings_nav_group_you), isTablet = isTablet) {
                 SettingsGroup(isTablet = isTablet) {
                     if (onSwitchProfileClick != null) {
                         SettingsNavigationRow(
@@ -125,13 +134,9 @@ internal fun LazyListScope.settingsRootContent(
             }
         }
     }
-    // Rubriques associées deux par deux, sans changer les destinations.
-    if (showGeneralSection) {
+    if (showLookSection) {
         item {
-            SettingsSection(
-                title = stringResource(Res.string.settings_org_root_experience),
-                isTablet = isTablet,
-            ) {
+            SettingsSection(title = stringResource(Res.string.settings_nav_group_look), isTablet = isTablet) {
                 SettingsGroup(isTablet = isTablet) {
                     SettingsNavigationRow(
                         title = stringResource(Res.string.compose_settings_page_appearance),
@@ -139,6 +144,29 @@ internal fun LazyListScope.settingsRootContent(
                         icon = Icons.Rounded.Palette,
                         isTablet = isTablet,
                         onClick = onAppearanceClick,
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_nav_layout_title),
+                        description = stringResource(Res.string.settings_nav_layout_description),
+                        icon = Icons.Rounded.GridView,
+                        isTablet = isTablet,
+                        onClick = onLayoutClick,
+                    )
+                }
+            }
+        }
+    }
+    if (showWatchSection) {
+        item {
+            SettingsSection(title = stringResource(Res.string.settings_nav_group_watch), isTablet = isTablet) {
+                SettingsGroup(isTablet = isTablet) {
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_org_sources_title),
+                        description = stringResource(Res.string.compose_settings_root_content_discovery_description),
+                        icon = Icons.Rounded.Extension,
+                        isTablet = isTablet,
+                        onClick = onContentDiscoveryClick,
                     )
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
@@ -151,20 +179,11 @@ internal fun LazyListScope.settingsRootContent(
                 }
             }
         }
+    }
+    if (showServicesSection) {
         item {
-            SettingsSection(
-                title = stringResource(Res.string.settings_org_root_content),
-                isTablet = isTablet,
-            ) {
+            SettingsSection(title = stringResource(Res.string.settings_nav_group_services), isTablet = isTablet) {
                 SettingsGroup(isTablet = isTablet) {
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.settings_org_sources_title),
-                        description = stringResource(Res.string.compose_settings_root_content_discovery_description),
-                        icon = Icons.Rounded.Extension,
-                        isTablet = isTablet,
-                        onClick = onContentDiscoveryClick,
-                    )
-                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_org_integrations_title),
                         description = stringResource(Res.string.compose_settings_root_integrations_description),
@@ -172,15 +191,7 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onIntegrationsClick,
                     )
-                }
-            }
-        }
-        item {
-            SettingsSection(
-                title = stringResource(Res.string.settings_org_root_activity),
-                isTablet = isTablet,
-            ) {
-                SettingsGroup(isTablet = isTablet) {
+                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.compose_settings_page_tracking),
                         description = stringResource(Res.string.compose_settings_root_tracking_description),
@@ -188,8 +199,15 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onTrackingClick,
                     )
+                }
+            }
+        }
+    }
+    if (showSystemSection) {
+        item {
+            SettingsSection(title = stringResource(Res.string.settings_nav_group_system), isTablet = isTablet) {
+                SettingsGroup(isTablet = isTablet) {
                     if (showNotificationsEntry) {
-                        SettingsGroupDivider(isTablet = isTablet)
                         SettingsNavigationRow(
                             title = stringResource(Res.string.compose_settings_page_notifications),
                             description = stringResource(Res.string.compose_settings_root_notifications_description),
@@ -197,18 +215,8 @@ internal fun LazyListScope.settingsRootContent(
                             isTablet = isTablet,
                             onClick = onNotificationsClick,
                         )
+                        SettingsGroupDivider(isTablet = isTablet)
                     }
-                }
-            }
-        }
-    }
-    if (showAdvancedSection) {
-        item {
-            SettingsSection(
-                title = stringResource(Res.string.settings_org_root_system),
-                isTablet = isTablet,
-            ) {
-                SettingsGroup(isTablet = isTablet) {
                     SettingsNavigationRow(
                         title = stringResource(Res.string.compose_settings_page_advanced),
                         description = stringResource(Res.string.compose_settings_root_advanced_description),
@@ -226,7 +234,6 @@ internal fun LazyListScope.settingsRootContent(
                             onClick = onCheckForUpdatesClick,
                         )
                     }
-                    // Option de diagnostic séparée des mentions légales.
                     if (onTestUpdateBannerClick != null) {
                         SettingsGroupDivider(isTablet = isTablet)
                         SettingsNavigationRow(
@@ -240,8 +247,6 @@ internal fun LazyListScope.settingsRootContent(
                 }
             }
         }
-    }
-    if (showAboutSection) {
         item {
             SettingsSection(
                 title = stringResource(Res.string.compose_settings_root_about_section),
@@ -275,7 +280,7 @@ internal fun LazyListScope.settingsRootContent(
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = if (isTablet) 20.dp else 16.dp),
         ) {
-            if (showAboutSection) {
+            if (showSystemSection) {
                 MemberBrandWordmark(
                     height = if (isTablet) 30.dp else 26.dp,
                     modifier = Modifier.align(Alignment.CenterHorizontally),

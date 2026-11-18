@@ -28,6 +28,28 @@ internal fun LazyListScope.contentDiscoveryContent(
     onMediaServersClick: () -> Unit,
 ) {
     item {
+        val recentSearchesEnabled by remember {
+            SearchHistoryRepository.ensureLoaded()
+            SearchHistoryRepository.enabled
+        }.collectAsStateWithLifecycle()
+
+        SettingsSection(
+            title = stringResource(Res.string.settings_content_discovery_section_search),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsSwitchRow(
+                    title = stringResource(Res.string.settings_content_discovery_recent_searches),
+                    description = stringResource(Res.string.settings_content_discovery_recent_searches_description),
+                    checked = recentSearchesEnabled,
+                    isTablet = isTablet,
+                    onCheckedChange = SearchHistoryRepository::setEnabled,
+                )
+            }
+        }
+    }
+
+    item {
         SettingsSection(
             title = stringResource(Res.string.settings_content_discovery_section_sources),
             isTablet = isTablet,
@@ -65,26 +87,5 @@ internal fun LazyListScope.contentDiscoveryContent(
         }
     }
 
-    item {
-        val recentSearchesEnabled by remember {
-            SearchHistoryRepository.ensureLoaded()
-            SearchHistoryRepository.enabled
-        }.collectAsStateWithLifecycle()
-
-        SettingsSection(
-            title = stringResource(Res.string.settings_content_discovery_section_search),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsSwitchRow(
-                    title = stringResource(Res.string.settings_content_discovery_recent_searches),
-                    description = stringResource(Res.string.settings_content_discovery_recent_searches_description),
-                    checked = recentSearchesEnabled,
-                    isTablet = isTablet,
-                    onCheckedChange = SearchHistoryRepository::setEnabled,
-                )
-            }
-        }
-    }
 
 }

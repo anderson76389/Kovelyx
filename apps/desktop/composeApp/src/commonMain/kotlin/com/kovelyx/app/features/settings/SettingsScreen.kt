@@ -685,6 +685,7 @@ private fun MobileSettingsScreen(
                             isTablet = false,
                             onPlaybackClick = { onPageChange(SettingsPage.Playback) },
                             onAppearanceClick = { onPageChange(SettingsPage.Appearance) },
+                            onLayoutClick = { onPageChange(SettingsPage.Layout) },
                             onAdvancedClick = { onPageChange(SettingsPage.Advanced) },
                             onNotificationsClick = { onPageChange(SettingsPage.Notifications) },
                             onContentDiscoveryClick = { onPageChange(SettingsPage.ContentDiscovery) },
@@ -737,7 +738,7 @@ private fun MobileSettingsScreen(
                 SettingsPage.Streams -> streamsSettingsContent(
                     isTablet = false,
                 )
-                SettingsPage.Appearance -> appearanceSettingsContent(
+                SettingsPage.Appearance, SettingsPage.Layout -> appearanceSettingsContent(
                     isTablet = isTabletLayout,
                     selectedTheme = selectedTheme,
                     onThemeSelected = onThemeSelected,
@@ -760,6 +761,7 @@ private fun MobileSettingsScreen(
                     onContinueWatchingClick = onContinueWatchingClick,
                     onPosterCustomizationClick = { onPageChange(SettingsPage.PosterCustomization) },
                     onHoverPreviewClick = { onPageChange(SettingsPage.HoverPreview) },
+                    layoutOnly = page == SettingsPage.Layout,
                 )
                 SettingsPage.HoverPreview -> hoverPreviewSettingsContent(
                     isTablet = false,
@@ -962,8 +964,8 @@ private fun TabletSettingsScreen(
     onTestUpdateBannerClick: (() -> Unit)? = null,
     onCollectionsClick: () -> Unit = {},
 ) {
-    var selectedCategory by rememberSaveable { mutableStateOf(SettingsCategory.General.name) }
-    val activeCategory = SettingsCategory.valueOf(selectedCategory)
+    var selectedCategory by rememberSaveable { mutableStateOf(SettingsCategory.You.name) }
+    val activeCategory = settingsCategoryForName(selectedCategory)
     val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val effectiveTopOffset = topChromePadding ?: (statusBarPadding + 24.dp)
 
@@ -1153,6 +1155,7 @@ private fun TabletSettingsScreen(
                                         isTablet = true,
                                         onPlaybackClick = { openInlinePage(SettingsPage.Playback) },
                                         onAppearanceClick = { openInlinePage(SettingsPage.Appearance) },
+                                         onLayoutClick = { openInlinePage(SettingsPage.Layout) },
                                         onAdvancedClick = { openInlinePage(SettingsPage.Advanced) },
                                         onNotificationsClick = { openInlinePage(SettingsPage.Notifications) },
                                         onContentDiscoveryClick = { openInlinePage(SettingsPage.ContentDiscovery) },
@@ -1165,11 +1168,12 @@ private fun TabletSettingsScreen(
                                         onAccountClick = { openInlinePage(SettingsPage.Account) },
                                         onSwitchProfileClick = onSwitchProfile,
                                         showNotificationsEntry = AppFeaturePolicy.notificationsEnabled,
-                                        showAccountSection = activeCategory == SettingsCategory.Account,
-                                        showGeneralSection = activeCategory == SettingsCategory.General,
-                                        showAboutSection = activeCategory == SettingsCategory.About,
+                                        showYouSection = activeCategory == SettingsCategory.You,
+                                        showLookSection = activeCategory == SettingsCategory.Look,
+                                        showWatchSection = activeCategory == SettingsCategory.Watch,
+                                        showServicesSection = activeCategory == SettingsCategory.Services,
+                                        showSystemSection = activeCategory == SettingsCategory.System,
                                         showAttribution = false,
-                                        showAdvancedSection = activeCategory == SettingsCategory.Advanced,
                                         showSupportersContributorsPage = AppFeaturePolicy.supportersContributorsPageEnabled,
                                     )
                                 }
@@ -1210,7 +1214,7 @@ private fun TabletSettingsScreen(
                             SettingsPage.Streams -> streamsSettingsContent(
                                 isTablet = true,
                             )
-                            SettingsPage.Appearance -> appearanceSettingsContent(
+                            SettingsPage.Appearance, SettingsPage.Layout -> appearanceSettingsContent(
                                 isTablet = true,
                                 selectedTheme = selectedTheme,
                                 onThemeSelected = onThemeSelected,
@@ -1233,6 +1237,7 @@ private fun TabletSettingsScreen(
                                 onContinueWatchingClick = { openInlinePage(SettingsPage.ContinueWatching) },
                                 onPosterCustomizationClick = { openInlinePage(SettingsPage.PosterCustomization) },
                                 onHoverPreviewClick = { openInlinePage(SettingsPage.HoverPreview) },
+                                layoutOnly = page == SettingsPage.Layout,
                             )
                             SettingsPage.HoverPreview -> hoverPreviewSettingsContent(
                                 isTablet = true,

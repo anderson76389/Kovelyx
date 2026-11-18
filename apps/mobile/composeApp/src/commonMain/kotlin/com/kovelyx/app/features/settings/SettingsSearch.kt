@@ -89,14 +89,24 @@ internal fun settingsSearchEntries(
     switchProfileAvailable: Boolean,
     checkForUpdatesAvailable: Boolean,
 ): List<SettingsSearchEntry> {
-    val accountCategory = stringResource(SettingsCategory.Account.labelRes)
-    val generalCategory = stringResource(SettingsCategory.General.labelRes)
-    val aboutCategory = stringResource(SettingsCategory.About.labelRes)
-    val advancedCategory = stringResource(SettingsCategory.Advanced.labelRes)
+    val accountCategory = stringResource(SettingsCategory.You.labelRes)
+    val generalCategory = stringResource(SettingsCategory.Look.labelRes)
+    val watchCategory = stringResource(SettingsCategory.Watch.labelRes)
+    val servicesCategory = stringResource(SettingsCategory.Services.labelRes)
+    val aboutCategory = stringResource(SettingsCategory.System.labelRes)
+    val advancedCategory = aboutCategory
+    val categoryLabels = mapOf(
+        SettingsCategory.You to accountCategory,
+        SettingsCategory.Look to generalCategory,
+        SettingsCategory.Watch to watchCategory,
+        SettingsCategory.Services to servicesCategory,
+        SettingsCategory.System to advancedCategory,
+    )
 
     val accountPage = stringResource(Res.string.compose_settings_page_account)
     val trackingPage = stringResource(Res.string.compose_settings_page_tracking)
     val layoutPage = stringResource(Res.string.compose_settings_page_appearance)
+    val layoutGroupPage = stringResource(Res.string.settings_nav_layout_title)
     val advancedPage = stringResource(Res.string.compose_settings_page_advanced)
     val contentDiscoveryPage = stringResource(Res.string.settings_org_sources_title)
     val playbackPage = stringResource(Res.string.compose_settings_page_playback)
@@ -144,7 +154,7 @@ internal fun settingsSearchEntries(
         key: String,
         title: String,
         description: String,
-        category: String = generalCategory,
+        category: String = categoryLabels[page.category] ?: generalCategory,
         icon: ImageVector,
     ) {
         add(
@@ -165,7 +175,7 @@ internal fun settingsSearchEntries(
         description: String = "",
         pageLabel: String,
         section: String,
-        category: String = generalCategory,
+        category: String = categoryLabels[page.category] ?: generalCategory,
         icon: ImageVector,
     ) {
         add(
@@ -205,15 +215,22 @@ internal fun settingsSearchEntries(
         key = "tracking",
         title = trackingPage,
         description = stringResource(Res.string.compose_settings_root_tracking_description),
-        category = generalCategory,
+        category = servicesCategory,
         icon = Icons.Default.Sync,
     )
     addPage(
         page = SettingsPage.Appearance,
-        key = "layout",
+        key = "appearance",
         title = layoutPage,
         description = stringResource(Res.string.compose_settings_root_appearance_description),
         icon = Icons.Rounded.Palette,
+    )
+    addPage(
+        page = SettingsPage.Layout,
+        key = "layout",
+        title = layoutGroupPage,
+        description = stringResource(Res.string.settings_nav_layout_description),
+        icon = Icons.Rounded.Style,
     )
     addPage(
         page = SettingsPage.Advanced,
