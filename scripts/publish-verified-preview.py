@@ -164,26 +164,26 @@ def verify_previous_public_signatures(root, tools, new_tag, current_signatures):
 def primary_platform_downloads(tag):
     """Three readable platform rows; keep native installer assets for existing OTA clients."""
     import re
-    if not re.fullmatch(r"v[0-9]+\\.[0-9]+\\.[0-9]+(?:-(?:alpha|beta|rc)(?:\\.[0-9]+)?)?", tag):
+    if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-(?:alpha|beta|rc)(?:\.[0-9]+)?)?", tag):
         raise ValueError("Version de publication invalide")
     prefix = f"https://github.com/{REPOSITORY}/releases/download/{tag}/"
     def link(label, filename):
         return f"[{label}]({prefix}{filename})"
     return (
-        "## Télécharger Kovelyx — 3 plateformes\\n\\n"
-        "| Plateforme | Téléchargement principal | Autres appareils ou formats |\\n"
-        "| --- | --- | --- |\\n"
+        "## Télécharger Kovelyx — 3 plateformes\n\n"
+        "| Plateforme | Téléchargement principal | Autres appareils ou formats |\n"
+        "| --- | --- | --- |\n"
         f"| **Android** | {link('Téléphone / tablette (APK)', f'Kovelyx-Android-{tag}.apk')} "
-        f"| {link('Android TV / Google TV (APK)', f'Kovelyx-TV-{tag}-universal.apk')} |\\n"
+        f"| {link('Android TV / Google TV (APK)', f'Kovelyx-TV-{tag}-universal.apk')} |\n"
         f"| **Linux x86_64** | {link('AppImage', f'Kovelyx-Linux-x86_64-{tag}.AppImage')} "
         f"| {link('Debian / Ubuntu (.deb)', f'Kovelyx-Linux-amd64-{tag}.deb')} · "
-        f"{link('Fedora / RPM (.rpm)', f'Kovelyx-Linux-x86_64-{tag}.rpm')} |\\n"
+        f"{link('Fedora / RPM (.rpm)', f'Kovelyx-Linux-x86_64-{tag}.rpm')} |\n"
         f"| **Windows x64** | {link('Installation (.msi)', f'Kovelyx-Windows-{tag}.msi')} "
         f"| {link('Assistant (.exe)', f'Kovelyx-Windows-Setup-{tag}.exe')} · "
-        f"{link('Portable (.zip)', f'Kovelyx-Windows-Portable-{tag}.zip')} |\\n\\n"
+        f"{link('Portable (.zip)', f'Kovelyx-Windows-Portable-{tag}.zip')} |\n\n"
         "Les fichiers .sha256 sont des empreintes de vérification, "
         "utilisées par les mises à jour intégrées : ne pas les supprimer. "
-        "Android TV utilise une APK distincte du téléphone.\\n\\n"
+        "Android TV utilise une APK distincte du téléphone.\n\n"
     )
 
 
