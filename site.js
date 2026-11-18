@@ -81,8 +81,19 @@
     return (release.assets || []).find(asset => validAsset(asset, pattern)) || null;
   }
   function findForPlatform(releases, platform) {
+    const osNames = {desktop: "Windows", linux: "Linux", android: "Android", tv: "TV"};
     for (const release of releases) {
       if (release.draft || !Array.isArray(release.assets)) continue;
+      // From v1.1.1168 onwards, one signed ZIP per OS. Legacy binary links
+      // remain available from the bridge release for older installed clients.
+      const tag = release.tag_name || "";
+      const bundleName = "Kovelyx-" + osNames[platform] + "-" + tag + ".zip";
+      const bundle = release.assets.find(asset =>
+        asset.name === bundleName &&
+        validAsset(asset, /^Kovelyx-(?:Windows|Linux|Android|TV)-v\d+\.\d+\.\d+(?:-(?:alpha|beta|rc))?\.zip$/i) &&
+        /^sha256:[a-f0-9]{64}$/i.test(asset.digest || "")
+      );
+      if (bundle) return {release, asset: bundle, extras: {}, bundle: true};
       if (platform === "linux") {
         const appimage = findAsset(release, patterns.linux);
         const deb = findAsset(release, patterns.linuxDeb);
@@ -141,6 +152,16 @@
     node.removeAttribute("download"); // Autoriser les redirections officielles GitHub.
     node.setAttribute("rel", "noopener noreferrer");
   }
+  function primaryDownloadLabel(platform, match) {
+    if (match?.bundle) {
+      const name = {desktop: "Windows 11", linux: "Linux", android: "Android mobile", tv: "Android TV"}[platform];
+      return "Télécharger " + name + " (ZIP)";
+    }
+    if (platform === "desktop" && /\.msi$/i.test(match?.asset?.name || "")) {
+      return "Télécharger Windows MSI";
+    }
+    return config[platform].button;
+  }
   function updateHero() {
     const items = [
       ["hero-windows-download", "desktop", "Télécharger Windows EXE"],
@@ -150,8 +171,7 @@
     ];
     for (const [id, platform, text] of items) {
       const match = versions[platform];
-      const title = match && platform === "desktop" && /\.msi$/i.test(match.asset.name)
-        ? "Télécharger Windows MSI" : text;
+      const title = match ? primaryDownloadLabel(platform, match) : text;
       safeLink($(id), match, title, "Voir les Releases " + (platform === "desktop" ? "Windows" : platform === "linux" ? "Linux" : platform === "android" ? "Android" : "TV"), platform);
     }
     const note = $("hero-download-note");
@@ -220,8 +240,7 @@
     if (match) {
       primary.hidden = false;
       primary.href = match.asset.browser_download_url;
-      setActionLabel(primary, platform === "desktop" && /\.msi$/i.test(match.asset.name)
-        ? "Télécharger Windows MSI" : item.button, platform);
+      setActionLabel(primary, primaryDownloadLabel(platform, match), platform);
       primary.setAttribute("rel", "noopener noreferrer");
       disabled.hidden = true;
     } else {
@@ -248,7 +267,7 @@
       const linuxRpm = card.querySelector(".linux-rpm-link");
       if (status) status.textContent = versionStatus(match);
       if (name) name.textContent = match ? match.asset.name : "Fichier en cours de vérification";
-      safeLink(action, match, "Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : platform === "linux" ? "AppImage" : "APK"), "Voir les Releases", platform);
+      safeLink(action, match, match?.bundle ? primaryDownloadLabel(platform, match) : "Télécharger le fichier " + (platform === "desktop" ? (/\.exe$/i.test(match?.asset.name || "") ? "EXE" : "MSI") : platform === "linux" ? "AppImage" : "APK"), "Voir les Releases", platform);
       if (more) more.href = match ? match.release.html_url : releasesPage;
       for (const [node, asset] of [[portable, match?.extras?.portable],
                                   [msi, platform === "desktop" && /\.exe$/i.test(match?.asset.name || "") ? match?.extras?.msi : null],
