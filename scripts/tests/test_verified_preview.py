@@ -212,7 +212,7 @@ class VerifiedPreviewTests(unittest.TestCase):
         self.assertIn("Kovelyx-Windows-v1.1.1167.msi", markdown)
         self.assertIn("Kovelyx-TV-v1.1.1167-universal.apk", markdown)
         self.assertIn("Kovelyx-Linux-x86_64-v1.1.1167.AppImage", markdown)
-        self.assertIn("\\n| **Android**", markdown)
+        self.assertIn(chr(10) + "| **Android**", markdown)
         self.assertEqual(markdown.count("https://github.com/anderson76389/Kovelyx/releases/download/v1.1.1167/"), 8)
         self.assertEqual(len(PREVIEW.expected_public_assets(tag)), 16)
         with self.assertRaises(ValueError):
