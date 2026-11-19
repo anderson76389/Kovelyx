@@ -104,6 +104,46 @@ def check_platform(platform: str) -> None:
         for key in ("settings_nav_layout_title", "settings_nav_layout_description"):
             ensure(f'name="{key}"' in xml, f"{platform}/{lang}: missing {key}")
 
+    # This is explicitly a Content Discovery change, not a player settings migration.
+    discovery = (settings / "ContentDiscoverySettingsPage.kt").read_text(encoding="utf-8")
+    discovery_group_keys = (
+        "settings_content_discovery_section_catalogues",
+        "settings_content_discovery_section_personal_servers",
+        "settings_content_discovery_section_search",
+    )
+    positions = [discovery.find(key) for key in discovery_group_keys]
+    ensure(all(pos >= 0 for pos in positions) and positions == sorted(positions),
+           f"{platform}: Content Discovery sections must be in catalogs/servers/search order")
+    ensure(discovery.count("SettingsSection(") == 3,
+           f"{platform}: Content Discovery must render three visible settings groups")
+    for callback in ("onAddonsClick", "onCollectionsClick", "onMediaServersClick", "onPluginsClick"):
+        ensure(f"onClick = {callback}," in discovery,
+               f"{platform}: missing a real Content Discovery navigation callback: {callback}")
+    ensure("if (showPluginsEntry)" in discovery,
+           f"{platform}: Content Discovery plugins must respect the platform policy")
+    ensure("SearchHistoryRepository::setEnabled" in discovery,
+           f"{platform}: discovery search-history switch is no longer connected")
+    ensure(screen.count("onCollectionsClick = onCollectionsClick,") >= 2,
+           f"{platform}: collections must work in phone/window and tablet layouts")
+    ensure("SettingsPage.ContentDiscovery -> contentDiscoveryContent(" in screen,
+           f"{platform}: Media/Content Discovery route is disconnected")
+    playback = (settings / "PlaybackSettingsPage.kt").read_text(encoding="utf-8")
+    ensure("PlaybackSettingsSection(" in playback and
+           "settings_playback_section_player" in playback,
+           f"{platform}: Playback must remain a separate usable Media route")
+
+    for lang in ("values", "values-fr"):
+        xml = (resources / lang / "settings_organization.xml").read_text(encoding="utf-8")
+        for key in (
+            "settings_content_discovery_section_catalogues",
+            "settings_content_discovery_section_personal_servers",
+            "settings_content_discovery_collections_description",
+        ):
+            ensure(f'name="{key}"' in xml,
+                   f"{platform}/{lang}: missing localized Content Discovery label: {key}")
+
+    print(f"PASS {platform}: Content Discovery has three real groups, collections, servers, and policy-safe plugins")
+
     print(f"PASS {platform}: 5 groups, 11 destinations, preserved settings routes and layout")
 
 
