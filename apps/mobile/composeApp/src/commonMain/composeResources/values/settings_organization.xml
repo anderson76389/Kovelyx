@@ -4,7 +4,7 @@
     <string name="settings_org_section_playback">PLAYBACK</string>
     <string name="settings_org_section_services">SERVICES AND TRACKING</string>
     <string name="settings_org_section_updates">UPDATES</string>
-    <string name="settings_org_sources_title">Sources and search</string>
+    <string name="settings_org_sources_title">Content and discovery</string>
     <string name="settings_org_integrations_title">Services and metadata</string>
     <string name="settings_org_stream_presentation">Video link appearance</string>
     <string name="settings_org_debrid_title">Debrid services</string>
