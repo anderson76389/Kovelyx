@@ -134,6 +134,10 @@ def check_platform(platform: str) -> None:
 
     for lang in ("values", "values-fr"):
         xml = (resources / lang / "settings_organization.xml").read_text(encoding="utf-8")
+        # The visible Media row and page heading must match the supplied Nuvio screenshot.
+        expected_sources_title = "Contenu et découverte" if lang == "values-fr" else "Content and discovery"
+        ensure(f'<string name="settings_org_sources_title">{expected_sources_title}</string>' in xml,
+               f"{platform}/{lang}: Media > Content Discovery title does not match screenshot")
         for key in (
             "settings_content_discovery_section_catalogues",
             "settings_content_discovery_section_personal_servers",
