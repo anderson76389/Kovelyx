@@ -12,11 +12,11 @@ ROOT = Path(__file__).resolve().parents[2]
 
 # Category order follows the user-facing sidebar, not alphabetical sorting.
 GROUPS = (
-    ("You", "settings_nav_group_you", ("onSwitchProfileClick", "onAccountClick")),
+    ("You", "settings_nav_group_you", ("onAccountClick", "onSwitchProfileClick")),
     ("Look", "settings_nav_group_look", ("onAppearanceClick", "onLayoutClick")),
     ("Watch", "settings_nav_group_watch", ("onContentDiscoveryClick", "onPlaybackClick")),
     ("Services", "settings_nav_group_services", ("onIntegrationsClick", "onTrackingClick")),
-    ("System", "settings_nav_group_system", ("onNotificationsClick", "onAdvancedClick", "onCheckForUpdatesClick")),
+    ("System", "settings_nav_group_system", ("onNotificationsClick", "onAdvancedClick")),
 )
 
 
@@ -55,6 +55,18 @@ def check_platform(platform: str) -> None:
             for guard in ("showNotificationsEntry", "onCheckForUpdatesClick != null",
                           "onTestUpdateBannerClick != null"):
                 ensure(guard in section, f"{platform}: missing system guard {guard}")
+            updates = section.find("Res.string.settings_org_section_updates")
+            about = section.find("Res.string.compose_settings_root_about_section")
+            advanced = section.find("onClick = onAdvancedClick")
+            ensure(0 <= advanced < updates < about,
+                   f"{platform}: system, updates and about are not separated")
+            ensure("if (onCheckForUpdatesClick != null || onTestUpdateBannerClick != null)" in section,
+                   f"{platform}: empty updates category could be visible")
+            for action in ("onCheckForUpdatesClick", "onTestUpdateBannerClick"):
+                ensure(section.count("onClick = " + action) == 1,
+                       f"{platform}: update action lost or duplicated: {action}")
+            ensure("if (onCheckForUpdatesClick != null) SettingsGroupDivider(isTablet = isTablet)" in section,
+                   f"{platform}: update-only/test-only must not show an orphan divider")
             ensure("onClick = onLicensesAttributionsClick" in section,
                    f"{platform}: licence route lost")
             ensure("onClick = onSupportersContributorsClick" in section,
@@ -104,7 +116,7 @@ def check_platform(platform: str) -> None:
         for key in ("settings_nav_layout_title", "settings_nav_layout_description"):
             ensure(f'name="{key}"' in xml, f"{platform}/{lang}: missing {key}")
 
-    print(f"PASS {platform}: 5 groups, 11 destinations, preserved settings routes and layout")
+    print(f"PASS {platform}: 5 groups, direct update area, preserved routes and layout")
 
 
 def check_tv_consistency() -> None:
@@ -115,6 +127,24 @@ def check_tv_consistency() -> None:
     ensure("PLAYBACK(SettingsRailGroup.WATCH)" in tv, "Android TV: player misplaced")
     ensure("LAYOUT(SettingsRailGroup.LOOK)" in tv, "Android TV: layout misplaced")
     ensure("TRACKING(SettingsRailGroup.SERVICES)" in tv, "Android TV: tracking misplaced")
+    # TV is already aligned with the latest native TV rail; do not change
+    # its focus order for a cosmetic regrouping on phone and desktop.
+    expected = (
+        ("ACCOUNT", "PROFILES", "YOU"),
+        ("APPEARANCE", "LAYOUT", "LOOK"),
+        ("CONTENT_DISCOVERY", "PLAYBACK", "WATCH"),
+        ("INTEGRATION", "TRACKING", "SERVICES"),
+        ("ADVANCED", "ABOUT", "SYSTEM"),
+    )
+    for left, right, group in expected:
+        first = f"{left}(SettingsRailGroup.{group})"
+        second = f"{right}(SettingsRailGroup.{group})"
+        ensure(first in tv and second in tv and tv.index(first) < tv.index(second),
+               f"Android TV: pair {left}/{right} reversed")
+    ensure("SettingsCategory.DEBUG -> isDebugBuild && !isEssentialMode" in tv,
+           "Android TV: debug option visible in release builds")
+    ensure("SettingsCategory.EXPERIENCE -> false" in tv,
+           "Android TV: unsupported experience option visible")
     print("PASS TV: native remote-driven rail already has the same five groups")
 
 

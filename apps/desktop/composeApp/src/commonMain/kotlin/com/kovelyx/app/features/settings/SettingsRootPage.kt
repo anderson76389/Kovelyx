@@ -102,16 +102,6 @@ internal fun LazyListScope.settingsRootContent(
         item {
             SettingsSection(title = stringResource(Res.string.settings_nav_group_you), isTablet = isTablet) {
                 SettingsGroup(isTablet = isTablet) {
-                    if (onSwitchProfileClick != null) {
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.compose_settings_root_switch_profile_title),
-                            description = stringResource(Res.string.compose_settings_root_switch_profile_description),
-                            icon = Icons.Rounded.People,
-                            isTablet = isTablet,
-                            onClick = onSwitchProfileClick,
-                        )
-                        SettingsGroupDivider(isTablet = isTablet)
-                    }
                     SettingsNavigationRow(
                         title = stringResource(Res.string.compose_settings_page_account),
                         description = stringResource(Res.string.compose_settings_root_account_description),
@@ -119,6 +109,16 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onAccountClick,
                     )
+                    if (onSwitchProfileClick != null) {
+                        SettingsGroupDivider(isTablet = isTablet)
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.compose_settings_root_switch_profile_title),
+                            description = stringResource(Res.string.compose_settings_root_switch_profile_description),
+                            icon = Icons.Rounded.People,
+                            isTablet = isTablet,
+                            onClick = onSwitchProfileClick,
+                        )
+                    }
                 }
             }
         }
@@ -213,25 +213,37 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onAdvancedClick,
                     )
-                    if (onCheckForUpdatesClick != null) {
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.compose_settings_root_check_updates_title),
-                            description = stringResource(Res.string.compose_settings_root_check_updates_description),
-                            icon = Icons.Rounded.CloudDownload,
-                            isTablet = isTablet,
-                            onClick = onCheckForUpdatesClick,
-                        )
-                    }
-                    if (onTestUpdateBannerClick != null) {
-                        SettingsGroupDivider(isTablet = isTablet)
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.updates_debug_test_title),
-                            description = stringResource(Res.string.updates_debug_test_description),
-                            icon = Icons.Rounded.BugReport,
-                            isTablet = isTablet,
-                            onClick = onTestUpdateBannerClick,
-                        )
+                }
+            }
+        }
+        // Les réglages système et les actions de mise à jour sont volontairement
+        // séparés : chaque rubrique ne contient que des éléments cohérents.
+        if (onCheckForUpdatesClick != null || onTestUpdateBannerClick != null) {
+            item {
+                SettingsSection(
+                    title = stringResource(Res.string.settings_org_section_updates),
+                    isTablet = isTablet,
+                ) {
+                    SettingsGroup(isTablet = isTablet) {
+                        if (onCheckForUpdatesClick != null) {
+                            SettingsNavigationRow(
+                                title = stringResource(Res.string.compose_settings_root_check_updates_title),
+                                description = stringResource(Res.string.compose_settings_root_check_updates_description),
+                                icon = Icons.Rounded.CloudDownload,
+                                isTablet = isTablet,
+                                onClick = onCheckForUpdatesClick,
+                            )
+                        }
+                        if (onTestUpdateBannerClick != null) {
+                            if (onCheckForUpdatesClick != null) SettingsGroupDivider(isTablet = isTablet)
+                            SettingsNavigationRow(
+                                title = stringResource(Res.string.updates_debug_test_title),
+                                description = stringResource(Res.string.updates_debug_test_description),
+                                icon = Icons.Rounded.BugReport,
+                                isTablet = isTablet,
+                                onClick = onTestUpdateBannerClick,
+                            )
+                        }
                     }
                 }
             }
