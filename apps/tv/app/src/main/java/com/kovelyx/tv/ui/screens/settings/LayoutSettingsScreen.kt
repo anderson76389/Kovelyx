@@ -59,6 +59,11 @@ fun LayoutSettingsContent(
         essentialMode = essentialMode,
         focusedPosterHasOptions = uiState.focusedPosterHasOptions()
     )
+    // The same pair model drives the visual cards and the regression tests.
+    val pairs = visibleLayoutSectionPairs(
+        essentialMode = essentialMode,
+        focusedPosterHasOptions = uiState.focusedPosterHasOptions()
+    )
     var expandedSections by rememberSaveable(essentialMode) {
         mutableStateOf(if (essentialMode) listOf(LayoutSection.HOME_LAYOUT.name) else emptyList())
     }
@@ -92,38 +97,44 @@ fun LayoutSettingsContent(
                     contentPadding = PaddingValues(bottom = 18.dp),
                     verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
                 ) {
-                    items(items = sections, key = { it.name }) { section ->
-                        val expanded = section.name in expandedSections
-                        // Non-focusable heading; each existing accordion keeps its stable key.
-                        val headingRes = section.pairHeadingRes
+                    items(items = pairs, key = { it.first().name }) { pair ->
+                        val first = pair.first()
+                        val headingRes = first.pairHeadingRes
                             ?: R.string.settings_tv_layout_pair_posters.takeIf {
-                                section == LayoutSection.POSTER_CARD &&
-                                    LayoutSection.FOCUSED_POSTER !in sections
+                                first == LayoutSection.POSTER_CARD
                             }
-                        if (headingRes != null) {
-                            SettingsSectionLabel(text = stringResource(headingRes))
-                        }
-                        SettingsCollapsibleSection(
-                            title = stringResource(section.title),
-                            description = stringResource(section.description),
-                            icon = section.icon,
-                            expanded = expanded,
-                            onToggle = {
-                                expandedSections = if (expanded) {
-                                    expandedSections - section.name
-                                } else {
-                                    expandedSections + section.name
-                                }
-                            },
-                            focusRequester = if (section == sections.first()) initialFocusRequester else null,
-                            modifier = Modifier.testTag(LayoutSettingsTestTags.section(section))
+                        SettingsGroupCard(
+                            title = headingRes?.let { stringResource(it) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(LayoutSettingsTestTags.pair(first))
                         ) {
-                            LayoutSectionContent(
-                                section = section,
-                                uiState = uiState,
-                                streamBadgeUiState = streamBadgeUiState,
-                                viewModel = viewModel
-                            )
+                            pair.forEachIndexed { index, section ->
+                                if (index > 0) SettingsPairDivider()
+                                val expanded = section.name in expandedSections
+                                SettingsCollapsibleSection(
+                                    title = stringResource(section.title),
+                                    description = stringResource(section.description),
+                                    icon = section.icon,
+                                    expanded = expanded,
+                                    onToggle = {
+                                        expandedSections = if (expanded) {
+                                            expandedSections - section.name
+                                        } else {
+                                            expandedSections + section.name
+                                        }
+                                    },
+                                    focusRequester = if (section == sections.first()) initialFocusRequester else null,
+                                    modifier = Modifier.testTag(LayoutSettingsTestTags.section(section))
+                                ) {
+                                    LayoutSectionContent(
+                                        section = section,
+                                        uiState = uiState,
+                                        streamBadgeUiState = streamBadgeUiState,
+                                        viewModel = viewModel
+                                    )
+                                }
+                            }
                         }
                     }
                 }

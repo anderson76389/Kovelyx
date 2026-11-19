@@ -136,6 +136,20 @@ internal fun SettingsNote(
     )
 }
 
+/** Separates the two related options inside a shared TV settings card.
+ * Decorative only: it never becomes a remote-control focus target.
+ */
+@Composable
+internal fun SettingsPairDivider() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = SettingsRowContentInset)
+            .height(KovelyxTheme.spacing.hairline)
+            .background(KovelyxTheme.colors.Border)
+    )
+}
+
 /** Informational headings only: never intercept D-pad focus or touch actions. */
 @Composable
 internal fun SettingsRailGroupLabel(text: String) {

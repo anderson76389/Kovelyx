@@ -56,6 +56,18 @@ internal fun visibleLayoutSections(
         }
     }
 
+/** Keep each logical pair together even if its first optional section is hidden. */
+internal fun visibleLayoutSectionPairs(
+    essentialMode: Boolean,
+    focusedPosterHasOptions: Boolean
+): List<List<LayoutSection>> {
+    val sections = visibleLayoutSections(essentialMode, focusedPosterHasOptions)
+    return LayoutSection.entries.chunked(2)
+        .map { pair -> pair.filter { it in sections } }
+        .filter { it.isNotEmpty() }
+}
+
 internal object LayoutSettingsTestTags {
     fun section(section: LayoutSection): String = "layout_section_${section.name.lowercase()}"
+    fun pair(firstSection: LayoutSection): String = "layout_pair_${firstSection.name.lowercase()}"
 }

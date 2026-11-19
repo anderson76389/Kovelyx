@@ -48,6 +48,24 @@ class PlaybackSettingsOrganizationTest {
     }
 
     @Test
+    fun everyPlaybackPairIsRenderedInsideOneVisibleCardNotOnlyAHeading() {
+        val settings = PlayerSettings(internalPlayerEngine = InternalPlayerEngine.EXOPLAYER)
+        setSections(settings)
+        val groups = visiblePlaybackSections(settings).chunked(2)
+        assertEquals(5, groups.size)
+        groups.forEach { pair ->
+            val first = pair.first()
+            composeRule.onNodeWithTag(PlaybackSettingsTestTags.pair(first)).assertExists()
+            pair.forEach { section ->
+                composeRule.onNode(
+                    hasTestTag(PlaybackSettingsTestTags.section(section)) and
+                        hasAnyAncestor(hasTestTag(PlaybackSettingsTestTags.pair(first)))
+                ).assertExists()
+            }
+        }
+    }
+
+    @Test
     fun everyVisiblePlaybackSectionOpensAndClosesWithRemoteAction() {
         val settings = PlayerSettings()
         setSections(settings)
