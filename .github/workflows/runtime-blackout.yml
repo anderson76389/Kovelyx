@@ -42,6 +42,7 @@ jobs:
             api_target: google_apis
             api_arch: x86_64
             device_profile: pixel_6
+            emulator_ram: 3072M
             emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
           - platform: tv
             release_prefix: v1.
@@ -49,6 +50,7 @@ jobs:
             api_target: google-tv
             api_arch: x86
             device_profile: tv_1080p
+            emulator_ram: 2048M
             emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
     steps:
       - uses: actions/checkout@v4
@@ -127,8 +129,8 @@ jobs:
           arch: ${{ matrix.api_arch }}
           profile: ${{ matrix.device_profile }}
           cores: 2
-          # Match the Freebox Pop's 2 GiB RAM budget on both DNS-blackout runs.
-          ram-size: 2048M
+          # Freebox Pop is constrained to 2 GiB; mobile keeps its own budget.
+          ram-size: ${{ matrix.emulator_ram }}
           heap-size: 512M
           disk-size: 6144M
           disable-animations: true
