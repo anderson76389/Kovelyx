@@ -59,10 +59,11 @@ fun LayoutSettingsContent(
         essentialMode = essentialMode,
         focusedPosterHasOptions = uiState.focusedPosterHasOptions()
     )
-    // Preserve the intended pairs when a conditional option (focused poster) is hidden.
-    val pairs = LayoutSection.entries.chunked(2)
-        .map { group -> group.filter { it in sections } }
-        .filter { it.isNotEmpty() }
+    // The same pair model drives the visual cards and the regression tests.
+    val pairs = visibleLayoutSectionPairs(
+        essentialMode = essentialMode,
+        focusedPosterHasOptions = uiState.focusedPosterHasOptions()
+    )
     var expandedSections by rememberSaveable(essentialMode) {
         mutableStateOf(if (essentialMode) listOf(LayoutSection.HOME_LAYOUT.name) else emptyList())
     }
