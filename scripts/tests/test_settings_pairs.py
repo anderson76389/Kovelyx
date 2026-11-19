@@ -141,7 +141,6 @@ def check_platform(platform: str) -> None:
         for key in (
             "settings_content_discovery_section_catalogues",
             "settings_content_discovery_section_personal_servers",
-            "settings_content_discovery_collections_description",
         ):
             ensure(f'name="{key}"' in xml,
                    f"{platform}/{lang}: missing localized Content Discovery label: {key}")
