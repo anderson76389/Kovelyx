@@ -6,6 +6,7 @@ on:
       - 'scripts/tests/fixtures/tv/Media3PlaybackSoakTest.kt'
       - 'scripts/tests/tv-playback-soak.sh'
       - 'apps/tv/app/src/main/java/com/kovelyx/tv/data/local/SubtitleFontStore.kt'
+      - 'apps/tv/app/src/main/java/com/kovelyx/tv/ui/screens/settings/PlaybackSubtitleSettings.kt'
       - 'apps/tv/app/src/test/java/com/kovelyx/tv/data/local/SubtitleFontImportDedupTest.kt'
       - '.github/workflows/tv-playback-soak.yml'
   workflow_dispatch:

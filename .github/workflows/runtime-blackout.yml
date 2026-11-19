@@ -42,6 +42,7 @@ jobs:
             api_target: google_apis
             api_arch: x86_64
             device_profile: pixel_6
+            emulator_ram: 3072M
             emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
           - platform: tv
             release_prefix: v1.
@@ -49,6 +50,7 @@ jobs:
             api_target: google-tv
             api_arch: x86
             device_profile: tv_1080p
+            emulator_ram: 2048M
             emulator_dns: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
     steps:
       - uses: actions/checkout@v4
@@ -61,8 +63,8 @@ jobs:
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > /tmp/kovelyx-releases.json
-          # Always select a COMPLETE unified Kovelyx Release with both Android APKs
-          # and the Windows portable bundle. On a release event, test that exact tag.
+          # Require the four direct installable assets of one stable Release.
+          # Old portable ZIPs were removed in v1.1.1169; never select those tags.
           requested=""
           if [[ "$GITHUB_EVENT_NAME" == "release" ]]; then requested="$GITHUB_REF_NAME"; fi
           tag="$(jq -r --arg prefix "$RELEASE_PREFIX" --arg requested "$requested" '
@@ -70,9 +72,11 @@ jobs:
               and (.tag_name | test("^v[0-9]+[.][0-9]+[.][0-9]+$"))
               and (.tag_name | startswith($prefix))
               and ($requested == "" or .tag_name == $requested)
-              and ([.assets[]?.name | select(startswith("Kovelyx-Android-") and endswith(".apk"))] | length > 0)
-              and ([.assets[]?.name | select(startswith("Kovelyx-TV-") and endswith("-universal.apk"))] | length > 0)
-              and ([.assets[]?.name | select(startswith("Kovelyx-Windows-Portable-") and endswith(".zip"))] | length > 0)
+              and (.tag_name as $tag | [.assets[]?.name] as $assets |
+                ($assets | index("Kovelyx-Android-\($tag).apk")) != null
+                and ($assets | index("Kovelyx-TV-\($tag)-universal.apk")) != null
+                and ($assets | index("Kovelyx-Windows-Setup-\($tag).exe")) != null
+                and ($assets | index("Kovelyx-Linux-x86_64-\($tag).AppImage")) != null)
             )] | sort_by(.published_at) | last | .tag_name // empty' /tmp/kovelyx-releases.json)"
           test -n "$tag" || { echo "::error::Aucune Release APK Kovelyx pour $RELEASE_PREFIX"; exit 1; }
           echo "KOVELYX_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
@@ -125,7 +129,8 @@ jobs:
           arch: ${{ matrix.api_arch }}
           profile: ${{ matrix.device_profile }}
           cores: 2
-          ram-size: 3072M
+          # Freebox Pop is constrained to 2 GiB; mobile keeps its own budget.
+          ram-size: ${{ matrix.emulator_ram }}
           heap-size: 512M
           disk-size: 6144M
           disable-animations: true

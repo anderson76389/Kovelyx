@@ -121,6 +121,17 @@ class PlaybackSettingsOrganizationTest {
     }
 
     @Test
+    fun subtitleOpacityRemainsAvailableWithNativeMpvEngine() {
+        setSections(PlayerSettings(internalPlayerEngine = InternalPlayerEngine.MVP_PLAYER))
+        expand(PlaybackSection.SUBTITLES)
+
+        // Freebox Pop must retain subtitle customization with either player engine.
+        assertRowCount(R.string.subtitle_style_text_opacity, PlaybackSection.SUBTITLES, 1)
+        assertRowCount(R.string.sub_text_color, PlaybackSection.SUBTITLES, 1)
+        assertRowCount(R.string.sub_size, PlaybackSection.SUBTITLES, 1)
+    }
+
+    @Test
     fun externalPlayerOptionsOnlyAppearForExternalPlayers() {
         setSections(PlayerSettings(playerPreference = PlayerPreference.INTERNAL))
         expand(PlaybackSection.PLAYER)
