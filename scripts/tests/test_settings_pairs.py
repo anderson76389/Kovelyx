@@ -111,7 +111,7 @@ def check_platform(platform: str) -> None:
         "settings_content_discovery_section_personal_servers",
         "settings_content_discovery_section_search",
     )
-    positions = [discovery.find(key) for key in discovery_group_keys]
+    positions = [discovery.find(f"title = stringResource(Res.string.{key})") for key in discovery_group_keys]
     ensure(all(pos >= 0 for pos in positions) and positions == sorted(positions),
            f"{platform}: Content Discovery sections must be in catalogs/servers/search order")
     ensure(discovery.count("SettingsSection(") == 3,
