@@ -111,6 +111,16 @@ jobs:
             adb shell screencap -p /sdcard/kovelyx-tv-smoke.png
             adb pull /sdcard/kovelyx-tv-smoke.png /tmp/kovelyx-tv-smoke.png
             python3 scripts/tests/tv_emulator_memory_probe.py
+            python3 scripts/tests/tv_guest_smoke.py
+            python3 scripts/tests/tv_settings_adb_probe.py --output /tmp/kovelyx-tv-settings-audit
+      - name: Conserver le rapport de navigation des paramètres TV
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-tv-settings-dpad-audit
+          path: /tmp/kovelyx-tv-settings-audit/
+          if-no-files-found: ignore
+          retention-days: 30
       - name: Enregistrer la preuve de compilation testée
         if: success()
         uses: actions/upload-artifact@v4
