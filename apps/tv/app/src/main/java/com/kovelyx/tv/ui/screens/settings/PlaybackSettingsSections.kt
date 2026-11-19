@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -24,6 +25,7 @@ import com.kovelyx.tv.ui.components.P2pConsentDialog
 
 internal object PlaybackSettingsTestTags {
     fun section(section: PlaybackSection): String = "playback_section_${section.name.lowercase()}"
+    fun pair(firstSection: PlaybackSection): String = "playback_pair_${firstSection.name.lowercase()}"
 }
 
 @Composable
@@ -38,6 +40,7 @@ internal fun PlaybackSettingsSections(
     initialFocusRequester: FocusRequester? = null
 ) {
     val sections = visiblePlaybackSections(playerSettings)
+    val pairs = sections.chunked(2)
     var expandedSections by rememberSaveable { mutableStateOf(emptyList<String>()) }
     val listState = rememberLazyListState()
 
@@ -48,41 +51,47 @@ internal fun PlaybackSettingsSections(
             contentPadding = PaddingValues(top = KovelyxTheme.spacing.xs, bottom = KovelyxTheme.spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.md)
         ) {
-            items(items = sections, key = { it.name }) { section ->
-                val expanded = section.name in expandedSections
-                val headingRes = section.pairHeadingRes
-                    ?: R.string.settings_tv_playback_pair_network.takeIf {
-                        section == PlaybackSection.P2P &&
-                            PlaybackSection.BUFFER_NETWORK !in sections
-                    }
-                if (headingRes != null) {
-                    SettingsSectionLabel(text = stringResource(headingRes))
-                }
-                SettingsCollapsibleSection(
-                    title = stringResource(section.title),
-                    description = stringResource(section.description),
-                    icon = section.icon,
-                    expanded = expanded,
-                    onToggle = {
-                        expandedSections = if (expanded) {
-                            expandedSections - section.name
-                        } else {
-                            expandedSections + section.name
-                        }
-                    },
-                    focusRequester = if (section == sections.first()) initialFocusRequester else null,
-                    modifier = Modifier.testTag(PlaybackSettingsTestTags.section(section))
+            items(items = pairs, key = { it.first().name }) { pair ->
+                val first = pair.first()
+                val headingRes = first.pairHeadingRes
+                    ?: R.string.settings_tv_playback_pair_network.takeIf { first == PlaybackSection.P2P }
+                // A real shared card, not a label above two unrelated sections.
+                SettingsGroupCard(
+                    title = headingRes?.let { stringResource(it) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(PlaybackSettingsTestTags.pair(first))
                 ) {
-                    PlaybackSectionContent(
-                        section = section,
-                        playerSettings = playerSettings,
-                        p2p = p2p,
-                        transparentLetterbox = transparentLetterbox,
-                        onUpdate = onUpdate,
-                        onOpenDialog = onOpenDialog,
-                        onMemorySettingChanged = onMemorySettingChanged,
-                        onClearTorrentCache = onClearTorrentCache
-                    )
+                    pair.forEachIndexed { index, section ->
+                        if (index > 0) SettingsPairDivider()
+                        val expanded = section.name in expandedSections
+                        SettingsCollapsibleSection(
+                            title = stringResource(section.title),
+                            description = stringResource(section.description),
+                            icon = section.icon,
+                            expanded = expanded,
+                            onToggle = {
+                                expandedSections = if (expanded) {
+                                    expandedSections - section.name
+                                } else {
+                                    expandedSections + section.name
+                                }
+                            },
+                            focusRequester = if (section == sections.first()) initialFocusRequester else null,
+                            modifier = Modifier.testTag(PlaybackSettingsTestTags.section(section))
+                        ) {
+                            PlaybackSectionContent(
+                                section = section,
+                                playerSettings = playerSettings,
+                                p2p = p2p,
+                                transparentLetterbox = transparentLetterbox,
+                                onUpdate = onUpdate,
+                                onOpenDialog = onOpenDialog,
+                                onMemorySettingChanged = onMemorySettingChanged,
+                                onClearTorrentCache = onClearTorrentCache
+                            )
+                        }
+                    }
                 }
             }
         }
