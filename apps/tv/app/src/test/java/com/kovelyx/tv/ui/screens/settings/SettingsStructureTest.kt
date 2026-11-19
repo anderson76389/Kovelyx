@@ -29,6 +29,50 @@ class SettingsStructureTest {
     }
 
     @Test
+    fun `playback cards contain two related options per visible group`() {
+        val sections = visiblePlaybackSections(PlayerSettings(internalPlayerEngine = InternalPlayerEngine.EXOPLAYER))
+        val pairs = sections.chunked(2)
+        assertEquals(5, pairs.size)
+        assertEquals(
+            listOf(
+                listOf(PlaybackSection.PLAYER, PlaybackSection.STREAM_SELECTION),
+                listOf(PlaybackSection.PLAYER_INTERFACE, PlaybackSection.VIDEO),
+                listOf(PlaybackSection.AUDIO, PlaybackSection.SUBTITLES),
+                listOf(PlaybackSection.UP_NEXT, PlaybackSection.SKIP_SEGMENTS),
+                listOf(PlaybackSection.BUFFER_NETWORK, PlaybackSection.P2P)
+            ),
+            pairs
+        )
+        val mpvPairs = visiblePlaybackSections(
+            PlayerSettings(internalPlayerEngine = InternalPlayerEngine.MVP_PLAYER)
+        ).chunked(2)
+        assertEquals(listOf(PlaybackSection.P2P), mpvPairs.last())
+    }
+
+    @Test
+    fun `layout cards keep coherent pairs when focused poster option disappears`() {
+        val full = visibleLayoutSectionPairs(essentialMode = false, focusedPosterHasOptions = true)
+        assertEquals(5, full.size)
+        assertTrue(full.all { it.size == 2 })
+        assertEquals(
+            listOf(LayoutSection.FOCUSED_POSTER, LayoutSection.POSTER_CARD),
+            full[2]
+        )
+        val withoutFocused = visibleLayoutSectionPairs(
+            essentialMode = false, focusedPosterHasOptions = false
+        )
+        assertEquals(listOf(LayoutSection.POSTER_CARD), withoutFocused[2])
+        assertEquals(
+            listOf(LayoutSection.CARD_DEPTH, LayoutSection.CUSTOM_POSTERS),
+            withoutFocused[3]
+        )
+        assertEquals(
+            listOf(LayoutSection.HOME_LAYOUT),
+            visibleLayoutSectionPairs(essentialMode = true, focusedPosterHasOptions = false).single()
+        )
+    }
+
+    @Test
     fun `playback settings display five coherent accordion pairs`() {
         val items = visiblePlaybackSections(PlayerSettings(internalPlayerEngine = InternalPlayerEngine.EXOPLAYER))
         assertEquals(
