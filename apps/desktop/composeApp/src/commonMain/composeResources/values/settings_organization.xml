@@ -27,5 +27,4 @@
     <string name="settings_nav_layout_description">Home, posters, details, streams and navigation</string>
     <string name="settings_content_discovery_section_catalogues">CATALOGS AND COLLECTIONS</string>
     <string name="settings_content_discovery_section_personal_servers">MEDIA SERVERS</string>
-    <string name="settings_content_discovery_collections_description">Open your collections and saved catalogs</string>
 </resources>
