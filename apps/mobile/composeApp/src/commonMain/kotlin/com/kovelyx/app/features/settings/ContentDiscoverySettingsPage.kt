@@ -7,6 +7,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.features.search.SearchHistoryRepository
 import nuvio.composeapp.generated.resources.Res
+import nuvio.composeapp.generated.resources.collections_header
 import nuvio.composeapp.generated.resources.compose_settings_page_addons
 import nuvio.composeapp.generated.resources.compose_settings_page_media_servers
 import nuvio.composeapp.generated.resources.compose_settings_page_plugins
@@ -14,7 +15,9 @@ import nuvio.composeapp.generated.resources.settings_content_discovery_addons_de
 import nuvio.composeapp.generated.resources.settings_content_discovery_addons_description_appstore
 import nuvio.composeapp.generated.resources.settings_content_discovery_media_servers_description
 import nuvio.composeapp.generated.resources.settings_content_discovery_plugins_description
-import nuvio.composeapp.generated.resources.settings_content_discovery_section_sources
+import nuvio.composeapp.generated.resources.settings_content_discovery_section_catalogues
+import nuvio.composeapp.generated.resources.settings_content_discovery_section_personal_servers
+import nuvio.composeapp.generated.resources.settings_content_discovery_collections_description
 import nuvio.composeapp.generated.resources.settings_content_discovery_section_search
 import nuvio.composeapp.generated.resources.settings_content_discovery_recent_searches
 import nuvio.composeapp.generated.resources.settings_content_discovery_recent_searches_description
@@ -25,8 +28,65 @@ internal fun LazyListScope.contentDiscoveryContent(
     showPluginsEntry: Boolean,
     onAddonsClick: () -> Unit,
     onPluginsClick: () -> Unit,
+    onCollectionsClick: () -> Unit,
     onMediaServersClick: () -> Unit,
 ) {
+    // The media home continues to expose only "Contenu et découverte" and
+    // "Lecture". All routes here remain under ContentDiscovery, not Playback.
+    item {
+        SettingsSection(
+            title = stringResource(Res.string.settings_content_discovery_section_catalogues),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.compose_settings_page_addons),
+                    description = stringResource(
+                        if (AppFeaturePolicy.personalMediaAddonCopyEnabled) {
+                            Res.string.settings_content_discovery_addons_description_appstore
+                        } else {
+                            Res.string.settings_content_discovery_addons_description
+                        },
+                    ),
+                    isTablet = isTablet,
+                    onClick = onAddonsClick,
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.collections_header),
+                    description = stringResource(Res.string.settings_content_discovery_collections_description),
+                    isTablet = isTablet,
+                    onClick = onCollectionsClick,
+                )
+                if (showPluginsEntry) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.compose_settings_page_plugins),
+                        description = stringResource(Res.string.settings_content_discovery_plugins_description),
+                        isTablet = isTablet,
+                        onClick = onPluginsClick,
+                    )
+                }
+            }
+        }
+    }
+
+    item {
+        SettingsSection(
+            title = stringResource(Res.string.settings_content_discovery_section_personal_servers),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.compose_settings_page_media_servers),
+                    description = stringResource(Res.string.settings_content_discovery_media_servers_description),
+                    isTablet = isTablet,
+                    onClick = onMediaServersClick,
+                )
+            }
+        }
+    }
+
     item {
         val recentSearchesEnabled by remember {
             SearchHistoryRepository.ensureLoaded()
@@ -48,44 +108,4 @@ internal fun LazyListScope.contentDiscoveryContent(
             }
         }
     }
-
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_content_discovery_section_sources),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_addons),
-                    description = stringResource(
-                        if (AppFeaturePolicy.personalMediaAddonCopyEnabled) {
-                            Res.string.settings_content_discovery_addons_description_appstore
-                        } else {
-                            Res.string.settings_content_discovery_addons_description
-                        },
-                    ),
-                    isTablet = isTablet,
-                    onClick = onAddonsClick,
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.compose_settings_page_media_servers),
-                    description = stringResource(Res.string.settings_content_discovery_media_servers_description),
-                    isTablet = isTablet,
-                    onClick = onMediaServersClick,
-                )
-                if (showPluginsEntry) {
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_plugins),
-                        description = stringResource(Res.string.settings_content_discovery_plugins_description),
-                        isTablet = isTablet,
-                        onClick = onPluginsClick,
-                    )
-                }
-            }
-        }
-    }
-
-
 }
