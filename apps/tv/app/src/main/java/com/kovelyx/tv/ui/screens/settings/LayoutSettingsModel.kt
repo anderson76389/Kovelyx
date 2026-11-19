@@ -58,4 +58,5 @@ internal fun visibleLayoutSections(
 
 internal object LayoutSettingsTestTags {
     fun section(section: LayoutSection): String = "layout_section_${section.name.lowercase()}"
+    fun pair(firstSection: LayoutSection): String = "layout_pair_${firstSection.name.lowercase()}"
 }
