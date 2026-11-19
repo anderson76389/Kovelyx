@@ -25,4 +25,7 @@
     <string name="settings_nav_group_system">Système</string>
     <string name="settings_nav_layout_title">Disposition</string>
     <string name="settings_nav_layout_description">Accueil, affiches, détails, flux et navigation</string>
+    <string name="settings_content_discovery_section_catalogues">CATALOGUES ET COLLECTIONS</string>
+    <string name="settings_content_discovery_section_personal_servers">SERVEURS MULTIMÉDIAS</string>
+    <string name="settings_content_discovery_collections_description">Accéder à vos collections et aux catalogues enregistrés</string>
 </resources>
