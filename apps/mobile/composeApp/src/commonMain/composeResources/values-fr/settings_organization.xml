@@ -4,7 +4,7 @@
     <string name="settings_org_section_playback">LECTURE</string>
     <string name="settings_org_section_services">SERVICES ET SUIVI</string>
     <string name="settings_org_section_updates">MISES À JOUR</string>
-    <string name="settings_org_sources_title">Sources et recherche</string>
+    <string name="settings_org_sources_title">Contenu et découverte</string>
     <string name="settings_org_integrations_title">Services et métadonnées</string>
     <string name="settings_org_stream_presentation">Présentation des liens vidéo</string>
     <string name="settings_org_debrid_title">Services de débridage</string>
@@ -25,4 +25,6 @@
     <string name="settings_nav_group_system">Système</string>
     <string name="settings_nav_layout_title">Disposition</string>
     <string name="settings_nav_layout_description">Accueil, affiches, détails, flux et navigation</string>
+    <string name="settings_content_discovery_section_catalogues">CATALOGUES ET COLLECTIONS</string>
+    <string name="settings_content_discovery_section_personal_servers">SERVEURS MULTIMÉDIAS</string>
 </resources>

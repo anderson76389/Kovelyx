@@ -798,6 +798,7 @@ private fun MobileSettingsScreen(
                     showPluginsEntry = AppFeaturePolicy.pluginsEnabled,
                     onAddonsClick = onAddonsClick,
                     onPluginsClick = onPluginsClick,
+                    onCollectionsClick = onCollectionsClick,
                     onMediaServersClick = { onPageChange(SettingsPage.MediaServers) },
                 )
                 SettingsPage.Addons -> addonsSettingsContent()
@@ -1274,6 +1275,7 @@ private fun TabletSettingsScreen(
                                 showPluginsEntry = AppFeaturePolicy.pluginsEnabled,
                                 onAddonsClick = { openInlinePage(SettingsPage.Addons) },
                                 onPluginsClick = { openInlinePage(SettingsPage.Plugins) },
+                                onCollectionsClick = onCollectionsClick,
                                 onMediaServersClick = { openInlinePage(SettingsPage.MediaServers) },
                             )
                             SettingsPage.Addons -> addonsSettingsContent()
