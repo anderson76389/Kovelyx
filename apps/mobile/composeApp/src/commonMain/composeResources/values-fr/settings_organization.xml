@@ -45,4 +45,5 @@
     <string name="kovelyx_media_video_description">Décodeurs, sortie vidéo et HDR</string>
     <string name="kovelyx_media_p2p_title">Streaming P2P</string>
     <string name="kovelyx_media_p2p_description">Torrent, profil et cache</string>
+    <string name="kovelyx_media_options_section">RÉGLAGES DE LECTURE ET DE MÉDIAS</string>
 </resources>
