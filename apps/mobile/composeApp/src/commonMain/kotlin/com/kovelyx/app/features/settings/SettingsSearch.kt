@@ -257,12 +257,33 @@ internal fun settingsSearchEntries(
         icon = Icons.Rounded.Search,
     )
     addPage(
-        page = SettingsPage.Playback,
+        page = SettingsPage.ContentDiscovery,
         key = "playback",
         title = playbackPage,
         description = stringResource(Res.string.settings_playback_subtitle),
         icon = Icons.Rounded.PlayArrow,
     )
+    // Search opens the exact new subpage, without instantiating the legacy
+    // all-settings player screen or its unrelated state observers.
+    for (page in listOf(
+        SettingsPage.ContentPlayer,
+        SettingsPage.ContentStreamSelection,
+        SettingsPage.ContentUpNext,
+        SettingsPage.ContentSkipSegments,
+        SettingsPage.ContentPlayerInterface,
+        SettingsPage.ContentAudio,
+        SettingsPage.ContentSubtitles,
+        SettingsPage.ContentVideo,
+        SettingsPage.ContentP2P,
+    )) {
+        addPage(
+            page = page,
+            key = "media-" + page.name.lowercase(),
+            title = stringResource(page.titleRes),
+            description = "",
+            icon = Icons.Rounded.PlayArrow,
+        )
+    }
     addPage(
         page = SettingsPage.Streams,
         key = "streams",
@@ -599,6 +620,7 @@ internal fun settingsSearchEntries(
         addRow = ::addRow,
         pageLabel = playbackPage,
         section = playbackPlayer,
+        targetPage = SettingsPage.ContentPlayerInterface,
         icon = Icons.Rounded.PlayArrow,
         rows = listOfNotNull(
             PlaybackSearchRow(
@@ -642,6 +664,7 @@ internal fun settingsSearchEntries(
         addRow = ::addRow,
         pageLabel = playbackPage,
         section = playbackSubtitleAudio,
+        targetPage = SettingsPage.ContentAudio,
         icon = Icons.Rounded.PlayArrow,
         rows = listOf(
             PlaybackSearchRow("preferred-audio", stringResource(Res.string.settings_playback_preferred_audio_language)),
@@ -654,6 +677,7 @@ internal fun settingsSearchEntries(
         addRow = ::addRow,
         pageLabel = playbackPage,
         section = playbackStreamSelection,
+        targetPage = SettingsPage.ContentStreamSelection,
         icon = Icons.Rounded.PlayArrow,
         rows = listOf(
             PlaybackSearchRow(
@@ -668,6 +692,7 @@ internal fun settingsSearchEntries(
         addRow = ::addRow,
         pageLabel = playbackPage,
         section = playbackStreamAutoPlay,
+        targetPage = SettingsPage.ContentStreamSelection,
         icon = Icons.Rounded.PlayArrow,
         rows = buildList {
             add(PlaybackSearchRow("stream-mode", stringResource(Res.string.settings_playback_stream_selection_mode)))
@@ -683,6 +708,7 @@ internal fun settingsSearchEntries(
             addRow = ::addRow,
             pageLabel = playbackPage,
             section = playbackDecoder,
+        targetPage = SettingsPage.ContentVideo,
             icon = Icons.Rounded.PlayArrow,
             rows = listOf(
                 PlaybackSearchRow("decoder-priority", stringResource(Res.string.settings_playback_decoder_priority)),
@@ -706,6 +732,7 @@ internal fun settingsSearchEntries(
             addRow = ::addRow,
             pageLabel = playbackPage,
             section = playbackSubtitleRendering,
+        targetPage = SettingsPage.ContentSubtitles,
             icon = Icons.Rounded.PlayArrow,
             rows = listOf(
                 PlaybackSearchRow("libass", stringResource(Res.string.settings_playback_enable_libass), stringResource(Res.string.settings_playback_enable_libass_description)),
@@ -717,6 +744,7 @@ internal fun settingsSearchEntries(
         addRow = ::addRow,
         pageLabel = playbackPage,
         section = playbackSkipSegments,
+        targetPage = SettingsPage.ContentSkipSegments,
         icon = Icons.Rounded.PlayArrow,
         rows = listOf(
             PlaybackSearchRow("skip-intro", stringResource(Res.string.settings_playback_skip_intro_outro_recap), stringResource(Res.string.settings_playback_skip_intro_outro_recap_description)),
@@ -730,6 +758,7 @@ internal fun settingsSearchEntries(
         addRow = ::addRow,
         pageLabel = playbackPage,
         section = playbackNextEpisode,
+        targetPage = SettingsPage.ContentUpNext,
         icon = Icons.Rounded.PlayArrow,
         rows = listOf(
             PlaybackSearchRow("auto-play-next", stringResource(Res.string.settings_playback_auto_play_next_episode), stringResource(Res.string.settings_playback_auto_play_next_episode_description)),
@@ -1044,11 +1073,17 @@ private fun addPlaybackRows(
     pageLabel: String,
     section: String,
     icon: ImageVector,
+    targetPage: SettingsPage = SettingsPage.Playback,
     rows: List<PlaybackSearchRow>,
 ) {
     rows.forEach { row ->
+        val destination = when (row.key) {
+            "external-player", "external-player-app" -> SettingsPage.ContentPlayer
+            "preferred-subtitles", "secondary-subtitles" -> SettingsPage.ContentSubtitles
+            else -> targetPage
+        }
         addRow(
-            SettingsPage.Playback,
+            destination,
             "playback-${row.key}",
             row.title,
             row.description,

@@ -15,6 +15,15 @@ import nuvio.composeapp.generated.resources.compose_settings_page_addons
 import nuvio.composeapp.generated.resources.compose_settings_page_advanced
 import nuvio.composeapp.generated.resources.compose_settings_page_appearance
 import nuvio.composeapp.generated.resources.settings_org_sources_title
+import nuvio.composeapp.generated.resources.settings_media_subpage_player
+import nuvio.composeapp.generated.resources.settings_media_subpage_streams
+import nuvio.composeapp.generated.resources.settings_media_subpage_up_next
+import nuvio.composeapp.generated.resources.settings_media_subpage_skip
+import nuvio.composeapp.generated.resources.settings_media_subpage_interface
+import nuvio.composeapp.generated.resources.settings_media_subpage_audio
+import nuvio.composeapp.generated.resources.settings_media_subpage_subtitles
+import nuvio.composeapp.generated.resources.settings_media_subpage_video
+import nuvio.composeapp.generated.resources.settings_media_subpage_p2p
 import nuvio.composeapp.generated.resources.settings_org_debrid_title
 import nuvio.composeapp.generated.resources.compose_settings_page_continue_watching
 import nuvio.composeapp.generated.resources.compose_settings_page_homescreen
@@ -129,6 +138,51 @@ internal enum class SettingsPage(
         titleRes = Res.string.settings_org_sources_title,
         category = SettingsCategory.Watch,
         parentPage = Root,
+    ),
+    ContentPlayer(
+        titleRes = Res.string.settings_media_subpage_player,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentStreamSelection(
+        titleRes = Res.string.settings_media_subpage_streams,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentUpNext(
+        titleRes = Res.string.settings_media_subpage_up_next,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentSkipSegments(
+        titleRes = Res.string.settings_media_subpage_skip,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentPlayerInterface(
+        titleRes = Res.string.settings_media_subpage_interface,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentAudio(
+        titleRes = Res.string.settings_media_subpage_audio,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentSubtitles(
+        titleRes = Res.string.settings_media_subpage_subtitles,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentVideo(
+        titleRes = Res.string.settings_media_subpage_video,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    ContentP2P(
+        titleRes = Res.string.settings_media_subpage_p2p,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
     ),
     Addons(
         titleRes = Res.string.compose_settings_page_addons,

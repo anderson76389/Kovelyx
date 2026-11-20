@@ -713,7 +713,17 @@ private fun MobileSettingsScreen(
                 SettingsPage.LicensesAttributions -> licensesAttributionsContent(
                     isTablet = false,
                 )
-                SettingsPage.Playback -> playbackSettingsContent(
+                SettingsPage.Playback,
+                SettingsPage.ContentPlayer,
+                SettingsPage.ContentStreamSelection,
+                SettingsPage.ContentUpNext,
+                SettingsPage.ContentSkipSegments,
+                SettingsPage.ContentPlayerInterface,
+                SettingsPage.ContentAudio,
+                SettingsPage.ContentSubtitles,
+                SettingsPage.ContentVideo,
+                SettingsPage.ContentP2P,
+                -> playbackSettingsContent(
                     isTablet = false,
                     showLoadingOverlay = showLoadingOverlay,
                     holdToSpeedEnabled = holdToSpeedEnabled,
@@ -734,6 +744,7 @@ private fun MobileSettingsScreen(
                     tunnelingEnabled = tunnelingEnabled,
                     useLibass = useLibass,
                     libassRenderType = libassRenderType,
+                selectedPage = page.takeUnless { it == SettingsPage.Playback },
                 )
                 SettingsPage.Streams -> streamsSettingsContent(
                     isTablet = false,
@@ -800,6 +811,7 @@ private fun MobileSettingsScreen(
                     onPluginsClick = onPluginsClick,
                     onCollectionsClick = onCollectionsClick,
                     onMediaServersClick = { onPageChange(SettingsPage.MediaServers) },
+                onMediaPageClick = { onPageChange(it) },
                 )
                 SettingsPage.Addons -> addonsSettingsContent()
                 SettingsPage.MediaServers -> mediaServersSettingsContent(
@@ -1190,7 +1202,17 @@ private fun TabletSettingsScreen(
                             SettingsPage.LicensesAttributions -> licensesAttributionsContent(
                                 isTablet = true,
                             )
-                            SettingsPage.Playback -> playbackSettingsContent(
+                            SettingsPage.Playback,
+                SettingsPage.ContentPlayer,
+                SettingsPage.ContentStreamSelection,
+                SettingsPage.ContentUpNext,
+                SettingsPage.ContentSkipSegments,
+                SettingsPage.ContentPlayerInterface,
+                SettingsPage.ContentAudio,
+                SettingsPage.ContentSubtitles,
+                SettingsPage.ContentVideo,
+                SettingsPage.ContentP2P,
+                -> playbackSettingsContent(
                                 isTablet = true,
                                 showLoadingOverlay = showLoadingOverlay,
                                 holdToSpeedEnabled = holdToSpeedEnabled,
@@ -1211,6 +1233,7 @@ private fun TabletSettingsScreen(
                                 tunnelingEnabled = tunnelingEnabled,
                                 useLibass = useLibass,
                                 libassRenderType = libassRenderType,
+                            selectedPage = page.takeUnless { it == SettingsPage.Playback },
                             )
                             SettingsPage.Streams -> streamsSettingsContent(
                                 isTablet = true,
@@ -1277,6 +1300,7 @@ private fun TabletSettingsScreen(
                                 onPluginsClick = { openInlinePage(SettingsPage.Plugins) },
                                 onCollectionsClick = onCollectionsClick,
                                 onMediaServersClick = { openInlinePage(SettingsPage.MediaServers) },
+                            onMediaPageClick = { openInlinePage(it) },
                             )
                             SettingsPage.Addons -> addonsSettingsContent()
                             SettingsPage.MediaServers -> mediaServersSettingsContent(
