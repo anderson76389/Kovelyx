@@ -47,4 +47,8 @@
     <string name="settings_media_subpage_p2p">P2P streaming</string>
     <string name="settings_media_desc_p2p">Torrents, profile and cache</string>
     <string name="settings_media_subtitle_preview_text">Every story begins with a little curiosity.</string>
+    <string name="settings_media_subtitle_font">Subtitle font</string>
+    <string name="settings_media_subtitle_text_opacity">Text opacity</string>
+    <string name="settings_media_subtitle_background_opacity">Background opacity</string>
+    <string name="settings_media_subtitle_outline_width">Outline width</string>
 </resources>
