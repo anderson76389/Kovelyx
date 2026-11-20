@@ -75,6 +75,7 @@ import com.kovelyx.app.features.player.PlayerSettingsRepository
 import com.kovelyx.app.features.player.STREAM_AUTO_PLAY_TIMEOUT_VALUES
 import com.kovelyx.app.features.player.SubtitleBackgroundColorSwatches
 import com.kovelyx.app.features.player.SubtitleColorSwatches
+import com.kovelyx.app.features.player.SubtitleFontChoice
 import com.kovelyx.app.features.player.SubtitleLanguageOption
 import com.kovelyx.app.features.player.formatPlaybackSpeedLabel
 import com.kovelyx.app.features.player.languageLabelForCode
@@ -343,6 +344,7 @@ private fun PlaybackSettingsSection(
     var showPreferredSubtitleDialog by remember { mutableStateOf(false) }
     var showSecondarySubtitleDialog by remember { mutableStateOf(false) }
     var showSubtitleTextColorDialog by remember { mutableStateOf(false) }
+    var showSubtitleFontDialog by remember { mutableStateOf(false) }
     var showSubtitleBackgroundColorDialog by remember { mutableStateOf(false) }
     var showSubtitleOutlineColorDialog by remember { mutableStateOf(false) }
     var showExternalPlayerDialog by remember { mutableStateOf(false) }
@@ -715,6 +717,14 @@ private fun PlaybackSettingsSection(
                         }
                     }
                     SettingsGroupDivider(isTablet = isTablet)
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_media_subtitle_font),
+                        description = SubtitleFontChoice.label(subtitleStyle.fontFamily),
+                        enabled = subtitleRenderingEnabled,
+                        isTablet = isTablet,
+                        onClick = { showSubtitleFontDialog = true },
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
                 }
                 SettingsSliderRow(
                     title = stringResource(Res.string.settings_playback_subtitle_size),
@@ -761,6 +771,23 @@ private fun PlaybackSettingsSection(
                     onClick = { showSubtitleTextColorDialog = true },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
+                if (selectedPage == SettingsPage.ContentSubtitles) {
+                    SettingsSliderRow(
+                        title = stringResource(Res.string.settings_media_subtitle_text_opacity),
+                        value = (subtitleStyle.textColor.alpha * 100f).roundToInt().coerceIn(0, 100),
+                        valueText = { "$"+"{it}%" },
+                        valueRange = 0..100,
+                        step = 5,
+                        isTablet = isTablet,
+                        enabled = subtitleRenderingEnabled,
+                        onValueChange = { value ->
+                            PlayerSettingsRepository.setSubtitleStyle(
+                                subtitleStyle.copy(textColor = subtitleStyle.textColor.copy(alpha = value / 100f)),
+                            )
+                        },
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
+                }
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_subtitle_background_color),
                     description = subtitleColorLabel(subtitleStyle.backgroundColor),
@@ -769,6 +796,23 @@ private fun PlaybackSettingsSection(
                     onClick = { showSubtitleBackgroundColorDialog = true },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
+                if (selectedPage == SettingsPage.ContentSubtitles) {
+                    SettingsSliderRow(
+                        title = stringResource(Res.string.settings_media_subtitle_background_opacity),
+                        value = (subtitleStyle.backgroundColor.alpha * 100f).roundToInt().coerceIn(0, 100),
+                        valueText = { "$"+"{it}%" },
+                        valueRange = 0..100,
+                        step = 5,
+                        isTablet = isTablet,
+                        enabled = subtitleRenderingEnabled,
+                        onValueChange = { value ->
+                            PlayerSettingsRepository.setSubtitleStyle(
+                                subtitleStyle.copy(backgroundColor = subtitleStyle.backgroundColor.copy(alpha = value / 100f)),
+                            )
+                        },
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
+                }
                 SettingsSwitchRow(
                     title = stringResource(Res.string.settings_playback_subtitle_outline),
                     description = stringResource(Res.string.settings_playback_subtitle_outline_description),
@@ -787,6 +831,21 @@ private fun PlaybackSettingsSection(
                         enabled = subtitleRenderingEnabled,
                         isTablet = isTablet,
                         onClick = { showSubtitleOutlineColorDialog = true },
+                    )
+                }
+                if (selectedPage == SettingsPage.ContentSubtitles && subtitleStyle.outlineEnabled) {
+                    SettingsGroupDivider(isTablet = isTablet)
+                    SettingsSliderRow(
+                        title = stringResource(Res.string.settings_media_subtitle_outline_width),
+                        value = subtitleStyle.outlineWidth,
+                        valueText = { it.toString() },
+                        valueRange = 0..10,
+                        step = 1,
+                        isTablet = isTablet,
+                        enabled = subtitleRenderingEnabled,
+                        onValueChange = { value ->
+                            PlayerSettingsRepository.setSubtitleStyle(subtitleStyle.copy(outlineWidth = value))
+                        },
                     )
                 }
                 val showLibassSettings = !isIos && (isDesktop || androidPlaybackEngine != AndroidPlaybackEngine.Libmpv)
@@ -1709,6 +1768,25 @@ private fun PlaybackSettingsSection(
             }
         }
 
+    }
+
+    if (showSubtitleFontDialog) {
+        IosEnumSelectionDialog(
+            title = stringResource(Res.string.settings_media_subtitle_font),
+            options = listOf(
+                SubtitleFontChoice.DEFAULT,
+                SubtitleFontChoice.SANS_SERIF,
+                SubtitleFontChoice.SERIF,
+                SubtitleFontChoice.MONOSPACE,
+            ),
+            selected = autoPlayPlayerSettings.subtitleStyle.fontFamily,
+            label = { SubtitleFontChoice.label(it) },
+            onSelect = { font ->
+                PlayerSettingsRepository.setSubtitleStyle(autoPlayPlayerSettings.subtitleStyle.copy(fontFamily = font))
+                showSubtitleFontDialog = false
+            },
+            onDismiss = { showSubtitleFontDialog = false },
+        )
     }
 
     if (showPreferredAudioDialog) {
