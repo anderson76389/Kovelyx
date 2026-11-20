@@ -168,14 +168,7 @@ internal fun LazyListScope.settingsRootContent(
                         isTablet = isTablet,
                         onClick = onContentDiscoveryClick,
                     )
-                    SettingsGroupDivider(isTablet = isTablet)
-                    SettingsNavigationRow(
-                        title = stringResource(Res.string.compose_settings_page_playback),
-                        description = stringResource(Res.string.settings_playback_subtitle),
-                        icon = Icons.Rounded.PlayArrow,
-                        isTablet = isTablet,
-                        onClick = onPlaybackClick,
-                    )
+
                 }
             }
         }
