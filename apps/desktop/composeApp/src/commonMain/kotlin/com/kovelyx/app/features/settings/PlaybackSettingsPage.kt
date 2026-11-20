@@ -124,6 +124,7 @@ internal fun LazyListScope.playbackSettingsContent(
     tunnelingEnabled: Boolean,
     useLibass: Boolean,
     libassRenderType: String,
+    selectedPage: SettingsPage? = null,
 ) {
     item {
         PlaybackSettingsSection(
@@ -147,6 +148,7 @@ internal fun LazyListScope.playbackSettingsContent(
             tunnelingEnabled = tunnelingEnabled,
             useLibass = useLibass,
             libassRenderType = libassRenderType,
+            selectedPage = selectedPage,
         )
     }
 }
@@ -333,6 +335,7 @@ private fun PlaybackSettingsSection(
     tunnelingEnabled: Boolean,
     useLibass: Boolean,
     libassRenderType: String,
+    selectedPage: SettingsPage? = null,
 ) {
     var showPreferredAudioDialog by remember { mutableStateOf(false) }
     var showSecondaryAudioDialog by remember { mutableStateOf(false) }
@@ -395,6 +398,7 @@ private fun PlaybackSettingsSection(
     Column(
         verticalArrangement = Arrangement.spacedBy(sectionSpacing),
     ) {
+        if (selectedPage == null || selectedPage == SettingsPage.ContentPlayer || selectedPage == SettingsPage.ContentPlayerInterface) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_player),
             isTablet = isTablet,
@@ -512,6 +516,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
+
+        }
+        if (selectedPage == null || selectedPage == SettingsPage.ContentAudio || selectedPage == SettingsPage.ContentSubtitles) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_subtitle_audio),
             isTablet = isTablet,
@@ -619,6 +626,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
+
+        }
+        if (selectedPage == null || selectedPage == SettingsPage.ContentSubtitles) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_subtitle_rendering),
             isTablet = isTablet,
@@ -724,6 +734,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
+
+        }
+        if (selectedPage == null || selectedPage == SettingsPage.ContentStreamSelection) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_stream_selection),
             isTablet = isTablet,
@@ -748,6 +761,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
+
+        }
+        if (selectedPage == null || selectedPage == SettingsPage.ContentStreamSelection) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_stream_auto_play),
             isTablet = isTablet,
@@ -872,6 +888,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
+
+        }
+        if (selectedPage == null || selectedPage == SettingsPage.ContentUpNext) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_next_episode),
             isTablet = isTablet,
@@ -1051,6 +1070,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
+
+        }
+        if (selectedPage == null || selectedPage == SettingsPage.ContentSkipSegments) {
         SettingsSection(
             title = stringResource(Res.string.settings_playback_section_skip_segments),
             isTablet = isTablet,
@@ -1134,7 +1156,9 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (!isIos && !isDesktop) {
+
+        }
+        if (!isIos && !isDesktop && (selectedPage == null || selectedPage == SettingsPage.ContentVideo)) {
             val decoderEnabled = !autoPlayPlayerSettings.externalPlayerEnabled
             val exoOptionsEnabled = decoderEnabled && (isDesktop || androidPlaybackEngine != AndroidPlaybackEngine.Libmpv)
             val libmpvOptionsVisible = !isDesktop && androidPlaybackEngine != AndroidPlaybackEngine.ExoPlayer
@@ -1432,7 +1456,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (isWindows) {
+        if (isWindows && (selectedPage == null || selectedPage == SettingsPage.ContentVideo)) {
             SettingsSection(
                 title = stringResource(Res.string.settings_playback_nvidia_rtx_video_section),
                 isTablet = isTablet,
@@ -1458,7 +1482,8 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (isIos) {
+        if (isIos && (selectedPage == null || selectedPage == SettingsPage.ContentAudio || selectedPage == SettingsPage.ContentVideo)) {
+            if (selectedPage == null || selectedPage == SettingsPage.ContentAudio) {
             SettingsSection(
                 title = stringResource(Res.string.settings_playback_ios_audio_output_section),
                 isTablet = isTablet,
@@ -1473,6 +1498,8 @@ private fun PlaybackSettingsSection(
                 }
             }
 
+            }
+            if (selectedPage == null || selectedPage == SettingsPage.ContentVideo) {
             SettingsSection(
                 title = stringResource(Res.string.settings_playback_ios_video_output),
                 isTablet = isTablet,
@@ -1516,9 +1543,10 @@ private fun PlaybackSettingsSection(
                     )
                 }
             }
+            }
         }
 
-        if (P2pSettingsRepository.isVisible) {
+        if (P2pSettingsRepository.isVisible && (selectedPage == null || selectedPage == SettingsPage.ContentP2P)) {
             SettingsSection(
                 title = stringResource(Res.string.settings_playback_section_p2p),
                 isTablet = isTablet,
