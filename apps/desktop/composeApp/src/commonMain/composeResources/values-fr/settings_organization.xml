@@ -27,4 +27,22 @@
     <string name="settings_nav_layout_description">Accueil, affiches, détails, flux et navigation</string>
     <string name="settings_content_discovery_section_catalogues">CATALOGUES ET COLLECTIONS</string>
     <string name="settings_content_discovery_section_personal_servers">SERVEURS MULTIMÉDIAS</string>
+    <string name="kovelyx_media_player_title">Lecteur</string>
+    <string name="kovelyx_media_player_description">Lecteur par défaut et moteurs de lecture</string>
+    <string name="kovelyx_media_stream_selection_title">Sélection du flux</string>
+    <string name="kovelyx_media_stream_selection_description">Sources, sélection et lecture automatique</string>
+    <string name="kovelyx_media_up_next_title">À suivre</string>
+    <string name="kovelyx_media_up_next_description">Lecture automatique de l’épisode suivant</string>
+    <string name="kovelyx_media_skip_segments_title">Passer des segments</string>
+    <string name="kovelyx_media_skip_segments_description">Intros, résumés et génériques</string>
+    <string name="kovelyx_media_player_interface_title">Interface du lecteur</string>
+    <string name="kovelyx_media_player_interface_description">Contrôles, écran de chargement et chapitres</string>
+    <string name="kovelyx_media_audio_title">Audio</string>
+    <string name="kovelyx_media_audio_description">Langues et réglages audio</string>
+    <string name="kovelyx_media_subtitles_title">Sous-titres</string>
+    <string name="kovelyx_media_subtitles_description">Langues, synchronisation et apparence</string>
+    <string name="kovelyx_media_video_title">Vidéo</string>
+    <string name="kovelyx_media_video_description">Décodeurs, sortie vidéo et HDR</string>
+    <string name="kovelyx_media_p2p_title">Streaming P2P</string>
+    <string name="kovelyx_media_p2p_description">Torrent, profil et cache</string>
 </resources>
