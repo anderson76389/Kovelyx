@@ -46,4 +46,5 @@
     <string name="settings_media_desc_video">Decoders and compatible video options</string>
     <string name="settings_media_subpage_p2p">P2P streaming</string>
     <string name="settings_media_desc_p2p">Torrents, profile and cache</string>
+    <string name="settings_media_subtitle_preview_text">Every story begins with a little curiosity.</string>
 </resources>
