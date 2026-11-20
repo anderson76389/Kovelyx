@@ -371,14 +371,33 @@ private fun PlaybackSettingsSection(
     val pluginsEnabled = AppFeaturePolicy.pluginsEnabled
     val externalPlayerSupported = AppFeaturePolicy.externalPlayerSupported
     val autoPlayPlayerSettings by PlayerSettingsRepository.uiState.collectAsStateWithLifecycle()
-    val p2pSettings by remember {
-        P2pSettingsRepository.ensureLoaded()
-        P2pSettingsRepository.uiState
-    }.collectAsStateWithLifecycle()
-    val p2pCacheState by P2pStreamingEngine.cacheState.collectAsStateWithLifecycle()
-    val p2pStreamingState by P2pStreamingEngine.state.collectAsStateWithLifecycle()
+    // Avoid observing torrent engine/cache flows while adjusting audio, subtitles,
+    // stream selection or other unrelated pages. On legacy bookmarks preserve the
+    // old full settings behavior.
+    val needsP2p = selectedPage == null || selectedPage == SettingsPage.ContentP2P
+    val p2pSettings = if (needsP2p) {
+        val state by remember {
+            P2pSettingsRepository.ensureLoaded()
+            P2pSettingsRepository.uiState
+        }.collectAsStateWithLifecycle()
+        state
+    } else {
+        P2pSettingsRepository.uiState.value
+    }
+    val p2pCacheState = if (needsP2p) {
+        val state by P2pStreamingEngine.cacheState.collectAsStateWithLifecycle()
+        state
+    } else {
+        P2pStreamingEngine.cacheState.value
+    }
+    val p2pStreamingState = if (needsP2p) {
+        val state by P2pStreamingEngine.state.collectAsStateWithLifecycle()
+        state
+    } else {
+        P2pStreamingEngine.state.value
+    }
     val coroutineScope = rememberCoroutineScope()
-    val availableExternalPlayers = if (externalPlayerSupported) {
+    val availableExternalPlayers = if (externalPlayerSupported && (selectedPage == null || selectedPage == SettingsPage.ContentPlayer)) {
         ExternalPlayerPlatform.availablePlayers()
     } else {
         emptyList()
@@ -386,8 +405,15 @@ private fun PlaybackSettingsSection(
     val selectedExternalPlayer = availableExternalPlayers.firstOrNull {
         it.id == autoPlayPlayerSettings.externalPlayerId
     }
-    val addonUiState by AddonRepository.uiState.collectAsStateWithLifecycle()
-    val pluginUiState = if (pluginsEnabled) {
+    // Source catalogs are observed only on the automatic stream selection page.
+    val needsSources = selectedPage == null || selectedPage == SettingsPage.ContentStreamSelection
+    val addonUiState = if (needsSources) {
+        val state by AddonRepository.uiState.collectAsStateWithLifecycle()
+        state
+    } else {
+        AddonRepository.uiState.value
+    }
+    val pluginUiState = if (pluginsEnabled && needsSources) {
         val state by PluginRepository.uiState.collectAsStateWithLifecycle()
         state
     } else {
