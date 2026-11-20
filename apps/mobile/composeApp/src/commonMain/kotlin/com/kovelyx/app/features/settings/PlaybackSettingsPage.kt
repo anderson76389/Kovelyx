@@ -99,6 +99,7 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
 internal fun LazyListScope.playbackSettingsContent(
+    topic: SettingsPage = SettingsPage.Playback,
     isTablet: Boolean,
     showLoadingOverlay: Boolean,
     holdToSpeedEnabled: Boolean,
@@ -122,6 +123,7 @@ internal fun LazyListScope.playbackSettingsContent(
 ) {
     item {
         PlaybackSettingsSection(
+            topic = topic,
             isTablet = isTablet,
             showLoadingOverlay = showLoadingOverlay,
             holdToSpeedEnabled = holdToSpeedEnabled,
@@ -308,6 +310,7 @@ private fun subtitleColorLabel(color: Color): String {
 
 @Composable
 private fun PlaybackSettingsSection(
+    topic: SettingsPage,
     isTablet: Boolean,
     showLoadingOverlay: Boolean,
     holdToSpeedEnabled: Boolean,
@@ -385,7 +388,7 @@ private fun PlaybackSettingsSection(
     Column(
         verticalArrangement = Arrangement.spacedBy(sectionSpacing),
     ) {
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaPlayer || topic == SettingsPage.MediaPlayerInterface) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_player),
             isTablet = isTablet,
         ) {
@@ -495,7 +498,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaAudio || topic == SettingsPage.MediaSubtitles) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_subtitle_audio),
             isTablet = isTablet,
         ) {
@@ -511,6 +514,7 @@ private fun PlaybackSettingsSection(
             val otherSubtitleOptionsEnabled = !isExternalPlayer
 
             SettingsGroup(isTablet = isTablet) {
+                if (topic != SettingsPage.MediaSubtitles) {
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_preferred_audio_language),
                     description = when (preferredAudioLanguage) {
@@ -532,6 +536,8 @@ private fun PlaybackSettingsSection(
                     onClick = { showSecondaryAudioDialog = true },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
+                }
+                if (topic != SettingsPage.MediaAudio) {
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_preferred_subtitle_language),
                     description = when (preferredSubtitleLanguage) {
@@ -599,10 +605,11 @@ private fun PlaybackSettingsSection(
                         )
                     },
                 )
+                }
             }
         }
 
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaSubtitles) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_subtitle_rendering),
             isTablet = isTablet,
         ) {
@@ -707,7 +714,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaStreamSelection) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_stream_selection),
             isTablet = isTablet,
         ) {
@@ -731,7 +738,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaStreamSelection) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_stream_auto_play),
             isTablet = isTablet,
         ) {
@@ -855,7 +862,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaUpNext) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_next_episode),
             isTablet = isTablet,
         ) {
@@ -1034,7 +1041,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaSkipSegments) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_skip_segments),
             isTablet = isTablet,
         ) {
@@ -1122,7 +1129,7 @@ private fun PlaybackSettingsSection(
             val libmpvOptionsVisible = androidPlaybackEngine != AndroidPlaybackEngine.ExoPlayer
             val libmpvOptionsEnabled = decoderEnabled && libmpvOptionsVisible
             val nativeMemorySupported = isExoNativeMemorySupported()
-            SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo) SettingsSection(
                 title = stringResource(Res.string.settings_org_decoder_title),
                 isTablet = isTablet,
             ) {
@@ -1220,7 +1227,7 @@ private fun PlaybackSettingsSection(
                     }
                 }
             }
-            SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo) SettingsSection(
                 title = stringResource(Res.string.settings_org_buffering_title),
                 isTablet = isTablet,
             ) {
@@ -1415,7 +1422,7 @@ private fun PlaybackSettingsSection(
         }
 
         if (isIos) {
-            SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaAudio) SettingsSection(
                 title = stringResource(Res.string.settings_playback_ios_audio_output_section),
                 isTablet = isTablet,
             ) {
@@ -1429,7 +1436,7 @@ private fun PlaybackSettingsSection(
                 }
             }
 
-            SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo) SettingsSection(
                 title = stringResource(Res.string.settings_playback_ios_video_output),
                 isTablet = isTablet,
             ) {
@@ -1475,7 +1482,7 @@ private fun PlaybackSettingsSection(
         }
 
         if (P2pSettingsRepository.isVisible) {
-            SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaP2P) SettingsSection(
                 title = stringResource(Res.string.settings_playback_section_p2p),
                 isTablet = isTablet,
             ) {
