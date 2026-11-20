@@ -399,6 +399,7 @@ private fun PlaybackSettingsSection(
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
+                if (topic != SettingsPage.MediaPlayer) {
                 SettingsSwitchRow(
                     title = stringResource(Res.string.settings_playback_legacy_layout),
                     description = stringResource(Res.string.settings_playback_legacy_layout_description),
@@ -430,7 +431,18 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
-                SettingsGroupDivider(isTablet = isTablet)
+                }
+                if (topic == SettingsPage.MediaPlayer && !isIos) {
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_playback_engine),
+                        description = androidPlaybackEngine.label,
+                        isTablet = isTablet,
+                        onClick = { showPlaybackEngineDialog = true },
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
+                }
+                if (topic != SettingsPage.MediaPlayerInterface) {
+                if (topic == SettingsPage.Playback) SettingsGroupDivider(isTablet = isTablet)
                 // Player preference picker: Internal / External
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_player_preference),
@@ -474,6 +486,7 @@ private fun PlaybackSettingsSection(
                         onCheckedChange = PlayerSettingsRepository::setExternalPlayerSendSkipSegments,
                     )
                 }
+                if (topic != SettingsPage.MediaPlayer) {
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsSwitchRow(
                     title = stringResource(Res.string.settings_playback_touch_gestures),
@@ -500,6 +513,7 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onClick = { showHoldToSpeedValueDialog = true },
                     )
+                }
                 }
             }
         }
