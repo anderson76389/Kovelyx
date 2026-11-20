@@ -738,8 +738,7 @@ private fun MobileSettingsScreen(
                 SettingsPage.MediaAudio,
                 SettingsPage.MediaSubtitles,
                 SettingsPage.MediaVideo,
-                SettingsPage.MediaP2P,
-                -> playbackSettingsContent(
+                SettingsPage.MediaP2P -> playbackSettingsContent(
                     topic = page,
                     isTablet = false,
                     showLoadingOverlay = showLoadingOverlay,
@@ -820,7 +819,7 @@ private fun MobileSettingsScreen(
                     onPluginsClick = onPluginsClick,
                     onCollectionsClick = onCollectionsClick,
                     onMediaServersClick = { onPageChange(SettingsPage.MediaServers) },
-onPlaybackTopicClick = { onPageChange(it) },
+                    onPlaybackTopicClick = { onPageChange(it) },
                 )
                 SettingsPage.Addons -> addonsSettingsContent()
                 SettingsPage.MediaServers -> mediaServersSettingsContent(
@@ -1192,8 +1191,7 @@ private fun TabletSettingsScreen(
                 SettingsPage.MediaAudio,
                 SettingsPage.MediaSubtitles,
                 SettingsPage.MediaVideo,
-                SettingsPage.MediaP2P,
-                -> playbackSettingsContent(
+                SettingsPage.MediaP2P -> playbackSettingsContent(
                         topic = page,
                         isTablet = true,
                         showLoadingOverlay = showLoadingOverlay,
@@ -1274,7 +1272,7 @@ private fun TabletSettingsScreen(
                         onPluginsClick = { openInlinePage(SettingsPage.Plugins) },
                         onCollectionsClick = onCollectionsClick,
                         onMediaServersClick = { openInlinePage(SettingsPage.MediaServers) },
-onPlaybackTopicClick = { openInlinePage(it) },
+                                onPlaybackTopicClick = { openInlinePage(it) },
                     )
                     SettingsPage.Addons -> addonsSettingsContent()
                     SettingsPage.MediaServers -> mediaServersSettingsContent(
