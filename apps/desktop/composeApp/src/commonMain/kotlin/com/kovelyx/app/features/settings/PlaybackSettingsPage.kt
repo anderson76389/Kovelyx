@@ -775,7 +775,7 @@ private fun PlaybackSettingsSection(
                     SettingsSliderRow(
                         title = stringResource(Res.string.settings_media_subtitle_text_opacity),
                         value = (subtitleStyle.textColor.alpha * 100f).roundToInt().coerceIn(0, 100),
-                        valueText = { "$"+"{it}%" },
+                        valueText = { it.toString() + "%" },
                         valueRange = 0..100,
                         step = 5,
                         isTablet = isTablet,
@@ -800,7 +800,7 @@ private fun PlaybackSettingsSection(
                     SettingsSliderRow(
                         title = stringResource(Res.string.settings_media_subtitle_background_opacity),
                         value = (subtitleStyle.backgroundColor.alpha * 100f).roundToInt().coerceIn(0, 100),
-                        valueText = { "$"+"{it}%" },
+                        valueText = { it.toString() + "%" },
                         valueRange = 0..100,
                         step = 5,
                         isTablet = isTablet,
