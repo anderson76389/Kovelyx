@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.features.addons.AddonRepository
 import com.kovelyx.app.features.addons.enabledAddons
@@ -641,6 +642,28 @@ private fun PlaybackSettingsSection(
             val subtitleRenderingEnabled = !autoPlayPlayerSettings.externalPlayerEnabled
             SettingsGroup(isTablet = isTablet) {
                 val subtitleStyle = autoPlayPlayerSettings.subtitleStyle
+                if (selectedPage == SettingsPage.ContentSubtitles) {
+                    // Lightweight inline preview, kept in the same UI state as the real player.
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 130.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        color = Color(0xFF263B47),
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(16.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.settings_media_subtitle_preview_text),
+                                fontSize = subtitleStyle.fontSizeSp.sp,
+                                fontWeight = if (subtitleStyle.bold) FontWeight.Bold else FontWeight.Normal,
+                                color = subtitleStyle.textColor,
+                                maxLines = 3,
+                            )
+                        }
+                    }
+                    SettingsGroupDivider(isTablet = isTablet)
+                }
                 SettingsSliderRow(
                     title = stringResource(Res.string.settings_playback_subtitle_size),
                     value = subtitleStyle.fontSizeSp,
