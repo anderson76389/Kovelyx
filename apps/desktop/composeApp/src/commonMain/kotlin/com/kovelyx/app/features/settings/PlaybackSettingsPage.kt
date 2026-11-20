@@ -409,6 +409,9 @@ private fun PlaybackSettingsSection(
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
+                // The default-player page and player-interface page no longer duplicate
+                // every control, while the original full Playback page is preserved.
+                if (topic != SettingsPage.MediaPlayer) {
                 if (!isDesktop) {
                     SettingsSwitchRow(
                         title = stringResource(Res.string.settings_playback_legacy_layout),
@@ -442,8 +445,20 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
-                if (externalPlayerSupported) {
-                    SettingsGroupDivider(isTablet = isTablet)
+                }
+                // On Android the internal engine belongs in the Player sub-page.
+                if (topic == SettingsPage.MediaPlayer && !isDesktop) {
+                    SettingsNavigationRow(
+                        title = stringResource(Res.string.settings_playback_engine),
+                        description = androidPlaybackEngine.label,
+                        isTablet = isTablet,
+                        onClick = { showPlaybackEngineDialog = true },
+                    )
+                }
+                if (externalPlayerSupported && topic != SettingsPage.MediaPlayerInterface) {
+                    if (topic == SettingsPage.Playback || (topic == SettingsPage.MediaPlayer && !isDesktop)) {
+                        SettingsGroupDivider(isTablet = isTablet)
+                    }
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_player_preference),
                         description = if (autoPlayPlayerSettings.externalPlayerEnabled) {
@@ -489,6 +504,7 @@ private fun PlaybackSettingsSection(
                         )
                     }
                 }
+                if (topic != SettingsPage.MediaPlayer) {
                 if (!isDesktop) {
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsSwitchRow(
@@ -517,6 +533,7 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onClick = { showHoldToSpeedValueDialog = true },
                     )
+                }
                 }
             }
         }
