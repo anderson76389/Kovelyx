@@ -517,7 +517,11 @@ private fun PlaybackSettingsSection(
         }
         if (selectedPage == null || selectedPage == SettingsPage.ContentAudio || selectedPage == SettingsPage.ContentSubtitles) {
         SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_subtitle_audio),
+            title = stringResource(when (selectedPage) {
+                SettingsPage.ContentAudio -> Res.string.settings_media_subpage_audio
+                SettingsPage.ContentSubtitles -> Res.string.settings_media_subpage_subtitles
+                else -> Res.string.settings_playback_section_subtitle_audio
+            }),
             isTablet = isTablet,
         ) {
             // Subtitle/Audio settings enable/disable logic:
@@ -532,6 +536,7 @@ private fun PlaybackSettingsSection(
             val otherSubtitleOptionsEnabled = !isExternalPlayer
 
             SettingsGroup(isTablet = isTablet) {
+                if (selectedPage != SettingsPage.ContentSubtitles) {
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_preferred_audio_language),
                     description = when (preferredAudioLanguage) {
@@ -552,7 +557,9 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onClick = { showSecondaryAudioDialog = true },
                 )
-                SettingsGroupDivider(isTablet = isTablet)
+                }
+                if (selectedPage != SettingsPage.ContentAudio) {
+                    if (selectedPage == null) SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_preferred_subtitle_language),
                     description = when (preferredSubtitleLanguage) {
@@ -620,6 +627,7 @@ private fun PlaybackSettingsSection(
                         )
                     },
                 )
+                }
             }
         }
 
