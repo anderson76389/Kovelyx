@@ -7,6 +7,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.ui.graphics.vector.ImageVector
+import nuvio.composeapp.generated.resources.*
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.compose_settings_category_about
 import nuvio.composeapp.generated.resources.compose_settings_category_general
@@ -129,6 +130,51 @@ internal enum class SettingsPage(
         titleRes = Res.string.settings_org_sources_title,
         category = SettingsCategory.Watch,
         parentPage = Root,
+    ),
+    MediaPlayer(
+        titleRes = Res.string.kovelyx_media_player_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaStreamSelection(
+        titleRes = Res.string.kovelyx_media_stream_selection_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaUpNext(
+        titleRes = Res.string.kovelyx_media_up_next_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaSkipSegments(
+        titleRes = Res.string.kovelyx_media_skip_segments_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaPlayerInterface(
+        titleRes = Res.string.kovelyx_media_player_interface_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaAudio(
+        titleRes = Res.string.kovelyx_media_audio_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaSubtitles(
+        titleRes = Res.string.kovelyx_media_subtitles_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaVideo(
+        titleRes = Res.string.kovelyx_media_video_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
+    ),
+    MediaP2P(
+        titleRes = Res.string.kovelyx_media_p2p_title,
+        category = SettingsCategory.Watch,
+        parentPage = ContentDiscovery,
     ),
     Addons(
         titleRes = Res.string.compose_settings_page_addons,
