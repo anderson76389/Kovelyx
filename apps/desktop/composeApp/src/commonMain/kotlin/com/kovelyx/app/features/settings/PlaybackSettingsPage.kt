@@ -400,10 +400,11 @@ private fun PlaybackSettingsSection(
     ) {
         if (selectedPage == null || selectedPage == SettingsPage.ContentPlayer || selectedPage == SettingsPage.ContentPlayerInterface) {
         SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_player),
+            title = stringResource(if (selectedPage == SettingsPage.ContentPlayerInterface) Res.string.settings_media_subpage_interface else Res.string.settings_playback_section_player),
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
+                if (selectedPage != SettingsPage.ContentPlayer) {
                 if (!isDesktop) {
                     SettingsSwitchRow(
                         title = stringResource(Res.string.settings_playback_legacy_layout),
@@ -437,8 +438,27 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
+                }
+                if (selectedPage != SettingsPage.ContentPlayerInterface) {
+                    if (!isDesktop && !isIos && selectedPage == SettingsPage.ContentPlayer) {
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.settings_playback_engine),
+                            description = androidPlaybackEngine.label,
+                            isTablet = isTablet,
+                            onClick = { showPlaybackEngineDialog = true },
+                        )
+                    }
+                    if (isDesktop && !externalPlayerSupported && selectedPage == SettingsPage.ContentPlayer) {
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.settings_playback_player_preference),
+                            description = stringResource(Res.string.settings_playback_player_preference_internal),
+                            enabled = false,
+                            isTablet = isTablet,
+                            onClick = {},
+                        )
+                    }
                 if (externalPlayerSupported) {
-                    SettingsGroupDivider(isTablet = isTablet)
+                    if (selectedPage == null || (!isDesktop && !isIos && selectedPage == SettingsPage.ContentPlayer)) SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_player_preference),
                         description = if (autoPlayPlayerSettings.externalPlayerEnabled) {
@@ -484,6 +504,8 @@ private fun PlaybackSettingsSection(
                         )
                     }
                 }
+                }
+                if (selectedPage != SettingsPage.ContentPlayer) {
                 if (!isDesktop) {
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsSwitchRow(
@@ -512,6 +534,7 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onClick = { showHoldToSpeedValueDialog = true },
                     )
+                }
                 }
             }
         }
