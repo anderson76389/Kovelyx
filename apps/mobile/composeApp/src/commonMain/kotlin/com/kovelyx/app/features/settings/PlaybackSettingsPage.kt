@@ -389,7 +389,13 @@ private fun PlaybackSettingsSection(
         verticalArrangement = Arrangement.spacedBy(sectionSpacing),
     ) {
         if (topic == SettingsPage.Playback || topic == SettingsPage.MediaPlayer || topic == SettingsPage.MediaPlayerInterface) SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_player),
+            title = stringResource(
+                if (topic == SettingsPage.MediaPlayerInterface) {
+                    Res.string.kovelyx_media_player_interface_title
+                } else {
+                    Res.string.settings_playback_section_player
+                },
+            ),
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
@@ -499,7 +505,13 @@ private fun PlaybackSettingsSection(
         }
 
         if (topic == SettingsPage.Playback || topic == SettingsPage.MediaAudio || topic == SettingsPage.MediaSubtitles) SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_subtitle_audio),
+            title = stringResource(
+                when (topic) {
+                    SettingsPage.MediaAudio -> Res.string.kovelyx_media_audio_title
+                    SettingsPage.MediaSubtitles -> Res.string.kovelyx_media_subtitles_title
+                    else -> Res.string.settings_playback_section_subtitle_audio
+                },
+            ),
             isTablet = isTablet,
         ) {
             // Subtitle/Audio settings enable/disable logic:
@@ -535,7 +547,7 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onClick = { showSecondaryAudioDialog = true },
                 )
-                SettingsGroupDivider(isTablet = isTablet)
+                if (topic == SettingsPage.Playback) SettingsGroupDivider(isTablet = isTablet)
                 }
                 if (topic != SettingsPage.MediaAudio) {
                 SettingsNavigationRow(
