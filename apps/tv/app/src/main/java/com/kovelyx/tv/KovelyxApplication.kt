@@ -108,7 +108,13 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
                 .build()
         }
 
-        val imageLoaderRef: () -> ImageLoader = { SingletonImageLoader.get(this) }
+        val imageCacheStrategy by lazy {
+            StaleWhileRevalidateCacheStrategy(
+                revalidationClient = { imageOkHttpClient },
+                imageLoaderProvider = { SingletonImageLoader.get(this) },
+                maxConcurrentRequests = if (constrainedTv) 2 else 8,
+            )
+        }
 
         return ImageLoader.Builder(this)
             .components {
@@ -122,12 +128,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
                 add(
                     coil3.network.okhttp.OkHttpNetworkFetcherFactory(
                         callFactory = { imageOkHttpClient },
-                        cacheStrategy = {
-                            StaleWhileRevalidateCacheStrategy(
-                                revalidationClient = { imageOkHttpClient },
-                                imageLoaderProvider = imageLoaderRef,
-                            )
-                        },
+                        cacheStrategy = { imageCacheStrategy },
                     )
                 )
             }

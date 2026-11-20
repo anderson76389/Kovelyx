@@ -1,5 +1,6 @@
 package com.kovelyx.tv.core.image
 
+import android.os.SystemClock
 import android.util.Log
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -32,22 +33,20 @@ import okhttp3.Request
 class StaleWhileRevalidateCacheStrategy(
     private val revalidationClient: () -> OkHttpClient,
     private val imageLoaderProvider: () -> ImageLoader,
+    maxConcurrentRequests: Int = 8,
 ) : CacheStrategy {
 
     companion object {
-        private const val TAG = "NuvioSWR"
-        private const val REVALIDATION_MAX_REQUESTS = 8
-        private val revalidationBudget = TvRevalidationBudget(
-            maxRememberedUrls = 256,
-            maxConcurrentRequests = REVALIDATION_MAX_REQUESTS,
-        )
+        private const val TAG = "KovelyxSWR"
     }
+
+    private val revalidationBudget = TvRevalidationBudget(maxConcurrentRequests = maxConcurrentRequests)
 
     private val revalidationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val delegate = CacheControlCacheStrategy()
     private val revalidationDispatcher = Dispatcher().apply {
-        maxRequests = REVALIDATION_MAX_REQUESTS
-        maxRequestsPerHost = REVALIDATION_MAX_REQUESTS
+        maxRequests = maxConcurrentRequests
+        maxRequestsPerHost = maxConcurrentRequests
     }
 
     @Volatile
@@ -91,7 +90,7 @@ class StaleWhileRevalidateCacheStrategy(
     }
 
     private fun scheduleBackgroundRevalidation(url: String, cachedResponse: NetworkResponse) {
-        if (!revalidationBudget.tryStart(url, System.currentTimeMillis())) return
+        if (!revalidationBudget.tryStart(url, SystemClock.elapsedRealtime())) return
 
         revalidationScope.launch {
             try {
@@ -133,7 +132,7 @@ class StaleWhileRevalidateCacheStrategy(
                     Log.w(TAG, "Revalidation error: ${e.javaClass.simpleName}")
                 }
             } finally {
-                revalidationBudget.finish(url, System.currentTimeMillis())
+                revalidationBudget.finish(url, SystemClock.elapsedRealtime())
             }
         }
     }
