@@ -390,10 +390,11 @@ private fun PlaybackSettingsSection(
     ) {
         if (selectedPage == null || selectedPage == SettingsPage.ContentPlayer || selectedPage == SettingsPage.ContentPlayerInterface) {
         SettingsSection(
-            title = stringResource(Res.string.settings_playback_section_player),
+            title = stringResource(if (selectedPage == SettingsPage.ContentPlayerInterface) Res.string.settings_media_subpage_interface else Res.string.settings_playback_section_player),
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
+                if (selectedPage != SettingsPage.ContentPlayer) {
                 SettingsSwitchRow(
                     title = stringResource(Res.string.settings_playback_legacy_layout),
                     description = stringResource(Res.string.settings_playback_legacy_layout_description),
@@ -425,7 +426,17 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
-                SettingsGroupDivider(isTablet = isTablet)
+                }
+                if (selectedPage != SettingsPage.ContentPlayerInterface) {
+                    if (!isIos && selectedPage == SettingsPage.ContentPlayer) {
+                        SettingsNavigationRow(
+                            title = stringResource(Res.string.settings_playback_engine),
+                            description = androidPlaybackEngine.label,
+                            isTablet = isTablet,
+                            onClick = { showPlaybackEngineDialog = true },
+                        )
+                    }
+                if (selectedPage == null || (!isIos && selectedPage == SettingsPage.ContentPlayer)) SettingsGroupDivider(isTablet = isTablet)
                 // Player preference picker: Internal / External
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_player_preference),
@@ -469,6 +480,8 @@ private fun PlaybackSettingsSection(
                         onCheckedChange = PlayerSettingsRepository::setExternalPlayerSendSkipSegments,
                     )
                 }
+                }
+                if (selectedPage != SettingsPage.ContentPlayer) {
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsSwitchRow(
                     title = stringResource(Res.string.settings_playback_touch_gestures),
@@ -495,6 +508,7 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onClick = { showHoldToSpeedValueDialog = true },
                     )
+                }
                 }
             }
         }
