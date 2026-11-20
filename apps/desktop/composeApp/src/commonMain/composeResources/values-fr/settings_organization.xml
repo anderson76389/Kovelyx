@@ -27,4 +27,23 @@
     <string name="settings_nav_layout_description">Accueil, affiches, détails, flux et navigation</string>
     <string name="settings_content_discovery_section_catalogues">CATALOGUES ET COLLECTIONS</string>
     <string name="settings_content_discovery_section_personal_servers">SERVEURS MULTIMÉDIAS</string>
+    <string name="settings_media_section_player">LECTURE</string>
+    <string name="settings_media_subpage_player">Lecteur</string>
+    <string name="settings_media_desc_player">Lecteur par défaut et moteur de lecture</string>
+    <string name="settings_media_subpage_streams">Sélection du flux</string>
+    <string name="settings_media_desc_streams">Choisir automatiquement les flux ou réutiliser le dernier lien</string>
+    <string name="settings_media_subpage_up_next">À suivre</string>
+    <string name="settings_media_desc_up_next">Épisode suivant et lecture automatique</string>
+    <string name="settings_media_subpage_skip">Passer des segments</string>
+    <string name="settings_media_desc_skip">Intros, résumés et génériques</string>
+    <string name="settings_media_subpage_interface">Interface du lecteur</string>
+    <string name="settings_media_desc_interface">Commandes, superpositions et gestes</string>
+    <string name="settings_media_subpage_audio">Audio</string>
+    <string name="settings_media_desc_audio">Langues préférées et paramètres audio</string>
+    <string name="settings_media_subpage_subtitles">Sous-titres</string>
+    <string name="settings_media_desc_subtitles">Langues, style, couleurs et rendu</string>
+    <string name="settings_media_subpage_video">Vidéo</string>
+    <string name="settings_media_desc_video">Décodeur et options vidéo compatibles</string>
+    <string name="settings_media_subpage_p2p">Streaming P2P</string>
+    <string name="settings_media_desc_p2p">Torrents, profil et cache</string>
 </resources>
