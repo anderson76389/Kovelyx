@@ -729,7 +729,18 @@ private fun MobileSettingsScreen(
                 SettingsPage.LicensesAttributions -> licensesAttributionsContent(
                     isTablet = false,
                 )
-                SettingsPage.Playback -> playbackSettingsContent(
+                SettingsPage.Playback,
+                SettingsPage.MediaPlayer,
+                SettingsPage.MediaStreamSelection,
+                SettingsPage.MediaUpNext,
+                SettingsPage.MediaSkipSegments,
+                SettingsPage.MediaPlayerInterface,
+                SettingsPage.MediaAudio,
+                SettingsPage.MediaSubtitles,
+                SettingsPage.MediaVideo,
+                SettingsPage.MediaP2P,
+                -> playbackSettingsContent(
+                    topic = page,
                     isTablet = false,
                     showLoadingOverlay = showLoadingOverlay,
                     holdToSpeedEnabled = holdToSpeedEnabled,
@@ -809,6 +820,7 @@ private fun MobileSettingsScreen(
                     onPluginsClick = onPluginsClick,
                     onCollectionsClick = onCollectionsClick,
                     onMediaServersClick = { onPageChange(SettingsPage.MediaServers) },
+onPlaybackTopicClick = { onPageChange(it) },
                 )
                 SettingsPage.Addons -> addonsSettingsContent()
                 SettingsPage.MediaServers -> mediaServersSettingsContent(
@@ -1171,7 +1183,18 @@ private fun TabletSettingsScreen(
                     SettingsPage.LicensesAttributions -> licensesAttributionsContent(
                         isTablet = true,
                     )
-                    SettingsPage.Playback -> playbackSettingsContent(
+                    SettingsPage.Playback,
+                SettingsPage.MediaPlayer,
+                SettingsPage.MediaStreamSelection,
+                SettingsPage.MediaUpNext,
+                SettingsPage.MediaSkipSegments,
+                SettingsPage.MediaPlayerInterface,
+                SettingsPage.MediaAudio,
+                SettingsPage.MediaSubtitles,
+                SettingsPage.MediaVideo,
+                SettingsPage.MediaP2P,
+                -> playbackSettingsContent(
+                        topic = page,
                         isTablet = true,
                         showLoadingOverlay = showLoadingOverlay,
                         holdToSpeedEnabled = holdToSpeedEnabled,
@@ -1251,6 +1274,7 @@ private fun TabletSettingsScreen(
                         onPluginsClick = { openInlinePage(SettingsPage.Plugins) },
                         onCollectionsClick = onCollectionsClick,
                         onMediaServersClick = { openInlinePage(SettingsPage.MediaServers) },
+onPlaybackTopicClick = { openInlinePage(it) },
                     )
                     SettingsPage.Addons -> addonsSettingsContent()
                     SettingsPage.MediaServers -> mediaServersSettingsContent(
