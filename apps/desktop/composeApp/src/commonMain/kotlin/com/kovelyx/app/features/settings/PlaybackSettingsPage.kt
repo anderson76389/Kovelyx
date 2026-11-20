@@ -1910,7 +1910,7 @@ private fun PlaybackSettingsSection(
             colors = SubtitleColorSwatches,
             selectedColor = autoPlayPlayerSettings.subtitleStyle.textColor,
             onColorSelected = { color ->
-                PlayerSettingsRepository.setSubtitleStyle(autoPlayPlayerSettings.subtitleStyle.copy(textColor = color))
+                PlayerSettingsRepository.setSubtitleStyle(autoPlayPlayerSettings.subtitleStyle.copy(textColor = color.copy(alpha = autoPlayPlayerSettings.subtitleStyle.textColor.alpha)))
                 showSubtitleTextColorDialog = false
             },
             onDismiss = { showSubtitleTextColorDialog = false },
