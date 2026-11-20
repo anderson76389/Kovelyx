@@ -107,15 +107,16 @@ def check_platform(platform: str) -> None:
     # This is explicitly a Content Discovery change, not a player settings migration.
     discovery = (settings / "ContentDiscoverySettingsPage.kt").read_text(encoding="utf-8")
     discovery_group_keys = (
+        "kovelyx_media_options_section",
         "settings_content_discovery_section_catalogues",
         "settings_content_discovery_section_personal_servers",
         "settings_content_discovery_section_search",
     )
     positions = [discovery.find(f"title = stringResource(Res.string.{key})") for key in discovery_group_keys]
     ensure(all(pos >= 0 for pos in positions) and positions == sorted(positions),
-           f"{platform}: Content Discovery sections must be in catalogs/servers/search order")
-    ensure(discovery.count("SettingsSection(") == 3,
-           f"{platform}: Content Discovery must render three visible settings groups")
+           f"{platform}: Content Discovery must show media subpages, then catalogs/servers/search")
+    ensure(discovery.count("SettingsSection(") == 4,
+           f"{platform}: Content Discovery must render four visible settings groups")
     for callback in ("onAddonsClick", "onCollectionsClick", "onMediaServersClick", "onPluginsClick"):
         ensure(f"onClick = {callback}," in discovery,
                f"{platform}: missing a real Content Discovery navigation callback: {callback}")
@@ -125,6 +126,21 @@ def check_platform(platform: str) -> None:
            f"{platform}: discovery search-history switch is no longer connected")
     ensure(screen.count("onCollectionsClick = onCollectionsClick,") >= 2,
            f"{platform}: collections must work in phone/window and tablet layouts")
+    media_routes = (
+        "MediaPlayer", "MediaStreamSelection", "MediaUpNext", "MediaSkipSegments",
+        "MediaPlayerInterface", "MediaAudio", "MediaSubtitles", "MediaVideo", "MediaP2P",
+    )
+    ensure(discovery.count("onPlaybackTopicClick(SettingsPage.") == len(media_routes),
+           f"{platform}: Content Discovery must expose all nine real Media subpages")
+    for route in media_routes:
+        ensure(f"onPlaybackTopicClick(SettingsPage.{route})" in discovery,
+               f"{platform}: missing Media destination {route}")
+        ensure(f"SettingsPage.{route}" in screen,
+               f"{platform}: Media destination not handled in SettingsScreen: {route}")
+        ensure(f"    {route}(" in model and "parentPage = ContentDiscovery" in model,
+               f"{platform}: Media page {route} absent or not nested under Content Discovery")
+    ensure("topic = page," in screen,
+           f"{platform}: Media destination does not filter the actual existing playback controls")
     ensure("SettingsPage.ContentDiscovery -> contentDiscoveryContent(" in screen,
            f"{platform}: Media/Content Discovery route is disconnected")
     playback = (settings / "PlaybackSettingsPage.kt").read_text(encoding="utf-8")
@@ -145,7 +161,7 @@ def check_platform(platform: str) -> None:
             ensure(f'name="{key}"' in xml,
                    f"{platform}/{lang}: missing localized Content Discovery label: {key}")
 
-    print(f"PASS {platform}: Content Discovery has three real groups, collections, servers, and policy-safe plugins")
+    print(f"PASS {platform}: Content Discovery has nine media destinations plus catalogs, servers and search")
 
     print(f"PASS {platform}: 5 groups, 11 destinations, preserved settings routes and layout")
 
