@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 GROUPS = (
     ("You", "settings_nav_group_you", ("onSwitchProfileClick", "onAccountClick")),
     ("Look", "settings_nav_group_look", ("onAppearanceClick", "onLayoutClick")),
-    ("Watch", "settings_nav_group_watch", ("onContentDiscoveryClick", "onPlaybackClick")),
+    ("Watch", "settings_nav_group_watch", ("onContentDiscoveryClick",)),
     ("Services", "settings_nav_group_services", ("onIntegrationsClick", "onTrackingClick")),
     ("System", "settings_nav_group_system", ("onNotificationsClick", "onAdvancedClick", "onCheckForUpdatesClick")),
 )
@@ -104,18 +104,20 @@ def check_platform(platform: str) -> None:
         for key in ("settings_nav_layout_title", "settings_nav_layout_description"):
             ensure(f'name="{key}"' in xml, f"{platform}/{lang}: missing {key}")
 
-    # This is explicitly a Content Discovery change, not a player settings migration.
+    # All playback subpages belong to Media > Content Discovery; the old 
+    # monolithic Playback route remains only for saved/bookmarked links.
     discovery = (settings / "ContentDiscoverySettingsPage.kt").read_text(encoding="utf-8")
     discovery_group_keys = (
+        "settings_media_section_player",
         "settings_content_discovery_section_catalogues",
         "settings_content_discovery_section_personal_servers",
         "settings_content_discovery_section_search",
     )
     positions = [discovery.find(f"title = stringResource(Res.string.{key})") for key in discovery_group_keys]
     ensure(all(pos >= 0 for pos in positions) and positions == sorted(positions),
-           f"{platform}: Content Discovery sections must be in catalogs/servers/search order")
-    ensure(discovery.count("SettingsSection(") == 3,
-           f"{platform}: Content Discovery must render three visible settings groups")
+           f"{platform}: Content Discovery sections must be in playback/catalogs/servers/search order")
+    ensure(discovery.count("SettingsSection(") == 4,
+           f"{platform}: Content Discovery must render four visible settings groups")
     for callback in ("onAddonsClick", "onCollectionsClick", "onMediaServersClick", "onPluginsClick"):
         ensure(f"onClick = {callback}," in discovery,
                f"{platform}: missing a real Content Discovery navigation callback: {callback}")
@@ -128,9 +130,30 @@ def check_platform(platform: str) -> None:
     ensure("SettingsPage.ContentDiscovery -> contentDiscoveryContent(" in screen,
            f"{platform}: Media/Content Discovery route is disconnected")
     playback = (settings / "PlaybackSettingsPage.kt").read_text(encoding="utf-8")
-    ensure("PlaybackSettingsSection(" in playback and
-           "settings_playback_section_player" in playback,
-           f"{platform}: Playback must remain a separate usable Media route")
+    media_pages = (
+        "ContentPlayer", "ContentStreamSelection", "ContentUpNext",
+        "ContentSkipSegments", "ContentPlayerInterface", "ContentAudio",
+        "ContentSubtitles", "ContentVideo", "ContentP2P",
+    )
+    for item in media_pages:
+        ensure(f"SettingsPage.{item} to Res.string." in discovery,
+               f"{platform}: missing a real media navigation row: {item}")
+        ensure(f"{item}(" in model and "parentPage = ContentDiscovery" in model,
+               f"{platform}: missing nested saved navigation for {item}")
+        ensure(f"selectedPage == SettingsPage.{item}" in playback or
+               f"selectedPage != SettingsPage.{item}" in playback,
+               f"{platform}: {item} has no real controls")
+    ensure("selectedPage = page.takeUnless { it == SettingsPage.Playback }" in screen,
+           f"{platform}: playback sections are not routed to their selected page")
+    ensure(screen.count("onMediaPageClick =") == 2,
+           f"{platform}: phone and tablet subpage navigation disconnected")
+    ensure("onClick = onPlaybackClick" not in root,
+           f"{platform}: separate Playback entry still present in Media root")
+    ensure("selectedPage != SettingsPage.ContentAudio" in playback and
+           "selectedPage != SettingsPage.ContentSubtitles" in playback,
+           f"{platform}: Audio and Subtitles remain mixed")
+    ensure("selectedPage != SettingsPage.ContentPlayerInterface" in playback,
+           f"{platform}: Player and Interface have not been separated")
 
     for lang in ("values", "values-fr"):
         xml = (resources / lang / "settings_organization.xml").read_text(encoding="utf-8")
@@ -145,7 +168,7 @@ def check_platform(platform: str) -> None:
             ensure(f'name="{key}"' in xml,
                    f"{platform}/{lang}: missing localized Content Discovery label: {key}")
 
-    print(f"PASS {platform}: Content Discovery has three real groups, collections, servers, and policy-safe plugins")
+    print(f"PASS {platform}: nine nested Media subpages, separate audio/subtitles, collections and servers")
 
     print(f"PASS {platform}: 5 groups, 11 destinations, preserved settings routes and layout")
 
