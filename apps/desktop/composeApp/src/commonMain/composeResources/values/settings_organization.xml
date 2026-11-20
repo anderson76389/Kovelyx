@@ -27,4 +27,22 @@
     <string name="settings_nav_layout_description">Home, posters, details, streams and navigation</string>
     <string name="settings_content_discovery_section_catalogues">CATALOGS AND COLLECTIONS</string>
     <string name="settings_content_discovery_section_personal_servers">MEDIA SERVERS</string>
+    <string name="kovelyx_media_player_title">Player</string>
+    <string name="kovelyx_media_player_description">Default player and playback engines</string>
+    <string name="kovelyx_media_stream_selection_title">Stream selection</string>
+    <string name="kovelyx_media_stream_selection_description">Sources, stream choice and autoplay</string>
+    <string name="kovelyx_media_up_next_title">Up next</string>
+    <string name="kovelyx_media_up_next_description">Automatically play the next episode</string>
+    <string name="kovelyx_media_skip_segments_title">Skip segments</string>
+    <string name="kovelyx_media_skip_segments_description">Intros, recaps and credits</string>
+    <string name="kovelyx_media_player_interface_title">Player interface</string>
+    <string name="kovelyx_media_player_interface_description">Controls, loading indicators and chapters</string>
+    <string name="kovelyx_media_audio_title">Audio</string>
+    <string name="kovelyx_media_audio_description">Languages and audio settings</string>
+    <string name="kovelyx_media_subtitles_title">Subtitles</string>
+    <string name="kovelyx_media_subtitles_description">Languages, timing and appearance</string>
+    <string name="kovelyx_media_video_title">Video</string>
+    <string name="kovelyx_media_video_description">Decoding, video output and HDR</string>
+    <string name="kovelyx_media_p2p_title">P2P streaming</string>
+    <string name="kovelyx_media_p2p_description">Torrents, profile and cache</string>
 </resources>
