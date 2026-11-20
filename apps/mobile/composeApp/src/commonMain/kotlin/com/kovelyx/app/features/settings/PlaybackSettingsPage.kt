@@ -486,6 +486,7 @@ private fun PlaybackSettingsSection(
                         onCheckedChange = PlayerSettingsRepository::setExternalPlayerSendSkipSegments,
                     )
                 }
+                } // End the player-preference group before interface controls.
                 if (topic != SettingsPage.MediaPlayer) {
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsSwitchRow(
