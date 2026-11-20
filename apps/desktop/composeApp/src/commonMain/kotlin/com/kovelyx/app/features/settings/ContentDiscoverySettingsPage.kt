@@ -7,6 +7,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.features.search.SearchHistoryRepository
 import nuvio.composeapp.generated.resources.Res
+import nuvio.composeapp.generated.resources.*
 import nuvio.composeapp.generated.resources.collections_header
 import nuvio.composeapp.generated.resources.compose_settings_page_addons
 import nuvio.composeapp.generated.resources.compose_settings_page_media_servers
@@ -30,9 +31,84 @@ internal fun LazyListScope.contentDiscoveryContent(
     onPluginsClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onMediaServersClick: () -> Unit,
+    onPlaybackTopicClick: (SettingsPage) -> Unit,
 ) {
     // The media home continues to expose only "Contenu et découverte" and
     // "Lecture". All routes here remain under ContentDiscovery, not Playback.
+    // Nuvio-style dedicated subsections, scoped strictly under Content Discovery.
+    // Each destination preserves its own settings and uses the existing repositories.
+    item {
+        SettingsSection(
+            title = stringResource(Res.string.kovelyx_media_options_section),
+            isTablet = isTablet,
+        ) {
+            SettingsGroup(isTablet = isTablet) {
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_player_title),
+                    description = stringResource(Res.string.kovelyx_media_player_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaPlayer) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_stream_selection_title),
+                    description = stringResource(Res.string.kovelyx_media_stream_selection_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaStreamSelection) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_up_next_title),
+                    description = stringResource(Res.string.kovelyx_media_up_next_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaUpNext) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_skip_segments_title),
+                    description = stringResource(Res.string.kovelyx_media_skip_segments_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaSkipSegments) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_player_interface_title),
+                    description = stringResource(Res.string.kovelyx_media_player_interface_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaPlayerInterface) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_audio_title),
+                    description = stringResource(Res.string.kovelyx_media_audio_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaAudio) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_subtitles_title),
+                    description = stringResource(Res.string.kovelyx_media_subtitles_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaSubtitles) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_video_title),
+                    description = stringResource(Res.string.kovelyx_media_video_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaVideo) },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_media_p2p_title),
+                    description = stringResource(Res.string.kovelyx_media_p2p_description),
+                    isTablet = isTablet,
+                    onClick = { onPlaybackTopicClick(SettingsPage.MediaP2P) },
+                )
+            }
+        }
+    }
+
     item {
         SettingsSection(
             title = stringResource(Res.string.settings_content_discovery_section_catalogues),
