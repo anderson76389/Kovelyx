@@ -75,6 +75,10 @@ import com.kovelyx.app.features.player.STREAM_AUTO_PLAY_TIMEOUT_VALUES
 import com.kovelyx.app.features.player.SubtitleBackgroundColorSwatches
 import com.kovelyx.app.features.player.SubtitleColorSwatches
 import com.kovelyx.app.features.player.SubtitleLanguageOption
+import com.kovelyx.app.features.player.SubtitleAppearancePreview
+import com.kovelyx.app.features.player.SubtitleFontChoice
+import com.kovelyx.app.features.player.SubtitleFontPickerDialog
+import com.kovelyx.app.features.player.SubtitleStyleState
 import com.kovelyx.app.features.player.formatPlaybackSpeedLabel
 import com.kovelyx.app.features.player.languageLabelForCode
 import com.kovelyx.app.features.player.subtitleFontSizeRangeSp
@@ -341,6 +345,7 @@ private fun PlaybackSettingsSection(
     var showSecondaryAudioDialog by remember { mutableStateOf(false) }
     var showPreferredSubtitleDialog by remember { mutableStateOf(false) }
     var showSecondarySubtitleDialog by remember { mutableStateOf(false) }
+    var showSubtitleFontDialog by remember { mutableStateOf(false) }
     var showSubtitleTextColorDialog by remember { mutableStateOf(false) }
     var showSubtitleBackgroundColorDialog by remember { mutableStateOf(false) }
     var showSubtitleOutlineColorDialog by remember { mutableStateOf(false) }
@@ -409,9 +414,6 @@ private fun PlaybackSettingsSection(
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
-                // The default-player page and player-interface page no longer duplicate
-                // every control, while the original full Playback page is preserved.
-                if (topic != SettingsPage.MediaPlayer) {
                 if (!isDesktop) {
                     SettingsSwitchRow(
                         title = stringResource(Res.string.settings_playback_legacy_layout),
@@ -445,9 +447,9 @@ private fun PlaybackSettingsSection(
                     isTablet = isTablet,
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
-                }
                 // On Android the internal engine belongs in the Player sub-page.
                 if (topic == SettingsPage.MediaPlayer && !isDesktop) {
+                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_engine),
                         description = androidPlaybackEngine.label,
@@ -456,9 +458,7 @@ private fun PlaybackSettingsSection(
                     )
                 }
                 if (externalPlayerSupported && topic != SettingsPage.MediaPlayerInterface) {
-                    if (topic == SettingsPage.Playback || (topic == SettingsPage.MediaPlayer && !isDesktop)) {
-                        SettingsGroupDivider(isTablet = isTablet)
-                    }
+                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_player_preference),
                         description = if (autoPlayPlayerSettings.externalPlayerEnabled) {
@@ -504,7 +504,6 @@ private fun PlaybackSettingsSection(
                         )
                     }
                 }
-                if (topic != SettingsPage.MediaPlayer) {
                 if (!isDesktop) {
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsSwitchRow(
@@ -533,7 +532,6 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onClick = { showHoldToSpeedValueDialog = true },
                     )
-                }
                 }
             }
         }
@@ -660,8 +658,20 @@ private fun PlaybackSettingsSection(
             isTablet = isTablet,
         ) {
             val subtitleRenderingEnabled = !autoPlayPlayerSettings.externalPlayerEnabled
+            val subtitleStyle = autoPlayPlayerSettings.subtitleStyle
             SettingsGroup(isTablet = isTablet) {
-                val subtitleStyle = autoPlayPlayerSettings.subtitleStyle
+                if (subtitleRenderingEnabled) {
+                    SubtitleAppearancePreview(subtitleStyle, Modifier.padding(12.dp))
+                    SettingsGroupDivider(isTablet = isTablet)
+                }
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_subtitle_font),
+                    description = SubtitleFontChoice.label(subtitleStyle.fontFamily),
+                    enabled = subtitleRenderingEnabled,
+                    isTablet = isTablet,
+                    onClick = { showSubtitleFontDialog = true },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
                 SettingsSliderRow(
                     title = stringResource(Res.string.settings_playback_subtitle_size),
                     value = subtitleStyle.fontSizeSp,
@@ -707,6 +717,21 @@ private fun PlaybackSettingsSection(
                     onClick = { showSubtitleTextColorDialog = true },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
+                SettingsSliderRow(
+                    title = stringResource(Res.string.compose_player_text_opacity),
+                    value = (subtitleStyle.textColor.alpha * 100).roundToInt(),
+                    valueText = { opacity -> "$opacity%" },
+                    valueRange = 0..100,
+                    step = 5,
+                    isTablet = isTablet,
+                    enabled = subtitleRenderingEnabled,
+                    onValueChange = { opacity ->
+                        PlayerSettingsRepository.setSubtitleStyle(
+                            subtitleStyle.copy(textColor = subtitleStyle.textColor.copy(alpha = opacity / 100f)),
+                        )
+                    },
+                )
+                SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
                     title = stringResource(Res.string.settings_playback_subtitle_background_color),
                     description = subtitleColorLabel(subtitleStyle.backgroundColor),
@@ -727,6 +752,19 @@ private fun PlaybackSettingsSection(
                 )
                 if (subtitleStyle.outlineEnabled) {
                     SettingsGroupDivider(isTablet = isTablet)
+                    SettingsSliderRow(
+                        title = stringResource(Res.string.kovelyx_subtitle_outline_width),
+                        value = subtitleStyle.outlineWidth,
+                        valueText = { it.toString() },
+                        valueRange = 1..5,
+                        step = 1,
+                        isTablet = isTablet,
+                        enabled = subtitleRenderingEnabled,
+                        onValueChange = { width ->
+                            PlayerSettingsRepository.setSubtitleStyle(subtitleStyle.copy(outlineWidth = width))
+                        },
+                    )
+                    SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_subtitle_outline_color),
                         description = subtitleColorLabel(subtitleStyle.outlineColor),
@@ -735,6 +773,23 @@ private fun PlaybackSettingsSection(
                         onClick = { showSubtitleOutlineColorDialog = true },
                     )
                 }
+                SettingsGroupDivider(isTablet = isTablet)
+                SettingsNavigationRow(
+                    title = stringResource(Res.string.kovelyx_subtitle_reset_appearance),
+                    description = null,
+                    enabled = subtitleRenderingEnabled,
+                    isTablet = isTablet,
+                    onClick = {
+                        val current = PlayerSettingsRepository.uiState.value.subtitleStyle
+                        PlayerSettingsRepository.setSubtitleStyle(
+                            SubtitleStyleState.DEFAULT.copy(
+                                stripSdh = current.stripSdh,
+                                useForcedSubtitles = current.useForcedSubtitles,
+                                showOnlyPreferredLanguages = current.showOnlyPreferredLanguages,
+                            ),
+                        )
+                    },
+                )
                 val showLibassSettings = !isIos && (isDesktop || androidPlaybackEngine != AndroidPlaybackEngine.Libmpv)
                 if (showLibassSettings) {
                     SettingsGroupDivider(isTablet = isTablet)
@@ -1087,7 +1142,7 @@ private fun PlaybackSettingsSection(
             }
         }
 
-        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaSkipSegments) SettingsSection(
+        if (topic == SettingsPage.Playback || topic == SettingsPage.MediaSkipSegments || topic == SettingsPage.MediaUpNext) SettingsSection(
             title = stringResource(Res.string.settings_playback_section_skip_segments),
             isTablet = isTablet,
         ) {
@@ -1175,7 +1230,7 @@ private fun PlaybackSettingsSection(
             val exoOptionsEnabled = decoderEnabled && (isDesktop || androidPlaybackEngine != AndroidPlaybackEngine.Libmpv)
             val libmpvOptionsVisible = !isDesktop && androidPlaybackEngine != AndroidPlaybackEngine.ExoPlayer
             val libmpvOptionsEnabled = decoderEnabled && libmpvOptionsVisible
-            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo) SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo || topic == SettingsPage.MediaAudio) SettingsSection(
                 title = stringResource(Res.string.settings_org_decoder_title),
                 isTablet = isTablet,
             ) {
@@ -1469,7 +1524,7 @@ private fun PlaybackSettingsSection(
         }
 
         if (isWindows) {
-            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo) SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo || topic == SettingsPage.MediaAudio) SettingsSection(
                 title = stringResource(Res.string.settings_playback_nvidia_rtx_video_section),
                 isTablet = isTablet,
             ) {
@@ -1509,7 +1564,7 @@ private fun PlaybackSettingsSection(
                 }
             }
 
-            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo) SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaVideo || topic == SettingsPage.MediaAudio) SettingsSection(
                 title = stringResource(Res.string.settings_playback_ios_video_output),
                 isTablet = isTablet,
             ) {
@@ -1555,7 +1610,7 @@ private fun PlaybackSettingsSection(
         }
 
         if (P2pSettingsRepository.isVisible) {
-            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaP2P) SettingsSection(
+            if (topic == SettingsPage.Playback || topic == SettingsPage.MediaP2P || topic == SettingsPage.MediaStreamSelection) SettingsSection(
                 title = stringResource(Res.string.settings_playback_section_p2p),
                 isTablet = isTablet,
             ) {
@@ -1754,13 +1809,25 @@ private fun PlaybackSettingsSection(
         )
     }
 
+    if (showSubtitleFontDialog) {
+        SubtitleFontPickerDialog(
+            selected = autoPlayPlayerSettings.subtitleStyle.fontFamily,
+            onSelected = { family ->
+                val current = PlayerSettingsRepository.uiState.value.subtitleStyle
+                PlayerSettingsRepository.setSubtitleStyle(current.copy(fontFamily = family))
+            },
+            onDismiss = { showSubtitleFontDialog = false },
+        )
+    }
+
     if (showSubtitleTextColorDialog) {
         SubtitleColorDialog(
             title = stringResource(Res.string.settings_playback_subtitle_text_color),
             colors = SubtitleColorSwatches,
             selectedColor = autoPlayPlayerSettings.subtitleStyle.textColor,
             onColorSelected = { color ->
-                PlayerSettingsRepository.setSubtitleStyle(autoPlayPlayerSettings.subtitleStyle.copy(textColor = color))
+                val current = PlayerSettingsRepository.uiState.value.subtitleStyle
+                PlayerSettingsRepository.setSubtitleStyle(current.copy(textColor = color.copy(alpha = current.textColor.alpha)))
                 showSubtitleTextColorDialog = false
             },
             onDismiss = { showSubtitleTextColorDialog = false },

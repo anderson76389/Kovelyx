@@ -8,20 +8,6 @@ import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.features.search.SearchHistoryRepository
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.*
-import nuvio.composeapp.generated.resources.collections_header
-import nuvio.composeapp.generated.resources.compose_settings_page_addons
-import nuvio.composeapp.generated.resources.compose_settings_page_media_servers
-import nuvio.composeapp.generated.resources.compose_settings_page_plugins
-import nuvio.composeapp.generated.resources.settings_content_discovery_addons_description
-import nuvio.composeapp.generated.resources.settings_content_discovery_addons_description_appstore
-import nuvio.composeapp.generated.resources.settings_content_discovery_media_servers_description
-import nuvio.composeapp.generated.resources.settings_content_discovery_plugins_description
-import nuvio.composeapp.generated.resources.settings_content_discovery_section_catalogues
-import nuvio.composeapp.generated.resources.settings_content_discovery_section_personal_servers
-import nuvio.composeapp.generated.resources.settings_content_discovery_collections_description
-import nuvio.composeapp.generated.resources.settings_content_discovery_section_search
-import nuvio.composeapp.generated.resources.settings_content_discovery_recent_searches
-import nuvio.composeapp.generated.resources.settings_content_discovery_recent_searches_description
 import org.jetbrains.compose.resources.stringResource
 
 internal fun LazyListScope.contentDiscoveryContent(
@@ -33,10 +19,6 @@ internal fun LazyListScope.contentDiscoveryContent(
     onMediaServersClick: () -> Unit,
     onPlaybackTopicClick: (SettingsPage) -> Unit,
 ) {
-    // The media home continues to expose only "Contenu et découverte" and
-    // "Lecture". All routes here remain under ContentDiscovery, not Playback.
-    // Nuvio-style dedicated subsections, scoped strictly under Content Discovery.
-    // Each destination preserves its own settings and uses the existing repositories.
     item {
         SettingsSection(
             title = stringResource(Res.string.kovelyx_media_options_section),
@@ -44,43 +26,29 @@ internal fun LazyListScope.contentDiscoveryContent(
         ) {
             SettingsGroup(isTablet = isTablet) {
                 SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_player_title),
-                    description = stringResource(Res.string.kovelyx_media_player_description),
+                    title = stringResource(Res.string.kovelyx_media_group_player_title),
+                    description = stringResource(Res.string.kovelyx_media_group_player_description),
                     isTablet = isTablet,
                     onClick = { onPlaybackTopicClick(SettingsPage.MediaPlayer) },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_stream_selection_title),
-                    description = stringResource(Res.string.kovelyx_media_stream_selection_description),
+                    title = stringResource(Res.string.kovelyx_media_group_streams_title),
+                    description = stringResource(Res.string.kovelyx_media_group_streams_description),
                     isTablet = isTablet,
                     onClick = { onPlaybackTopicClick(SettingsPage.MediaStreamSelection) },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_up_next_title),
-                    description = stringResource(Res.string.kovelyx_media_up_next_description),
+                    title = stringResource(Res.string.kovelyx_media_group_episodes_title),
+                    description = stringResource(Res.string.kovelyx_media_group_episodes_description),
                     isTablet = isTablet,
                     onClick = { onPlaybackTopicClick(SettingsPage.MediaUpNext) },
                 )
                 SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_skip_segments_title),
-                    description = stringResource(Res.string.kovelyx_media_skip_segments_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaSkipSegments) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_player_interface_title),
-                    description = stringResource(Res.string.kovelyx_media_player_interface_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaPlayerInterface) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_audio_title),
-                    description = stringResource(Res.string.kovelyx_media_audio_description),
+                    title = stringResource(Res.string.kovelyx_media_group_audio_video_title),
+                    description = stringResource(Res.string.kovelyx_media_group_audio_video_description),
                     isTablet = isTablet,
                     onClick = { onPlaybackTopicClick(SettingsPage.MediaAudio) },
                 )
@@ -91,27 +59,18 @@ internal fun LazyListScope.contentDiscoveryContent(
                     isTablet = isTablet,
                     onClick = { onPlaybackTopicClick(SettingsPage.MediaSubtitles) },
                 )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_video_title),
-                    description = stringResource(Res.string.kovelyx_media_video_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaVideo) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_p2p_title),
-                    description = stringResource(Res.string.kovelyx_media_p2p_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaP2P) },
-                )
             }
         }
     }
 
     item {
+        val recentSearchesEnabled by remember {
+            SearchHistoryRepository.ensureLoaded()
+            SearchHistoryRepository.enabled
+        }.collectAsStateWithLifecycle()
+
         SettingsSection(
-            title = stringResource(Res.string.settings_content_discovery_section_catalogues),
+            title = stringResource(Res.string.kovelyx_media_group_catalogue),
             isTablet = isTablet,
         ) {
             SettingsGroup(isTablet = isTablet) {
@@ -143,37 +102,14 @@ internal fun LazyListScope.contentDiscoveryContent(
                         onClick = onPluginsClick,
                     )
                 }
-            }
-        }
-    }
-
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.settings_content_discovery_section_personal_servers),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
+                SettingsGroupDivider(isTablet = isTablet)
                 SettingsNavigationRow(
                     title = stringResource(Res.string.compose_settings_page_media_servers),
                     description = stringResource(Res.string.settings_content_discovery_media_servers_description),
                     isTablet = isTablet,
                     onClick = onMediaServersClick,
                 )
-            }
-        }
-    }
-
-    item {
-        val recentSearchesEnabled by remember {
-            SearchHistoryRepository.ensureLoaded()
-            SearchHistoryRepository.enabled
-        }.collectAsStateWithLifecycle()
-
-        SettingsSection(
-            title = stringResource(Res.string.settings_content_discovery_section_search),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
+                SettingsGroupDivider(isTablet = isTablet)
                 SettingsSwitchRow(
                     title = stringResource(Res.string.settings_content_discovery_recent_searches),
                     description = stringResource(Res.string.settings_content_discovery_recent_searches_description),

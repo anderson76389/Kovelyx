@@ -40,6 +40,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kovelyx.app.core.ui.nuvio
 import nuvio.composeapp.generated.resources.Res
+import nuvio.composeapp.generated.resources.action_close
+import nuvio.composeapp.generated.resources.kovelyx_subtitle_font
+import nuvio.composeapp.generated.resources.kovelyx_subtitle_font_local
 import nuvio.composeapp.generated.resources.compose_action_off
 import nuvio.composeapp.generated.resources.compose_action_on
 import nuvio.composeapp.generated.resources.compose_player_auto_sync
@@ -126,7 +129,7 @@ fun SubtitleStylePanel(
             )
         }
 
-        SubtitleStyleSection(title = "Police des sous-titres") {
+        SubtitleStyleSection(title = stringResource(Res.string.kovelyx_subtitle_font)) {
             SubtitleTextAction(
                 label = SubtitleFontChoice.label(style.fontFamily),
                 onClick = { fontDialogOpen = true },
@@ -212,35 +215,50 @@ fun SubtitleStylePanel(
     }
 
     if (fontDialogOpen) {
-        AlertDialog(
-            onDismissRequest = { fontDialogOpen = false },
-            title = { Text("Police des sous-titres") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    listOf(
-                        SubtitleFontChoice.DEFAULT,
-                        SubtitleFontChoice.SANS_SERIF,
-                        SubtitleFontChoice.SERIF,
-                        SubtitleFontChoice.MONOSPACE,
-                    ).forEach { choice ->
-                        SubtitleTextAction(
-                            label = (if (style.fontFamily == choice) "✓ " else "") + SubtitleFontChoice.label(choice),
-                            onClick = { onStyleChanged(style.copy(fontFamily = choice)); fontDialogOpen = false }
-                        )
-                    }
-                    if (SubtitleFontChoice.isCustom(style.fontFamily)) {
-                        SubtitleTextAction(label = "✓ Police importée", onClick = { fontDialogOpen = false })
-                    }
-                    SubtitleFontImportButton(onImported = { imported ->
-                        onStyleChanged(style.copy(fontFamily = imported))
-                        fontDialogOpen = false
-                    })
-                    Text(".ttf ou .otf, jusqu'à 10 Mo. Police conservée sur cet appareil.")
-                }
-            },
-            confirmButton = { TextButton(onClick = { fontDialogOpen = false }) { Text("Terminé") } },
+        SubtitleFontPickerDialog(
+            selected = style.fontFamily,
+            onSelected = { onStyleChanged(style.copy(fontFamily = it)) },
+            onDismiss = { fontDialogOpen = false },
         )
     }
+}
+
+@Composable
+internal fun SubtitleFontPickerDialog(
+    selected: String,
+    onSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.kovelyx_subtitle_font)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                listOf(
+                    SubtitleFontChoice.DEFAULT,
+                    SubtitleFontChoice.SANS_SERIF,
+                    SubtitleFontChoice.SERIF,
+                    SubtitleFontChoice.MONOSPACE,
+                ).forEach { choice ->
+                    TextButton(onClick = {
+                        onSelected(choice)
+                        onDismiss()
+                    }) {
+                        Text((if (selected == choice) "✓ " else "") + SubtitleFontChoice.label(choice))
+                    }
+                }
+                if (SubtitleFontChoice.isCustom(selected)) {
+                    TextButton(onClick = onDismiss) { Text("✓ " + SubtitleFontChoice.label(selected)) }
+                }
+                SubtitleFontImportButton(onImported = { imported ->
+                    onSelected(imported)
+                    onDismiss()
+                })
+                Text(stringResource(Res.string.kovelyx_subtitle_font_local))
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.action_close)) } },
+    )
 }
 
 @Composable

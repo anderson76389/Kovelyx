@@ -573,6 +573,18 @@ internal fun settingsSearchEntries(
     val playbackStreamAutoPlay = stringResource(Res.string.settings_playback_section_stream_auto_play)
     val playbackDecoder = stringResource(Res.string.settings_org_decoder_title)
     val playbackSubtitleRendering = stringResource(Res.string.settings_playback_section_subtitle_rendering)
+    addPlaybackRows(
+        addRow = ::addRow,
+        page = SettingsPage.MediaSubtitles,
+        pageLabel = stringResource(Res.string.kovelyx_media_subtitles_title),
+        section = playbackSubtitleRendering,
+        icon = Icons.Rounded.PlayArrow,
+        rows = listOf(
+            PlaybackSearchRow("subtitle-font", stringResource(Res.string.kovelyx_subtitle_font)),
+            PlaybackSearchRow("subtitle-opacity", stringResource(Res.string.compose_player_text_opacity)),
+            PlaybackSearchRow("subtitle-outline-width", stringResource(Res.string.kovelyx_subtitle_outline_width)),
+        ),
+    )
     val playbackSkipSegments = stringResource(Res.string.settings_playback_section_skip_segments)
     val playbackNextEpisode = stringResource(Res.string.settings_playback_section_next_episode)
     addRow(
@@ -1091,10 +1103,11 @@ private fun addPlaybackRows(
     section: String,
     icon: ImageVector,
     rows: List<PlaybackSearchRow>,
+    page: SettingsPage = SettingsPage.Playback,
 ) {
     rows.forEach { row ->
         addRow(
-            SettingsPage.Playback,
+            page,
             "playback-${row.key}",
             row.title,
             row.description,

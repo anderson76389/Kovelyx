@@ -108,15 +108,13 @@ def check_platform(platform: str) -> None:
     discovery = (settings / "ContentDiscoverySettingsPage.kt").read_text(encoding="utf-8")
     discovery_group_keys = (
         "kovelyx_media_options_section",
-        "settings_content_discovery_section_catalogues",
-        "settings_content_discovery_section_personal_servers",
-        "settings_content_discovery_section_search",
+        "kovelyx_media_group_catalogue",
     )
     positions = [discovery.find(f"title = stringResource(Res.string.{key})") for key in discovery_group_keys]
     ensure(all(pos >= 0 for pos in positions) and positions == sorted(positions),
            f"{platform}: Content Discovery must show media subpages, then catalogs/servers/search")
-    ensure(discovery.count("SettingsSection(") == 4,
-           f"{platform}: Content Discovery must render four visible settings groups")
+    ensure(discovery.count("SettingsSection(") == 2,
+           f"{platform}: Content Discovery must render two visible settings groups")
     for callback in ("onAddonsClick", "onCollectionsClick", "onMediaServersClick", "onPluginsClick"):
         ensure(f"onClick = {callback}," in discovery,
                f"{platform}: missing a real Content Discovery navigation callback: {callback}")
@@ -127,11 +125,10 @@ def check_platform(platform: str) -> None:
     ensure(screen.count("onCollectionsClick = onCollectionsClick,") >= 2,
            f"{platform}: collections must work in phone/window and tablet layouts")
     media_routes = (
-        "MediaPlayer", "MediaStreamSelection", "MediaUpNext", "MediaSkipSegments",
-        "MediaPlayerInterface", "MediaAudio", "MediaSubtitles", "MediaVideo", "MediaP2P",
+        "MediaPlayer", "MediaStreamSelection", "MediaUpNext", "MediaAudio", "MediaSubtitles",
     )
     ensure(discovery.count("onPlaybackTopicClick(SettingsPage.") == len(media_routes),
-           f"{platform}: Content Discovery must expose all nine real Media subpages")
+           f"{platform}: Content Discovery must expose five grouped Media destinations")
     for route in media_routes:
         ensure(f"onPlaybackTopicClick(SettingsPage.{route})" in discovery,
                f"{platform}: missing Media destination {route}")
@@ -147,6 +144,15 @@ def check_platform(platform: str) -> None:
     ensure("PlaybackSettingsSection(" in playback and
            "settings_playback_section_player" in playback,
            f"{platform}: Playback must remain a separate usable Media route")
+    for old, group in (("MediaSkipSegments", "MediaUpNext"), ("MediaVideo", "MediaAudio"),
+                       ("MediaP2P", "MediaStreamSelection")):
+        ensure(f"topic == SettingsPage.{old} || topic == SettingsPage.{group}" in playback,
+               f"{platform}: {old} controls must be reachable through {group}")
+        ensure(f"SettingsPage.{old}" in screen,
+               f"{platform}: previous {old} route must still be accepted")
+    for action in ("SubtitleAppearancePreview(subtitleStyle", "SubtitleFontPickerDialog(",
+                   "compose_player_text_opacity", "kovelyx_subtitle_reset_appearance"):
+        ensure(action in playback, f"{platform}: subtitle appearance action missing: {action}")
 
     for lang in ("values", "values-fr"):
         xml = (resources / lang / "settings_organization.xml").read_text(encoding="utf-8")
@@ -155,13 +161,13 @@ def check_platform(platform: str) -> None:
         ensure(f'<string name="settings_org_sources_title">{expected_sources_title}</string>' in xml,
                f"{platform}/{lang}: Media > Content Discovery title does not match screenshot")
         for key in (
-            "settings_content_discovery_section_catalogues",
-            "settings_content_discovery_section_personal_servers",
+            "kovelyx_media_group_catalogue",
+            "kovelyx_subtitle_preview_sample",
         ):
             ensure(f'name="{key}"' in xml,
                    f"{platform}/{lang}: missing localized Content Discovery label: {key}")
 
-    print(f"PASS {platform}: Content Discovery has nine media destinations plus catalogs, servers and search")
+    print(f"PASS {platform}: five Media destinations, catalogue and search controls, subtitle customization")
 
     print(f"PASS {platform}: 5 groups, 11 destinations, preserved settings routes and layout")
 
@@ -174,6 +180,9 @@ def check_tv_consistency() -> None:
     ensure("PLAYBACK(SettingsRailGroup.WATCH)" in tv, "Android TV: player misplaced")
     ensure("LAYOUT(SettingsRailGroup.LOOK)" in tv, "Android TV: layout misplaced")
     ensure("TRACKING(SettingsRailGroup.SERVICES)" in tv, "Android TV: tracking misplaced")
+    subtitles = path.with_name("PlaybackSubtitleSettings.kt").read_text(encoding="utf-8")
+    ensure("SubtitleAppearancePreview(style)" in subtitles and "SubtitleFontStore.resolve" in subtitles,
+           "Android TV: live preview must use the player subtitle style and installed fonts")
     print("PASS TV: native remote-driven rail already has the same five groups")
 
 

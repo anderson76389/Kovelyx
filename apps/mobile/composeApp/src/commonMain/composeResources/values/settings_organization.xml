@@ -46,4 +46,18 @@
     <string name="kovelyx_media_p2p_title">P2P streaming</string>
     <string name="kovelyx_media_p2p_description">Torrents, profile and cache</string>
     <string name="kovelyx_media_options_section">PLAYBACK AND MEDIA SETTINGS</string>
+    <string name="kovelyx_media_group_player_title">Player and controls</string>
+    <string name="kovelyx_media_group_player_description">Default player, controls and playback screen</string>
+    <string name="kovelyx_media_group_streams_title">Streams and P2P</string>
+    <string name="kovelyx_media_group_streams_description">Stream selection, sources and P2P cache</string>
+    <string name="kovelyx_media_group_episodes_title">Episodes and skips</string>
+    <string name="kovelyx_media_group_episodes_description">Next episode, intros, recaps and credits</string>
+    <string name="kovelyx_media_group_audio_video_title">Audio and video</string>
+    <string name="kovelyx_media_group_audio_video_description">Audio languages, decoders and picture output</string>
+    <string name="kovelyx_media_group_catalogue">CATALOGUES, SERVERS AND SEARCH</string>
+    <string name="kovelyx_subtitle_font">Subtitle font</string>
+    <string name="kovelyx_subtitle_font_local">Imported .ttf and .otf fonts stay on this device. Up to 10 MB per font.</string>
+    <string name="kovelyx_subtitle_outline_width">Outline thickness</string>
+    <string name="kovelyx_subtitle_reset_appearance">Reset subtitle appearance</string>
+    <string name="kovelyx_subtitle_preview_sample">A sample subtitle</string>
 </resources>
