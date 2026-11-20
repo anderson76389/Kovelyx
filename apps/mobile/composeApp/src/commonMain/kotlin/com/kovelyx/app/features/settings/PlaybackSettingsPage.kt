@@ -365,19 +365,46 @@ private fun PlaybackSettingsSection(
     var p2pCacheClearFailed by remember { mutableStateOf(false) }
     val pluginsEnabled = AppFeaturePolicy.pluginsEnabled
     val autoPlayPlayerSettings by PlayerSettingsRepository.uiState.collectAsStateWithLifecycle()
-    val p2pSettings by remember {
-        P2pSettingsRepository.ensureLoaded()
-        P2pSettingsRepository.uiState
-    }.collectAsStateWithLifecycle()
-    val p2pCacheState by P2pStreamingEngine.cacheState.collectAsStateWithLifecycle()
-    val p2pStreamingState by P2pStreamingEngine.state.collectAsStateWithLifecycle()
+    // Torrent caches and streams should not be observed by unrelated settings pages.
+    val needsP2p = selectedPage == null || selectedPage == SettingsPage.ContentP2P
+    val p2pSettings = if (needsP2p) {
+        val state by remember {
+            P2pSettingsRepository.ensureLoaded()
+            P2pSettingsRepository.uiState
+        }.collectAsStateWithLifecycle()
+        state
+    } else {
+        P2pSettingsRepository.uiState.value
+    }
+    val p2pCacheState = if (needsP2p) {
+        val state by P2pStreamingEngine.cacheState.collectAsStateWithLifecycle()
+        state
+    } else {
+        P2pStreamingEngine.cacheState.value
+    }
+    val p2pStreamingState = if (needsP2p) {
+        val state by P2pStreamingEngine.state.collectAsStateWithLifecycle()
+        state
+    } else {
+        P2pStreamingEngine.state.value
+    }
     val coroutineScope = rememberCoroutineScope()
-    val availableExternalPlayers = ExternalPlayerPlatform.availablePlayers()
+    val availableExternalPlayers = if (selectedPage == null || selectedPage == SettingsPage.ContentPlayer) {
+        ExternalPlayerPlatform.availablePlayers()
+    } else {
+        emptyList()
+    }
     val selectedExternalPlayer = availableExternalPlayers.firstOrNull {
         it.id == autoPlayPlayerSettings.externalPlayerId
     }
-    val addonUiState by AddonRepository.uiState.collectAsStateWithLifecycle()
-    val pluginUiState = if (pluginsEnabled) {
+    val needsSources = selectedPage == null || selectedPage == SettingsPage.ContentStreamSelection
+    val addonUiState = if (needsSources) {
+        val state by AddonRepository.uiState.collectAsStateWithLifecycle()
+        state
+    } else {
+        AddonRepository.uiState.value
+    }
+    val pluginUiState = if (pluginsEnabled && needsSources) {
         val state by PluginRepository.uiState.collectAsStateWithLifecycle()
         state
     } else {
