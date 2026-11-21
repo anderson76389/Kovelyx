@@ -48,6 +48,8 @@ import com.kovelyx.app.features.settings.AppIconRepository
 import com.kovelyx.app.features.settings.applyDesktopRendererPreference
 import com.kovelyx.app.features.settings.transparentPreviewResource
 import java.awt.Desktop
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import java.net.URI
 import javax.imageio.ImageIO
 import java.awt.Color as AwtColor
@@ -182,6 +184,22 @@ fun main(args: Array<String>) {
 
         SwingWindow(
             onCloseRequest = {
+                // Flush the last window position, even if closed during a drag.
+                // Windows implements fullscreen outside WindowPlacement, so check
+                // its persisted native fullscreen flag before saving geometry.
+                if (windowState.placement == WindowPlacement.Floating &&
+                    !DesktopWindowModeStorage.loadWasFullscreen() &&
+                    windowState.position.isSpecified
+                ) {
+                    DesktopWindowModeStorage.saveWindowedGeometry(
+                        DesktopWindowGeometry(
+                            x = windowState.position.x.value,
+                            y = windowState.position.y.value,
+                            width = windowState.size.width.value,
+                            height = windowState.size.height.value,
+                        ),
+                    )
+                }
                 DesktopCollectionImportBridge.stop()
                 P2pStreamingEngine.shutdown()
                 DiscordPresenceManager.shutdown()
@@ -254,25 +272,33 @@ fun main(args: Array<String>) {
                 }
             }
             LaunchedEffect(windowState) {
-                // Only persist geometry while windowed: fullscreen/native-Windows-fullscreen
-                // coordinates aren't a meaningful "windowed position" to restore later.
-                snapshotFlow { Triple(windowState.placement, windowState.position, windowState.size) }
-                    .collect { (placement, position, size) ->
-                        val isFullscreen = fullscreenController.isFullscreen(window, windowState)
-                        if (!isFullscreen && restoresMaximizedWindowPlacement) {
+                // Keep maximized/floating transitions persisted immediately.
+                snapshotFlow { windowState.placement }
+                    .collect { placement ->
+                        if (!fullscreenController.isFullscreen(window, windowState) && restoresMaximizedWindowPlacement) {
                             DesktopWindowModeStorage.saveWasMaximized(placement == WindowPlacement.Maximized)
                         }
-                        val isWindowed = placement == WindowPlacement.Floating && !isFullscreen
-                        if (isWindowed && position.isSpecified) {
-                            DesktopWindowModeStorage.saveWindowedGeometry(
-                                DesktopWindowGeometry(
-                                    x = position.x.value,
-                                    y = position.y.value,
-                                    width = size.width.value,
-                                    height = size.height.value,
-                                ),
-                            )
-                        }
+                    }
+            }
+            LaunchedEffect(windowState) {
+                // Coalesce rapid drag/resize events: otherwise every pixel move
+                // performs a synchronous properties-file rewrite on Windows/Linux.
+                // The close handler above flushes the final value synchronously.
+                snapshotFlow { Triple(windowState.placement, windowState.position, windowState.size) }
+                    .collectLatest { (placement, position, size) ->
+                        if (placement != WindowPlacement.Floating || !position.isSpecified) return@collectLatest
+                        delay(200L)
+                        if (windowState.placement != WindowPlacement.Floating ||
+                            fullscreenController.isFullscreen(window, windowState)
+                        ) return@collectLatest
+                        DesktopWindowModeStorage.saveWindowedGeometry(
+                            DesktopWindowGeometry(
+                                x = position.x.value,
+                                y = position.y.value,
+                                width = size.width.value,
+                                height = size.height.value,
+                            ),
+                        )
                     }
             }
             DisposableEffect(window, windowState) {
