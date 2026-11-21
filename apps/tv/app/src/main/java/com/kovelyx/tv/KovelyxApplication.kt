@@ -109,6 +109,15 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
         }
 
         val imageLoaderRef: () -> ImageLoader = { SingletonImageLoader.get(this) }
+        // Coil invokes the cache-strategy factory for individual image requests.
+        // Reuse the scope, network dispatcher and conditional-fetch client instead
+        // of allocating them again for every poster (especially on 2 GB TV boxes).
+        val sharedRevalidationStrategy by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            StaleWhileRevalidateCacheStrategy(
+                revalidationClient = { imageOkHttpClient },
+                imageLoaderProvider = imageLoaderRef,
+            )
+        }
 
         return ImageLoader.Builder(this)
             .components {
@@ -122,12 +131,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
                 add(
                     coil3.network.okhttp.OkHttpNetworkFetcherFactory(
                         callFactory = { imageOkHttpClient },
-                        cacheStrategy = {
-                            StaleWhileRevalidateCacheStrategy(
-                                revalidationClient = { imageOkHttpClient },
-                                imageLoaderProvider = imageLoaderRef,
-                            )
-                        },
+                        cacheStrategy = { sharedRevalidationStrategy },
                     )
                 )
             }
