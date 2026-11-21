@@ -116,6 +116,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
             StaleWhileRevalidateCacheStrategy(
                 revalidationClient = { imageOkHttpClient },
                 imageLoaderProvider = imageLoaderRef,
+                maxConcurrentRequests = if (constrainedTv) 2 else 8,
             )
         }
 
