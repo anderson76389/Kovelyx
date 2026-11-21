@@ -48,6 +48,9 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kovelyx.app.features.collection.collectionFilePickerAvailable
+import com.kovelyx.app.features.collection.rememberCollectionFilePicker
+import androidx.compose.material3.TextButton
 import com.kovelyx.app.core.build.AppFeaturePolicy
 import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
 import com.kovelyx.app.core.ui.KovelyxIconActionButton
@@ -99,6 +102,15 @@ internal fun AddonsSettingsPageContent(
     var formMessage by rememberSaveable { mutableStateOf<String?>(null) }
     var installModalState by remember { mutableStateOf<AddonInstallModalState?>(null) }
     var addonPendingDeletionUrl by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingManifestImport by remember { mutableStateOf<List<String>?>(null) }
+    val pickManifestFile = rememberCollectionFilePicker(
+        onSelected = { text ->
+            runCatching { parseAddonManifestUrlsFile(text) }
+                .onSuccess { pendingManifestImport = it; formMessage = null }
+                .onFailure { formMessage = it.message ?: "Fichier d'extensions invalide." }
+        },
+        onError = { formMessage = it },
+    )
     val enterAddonUrlMessage = stringResource(Res.string.addons_error_enter_url)
     val usePersonalMediaCopy = AppFeaturePolicy.personalMediaAddonCopyEnabled
 
@@ -145,6 +157,19 @@ internal fun AddonsSettingsPageContent(
             },
         )
 
+        if (collectionFilePickerAvailable) {
+            TextButton(onClick = pickManifestFile) {
+                Text("Importer un fichier JSON d'extensions")
+            }
+            Text(
+                "Importez un export contenant des adresses HTTPS /manifest.json. " +
+                    "Les sauvegardes de collections s'importent dans Collections ; " +
+                    "un ZIP de site web n'est pas un addon.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
         SectionHeader(stringResource(Res.string.addons_section_installed))
         if (uiState.addons.isEmpty()) {
             EmptyStateCard(usePersonalMediaCopy = usePersonalMediaCopy)
@@ -189,6 +214,42 @@ internal fun AddonsSettingsPageContent(
                 )
             }
         }
+    }
+
+    val importUrls = pendingManifestImport
+    if (importUrls != null) {
+        KovelyxStatusModal(
+            title = "Importer des extensions",
+            message = "${importUrls.size} adresse(s) de manifest détectée(s). " +
+                "Vérifiez que ces serveurs vous appartiennent ou sont fiables. " +
+                "Les extensions seront contactées et installées sur ce profil après votre confirmation.",
+            isVisible = true,
+            confirmText = "Installer",
+            dismissText = "Annuler",
+            onConfirm = {
+                pendingManifestImport = null
+                installModalState = AddonInstallModalState.Checking
+                coroutineScope.launch {
+                    var installed = 0
+                    val failures = mutableListOf<String>()
+                    for (url in importUrls) {
+                        when (val result = AddonRepository.addAddon(url)) {
+                            is AddAddonResult.Success -> installed++
+                            is AddAddonResult.Error -> failures.add(result.message.take(130))
+                        }
+                    }
+                    installModalState = if (failures.isEmpty()) {
+                        AddonInstallModalState.Success("$installed extension(s) depuis le JSON")
+                    } else {
+                        AddonInstallModalState.Error(
+                            "$installed extension(s) installée(s) sur ${importUrls.size}. " +
+                                "${failures.size} échec(s) : ${failures.first()}"
+                        )
+                    }
+                }
+            },
+            onDismiss = { pendingManifestImport = null },
+        )
     }
 
     val pendingDeletionUrl = addonPendingDeletionUrl
