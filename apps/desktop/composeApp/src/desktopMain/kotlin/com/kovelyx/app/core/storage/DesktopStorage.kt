@@ -120,6 +120,20 @@ internal object DesktopStorage {
             putString(key, value.toString())
         }
 
+        /** Persist related preferences in one write, skipping identical values. */
+        fun putFloats(values: Map<String, Float>) = synchronized(lock) {
+            ensureLoaded()
+            var changed = false
+            for ((key, value) in values) {
+                val serialized = value.toString()
+                if (properties.getProperty(key) != serialized) {
+                    properties.setProperty(key, serialized)
+                    changed = true
+                }
+            }
+            if (changed) persist()
+        }
+
         fun getStringSet(key: String): Set<String>? =
             getString(key)?.let { payload ->
                 runCatching { json.decodeFromString<List<String>>(payload).toSet() }.getOrNull()
