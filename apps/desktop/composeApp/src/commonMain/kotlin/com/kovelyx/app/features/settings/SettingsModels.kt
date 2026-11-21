@@ -132,17 +132,17 @@ internal enum class SettingsPage(
         parentPage = Root,
     ),
     MediaPlayer(
-        titleRes = Res.string.kovelyx_media_player_title,
+        titleRes = Res.string.kovelyx_media_group_player_title,
         category = SettingsCategory.Watch,
         parentPage = ContentDiscovery,
     ),
     MediaStreamSelection(
-        titleRes = Res.string.kovelyx_media_stream_selection_title,
+        titleRes = Res.string.kovelyx_media_group_streams_title,
         category = SettingsCategory.Watch,
         parentPage = ContentDiscovery,
     ),
     MediaUpNext(
-        titleRes = Res.string.kovelyx_media_up_next_title,
+        titleRes = Res.string.kovelyx_media_group_episodes_title,
         category = SettingsCategory.Watch,
         parentPage = ContentDiscovery,
     ),
@@ -157,7 +157,7 @@ internal enum class SettingsPage(
         parentPage = ContentDiscovery,
     ),
     MediaAudio(
-        titleRes = Res.string.kovelyx_media_audio_title,
+        titleRes = Res.string.kovelyx_media_group_audio_video_title,
         category = SettingsCategory.Watch,
         parentPage = ContentDiscovery,
     ),
