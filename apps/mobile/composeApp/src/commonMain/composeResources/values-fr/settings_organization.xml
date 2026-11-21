@@ -46,4 +46,18 @@
     <string name="kovelyx_media_p2p_title">Streaming P2P</string>
     <string name="kovelyx_media_p2p_description">Torrent, profil et cache</string>
     <string name="kovelyx_media_options_section">RÉGLAGES DE LECTURE ET DE MÉDIAS</string>
+    <string name="kovelyx_media_group_player_title">Lecteur et interface</string>
+    <string name="kovelyx_media_group_player_description">Lecteur par défaut, contrôles et écran de lecture</string>
+    <string name="kovelyx_media_group_streams_title">Flux et P2P</string>
+    <string name="kovelyx_media_group_streams_description">Sélection du flux, sources et cache P2P</string>
+    <string name="kovelyx_media_group_episodes_title">Épisodes et passages</string>
+    <string name="kovelyx_media_group_episodes_description">Épisode suivant, intros, résumés et génériques</string>
+    <string name="kovelyx_media_group_audio_video_title">Audio et vidéo</string>
+    <string name="kovelyx_media_group_audio_video_description">Langues audio, décodeurs et sortie vidéo</string>
+    <string name="kovelyx_media_group_catalogue">CATALOGUES, SERVEURS ET RECHERCHE</string>
+    <string name="kovelyx_subtitle_font">Police des sous-titres</string>
+    <string name="kovelyx_subtitle_font_local">Les polices .ttf et .otf importées restent sur cet appareil. Jusqu’à 10 Mo par police.</string>
+    <string name="kovelyx_subtitle_outline_width">Épaisseur du contour</string>
+    <string name="kovelyx_subtitle_reset_appearance">Rétablir l’apparence par défaut</string>
+    <string name="kovelyx_subtitle_preview_sample">Un exemple de sous-titre</string>
 </resources>

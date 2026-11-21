@@ -1,5 +1,6 @@
 package com.kovelyx.app
 
+import android.app.ActivityManager
 import android.app.Application
 import androidx.work.Configuration
 import androidx.work.WorkManager
@@ -9,6 +10,7 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
+import coil3.memory.MemoryCache
 import coil3.network.cachecontrol.CacheControlCacheStrategy
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.CachePolicy
@@ -41,7 +43,16 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory, Configur
 
 
     override fun newImageLoader(context: android.content.Context): ImageLoader {
+        val activityManager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        val lowRamDevice = activityManager.isLowRamDevice
+        // Bound disposable poster RAM without constraining the video decoder or downloads.
+        // Higher-memory phones keep a larger cache to avoid unnecessary re-fetches.
+        val memoryFraction = if (lowRamDevice) 0.12 else 0.18
+        val sharedCacheStrategy = CacheControlCacheStrategy()
         return ImageLoader.Builder(context)
+            .memoryCache {
+                MemoryCache.Builder().maxSizePercent(context, memoryFraction).build()
+            }
             .crossfade(true)
             .diskCachePolicy(CachePolicy.ENABLED)
             .memoryCachePolicy(CachePolicy.ENABLED)
@@ -50,7 +61,7 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory, Configur
                 add(SvgDecoder.Factory())
                 add(
                     KtorNetworkFetcherFactory(
-                        cacheStrategy = { CacheControlCacheStrategy() },
+                        cacheStrategy = { sharedCacheStrategy },
                     ),
                 )
                 if (Build.VERSION.SDK_INT >= 28) {

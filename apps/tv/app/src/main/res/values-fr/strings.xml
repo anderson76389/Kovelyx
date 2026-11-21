@@ -1264,6 +1264,7 @@
     <string name="subtitle_style_bold">Gras</string>
     <string name="subtitle_style_text_color">Couleur du texte</string>
     <string name="subtitle_style_text_opacity">Opacité du texte</string>
+    <string name="subtitle_style_preview_sample">Un exemple de sous-titre</string>
     <string name="subtitle_style_outline">Contour</string>
     <string name="subtitle_style_bottom_offset">Décalage inférieur</string>
     <string name="subtitle_style_defaults">Par défaut</string>

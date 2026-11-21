@@ -1,10 +1,31 @@
 package com.kovelyx.tv.ui.screens.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kovelyx.tv.R
 import com.kovelyx.tv.data.local.AVAILABLE_SUBTITLE_LANGUAGES
 import com.kovelyx.tv.data.local.LibassRenderType
@@ -95,6 +116,7 @@ internal fun PlaybackSubtitlesSection(
     )
 
     SettingsSectionLabel(text = stringResource(R.string.sub_style_label))
+    if (enabled) SubtitleAppearancePreview(style)
     SettingsActionRow(
         title = "Police des sous-titres",
         subtitle = "Par défaut, sans empattement, serif, monospace ou .ttf/.otf local (10 Mo max.)",
@@ -186,6 +208,47 @@ internal fun PlaybackSubtitlesSection(
             value = libassRenderTypeOptions().firstOrNull { it.value == settings.libassRenderType }?.title,
             onClick = { onOpenDialog(PlaybackDialog.LIBASS_RENDER_TYPE) }
         )
+    }
+}
+
+@Composable
+private fun SubtitleAppearancePreview(style: SubtitleStyleSettings) {
+    val context = LocalContext.current
+    val fontFamily = remember(context, style.fontFamily, style.bold) {
+        FontFamily(SubtitleFontStore.resolve(context, style.fontFamily, style.bold))
+    }
+    val textColor = Color(style.textColor)
+    val textStyle = TextStyle(
+        color = textColor,
+        fontFamily = fontFamily,
+        fontWeight = if (style.bold) FontWeight.Bold else FontWeight.Normal,
+        fontSize = (22 * style.size.coerceIn(50, 200) / 100f).sp,
+        textAlign = TextAlign.Center
+    )
+    val outlineWidth = with(LocalDensity.current) { style.outlineWidth.coerceIn(1, 5).dp.toPx() }
+    val outline = Color(style.outlineColor)
+    val sample = stringResource(R.string.subtitle_style_preview_sample)
+    Box(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 128.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Brush.horizontalGradient(listOf(Color(0xFF222B3C), Color(0xFF5B6575))))
+            .padding(start = 12.dp, top = 12.dp, end = 12.dp,
+                bottom = (12 + (style.verticalOffset.coerceIn(-20, 50) + 20) * 0.6f).dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Box(Modifier.background(Color(style.backgroundColor)).padding(horizontal = 6.dp, vertical = 2.dp)) {
+            if (style.outlineEnabled) {
+                BasicText(
+                    text = sample,
+                    modifier = Modifier.clearAndSetSemantics { },
+                    style = textStyle.copy(
+                        color = outline.copy(alpha = outline.alpha * textColor.alpha),
+                        drawStyle = Stroke(width = outlineWidth)
+                    )
+                )
+            }
+            BasicText(text = sample, style = textStyle)
+        }
     }
 }
 
