@@ -39,6 +39,10 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          # Avoid restoring stale dependency-metadata failures from shared Gradle caches.
+          # This workflow must resolve the same Maven artifacts as the successful builds.
+          cache-disabled: true
       - name: Vérifier progression, notes d'épisodes et mises à jour
         shell: bash
         run: |
