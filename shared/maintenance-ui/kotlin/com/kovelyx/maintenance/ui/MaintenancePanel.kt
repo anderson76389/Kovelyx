@@ -49,6 +49,11 @@ fun MaintenancePanel(
         try { storage = readStorage(); sync = readSync() }
         catch (_: Exception) { message = "Impossible de mesurer le stockage actuellement." }
     }
+    // This panel is embedded in Settings rather than in a Material Surface. On
+    // desktop the surrounding LazyColumn can supply a dark LocalContentColor,
+    // although Kovelyx uses a dark surface. Set the content color explicitly so
+    // every heading, storage value and sync diagnostic remains readable.
+    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("Stockage, synchronisation et sauvegarde", style = MaterialTheme.typography.titleLarge)
         Text("Les tailles sont celles des fichiers accessibles à Kovelyx. Les vidéos téléchargées et les données personnelles ne sont jamais nettoyées.", style = MaterialTheme.typography.bodySmall)
@@ -98,6 +103,7 @@ fun MaintenancePanel(
         text = { Text("Les fichiers temporaires seront téléchargés à nouveau si nécessaire. Ferme complètement Kovelyx puis relance-le pour appliquer le nettoyage.") },
         confirmButton = { TextButton(onClick = { clearKey = null; run { clear(key); "Nettoyage prévu au prochain démarrage" } }) { Text("Planifier le nettoyage") } },
         dismissButton = { TextButton(onClick = { clearKey = null }) { Text("Annuler") } }) }
+    }
 }
 
 private fun formatBytes(bytes: Long): String = when {
