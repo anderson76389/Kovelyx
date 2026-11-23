@@ -206,5 +206,3 @@ object WatchingActions {
     }
 }
 
-internal fun String.isSeriesLikeWatchingContentType(includeAnime = true): Boolean =
-    trim().lowercase() in setOf("series", "show", "tv", "tvshow", "anime")
