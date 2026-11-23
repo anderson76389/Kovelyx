@@ -205,5 +205,5 @@ object WatchingActions {
     }
 }
 
-private fun String.isSeriesLikeType(): Boolean =
-    trim().lowercase() in setOf("series", "show", "tv", "tvshow")
+internal fun String.isSeriesLikeType(): Boolean =
+    trim().lowercase() in setOf("series", "show", "tv", "tvshow", "anime")
