@@ -870,6 +870,7 @@ fun MetaDetailsScreen(
                     detailImdbRatingsVisibility = uiState.detailImdbRatingsVisibility,
                     isMovieWatched = uiState.isMovieWatched,
                     isMovieWatchedPending = uiState.isMovieWatchedPending,
+                    allEpisodesWatchedPending = uiState.allEpisodesWatchedPending,
                     moreLikeThis = uiState.moreLikeThis,
                     moreLikeThisSource = uiState.moreLikeThisSource,
                     posterCardCornerRadiusDp = posterCardCornerRadiusDp,
@@ -947,6 +948,7 @@ fun MetaDetailsScreen(
                     onToggleLibrary = { viewModel.onEvent(MetaDetailsEvent.OnToggleLibrary) },
                     onLibraryLongPress = { viewModel.onEvent(MetaDetailsEvent.OnLibraryLongPress) },
                     onToggleMovieWatched = { viewModel.onEvent(MetaDetailsEvent.OnToggleMovieWatched) },
+                    onToggleAllEpisodesWatched = { viewModel.onEvent(MetaDetailsEvent.OnToggleAllEpisodesWatched) },
                     onToggleEpisodeWatched = { video ->
                         viewModel.onEvent(MetaDetailsEvent.OnToggleEpisodeWatched(video))
                     },
@@ -1209,6 +1211,7 @@ private fun MetaDetailsContent(
     detailImdbRatingsVisibility: DetailImdbRatingsVisibility,
     isMovieWatched: Boolean,
     isMovieWatchedPending: Boolean,
+    allEpisodesWatchedPending: Boolean,
     moreLikeThis: List<MetaPreview>,
     moreLikeThisSource: MoreLikeThisSource?,
     posterCardCornerRadiusDp: Int = 12,
@@ -1244,6 +1247,7 @@ private fun MetaDetailsContent(
     onToggleLibrary: () -> Unit,
     onLibraryLongPress: () -> Unit,
     onToggleMovieWatched: () -> Unit,
+    onToggleAllEpisodesWatched: () -> Unit,
     onToggleEpisodeWatched: (Video) -> Unit,
     onMarkSeasonWatched: (Int) -> Unit,
     onMarkSeasonUnwatched: (Int) -> Unit,
@@ -1298,6 +1302,17 @@ private fun MetaDetailsContent(
     }
     val isSeries = remember(meta.type, meta.videos) {
         meta.type == ContentType.SERIES || meta.videos.isNotEmpty()
+    }
+    // Compute this only when the episode collection or progress changes, not
+    // on each DPAD focus frame (important for low-memory Android TV devices).
+    val bulkWatchedEpisodes = remember(meta.apiType, meta.videos, episodesForSeason) {
+        releasedEpisodesForWholeSeries(meta.apiType, meta.videos, episodesForSeason)
+    }
+    val isWholeSeriesWatched = remember(bulkWatchedEpisodes, watchedEpisodes, episodeProgressMap) {
+        allReleasedEpisodesWatched(bulkWatchedEpisodes) { episode ->
+            val key = episode.season!! to episode.episode!!
+            key in watchedEpisodes || episodeProgressMap[key]?.isCompleted() == true
+        }
     }
     val defaultSeriesVideo = remember(meta.behaviorHints?.defaultVideoId, meta.videos) {
         val defaultVideoId = meta.behaviorHints?.defaultVideoId
@@ -2469,6 +2484,10 @@ private fun MetaDetailsContent(
                         isMovieWatched = isMovieWatched,
                         isMovieWatchedPending = isMovieWatchedPending,
                         onToggleMovieWatched = onToggleMovieWatched,
+                        showWholeSeriesWatched = bulkWatchedEpisodes.isNotEmpty(),
+                        isWholeSeriesWatched = isWholeSeriesWatched,
+                        isWholeSeriesWatchedPending = allEpisodesWatchedPending,
+                        onToggleWholeSeriesWatched = onToggleAllEpisodesWatched,
                         mdbListRatings = visibleMdbListRatings,
                         mdbListRatingOrder = mdbListRatingOrder,
                         hideMetaInfoImdb = !showStandardOverallRatings,
