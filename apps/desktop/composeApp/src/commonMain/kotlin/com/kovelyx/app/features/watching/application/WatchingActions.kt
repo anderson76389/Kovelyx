@@ -24,7 +24,7 @@ object WatchingActions {
     private val actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     suspend fun togglePosterWatched(preview: MetaPreview) {
-        if (!preview.type.isSeriesLikeWatchingContentType()) {
+        if (!preview.type.isSeriesLikeWatchingContentType(includeAnime = true)) {
             WatchedRepository.toggleWatched(preview.toWatchedItem(markedAtEpochMs = 0L))
             return
         }
@@ -139,7 +139,7 @@ object WatchingActions {
         meta: MetaDetails,
         todayIsoDate: String = CurrentDateProvider.todayIsoDate(),
     ) {
-        if (!meta.type.isSeriesLikeWatchingContentType()) return
+        if (!meta.type.isSeriesLikeWatchingContentType(includeAnime = true)) return
 
         WatchedRepository.reconcileSeriesWatchedState(
             meta = meta,
