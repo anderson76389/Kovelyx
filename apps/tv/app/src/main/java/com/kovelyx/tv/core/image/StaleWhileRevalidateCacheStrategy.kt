@@ -37,7 +37,6 @@ class StaleWhileRevalidateCacheStrategy(
 
     init { require(maxConcurrentRevalidations in 1..8) }
 
-
     companion object {
         private const val TAG = "NuvioSWR"
     }
@@ -46,9 +45,6 @@ class StaleWhileRevalidateCacheStrategy(
         maxRememberedUrls = 256,
         maxConcurrentRequests = maxConcurrentRevalidations,
     )
-
-    private companion object FixEndMarker {
-    }
 
     private val revalidationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val delegate = CacheControlCacheStrategy()
