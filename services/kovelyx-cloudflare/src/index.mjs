@@ -57,6 +57,50 @@ async function ownedProfile(env, userId, profileId) {
   return env.DB.prepare("SELECT id FROM kv_profiles WHERE id=? AND owner_id=?")
     .bind(profileId, userId).first();
 }
+// Bounded revision-aware writes: one authentication and one D1 batch for many
+// episodes. A CAS conflict remains a conflict, never a blind overwrite.
+async function handleSyncBatch(request, env, user) {
+  if (request.method !== "POST") return jsonResponse({error:"Méthode interdite"},405);
+  const maxBytes = 262144;
+  if (Number(request.headers.get("content-length") || 0) > maxBytes)
+    return jsonResponse({error:"Lot trop volumineux"},413);
+  const text = await request.text();
+  if (new TextEncoder().encode(text).length > maxBytes)
+    return jsonResponse({error:"Lot trop volumineux"},413);
+  let body;
+  try { body = JSON.parse(text); } catch { return jsonResponse({error:"Lot invalide"},400); }
+  const items = body?.items;
+  if (!validProfileId(body?.profileId) || !Array.isArray(items) || items.length < 1 || items.length > 25)
+    return jsonResponse({error:"Lot invalide"},400);
+  const keys = new Set();
+  for (const item of items) {
+    if (!item || !["watch_progress","watched_items"].includes(item.category) ||
+        !validSyncInput({...item,profileId:body.profileId}))
+      return jsonResponse({error:"Modification invalide"},400);
+    const key = item.category + "|" + item.itemKey;
+    if (keys.has(key)) return jsonResponse({error:"Modification en double"},400);
+    keys.add(key);
+  }
+  if (!await ownedProfile(env,user.id,body.profileId))
+    return jsonResponse({error:"Profil introuvable"},404);
+  const now = Date.now();
+  const statements = items.map(item => item.revision === 0
+    ? env.DB.prepare(
+      "INSERT OR IGNORE INTO kv_sync "+
+      "(owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at) VALUES (?,?,?,?,?,1,?,?)"
+      ).bind(user.id,body.profileId,item.category,item.itemKey,JSON.stringify(item.payload),item.deleted?1:0,now)
+    : env.DB.prepare(
+      "UPDATE kv_sync SET payload=?,revision=revision+1,deleted=?,updated_at=? "+
+      "WHERE owner_id=? AND profile_id=? AND category=? AND item_key=? AND revision=?"
+      ).bind(JSON.stringify(item.payload),item.deleted?1:0,now,user.id,body.profileId,
+        item.category,item.itemKey,item.revision));
+  const results = await env.DB.batch(statements);
+  const conflicts = results.flatMap((result,index) => result.meta?.changes === 1 ? [] : [index]);
+  // Other valid CAS writes may have succeeded. Clients retain all pending
+  // mutations and reconcile fresh revisions on a conflict.
+  if (conflicts.length) return jsonResponse({error:"Conflit de synchronisation",conflicts},409);
+  return jsonResponse({written:items.length});
+}
 async function handleSync(request, env, user, url) {
   if (request.method === "GET") {
     const profileId = url.searchParams.get("profileId") || "";
@@ -221,9 +265,11 @@ async function productionReadiness(env) {
     if ((media.results || []).length !== 4 || !media.results.some(row => row.name === "kv_profile_media" && row.sql?.includes("18000000")) || !media.results.some(row => row.name === "kv_profile_media_chunks" && row.sql?.includes("0 AND 34"))) return unavailable();
     const pins=await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='kv_profile_pins'").first();
     if(!pins)return unavailable();
+    const cursor = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_kv_sync_cursor'").first();
+    if (!cursor) return unavailable();
     return jsonResponse({
       service:"Kovelyx Cloud",provider:env.KOVELYX_PROVIDER || "Cloudflare D1",
-      status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES,catalogueSnapshotSchema:1,profilePinSchema:1
+      status:"ok",schema:"0004_profile_media_gifs",maxProfileMediaBytes:MAX_PROFILE_MEDIA_BYTES,catalogueSnapshotSchema:1,profilePinSchema:1,syncDeltaSchema:1
     });
   } catch {
     return unavailable();
@@ -271,6 +317,7 @@ export default {
         return respond(await handleProfilePin(request,env,user,url,readJson));
       if (url.pathname === "/v1/profile-media") return respond(await handleProfileMedia(request,env,user,url));
       if (url.pathname === "/v1/sync") return respond(await handleSync(request,env,user,url));
+      if (url.pathname === "/v1/sync-batch") return respond(await handleSyncBatch(request,env,user));
       if (url.pathname === "/v1/catalogue-manifest") return respond(await handleCatalogueManifest(request,env,user,await readJson(request)));
       if (url.pathname === "/v1/catalogue-chunk") return respond(await handleCatalogueChunk(request,env,user,await readJson(request)));
       return respond(jsonResponse({error:"Route inconnue"},404));
