@@ -38,7 +38,7 @@ class BackupValidation(unittest.TestCase):
         self.db.close()
 
     def insert(self, category, key, payload):
-        self.db.execute('INSERT INTO kv_sync VALUES (?,?,?,?,?,?,?,?)', ('test', 'profile', category, key, json.dumps(payload), 1, 0, 1))
+        self.db.execute('INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at) VALUES (?,?,?,?,?,?,?,?)', ('test', 'profile', category, key, json.dumps(payload), 1, 0, 1))
 
     def validate(self):
         with tempfile.TemporaryDirectory() as directory:
