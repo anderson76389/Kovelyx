@@ -24,6 +24,15 @@ Ce contrôle atteste du Worker, de Better Auth et de la migration D1 nécessaire
 
 **État des sources au 5 novembre 2026 :** les trois applications Android mobile, Windows et Android TV ont migré leur code de comptes, profils, bibliothèques, progression, éléments vus et préférences vers Cloudflare Workers + Better Auth + D1. Les tests automatisés de compilation et de schéma sont distincts d'un déploiement de production : vérifier le Worker et exécuter les migrations restantes après sauvegarde. La synchronisation multiappareils reste à valider sur appareils réels. La liaison TV par QR/code et la récupération de mot de passe ne sont pas encore disponibles.
 
+## Réduction de la consommation Cloudflare (migration 0006)
+
+- Les applications récentes demandent seulement les changements depuis un curseur monotone par profil. Les anciennes versions restent compatibles avec les lectures paginées existantes.
+- Le premier chargement, un changement de profil, un redémarrage ou une restauration nécessitent une lecture complète. Le cache de lecture est borné (8 000 lignes et 4 millions de caractères sérialisés) et renouvelé après six heures ; il n'est pas conservé après déconnexion.
+- Les écritures de progression et de contenu vu sont groupées par 25 maximum. Les révisions empêchent d'écraser une modification concurrente. Les suppressions conservent leur mécanisme durable existant.
+- Les demandes de synchronisation courantes sont regroupées sur 10 secondes et le contrôle périodique en premier plan passe à deux minutes. Après une réponse de quota HTTP 429, les reprises du cycle principal sont espacées (15 minutes puis jusqu'à une heure).
+- Ces changements diminuent surtout les appels HTTP et les lectures répétées. Les index, curseurs et lignes écrites restent comptabilisés par D1 : aucun quota gratuit ne peut être garanti indéfiniment.
+- L'activation du protocole nécessite le Worker mis à jour et la migration additive 0006. Utiliser le déploiement protégé ou `scripts/setup.mjs` avec sa sauvegarde obligatoire. `/ready` doit alors annoncer `syncDeltaSchema: 1`. Avant ce déploiement, les clients conservent le protocole historique.
+
 ## Un hébergement gratuit sans pause 7 jours ?
 
 Oui, Cloudflare Workers Free + D1 n'a pas de mise en pause automatique après sept jours d'inactivité comparable aux anciens hébergements. Mais **gratuit pour toujours n'est pas garanti** et le forfait a des limites :
