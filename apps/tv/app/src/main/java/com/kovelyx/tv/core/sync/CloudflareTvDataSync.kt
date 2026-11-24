@@ -93,6 +93,8 @@ class CloudflareTvDataSync @Inject constructor(
             try {
                 var retryDelayMs = 2_000L
                 do {
+                    // Local edits are already persisted. Coalesce repeated requests, including playback ticks.
+                    delay(10_000L)
                     rerunRequested.remove(profileId)
                     try {
                         synchronize(profileId)
@@ -103,8 +105,11 @@ class CloudflareTvDataSync @Inject constructor(
                         Log.w(TAG, "Synchronisation D1 TV différée : reprise automatique, données locales préservées", error)
                         if (CloudflareTvAccountClient.account == null ||
                             profileManager.activeProfileId.value != profileId) break
+                        val quota = error.message.orEmpty().contains("HTTP 429") ||
+                            error.message.orEmpty().contains("quota", ignoreCase = true)
+                        if (quota) retryDelayMs = maxOf(retryDelayMs, 15 * 60_000L)
                         delay(retryDelayMs)
-                        retryDelayMs = (retryDelayMs * 2).coerceAtMost(60_000L)
+                        retryDelayMs = (retryDelayMs * 2).coerceAtMost(if (quota || retryDelayMs >= 15 * 60_000L) 60 * 60_000L else 60_000L)
                         rerunRequested.add(profileId)
                     }
                     // Les modifications reçues pendant la requête sont reprises.
@@ -352,6 +357,7 @@ class CloudflareTvDataSync @Inject constructor(
                 lastWatched = lastUpdated
             ), profileId)
         }
+        val writes = mutableListOf<CloudflareTvAccountClient.SyncWrite>()
         for ((key, item) in local) {
             if (key in deletedKeys) continue
             val cloudKey = key.take(200)
@@ -374,8 +380,9 @@ class CloudflareTvDataSync @Inject constructor(
                 .put("isCompleted", item.isCompleted())
             item.season?.let { data.put("seasonNumber", it) }
             item.episode?.let { data.put("episodeNumber", it) }
-            CloudflareTvAccountClient.writeSync(uuid, "watch_progress", cloudKey, data, revision(record))
+            writes += CloudflareTvAccountClient.SyncWrite("watch_progress", cloudKey, data, revision(record))
         }
+        CloudflareTvAccountClient.writeSyncBatch(uuid, writes)
         mutations.acknowledgeProgressUpserts(local.filterKeys { it !in deletedKeys }, profileId)
     }
 
@@ -415,6 +422,7 @@ class CloudflareTvDataSync @Inject constructor(
         if (additions.isNotEmpty() || removals.isNotEmpty()) {
             watched.applyRemoteChanges(additions, removals, profileId = profileId)
         }
+        val writes = mutableListOf<CloudflareTvAccountClient.SyncWrite>()
         for (item in local) {
             val key = watchedKey(item)
             if (key in deletedKeys) continue
@@ -431,8 +439,9 @@ class CloudflareTvDataSync @Inject constructor(
                 .put("markedAtEpochMs", item.watchedAt)
             item.season?.let { data.put("season", it) }
             item.episode?.let { data.put("episode", it) }
-            CloudflareTvAccountClient.writeSync(uuid, "watched_items", key, data, revision(record))
+            writes += CloudflareTvAccountClient.SyncWrite("watched_items", key, data, revision(record))
         }
+        CloudflareTvAccountClient.writeSyncBatch(uuid, writes)
         mutations.acknowledgeWatchedUpserts(local.filter { watchedKey(it) !in deletedKeys }, profileId)
     }
 
