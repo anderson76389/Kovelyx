@@ -318,7 +318,11 @@ internal object CloudflareTvAccountClient {
                     }
                     check(account == active) { "Compte modifié" }
                     val prior = if (resetOnce) null else cached
-                    val merged = if (changed.isEmpty() && prior != null) prior.rows else {
+                    if (changed.isEmpty() && prior != null) {
+                        batchAccount = active
+                        return@withLock prior.rows
+                    }
+                    val merged = run {
                         val byKey = linkedMapOf<Pair<String, String>, JSONObject>()
                         fun key(row: JSONObject) = row.getString("category") to row.getString("itemKey")
                         prior?.rows?.forEach { byKey[key(it)] = it }
