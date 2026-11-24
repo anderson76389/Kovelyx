@@ -6,6 +6,10 @@ import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import android.os.SystemClock
+import org.json.JSONArray
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -104,6 +108,8 @@ internal object CloudflareTvAccountClient {
             if (sessionRevision == expectedRevision) {
                 sessionRevision += 1L
                 account = null
+                deltaSnapshot = null
+                batchAccount = null
                 sessionStore?.clear()
             }
         }
@@ -247,40 +253,129 @@ internal object CloudflareTvAccountClient {
         }
     }
 
+    private data class DeltaSnapshot(
+        val account: Account, val profileId: String, val cursor: Long,
+        val rows: List<JSONObject>, val startedAt: Long
+    )
+    private val syncReadMutex = Mutex()
+    @Volatile private var deltaSnapshot: DeltaSnapshot? = null
+    @Volatile private var batchAccount: Account? = null
+
     suspend fun syncRows(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JSONObject> = withContext(Dispatchers.IO) {
+        syncReadMutex.withLock {
+            val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
+            require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
+            require((snapshotKind == null && snapshotHash == null) ||
+                (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
+            val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
+            var delta = snapshotKind == null
+            val cached = deltaSnapshot?.takeIf {
+                delta && it.account == active && it.profileId == profileId &&
+                    SystemClock.elapsedRealtime() - it.startedAt < 6L * 60 * 60 * 1000
+            }
+            if (delta && cached == null) deltaSnapshot = null
+            var cursor = cached?.cursor ?: 0L
+            val changed = mutableListOf<JSONObject>()
+            val all = mutableListOf<JSONObject>()
+            var offset = 0
+            var resetOnce = false
+            while (true) {
+                val query = if (delta) "&mode=delta&since=$cursor" else ""
+                val request = Request.Builder()
+                    .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
+                        "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery$query")
+                    .header("Authorization", "Bearer ${active.bearerToken}").get().build()
+                val page = client.newCall(request).execute().use { response ->
+                    check(response.isSuccessful && account == active) {
+                        "Cloudflare sync HTTP ${response.code} ou compte modifié"
+                    }
+                    JSONObject(response.body?.string().orEmpty())
+                }
+                val values = page.getJSONArray("items")
+                val rows = List(values.length()) { values.getJSONObject(it) }
+                if (delta && page.optInt("syncVersion") == 1) {
+                    if (page.optBoolean("reset")) {
+                        check(!resetOnce) { "Curseur Cloudflare invalide" }
+                        resetOnce = true
+                        cursor = 0L
+                        changed.clear()
+                        deltaSnapshot = null
+                        continue
+                    }
+                    val next = page.getLong("nextSince")
+                    var previous = cursor
+                    for (row in rows) {
+                        val seq = row.getLong("syncSeq")
+                        check(seq > previous) { "Delta Cloudflare désordonné" }
+                        previous = seq
+                    }
+                    check(next == previous && rows.size <= 25 && changed.size + rows.size <= 100000) { "Pagination delta invalide" }
+                    changed.addAll(rows)
+                    cursor = next
+                    if (page.optBoolean("partial")) {
+                        check(rows.isNotEmpty()) { "Delta Cloudflare incomplet" }
+                        continue
+                    }
+                    check(account == active) { "Compte modifié" }
+                    val prior = if (resetOnce) null else cached
+                    val merged = if (changed.isEmpty() && prior != null) prior.rows else {
+                        val byKey = linkedMapOf<Pair<String, String>, JSONObject>()
+                        fun key(row: JSONObject) = row.getString("category") to row.getString("itemKey")
+                        prior?.rows?.forEach { byKey[key(it)] = it }
+                        changed.forEach { byKey[key(it)] = it }
+                        byKey.values.toList()
+                    }
+                    deltaSnapshot = if (merged.size <= 8000 &&
+                        merged.sumOf { it.toString().length.toLong() } <= 4_000_000L)
+                        DeltaSnapshot(active, profileId, cursor, merged, prior?.startedAt ?: SystemClock.elapsedRealtime()) else null
+                    batchAccount = active
+                    return@withLock merged
+                }
+                if (delta) {
+                    check(page.has("nextOffset")) { "Protocole Cloudflare inattendu" }
+                    delta = false
+                    deltaSnapshot = null
+                    batchAccount = null
+                    changed.clear()
+                }
+                all.addAll(rows)
+                val next = if (page.isNull("nextOffset")) -1 else page.getInt("nextOffset")
+                if (next == -1) return@withLock all
+                check(next == offset + 25 && rows.size == 25 && all.size <= 100000) { "Pagination Cloudflare invalide" }
+                offset = next
+            }
+            @Suppress("UNREACHABLE_CODE")
+            error("Pagination interrompue")
+        }
+    }
+
+    data class SyncWrite(val category: String, val key: String, val payload: JSONObject, val revision: Int)
+
+    suspend fun writeSyncBatch(profileId: String, items: List<SyncWrite>) = withContext(Dispatchers.IO) {
+        if (items.isEmpty()) return@withContext
         val active = checkNotNull(account) { "Compte Kovelyx non connecté" }
-        require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
-        require((snapshotKind == null && snapshotHash == null) ||
-            (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
-        val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
-        val rows = mutableListOf<JSONObject>()
-        var offset = 0
-        do {
-            val request = Request.Builder()
-                .url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') +
-                    "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery")
-                .header("Authorization", "Bearer ${active.bearerToken}")
-                .get().build()
-            val next = client.newCall(request).execute().use { response ->
-                check(response.isSuccessful && account?.bearerToken == active.bearerToken) {
-                    "Cloudflare sync HTTP ${response.code} ou compte modifié"
+        for (chunk in items.chunked(25)) {
+            check(account == active) { "Compte modifié" }
+            if (batchAccount != active) {
+                for (item in chunk) {
+                    check(account == active) { "Compte modifié" }
+                    writeSync(profileId, item.category, item.key, item.payload, item.revision)
                 }
-                val page = JSONObject(response.body?.string().orEmpty())
-                val values = page.optJSONArray("items") ?: org.json.JSONArray()
-                for (i in 0 until values.length()) {
-                    values.optJSONObject(i)?.let(rows::add)
+            } else {
+                val entries = JSONArray()
+                for (item in chunk) entries.put(JSONObject()
+                    .put("category", item.category).put("itemKey", item.key)
+                    .put("revision", item.revision).put("deleted", false).put("payload", item.payload))
+                val body = JSONObject().put("profileId", profileId).put("items", entries)
+                val request = Request.Builder().url(BuildConfig.KOVELYX_CLOUD_URL.trimEnd('/') + "/v1/sync-batch")
+                    .header("Authorization", "Bearer ${active.bearerToken}")
+                    .post(body.toString().toRequestBody("application/json".toMediaType())).build()
+                client.newCall(request).execute().use { response ->
+                    check(response.isSuccessful && account == active) { "Cloudflare sync HTTP ${response.code} ou compte modifié" }
+                    check(JSONObject(response.body?.string().orEmpty()).optInt("written") == chunk.size) { "Lot Cloudflare non confirmé" }
                 }
-                if (page.isNull("nextOffset")) -1 else page.optInt("nextOffset", -1)
             }
-            if (next == -1) break
-            check(account?.bearerToken == active.bearerToken) { "Compte modifié pendant la pagination" }
-            check(next == offset + 25 && rows.size <= 100000) {
-                "Pagination Cloudflare invalide"
-            }
-            offset = next
-        } while (true)
-        check(account?.bearerToken == active.bearerToken) { "Compte modifié pendant la synchronisation" }
-        rows
+        }
     }
 
     private suspend fun postCatalogue(path: String, body: JSONObject) = withContext(Dispatchers.IO) {
@@ -332,6 +427,8 @@ internal object CloudflareTvAccountClient {
         synchronized(sessionLock) {
             sessionRevision += 1L
             account = null
+            deltaSnapshot = null
+            batchAccount = null
             sessionStore?.clear()
         }
     }
