@@ -80,6 +80,7 @@ try {
   assert.equal(ready.data?.maxProfileMediaBytes,18_000_000);
   assert.equal(ready.data?.catalogueSnapshotSchema,1);
   assert.equal(ready.data?.profilePinSchema,1,"Profile PIN migration must be present");
+  assert.equal(ready.data?.syncDeltaSchema,1,"Delta cursor migration must be present");
 
   const unauth=await req("/v1/profiles");
   assert.equal(unauth.status,401,"Unauthenticated private endpoint");
@@ -385,9 +386,41 @@ try {
     profileId, category:"watched_items", itemKey:`series:tt-batch:1:${n+1}`, revision:0,
     deleted:false, payload:{id:"tt-batch",type:"series",name:"Série française",season:1,episode:n+1,markedAtEpochMs:1720010600000+n}
   }));
-  for (const mark of batchMarks) {
-    assert.equal((await req("/v1/sync","POST",mark,alice.token)).status,201,"Mark episode watched");
+  // Initial indexed read, then incremental pulls across independent sessions.
+  async function readDelta(token, since=0) {
+    const items=[];
+    let pages=0, page;
+    do {
+      page=await req(`/v1/sync?profileId=${profileId}&mode=delta&since=${since}`,"GET",null,token);
+      assert.equal(page.status,200);
+      assert.equal(page.data.syncVersion,1);
+      assert.ok(page.data.items.length<=25);
+      for(const item of page.data.items) {
+        assert.ok(item.syncSeq>since,"Strictly increasing delta cursor");
+        since=item.syncSeq;
+        items.push(item);
+      }
+      assert.equal(page.data.nextSince,since);
+      assert.ok(++pages<1000,"Bounded pagination");
+    } while(page.data.partial);
+    return {items,since,pages};
   }
+  const beforeBatch=await readDelta(tvToken);
+  assert.ok(beforeBatch.items.length>0);
+  for(let i=0;i<batchMarks.length;i+=25) {
+    const items=batchMarks.slice(i,i+25);
+    const written=await req("/v1/sync-batch","POST",{profileId,items},alice.token);
+    assert.equal(written.status,200,"Mark episodes in one bounded batch");
+    assert.equal(written.data.written,items.length);
+  }
+  const batchDelta=await readDelta(tvToken,beforeBatch.since);
+  assert.equal(batchDelta.items.length,31);
+  assert.equal(batchDelta.pages,2);
+  assert.ok(batchDelta.items.every(row=>row.category==="watched_items" && !row.deleted));
+  assert.equal((await readDelta(tvToken,batchDelta.since)).items.length,0,"Unchanged history is not downloaded again");
+  assert.equal((await req("/v1/sync-batch","POST",{profileId,items:batchMarks.slice(0,2)},bob.token)).status,404);
+  assert.equal((await req("/v1/sync-batch","POST",{profileId,items:[batchMarks[0],batchMarks[0]]},alice.token)).status,400);
+  assert.equal((await req("/v1/sync-batch","POST",{profileId,items:batchMarks.slice(0,2)},alice.token)).status,409,"Stale batch must not overwrite revisions");
   async function readAllSync(token) {
     const rows=[];
     let offset=0;
@@ -408,6 +441,12 @@ try {
   const afterUnmark=await readAllSync(alice.token);
   const tombstone=afterUnmark.find(row=>row.category==="watched_items" && row.itemKey===unmark.itemKey);
   assert.equal(tombstone?.deleted,true,"Unmark tombstone visible to first session");
+  const deleteDelta=await readDelta(alice.token,batchDelta.since);
+  assert.equal(deleteDelta.items.length,1,"Only one change since the batch");
+  assert.equal(deleteDelta.items[0].itemKey,unmark.itemKey);
+  assert.equal(deleteDelta.items[0].deleted,true,"Legacy single writes remain visible to new delta clients");
+  const reset=await req(`/v1/sync?profileId=${profileId}&mode=delta&since=999999999999`,"GET",null,alice.token);
+  assert.equal(reset.data.reset,true,"Restoring an older snapshot resets an obsolete cursor");
   assert.equal(afterUnmark.filter(row=>row.category==="watched_items" && row.payload?.id==="tt-batch" && !row.deleted).length,30);
 
   // Trois clients natifs SIMULÉS : sessions Better Auth indépendantes sur D1 jetable.
