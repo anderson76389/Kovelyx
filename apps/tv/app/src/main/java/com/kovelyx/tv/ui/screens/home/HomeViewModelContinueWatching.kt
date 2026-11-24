@@ -1971,8 +1971,11 @@ private suspend fun HomeViewModel.enrichInProgressItem(
             val tmdbIdInt = tmdbIdStr?.toIntOrNull()
             if (imdbId != null || tmdbIdInt != null) {
                 runCatching {
-                    imdbEpisodeRatingsRepository.getEpisodeRatings(imdbId, tmdbIdInt)
-                }.getOrNull()?.get(item.progress.season!! to item.progress.episode!!)?.toFloat()
+                    imdbEpisodeRatingsRepository.getEpisodeRatings(
+                        imdbId, tmdbIdInt, setOf(item.progress.season!! to item.progress.episode!!)
+                    )
+                }.getOrNull()?.get(item.progress.season!! to item.progress.episode!!)
+                    ?.takeIf { it.source == "IMDb" }?.value?.toFloat()
             } else null
         }
         externalRating ?: addonRating
@@ -2075,8 +2078,8 @@ private suspend fun HomeViewModel.enrichNextUpItem(
             val tmdbIdInt = tmdbIdStr?.toIntOrNull()
             if (imdbId != null || tmdbIdInt != null) {
                 runCatching {
-                    imdbEpisodeRatingsRepository.getEpisodeRatings(imdbId, tmdbIdInt)
-                }.getOrNull()?.get(s to e)?.toFloat()
+                    imdbEpisodeRatingsRepository.getEpisodeRatings(imdbId, tmdbIdInt, setOf(s to e))
+                }.getOrNull()?.get(s to e)?.takeIf { it.source == "IMDb" }?.value?.toFloat()
             } else null
         }
         externalRating ?: addonRating
