@@ -100,6 +100,10 @@ fun HeroContentSection(
     isMovieWatched: Boolean,
     isMovieWatchedPending: Boolean,
     onToggleMovieWatched: () -> Unit,
+    showWholeSeriesWatched: Boolean = false,
+    isWholeSeriesWatched: Boolean = false,
+    isWholeSeriesWatchedPending: Boolean = false,
+    onToggleWholeSeriesWatched: () -> Unit = {},
     trailerAvailable: Boolean = false,
     onTrailerClick: () -> Unit = {},
     showRandomEpisodeButton: Boolean = false,
@@ -290,6 +294,22 @@ fun HeroContentSection(
                                 selectedContainerColor = Color.White,
                                 selectedContentColor = Color.Black,
                                 onFocused = onHeroActionFocused
+                            )
+                        }
+
+                        if (showWholeSeriesWatched) {
+                            ActionIconButton(
+                                icon = if (isWholeSeriesWatched) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = stringResource(
+                                    if (isWholeSeriesWatched) R.string.hero_mark_all_unwatched
+                                    else R.string.hero_mark_all_watched
+                                ),
+                                onClick = onToggleWholeSeriesWatched,
+                                enabled = !isWholeSeriesWatchedPending,
+                                selected = isWholeSeriesWatched,
+                                selectedContainerColor = Color.White,
+                                selectedContentColor = Color.Black,
+                                onFocused = onHeroActionFocused,
                             )
                         }
 

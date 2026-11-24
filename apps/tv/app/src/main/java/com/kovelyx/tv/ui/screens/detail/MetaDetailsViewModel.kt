@@ -365,6 +365,7 @@ class MetaDetailsViewModel @Inject constructor(
             MetaDetailsEvent.OnDismissSharedTrailer -> dismissSharedTrailerOverlay()
             MetaDetailsEvent.OnRetrySharedTrailer -> retrySharedTrailer()
             MetaDetailsEvent.OnToggleMovieWatched -> toggleMovieWatched()
+            MetaDetailsEvent.OnToggleAllEpisodesWatched -> toggleAllEpisodesWatched()
             is MetaDetailsEvent.OnToggleEpisodeWatched -> toggleEpisodeWatched(event.video)
             is MetaDetailsEvent.OnMarkSeasonWatched -> markSeasonWatched(event.season)
             is MetaDetailsEvent.OnMarkSeasonUnwatched -> markSeasonUnwatched(event.season)
@@ -1822,11 +1823,11 @@ class MetaDetailsViewModel @Inject constructor(
     private fun reevaluateSeriesWatchedBadge() {
         val contentId = _effectiveContentId.value
         val meta = _uiState.value.meta ?: return
-        val isSeries = meta.apiType.equals("series", ignoreCase = true) ||
-            meta.apiType.equals("tv", ignoreCase = true)
-        if (!isSeries) return
-
-        val episodes = meta.watchableEpisodes()
+        val episodes = releasedEpisodesForWholeSeries(
+            apiType = meta.apiType,
+            videos = meta.videos,
+            displayedEpisodes = _uiState.value.episodesForSeason,
+        )
         if (episodes.isEmpty()) return
 
         val watchedEpisodes = _uiState.value.watchedEpisodes
@@ -2456,6 +2457,79 @@ class MetaDetailsViewModel @Inject constructor(
                 )
             }
             _uiState.update { it.copy(isMovieWatchedPending = false) }
+        }
+    }
+
+    /**
+     * One batch for an entire released series or anime, mirroring the existing
+     * season action. Keeps the same progress/sync repositories and profile ID.
+     */
+    private fun toggleAllEpisodesWatched() {
+        val state = _uiState.value
+        val meta = state.meta ?: return
+        if (state.allEpisodesWatchedPending) return
+        val episodes = releasedEpisodesForWholeSeries(
+            apiType = meta.apiType,
+            videos = meta.videos,
+            displayedEpisodes = state.episodesForSeason,
+        )
+        if (episodes.isEmpty()) return
+
+        fun watched(video: Video): Boolean {
+            val key = video.season!! to video.episode!!
+            return key in state.watchedEpisodes || state.episodeProgressMap[key]?.isCompleted() == true
+        }
+
+        val allWatched = allReleasedEpisodesWatched(episodes, ::watched)
+        val affected = if (allWatched) episodes else episodes.filterNot(::watched)
+        if (affected.isEmpty()) return
+
+        val pendingKeys = affected.map(::episodePendingKey).toSet()
+        val episodeKeys = affected.map { it.season!! to it.episode!! }.toSet()
+        viewModelScope.launch {
+            _uiState.update { it.copy(
+                allEpisodesWatchedPending = true,
+                episodeWatchedPendingKeys = it.episodeWatchedPendingKeys + pendingKeys,
+            ) }
+            try {
+                if (allWatched) {
+                    watchProgressRepository.removeFromHistoryBatch(
+                        contentId = _effectiveContentId.value,
+                        videoId = resolveFallbackVideoId(),
+                        episodes = affected.map { Triple(it.season!!, it.episode!!, it.id) },
+                    )
+                    _optimisticMarks.removeAll(episodeKeys)
+                    _optimisticUnmarks.addAll(episodeKeys)
+                } else {
+                    watchProgressRepository.markAsCompletedBatch(
+                        affected.map { buildCompletedEpisodeProgress(meta, it) },
+                    )
+                    _optimisticUnmarks.removeAll(episodeKeys)
+                    _optimisticMarks.addAll(episodeKeys)
+                }
+                _uiState.update { current -> current.copy(
+                    watchedEpisodes = if (allWatched) current.watchedEpisodes - episodeKeys
+                        else current.watchedEpisodes + episodeKeys,
+                ) }
+                reevaluateSeriesWatchedBadge()
+                showMessage(localizedContext.getString(
+                    if (allWatched) R.string.detail_marked_episodes_unwatched
+                    else R.string.detail_marked_episodes_watched,
+                    affected.size,
+                ))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                showMessage(
+                    message = error.message ?: localizedContext.getString(R.string.detail_error_update_episode_watched_failed),
+                    isError = true,
+                )
+            } finally {
+                _uiState.update { it.copy(
+                    allEpisodesWatchedPending = false,
+                    episodeWatchedPendingKeys = it.episodeWatchedPendingKeys - pendingKeys,
+                ) }
+            }
         }
     }
 

@@ -116,6 +116,9 @@ class KovelyxApplication : Application(), SingletonImageLoader.Factory {
             StaleWhileRevalidateCacheStrategy(
                 revalidationClient = { imageOkHttpClient },
                 imageLoaderProvider = imageLoaderRef,
+                // Only conditional BACKGROUND refreshes are throttled.
+                // Visible poster loads and playback retain their normal priority.
+                maxConcurrentRevalidations = if (constrainedTv) 3 else 8,
             )
         }
 

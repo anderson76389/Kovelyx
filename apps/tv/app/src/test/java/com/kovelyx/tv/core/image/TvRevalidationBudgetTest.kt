@@ -7,6 +7,16 @@ import org.junit.Test
 
 class TvRevalidationBudgetTest {
     @Test
+    fun constrainedTvLimitsBackgroundRevalidationsToThreeWithoutBlockingVisibleImages() {
+        val budget = TvRevalidationBudget(maxConcurrentRequests = 3)
+        repeat(3) { assertTrue(budget.tryStart("https://poster.invalid/low-ram/$it", 100L)) }
+        assertFalse(budget.tryStart("https://poster.invalid/low-ram/fourth", 100L))
+        budget.finish("https://poster.invalid/low-ram/0", 101L)
+        assertTrue(budget.tryStart("https://poster.invalid/low-ram/fourth", 101L))
+        assertEquals(3, budget.inFlightCountForTest())
+    }
+
+    @Test
     fun cachedPostersNeverQueueMoreThanEightNetworkCalls() {
         val budget = TvRevalidationBudget()
         repeat(8) { assertTrue(budget.tryStart("https://poster.invalid/$it", 0L)) }

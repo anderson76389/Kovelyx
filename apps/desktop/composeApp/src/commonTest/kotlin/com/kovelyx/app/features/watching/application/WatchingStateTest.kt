@@ -8,11 +8,18 @@ import com.kovelyx.app.features.watchprogress.WatchProgressEntry
 import com.kovelyx.app.features.watchprogress.WatchProgressSourceTraktPlayback
 import com.kovelyx.app.features.watching.domain.WatchingCompletedEpisode
 import com.kovelyx.app.features.watching.domain.WatchingContentRef
+import com.kovelyx.app.features.watching.domain.isSeriesLikeWatchingContentType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class WatchingStateTest {
+    @Test
+    fun `anime is considered episodic for whole-poster watched actions`() {
+        assertTrue("anime".isSeriesLikeWatchingContentType(includeAnime = true))
+        assertTrue("tvshow".isSeriesLikeWatchingContentType(includeAnime = true))
+    }
+
     @Test
     fun `tv poster matches fully watched series key`() {
         val result = WatchingState.isPosterWatched(

@@ -8,6 +8,7 @@ import com.kovelyx.app.features.watched.WatchedItem
 import com.kovelyx.app.features.watched.WatchedRepository
 import com.kovelyx.app.features.watched.episodePlaybackId
 import com.kovelyx.app.features.watched.releasedMainSeasonEpisodes
+import com.kovelyx.app.features.watched.releasedPlayableEpisodes
 import com.kovelyx.app.features.watched.toEpisodeWatchedItem
 import com.kovelyx.app.features.watched.toSeriesWatchedItem
 import com.kovelyx.app.features.watched.toWatchedItem
@@ -24,7 +25,7 @@ object WatchingActions {
     private val actionScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     suspend fun togglePosterWatched(preview: MetaPreview) {
-        if (!preview.type.isSeriesLikeWatchingContentType()) {
+        if (!preview.type.isSeriesLikeWatchingContentType(includeAnime = true)) {
             WatchedRepository.toggleWatched(preview.toWatchedItem(markedAtEpochMs = 0L))
             return
         }
@@ -34,7 +35,14 @@ object WatchingActions {
             type = preview.type,
         ) || WatchedRepository.isFullyWatchedSeries(id = preview.id, type = preview.type)
         val meta = MetaDetailsRepository.fetch(type = preview.type, id = preview.id)
+        val isAnime = preview.type.equals("anime", ignoreCase = true) || meta?.type.equals("anime", ignoreCase = true)
         if (meta == null) {
+            // Anime without reachable metadata must keep the previous poster-only
+            // toggle; do not turn a working action into a no-op when offline.
+            if (isAnime) {
+                WatchedRepository.toggleWatched(preview.toWatchedItem(markedAtEpochMs = 0L))
+                return
+            }
             if (isCurrentlyWatched) {
                 WatchedRepository.unmarkWatched(preview.toWatchedItem(markedAtEpochMs = 0L))
                 WatchedRepository.updateFullyWatchedSeries(
@@ -47,8 +55,30 @@ object WatchingActions {
         }
 
         val todayIsoDate = CurrentDateProvider.todayIsoDate()
-        val releasedMainEpisodes = meta.releasedMainSeasonEpisodes(todayIsoDate)
+        // Some anime providers index episodes but omit the season entirely.
+        // Keep those original coordinates rather than fabricating S01, and
+        // ignore specials/unreleased or unnumbered videos.
+        val releasedMainEpisodes = if (isAnime) {
+            meta.releasedPlayableEpisodes(todayIsoDate).filter { video ->
+                video.episode != null && (video.season == null || video.season > 0)
+            }
+        } else {
+            meta.releasedMainSeasonEpisodes(todayIsoDate)
+        }
         if (releasedMainEpisodes.isEmpty()) {
+            if (isAnime) {
+                // If the addon exposes no indexed episodes, preserve the
+                // historical poster toggle rather than silently doing nothing.
+                if (isCurrentlyWatched) {
+                    WatchedRepository.unmarkWatched(meta.toSeriesWatchedItem())
+                    WatchedRepository.updateFullyWatchedSeries(
+                        id = meta.id, type = meta.type, isFullyWatched = false,
+                    )
+                } else {
+                    WatchedRepository.markWatched(meta.toSeriesWatchedItem())
+                }
+                return
+            }
             if (isCurrentlyWatched) {
                 WatchedRepository.unmarkWatched(meta.toSeriesWatchedItem())
                 WatchedRepository.updateFullyWatchedSeries(
@@ -139,7 +169,7 @@ object WatchingActions {
         meta: MetaDetails,
         todayIsoDate: String = CurrentDateProvider.todayIsoDate(),
     ) {
-        if (!meta.type.isSeriesLikeWatchingContentType()) return
+        if (!meta.type.isSeriesLikeWatchingContentType(includeAnime = true)) return
 
         WatchedRepository.reconcileSeriesWatchedState(
             meta = meta,
