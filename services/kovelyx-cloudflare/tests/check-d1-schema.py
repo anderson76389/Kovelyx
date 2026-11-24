@@ -172,6 +172,40 @@ class CloudflareDatabase(unittest.TestCase):
             ).fetchone()[0], 4
         )
 
+    def test_delta_migration_backfills_without_touching_old_records(self):
+        with sqlite3.connect(":memory:") as db:
+            for migration in migrations:
+                if migration.name.startswith("0006_"):
+                    break
+                db.executescript(migration.read_text(encoding="utf-8"))
+            db.execute('INSERT INTO "user" (id,name,email,createdAt,updatedAt) VALUES (?,?,?,?,?)',
+                       ("old","Old","old@example.test",1,1))
+            db.execute("INSERT INTO kv_profiles (id,owner_id,display_name,created_at,updated_at) VALUES (?,?,?,?,?)",
+                       ("profile","old","Main",1,1))
+            db.execute("INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at) "
+                       "VALUES ('old','profile','watched_items','series:keep:1:1','{}',7,1,123)")
+            before = list(db.execute("SELECT owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at FROM kv_sync"))
+            db.executescript(next(m for m in migrations if m.name.startswith("0006_")).read_text(encoding="utf-8"))
+            self.assertEqual(before, list(db.execute("SELECT owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at FROM kv_sync")))
+            self.assertGreater(db.execute("SELECT sync_seq FROM kv_sync").fetchone()[0],0)
+            self.assertEqual(list(db.execute("PRAGMA foreign_key_check")),[])
+
+    def test_delta_cursor_is_monotonic_even_for_same_clock_and_legacy_writes(self):
+        for category, key in (("watched_items","a"),("watch_progress","b"),("preferences","head")):
+            self.db.execute("INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,updated_at) "
+                            "VALUES (?,?,?,?,?,?)", ("alice","alice-profile",category,key,"{}",10))
+        high = self.db.execute("SELECT max(sync_seq) FROM kv_sync WHERE owner_id='alice'").fetchone()[0]
+        self.db.execute("UPDATE kv_sync SET deleted=1,revision=revision+1,updated_at=10 WHERE owner_id='alice' AND item_key='a'")
+        delta = list(self.db.execute("SELECT item_key,deleted,sync_seq FROM kv_sync WHERE owner_id='alice' AND profile_id='alice-profile' AND sync_seq>? ORDER BY sync_seq",(high,)))
+        self.assertEqual(delta,[("a",1,high+1)])
+        self.db.execute("INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,updated_at) "
+                        "VALUES ('alice','alice-profile','catalogues','chunk','{}',10)")
+        self.assertEqual(self.db.execute("SELECT sync_seq FROM kv_sync WHERE item_key='chunk'").fetchone()[0],0)
+        self.db.execute("INSERT INTO kv_sync(owner_id,profile_id,category,item_key,payload,updated_at) "
+                        "VALUES ('bob','bob-profile','library','b','{}',10)")
+        self.assertEqual(self.db.execute("SELECT sync_seq FROM kv_sync WHERE owner_id='bob'").fetchone()[0],1)
+        self.assertEqual(self.db.execute("SELECT max(sync_seq) FROM kv_sync WHERE owner_id='alice'").fetchone()[0],high+1)
+
     def test_private_pin_table_is_owned_and_cascades(self):
         self.db.execute(
             "INSERT INTO kv_profile_pins(owner_id,profile_id,salt,pin_hash,updated_at) "
