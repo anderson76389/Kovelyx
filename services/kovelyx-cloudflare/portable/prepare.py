@@ -57,6 +57,10 @@ def create_database(output: Path, sql_path: Path | None = None) -> dict:
             db.execute("PRAGMA foreign_keys=OFF")
             if sql_path is not None:
                 db.executescript(sql_path.read_text(encoding="utf-8"))
+                # Old verified exports predate the additive cursor migration.
+                columns = {row[1] for row in db.execute("PRAGMA table_info(kv_sync)")}
+                if "sync_seq" not in columns:
+                    db.executescript((MIGRATIONS / "0006_sync_delta_cursor.sql").read_text(encoding="utf-8"))
             else:
                 for migration in sorted(MIGRATIONS.glob("*.sql")):
                     db.executescript(migration.read_text(encoding="utf-8"))
