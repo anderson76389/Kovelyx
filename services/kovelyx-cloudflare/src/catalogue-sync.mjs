@@ -65,7 +65,7 @@ export async function handleCatalogueManifest(request,env,user,body) {
       WHERE owner_id=? AND profile_id=? AND category='preferences' AND item_key=? AND revision=? AND ${complete}`)
       .bind(payload,now,user.id,body.profileId,key,body.revision,user.id,body.profileId,prefix,prefix+'~',prefix,body.parts-1,body.parts).run();
   }
-  if(result.meta?.changes!==1)return jsonResponse({error:'Conflit ou transfert incomplet ; reprendre la synchronisation'},409);
+  if(Number(result.meta?.changes || 0)<1)return jsonResponse({error:'Conflit ou transfert incomplet ; reprendre la synchronisation'},409);
   // Resolve the CURRENT head in this statement, not the head captured by this request.
   // Concurrent writers may retry missing chunks, but never expose partial files.
   const kindPrefix='snapshot:'+body.kind+':';
