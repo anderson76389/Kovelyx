@@ -77,6 +77,17 @@ test("portable Better Auth and profile sync survive restart",{timeout:90000},asy
     assert.equal((await call("/v1/sync","POST",record,tvToken)).status,409);
     assert.ok((await call("/v1/sync?profileId="+profileId,"GET",null,tvToken))
       .data.items.some(r=>r.itemKey===record.itemKey));
+    const initialDelta=await call("/v1/sync?profileId="+profileId+"&mode=delta&since=0","GET",null,tvToken);
+    assert.equal(initialDelta.data.syncVersion,1);
+    assert.equal(initialDelta.data.items.length,1);
+    const cursor=initialDelta.data.nextSince;
+    const batch=[{category:"watched_items",itemKey:"series:portable:1:1",revision:0,deleted:false,
+      payload:{id:"portable",type:"series",season:1,episode:1}}];
+    assert.equal((await call("/v1/sync-batch","POST",{profileId,items:batch},token)).data.written,1);
+    const delta=await call("/v1/sync?profileId="+profileId+"&mode=delta&since="+cursor,"GET",null,tvToken);
+    assert.equal(delta.data.items.length,1);
+    assert.equal(delta.data.items[0].itemKey,batch[0].itemKey);
+    assert.equal((await call("/v1/sync-batch","POST",{profileId,items:batch},tvToken)).status,409);
     assert.equal((await call("/v1/profile-pin","POST",{profileId,pin:"4321"},token)).status,201);
     // GIF/photo transport uses the same atomic binary D1 batch as Cloudflare.
     const image=Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO9ASb8AAAAASUVORK5CYII=","base64");
