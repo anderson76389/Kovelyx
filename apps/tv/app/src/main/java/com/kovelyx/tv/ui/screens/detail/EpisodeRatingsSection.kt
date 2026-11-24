@@ -1,5 +1,8 @@
 package com.kovelyx.tv.ui.screens.detail
 
+import com.kovelyx.tv.domain.model.EpisodeRating
+import com.kovelyx.tv.domain.model.validEpisodeRating
+
 import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import androidx.compose.foundation.focusGroup
@@ -44,7 +47,7 @@ import com.kovelyx.tv.domain.model.Video
 @Composable
 fun EpisodeRatingsSection(
     episodes: List<Video>,
-    ratings: Map<Pair<Int, Int>, Double>,
+    ratings: Map<Pair<Int, Int>, EpisodeRating>,
     isLoading: Boolean,
     error: String?,
     modifier: Modifier = Modifier,
@@ -94,9 +97,9 @@ fun EpisodeRatingsSection(
             val season = episode.season ?: return@mapNotNull null
             val episodeNumber = episode.episode ?: return@mapNotNull null
             val rating = ratings[season to episodeNumber]
-            val ratingText = rating?.let { String.format("%.1f", it) } ?: "—"
-            val chipColor = rating?.let(::ratingColor) ?: defaultChipColor
-            val chipTextColor = rating?.let(::ratingTextColor) ?: defaultChipTextColor
+            val ratingText = rating?.let { "${it.source} ${String.format("%.1f", it.value)}" } ?: "—"
+            val chipColor = rating?.value?.let(::ratingColor) ?: defaultChipColor
+            val chipTextColor = rating?.value?.let(::ratingTextColor) ?: defaultChipTextColor
             EpisodeRatingChipUi(
                 id = episode.id,
                 seasonNumber = season,

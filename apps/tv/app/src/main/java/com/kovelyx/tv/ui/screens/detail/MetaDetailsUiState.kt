@@ -1,5 +1,8 @@
 package com.kovelyx.tv.ui.screens.detail
 
+import com.kovelyx.tv.domain.model.EpisodeRating
+import com.kovelyx.tv.domain.model.validEpisodeRating
+
 import com.kovelyx.tv.core.tracking.TrackingMembershipRemovalConfirmation
 import com.kovelyx.tv.domain.model.DetailImdbRatingsVisibility
 import com.kovelyx.tv.domain.model.EpisodeOptionsOverlayStyle
@@ -78,7 +81,7 @@ data class MetaDetailsUiState(
     val collection: List<MetaPreview> = emptyList(),
     val collectionName: String? = null,
     val relatedWatchedStatus: Map<String, Boolean> = emptyMap(),
-    val episodeImdbRatings: Map<Pair<Int, Int>, Double> = emptyMap(),
+    val episodeImdbRatings: Map<Pair<Int, Int>, EpisodeRating> = emptyMap(),
     val isEpisodeRatingsLoading: Boolean = false,
     val episodeRatingsError: String? = null,
     val mdbListRatings: MDBListRatings? = null,

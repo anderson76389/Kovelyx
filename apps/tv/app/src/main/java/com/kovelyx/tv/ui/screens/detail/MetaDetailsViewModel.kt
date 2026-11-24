@@ -1,5 +1,8 @@
 package com.kovelyx.tv.ui.screens.detail
 
+import com.kovelyx.tv.domain.model.EpisodeRating
+import com.kovelyx.tv.domain.model.validEpisodeRating
+
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -1432,7 +1435,7 @@ class MetaDetailsViewModel @Inject constructor(
     private fun loadEpisodeRatingsAsync(meta: Meta) {
         episodeRatingsJob?.cancel()
 
-        val isSeries = meta.type == ContentType.SERIES || meta.type == ContentType.TV || meta.apiType in listOf("series", "tv")
+        val isSeries = meta.type == ContentType.SERIES || meta.type == ContentType.TV || meta.apiType in listOf("series", "tv", "anime")
         if (!isSeries) {
             _uiState.update {
                 it.copy(
@@ -1455,10 +1458,10 @@ class MetaDetailsViewModel @Inject constructor(
 
             // Ratings the addon supplied on meta.videos[].rating. The repository below
             // still wins wherever it has an entry.
-            val addonRatings: Map<Pair<Int, Int>, Double> = meta.videos.mapNotNull { video ->
+            val addonRatings: Map<Pair<Int, Int>, EpisodeRating> = meta.videos.mapNotNull { video ->
                 val season = video.season ?: return@mapNotNull null
                 val episode = video.episode ?: return@mapNotNull null
-                val rating = video.rating ?: return@mapNotNull null
+                val rating = validEpisodeRating(video.rating, "Addon") ?: return@mapNotNull null
                 (season to episode) to rating
             }.toMap()
 
@@ -1502,7 +1505,12 @@ class MetaDetailsViewModel @Inject constructor(
 
                 val ratings = imdbEpisodeRatingsRepository.getEpisodeRatings(
                     imdbId = imdbId,
-                    tmdbId = tmdbId
+                    tmdbId = tmdbId,
+                    expectedEpisodes = meta.videos.mapNotNull { video ->
+                        val season = video.season ?: return@mapNotNull null
+                        val episode = video.episode ?: return@mapNotNull null
+                        season to episode
+                    }.toSet()
                 )
 
                 _uiState.update { state ->
@@ -1549,7 +1557,7 @@ class MetaDetailsViewModel @Inject constructor(
             ?: tmdbService.ensureTmdbId(itemId, itemType, fallbackImdbId = meta.imdbId)
             ?: return meta
 
-        val isSeries = meta.apiType in listOf("series", "tv")
+        val isSeries = meta.apiType in listOf("series", "tv", "anime")
         val needsEpisodes = settings.useEpisodes && isSeries
 
         // Fetch main enrichment and episode enrichment in parallel.
@@ -1875,7 +1883,7 @@ class MetaDetailsViewModel @Inject constructor(
         progressMap: Map<Pair<Int, Int>, WatchProgress> = emptyMap(),
         watchedEpisodes: Set<Pair<Int, Int>> = emptySet()
     ): NextToWatch {
-        val isSeries = meta.apiType in listOf("series", "tv")
+        val isSeries = meta.apiType in listOf("series", "tv", "anime")
 
         if (!isSeries) {
             val progress = watchProgressRepository.getProgress(_effectiveContentId.value).first()
