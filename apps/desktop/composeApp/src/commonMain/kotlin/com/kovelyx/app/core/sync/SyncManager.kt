@@ -534,7 +534,7 @@ object SyncManager {
             CloudflareDataSync.request(profileId)
             periodicNuvioSyncPullJob = accountScopeSnapshot().launch {
                 while (isActive) {
-                    delay(60_000L)
+                    delay(120_000L)
                     val state = AuthRepository.state.value as? AuthState.Authenticated
                     if (state != null && !state.isAnonymous &&
                         ProfileRepository.activeProfileId == profileId) {
