@@ -76,7 +76,8 @@ object CloudflareDataSync {
     init {
         scope.launch {
             for (profileId in requests) {
-                delay(900L)
+                // Coalesce position ticks and rapid UI edits; persistence is local first.
+                delay(10_000L)
                 var retryDelayMs = 2_000L
                 // A transient outage or HTTP 409 must not silently discard the
                 // only queued upload. Each attempt pulls fresh D1 revisions.
@@ -94,8 +95,13 @@ object CloudflareDataSync {
                         // No local deletion. Retry while this same user/profile
                         // remains active, with a bounded exponential delay.
                         log.w(error) { "Cloudflare D1 indisponible : nouvelle tentative automatique, données conservées" }
+                        // Quotas may remain exhausted until the next UTC day.
+                        // Avoid a hot retry loop while preserving the pending edits.
+                        val quota = error.message.orEmpty().contains("HTTP 429") ||
+                            error.message.orEmpty().contains("quota", ignoreCase = true)
+                        if (quota) retryDelayMs = maxOf(retryDelayMs, 15 * 60_000L)
                         delay(retryDelayMs)
-                        retryDelayMs = (retryDelayMs * 2).coerceAtMost(60_000L)
+                        retryDelayMs = (retryDelayMs * 2).coerceAtMost(if (quota || retryDelayMs >= 15 * 60_000L) 60 * 60_000L else 60_000L)
                     }
                 }
             }
@@ -345,6 +351,7 @@ object CloudflareDataSync {
         }
         if (remoteDeletes.isNotEmpty()) WatchProgressRepository.applyCloudProgressDeletes(profileId, remoteDeletes)
         if (incoming.isNotEmpty()) WatchProgressRepository.applyExternalProgress(incoming)
+        val writes = mutableListOf<CloudflareAccountClient.SyncWrite>()
         for (entry in local) {
             val key = entry.resolvedProgressKey().take(200)
             if ("watch_progress|$key" in suppressed) continue
@@ -355,10 +362,9 @@ object CloudflareDataSync {
             } else row?.get("payload")?.jsonObject
                 ?.get("lastUpdatedEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
             if (row != null && entry.lastUpdatedEpochMs <= remoteDate) continue
-            CloudflareAccountClient.writeSync(
-                cloudId, "watch_progress", key, progressPayload(entry), revision(row)
-            )
+            writes += CloudflareAccountClient.SyncWrite("watch_progress", key, progressPayload(entry), revision(row))
         }
+        CloudflareAccountClient.writeSyncBatch(cloudId, writes)
     }
 
     private fun progressPayload(entry: WatchProgressEntry): JsonObject = buildJsonObject {
@@ -397,6 +403,7 @@ object CloudflareDataSync {
         }
         if (remoteDeletes.isNotEmpty()) WatchedRepository.applyCloudDeletedWatched(profileId, remoteDeletes)
         if (incoming.isNotEmpty()) WatchedRepository.applyCloudWatched(incoming)
+        val writes = mutableListOf<CloudflareAccountClient.SyncWrite>()
         for (item in local) {
             val key = watchedItemKey(item.type, item.id, item.season, item.episode)
             if ("watched_items|$key" in suppressed) continue
@@ -407,8 +414,8 @@ object CloudflareDataSync {
             } else row?.get("payload")?.jsonObject
                 ?.get("markedAtEpochMs")?.jsonPrimitive?.longOrNull ?: Long.MIN_VALUE
             if (row != null && item.markedAtEpochMs <= remoteDate) continue
-            CloudflareAccountClient.writeSync(
-                cloudId, "watched_items", key, buildJsonObject {
+            writes += CloudflareAccountClient.SyncWrite(
+                "watched_items", key, buildJsonObject {
                     put("id", item.id)
                     put("type", item.type)
                     put("name", item.name.take(500))
@@ -418,5 +425,6 @@ object CloudflareDataSync {
                 }, revision(row)
             )
         }
+        CloudflareAccountClient.writeSyncBatch(cloudId, writes)
     }
 }
