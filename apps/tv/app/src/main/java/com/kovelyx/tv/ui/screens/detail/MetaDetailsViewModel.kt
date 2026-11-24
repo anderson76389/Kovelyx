@@ -1466,7 +1466,7 @@ class MetaDetailsViewModel @Inject constructor(
             }.toMap()
 
             try {
-                val tmdbContentType = resolveTmdbContentType(meta)
+                val tmdbContentType = if (meta.apiType.equals("anime", ignoreCase = true)) ContentType.SERIES else resolveTmdbContentType(meta)
                 if (tmdbContentType !in listOf(ContentType.SERIES, ContentType.TV)) {
                     _uiState.update {
                         it.copy(
@@ -1478,11 +1478,11 @@ class MetaDetailsViewModel @Inject constructor(
                     return@launch
                 }
 
-                val tmdbLookupType = tmdbContentType.toApiString()
-                val tmdbIdString = tmdbService.ensureTmdbId(meta.id, tmdbLookupType, fallbackImdbId = meta.imdbId)
-                    ?: tmdbService.ensureTmdbId(itemId, itemType, fallbackImdbId = meta.imdbId)
-                val tmdbId = tmdbIdString?.toIntOrNull()
                 val imdbId = extractImdbId(meta.id) ?: extractImdbId(itemId) ?: meta.imdbId
+                val tmdbId = listOf(meta.id, itemId).firstNotNullOfOrNull { raw ->
+                    raw.takeIf { it.startsWith("tmdb:", ignoreCase = true) }
+                        ?.substringAfter(':')?.substringBefore(':')?.toIntOrNull()?.takeIf { it > 0 }
+                } ?: imdbId?.let { tmdbService.imdbToTmdb(it, "series") }
 
                 if (tmdbId == null && imdbId == null) {
                     _uiState.update { state ->
@@ -1557,7 +1557,7 @@ class MetaDetailsViewModel @Inject constructor(
             ?: tmdbService.ensureTmdbId(itemId, itemType, fallbackImdbId = meta.imdbId)
             ?: return meta
 
-        val isSeries = meta.apiType in listOf("series", "tv", "anime")
+        val isSeries = meta.apiType in listOf("series", "tv")
         val needsEpisodes = settings.useEpisodes && isSeries
 
         // Fetch main enrichment and episode enrichment in parallel.
@@ -1883,7 +1883,7 @@ class MetaDetailsViewModel @Inject constructor(
         progressMap: Map<Pair<Int, Int>, WatchProgress> = emptyMap(),
         watchedEpisodes: Set<Pair<Int, Int>> = emptySet()
     ): NextToWatch {
-        val isSeries = meta.apiType in listOf("series", "tv", "anime")
+        val isSeries = meta.apiType in listOf("series", "tv")
 
         if (!isSeries) {
             val progress = watchProgressRepository.getProgress(_effectiveContentId.value).first()

@@ -1,7 +1,6 @@
 package com.kovelyx.tv.ui.screens.detail
 
 import com.kovelyx.tv.domain.model.EpisodeRating
-import com.kovelyx.tv.domain.model.validEpisodeRating
 
 import com.kovelyx.tv.ui.components.LocalPlaybackAvailability
 import com.kovelyx.tv.ui.navigation.LocalDetailChildClosedEpoch

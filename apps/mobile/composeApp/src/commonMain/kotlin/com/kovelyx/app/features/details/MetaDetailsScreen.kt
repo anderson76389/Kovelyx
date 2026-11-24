@@ -376,8 +376,7 @@ fun MetaDetailsScreen(
         val imdbId = extractImdbId(metaForRatings.id) ?: extractImdbId(id) ?: metaForRatings.imdbId
         val tmdbId = extractTmdbId(metaForRatings.id)
             ?: extractTmdbId(id)
-            ?: TmdbService.ensureTmdbId(metaForRatings.id, metaForRatings.type, fallbackImdbId = metaForRatings.imdbId)?.toIntOrNull()
-            ?: TmdbService.ensureTmdbId(id, type, fallbackImdbId = metaForRatings.imdbId)?.toIntOrNull()
+            ?: imdbId?.let { TmdbService.ensureTmdbId(it, "series")?.toIntOrNull() }
 
         if (imdbId == null && tmdbId == null) {
             episodeImdbRatings = emptyMap()
@@ -592,7 +591,7 @@ fun MetaDetailsScreen(
                     }
                 }
                 LaunchedEffect(meta.id, meta.type, watchProgressUiState.hasLoadedRemoteProgress) {
-                    if (meta.type.lowercase() in setOf("series", "show", "tv", "tvshow", "anime")) {
+                    if (meta.type.lowercase() in setOf("series", "show", "tv", "tvshow")) {
                         WatchProgressRepository.refreshEpisodeProgress(meta.id)
                     }
                 }

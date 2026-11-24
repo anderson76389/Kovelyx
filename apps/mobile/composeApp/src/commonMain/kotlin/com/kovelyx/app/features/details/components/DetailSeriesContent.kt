@@ -1298,7 +1298,7 @@ private fun EpisodeListCard(
                         ratingLabel?.let { rating ->
                             ImdbEpisodeRatingBadge(
                                 rating = rating,
-                            source = imdbRating?.source.orEmpty(),
+                                source = imdbRating?.source.orEmpty(),
                                 logoWidth = 24.dp,
                                 logoHeight = 12.dp,
                                 textSize = sizing.metaTextSize,
