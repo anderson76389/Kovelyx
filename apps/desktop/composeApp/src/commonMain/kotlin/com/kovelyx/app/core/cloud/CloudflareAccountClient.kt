@@ -2,7 +2,14 @@ package com.kovelyx.app.core.cloud
 
 import com.kovelyx.app.features.addons.httpRequestRaw
 import com.kovelyx.app.core.auth.CloudflareCredentialStore
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.time.TimeSource
+import kotlin.time.TimeMark
+import kotlin.time.Duration.Companion.hours
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.intOrNull
@@ -146,12 +153,16 @@ object CloudflareAccountClient {
     suspend fun signOut() {
         val old = session
         session = null
+        deltaSnapshot = null
+        batchSession = null
         CloudflareCredentialStore.clear()
         if (old != null) request("/api/auth/sign-out", "{}", old.bearerToken)
     }
 
     fun clearLocalSession() {
         session = null
+        deltaSnapshot = null
+        batchSession = null
         CloudflareCredentialStore.clear()
     }
 
@@ -252,6 +263,7 @@ object CloudflareAccountClient {
             put("payload", payload)
         }
         val (response, _) = request("/v1/sync", data.toString(), active.bearerToken)
+        check(session == active) { "Compte modifié" }
         return json.parseToJsonElement(response).jsonObject
     }
 
@@ -278,30 +290,127 @@ object CloudflareAccountClient {
     }
 
     /** Read all pages, instead of silently truncating the library at 500 entries. */
-    suspend fun synchronizeAll(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JsonObject> {
+    // Keep one bounded, session-scoped snapshot. A delta is committed only
+    // after every page succeeds. Old Workers transparently return offset pages.
+    private data class DeltaSnapshot(
+        val session: Session, val profileId: String, val cursor: Long,
+        val rows: List<JsonObject>, val started: TimeMark
+    )
+    private val syncReadMutex = Mutex()
+    private var deltaSnapshot: DeltaSnapshot? = null
+    private var batchSession: Session? = null
+
+    suspend fun synchronizeAll(profileId: String, snapshotKind: String? = null, snapshotHash: String? = null): List<JsonObject> = syncReadMutex.withLock {
         val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
         require(profileId.matches(Regex("[a-fA-F0-9-]{36}")))
         require((snapshotKind == null && snapshotHash == null) ||
             (snapshotKind in setOf("collections", "layout") && snapshotHash?.matches(Regex("[a-f0-9]{64}")) == true))
         val catalogueQuery = if (snapshotKind == null) "" else "&snapshotKind=$snapshotKind&snapshotHash=$snapshotHash"
+        var delta = snapshotKind == null
+        val cached = deltaSnapshot?.takeIf {
+            delta && it.session == active && it.profileId == profileId && it.started.elapsedNow() < 6.hours
+        }
+        if (delta && cached == null) deltaSnapshot = null
+        var cursor = cached?.cursor ?: 0L
+        val changed = mutableListOf<JsonObject>()
         val all = mutableListOf<JsonObject>()
         var offset = 0
+        var resetOnce = false
         while (true) {
+            val query = if (delta) "&mode=delta&since=$cursor" else ""
             val response = httpRequestRaw(
-                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery",
+                method = "GET", url = base() + "/v1/sync?profileId=$profileId&offset=$offset&limit=25$catalogueQuery$query",
                 headers = mapOf("Authorization" to "Bearer ${active.bearerToken}"),
                 body = "", followRedirects = false, maxResponseBodyBytes = 1048576
             )
-            check(response.status == 200) { "Kovelyx Cloud : synchronisation HTTP ${response.status}" }
+            check(response.status == 200 && session == active) { "Kovelyx Cloud : synchronisation HTTP ${response.status} ou compte modifié" }
             val page = json.parseToJsonElement(response.body).jsonObject
             val rows = page["items"]?.jsonArray.orEmpty().map { it.jsonObject }
+            if (delta && page["syncVersion"]?.jsonPrimitive?.intOrNull == 1) {
+                if (page["reset"]?.jsonPrimitive?.booleanOrNull == true) {
+                    check(!resetOnce) { "Curseur Cloudflare invalide" }
+                    resetOnce = true
+                    cursor = 0L
+                    changed.clear()
+                    deltaSnapshot = null
+                    continue
+                }
+                val next = checkNotNull(page["nextSince"]?.jsonPrimitive?.longOrNull)
+                var previous = cursor
+                for (row in rows) {
+                    val seq = checkNotNull(row["syncSeq"]?.jsonPrimitive?.longOrNull)
+                    check(seq > previous) { "Delta Cloudflare désordonné" }
+                    previous = seq
+                }
+                check(next == previous && rows.size <= 25 && changed.size + rows.size <= 100000) { "Pagination delta invalide" }
+                changed.addAll(rows)
+                cursor = next
+                if (page["partial"]?.jsonPrimitive?.booleanOrNull == true) {
+                    check(rows.isNotEmpty()) { "Delta Cloudflare incomplet" }
+                    continue
+                }
+                check(session == active) { "Compte modifié" }
+                val prior = if (resetOnce) null else cached
+                val merged = if (changed.isEmpty() && prior != null) prior.rows else {
+                    val byKey = linkedMapOf<Pair<String, String>, JsonObject>()
+                    fun key(row: JsonObject) = row.getValue("category").jsonPrimitive.content to row.getValue("itemKey").jsonPrimitive.content
+                    prior?.rows?.forEach { byKey[key(it)] = it }
+                    changed.forEach { byKey[key(it)] = it }
+                    byKey.values.toList()
+                }
+                // Limit retained memory; large accounts still use indexed delta pages
+                // but restart from zero rather than retaining an unbounded snapshot.
+                deltaSnapshot = if (merged.size <= 8000 &&
+                    merged.sumOf { it.toString().length.toLong() } <= 4_000_000L)
+                    DeltaSnapshot(active, profileId, cursor, merged, prior?.started ?: TimeSource.Monotonic.markNow()) else null
+                batchSession = active
+                return@withLock merged
+            }
+            if (delta) {
+                check(page.containsKey("nextOffset")) { "Protocole Cloudflare inattendu" }
+                delta = false
+                deltaSnapshot = null
+                batchSession = null
+                changed.clear()
+            }
             all.addAll(rows)
             val next = page["nextOffset"]?.jsonPrimitive?.intOrNull
-            if (next == null) return all
-            check(next > offset && rows.size == 25 && all.size <= 100000) {
-                "Kovelyx Cloud : pagination invalide"
-            }
+            if (next == null) return@withLock all
+            check(next == offset + 25 && rows.size == 25 && all.size <= 100000) { "Kovelyx Cloud : pagination invalide" }
             offset = next
+        }
+        @Suppress("UNREACHABLE_CODE")
+        error("Pagination interrompue")
+    }
+
+    internal data class SyncWrite(val category: String, val key: String, val payload: JsonObject, val revision: Int)
+
+    internal suspend fun writeSyncBatch(profileId: String, items: List<SyncWrite>) {
+        if (items.isEmpty()) return
+        val active = checkNotNull(session) { "Compte Kovelyx non connecté" }
+        for (chunk in items.chunked(25)) {
+            check(session == active) { "Compte modifié" }
+            if (batchSession != active) {
+                for (item in chunk) {
+                    check(session == active) { "Compte modifié" }
+                    writeSync(profileId, item.category, item.key, item.payload, item.revision)
+                }
+            } else {
+                val body = buildJsonObject {
+                    put("profileId", profileId)
+                    put("items", JsonArray(chunk.map { item -> buildJsonObject {
+                        put("category", item.category)
+                        put("itemKey", item.key)
+                        put("revision", item.revision)
+                        put("deleted", false)
+                        put("payload", item.payload)
+                    } }))
+                }
+                val (reply, _) = request("/v1/sync-batch", body.toString(), active.bearerToken)
+                check(session == active && json.parseToJsonElement(reply).jsonObject["written"]?.jsonPrimitive?.intOrNull == chunk.size) {
+                    "Lot Cloudflare non confirmé"
+                }
+            }
         }
     }
 
