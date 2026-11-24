@@ -95,7 +95,7 @@ async function handleSyncBatch(request, env, user) {
       ).bind(JSON.stringify(item.payload),item.deleted?1:0,now,user.id,body.profileId,
         item.category,item.itemKey,item.revision));
   const results = await env.DB.batch(statements);
-  const conflicts = results.flatMap((result,index) => result.meta?.changes === 1 ? [] : [index]);
+  const conflicts = results.flatMap((result,index) => Number(result.meta?.changes || 0) > 0 ? [] : [index]);
   // Other valid CAS writes may have succeeded. Clients retain all pending
   // mutations and reconcile fresh revisions on a conflict.
   if (conflicts.length) return jsonResponse({error:"Conflit de synchronisation",conflicts},409);
@@ -120,6 +120,15 @@ async function handleSync(request, env, user, url) {
         "AND category<>'catalogues' ORDER BY sync_seq LIMIT 26"
       ).bind(user.id,profileId,since).all();
       const rows = result.results || [];
+      // A restored database can have an older cursor. Force a full snapshot
+      // instead of leaving the client permanently above the current high-water.
+      if (!rows.length && since > 0) {
+        const high = await env.DB.prepare(
+          "SELECT COALESCE(MAX(sync_seq),0) AS seq FROM kv_sync WHERE owner_id=? AND profile_id=?"
+        ).bind(user.id,profileId).first();
+        if (Number(high?.seq || 0) < since)
+          return jsonResponse({syncVersion:1,items:[],nextSince:0,partial:false,reset:true});
+      }
       const items = rows.slice(0,25).map(row => ({
         ...row,payload:JSON.parse(row.payload),deleted:row.deleted===1
       }));
@@ -176,14 +185,14 @@ async function handleSync(request, env, user, url) {
       "(owner_id,profile_id,category,item_key,payload,revision,deleted,updated_at) "+
       "VALUES (?,?,?,?,?,1,?,?)"
     ).bind(user.id, body.profileId, body.category, body.itemKey, payload, body.deleted ? 1 : 0, now).run();
-    if (inserted.meta?.changes === 1) return jsonResponse({revision:1,updatedAt:now},201);
+    if (Number(inserted.meta?.changes || 0) > 0) return jsonResponse({revision:1,updatedAt:now},201);
   } else {
     const updated = await env.DB.prepare(
       "UPDATE kv_sync SET payload=?, revision=revision+1,deleted=?,updated_at=? "+
       "WHERE owner_id=? AND profile_id=? AND category=? AND item_key=? AND revision=?"
     ).bind(payload, body.deleted ? 1 : 0, now, user.id, body.profileId, body.category,
       body.itemKey, body.revision).run();
-    if (updated.meta?.changes === 1) return jsonResponse({revision:body.revision+1,updatedAt:now});
+    if (Number(updated.meta?.changes || 0) > 0) return jsonResponse({revision:body.revision+1,updatedAt:now});
   }
   const latest = await env.DB.prepare(
     "SELECT revision,updated_at AS updatedAt FROM kv_sync "+
