@@ -351,7 +351,11 @@ object CloudflareAccountClient {
                 }
                 check(session == active) { "Compte modifié" }
                 val prior = if (resetOnce) null else cached
-                val merged = if (changed.isEmpty() && prior != null) prior.rows else {
+                if (changed.isEmpty() && prior != null) {
+                    batchSession = active
+                    return@withLock prior.rows
+                }
+                val merged = run {
                     val byKey = linkedMapOf<Pair<String, String>, JsonObject>()
                     fun key(row: JsonObject) = row.getValue("category").jsonPrimitive.content to row.getValue("itemKey").jsonPrimitive.content
                     prior?.rows?.forEach { byKey[key(it)] = it }
