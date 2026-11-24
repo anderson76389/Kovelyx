@@ -62,6 +62,29 @@ async function handleSync(request, env, user, url) {
     const profileId = url.searchParams.get("profileId") || "";
     if (!validProfileId(profileId) || !await ownedProfile(env, user.id, profileId))
       return jsonResponse({error:"Profil introuvable"},404);
+    // Opt-in delta protocol; old clients keep the existing offset API.
+    // The cursor is assigned by SQLite triggers, not by client/wall clocks.
+    if (url.searchParams.get("mode") === "delta") {
+      const raw = url.searchParams.get("since") || "0";
+      if (!/^(0|[1-9][0-9]{0,15})$/.test(raw) || !Number.isSafeInteger(Number(raw)) ||
+          url.searchParams.has("snapshotKind") || url.searchParams.has("snapshotHash"))
+        return jsonResponse({error:"Curseur delta invalide"},400);
+      const since = Number(raw);
+      const result = await env.DB.prepare(
+        "SELECT category,item_key AS itemKey,payload,revision,deleted,updated_at AS updatedAt,sync_seq AS syncSeq "+
+        "FROM kv_sync WHERE owner_id=? AND profile_id=? AND sync_seq>? "+
+        "AND category<>'catalogues' ORDER BY sync_seq LIMIT 26"
+      ).bind(user.id,profileId,since).all();
+      const rows = result.results || [];
+      const items = rows.slice(0,25).map(row => ({
+        ...row,payload:JSON.parse(row.payload),deleted:row.deleted===1
+      }));
+      return jsonResponse({
+        syncVersion:1,items,
+        nextSince:items.length ? items[items.length-1].syncSeq : since,
+        partial:rows.length>25
+      });
+    }
     const requestedOffset = url.searchParams.get("offset") || "0";
     if (!validSyncOffset(requestedOffset)) return jsonResponse({error:"Curseur invalide"},400);
     const offset = Number(requestedOffset);
@@ -253,6 +276,8 @@ export default {
       return respond(jsonResponse({error:"Route inconnue"},404));
     } catch (error) {
       console.error("Kovelyx Cloud request failed", {path:url.pathname,kind:error?.name || "Error"});
+      if (/quota|daily limit|rate limit|too many requests|D1_ERROR:.*limit/i.test(String(error?.message || "")))
+        return respond(jsonResponse({error:"Quota temporairement atteint ; modifications locales conservées"},429,{"retry-after":"900"}));
       return respond(jsonResponse({error:"Erreur du serveur Kovelyx"},500));
     }
   }
