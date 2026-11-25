@@ -1,5 +1,6 @@
 param(
-    [string]$Destination = (Join-Path $HOME "Documents\Kovelyx-Backups")
+    [string]$Destination = (Join-Path $HOME "Documents\Kovelyx-Backups"),
+    [switch]$IncludeBuildDependencies
 )
 
 $ErrorActionPreference = "Stop"
@@ -73,14 +74,22 @@ if ($LASTEXITCODE -eq 0) {
     Write-Warning "GitHub CLI non connecté : seules les sources Git sont sauvegardées. Lance gh auth login puis réessaie."
 }
 
+if ($IncludeBuildDependencies) {
+    $python = Get-Command python -ErrorAction Stop
+    $vault = Join-Path $PSScriptRoot "build-dependency-vault.py"
+    & $python.Source $vault capture (Join-Path $target "Build-Dependencies")
+    if ($LASTEXITCODE -ne 0) { throw "Échec de la sauvegarde des dépendances." }
+}
+
 @"
 KOVELYX - SAUVEGARDE LOCALE
 Date : $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
 Référentiel : https://github.com/$repository
 Git mirror : Kovelyx.git
 Releases : Releases/
-ATTENTION : un miroir Git ne sauvegarde pas les dépendances téléchargées
-(Maven, NuGet, SDK Android) ni les anciens binaires LFS hors dépôt.
+ATTENTION : un miroir Git ne sauvegarde pas les dépendances téléchargées.
+Option -IncludeBuildDependencies : coffre Gradle et Maven Robolectric local.
+Voir docs/COFFRE_COMPILATION.md ; SDK, JDK, NuGet, clés et binaires LFS à part.
 Les Releases et checksums sont copiés séparément lorsqu'ils existent.
 Les derniers artefacts temporaires Windows-MPV et Windows-MSI sont aussi
 sauvegardés lorsque leur téléchargement GitHub est encore possible.
