@@ -25,3 +25,19 @@ Utiliser une copie propre des sources correspondant à la révision indiquée da
 Exécuter les tâches Gradle habituelles avec --offline --no-daemon --no-build-cache et --rerun-tasks, par exemple assembleFullDebug et testAndroidHostTest pour le mobile, :app:assembleFullDebug et :app:testFullDebugUnitTest pour la TV, :composeApp:desktopTest et les tâches de packaging du système pour desktop. Consulter les workflows pour les tâches exactes et prérequis natifs. Couper réellement le réseau pour prouver qu'aucun téléchargement hors Gradle n'est nécessaire.
 
 **Limites :** ce coffre n'inclut pas les SDK Android/NDK, JDK, outils C/C++, Kotlin/Native hors cache Gradle, NuGet/WebView2, outils de packaging, binaires externes ni clés de signature. Les sauvegarder séparément selon les licences et les workflows. La capture et sa vérification ne certifient jamais une compilation hors réseau ; le manifeste indique explicitement offline_build_verified=false. Une archive doit être renouvelée après changement de dépendances et testée sur une machine isolée. Elle n'ajoute aucune dépendance runtime ni requête Cloudflare.
+
+## Archiver aussi les outils hors Gradle
+
+À partir d'archives ou installateurs officiels déjà téléchargés, avec leurs licences et empreintes d'origine, ajouter une option répétable `--toolchain-file LABEL=PATH` lors de la capture. Exemple Windows (adapter les chemins, versions exactes à relever dans les workflows) :
+
+    python scripts/build-dependency-vault.py capture D:\Kovelyx\Build-Windows --toolchain-file "jdk=D:\Installateurs\jdk21.zip" --toolchain-file "sdk=D:\Installateurs\android-sdk.zip" --toolchain-file "ndk=D:\Installateurs\android-ndk.zip" --toolchain-file "webview2=D:\Installateurs\webview2.nupkg"
+
+Inclure également les outils de compilation C/C++, packaging Windows/Linux, Kotlin/Native et les binaires nécessaires à la version ciblée. Une archive SDK doit inclure les plateformes, build-tools, platform-tools, licences et NDK nécessaires au build, pas seulement command-line tools. L'option ne télécharge rien et ne prétend pas vérifier que tous ces composants sont présents. Les archives sont restaurées dans `toolchains/<label>/`, non exécutées ni installées automatiquement. Vérifier le contenu et les licences avant archivage. Les clés de signature restent séparées, dans une sauvegarde privée chiffrée.
+
+### Validation finale (à remplir avec des preuves)
+
+- Restaurer le coffre sur Windows et Linux propres, installer les outils depuis leurs archives, bloquer le réseau avant de lancer les tâches Gradle hors ligne.
+- Tester la vraie APK sur la Freebox Pop et sur le mobile, les exécutables Windows et Linux, mise à jour sur une version antérieure, données et espace disque avant/après.
+- Mesurer CPU/RAM/PSS à froid, après 30 minutes et après 10 heures de lecture du même média légal local, avec pauses et changements d'épisodes. Une mesure de 30 minutes ne valide pas dix heures.
+- Tester les trois comptes distincts et leurs sessions, plus la disponibilité réelle des fournisseurs d'épisodes. Le banc D1 local mesure le contrat et l'isolation, jamais les quotas du compte Cloudflare.
+- Conserver commit, versions, SHA-256, date, résultats et échecs avec les archives. Ne pas publier de jetons ou données de compte.
