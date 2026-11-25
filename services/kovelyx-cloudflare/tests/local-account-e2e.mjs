@@ -759,6 +759,10 @@ try {
   // All requests stay in this disposable local D1 instance. A virtual tick is
   // not a duration/CPU benchmark and the counts are not production D1 metrics.
   const charlie=await signupAndLogin("charlie");
+  // Auth protects the sign-in endpoint with 5 attempts / 60 seconds per IP.
+  // All simulated devices share localhost; wait out the real window instead
+  // of disabling production rate limits or spoofing a client's IP.
+  await sleep(61_000);
   const isolatedAccounts=[alice,bob,charlie];
   const loadAccounts=await Promise.all(isolatedAccounts.map(async (account,index)=>{
     const created=await req("/v1/profiles","POST",{displayName:"Charge "+(index+1)},account.token);

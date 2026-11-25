@@ -19,6 +19,7 @@ jobs:
     timeout-minutes: 45
     env:
       WRANGLER_SEND_METRICS: "false"
+      JAVA_TOOL_OPTIONS: "-Drobolectric.dependency.repo.url=https://maven-central.storage-download.googleapis.com/maven2"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,8 +31,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Isoler le cache de préparation
-        run: echo "GRADLE_USER_HOME=$RUNNER_TEMP/kovelyx-online-gradle" >> "$GITHUB_ENV"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.m2/repository/org/robolectric/android-all-instrumented
+          key: robolectric-runtimes-v1-${{ runner.os }}-${{ hashFiles('scripts/prefetch-robolectric.py') }}
       - name: Préparer les sources et télécharger les dépendances
         shell: bash
         run: |
@@ -47,7 +53,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 scripts/build-dependency-vault.py capture "$RUNNER_TEMP/kovelyx-vault"
+          python3 scripts/build-dependency-vault.py capture "$RUNNER_TEMP/kovelyx-vault" --gradle-home "${GRADLE_USER_HOME:-$HOME/.gradle}"
           python3 scripts/build-dependency-vault.py verify "$RUNNER_TEMP/kovelyx-vault"
           python3 scripts/build-dependency-vault.py restore "$RUNNER_TEMP/kovelyx-vault" "$RUNNER_TEMP/kovelyx-restored"
           git worktree add --detach "$RUNNER_TEMP/kovelyx-clean-source" HEAD
