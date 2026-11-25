@@ -1,0 +1,11 @@
+// CI-only mirror configuration. Apply identically before and after restoration
+// so Gradle's repository-specific metadata can be used without network access.
+gradle.settingsEvaluated { settings ->
+    [settings.pluginManagement.repositories, settings.dependencyResolutionManagement.repositories].each { repositories ->
+        repositories.withType(org.gradle.api.artifacts.repositories.MavenArtifactRepository).configureEach { repository ->
+            if (repository.url.toString().replaceAll('/+$', '') == 'https://repo.maven.apache.org/maven2') {
+                repository.url = uri('https://maven-central.storage-download.googleapis.com/maven2')
+            }
+        }
+    }
+}

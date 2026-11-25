@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/offline-android-rebuild.yml'
       - 'scripts/tests/offline-android-build.sh'
+      - 'scripts/tests/offline-maven-mirror.init.gradle'
       - 'scripts/build-dependency-vault.py'
       - 'scripts/prefetch-robolectric.py'
   workflow_dispatch:
@@ -44,8 +45,8 @@ jobs:
           set -euo pipefail
           chmod +x apps/mobile/gradlew
           python3 scripts/prefetch-robolectric.py
-          ./apps/mobile/gradlew -p apps/mobile :androidApp:assembleFullDebug :composeApp:testAndroidHostTest \
-            -Pnuvio.android.distribution=full --no-daemon --max-workers=2 --no-build-cache \
+          ./apps/mobile/gradlew -p apps/mobile -I "$GITHUB_WORKSPACE/scripts/tests/offline-maven-mirror.init.gradle" :androidApp:assembleFullDebug :composeApp:testAndroidHostTest \
+            -Pnuvio.android.distribution=full --no-daemon --max-workers=2 --no-build-cache --no-configuration-cache \
             -Pkotlin.compiler.execution.strategy=in-process \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
           ./apps/mobile/gradlew -p apps/mobile --stop
