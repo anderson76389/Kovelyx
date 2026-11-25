@@ -34,8 +34,8 @@ jobs:
     timeout-minutes: 35
     env:
       # Robolectric fetches Android framework test JARs in the forked test JVM.
-      # Use canonical Maven Central instead of the intermittently failing repo1 mirror.
-      JAVA_TOOL_OPTIONS: "-Drobolectric.dependency.repo.url=https://repo.maven.apache.org/maven2"
+      # Use Google's documented Maven Central mirror; explicit prefetch verifies jars.
+      JAVA_TOOL_OPTIONS: "-Drobolectric.dependency.repo.url=https://maven-central.storage-download.googleapis.com/maven2"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -47,6 +47,11 @@ jobs:
           # Avoid restoring stale dependency-metadata failures from shared Gradle caches.
           # This workflow must resolve the same Maven artifacts as the successful builds.
           cache-disabled: true
+      - name: Restaurer uniquement les JAR publics Robolectric vérifiés
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric/android-all-instrumented
+          key: robolectric-runtimes-v1-${{ runner.os }}-${{ hashFiles('scripts/prefetch-robolectric.py') }}
       - name: Vérifier la récupération des dépendances puis précharger les SDK de test
         shell: bash
         run: |
