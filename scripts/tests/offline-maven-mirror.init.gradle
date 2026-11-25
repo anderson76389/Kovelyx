@@ -9,3 +9,19 @@ gradle.settingsEvaluated { settings ->
         }
     }
 }
+
+// Robolectric API 36 needs Java 21 even if the Android plugin defaults to 17.
+// Explicitly select the test JVM on both sides of the backup/restore proof.
+gradle.beforeProject { project ->
+    project.tasks.withType(org.gradle.api.tasks.testing.Test).configureEach { task ->
+        def toolchains = project.extensions.getByType(org.gradle.jvm.toolchain.JavaToolchainService)
+        task.javaLauncher.set(toolchains.launcherFor {
+            languageVersion = org.gradle.jvm.toolchain.JavaLanguageVersion.of(21)
+        })
+        task.doFirst {
+            def launcher = task.javaLauncher.get()
+            assert launcher.metadata.languageVersion.asInt() == 21
+            logger.lifecycle("Offline proof test JVM: " + launcher.executablePath.asFile)
+        }
+    }
+}

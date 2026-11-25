@@ -66,8 +66,10 @@ jobs:
           export GRADLE_USER_HOME="$RUNNER_TEMP/kovelyx-restored/gradle-home"
           export JAVA_TOOL_OPTIONS="-Drobolectric.offline=true -Drobolectric.dependency.dir=$RUNNER_TEMP/kovelyx-restored/robolectric-jars"
           export OFFLINE_SOURCE="$RUNNER_TEMP/kovelyx-clean-source"
+          export KOVELYX_JAVA21_HOME="$JAVA_HOME"
+          "$KOVELYX_JAVA21_HOME/bin/java" -version
           # Only loopback inside the new network namespace; execute Gradle as runner.
-          sudo --preserve-env=GRADLE_USER_HOME,JAVA_TOOL_OPTIONS,JAVA_HOME,ANDROID_HOME,ANDROID_SDK_ROOT,OFFLINE_SOURCE unshare --net -- bash -c '
+          sudo --preserve-env=GRADLE_USER_HOME,JAVA_TOOL_OPTIONS,JAVA_HOME,KOVELYX_JAVA21_HOME,ANDROID_HOME,ANDROID_SDK_ROOT,OFFLINE_SOURCE unshare --net -- bash -c '
             set -euo pipefail
             ip link set lo up
             test -z "$(ip route show default)"
