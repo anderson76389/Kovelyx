@@ -54,7 +54,7 @@ class DependencyVaultTest(unittest.TestCase):
                 vault.verify(bundle)
 
     def test_path_and_link_rejection(self):
-        for name in ("../x", "/absolute", "gradle-home/caches/modules-2/../../evil", "settings.xml"):
+        for name in ("../x", "/absolute", "gradle-home/caches/modules-2/../../evil", "settings.xml", "toolchains/jdk/../../private", "toolchains/../evil.zip"):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 vault.validate_member(tarfile.TarInfo(name))
         link = tarfile.TarInfo("gradle-home/caches/modules-2/symlink")

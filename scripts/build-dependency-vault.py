@@ -135,6 +135,20 @@ def verify(bundle):
                 manifest = json.load(tar.extractfile(member))
         if not manifest or manifest.get("format") != 1:
             raise ValueError("Missing or unsupported manifest.")
+    packages = manifest.get("toolchain_files", {})
+    if not isinstance(packages, dict):
+        raise ValueError("Invalid toolchain manifest.")
+    for label, entry in packages.items():
+        if not isinstance(label, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", label):
+            raise ValueError("Invalid toolchain label in manifest.")
+        if not isinstance(entry, dict):
+            raise ValueError("Invalid toolchain entry.")
+        name, checksum = entry.get("name"), entry.get("sha256")
+        if (not isinstance(name, str) or not name or name in (".", "..")
+                or "/" in name or "\\" in name or ":" in name
+                or not isinstance(checksum, str) or not re.fullmatch(r"[a-f0-9]{64}", checksum)
+                or ("toolchains/" + label + "/" + name) not in seen):
+            raise ValueError("Invalid toolchain file in manifest.")
     return manifest
 
 

@@ -1,0 +1,84 @@
+name: Prouver la reconstruction Android depuis un coffre hors réseau
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/offline-android-rebuild.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: kovelyx-offline-rebuild-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  restore-mobile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      GRADLE_USER_HOME: ${{ runner.temp }}/kovelyx-online-gradle
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Préparer les sources et télécharger les dépendances
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x apps/mobile/gradlew
+          python3 scripts/prefetch-robolectric.py
+          ./apps/mobile/gradlew -p apps/mobile :androidApp:assembleFullDebug :composeApp:testAndroidHostTest \
+            -Pnuvio.android.distribution=full --no-daemon --max-workers=2 --no-build-cache \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=768m"
+          ./apps/mobile/gradlew -p apps/mobile --stop
+      - name: Archiver et restaurer les dépendances dans un répertoire vide
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/build-dependency-vault.py capture "$RUNNER_TEMP/kovelyx-vault"
+          python3 scripts/build-dependency-vault.py verify "$RUNNER_TEMP/kovelyx-vault"
+          python3 scripts/build-dependency-vault.py restore "$RUNNER_TEMP/kovelyx-vault" "$RUNNER_TEMP/kovelyx-restored"
+          git worktree add --detach "$RUNNER_TEMP/kovelyx-clean-source" HEAD
+          chmod +x "$RUNNER_TEMP/kovelyx-clean-source/apps/mobile/gradlew"
+      - name: Recompiler sans réseau extérieur avec cache restauré et sources vierges
+        shell: bash
+        run: |
+          set -euo pipefail
+          export GRADLE_USER_HOME="$RUNNER_TEMP/kovelyx-restored/gradle-home"
+          export JAVA_TOOL_OPTIONS="-Drobolectric.offline=true -Drobolectric.dependency.dir=$RUNNER_TEMP/kovelyx-restored/robolectric-jars"
+          export OFFLINE_SOURCE="$RUNNER_TEMP/kovelyx-clean-source"
+          # A new Linux network namespace has only loopback and no host route.
+          # Retain loopback so Gradle can communicate with its own test JVMs.
+          sudo --preserve-env=GRADLE_USER_HOME,JAVA_TOOL_OPTIONS,JAVA_HOME,ANDROID_HOME,ANDROID_SDK_ROOT,OFFLINE_SOURCE,PATH unshare --net -- bash -c '
+            set -euo pipefail
+            ip link set lo up
+            test -z "$(ip route show default)"
+            test "$(ip -o link show | wc -l)" -eq 1
+            exec runuser -u "$SUDO_USER" --preserve-environment -- bash -c "
+              cd \"\$OFFLINE_SOURCE/apps/mobile\"
+              ./gradlew :androidApp:assembleFullDebug :composeApp:testAndroidHostTest \\
+                -Pnuvio.android.distribution=full --offline --no-daemon --max-workers=2 --no-build-cache --rerun-tasks \\
+                -Pkotlin.compiler.execution.strategy=in-process \\
+                -Dorg.gradle.jvmargs=\"-Xmx4g -XX:MaxMetaspaceSize=768m\"
+            "
+          '
+          echo '### Android mobile recompilé hors réseau depuis les caches restaurés' >> "$GITHUB_STEP_SUMMARY"
+          echo 'SDK et JDK du runner déjà installés : cette preuve ne couvre pas leur restauration ni TV/Windows/Linux.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Conserver les preuves de tests, pas le cache ni les secrets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kovelyx-offline-mobile-proof
+          path: |
+            ${{ runner.temp }}/kovelyx-vault/dependencies.sha256
+            ${{ runner.temp }}/kovelyx-clean-source/apps/mobile/composeApp/build/test-results/testAndroidHostTest/
+          if-no-files-found: warn
+          retention-days: 30
