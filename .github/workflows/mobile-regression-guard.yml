@@ -8,12 +8,16 @@ on:
       - 'apps/mobile/**'
       - 'apps/desktop/composeApp/src/commonMain/kotlin/com/kovelyx/app/features/watchprogress/**'
       - '.github/workflows/mobile-regression-guard.yml'
+      - 'scripts/prefetch-robolectric.py'
+      - 'scripts/tests/test_prefetch_robolectric.py'
   push:
     branches: [main]
     paths:
       - 'shared/**'
       - 'apps/mobile/**'
       - '.github/workflows/mobile-regression-guard.yml'
+      - 'scripts/prefetch-robolectric.py'
+      - 'scripts/tests/test_prefetch_robolectric.py'
   workflow_dispatch:
 
 permissions:
@@ -43,6 +47,12 @@ jobs:
           # Avoid restoring stale dependency-metadata failures from shared Gradle caches.
           # This workflow must resolve the same Maven artifacts as the successful builds.
           cache-disabled: true
+      - name: Vérifier la récupération des dépendances puis précharger les SDK de test
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s scripts/tests -p test_prefetch_robolectric.py
+          python3 scripts/prefetch-robolectric.py
       - name: Vérifier progression, notes d'épisodes et mises à jour
         shell: bash
         run: |
