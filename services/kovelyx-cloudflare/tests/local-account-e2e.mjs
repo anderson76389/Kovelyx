@@ -760,7 +760,7 @@ try {
   // not a duration/CPU benchmark and the counts are not production D1 metrics.
   const charlie=await signupAndLogin("charlie");
   const isolatedAccounts=[alice,bob,charlie];
-  const isolated=await Promise.all(isolatedAccounts.map(async (account,index)=>{
+  const loadAccounts=await Promise.all(isolatedAccounts.map(async (account,index)=>{
     const created=await req("/v1/profiles","POST",{displayName:"Charge "+(index+1)},account.token);
     assert.equal(created.status,201);
     const id=created.data?.profile?.id;
@@ -775,10 +775,10 @@ try {
     assert.equal(initial.items.length,0);
     return {account,id,reader,since:initial.since,index};
   }));
-  assert.equal(new Set(isolated.map(a=>a.id)).size,3);
+  assert.equal(new Set(loadAccounts.map(a=>a.id)).size,3);
   const rounds=12;
   for(let tick=1;tick<=rounds;tick++){
-    await Promise.all(isolated.map(async a=>{
+    await Promise.all(loadAccounts.map(async a=>{
       const position=1000*a.index+tick*10000;
       const payload={...progress.payload,lastPositionMs:position,durationMs:1000000,
         lastUpdatedEpochMs:1720020000000+tick*120000};
@@ -794,11 +794,11 @@ try {
       a.since=delta.since;
     }));
   }
-  for(const a of isolated){
+  for(const a of loadAccounts){
     const idle=await readDelta(a.reader,a.since,a.id);
     assert.equal(idle.items.length,0);
     assert.equal(idle.pages,1);
-    for(const foreign of isolated.filter(b=>b!==a)){
+    for(const foreign of loadAccounts.filter(b=>b!==a)){
       assert.equal((await req(`/v1/sync?profileId=${foreign.id}&mode=delta&since=0`,"GET",null,a.reader)).status,404);
     }
   }
