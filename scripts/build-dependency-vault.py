@@ -6,6 +6,7 @@ import io
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import tarfile
@@ -40,7 +41,21 @@ def archive_filter(info):
     return info
 
 
-def capture(destination, gradle_home, maven_repo, commit):
+def capture(destination, gradle_home, maven_repo, commit, toolchain_files=None):
+    # Explicit pre-downloaded installers/archives only, never the user's entire
+    # SDK home, credential stores, or arbitrary directory trees.
+    toolchains = {}
+    for label, path in (toolchain_files or {}).items():
+        path = Path(path)
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", label) or label in (".", ".."):
+            raise ValueError("Invalid toolchain label: " + label)
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("Toolchain must be a regular local archive/installer: " + str(path))
+        if not path.name.lower().endswith((".zip", ".tar.gz", ".tgz", ".tar.xz", ".7z", ".msi", ".exe", ".deb", ".rpm", ".nupkg")):
+            raise ValueError("Unsupported toolchain package: " + path.name)
+        toolchains[label] = path
+    if len({label.lower() for label in toolchains}) != len(toolchains):
+        raise ValueError("Case-insensitive toolchain label collision.")
     modules = gradle_home / "caches" / "modules-2"
     dists = gradle_home / "wrapper" / "dists"
     robo = maven_repo / "org" / "robolectric"
@@ -59,6 +74,7 @@ def capture(destination, gradle_home, maven_repo, commit):
         "gradle_versions_found": versions, "robolectric_jars": len(jars),
         "scope": "cached Gradle modules and distributions; org/robolectric Maven artifacts only",
         "offline_build_verified": False,
+        "toolchain_files": {label: {"name": path.name, "sha256": digest(path)} for label, path in toolchains.items()},
     }
     destination.mkdir(parents=True, exist_ok=False)
     temporary = destination / (ARCHIVE + ".partial")
@@ -68,6 +84,8 @@ def capture(destination, gradle_home, maven_repo, commit):
             tar.add(dists, arcname="gradle-home/wrapper/dists", filter=archive_filter)
             if robo.is_dir():
                 tar.add(robo, arcname="maven-repository/org/robolectric", filter=archive_filter)
+            for label, path in toolchains.items():
+                tar.add(path, arcname="toolchains/" + label + "/" + path.name, filter=archive_filter)
             payload = (json.dumps(manifest, indent=2) + "\n").encode()
             entry = tarfile.TarInfo(MANIFEST)
             entry.size = len(payload)
@@ -91,6 +109,8 @@ def validate_member(member):
         or path.parts[:3] == ("gradle-home", "caches", "modules-2")
         or path.parts[:3] == ("gradle-home", "wrapper", "dists")
         or path.parts[:3] == ("maven-repository", "org", "robolectric")
+        or (len(path.parts) == 3 and path.parts[0] == "toolchains"
+            and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,79}", path.parts[1]) and member.isfile())
     )
     if not allowed or not (member.isfile() or member.isdir()):
         raise ValueError("Unexpected archive entry: " + member.name)
@@ -142,6 +162,10 @@ def restore(bundle, destination):
                 os.link(jar, target)
             except OSError:
                 shutil.copy2(jar, target)
+        for label, entry in manifest.get("toolchain_files", {}).items():
+            package = destination / "toolchains" / label / entry["name"]
+            if digest(package) != entry["sha256"]:
+                raise ValueError("Toolchain package SHA-256 mismatch: " + label)
         print("Restored:", destination)
         print("Gradle home:", destination / "gradle-home")
         print("Robolectric offline JARs:", flat)
@@ -165,6 +189,8 @@ def main():
     cap.add_argument("destination", type=Path)
     cap.add_argument("--gradle-home", type=Path, default=Path(os.environ.get("GRADLE_USER_HOME", Path.home() / ".gradle")))
     cap.add_argument("--maven-repo", type=Path, default=Path.home() / ".m2" / "repository")
+    cap.add_argument("--toolchain-file", action="append", default=[], metavar="LABEL=PATH",
+                     help="Optional offline toolchain installer/archive; repeat for each package.")
     check = sub.add_parser("verify")
     check.add_argument("bundle", type=Path)
     res = sub.add_parser("restore")
@@ -173,7 +199,13 @@ def main():
     args = parser.parse_args()
     try:
         if args.action == "capture":
-            capture(args.destination.resolve(), args.gradle_home.resolve(), args.maven_repo.resolve(), source_commit())
+            toolchains = {}
+            for item in args.toolchain_file:
+                label, sep, path = item.partition("=")
+                if not sep or not path or label in toolchains:
+                    raise ValueError("Expected unique LABEL=PATH for each toolchain.")
+                toolchains[label] = Path(path).expanduser()
+            capture(args.destination.resolve(), args.gradle_home.resolve(), args.maven_repo.resolve(), source_commit(), toolchains)
         elif args.action == "verify":
             print(json.dumps(verify(args.bundle), indent=2))
         else:

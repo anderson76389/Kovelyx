@@ -387,11 +387,11 @@ try {
     deleted:false, payload:{id:"tt-batch",type:"series",name:"Série française",season:1,episode:n+1,markedAtEpochMs:1720010600000+n}
   }));
   // Initial indexed read, then incremental pulls across independent sessions.
-  async function readDelta(token, since=0) {
+  async function readDelta(token, since=0, targetProfileId=profileId) {
     const items=[];
     let pages=0, page;
     do {
-      page=await req(`/v1/sync?profileId=${profileId}&mode=delta&since=${since}`,"GET",null,token);
+      page=await req(`/v1/sync?profileId=${targetProfileId}&mode=delta&since=${since}`,"GET",null,token);
       assert.equal(page.status,200);
       assert.equal(page.data.syncVersion,1);
       assert.ok(page.data.items.length<=25);
@@ -754,6 +754,56 @@ try {
   assert.equal(loaded.data.profiles[0].displayName,"Principal TV");
   const last=await req("/v1/profiles?profileId="+profileId,"DELETE",{},alice.token);
   assert.equal(last.status,409,"Last profile cannot be deleted");
+
+  // Three distinct accounts, not merely three sessions on the same account.
+  // All requests stay in this disposable local D1 instance. A virtual tick is
+  // not a duration/CPU benchmark and the counts are not production D1 metrics.
+  const charlie=await signupAndLogin("charlie");
+  const isolatedAccounts=[alice,bob,charlie];
+  const isolated=await Promise.all(isolatedAccounts.map(async (account,index)=>{
+    const created=await req("/v1/profiles","POST",{displayName:"Charge "+(index+1)},account.token);
+    assert.equal(created.status,201);
+    const id=created.data?.profile?.id;
+    assert.match(id||"",/^[a-f0-9-]{36}$/i);
+    const readerLogin=await req("/api/auth/sign-in/email","POST",{
+      email:account.email,password:accountPassword
+    });
+    assert.equal(readerLogin.status,200);
+    const reader=readerLogin.headers.get("set-auth-token")||readerLogin.data?.token;
+    assert.ok(reader&&reader!==account.token);
+    const initial=await readDelta(reader,0,id);
+    assert.equal(initial.items.length,0);
+    return {account,id,reader,since:initial.since,index};
+  }));
+  assert.equal(new Set(isolated.map(a=>a.id)).size,3);
+  const rounds=12;
+  for(let tick=1;tick<=rounds;tick++){
+    await Promise.all(isolated.map(async a=>{
+      const position=1000*a.index+tick*10000;
+      const payload={...progress.payload,lastPositionMs:position,durationMs:1000000,
+        lastUpdatedEpochMs:1720020000000+tick*120000};
+      const row={...progress,profileId:a.id,revision:tick-1,payload};
+      const written=await req("/v1/sync","POST",row,a.account.token);
+      assert.equal(written.status,tick===1?201:200);
+      assert.equal(written.data.revision,tick);
+      const delta=await readDelta(a.reader,a.since,a.id);
+      assert.equal(delta.pages,1);
+      assert.equal(delta.items.length,1);
+      assert.equal(delta.items[0].itemKey,row.itemKey);
+      assert.equal(delta.items[0].payload.lastPositionMs,position);
+      a.since=delta.since;
+    }));
+  }
+  for(const a of isolated){
+    const idle=await readDelta(a.reader,a.since,a.id);
+    assert.equal(idle.items.length,0);
+    assert.equal(idle.pages,1);
+    for(const foreign of isolated.filter(b=>b!==a)){
+      assert.equal((await req(`/v1/sync?profileId=${foreign.id}&mode=delta&since=0`,"GET",null,a.reader)).status,404);
+    }
+  }
+  console.log("PASS: 3 comptes distincts, 6 sessions, "+(rounds*3)+" écritures de progression, "+
+    (rounds*3)+" lectures delta à une seule ligne, isolation et lectures à vide; D1 LOCAL uniquement");
 
   const signedOut=await req("/api/auth/sign-out","POST",{},alice.token);
   assert.ok(signedOut.status>=200&&signedOut.status<300);

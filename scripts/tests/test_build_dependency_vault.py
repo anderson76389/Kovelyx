@@ -29,10 +29,13 @@ class DependencyVaultTest(unittest.TestCase):
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_bytes(b"fixture")
             bundle = root / "backup"
-            vault.capture(bundle, gradle, maven, "test-commit")
+            package = root / "jdk.zip"
+            package.write_bytes(b"offline-installer-fixture")
+            vault.capture(bundle, gradle, maven, "test-commit", {"jdk": package})
             meta = vault.verify(bundle)
             self.assertEqual(meta["gradle_versions_found"], ["8.13"])
             self.assertEqual(meta["robolectric_jars"], 1)
+            self.assertEqual(meta["toolchain_files"]["jdk"]["sha256"], vault.digest(package))
             self.assertFalse(meta["offline_build_verified"])
             restored = root / "restored"
             vault.restore(bundle, restored)
@@ -42,6 +45,7 @@ class DependencyVaultTest(unittest.TestCase):
             self.assertFalse((restored / "gradle-home/caches/modules-2/cache.lock").exists())
             self.assertFalse((restored / "gradle-home/caches/modules-2/gc.properties").exists())
             self.assertFalse((restored / "maven-repository/private").exists())
+            self.assertEqual((restored / "toolchains/jdk/jdk.zip").read_bytes(), package.read_bytes())
             with self.assertRaises(FileExistsError):
                 vault.restore(bundle, restored)
             with (bundle / vault.ARCHIVE).open("ab") as f:
