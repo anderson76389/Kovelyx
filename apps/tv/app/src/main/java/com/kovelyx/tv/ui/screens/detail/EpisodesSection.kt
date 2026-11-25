@@ -1,5 +1,7 @@
 package com.kovelyx.tv.ui.screens.detail
 
+import com.kovelyx.tv.domain.model.EpisodeRating
+
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.BorderStroke
@@ -370,7 +372,7 @@ fun SeasonTabs(
 fun EpisodesRow(
     episodes: List<Video>,
     episodeProgressMap: Map<Pair<Int, Int>, com.kovelyx.tv.domain.model.WatchProgress> = emptyMap(),
-    episodeRatings: Map<Pair<Int, Int>, Double> = emptyMap(),
+    episodeRatings: Map<Pair<Int, Int>, EpisodeRating> = emptyMap(),
     watchedEpisodes: Set<Pair<Int, Int>> = emptySet(),
     episodeWatchedPendingKeys: Set<String> = emptySet(),
     blurUnwatchedEpisodes: Boolean = false,
@@ -628,7 +630,7 @@ fun EpisodesRow(
 private fun EpisodeCard(
     episode: Video,
     watchProgress: com.kovelyx.tv.domain.model.WatchProgress? = null,
-    imdbRating: Double? = null,
+    imdbRating: EpisodeRating? = null,
     isMarkedWatched: Boolean = false,
     blurUnwatched: Boolean = false,
     suppressMarquee: Boolean = false,
@@ -652,7 +654,7 @@ private fun EpisodeCard(
         episode.runtime?.takeIf { it > 0 }?.let(::formatEpisodeRuntime)
     }
     val ratingLabel = remember(imdbRating) {
-        imdbRating?.takeIf { it > 0.0 }?.let { String.format(Locale.US, "%.1f", it) }
+        imdbRating?.let { String.format(Locale.US, "%.1f", it.value) }
     }
     val description = remember(episode.overview) { episode.overview?.trim().orEmpty() }
     val isWatched = remember(watchProgress, isMarkedWatched) { watchProgress?.isCompleted() == true || isMarkedWatched }
@@ -1012,13 +1014,13 @@ private fun EpisodeCard(
                                 horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                ImdbRatingSourceLabel(
+                                if (imdbRating?.source == "IMDb") ImdbRatingSourceLabel(
                                     logoModifier = Modifier
                                         .width(cardMetrics.imdbLogoWidth)
                                         .height(cardMetrics.imdbLogoHeight),
                                     textStyle = metaLabelStyle,
                                     textColor = textSecondary
-                                )
+                                ) else Text(text = imdbRating?.source.orEmpty(), style = metaLabelStyle, color = textSecondary, maxLines = 1)
                                 Text(
                                     text = rating,
                                     style = ratingStyle,

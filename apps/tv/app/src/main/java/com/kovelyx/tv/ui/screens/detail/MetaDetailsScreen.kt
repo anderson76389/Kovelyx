@@ -1,5 +1,7 @@
 package com.kovelyx.tv.ui.screens.detail
 
+import com.kovelyx.tv.domain.model.EpisodeRating
+
 import com.kovelyx.tv.ui.components.LocalPlaybackAvailability
 import com.kovelyx.tv.ui.navigation.LocalDetailChildClosedEpoch
 import com.kovelyx.tv.ui.navigation.LocalDetailChildOverlayVisible
@@ -1218,7 +1220,7 @@ private fun MetaDetailsContent(
     collection: List<MetaPreview>,
     collectionName: String?,
     relatedWatchedStatus: Map<String, Boolean> = emptyMap(),
-    episodeImdbRatings: Map<Pair<Int, Int>, Double>,
+    episodeImdbRatings: Map<Pair<Int, Int>, EpisodeRating>,
     isEpisodeRatingsLoading: Boolean,
     episodeRatingsError: String?,
     mdbListRatings: MDBListRatings?,

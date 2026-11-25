@@ -1,5 +1,7 @@
 package com.kovelyx.tv.ui.screens.detail
 
+import com.kovelyx.tv.domain.model.EpisodeRating
+
 import android.content.Context
 import android.view.KeyEvent as AndroidKeyEvent
 import androidx.compose.foundation.background
@@ -85,7 +87,7 @@ private data class EpisodeOverlayAction(
 @Composable
 internal fun EpisodeOptionsOverlay(
     episode: Video,
-    imdbRating: Double? = null,
+    imdbRating: EpisodeRating? = null,
     isWatched: Boolean,
     blurUnwatchedEpisodes: Boolean = false,
     style: EpisodeOptionsOverlayStyle = EpisodeOptionsOverlayStyle.ARTWORK,
@@ -170,7 +172,7 @@ internal fun EpisodeOptionsOverlay(
         )
     }
     val ratingLabel = remember(imdbRating) {
-        imdbRating?.takeIf { it > 0.0 }?.let { String.format(Locale.US, "%.1f", it) }
+        imdbRating?.let { String.format(Locale.US, "%.1f", it.value) }
     }
     val episodeLabel = when {
         episode.season != null && episode.episode != null -> {
@@ -393,11 +395,11 @@ internal fun EpisodeOptionsOverlay(
                                 horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                ImdbRatingSourceLabel(
+                                if (imdbRating?.source == "IMDb") ImdbRatingSourceLabel(
                                     logoModifier = Modifier.size(30.dp),
                                     textStyle = MaterialTheme.typography.titleMedium,
                                     textColor = Color.White.copy(alpha = 0.72f)
-                                )
+                                ) else Text(text = imdbRating?.source.orEmpty(), style = MaterialTheme.typography.titleMedium, color = Color.White.copy(alpha = 0.72f))
                                 Text(
                                     text = rating,
                                     style = MaterialTheme.typography.titleMedium,

@@ -75,6 +75,8 @@ import com.kovelyx.app.core.ui.secondaryClick
 import com.kovelyx.app.features.details.MetaDetails
 import com.kovelyx.app.isDesktop
 import com.kovelyx.app.features.details.EpisodeRatingsVisibility
+import com.kovelyx.app.features.details.EpisodeRating
+import com.kovelyx.app.features.details.validEpisodeRating
 import com.kovelyx.app.features.details.MetaEpisodeCardStyle
 import com.kovelyx.app.features.details.MetaVideo
 import com.kovelyx.app.features.details.SeasonViewMode
@@ -107,7 +109,7 @@ fun DetailSeriesContent(
     episodeCardStyle: MetaEpisodeCardStyle = MetaEpisodeCardStyle.Horizontal,
     progressByVideoId: Map<String, WatchProgressEntry> = emptyMap(),
     watchedKeys: Set<String> = emptySet(),
-    episodeRatings: Map<Pair<Int, Int>, Double> = emptyMap(),
+    episodeRatings: Map<Pair<Int, Int>, EpisodeRating> = emptyMap(),
     episodeRatingsVisibility: EpisodeRatingsVisibility = EpisodeRatingsVisibility.SHOW_ALL,
     blurUnwatchedEpisodes: Boolean = false,
     onEpisodeClick: ((MetaVideo) -> Unit)? = null,
@@ -253,7 +255,7 @@ fun DetailSeriesContent(
                                     video = episode,
                                     fallbackImage = meta.background ?: meta.poster,
                                     progressEntry = progressByVideoId[episodeVideoId],
-                                    imdbRating = episode.seasonEpisodeKey()?.let { episodeRatings[it] } ?: episode.rating,
+                                    imdbRating = episode.seasonEpisodeKey()?.let { episodeRatings[it] } ?: validEpisodeRating(episode.rating, "Addon"),
                                     isWatched = progressByVideoId[episodeVideoId]?.isEffectivelyCompleted == true ||
                                         WatchingState.isEpisodeWatched(
                                             watchedKeys = watchedKeys,
@@ -319,7 +321,7 @@ internal fun DetailSeriesListEpisode(
     episode: MetaVideo,
     progressByVideoId: Map<String, WatchProgressEntry>,
     watchedKeys: Set<String>,
-    episodeRatings: Map<Pair<Int, Int>, Double>,
+    episodeRatings: Map<Pair<Int, Int>, EpisodeRating>,
     episodeRatingsVisibility: EpisodeRatingsVisibility,
     blurUnwatchedEpisodes: Boolean,
     onEpisodeClick: ((MetaVideo) -> Unit)?,
@@ -338,7 +340,7 @@ internal fun DetailSeriesListEpisode(
             video = episode,
             fallbackImage = meta.background ?: meta.poster,
             progressEntry = progressByVideoId[episodeVideoId],
-            imdbRating = episode.seasonEpisodeKey()?.let { episodeRatings[it] } ?: episode.rating,
+            imdbRating = episode.seasonEpisodeKey()?.let { episodeRatings[it] } ?: validEpisodeRating(episode.rating, "Addon"),
             isWatched = progressByVideoId[episodeVideoId]?.isEffectivelyCompleted == true ||
                 WatchingState.isEpisodeWatched(
                     watchedKeys = watchedKeys,
@@ -715,7 +717,7 @@ private fun EpisodeHorizontalRow(
     watchedKeys: Set<String>,
     fallbackImage: String?,
     progressByVideoId: Map<String, WatchProgressEntry>,
-    episodeRatings: Map<Pair<Int, Int>, Double>,
+    episodeRatings: Map<Pair<Int, Int>, EpisodeRating>,
     episodeRatingsVisibility: EpisodeRatingsVisibility,
     blurUnwatchedEpisodes: Boolean,
     preferredEpisodeNumber: Int? = null,
@@ -768,7 +770,7 @@ private fun EpisodeHorizontalRow(
                 video = episode,
                 fallbackImage = fallbackImage,
                 progressEntry = progressByVideoId[episodeVideoId],
-                imdbRating = episode.seasonEpisodeKey()?.let { episodeRatings[it] } ?: episode.rating,
+                imdbRating = episode.seasonEpisodeKey()?.let { episodeRatings[it] } ?: validEpisodeRating(episode.rating, "Addon"),
                 isWatched = progressByVideoId[episodeVideoId]?.isEffectivelyCompleted == true ||
                     WatchingState.isEpisodeWatched(
                         watchedKeys = watchedKeys,
@@ -792,7 +794,7 @@ private fun EpisodeHorizontalCard(
     video: MetaVideo,
     fallbackImage: String?,
     progressEntry: WatchProgressEntry?,
-    imdbRating: Double?,
+    imdbRating: EpisodeRating?,
     isWatched: Boolean,
     episodeRatingsVisibility: EpisodeRatingsVisibility,
     blurUnwatchedEpisodes: Boolean,
@@ -802,8 +804,8 @@ private fun EpisodeHorizontalCard(
 ) {
     val cardShape = RoundedCornerShape(metrics.cornerRadius)
     val ratingLabel = remember(imdbRating, episodeRatingsVisibility, isWatched) {
-        imdbRating?.takeIf { it > 0.0 && episodeRatingsVisibility.showRating(isWatched) }
-            ?.let(::formatEpisodeRating)
+        imdbRating?.takeIf { episodeRatingsVisibility.showRating(isWatched) }
+            ?.value?.let(::formatEpisodeRating)
     }
     val formattedDate = remember(video.released) { video.released?.let { formatReleaseDateForDisplay(it) } }
     val runtimeLabel = remember(video.runtime) { video.runtime?.takeIf { it > 0 }?.let(::formatEpisodeRuntime) }
@@ -932,6 +934,7 @@ private fun EpisodeHorizontalCard(
                     ratingLabel?.let { rating ->
                         ImdbEpisodeRatingBadge(
                             rating = rating,
+                            source = imdbRating?.source.orEmpty(),
                             logoWidth = metrics.imdbLogoWidth,
                             logoHeight = metrics.imdbLogoHeight,
                             textSize = metrics.metaTextSize,
@@ -1131,6 +1134,7 @@ private fun EpisodeCodeBadge(
 @Composable
 private fun ImdbEpisodeRatingBadge(
     rating: String,
+    source: String,
     logoWidth: Dp,
     logoHeight: Dp,
     textSize: androidx.compose.ui.unit.TextUnit,
@@ -1139,7 +1143,7 @@ private fun ImdbEpisodeRatingBadge(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (AppFeaturePolicy.imdbRatingLogoEnabled) {
+        if (source == "IMDb" && AppFeaturePolicy.imdbRatingLogoEnabled) {
             Image(
                 painter = painterResource(Res.drawable.rating_imdb),
                 contentDescription = stringResource(Res.string.source_imdb),
@@ -1150,7 +1154,7 @@ private fun ImdbEpisodeRatingBadge(
             )
         } else {
             Text(
-                text = stringResource(Res.string.source_imdb),
+                text = source,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = textSize,
                     fontWeight = FontWeight.SemiBold,
@@ -1178,7 +1182,7 @@ private fun EpisodeListCard(
     video: MetaVideo,
     fallbackImage: String?,
     progressEntry: WatchProgressEntry?,
-    imdbRating: Double?,
+    imdbRating: EpisodeRating?,
     isWatched: Boolean,
     episodeRatingsVisibility: EpisodeRatingsVisibility,
     blurUnwatchedEpisodes: Boolean,
@@ -1190,8 +1194,8 @@ private fun EpisodeListCard(
     val cornerRadius = rememberPosterCardStyleUiState().cornerRadiusDp.dp
     val cardShape = RoundedCornerShape(cornerRadius)
     val ratingLabel = remember(imdbRating, episodeRatingsVisibility, isWatched) {
-        imdbRating?.takeIf { it > 0.0 && episodeRatingsVisibility.showRating(isWatched) }
-            ?.let(::formatEpisodeRating)
+        imdbRating?.takeIf { episodeRatingsVisibility.showRating(isWatched) }
+            ?.value?.let(::formatEpisodeRating)
     }
     val formattedDate = remember(video.released) { video.released?.let { formatReleaseDateForDisplay(it) } }
     Box(
@@ -1306,6 +1310,7 @@ private fun EpisodeListCard(
                         ratingLabel?.let { rating ->
                             ImdbEpisodeRatingBadge(
                                 rating = rating,
+                                source = imdbRating?.source.orEmpty(),
                                 logoWidth = 24.dp,
                                 logoHeight = 12.dp,
                                 textSize = sizing.metaTextSize,

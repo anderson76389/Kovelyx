@@ -294,7 +294,7 @@ fun MetaDetailsScreen(
         mutableStateOf<PendingTrackingMembershipRemoval?>(null)
     }
     val trackingListsUpdateFailedMessage = stringResource(Res.string.tracking_lists_update_failed)
-    var episodeImdbRatings by remember(type, id) { mutableStateOf<Map<Pair<Int, Int>, Double>>(emptyMap()) }
+    var episodeImdbRatings by remember(type, id) { mutableStateOf<Map<Pair<Int, Int>, EpisodeRating>>(emptyMap()) }
     var deferredMetaWorkAllowed by remember(type, id) { mutableStateOf(false) }
 
     LaunchedEffect(
@@ -406,8 +406,7 @@ fun MetaDetailsScreen(
         val imdbId = extractImdbId(metaForRatings.id) ?: extractImdbId(id) ?: metaForRatings.imdbId
         val tmdbId = extractTmdbId(metaForRatings.id)
             ?: extractTmdbId(id)
-            ?: TmdbService.ensureTmdbId(metaForRatings.id, metaForRatings.type, fallbackImdbId = metaForRatings.imdbId)?.toIntOrNull()
-            ?: TmdbService.ensureTmdbId(id, type, fallbackImdbId = metaForRatings.imdbId)?.toIntOrNull()
+            ?: imdbId?.let { TmdbService.ensureTmdbId(it, "series")?.toIntOrNull() }
 
         if (imdbId == null && tmdbId == null) {
             episodeImdbRatings = emptyMap()
@@ -417,6 +416,11 @@ fun MetaDetailsScreen(
         episodeImdbRatings = ImdbEpisodeRatingsRepository.getEpisodeRatings(
             imdbId = imdbId,
             tmdbId = tmdbId,
+            expectedEpisodes = metaForRatings.videos.mapNotNull { video ->
+                val season = video.season ?: return@mapNotNull null
+                val episode = video.episode ?: return@mapNotNull null
+                season to episode
+            }.toSet(),
         )
     }
 
@@ -2123,7 +2127,7 @@ fun MetaDetailsScreen(
 private fun MetaDetails.isSeriesLikeForEpisodeRatings(): Boolean {
     val normalizedType = type.trim().lowercase()
     val hasNumberedEpisodes = videos.any { it.season != null && it.episode != null }
-    return hasNumberedEpisodes && normalizedType in setOf("series", "show", "tv", "tvshow")
+    return hasNumberedEpisodes && normalizedType in setOf("series", "show", "tv", "tvshow", "anime")
 }
 
 @Composable
@@ -2235,7 +2239,7 @@ private fun LazyListScope.configuredMetaSectionItems(
     commentsCurrentPage: Int,
     commentsPageCount: Int,
     commentsError: String?,
-    episodeImdbRatings: Map<Pair<Int, Int>, Double>,
+    episodeImdbRatings: Map<Pair<Int, Int>, EpisodeRating>,
     episodeListGroupedEpisodes: Map<Int, List<MetaVideo>>,
     episodeListSeasons: List<Int>,
     episodeListCurrentSeason: Int?,
@@ -2549,7 +2553,7 @@ private fun ConfiguredMetaSections(
     commentsCurrentPage: Int,
     commentsPageCount: Int,
     commentsError: String?,
-    episodeImdbRatings: Map<Pair<Int, Int>, Double>,
+    episodeImdbRatings: Map<Pair<Int, Int>, EpisodeRating>,
     onRetryComments: () -> Unit,
     onLoadMoreComments: () -> Unit,
     onCommentClick: (TraktCommentReview) -> Unit,

@@ -64,7 +64,7 @@ class RatingsVisibilityTest {
         val visibility = mutableStateOf(EpisodeRatingsVisibility.SHOW_ALL)
         val watchedKeys = mutableStateOf(emptySet<String>())
         val progress = mutableStateOf(emptyMap<String, WatchProgressEntry>())
-        val ratings = mutableStateOf(mapOf((1 to 1) to 8.4))
+        val ratings = mutableStateOf(mapOf((1 to 1) to EpisodeRating(8.4, "IMDb")))
         val layout = mutableStateOf(0)
         val episode = MetaVideo(id = "tt1234567:1:1", title = "Episode", season = 1, episode = 1, rating = 6.2)
         val meta = MetaDetails(id = "tt1234567", type = "series", name = "Series", videos = listOf(episode))
@@ -100,7 +100,7 @@ class RatingsVisibilityTest {
                 visibility.value = EpisodeRatingsVisibility.SHOW_ALL
                 watchedKeys.value = emptySet()
                 progress.value = emptyMap()
-                ratings.value = mapOf((1 to 1) to 8.4)
+                ratings.value = mapOf((1 to 1) to EpisodeRating(8.4, "IMDb"))
             }
             compose.onNodeWithText("8.4").assertIsDisplayed()
             compose.onNodeWithText("6.2").assertDoesNotExist()
