@@ -15,7 +15,7 @@ internal fun PlaybackPlayerSection(
     onUpdate: PlaybackSettingsUpdate,
     onOpenDialog: (PlaybackDialog) -> Unit
 ) {
-    val usesExternalPlayer = settings.playerPreference == PlayerPreference.EXTERNAL
+    val usesExternalPlayer = settings.playerPreference.usesActivityPlayer
 
     SettingsActionRow(
         title = stringResource(R.string.playback_default_player),
@@ -60,7 +60,7 @@ internal fun PlaybackSkipSegmentsSection(
     settings: PlayerSettings,
     onUpdate: PlaybackSettingsUpdate
 ) {
-    val internalPlayer = settings.playerPreference != PlayerPreference.EXTERNAL
+    val internalPlayer = !settings.playerPreference.usesActivityPlayer
     val autoSkipEnabled = internalPlayer && settings.skipIntroEnabled
 
     SettingsToggleRow(
@@ -133,7 +133,7 @@ internal fun PlaybackPlayerInterfaceSection(
     settings: PlayerSettings,
     onUpdate: PlaybackSettingsUpdate
 ) {
-    val internalPlayer = settings.playerPreference != PlayerPreference.EXTERNAL
+    val internalPlayer = !settings.playerPreference.usesActivityPlayer
 
     SettingsToggleRow(
         title = stringResource(R.string.playback_loading_overlay),
@@ -166,6 +166,8 @@ internal fun PlaybackPlayerInterfaceSection(
 
 @Composable
 private fun playerPreferenceLabel(preference: PlayerPreference): String = when (preference) {
+    PlayerPreference.VLC -> stringResource(R.string.playback_vlc_internal)
+    PlayerPreference.VLC_EXTERNAL -> stringResource(R.string.playback_vlc_external)
     PlayerPreference.INTERNAL -> stringResource(R.string.playback_player_internal)
     PlayerPreference.EXTERNAL -> stringResource(R.string.playback_player_external)
     PlayerPreference.ASK_EVERY_TIME -> stringResource(R.string.playback_player_ask)
@@ -186,6 +188,8 @@ internal fun PlayerPreferenceDialog(
 ) {
     val options = listOf(
         SettingsPickerOption(PlayerPreference.INTERNAL, stringResource(R.string.playback_player_internal), stringResource(R.string.playback_player_internal_desc)),
+        SettingsPickerOption(PlayerPreference.VLC, stringResource(R.string.playback_vlc_internal), "LibVLC"),
+        SettingsPickerOption(PlayerPreference.VLC_EXTERNAL, stringResource(R.string.playback_vlc_external), stringResource(R.string.playback_vlc_external_desc)),
         SettingsPickerOption(PlayerPreference.EXTERNAL, stringResource(R.string.playback_player_external), stringResource(R.string.playback_player_external_desc)),
         SettingsPickerOption(PlayerPreference.ASK_EVERY_TIME, stringResource(R.string.playback_player_ask), stringResource(R.string.playback_player_ask_desc))
     )

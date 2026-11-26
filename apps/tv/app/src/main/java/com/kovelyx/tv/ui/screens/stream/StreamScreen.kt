@@ -206,7 +206,7 @@ fun StreamScreen(
             PlayerPreference.INTERNAL -> {
                 launchInternalPlayer(playbackInfo)
             }
-            PlayerPreference.EXTERNAL -> {
+            PlayerPreference.EXTERNAL, PlayerPreference.VLC, PlayerPreference.VLC_EXTERNAL -> {
                 if (playbackInfo.url != null || playbackInfo.isTorrent) {
                     launchExternalPlayer(playbackInfo)
                 }
@@ -233,7 +233,7 @@ fun StreamScreen(
         if (uiState.isDirectAutoPlayFlow) {
             // Respect player preference even in direct autoplay flow
             when (preference) {
-                PlayerPreference.EXTERNAL -> {
+                PlayerPreference.EXTERNAL, PlayerPreference.VLC, PlayerPreference.VLC_EXTERNAL -> {
                     val url = playbackInfo.url ?: if (playbackInfo.isTorrent) "torrent://${playbackInfo.infoHash}" else null
                     url?.let { urlString ->
                         scope.coroutineLaunch {
@@ -306,7 +306,7 @@ fun StreamScreen(
         if (!uiState.isLoading) {
             viewModel.dismissExternalAutoNextOverlay(
                 forceRelease = !uiState.isDirectAutoPlayFlow ||
-                    playerPreference != PlayerPreference.EXTERNAL
+                    playerPreference?.usesActivityPlayer != true
             )
         }
     }
@@ -328,7 +328,7 @@ fun StreamScreen(
             }
             // Respect player preference for cached links too
             when (playerPreference ?: return@LaunchedEffect) {
-                PlayerPreference.EXTERNAL -> {
+                PlayerPreference.EXTERNAL, PlayerPreference.VLC, PlayerPreference.VLC_EXTERNAL -> {
                     val url = playbackInfo.url ?: if (playbackInfo.isTorrent) "torrent://${playbackInfo.infoHash}" else null
                     url?.let { urlString ->
                         Log.d("StreamScreen", "autoPlayPlaybackInfo EXTERNAL: launching player, will pop after 800ms")

@@ -317,6 +317,8 @@ android {
         buildConfig = true
     }
 
+    sourceSets.getByName("main").java.srcDir(rootProject.file("../../shared/vlc-android/kotlin"))
+
     sourceSets {
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
@@ -444,6 +446,7 @@ sentry {
 }
 
 dependencies {
+    implementation("org.videolan.android:libvlc-all:3.7.8")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     val composeBom = platform("androidx.compose:compose-bom:2026.05.01")
 

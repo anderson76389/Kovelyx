@@ -391,8 +391,8 @@ class ExternalPlaybackTracker @Inject constructor(
             Log.d(AUTO_NEXT_TAG, "auto launch cancelled before tracker setup")
             return false
         }
-        val autoNextEnabled = playerSettingsDataStore.playerSettings.first()
-            .streamAutoPlayNextEpisodeEnabled
+        val settings = playerSettingsDataStore.playerSettings.first()
+        val autoNextEnabled = settings.streamAutoPlayNextEpisodeEnabled
         if (shouldCancelPendingAutoLaunch(autoLaunch)) {
             Log.d(AUTO_NEXT_TAG, "auto launch cancelled while reading player settings")
             return false
@@ -428,6 +428,7 @@ class ExternalPlaybackTracker @Inject constructor(
             } else {
                 withContext(Dispatchers.Main.immediate) {
                     doLaunch(
+                        preference = settings.playerPreference,
                         url = url,
                         title = title,
                         headers = headers,
@@ -511,6 +512,7 @@ class ExternalPlaybackTracker @Inject constructor(
     }
 
     private fun doLaunch(
+        preference: com.kovelyx.tv.data.local.PlayerPreference,
         url: String,
         title: String?,
         headers: Map<String, String>?,
@@ -522,6 +524,7 @@ class ExternalPlaybackTracker @Inject constructor(
     ): Boolean {
 
         val input = ExternalPlayerInput(
+            preference = preference,
             url = url,
             title = title,
             headers = headers,
@@ -542,6 +545,7 @@ class ExternalPlaybackTracker @Inject constructor(
             } catch (e: Exception) {
                 awaitingExternalPlayerResult = false
                 Log.w(TAG, "ActivityResultLauncher failed, falling back to fire-and-forget", e)
+                if (preference == com.kovelyx.tv.data.local.PlayerPreference.VLC || preference == com.kovelyx.tv.data.local.PlayerPreference.VLC_EXTERNAL) return false
                 ExternalPlayerLauncher.launch(
                     context = context,
                     url = url,
@@ -557,6 +561,7 @@ class ExternalPlaybackTracker @Inject constructor(
 
         awaitingExternalPlayerResult = false
         Log.w(TAG, "No activityLauncher registered, using fire-and-forget")
+        if (preference == com.kovelyx.tv.data.local.PlayerPreference.VLC || preference == com.kovelyx.tv.data.local.PlayerPreference.VLC_EXTERNAL) return false
         return ExternalPlayerLauncher.launch(
             context = context,
             url = url,

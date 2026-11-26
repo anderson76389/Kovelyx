@@ -71,7 +71,7 @@ internal fun PlaybackSubtitlesSection(
     onOpenDialog: (PlaybackDialog) -> Unit
 ) {
     val style = settings.subtitleStyle
-    val enabled = settings.playerPreference != PlayerPreference.EXTERNAL
+    val enabled = !settings.playerPreference.usesActivityPlayer
     val languageSelectionEnabled = enabled || settings.externalPlayerForwardSubtitles
 
     SettingsSectionLabel(text = stringResource(R.string.sub_languages_label))

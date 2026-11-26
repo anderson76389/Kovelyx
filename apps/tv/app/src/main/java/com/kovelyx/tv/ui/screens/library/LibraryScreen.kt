@@ -186,7 +186,7 @@ fun LibraryScreen(
         scope.launch {
             when (viewModel.getPlayerPreference()) {
                 PlayerPreference.INTERNAL -> onCloudPlaybackResolved(info)
-                PlayerPreference.EXTERNAL -> {
+                PlayerPreference.EXTERNAL, PlayerPreference.VLC, PlayerPreference.VLC_EXTERNAL -> {
                     viewModel.launchCloudPlaybackExternally(info, activityContext)
                 }
                 PlayerPreference.ASK_EVERY_TIME -> {

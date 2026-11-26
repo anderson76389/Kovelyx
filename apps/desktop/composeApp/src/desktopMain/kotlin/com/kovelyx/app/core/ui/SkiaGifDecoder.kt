@@ -17,7 +17,6 @@ import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.SamplingMode
-import okio.use
 
 private const val MAX_FRAME_DIMENSION = 512
 
@@ -33,59 +32,62 @@ class SkiaGifDecoder(
         }
         if (bytes.isEmpty()) return null
 
-        val codec = Codec.makeFromData(Data.makeFromBytes(bytes))
-        val count = codec.frameCount
-        if (count <= 0) return null
+        return Data.makeFromBytes(bytes).use { Codec.makeFromData(it) }.use { codec ->
+            val count = codec.frameCount
+            if (count <= 0) return null
 
-        val w = codec.width
-        val h = codec.height
-        if (w <= 0 || h <= 0) return null
+            val w = codec.width
+            val h = codec.height
+            if (w <= 0 || h <= 0) return null
 
-        val scale = if (w > MAX_FRAME_DIMENSION || h > MAX_FRAME_DIMENSION) {
-            minOf(MAX_FRAME_DIMENSION.toFloat() / w, MAX_FRAME_DIMENSION.toFloat() / h)
-        } else 1f
+            val scale = if (w > MAX_FRAME_DIMENSION || h > MAX_FRAME_DIMENSION) {
+                minOf(MAX_FRAME_DIMENSION.toFloat() / w, MAX_FRAME_DIMENSION.toFloat() / h)
+            } else 1f
 
-        val tw = (w * scale).toInt().coerceAtLeast(1)
-        val th = (h * scale).toInt().coerceAtLeast(1)
-        val needsScale = tw != w || th != h
+            val tw = (w * scale).toInt().coerceAtLeast(1)
+            val th = (h * scale).toInt().coerceAtLeast(1)
+            val needsScale = tw != w || th != h
 
-        val bitmap: Bitmap
-        if (needsScale) {
-            val fullBitmap = Bitmap().apply {
-                allocPixels(ImageInfo.makeN32Premul(w, h))
-            }
-            try {
-                codec.readPixels(fullBitmap, 0)
+            val bitmap: Bitmap
+            if (needsScale) {
+                val fullBitmap = Bitmap().apply {
+                    allocPixels(ImageInfo.makeN32Premul(w, h))
+                }
+                try {
+                    codec.readPixels(fullBitmap, 0)
+                    bitmap = Bitmap().apply {
+                        allocPixels(ImageInfo.makeN32Premul(tw, th))
+                    }
+                    val skiaImg = Image.makeFromBitmap(fullBitmap)
+                    try {
+                        Canvas(bitmap).use { canvas ->
+                            canvas.drawImageRect(
+                                skiaImg,
+                                Rect.makeWH(w.toFloat(), h.toFloat()),
+                                Rect.makeWH(tw.toFloat(), th.toFloat()),
+                                SamplingMode.LINEAR,
+                                null,
+                                true,
+                            )
+                        }
+                    } finally {
+                        skiaImg.close()
+                    }
+                } finally {
+                    fullBitmap.close()
+                }
+            } else {
                 bitmap = Bitmap().apply {
                     allocPixels(ImageInfo.makeN32Premul(tw, th))
                 }
-                val skiaImg = Image.makeFromBitmap(fullBitmap)
-                try {
-                    Canvas(bitmap).drawImageRect(
-                        skiaImg,
-                        Rect.makeWH(w.toFloat(), h.toFloat()),
-                        Rect.makeWH(tw.toFloat(), th.toFloat()),
-                        SamplingMode.LINEAR,
-                        null,
-                        true,
-                    )
-                } finally {
-                    skiaImg.close()
-                }
-            } finally {
-                fullBitmap.close()
+                codec.readPixels(bitmap, 0)
             }
-        } else {
-            bitmap = Bitmap().apply {
-                allocPixels(ImageInfo.makeN32Premul(tw, th))
-            }
-            codec.readPixels(bitmap, 0)
-        }
 
-        return DecodeResult(
-            image = bitmap.asImage(),
-            isSampled = needsScale,
-        )
+            DecodeResult(
+                image = bitmap.asImage(),
+                isSampled = needsScale,
+            )
+        }
     }
 
     class Factory : Decoder.Factory {

@@ -53,7 +53,7 @@ internal fun PlaybackVideoSection(
     onUpdate: PlaybackSettingsUpdate,
     onOpenDialog: (PlaybackDialog) -> Unit
 ) {
-    val enabled = settings.playerPreference != PlayerPreference.EXTERNAL
+    val enabled = !settings.playerPreference.usesActivityPlayer
     val displayCapabilities = rememberDisplayCapabilities()
     val frameRateFocusRequester = remember { FocusRequester() }
     val resolutionSwitchingSupported = !displayCapabilities.apiSupported ||

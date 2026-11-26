@@ -17,7 +17,7 @@ internal fun PlaybackAudioSection(
     onUpdate: PlaybackSettingsUpdate,
     onOpenDialog: (PlaybackDialog) -> Unit
 ) {
-    val enabled = settings.playerPreference != PlayerPreference.EXTERNAL
+    val enabled = !settings.playerPreference.usesActivityPlayer
     val isExoEngine = settings.usesExoPlayerEngine
 
     SettingsNote(text = stringResource(R.string.audio_passthrough_info))

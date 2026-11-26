@@ -1,0 +1,5 @@
+<resources>
+    <string name="playback_vlc_internal">VLC intégré</string>
+    <string name="playback_vlc_external">VLC externe</string>
+    <string name="playback_vlc_external_desc">Ouvrir l’application VLC installée</string>
+</resources>
