@@ -92,15 +92,17 @@ class ImdbEpisodeRatingsRepository @Inject constructor(
         val ratings = linkedMapOf<Pair<Int, Int>, EpisodeRating>()
         val resolvedImdbId = imdbId ?: tmdbId?.let { tmdbService.tmdbToImdb(it, "series") }
         if (!resolvedImdbId.isNullOrBlank()) ratings.putAll(fetchFromImdbTapframe(resolvedImdbId))
-        if (tmdbId != null && (ratings.isEmpty() || !ratings.keys.containsAll(expectedEpisodes))) {
-            fetchFromSeriesGraph(tmdbId).forEach { (key, value) ->
+        if (ratings.isNotEmpty() && ratings.keys.containsAll(expectedEpisodes)) return ratings
+        val fallbackTmdbId = tmdbId ?: resolvedImdbId?.let { tmdbService.imdbToTmdb(it, "series") }
+        if (fallbackTmdbId != null) {
+            fetchFromSeriesGraph(fallbackTmdbId).forEach { (key, value) ->
                 if (key !in ratings) ratings[key] = value
             }
             val apiKey = tmdbService.apiKey()
             if (apiKey.isNotBlank()) {
                 for (season in (expectedEpisodes - ratings.keys).map { it.first }.distinct().sorted()) {
                     try {
-                        val response = tmdbApi.getTvSeasonDetails(tmdbId, season, apiKey)
+                        val response = tmdbApi.getTvSeasonDetails(fallbackTmdbId, season, apiKey)
                         if (!response.isSuccessful) continue
                         response.body()?.episodes.orEmpty().forEach { episode ->
                             val number = episode.episodeNumber ?: return@forEach

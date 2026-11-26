@@ -1465,7 +1465,8 @@ class MetaDetailsViewModel @Inject constructor(
             val addonRatings: Map<Pair<Int, Int>, EpisodeRating> = meta.videos.mapNotNull { video ->
                 val season = video.season ?: return@mapNotNull null
                 val episode = video.episode ?: return@mapNotNull null
-                val rating = validEpisodeRating(video.rating, "Addon") ?: return@mapNotNull null
+                val rating = validEpisodeRating(video.imdbRating, "IMDb")
+                    ?: validEpisodeRating(video.rating, "Addon") ?: return@mapNotNull null
                 (season to episode) to rating
             }.toMap()
 
@@ -1478,7 +1479,7 @@ class MetaDetailsViewModel @Inject constructor(
                 val tmdbId = listOf(meta.id, itemId).firstNotNullOfOrNull { raw ->
                     raw.takeIf { it.startsWith("tmdb:", ignoreCase = true) }
                         ?.substringAfter(':')?.substringBefore(':')?.toIntOrNull()?.takeIf { it > 0 }
-                } ?: imdbId?.let { tmdbService.imdbToTmdb(it, "series") }
+                }
 
                 if ((tmdbId == null && imdbId == null) || expectedEpisodes.isEmpty()) {
                     _uiState.update { state ->
@@ -1510,7 +1511,9 @@ class MetaDetailsViewModel @Inject constructor(
                         state
                     } else {
                         state.copy(
-                            episodeImdbRatings = addonRatings + ratings.filterKeys { it in expectedEpisodes },
+                            episodeImdbRatings = addonRatings + ratings.filter { (key, value) ->
+                                key in expectedEpisodes && (addonRatings[key]?.source != "IMDb" || value.source == "IMDb")
+                            },
                             isEpisodeRatingsLoading = false,
                             episodeRatingsError = if (addonRatings.isEmpty() && ratings.keys.none { it in expectedEpisodes }) localizedContext.getString(R.string.ratings_unavailable) else null
                         )
@@ -2510,6 +2513,7 @@ class MetaDetailsViewModel @Inject constructor(
                 _uiState.update { current -> current.copy(
                     watchedEpisodes = if (allWatched) current.watchedEpisodes - episodeKeys
                         else current.watchedEpisodes + episodeKeys,
+                    episodeProgressMap = if (allWatched) current.episodeProgressMap - episodeKeys else current.episodeProgressMap,
                 ) }
                 reevaluateSeriesWatchedBadge()
                 showMessage(localizedContext.getString(
