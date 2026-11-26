@@ -26,6 +26,8 @@ class VlcPlaybackActivity : Activity() {
         val uri = intent.data ?: run { finish(); return }
         val layout = VLCVideoLayout(this)
         setContentView(layout)
+        engine = LibVLC(this, arrayListOf())
+        player = MediaPlayer(engine)
         val controls = android.widget.MediaController(this)
         controls.setAnchorView(layout)
         controls.setMediaPlayer(object : android.widget.MediaController.MediaPlayerControl {
@@ -42,8 +44,6 @@ class VlcPlaybackActivity : Activity() {
             override fun getAudioSessionId() = 0
         })
         layout.setOnClickListener { controls.show() }
-        engine = LibVLC(this, arrayListOf())
-        player = MediaPlayer(engine)
         player.attachViews(layout, null, true, false)
         resumeMs = state?.getLong("position") ?: intent.getLongExtra("extra_position", 0L)
         val media = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
