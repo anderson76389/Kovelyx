@@ -331,25 +331,34 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $release = & gh api "repos/$env:GITHUB_REPOSITORY/releases/latest" | ConvertFrom-Json
           if ($LASTEXITCODE -ne 0 -or -not $release.tag_name) { throw 'Release de référence introuvable.' }
-          # Compact three-pack Releases no longer expose the nested portable
-          # installer as a standalone asset. Keep the last verified direct
-          # package (the permanent v1.1.1167 bridge) as RAM baseline.
-          $original = "Kovelyx-Windows-Portable-$($release.tag_name).zip"
-          if (-not @($release.assets | Where-Object { $_.name -eq $original }).Count) {
-            $allReleases = & gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=100" | ConvertFrom-Json
-            $legacy = @($allReleases | Where-Object {
-              $t = $_.tag_name
-              @($_.assets | Where-Object { $_.name -eq "Kovelyx-Windows-Portable-$t.zip" }).Count -eq 1
-            } | Select-Object -First 1)
-            if ($legacy.Count -ne 1) { throw 'Release héritée pour comparer la RAM introuvable.' }
-            $release = $legacy[0]
-          }
           $tag = $release.tag_name
           $folder = Join-Path $env:RUNNER_TEMP 'kovelyx-memory-baseline'
           New-Item -ItemType Directory -Force -Path $folder | Out-Null
-          & gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern "Kovelyx-Windows-Portable-$tag.zip" --pattern "Kovelyx-Windows-Portable-$tag.zip.sha256" --dir $folder
-          if ($LASTEXITCODE -ne 0) { throw 'Téléchargement de référence échoué.' }
-          $zip = Join-Path $folder "Kovelyx-Windows-Portable-$tag.zip"
+          $baseSha = & gh api "repos/$env:GITHUB_REPOSITORY/commits/$tag" --jq '.sha'
+          if ($LASTEXITCODE -ne 0 -or $baseSha -notmatch '^[a-f0-9]{40}$') { throw 'Commit de la version publiée introuvable.' }
+          $runs = & gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/windows.yml/runs?head_sha=$baseSha&event=push&status=success" | ConvertFrom-Json
+          $build = $runs.workflow_runs | Where-Object { $_.head_branch -eq 'main' } | Select-Object -First 1
+          if ($build) {
+            $artifacts = & gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$($build.id)/artifacts" | ConvertFrom-Json
+            $portable = $artifacts.artifacts | Where-Object { $_.name -eq 'Kovelyx-Windows-installers-experimental' -and -not $_.expired }
+          }
+          if ($build -and $portable) {
+            & gh run download $build.id --repo $env:GITHUB_REPOSITORY --name 'Kovelyx-Windows-installers-experimental' --dir $folder
+            if ($LASTEXITCODE -ne 0) { throw 'Téléchargement de la distribution précédente échoué.' }
+            $zip = Join-Path $folder "Kovelyx-Windows-Portable-$baseSha.zip"
+          } else {
+            $allReleases = & gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=100" | ConvertFrom-Json
+            $legacy = $allReleases | Where-Object {
+              $t = $_.tag_name
+              @($_.assets | Where-Object { $_.name -eq "Kovelyx-Windows-Portable-$t.zip" }).Count -eq 1
+            } | Select-Object -First 1
+            if (-not $legacy) { throw 'Archive portable de référence introuvable.' }
+            $tag = $legacy.tag_name
+            & gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern "Kovelyx-Windows-Portable-$tag.zip*" --dir $folder
+            if ($LASTEXITCODE -ne 0) { throw 'Téléchargement de référence échoué.' }
+            $zip = Join-Path $folder "Kovelyx-Windows-Portable-$tag.zip"
+          }
+          Write-Host "Version de référence RAM : $tag"
           $checksum = "$zip.sha256"
           if (-not (Test-Path -LiteralPath $zip) -or -not (Test-Path -LiteralPath $checksum)) { throw 'Archive ou SHA-256 manquant.' }
           $line = (Get-Content -LiteralPath $checksum -Raw).Trim()

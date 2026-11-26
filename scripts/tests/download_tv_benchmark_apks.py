@@ -7,8 +7,6 @@ import subprocess
 import time
 
 REPO = 'anderson76389/Kovelyx'
-BASE_RUN = 42835163700
-BASE_SHA = '83c81a84cce6630ae6c69e042751298e5416b163'
 
 
 def api(path):
@@ -20,16 +18,15 @@ def main():
     pr = event['pull_request']
     assert pr['head']['repo']['full_name'] == REPO
     expected = pr['head']['sha']
-    # Baseline source must be identical to the PR base for the measured TV app.
-    subprocess.run(['git', 'diff', '--exit-code', BASE_SHA, pr['base']['sha'],
-                    '--', 'apps/tv'], check=True)
+    base_sha = pr['base']['sha']
+    base_runs = api(f'actions/workflows/build.yml/runs?head_sha={base_sha}&event=push&status=success')['workflow_runs']
+    baseline = next(r for r in base_runs if r['head_branch'] == pr['base']['ref'] and r['head_sha'] == base_sha)
     proofs = {}
     for label in ('baseline', 'candidate'):
         ready = None
         for _ in range(240):
             if label == 'baseline':
-                run = api(f'actions/runs/{BASE_RUN}')
-                assert run['head_sha'] == BASE_SHA and run['event'] == 'push'
+                run = baseline
             else:
                 runs = api('actions/workflows/build.yml/runs?event=pull_request&per_page=100')['workflow_runs']
                 matching = [r for r in runs if r['head_sha'] == expected
