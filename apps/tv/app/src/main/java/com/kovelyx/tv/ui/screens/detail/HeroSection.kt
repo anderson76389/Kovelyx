@@ -298,17 +298,10 @@ fun HeroContentSection(
                         }
 
                         if (showWholeSeriesWatched) {
-                            ActionIconButton(
-                                icon = if (isWholeSeriesWatched) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                contentDescription = stringResource(
-                                    if (isWholeSeriesWatched) R.string.hero_mark_all_unwatched
-                                    else R.string.hero_mark_all_watched
-                                ),
+                            WholeSeriesWatchedButton(
+                                watched = isWholeSeriesWatched,
+                                pending = isWholeSeriesWatchedPending,
                                 onClick = onToggleWholeSeriesWatched,
-                                enabled = !isWholeSeriesWatchedPending,
-                                selected = isWholeSeriesWatched,
-                                selectedContainerColor = Color.White,
-                                selectedContentColor = Color.Black,
                                 onFocused = onHeroActionFocused,
                             )
                         }
@@ -982,4 +975,39 @@ private fun MetaInfoDivider() {
         style = MaterialTheme.typography.labelLarge,
         color = KovelyxTheme.extendedColors.textTertiary
     )
+}
+
+
+@OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)
+@Composable
+internal fun WholeSeriesWatchedButton(
+    watched: Boolean,
+    pending: Boolean,
+    onClick: () -> Unit,
+    onFocused: () -> Unit = {},
+) {
+    val description = stringResource(if (watched) R.string.hero_mark_all_unwatched else R.string.hero_mark_all_watched)
+    Button(
+        onClick = onClick,
+        enabled = !pending,
+        modifier = Modifier.onFocusChanged { if (it.isFocused) onFocused() }
+            .focusProperties { up = FocusRequester.Cancel },
+        colors = ButtonDefaults.colors(
+            containerColor = if (watched) Color.White else KovelyxTheme.colors.BackgroundCard,
+            contentColor = if (watched) Color.Black else KovelyxTheme.colors.TextPrimary,
+            focusedContainerColor = KovelyxTheme.colors.Secondary,
+            focusedContentColor = KovelyxTheme.colors.OnSecondary,
+        ),
+        border = ButtonDefaults.border(
+            focusedBorder = Border(border = KovelyxTheme.focusRing.border(KovelyxTheme.spacing.xxs),
+                shape = RoundedCornerShape(KovelyxTheme.spacing.xxl))
+        ),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    ) {
+        Icon(if (watched) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+            contentDescription = description, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(stringResource(if (watched) R.string.hero_all_watched_short else R.string.hero_mark_all_watched_short),
+            maxLines = 1, style = MaterialTheme.typography.labelMedium)
+    }
 }

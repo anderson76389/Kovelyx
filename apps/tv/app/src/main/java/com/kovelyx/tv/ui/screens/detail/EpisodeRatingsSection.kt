@@ -131,7 +131,7 @@ fun EpisodeRatingsSection(
         }
 
         when {
-            isLoading -> {
+            isLoading && ratings.isEmpty() -> {
                 Text(
                     text = stringResource(R.string.ratings_loading),
                     style = MaterialTheme.typography.bodyMedium,
@@ -139,7 +139,7 @@ fun EpisodeRatingsSection(
                     modifier = Modifier.padding(horizontal = KovelyxTheme.spacing.xxxl, vertical = KovelyxTheme.spacing.md)
                 )
             }
-            error != null -> {
+            error != null && ratings.isEmpty() -> {
                 Text(
                     text = error,
                     style = MaterialTheme.typography.bodyMedium,

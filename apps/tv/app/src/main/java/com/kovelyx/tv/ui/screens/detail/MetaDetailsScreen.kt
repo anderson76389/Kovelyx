@@ -1865,11 +1865,7 @@ private fun MetaDetailsContent(
             ).joinToString("|") in leadingKeys
         }
     }
-    val isTvShow = remember(meta.type, meta.apiType) {
-        meta.type == ContentType.SERIES ||
-            meta.type == ContentType.TV ||
-            meta.apiType in listOf("series", "tv")
-    }
+    val isTvShow = remember(meta.apiType, meta.videos) { isEpisodeDetail(meta.apiType, meta.videos) }
     val hasCastSection = directorWriterMembers.isNotEmpty() || normalCastMembers.isNotEmpty()
     val hasMoreLikeThisSection = moreLikeThis.isNotEmpty()
     val hasTrailerSection = remember(meta.trailers) { meta.trailers.any { !it.ytId.isNullOrBlank() } }

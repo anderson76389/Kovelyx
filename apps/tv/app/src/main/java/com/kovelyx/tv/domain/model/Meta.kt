@@ -198,7 +198,9 @@ data class Video(
     val runtime: Int? = null, // episode runtime in minutes
     /** Per-episode rating supplied by the addon, when it provides one. */
     val rating: Double? = null,
-    val available: Boolean? = null
+    val available: Boolean? = null,
+    /** Explicit IMDb episode score, distinct from an unlabelled addon rating. */
+    val imdbRating: Double? = null
 )
 
 @Immutable
