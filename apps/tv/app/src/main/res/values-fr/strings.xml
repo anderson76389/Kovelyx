@@ -189,6 +189,8 @@
     <string name="hero_mark_watched">Marquer comme vu</string>
     <string name="hero_mark_unwatched">Marquer comme non vu</string>
     <string name="hero_mark_all_watched">Tout vu (épisodes disponibles)</string>
+    <string name="hero_mark_all_watched_short">Tout vu</string>
+    <string name="hero_all_watched_short">Tout est vu</string>
     <string name="hero_mark_all_unwatched">Tout marquer comme non vu</string>
     <string name="hero_play_trailer">Regarder la bande-annonce</string>
     <string name="hero_press_back_trailer">Appuyez sur «&#160;Retour&#160;» pour quitter la bande-annonce</string>

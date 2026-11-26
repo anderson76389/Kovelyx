@@ -1004,7 +1004,8 @@ class MetaDetailsViewModel @Inject constructor(
 
     private suspend fun applyMetaWithEnrichment(meta: Meta) {
         if (!isServerItem) loadMoreLikeThisAsync(meta)
-        val enriched = if (isServerItem) meta else enrichMeta(meta)
+        val rawEnriched = if (isServerItem) meta else enrichMeta(meta)
+        val enriched = rawEnriched.copy(videos = episodeDetailVideos(rawEnriched.apiType, rawEnriched.videos))
 
         syncEffectiveContentId(enriched)
         val cachedNextToWatch = metaDetailsSessionState.getNextToWatch(
@@ -1019,6 +1020,12 @@ class MetaDetailsViewModel @Inject constructor(
             initialNextToWatch = cachedNextToWatch
         )
 
+        // Ratings are independent of the remote watch-progress provider.
+        // A slow/offline Trakt or Simkl session must not suppress IMDb.
+        if (!isServerItem) {
+            loadEpisodeRatingsAsync(enriched, providerEpisodeKeys(rawEnriched.videos))
+            viewModelScope.launch { loadMDBListRatings(enriched) }
+        }
         val contentId = _effectiveContentId.value
 
         // Wait for remote progress provider (Simkl/Trakt) to finish initial load.
@@ -1041,9 +1048,6 @@ class MetaDetailsViewModel @Inject constructor(
         val precomputedNextToWatch = computeNextToWatch(enriched, progressMap, watchedEpisodes)
         updateNextToWatch(precomputedNextToWatch)
 
-        if (isServerItem) return
-        loadEpisodeRatingsAsync(enriched)
-        viewModelScope.launch { loadMDBListRatings(enriched) }
     }
 
     private fun NextToWatch.resolveForMeta(meta: Meta): NextToWatch? {
@@ -1432,10 +1436,10 @@ class MetaDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun loadEpisodeRatingsAsync(meta: Meta) {
+    private fun loadEpisodeRatingsAsync(meta: Meta, expectedEpisodes: Set<Pair<Int, Int>>) {
         episodeRatingsJob?.cancel()
 
-        val isSeries = meta.type == ContentType.SERIES || meta.type == ContentType.TV || meta.apiType in listOf("series", "tv", "anime")
+        val isSeries = isEpisodeDetail(meta.apiType, meta.videos)
         if (!isSeries) {
             _uiState.update {
                 it.copy(
@@ -1465,26 +1469,18 @@ class MetaDetailsViewModel @Inject constructor(
                 (season to episode) to rating
             }.toMap()
 
+            // Show the ratings already supplied by the addon immediately.
+            _uiState.update { state ->
+                if (state.meta?.id == meta.id) state.copy(episodeImdbRatings = addonRatings) else state
+            }
             try {
-                val tmdbContentType = if (meta.apiType.equals("anime", ignoreCase = true)) ContentType.SERIES else resolveTmdbContentType(meta)
-                if (tmdbContentType !in listOf(ContentType.SERIES, ContentType.TV)) {
-                    _uiState.update {
-                        it.copy(
-                            episodeImdbRatings = addonRatings,
-                            isEpisodeRatingsLoading = false,
-                            episodeRatingsError = null
-                        )
-                    }
-                    return@launch
-                }
-
-                val imdbId = extractImdbId(meta.id) ?: extractImdbId(itemId) ?: meta.imdbId
+                val imdbId = listOf(meta.id, itemId, meta.imdbId).firstNotNullOfOrNull(::extractImdbId)
                 val tmdbId = listOf(meta.id, itemId).firstNotNullOfOrNull { raw ->
                     raw.takeIf { it.startsWith("tmdb:", ignoreCase = true) }
                         ?.substringAfter(':')?.substringBefore(':')?.toIntOrNull()?.takeIf { it > 0 }
                 } ?: imdbId?.let { tmdbService.imdbToTmdb(it, "series") }
 
-                if (tmdbId == null && imdbId == null) {
+                if ((tmdbId == null && imdbId == null) || expectedEpisodes.isEmpty()) {
                     _uiState.update { state ->
                         if (state.meta == null || state.meta.id != meta.id) {
                             state
@@ -1506,11 +1502,7 @@ class MetaDetailsViewModel @Inject constructor(
                 val ratings = imdbEpisodeRatingsRepository.getEpisodeRatings(
                     imdbId = imdbId,
                     tmdbId = tmdbId,
-                    expectedEpisodes = meta.videos.mapNotNull { video ->
-                        val season = video.season ?: return@mapNotNull null
-                        val episode = video.episode ?: return@mapNotNull null
-                        season to episode
-                    }.toSet()
+                    expectedEpisodes = expectedEpisodes
                 )
 
                 _uiState.update { state ->
@@ -1518,9 +1510,9 @@ class MetaDetailsViewModel @Inject constructor(
                         state
                     } else {
                         state.copy(
-                            episodeImdbRatings = addonRatings + ratings,
+                            episodeImdbRatings = addonRatings + ratings.filterKeys { it in expectedEpisodes },
                             isEpisodeRatingsLoading = false,
-                            episodeRatingsError = null
+                            episodeRatingsError = if (addonRatings.isEmpty() && ratings.keys.none { it in expectedEpisodes }) localizedContext.getString(R.string.ratings_unavailable) else null
                         )
                     }
                 }

@@ -90,7 +90,8 @@ class ImdbEpisodeRatingsRepository @Inject constructor(
         expectedEpisodes: Set<Pair<Int, Int>>
     ): Map<Pair<Int, Int>, EpisodeRating> {
         val ratings = linkedMapOf<Pair<Int, Int>, EpisodeRating>()
-        if (!imdbId.isNullOrBlank()) ratings.putAll(fetchFromImdbTapframe(imdbId))
+        val resolvedImdbId = imdbId ?: tmdbId?.let { tmdbService.tmdbToImdb(it, "series") }
+        if (!resolvedImdbId.isNullOrBlank()) ratings.putAll(fetchFromImdbTapframe(resolvedImdbId))
         if (tmdbId != null && (ratings.isEmpty() || !ratings.keys.containsAll(expectedEpisodes))) {
             fetchFromSeriesGraph(tmdbId).forEach { (key, value) ->
                 if (key !in ratings) ratings[key] = value

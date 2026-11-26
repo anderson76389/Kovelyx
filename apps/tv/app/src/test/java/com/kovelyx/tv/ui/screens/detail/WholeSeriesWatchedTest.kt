@@ -52,6 +52,27 @@ class WholeSeriesWatchedTest {
     }
 
     @Test
+    fun unavailableFirstEpisodeDoesNotHideReleasedEpisodesAndCanonicalIdsRestoreCoordinates() {
+        val source = listOf(
+            episode("tt1234567:1:1", season = null, number = null, available = false),
+            episode("tt1234567:1:2", season = null, number = null),
+            episode("tt1234567:2:1", season = null, number = null, released = "2099-12-31"),
+        )
+        assertEquals(setOf(1 to 1, 1 to 2, 2 to 1), providerEpisodeKeys(source))
+        assertEquals(listOf("tt1234567:1:2"),
+            releasedEpisodesForWholeSeries("anime", source, emptyList()).map { it.id })
+    }
+
+    @Test
+    fun unnumberedAnimeIsVisibleButNeverReceivesGuessedExternalRatings() {
+        val source = listOf(episode("anime-a", season = null, number = null),
+            episode("anime-b", season = null, number = null))
+        assertEquals(listOf(1 to 1, 1 to 2), episodeDetailVideos("anime", source).map { it.season to it.episode })
+        assertTrue(providerEpisodeKeys(source).isEmpty())
+        assertTrue(isEpisodeDetail("anime", source))
+    }
+
+    @Test
     fun moviesChannelsAndEmptySeriesDoNotExposeBulkAction() {
         val episodes = listOf(episode("episode"))
         assertTrue(releasedEpisodesForWholeSeries("movie", episodes, episodes).isEmpty())
