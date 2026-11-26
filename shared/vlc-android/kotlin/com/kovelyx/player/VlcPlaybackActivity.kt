@@ -122,6 +122,7 @@ class VlcPlaybackActivity : Activity() {
     }
 
     override fun finish() {
+        if (isFinishing || isDestroyed) return
         if (::player.isInitialized) setResult(RESULT_OK, Intent().apply {
             putExtra("extra_position", player.time)
             putExtra("extra_duration", player.length)
