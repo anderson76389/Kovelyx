@@ -19,6 +19,7 @@ on:
       - 'scripts/package-linux-release.sh'
       - '.github/workflows/linux.yml'
       - 'scripts/tests/test_verified_preview.py'
+      - 'scripts/tests/tv_settings_adb_probe.py'
       - '.github/workflows/publish-signed-android.yml'
       - 'scripts/publish-unified-preview.sh'
       - '.github/workflows/publish-unified-preview.yml'
@@ -38,6 +39,7 @@ on:
       - 'scripts/package-linux-release.sh'
       - '.github/workflows/linux.yml'
       - 'scripts/tests/test_verified_preview.py'
+      - 'scripts/tests/tv_settings_adb_probe.py'
       - '.github/workflows/publish-signed-android.yml'
   workflow_dispatch:
     inputs:
@@ -96,6 +98,7 @@ jobs:
               - 'scripts/package-linux-release.sh'
               - '.github/workflows/linux.yml'
               - 'scripts/tests/test_verified_preview.py'
+              - 'scripts/tests/tv_settings_adb_probe.py'
               - '.github/workflows/publish-signed-android.yml'
               - 'scripts/publish-unified-preview.sh'
               - '.github/workflows/publish-unified-preview.yml'
