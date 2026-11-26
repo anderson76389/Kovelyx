@@ -5,8 +5,8 @@ import coil3.memory.MemoryCache
 
 // Coil retains decoded (uncompressed) poster bitmaps off-heap on desktop.
 // Previously 256 MiB of posters could coexist with Skia and video buffers.
-// Bound the *image* cache to 128 MiB; never cap the whole JVM or player.
-internal const val DesktopImageMemoryCacheBytes = 128L * 1024 * 1024
+// Bound the *image* cache to 96 MiB; never cap the whole JVM or player.
+internal const val DesktopImageMemoryCacheBytes = 96L * 1024 * 1024
 
 internal actual val platformProvidesImageLoader: Boolean = false
 

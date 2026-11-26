@@ -27,7 +27,8 @@ data class ExternalPlayerInput(
     val subtitles: List<SubtitleInput>? = null,
     // Pre-resolved intro/outro skip segments as a JSON array string
     // (`[{"type","start","end"}]`, times in seconds). Read by mpvNova.
-    val skipSegmentsJson: String? = null
+    val skipSegmentsJson: String? = null,
+    val preference: com.kovelyx.tv.data.local.PlayerPreference? = null
 )
 
 /**
@@ -57,6 +58,11 @@ class ExternalPlayerResultContract : ActivityResultContract<ExternalPlayerInput,
 
     override fun createIntent(context: Context, input: ExternalPlayerInput): Intent {
         return Intent(Intent.ACTION_VIEW).apply {
+            when (input.preference) {
+                com.kovelyx.tv.data.local.PlayerPreference.VLC -> setClass(context, com.kovelyx.player.VlcPlaybackActivity::class.java)
+                com.kovelyx.tv.data.local.PlayerPreference.VLC_EXTERNAL -> setPackage("org.videolan.vlc")
+                else -> Unit
+            }
             setDataAndType(Uri.parse(input.url), "video/*")
 
             input.title?.let {

@@ -25,6 +25,8 @@ internal actual object ExternalPlayerPlatform {
 
     actual fun availablePlayers(): List<ExternalPlayerApp> =
         listOf(
+            ExternalPlayerApp("libvlc", "VLC (LibVLC)"),
+            ExternalPlayerApp("org.videolan.vlc", "VLC (Android)"),
             ExternalPlayerApp(
                 AndroidSystemPlayerId,
                 runBlocking { getString(Res.string.external_player_android_system) },
@@ -38,7 +40,7 @@ internal actual object ExternalPlayerPlatform {
         val context = appContext ?: return ExternalPlayerOpenResult.Failed
         val uri = request.sourceUrl.toExternalPlaybackUri(context)
             ?: return ExternalPlayerOpenResult.Failed
-        val intent = buildExternalPlayerIntent(context, request, uri).apply {
+        val intent = buildExternalPlayerIntent(context, request, uri, playerId).apply {
             // Required when launching from application context (fire-and-forget path)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
@@ -60,7 +62,7 @@ internal actual object ExternalPlayerPlatform {
         val context = appContext ?: return ExternalPlayerIntentResult.Failed
         val uri = request.sourceUrl.toExternalPlaybackUri(context)
             ?: return ExternalPlayerIntentResult.Failed
-        val intent = buildExternalPlayerIntent(context, request, uri)
+        val intent = buildExternalPlayerIntent(context, request, uri, playerId)
         return ExternalPlayerIntentResult.Success(intent)
     }
 
@@ -68,8 +70,13 @@ internal actual object ExternalPlayerPlatform {
         context: Context,
         request: ExternalPlayerPlaybackRequest,
         uri: Uri,
+        playerId: String?,
     ): Intent = Intent(Intent.ACTION_VIEW).apply {
         setDataAndType(uri, request.sourceUrl.videoMimeType())
+        when (playerId) {
+            "libvlc" -> setClassName(context, "com.kovelyx.player.VlcPlaybackActivity")
+            "org.videolan.vlc" -> setPackage(playerId)
+        }
         addCategory(Intent.CATEGORY_DEFAULT)
         if (uri.scheme.equals("content", ignoreCase = true)) {
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

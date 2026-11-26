@@ -3,6 +3,8 @@ package com.kovelyx.tv.ui.screens.detail
 import com.kovelyx.tv.domain.model.Video
 import com.kovelyx.tv.core.util.isEpisodeReleaseAired
 
+private val canonicalEpisodeId = Regex("^(?:tt[0-9]+|tmdb:[0-9]+):([0-9]+):([0-9]+)$", RegexOption.IGNORE_CASE)
+
 /**
  * Uses per-episode released/available rules; one unavailable episode must not hide an entire season.
  * Anime/other addons sometimes omit seasons; their displayed virtual season
@@ -20,10 +22,9 @@ internal fun isEpisodeDetail(apiType: String, videos: List<Video>): Boolean =
 /** Preserve addon numbering, recover canonical Stremio IDs, and give truly
  * unnumbered single-season lists the same stable coordinates as the TV cards. */
 internal fun episodeDetailVideos(apiType: String, videos: List<Video>): List<Video> {
-    if (!isEpisodeDetail(apiType, videos)) return videos
+    if (!isEpisodeDetail(apiType, videos) || videos.all { it.season != null && it.episode != null }) return videos
     val recovered = videos.map { video ->
-        val match = Regex("^(?:tt[0-9]+|tmdb:[0-9]+):([0-9]+):([0-9]+)$", RegexOption.IGNORE_CASE)
-            .matchEntire(video.id)
+        val match = canonicalEpisodeId.matchEntire(video.id)
         val season = video.season ?: match?.groupValues?.get(1)?.toIntOrNull()
         val episode = video.episode ?: match?.groupValues?.get(2)?.toIntOrNull()
         if (season == video.season && episode == video.episode) video
@@ -43,8 +44,10 @@ internal fun episodeDetailVideos(apiType: String, videos: List<Video>): List<Vid
  * episode order for a synthetic anime list. Addon ratings remain usable by ID. */
 internal fun providerEpisodeKeys(videos: List<Video>): Set<Pair<Int, Int>> =
     videos.mapNotNull { video ->
-        val match = Regex("^(?:tt[0-9]+|tmdb:[0-9]+):([0-9]+):([0-9]+)$", RegexOption.IGNORE_CASE)
-            .matchEntire(video.id)
+        if (video.season != null && video.episode != null) {
+            return@mapNotNull (video.season to video.episode).takeIf { video.season >= 0 && video.episode > 0 }
+        }
+        val match = canonicalEpisodeId.matchEntire(video.id)
         val season = video.season ?: match?.groupValues?.get(1)?.toIntOrNull() ?: return@mapNotNull null
         val episode = video.episode ?: match?.groupValues?.get(2)?.toIntOrNull() ?: return@mapNotNull null
         (season to episode).takeIf { season >= 0 && episode > 0 }

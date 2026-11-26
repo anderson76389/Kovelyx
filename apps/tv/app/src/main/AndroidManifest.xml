@@ -80,6 +80,8 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <activity android:name="com.kovelyx.player.VlcPlaybackActivity" android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

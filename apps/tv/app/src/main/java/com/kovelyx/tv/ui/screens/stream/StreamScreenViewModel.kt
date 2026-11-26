@@ -425,7 +425,7 @@ class StreamScreenViewModel @Inject constructor(
                     autoPlayHandledForSession = true
                     resolvedAutoPlayTarget = true
                     val isCachedTorrent = cached.infoHash != null && cached.url.isNullOrBlank()
-                    val showOverlay = playerSettings.playerPreference == PlayerPreference.EXTERNAL
+                    val showOverlay = playerSettings.playerPreference.usesActivityPlayer
                     updateUiStateIfChanged {
                         it.copy(
                             autoPlayPlaybackInfo = StreamPlaybackInfo(

@@ -7,6 +7,9 @@ pluginManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
+        if (System.getenv("GITHUB_ACTIONS") == "true") {
+            maven("https://maven-central.storage-download.googleapis.com/maven2")
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -27,6 +30,9 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.android")
                 includeGroupAndSubgroups("com.google")
             }
+        }
+        if (System.getenv("GITHUB_ACTIONS") == "true") {
+            maven("https://maven-central.storage-download.googleapis.com/maven2")
         }
         mavenCentral()
     }

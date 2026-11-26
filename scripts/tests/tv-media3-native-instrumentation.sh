@@ -74,6 +74,7 @@ echo "Android instrumentation runner: $RUNNER"
 # Each selected native test must actually run, return OK (1 test), and
 # complete in under 3 minutes. 'No test discovered' is a failure too.
 CASES=(
+  'com.kovelyx.tv.ui.screens.player.VlcPlaybackTest#explicitInternalPlayerPlaysLocalClipToCompletion'
   'androidx.media3.exoplayer.upstream.DefaultAllocatorNativeLeakTest#testDefaultAllocatorLateReleaseLeak'
   'androidx.media3.exoplayer.upstream.DefaultAllocatorNativeTest#testAllocationAndReleaseLifecycle'
   'androidx.media3.exoplayer.source.SampleDataQueueNativeTest#testCopyFromArray'
@@ -99,4 +100,4 @@ for i in "${!CASES[@]}"; do
     exit 1
   fi
 done
-echo "PASS: seven real Android TV Media3 instrumentation cases, including repeated H264 decode and release."
+echo "PASS: Android TV LibVLC and Media3 instrumentation cases, including repeated H264 decode and release."

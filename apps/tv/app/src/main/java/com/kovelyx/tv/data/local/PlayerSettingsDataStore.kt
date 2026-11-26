@@ -418,7 +418,9 @@ enum class AutoSkipSegmentType(val storedValue: String) {
 }
 
 enum class PlayerPreference {
-    INTERNAL, EXTERNAL, ASK_EVERY_TIME
+    INTERNAL, EXTERNAL, ASK_EVERY_TIME, VLC, VLC_EXTERNAL;
+
+    val usesActivityPlayer: Boolean get() = this == EXTERNAL || this == VLC || this == VLC_EXTERNAL
 }
 
 enum class InternalPlayerEngine {

@@ -24,6 +24,7 @@
         android:theme="@style/Theme.Nuvio">
         <!-- Use the application's configured WorkerFactory so jobs queued before
              the source-package rename continue after an in-place APK update. -->
+        <activity android:name="com.kovelyx.player.VlcPlaybackActivity" android:exported="false" />
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   compare:
-    if: github.repository == 'anderson76389/Kovelyx' && github.event.pull_request.number == 108
+    if: github.repository == 'anderson76389/Kovelyx' && (github.event.pull_request.number == 108 || contains(github.event.pull_request.labels.*.name, 'benchmark-tv'))
     runs-on: ubuntu-latest
     timeout-minutes: 75
     steps:

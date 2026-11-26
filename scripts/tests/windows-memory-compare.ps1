@@ -73,8 +73,6 @@ $result = [pscustomobject]@{
     candidate = $candidate
     workingSetDifferenceMiB = [math]::Round($candidate.workingSetMiB - $baseline.workingSetMiB, 2)
     privateMemoryDifferenceMiB = [math]::Round($candidate.privateMiB - $baseline.privateMiB, 2)
-    imageCacheLimitBeforeMiB = 256
-    imageCacheLimitAfterMiB = 128
     limitations = 'Not a physical Windows machine. No user catalogues, artwork stress, fullscreen decoding or long video playback.'
 }
 $result | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
@@ -84,7 +82,6 @@ if ($env:GITHUB_STEP_SUMMARY) {
     "|---|---:|---:|" >> $env:GITHUB_STEP_SUMMARY
     "| Working set (Mio) | $($baseline.workingSetMiB) | $($candidate.workingSetMiB) |" >> $env:GITHUB_STEP_SUMMARY
     "| Mémoire privée (Mio) | $($baseline.privateMiB) | $($candidate.privateMiB) |" >> $env:GITHUB_STEP_SUMMARY
-    "| Plafond cache affiches (Mio) | 256 | 128 |" >> $env:GITHUB_STEP_SUMMARY
     "Comparaison à froid sans catalogues personnels ni lecture vidéo longue. Ces mesures ne garantissent pas la RAM sur le PC de l'utilisateur." >> $env:GITHUB_STEP_SUMMARY
 }
 Write-Host "Working set baseline=$($baseline.workingSetMiB) MiB; candidate=$($candidate.workingSetMiB) MiB"

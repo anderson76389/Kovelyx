@@ -1258,6 +1258,9 @@ compose.desktop {
         mainClass = "com.kovelyx.app.MainKt"
         val smokePlayerUrl = providers.gradleProperty("nuvio.desktop.smokePlayerUrl").orNull
             ?: System.getenv("NUVIO_DESKTOP_SMOKE_PLAYER_URL")
+        // Let the Windows heap grow with the catalogue instead of sizing its
+        // initial commitment as a fraction of all installed system RAM.
+        if (isWindowsHost) jvmArgs += "-Xms32m"
         jvmArgs += listOfNotNull(
             "-Dapple.awt.application.appearance=NSAppearanceNameDarkAqua",
             // Keep AWT from loading its own GTK (Swing L&F/file dialogs): the

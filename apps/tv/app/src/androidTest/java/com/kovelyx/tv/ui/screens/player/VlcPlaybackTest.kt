@@ -1,0 +1,48 @@
+package com.kovelyx.tv.ui.screens.player
+
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import android.util.Base64
+import androidx.test.core.app.ActivityScenario
+import androidx.test.platform.app.InstrumentationRegistry
+import com.kovelyx.player.VlcPlaybackActivity
+import com.kovelyx.tv.MainActivity
+import java.io.File
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class VlcPlaybackTest {
+    @Test(timeout = 60000)
+    fun explicitInternalPlayerPlaysLocalClipToCompletion() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val file = File(context.cacheDir, "vlc-smoke.mp4")
+        try {
+            instrumentation.context.assets.open("media3-smoke.mp4.b64").use {
+                file.writeBytes(Base64.decode(it.readBytes(), Base64.DEFAULT))
+            }
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val intent = Intent(context, VlcPlaybackActivity::class.java).setData(uri)
+            ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+                val completion = CompletableFuture<ActivityResult>()
+                scenario.onActivity { host ->
+                    val launcher = host.activityResultRegistry.register(
+                        "embedded-vlc-smoke",
+                        ActivityResultContracts.StartActivityForResult(),
+                    ) { result -> completion.complete(result) }
+                    launcher.launch(intent)
+                }
+                val result = completion.get(40, TimeUnit.SECONDS)
+                assertEquals(Activity.RESULT_OK, result.resultCode)
+                assertEquals("playback_completion", result.data?.getStringExtra("end_by"))
+            }
+        } finally {
+            file.delete()
+        }
+    }
+}
