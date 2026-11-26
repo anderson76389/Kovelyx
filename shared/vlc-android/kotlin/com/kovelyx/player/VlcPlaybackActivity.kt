@@ -1,6 +1,8 @@
 package com.kovelyx.player
 
 import android.app.Activity
+import android.content.ContentResolver
+import android.os.ParcelFileDescriptor
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,13 +17,13 @@ import org.videolan.libvlc.util.VLCVideoLayout
 class VlcPlaybackActivity : Activity() {
     private lateinit var engine: LibVLC
     private lateinit var player: MediaPlayer
+    private var localFile: ParcelFileDescriptor? = null
     private var completed = false
     private var resumeMs = 0L
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
         val uri = intent.data ?: run { finish(); return }
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val layout = VLCVideoLayout(this)
         setContentView(layout)
         val controls = android.widget.MediaController(this)
@@ -44,7 +46,23 @@ class VlcPlaybackActivity : Activity() {
         player = MediaPlayer(engine)
         player.attachViews(layout, null, true, false)
         resumeMs = state?.getLong("position") ?: intent.getLongExtra("extra_position", 0L)
-        val media = Media(engine, uri)
+        val media = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
+            val descriptor = try {
+                contentResolver.openFileDescriptor(uri, "r")
+            } catch (_: java.io.IOException) {
+                null
+            } catch (_: SecurityException) {
+                null
+            }
+            if (descriptor == null) {
+                showPlaybackError()
+                return
+            }
+            localFile = descriptor
+            Media(engine, descriptor.fileDescriptor)
+        } else {
+            Media(engine, uri)
+        }
         try {
             for (header in intent.getStringArrayExtra("headers").orEmpty()) {
                 val value = header.substringAfter(':').trim()
@@ -62,18 +80,24 @@ class VlcPlaybackActivity : Activity() {
         subtitle?.let { player.addSlave(org.videolan.libvlc.interfaces.IMedia.Slave.Type.Subtitle, it, true) }
         player.setEventListener { event ->
             when (event.type) {
-                MediaPlayer.Event.Playing -> if (resumeMs > 0 && player.isSeekable) {
-                    player.setTime(resumeMs)
-                    resumeMs = 0
+                MediaPlayer.Event.Playing -> {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    if (resumeMs > 0 && player.isSeekable) {
+                        player.setTime(resumeMs)
+                        resumeMs = 0
+                    }
                 }
+                MediaPlayer.Event.Paused, MediaPlayer.Event.Stopped -> window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                 MediaPlayer.Event.EndReached -> { completed = true; finish() }
-                MediaPlayer.Event.EncounteredError -> {
-                    Toast.makeText(this, android.R.string.VideoView_error_text_unknown, Toast.LENGTH_LONG).show()
-                    finish()
-                }
+                MediaPlayer.Event.EncounteredError -> showPlaybackError()
             }
         }
         player.play()
+    }
+
+    private fun showPlaybackError() {
+        Toast.makeText(this, android.R.string.VideoView_error_text_unknown, Toast.LENGTH_LONG).show()
+        finish()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -112,6 +136,7 @@ class VlcPlaybackActivity : Activity() {
             player.detachViews()
             player.release()
         }
+        localFile?.close()
         if (::engine.isInitialized) engine.release()
         super.onDestroy()
     }
