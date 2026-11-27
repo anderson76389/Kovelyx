@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kovelyx.app.core.ui.KovelyxAsyncImage as AsyncImage
+import com.kovelyx.app.core.ui.KovelyxDesktopImageScaling
 import com.kovelyx.app.core.ui.ProfileMeshBackground
 import com.kovelyx.app.features.membership.MemberAccessRepository
 import com.kovelyx.app.features.membership.ProfileBackgroundRepository
@@ -74,6 +75,7 @@ fun ProfileBackgroundBackdrop(
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
+                desktopImageScaling = KovelyxDesktopImageScaling.Disabled,
             )
             Box(
                 modifier = Modifier

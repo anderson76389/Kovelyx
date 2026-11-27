@@ -2180,7 +2180,7 @@ private fun PlayerPreferenceDialog(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun ExternalPlayerSelectionDialog(
+internal fun ExternalPlayerSelectionDialog(
     players: List<ExternalPlayerApp>,
     selectedPlayerId: String?,
     onPlayerSelected: (String) -> Unit,

@@ -4,10 +4,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.features.player.ExternalPlayerIntentResult
+import com.kovelyx.app.features.settings.ExternalPlayerSelectionDialog
+import com.kovelyx.app.features.player.ExternalPlayerPlaybackRequest
 import com.kovelyx.app.features.player.ExternalPlayerPlatform
 import com.kovelyx.app.features.player.PlayerLaunch
 import com.kovelyx.app.features.player.PlayerLaunchStore
@@ -62,6 +67,7 @@ internal fun PlayerDestination(
     LaunchedEffect(launch.videoId) {
         launch.videoId?.let { ResumePromptRepository.markPlayerEntered(it) }
     }
+    var pendingExternal by remember(route.launchId) { mutableStateOf<ExternalPlayerPlaybackRequest?>(null) }
     PlayerScreen(
         profileId = launch.profileId,
         title = launch.title,
@@ -98,56 +104,66 @@ internal fun PlayerDestination(
         launchId = route.launchId,
         onBack = onBack,
         onSystemBackHandlerChanged = registerSystemBack,
-        onOpenInExternalPlayer = if (externalPlayerSupported) { { request ->
-            val playerLaunch = PlayerLaunch(
-                profileId = launch.profileId,
-                title = launch.title,
-                sourceUrl = request.sourceUrl,
-                sourceHeaders = request.sourceHeaders,
-                logo = launch.logo,
-                poster = launch.poster,
-                background = launch.background,
-                seasonNumber = launch.seasonNumber,
-                episodeNumber = launch.episodeNumber,
-                episodeTitle = launch.episodeTitle,
-                episodeThumbnail = launch.episodeThumbnail,
-                streamTitle = request.streamTitle ?: launch.streamTitle,
-                streamSubtitle = launch.streamSubtitle,
-                bingeGroup = launch.bingeGroup,
-                pauseDescription = launch.pauseDescription,
-                providerName = launch.providerName,
-                providerAddonId = launch.providerAddonId,
-                contentType = launch.contentType,
-                videoId = launch.videoId,
-                parentMetaId = launch.parentMetaId,
-                parentMetaType = launch.parentMetaType,
-                initialPositionMs = request.resumePositionMs,
-            )
-            onExternalPlayerLaunch(playerLaunch)
-            val intentResult = ExternalPlayerPlatform.buildIntent(
-                request = request,
-                playerId = externalPlayerId,
-            )
-            when (intentResult) {
-                is ExternalPlayerIntentResult.Success -> {
-                    val launched = launchExternalPlayer(intentResult)
-                    if (!launched) {
-                        KovelyxToastController.show(externalPlayerFailedText)
-                    } else if (isDesktop || externalPlayerId == "infuse") {
-                        popBack()
-                    }
-                }
-                ExternalPlayerIntentResult.NotConfigured -> {
-                    KovelyxToastController.show(externalPlayerNotConfiguredText)
-                }
-                ExternalPlayerIntentResult.Failed -> {
-                    KovelyxToastController.show(externalPlayerFailedText)
-                }
-            }
-        } } else null,
+        onOpenInExternalPlayer = if (externalPlayerSupported) { { pendingExternal = it } } else null,
         onOpenExternalUrl = { url ->
             openExternalStreamUrl(url)
         },
         modifier = Modifier.fillMaxSize(),
     )
+
+    pendingExternal?.let { request ->
+        ExternalPlayerSelectionDialog(
+            players = remember(request) { ExternalPlayerPlatform.availablePlayers() },
+            selectedPlayerId = externalPlayerId,
+            onDismiss = { pendingExternal = null },
+            onPlayerSelected = { chosenId ->
+                pendingExternal = null
+                val playerLaunch = PlayerLaunch(
+                    profileId = launch.profileId,
+                    title = launch.title,
+                    sourceUrl = request.sourceUrl,
+                    sourceHeaders = request.sourceHeaders,
+                    logo = launch.logo,
+                    poster = launch.poster,
+                    background = launch.background,
+                    seasonNumber = launch.seasonNumber,
+                    episodeNumber = launch.episodeNumber,
+                    episodeTitle = launch.episodeTitle,
+                    episodeThumbnail = launch.episodeThumbnail,
+                    streamTitle = request.streamTitle ?: launch.streamTitle,
+                    streamSubtitle = launch.streamSubtitle,
+                    bingeGroup = launch.bingeGroup,
+                    pauseDescription = launch.pauseDescription,
+                    providerName = launch.providerName,
+                    providerAddonId = launch.providerAddonId,
+                    contentType = launch.contentType,
+                    videoId = launch.videoId,
+                    parentMetaId = launch.parentMetaId,
+                    parentMetaType = launch.parentMetaType,
+                    initialPositionMs = request.resumePositionMs,
+                )
+                onExternalPlayerLaunch(playerLaunch)
+                val intentResult = ExternalPlayerPlatform.buildIntent(
+                    request = request,
+                    playerId = chosenId,
+                )
+                when (intentResult) {
+                    is ExternalPlayerIntentResult.Success -> {
+                        val launched = launchExternalPlayer(intentResult)
+                        if (!launched) {
+                            KovelyxToastController.show(externalPlayerFailedText)
+                        } else if (isDesktop || chosenId == "infuse") {
+                            popBack()
+                        }
+                    }
+                    ExternalPlayerIntentResult.NotConfigured -> {
+                        KovelyxToastController.show(externalPlayerNotConfiguredText)
+                    }
+                    ExternalPlayerIntentResult.Failed -> {
+                        KovelyxToastController.show(externalPlayerFailedText)
+                    }
+                }
+            },
+        )
+    }
 }
