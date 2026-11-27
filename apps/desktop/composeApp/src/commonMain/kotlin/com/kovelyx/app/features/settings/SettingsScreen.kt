@@ -810,7 +810,7 @@ private fun MobileSettingsScreen(
                     onPluginsClick = onPluginsClick,
                     onCollectionsClick = onCollectionsClick,
                     onMediaServersClick = { onPageChange(SettingsPage.MediaServers) },
-                    onPlaybackTopicClick = { onPageChange(it) },
+
                 )
                 SettingsPage.Addons -> addonsSettingsContent()
                 SettingsPage.MediaServers -> mediaServersSettingsContent(
@@ -1298,7 +1298,7 @@ private fun TabletSettingsScreen(
                                 onPluginsClick = { openInlinePage(SettingsPage.Plugins) },
                                 onCollectionsClick = onCollectionsClick,
                                 onMediaServersClick = { openInlinePage(SettingsPage.MediaServers) },
-                                onPlaybackTopicClick = { openInlinePage(it) },
+
                             )
                             SettingsPage.Addons -> addonsSettingsContent()
                             SettingsPage.MediaServers -> mediaServersSettingsContent(

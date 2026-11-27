@@ -133,7 +133,7 @@ internal fun PlayerDestination(
                     val launched = launchExternalPlayer(intentResult)
                     if (!launched) {
                         KovelyxToastController.show(externalPlayerFailedText)
-                    } else if (externalPlayerId == "infuse") {
+                    } else if (isDesktop || externalPlayerId == "infuse") {
                         popBack()
                     }
                 }

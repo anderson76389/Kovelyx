@@ -663,7 +663,7 @@ internal fun settingsSearchEntries(
                     ),
                 )
             }
-            if (externalPlayerSupported && isIos) {
+            if (externalPlayerSupported) {
                 add(
                     PlaybackSearchRow(
                         "external-player-app",

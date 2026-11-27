@@ -17,52 +17,7 @@ internal fun LazyListScope.contentDiscoveryContent(
     onPluginsClick: () -> Unit,
     onCollectionsClick: () -> Unit,
     onMediaServersClick: () -> Unit,
-    onPlaybackTopicClick: (SettingsPage) -> Unit,
 ) {
-    item {
-        SettingsSection(
-            title = stringResource(Res.string.kovelyx_media_options_section),
-            isTablet = isTablet,
-        ) {
-            SettingsGroup(isTablet = isTablet) {
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_group_player_title),
-                    description = stringResource(Res.string.kovelyx_media_group_player_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaPlayer) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_group_streams_title),
-                    description = stringResource(Res.string.kovelyx_media_group_streams_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaStreamSelection) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_group_episodes_title),
-                    description = stringResource(Res.string.kovelyx_media_group_episodes_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaUpNext) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_group_audio_video_title),
-                    description = stringResource(Res.string.kovelyx_media_group_audio_video_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaAudio) },
-                )
-                SettingsGroupDivider(isTablet = isTablet)
-                SettingsNavigationRow(
-                    title = stringResource(Res.string.kovelyx_media_subtitles_title),
-                    description = stringResource(Res.string.kovelyx_media_subtitles_description),
-                    isTablet = isTablet,
-                    onClick = { onPlaybackTopicClick(SettingsPage.MediaSubtitles) },
-                )
-            }
-        }
-    }
-
     item {
         val recentSearchesEnabled by remember {
             SearchHistoryRepository.ensureLoaded()

@@ -104,17 +104,10 @@ def check_platform(platform: str) -> None:
         for key in ("settings_nav_layout_title", "settings_nav_layout_description"):
             ensure(f'name="{key}"' in xml, f"{platform}/{lang}: missing {key}")
 
-    # This is explicitly a Content Discovery change, not a player settings migration.
     discovery = (settings / "ContentDiscoverySettingsPage.kt").read_text(encoding="utf-8")
-    discovery_group_keys = (
-        "kovelyx_media_options_section",
-        "kovelyx_media_group_catalogue",
-    )
-    positions = [discovery.find(f"title = stringResource(Res.string.{key})") for key in discovery_group_keys]
-    ensure(all(pos >= 0 for pos in positions) and positions == sorted(positions),
-           f"{platform}: Content Discovery must show media subpages, then catalogs/servers/search")
-    ensure(discovery.count("SettingsSection(") == 2,
-           f"{platform}: Content Discovery must render two visible settings groups")
+    ensure(discovery.count("SettingsSection(") == 1 and "kovelyx_media_group_catalogue" in discovery
+           and "onPlaybackTopicClick" not in discovery,
+           f"{platform}: Discovery must contain only catalogue and search settings")
     for callback in ("onAddonsClick", "onCollectionsClick", "onMediaServersClick", "onPluginsClick"):
         ensure(f"onClick = {callback}," in discovery,
                f"{platform}: missing a real Content Discovery navigation callback: {callback}")
@@ -127,15 +120,11 @@ def check_platform(platform: str) -> None:
     media_routes = (
         "MediaPlayer", "MediaStreamSelection", "MediaUpNext", "MediaAudio", "MediaSubtitles",
     )
-    ensure(discovery.count("onPlaybackTopicClick(SettingsPage.") == len(media_routes),
-           f"{platform}: Content Discovery must expose five grouped Media destinations")
     for route in media_routes:
-        ensure(f"onPlaybackTopicClick(SettingsPage.{route})" in discovery,
-               f"{platform}: missing Media destination {route}")
         ensure(f"SettingsPage.{route}" in screen,
                f"{platform}: Media destination not handled in SettingsScreen: {route}")
-        ensure(f"    {route}(" in model and "parentPage = ContentDiscovery" in model,
-               f"{platform}: Media page {route} absent or not nested under Content Discovery")
+        ensure(f"    {route}(" in model and "parentPage = Playback" in model.split(f"    {route}(", 1)[1].split("),", 1)[0],
+               f"{platform}: Media page {route} absent or not nested under Playback")
     ensure("topic = page," in screen,
            f"{platform}: Media destination does not filter the actual existing playback controls")
     ensure("SettingsPage.ContentDiscovery -> contentDiscoveryContent(" in screen,
