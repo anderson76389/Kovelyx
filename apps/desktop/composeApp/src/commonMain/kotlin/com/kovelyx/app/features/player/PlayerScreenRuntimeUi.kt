@@ -377,7 +377,7 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         showVideoSettings = isIos,
         showSources = activeVideoId != null,
         showEpisodes = isSeries,
-        showExternalPlayer = args.onOpenInExternalPlayer != null,
+        showExternalPlayer = args.onOpenInExternalPlayer != null && !ServerStreams.isServerSourceId(activeProviderAddonId),
         durationMs = playbackSnapshot.durationMs,
         positionMs = displayedPositionMs,
         sourceIsLoading = sourceStreamsState.isAnyLoading,

@@ -51,6 +51,7 @@ typedef enum mpv_event_id {
     MPV_EVENT_SHUTDOWN = 1,
     MPV_EVENT_END_FILE = 7,
     MPV_EVENT_VIDEO_RECONFIG = 17,
+    MPV_EVENT_PROPERTY_CHANGE = 22,
 } mpv_event_id;
 
 typedef struct mpv_event {
@@ -575,6 +576,8 @@ struct MpvApi {
     mpv_command_fn command = nullptr;
     mpv_error_string_fn errorString = nullptr;
     mpv_free_fn freeValue = nullptr;
+    using ObserveProperty = int (*)(mpv_handle *, uint64_t, const char *, mpv_format);
+    ObserveProperty observeProperty = nullptr;
     mpv_wait_event_fn waitEvent = nullptr;
     mpv_wakeup_fn wakeup = nullptr;
 
@@ -634,6 +637,7 @@ struct MpvApi {
         command = loadSymbol<mpv_command_fn>("mpv_command");
         errorString = loadSymbol<mpv_error_string_fn>("mpv_error_string");
         freeValue = loadSymbol<mpv_free_fn>("mpv_free");
+        observeProperty = loadSymbol<ObserveProperty>("mpv_observe_property");
         waitEvent = loadSymbol<mpv_wait_event_fn>("mpv_wait_event");
         wakeup = loadSymbol<mpv_wakeup_fn>("mpv_wakeup");
     }
@@ -1031,9 +1035,11 @@ public:
         }
     }
 
+    std::atomic_bool tracksChanged{true};
+    std::atomic_bool observingTracks{false};
+
     void onTimer() {
         if (shuttingDown.load()) return;
-        layoutNativeSubviews();
         syncControls();
     }
 
@@ -1850,6 +1856,7 @@ private:
                 throw std::runtime_error(std::string("mpv_initialize failed: ") + api.errorText(initResult));
             }
 
+            observingTracks = api.observeProperty(mpv, 1, "track-list", MPV_FORMAT_NONE) >= 0;
             std::vector<const char *> loadCommand = {"loadfile", sourceUrl.c_str()};
             std::string loadOptions;
             if (initialPositionMs > 0) {
@@ -1946,18 +1953,18 @@ private:
         double volumeLevel = volume();
         bool paused = isPaused();
         bool loading = isLoading();
-        std::string audioTracks = audioTracksJson();
-        std::string subtitleTracks = subtitleTracksJson();
 
         std::ostringstream script;
         script << "window.playerUpdate({duration:" << duration
                << ",position:" << position
                << ",volumeLevel:" << volumeLevel
                << ",paused:" << (paused ? "true" : "false")
-               << ",loading:" << (loading ? "true" : "false")
-               << ",audioTracks:" << audioTracks
-               << ",subtitleTracks:" << subtitleTracks
-               << "})";
+               << ",loading:" << (loading ? "true" : "false");
+        if (!observingTracks || tracksChanged.exchange(false)) {
+            script << ",audioTracks:" << audioTracksJson()
+                   << ",subtitleTracks:" << subtitleTracksJson();
+        }
+        script << "})";
         std::wstring wideScript = toWide(script.str());
         webView->ExecuteScript(wideScript.c_str(), nullptr);
     }
@@ -1968,6 +1975,7 @@ private:
         double value = extractJsonNumber(messageJson, L"value", 0.0);
 
         if (type == "controlsReady") {
+            tracksChanged.store(true);
             controlsWebReady.store(true);
             flushPendingControlsJsonIfReady();
             syncControls();
@@ -2083,6 +2091,9 @@ private:
             if (!event) continue;
             if (event->event_id == MPV_EVENT_SHUTDOWN) {
                 return;
+            }
+            if (event->event_id == MPV_EVENT_PROPERTY_CHANGE && event->reply_userdata == 1) {
+                tracksChanged.store(true);
             }
             const bool resized = rtxLayoutChanged.exchange(false);
             if (resized && rtxAvailable && !rtxRetryDone) { rtxPending = true; rtxFilterTried = false; }

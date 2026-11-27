@@ -2310,6 +2310,8 @@ const renderChrome = () => {
 
   setVisible(submitIntroButton, Boolean(state.showSubmitIntro));
   setVisible(videoSettingsButton, Boolean(state.showVideoSettings));
+  setVisible(document.getElementById("externalButton"), Boolean(state.showExternalPlayer));
+  setActionButtonLabel("external", state.externalPlayerLabel);
   setVisible(sourcesButton, Boolean(state.showSources));
   setVisible(episodesButton, Boolean(state.showEpisodes));
   syncActionFocusState();
@@ -3016,10 +3018,10 @@ window.playerUpdate = update => {
   const volumeLevel = Number.isFinite(reportedVolumeLevel)
     ? clampVolumeLevel(reportedVolumeLevel)
     : state.volumeLevel;
-  const audioTracks = normalizeTracks(update.audioTracks);
-  const subtitleTracks = normalizeTracks(update.subtitleTracks);
-  const audioTracksChanged = trackListSignature(audioTracks) !== trackListSignature(state.audioTracks);
-  const subtitleTracksChanged = trackListSignature(subtitleTracks) !== trackListSignature(state.subtitleTracks);
+  const audioTracks = update.audioTracks === undefined ? state.audioTracks : normalizeTracks(update.audioTracks);
+  const subtitleTracks = update.subtitleTracks === undefined ? state.subtitleTracks : normalizeTracks(update.subtitleTracks);
+  const audioTracksChanged = audioTracks !== state.audioTracks && trackListSignature(audioTracks) !== trackListSignature(state.audioTracks);
+  const subtitleTracksChanged = subtitleTracks !== state.subtitleTracks && trackListSignature(subtitleTracks) !== trackListSignature(state.subtitleTracks);
   const nativeIsPlaying = !Boolean(update.paused);
   lastNativeIsPlaying = nativeIsPlaying;
   if (pendingIsPlaying !== null && nativeIsPlaying === pendingIsPlaying) {
@@ -3027,12 +3029,17 @@ window.playerUpdate = update => {
     window.clearTimeout(pendingPlaybackTimer);
     pendingPlaybackTimer = 0;
   }
+  const isPlaying = pendingIsPlaying === null ? nativeIsPlaying : pendingIsPlaying;
+  const isLoading = Boolean(update.loading || update.isLoading);
+  const steadyPlayback = hasReceivedPlayerControls && isPlaying && state.isPlaying &&
+    !isLoading && !state.isLoading && state.durationMs === durationMs &&
+    volumeLevel === state.volumeLevel && !audioTracksChanged && !subtitleTracksChanged;
   state = {
     ...state,
     durationMs,
     positionMs,
-    isPlaying: pendingIsPlaying === null ? nativeIsPlaying : pendingIsPlaying,
-    isLoading: Boolean(update.loading || update.isLoading),
+    isPlaying,
+    isLoading,
     volumeLevel,
     audioTracks,
     subtitleTracks,
@@ -3050,6 +3057,11 @@ window.playerUpdate = update => {
       activeSubtitleLanguageKey = selected.languageKey;
       pendingSubtitleOptionId = selected.id;
     }
+  }
+  // A clock tick only changes the timeline. Hidden controls catch up on the next reveal.
+  if (steadyPlayback) {
+    if (state.controlsVisible && !isScrubbing) setProgress(positionMs, durationMs);
+    return;
   }
   renderChrome();
   if ((audioTracksChanged && activeModal === "audio") ||

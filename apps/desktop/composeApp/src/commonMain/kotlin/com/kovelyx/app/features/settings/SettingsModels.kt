@@ -134,47 +134,47 @@ internal enum class SettingsPage(
     MediaPlayer(
         titleRes = Res.string.kovelyx_media_group_player_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaStreamSelection(
         titleRes = Res.string.kovelyx_media_group_streams_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaUpNext(
         titleRes = Res.string.kovelyx_media_group_episodes_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaSkipSegments(
         titleRes = Res.string.kovelyx_media_skip_segments_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaPlayerInterface(
         titleRes = Res.string.kovelyx_media_player_interface_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaAudio(
         titleRes = Res.string.kovelyx_media_group_audio_video_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaSubtitles(
         titleRes = Res.string.kovelyx_media_subtitles_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaVideo(
         titleRes = Res.string.kovelyx_media_video_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     MediaP2P(
         titleRes = Res.string.kovelyx_media_p2p_title,
         category = SettingsCategory.Watch,
-        parentPage = ContentDiscovery,
+        parentPage = Playback,
     ),
     Addons(
         titleRes = Res.string.compose_settings_page_addons,

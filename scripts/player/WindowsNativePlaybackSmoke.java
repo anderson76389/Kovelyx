@@ -59,10 +59,33 @@ public final class WindowsNativePlaybackSmoke {
                 if (position >= 800 && duration >= 1800) break;
                 Thread.sleep(100);
             }
-            ImageIO.write(new Robot().createScreenCapture(frame.getBounds()), "png", new File(args[1]));
             if (position < 800 || duration < 1800) {
                 throw new AssertionError("Video never progressed: position=" + position + ", duration=" + duration);
             }
+            Method updateControls = type.getMethod("updateControls", long.class, String.class);
+            Method positionMs = type.getMethod("positionMs", long.class);
+            for (boolean visible : new boolean[]{true, false}) {
+                updateControls.invoke(bridge, handle, "{\"controlsVisible\":" + visible + "}");
+                long start = ((Number) positionMs.invoke(bridge, handle)).longValue();
+                long previous = start;
+                long lastAdvance = System.nanoTime();
+                long phaseDeadline = lastAdvance + 8_000_000_000L;
+                while (previous - start < 2500 && System.nanoTime() < phaseDeadline) {
+                    Thread.sleep(100);
+                    long current = ((Number) positionMs.invoke(bridge, handle)).longValue();
+                    long now = System.nanoTime();
+                    if (current > previous) {
+                        lastAdvance = now;
+                    } else if (now - lastAdvance > 2_500_000_000L) {
+                        throw new AssertionError("1080p playback stalled at " + current + "/" + duration +
+                            " ms, controlsVisible=" + visible);
+                    }
+                    previous = current;
+                }
+                if (previous - start < 2500) throw new AssertionError("Insufficient 1080p progression");
+                System.out.println("1080p: controlsVisible=" + visible + ", advanced " + (previous - start) + " ms");
+            }
+            ImageIO.write(new Robot().createScreenCapture(frame.getBounds()), "png", new File(args[1]));
             System.out.println("PASS: native MP4 playback, position=" + position + ", duration=" + duration);
             type.getMethod("dispose", long.class).invoke(bridge, handle);
             handle = 0;

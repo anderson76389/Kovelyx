@@ -448,7 +448,7 @@ private fun PlaybackSettingsSection(
                     onCheckedChange = PlayerSettingsRepository::setPauseOverlayEnabled,
                 )
                 // On Android the internal engine belongs in the Player sub-page.
-                if (topic == SettingsPage.MediaPlayer && !isDesktop) {
+                if (topic != SettingsPage.MediaPlayerInterface && !isDesktop) {
                     SettingsGroupDivider(isTablet = isTablet)
                     SettingsNavigationRow(
                         title = stringResource(Res.string.settings_playback_engine),
@@ -469,7 +469,7 @@ private fun PlaybackSettingsSection(
                         isTablet = isTablet,
                         onClick = { showExternalPlayerDialog = true },
                     )
-                    if (isIos && autoPlayPlayerSettings.externalPlayerEnabled) {
+                    if (autoPlayPlayerSettings.externalPlayerEnabled) {
                         SettingsGroupDivider(isTablet = isTablet)
                         SettingsNavigationRow(
                             title = stringResource(Res.string.settings_playback_external_player_app),
@@ -1236,13 +1236,15 @@ private fun PlaybackSettingsSection(
             ) {
                 SettingsGroup(isTablet = isTablet) {
                     if (!isDesktop) {
-                        SettingsNavigationRow(
-                            title = stringResource(Res.string.settings_playback_engine),
-                            description = androidPlaybackEngine.label,
-                            enabled = decoderEnabled,
-                            isTablet = isTablet,
-                            onClick = { showPlaybackEngineDialog = true },
-                        )
+                        if (topic != SettingsPage.Playback) {
+                            SettingsNavigationRow(
+                                title = stringResource(Res.string.settings_playback_engine),
+                                description = androidPlaybackEngine.label,
+                                enabled = decoderEnabled,
+                                isTablet = isTablet,
+                                onClick = { showPlaybackEngineDialog = true },
+                            )
+                        }
                     }
                     if (libmpvOptionsVisible) {
                         SettingsGroupDivider(isTablet = isTablet)
@@ -1875,7 +1877,8 @@ private fun PlaybackSettingsSection(
         PlayerPreferenceDialog(
             isExternal = autoPlayPlayerSettings.externalPlayerEnabled,
             onPreferenceSelected = { external ->
-                PlayerSettingsRepository.setExternalPlayerEnabled(external)
+                if (external) showExternalPlayerAppDialog = true
+                else PlayerSettingsRepository.setExternalPlayerEnabled(false)
                 showExternalPlayerDialog = false
             },
             onDismiss = { showExternalPlayerDialog = false },
@@ -1888,6 +1891,7 @@ private fun PlaybackSettingsSection(
             selectedPlayerId = autoPlayPlayerSettings.externalPlayerId,
             onPlayerSelected = { playerId ->
                 PlayerSettingsRepository.setExternalPlayerId(playerId)
+                PlayerSettingsRepository.setExternalPlayerEnabled(true)
                 showExternalPlayerAppDialog = false
             },
             onDismiss = { showExternalPlayerAppDialog = false },
@@ -1928,6 +1932,7 @@ private fun PlaybackSettingsSection(
             selectedEngine = androidPlaybackEngine,
             onEngineSelected = { engine ->
                 PlayerSettingsRepository.setAndroidPlaybackEngine(engine)
+                PlayerSettingsRepository.setExternalPlayerEnabled(false)
                 showPlaybackEngineDialog = false
             },
             onDismiss = { showPlaybackEngineDialog = false },
@@ -2175,7 +2180,7 @@ private fun PlayerPreferenceDialog(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun ExternalPlayerSelectionDialog(
+internal fun ExternalPlayerSelectionDialog(
     players: List<ExternalPlayerApp>,
     selectedPlayerId: String?,
     onPlayerSelected: (String) -> Unit,

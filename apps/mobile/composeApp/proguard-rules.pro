@@ -53,6 +53,10 @@
 -keep class com.google.android.exoplayer2.** { *; }
 -keep interface com.google.android.exoplayer2.** { *; }
 
+# LibVLC resolves Java API types (including IMedia$Track) by name in JNI_OnLoad.
+-keep class org.videolan.libvlc.** { *; }
+-keep interface org.videolan.libvlc.** { *; }
+
 -keep class is.xyz.mpv.** { *; }
 -keep interface is.xyz.mpv.** { *; }
 

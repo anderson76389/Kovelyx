@@ -633,10 +633,10 @@ internal fun settingsSearchEntries(
                 stringResource(Res.string.settings_playback_external_player),
                 stringResource(Res.string.settings_playback_external_player_description_android),
             ),
-            if (isIos) PlaybackSearchRow(
+            PlaybackSearchRow(
                 "external-player-app",
                 stringResource(Res.string.settings_playback_external_player_app),
-            ) else null,
+            ),
             PlaybackSearchRow(
                 "hold-to-speed",
                 stringResource(Res.string.settings_playback_hold_to_speed),

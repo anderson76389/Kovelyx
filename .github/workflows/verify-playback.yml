@@ -4,10 +4,11 @@ on:
     branches: [main, fix/cloudflare-network-status-and-settings]
     paths:
       - 'scripts/player/**'
+      - 'tests/fixtures/windows-playback-1080p.mp4.b64'
       - '.github/workflows/verify-playback.yml'
   pull_request:
     branches: [main]
-    paths: ['.github/workflows/verify-playback.yml', 'scripts/player/**']
+    paths: ['.github/workflows/verify-playback.yml', 'scripts/player/**', 'tests/fixtures/windows-playback-1080p.mp4.b64']
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,16 +32,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Latest Release unavailable' }
           $dest = Join-Path $env:RUNNER_TEMP 'kovelyx-release-playback'
           New-Item -ItemType Directory -Force $dest | Out-Null
-          gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY --pattern 'Kovelyx-Windows-Portable-*.zip*' --dir $dest
+          $name = "Kovelyx-Windows-Setup-$($release.tag_name).exe"
+          gh release download $release.tag_name --repo $env:GITHUB_REPOSITORY --pattern $name --pattern "$name.sha256" --dir $dest
           if ($LASTEXITCODE -ne 0) { throw 'Release download failed' }
-          $zip = @(Get-ChildItem $dest -Filter '*.zip')
-          if ($zip.Count -ne 1) { throw 'Ambiguous portable package' }
-          $expected = ((Get-Content ($zip[0].FullName + '.sha256') -Raw).Trim() -split '\s+')[0]
-          if ((Get-FileHash $zip[0].FullName -Algorithm SHA256).Hash -ne $expected) { throw 'Release checksum mismatch' }
-          Expand-Archive $zip[0].FullName (Join-Path $dest 'app')
-          $exe = Get-ChildItem (Join-Path $dest 'app') -Recurse -Filter Kovelyx.exe | Select-Object -First 1
-          if (-not $exe) { throw 'Kovelyx.exe missing' }
-          "PLAYBACK_APP_ROOT=$($exe.Directory.FullName)" >> $env:GITHUB_ENV
+          $setup = Join-Path $dest $name
+          $expected = ((Get-Content "$setup.sha256" -Raw).Trim() -split '\s+')[0]
+          if ((Get-FileHash $setup -Algorithm SHA256).Hash -ne $expected) { throw 'Release checksum mismatch' }
+          $install = Start-Process -FilePath $setup -ArgumentList '/quiet', '/norestart' -Wait -PassThru
+          if ($install.ExitCode -notin @(0, 3010)) { throw "Installer returned $($install.ExitCode)" }
+          $app = Join-Path $env:ProgramFiles 'Kovelyx'
+          if (-not (Test-Path (Join-Path $app 'Kovelyx.exe'))) { throw 'Installed Kovelyx.exe missing' }
+          "PLAYBACK_APP_ROOT=$app" >> $env:GITHUB_ENV
           "Release exercised: $($release.tag_name)" >> $env:GITHUB_STEP_SUMMARY
       - name: Bloquer Nuvio avant de lire le MP4 du lecteur Windows publié
         shell: pwsh

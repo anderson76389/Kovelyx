@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.rounded.Build
@@ -182,6 +183,7 @@ internal fun PlayerControlsShell(
                     onLockToggle = onLockToggle,
                     onVideoSettingsClick = onVideoSettingsClick,
                     onOpenInExternalPlayer = onOpenInExternalPlayer,
+                    onSwitchEngineClick = onSwitchEngineClick,
                     onBack = onBack,
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -330,6 +332,7 @@ private fun PlayerHeader(
     onLockToggle: () -> Unit,
     onVideoSettingsClick: (() -> Unit)?,
     onOpenInExternalPlayer: (() -> Unit)?,
+    onSwitchEngineClick: (() -> Unit)?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -423,9 +426,18 @@ private fun PlayerHeader(
                             onClick = onSubmitIntroClick,
                         )
                     }
-                    if (onOpenInExternalPlayer != null) {
+                    if (onSwitchEngineClick != null) {
                         PlayerHeaderIconButton(
                             icon = Icons.Filled.SwapHoriz,
+                            contentDescription = stringResource(Res.string.cd_switch_player_engine),
+                            buttonSize = metrics.headerIconSize + 16.dp,
+                            iconSize = metrics.headerIconSize,
+                            onClick = onSwitchEngineClick,
+                        )
+                    }
+                    if (onOpenInExternalPlayer != null) {
+                        PlayerHeaderIconButton(
+                            icon = Icons.AutoMirrored.Filled.OpenInNew,
                             contentDescription = stringResource(Res.string.streams_open_external_player),
                             buttonSize = metrics.headerIconSize + 16.dp,
                             iconSize = metrics.headerIconSize,
