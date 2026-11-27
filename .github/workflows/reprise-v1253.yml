@@ -3,153 +3,6 @@ permissions:
   contents: read
   actions: read
 jobs:
-  android:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 75
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - platform: tv
-          task: :app:assembleFullDebug
-    steps:
-    - uses: actions/checkout@v4
-      with: &id001
-        ref: a8b19afd42d82a7a7f29fc53eac745c3d5d6a583
-        persist-credentials: false
-    - &id002
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: '21'
-    - &id003
-      uses: gradle/actions/setup-gradle@v4
-      with:
-        cache-read-only: true
-    - name: Préparer les archives du code et des dépendances sur la machine de test
-      env:
-        PLATFORM: ${{ matrix.platform }}
-        TASK: ${{ matrix.task }}
-      shell: bash
-      run: "set -euo pipefail\nfor host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv\
-        \ cdn.nuvio.tv nuvioapp.space; do\n  echo \"127.0.0.1 $host\" | sudo tee -a\
-        \ /etc/hosts >/dev/null\ndone\ngit config --global url.\"https://blocked.invalid/NuvioMedia/\"\
-        .insteadOf \"https://github.com/NuvioMedia/\"\ngit archive -o \"$RUNNER_TEMP/sources.tar\"\
-        \ HEAD apps/tv shared vendor scripts\nchmod +x \"apps/$PLATFORM/gradlew\"\n\
-        \"apps/$PLATFORM/gradlew\" -p \"apps/$PLATFORM\" \"$TASK\" -Pkovelyx.app.versionName=1.1.1253\
-        \ -Pkovelyx.app.versionCode=101253 --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process\
-        \ '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'\npython3 scripts/build-dependency-vault.py\
-        \ capture \"$RUNNER_TEMP/vault\" --gradle-home \"${GRADLE_USER_HOME:-$HOME/.gradle}\"\
-        \nsha256sum \"$RUNNER_TEMP/sources.tar\" > \"$RUNNER_TEMP/source.sha256\"\n"
-    - name: Restaurer puis reconstruire avec la boucle locale comme seule interface
-      env:
-        PLATFORM: ${{ matrix.platform }}
-        TASK: ${{ matrix.task }}
-      shell: bash
-      run: "set -euo pipefail\nfresh=\"$RUNNER_TEMP/restored-source\"\nmkdir \"$fresh\"\
-        \nsha256sum -c \"$RUNNER_TEMP/source.sha256\"\ntar xf \"$RUNNER_TEMP/sources.tar\"\
-        \ -C \"$fresh\"\npython3 scripts/build-dependency-vault.py restore \"$RUNNER_TEMP/vault\"\
-        \ \"$RUNNER_TEMP/restored-deps\"\nexport GRADLE_USER_HOME=\"$RUNNER_TEMP/restored-deps/gradle-home\"\
-        \ncd \"$fresh/apps/$PLATFORM\"\nchmod +x gradlew\nsudo --preserve-env=GRADLE_USER_HOME,ANDROID_HOME,ANDROID_SDK_ROOT,JAVA_HOME,TASK\
-        \ unshare --net -- bash -ec '\n  ip link set lo up\n  test -z \"$(ip route\
-        \ show default)\"\n  test \"$(ip -o link show | wc -l)\" -eq 1\n  exec runuser\
-        \ -u \"$SUDO_USER\" --preserve-environment -- ./gradlew \"$TASK\" -Pkovelyx.app.versionName=1.1.1253\
-        \ -Pkovelyx.app.versionCode=101253 --offline --rerun-tasks --no-daemon --max-workers=1\
-        \ --no-build-cache --no-configuration-cache -Pkotlin.compiler.execution.strategy=in-process\
-        \ \"-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m\"\n'\nmapfile -t\
-        \ apks < <(find . -path '*/build/outputs/apk/*' -name '*.apk')\ntest \"${#apks[@]}\"\
-        \ -gt 0\nfor apk in \"${apks[@]}\"; do unzip -tq \"$apk\" >/dev/null; sha256sum\
-        \ \"$apk\"; done\n"
-  linux:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 80
-    env:
-      KOVELYX_BUILD_VERSION: 1.1.1253
-    steps:
-    - uses: actions/checkout@v4
-      with: *id001
-    - *id002
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-    - *id003
-    - name: Bloquer les domaines amont
-      shell: bash
-      run: "set -euo pipefail\nfor host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv\
-        \ cdn.nuvio.tv nuvioapp.space; do\n  echo \"127.0.0.1 $host\" | sudo tee -a\
-        \ /etc/hosts >/dev/null\ndone\ngit config --global url.\"https://blocked.invalid/NuvioMedia/\"\
-        .insteadOf \"https://github.com/NuvioMedia/\"\n"
-    - name: Installer les bibliothèques Linux et outils de packaging
-      shell: bash
-      run: "set -euo pipefail\nbash apps/desktop/scripts/linux/install-desktop-build-dependencies.sh\
-        \ \\\n  rpm rpm2cpio cpio fakeroot libwebkit2gtk-4.1-0 libmpv2 \\\n  libxcomposite1\
-        \ libxext6 gstreamer1.0-plugins-good gstreamer1.0-libav \\\n  glib-networking\
-        \ squashfs-tools desktop-file-utils\n"
-    - name: Générer les icônes et ressources à l'identité Kovelyx
-      shell: bash
-      run: 'set -euo pipefail
-
-        python3 -m pip install --disable-pip-version-check ''Pillow==11.3.0''
-
-        python3 scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
-
-        python3 scripts/generate-compose-brand.py --project apps/desktop
-
-        test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
-
-        '
-    - name: Préparer appimagetool
-      shell: bash
-      run: "set -euo pipefail\ntool=\"$RUNNER_TEMP/appimagetool-x86_64.AppImage\"\n\
-        curl --fail --location --retry 3 --connect-timeout 20 \\\n  'https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage'\
-        \ \\\n  --output \"$tool\"\necho \"e8c1169c4af66c3184d7ee110713d4be04befe671fa358e2c1591ee840553b03\
-        \  $tool\" | sha256sum -c -\ntest \"$(head -c 4 \"$tool\" | od -An -tx1 |\
-        \ tr -d '[:space:]')\" = 7f454c46\nchmod +x \"$tool\"\necho \"APPIMAGETOOL=$tool\"\
-        \ >> \"$GITHUB_ENV\"\n"
-    - name: Archiver les sources préparées avant la première compilation
-      shell: bash
-      run: "set -euo pipefail\ngit ls-files -co --exclude-standard -z > files.nul.tmp\n\
-        python - <<'PYFILE'\nfrom pathlib import Path\np=Path(\"files.nul.tmp\")\n\
-        paths=set(p.read_bytes().split(b\"\\0\"))-{b\"\",b\"files.nul.tmp\"}\nfor\
-        \ f in Path(\"apps/desktop/composeApp/src\").rglob(\"*\"):\n    if f.is_file():paths.add(f.as_posix().encode())\n\
-        p.write_bytes(b\"\\0\".join(sorted(paths))+b\"\\0\")\nPYFILE\ntar --null -T\
-        \ files.nul.tmp -cf \"$RUNNER_TEMP/source.tar\"\nsha256sum \"$RUNNER_TEMP/source.tar\"\
-        \ > \"$RUNNER_TEMP/sources.sha256\""
-    - name: Compiler le paquet Linux
-      working-directory: apps/desktop
-      shell: bash
-      run: 'chmod +x gradlew scripts/linux/*.sh
-
-        ./gradlew :composeApp:packageReleaseAppImage --no-daemon --max-workers=2 --no-configuration-cache
-        -Pnuvio.desktop.versionName=1.1.1253 "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m"'
-    - name: Restaurer les archives dans des répertoires vides
-      shell: bash
-      run: 'set -euo pipefail
-
-        sha256sum -c "$RUNNER_TEMP/sources.sha256"
-
-        python scripts/build-dependency-vault.py capture "$RUNNER_TEMP/coffre" --gradle-home
-        "${GRADLE_USER_HOME:-$HOME/.gradle}"
-
-        python scripts/build-dependency-vault.py restore "$RUNNER_TEMP/coffre" "$RUNNER_TEMP/deps"
-
-        mkdir "$RUNNER_TEMP/repris"
-
-        tar xf "$RUNNER_TEMP/source.tar" -C "$RUNNER_TEMP/repris"
-
-        echo "GRADLE_USER_HOME=$RUNNER_TEMP/deps/gradle-home" >> "$GITHUB_ENV"'
-    - name: Recompiler AppImage sans réseau extérieur
-      shell: bash
-      run: "set -euo pipefail\ncd \"$RUNNER_TEMP/repris/apps/desktop\"\nchmod +x gradlew\
-        \ scripts/linux/*.sh\nsudo --preserve-env=GRADLE_USER_HOME,JAVA_HOME,ANDROID_HOME,ANDROID_SDK_ROOT,APPIMAGETOOL\
-        \ unshare --net -- bash -ec '\n  ip link set lo up\n  test -z \"$(ip route\
-        \ show default)\"\n  exec runuser -u \"$SUDO_USER\" --preserve-environment\
-        \ -- ./gradlew :composeApp:packageReleaseAppImage --offline --rerun-tasks\
-        \ --no-configuration-cache --no-build-cache --no-daemon --max-workers=2 -Pnuvio.desktop.versionName=1.1.1253\
-        \ \"-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m\"\n'\nfind . -type\
-        \ f -name '*.AppImage' -size +1M > \"$RUNNER_TEMP/linux-proof\"\ntest -s \"\
-        $RUNNER_TEMP/linux-proof\"\nxargs -d '\\n' sha256sum < \"$RUNNER_TEMP/linux-proof\""
-    if: '!contains(github.event.head_commit.message, ''[TV]'')'
   windows:
     runs-on: windows-latest
     timeout-minutes: 80
@@ -157,12 +10,19 @@ jobs:
       KOVELYX_BUILD_VERSION: 1.1.1253
     steps:
     - uses: actions/checkout@v4
-      with: *id001
-    - *id002
+      with:
+        ref: a8b19afd42d82a7a7f29fc53eac745c3d5d6a583
+        persist-credentials: false
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '21'
     - uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    - *id003
+    - uses: gradle/actions/setup-gradle@v4
+      with:
+        cache-read-only: true
     - name: Bloquer les domaines amont
       shell: pwsh
       run: '$hostsFile = Join-Path $env:WINDIR ''System32/drivers/etc/hosts''
@@ -284,10 +144,25 @@ jobs:
 
         sha256sum -c "$RUNNER_TEMP/sources.sha256"
 
+        gradle_cache="$(cygpath -u "${GRADLE_USER_HOME:-$HOME/.gradle}")"
+
+        test -s "$gradle_cache/compose-jb/wix311.zip"
+
         python scripts/build-dependency-vault.py capture "$RUNNER_TEMP/coffre" --gradle-home
-        "${GRADLE_USER_HOME:-$HOME/.gradle}"
+        "$gradle_cache" --toolchain-file "wix=$gradle_cache/compose-jb/wix311.zip"
+        --toolchain-file "webview=$RUNNER_TEMP/kovelyx-webview2/sdk.zip"
 
         python scripts/build-dependency-vault.py restore "$RUNNER_TEMP/coffre" "$RUNNER_TEMP/deps"
+
+        mkdir -p "$RUNNER_TEMP/deps/gradle-home/compose-jb" "$RUNNER_TEMP/deps/webview-sdk"
+
+        cp "$RUNNER_TEMP/deps/toolchains/wix/wix311.zip" "$RUNNER_TEMP/deps/gradle-home/compose-jb/wix311.zip"
+
+        unzip -q "$RUNNER_TEMP/deps/toolchains/webview/sdk.zip" -d "$RUNNER_TEMP/deps/webview-sdk"
+
+        test -f "$RUNNER_TEMP/deps/webview-sdk/build/native/include/WebView2.h"
+
+        echo "WEBVIEW_DIR=$(cygpath -w "$RUNNER_TEMP/deps/webview-sdk")" >> "$GITHUB_ENV"
 
         mkdir "$RUNNER_TEMP/repris"
 
@@ -312,7 +187,6 @@ jobs:
         \ $LASTEXITCODE }\n\n$exe = Get-ChildItem composeApp/build/compose/binaries\
         \ -Recurse -Filter *.exe | Where-Object { $_.Directory.Name -eq \"exe\" }\n\
         if (-not $exe) { throw \"Installateur absent\" }; $exe | Get-FileHash"
-    if: '!contains(github.event.head_commit.message, ''[TV]'')'
 'on':
   push:
     branches:
