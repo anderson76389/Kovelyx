@@ -116,6 +116,10 @@
 # MPV (native JNI callbacks)
 # Native code reflects into multiple classes/methods under is.xyz.mpv,
 # so keep the whole package to avoid JNI lookup crashes after R8.
+# LibVLC resolves Java API types (including IMedia$Track) by name in JNI_OnLoad.
+-keep class org.videolan.libvlc.** { *; }
+-keep interface org.videolan.libvlc.** { *; }
+
 -keep class is.xyz.mpv.** { *; }
 
 # ── Missing class stubs (referenced by cloudstream3 / jsoup / newpipe) ────────
