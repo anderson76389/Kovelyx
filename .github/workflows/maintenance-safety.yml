@@ -53,5 +53,5 @@ jobs:
           separator=':'
           if [[ "$RUNNER_OS" == Windows ]]; then separator=';'; fi
           coroutines="$RUNNER_TEMP/kotlin/kotlinc/lib/kotlinx-coroutines-core-jvm.jar"
-          "$compiler" -opt-in=kotlin.time.ExperimentalTime -cp "$coroutines" shared/maintenance-ui/kotlin/com/kovelyx/maintenance/ui/SyncHealth.kt shared/maintenance/tests/SyncHealthTest.kt -include-runtime -d "$RUNNER_TEMP/sync-health-tests.jar"
+          "$compiler" -opt-in=kotlin.time.ExperimentalTime -cp "$coroutines" shared/maintenance-ui/kotlin/com/kovelyx/maintenance/ui/SyncHealth.kt shared/maintenance-ui/kotlin/com/kovelyx/maintenance/ui/PlaybackSyncCadence.kt shared/maintenance/tests/SyncHealthTest.kt -include-runtime -d "$RUNNER_TEMP/sync-health-tests.jar"
           java -cp "$RUNNER_TEMP/sync-health-tests.jar${separator}${coroutines}" com.kovelyx.maintenance.ui.SyncHealthTestKt

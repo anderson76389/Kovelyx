@@ -2,7 +2,6 @@
 
 package com.kovelyx.tv.ui.screens.home
 
-import androidx.compose.ui.layout.layout
 import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent as AndroidKeyEvent
