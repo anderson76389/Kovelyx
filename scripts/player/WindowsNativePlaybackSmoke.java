@@ -59,7 +59,6 @@ public final class WindowsNativePlaybackSmoke {
                 if (position >= 800 && duration >= 1800) break;
                 Thread.sleep(100);
             }
-            ImageIO.write(new Robot().createScreenCapture(frame.getBounds()), "png", new File(args[1]));
             if (position < 800 || duration < 1800) {
                 throw new AssertionError("Video never progressed: position=" + position + ", duration=" + duration);
             }
@@ -75,15 +74,18 @@ public final class WindowsNativePlaybackSmoke {
                     Thread.sleep(100);
                     long current = ((Number) positionMs.invoke(bridge, handle)).longValue();
                     long now = System.nanoTime();
-                    if (now - lastAdvance > 2_500_000_000L) {
-                        throw new AssertionError("1080p playback stalled, controlsVisible=" + visible);
+                    if (current > previous) {
+                        lastAdvance = now;
+                    } else if (now - lastAdvance > 2_500_000_000L) {
+                        throw new AssertionError("1080p playback stalled at " + current + "/" + duration +
+                            " ms, controlsVisible=" + visible);
                     }
-                    if (current > previous) lastAdvance = now;
                     previous = current;
                 }
                 if (previous - start < 2500) throw new AssertionError("Insufficient 1080p progression");
                 System.out.println("1080p: controlsVisible=" + visible + ", advanced " + (previous - start) + " ms");
             }
+            ImageIO.write(new Robot().createScreenCapture(frame.getBounds()), "png", new File(args[1]));
             System.out.println("PASS: native MP4 playback, position=" + position + ", duration=" + duration);
             type.getMethod("dispose", long.class).invoke(bridge, handle);
             handle = 0;
