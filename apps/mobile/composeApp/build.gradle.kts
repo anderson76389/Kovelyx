@@ -435,6 +435,7 @@ kotlin {
         androidMain {
             kotlin.srcDir(rootProject.file("../../shared/maintenance/kotlin"))
             kotlin.srcDir(rootProject.file("../../shared/maintenance-android/kotlin"))
+            kotlin.srcDir(rootProject.file("../../shared/vlc-android/kotlin"))
             kotlin.srcDir(project.file(androidDistributionSourceDir))
             if (androidDistribution == "full") {
                 kotlin.srcDir(fullCommonSourceDir)
@@ -442,6 +443,7 @@ kotlin {
 
             dependencies {
                 implementation(libs.compose.uiToolingPreview)
+                implementation("org.videolan.android:libvlc-all:3.7.8")
                 implementation(libs.androidx.appcompat)
                 implementation(libs.androidx.activity.compose)
                 implementation("androidx.lifecycle:lifecycle-process:2.10.0")

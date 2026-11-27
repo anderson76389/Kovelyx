@@ -104,7 +104,6 @@ android {
         }
     }
 
-    sourceSets.getByName("main").java.srcDir(rootProject.file("../../shared/vlc-android/kotlin"))
 
     sourceSets.getByName("full") {
         manifest.srcFile("src/full/AndroidManifest.xml")
@@ -206,7 +205,6 @@ sentry {
 }
 
 dependencies {
-    implementation("org.videolan.android:libvlc-all:3.7.8")
     implementation(project(":composeApp"))
     implementation(libs.androidx.appcompat)
     implementation(libs.compose.runtime)
