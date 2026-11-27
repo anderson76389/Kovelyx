@@ -311,16 +311,17 @@ internal class ParallelRangeDataSource(
         }
 
         private fun teardownSessionLocked(session: ChunkSession, poolCap: Int) {
-            session.abandoned.set(true)
+            val indices = synchronized(session) {
+                session.abandoned.set(true)
+                session.futures.keys.toList()
+            }
             session.activeSources.forEach { ds ->
                 try { ds.close() } catch (_: Exception) {}
             }
             session.activeSources.clear()
-            val indices = session.futures.keys.toList()
             for (index in indices) {
                 evictFuture(session, index, poolCap)
             }
-            session.futures.clear()
             session.lastTouch.clear()
             session.inFlight.clear()
         }
@@ -1155,34 +1156,36 @@ internal class ParallelRangeDataSource(
     private fun ensureChunkScheduled(chunkIndex: Long) {
         val activeSession = session ?: return
 
-        enforceSessionCap(activeSession, protectIndex = chunkIndex, poolCap = maxPoolSize)
-        activeSession.futures.computeIfAbsent(chunkIndex) {
-            val future = CompletableFuture<DownloadedChunk>()
-            activeSession.touch(chunkIndex)
-            Log.d(TAG, "Scheduling chunk $chunkIndex")
-            sharedExecutor.execute {
-                try {
-                    if (!future.isCancelled && !activeSession.abandoned.get()) {
-                        val result = downloadChunk(activeSession, chunkIndex, future)
-                        if (!future.complete(result)) {
-                            releaseBuffer(result.buffer)
-                        }
-                    } else if (future.isCancelled) {
-
-                    } else {
-                        future.completeExceptionally(IOException("Session abandoned"))
-                    }
-                } catch (e: Exception) {
-                    future.completeExceptionally(e)
-                } catch (e: OutOfMemoryError) {
-
-                    drainIdleBuffers(activeSession.chunkSize)
-                    future.completeExceptionally(
-                        IOException("Native chunk buffer allocation failed (out of memory)", e)
-                    )
-                }
+        // Register ownership before work is submitted. Teardown snapshots all registered
+        // futures under this same lock, even if the worker has not started yet.
+        val future = synchronized(activeSession) {
+            if (activeSession.abandoned.get() || activeSession.futures.containsKey(chunkIndex)) return
+            enforceSessionCap(activeSession, protectIndex = chunkIndex, poolCap = maxPoolSize)
+            CompletableFuture<DownloadedChunk>().also {
+                activeSession.futures[chunkIndex] = it
+                activeSession.touch(chunkIndex)
             }
-            future
+        }
+        Log.d(TAG, "Scheduling chunk $chunkIndex")
+        sharedExecutor.execute {
+            try {
+                if (!future.isCancelled && !activeSession.abandoned.get()) {
+                    val result = downloadChunk(activeSession, chunkIndex, future)
+                    if (!future.complete(result)) {
+                        releaseBuffer(result.buffer)
+                    }
+                } else if (!future.isCancelled) {
+                    future.completeExceptionally(IOException("Session abandoned"))
+                }
+            } catch (e: Exception) {
+                future.completeExceptionally(e)
+            } catch (e: OutOfMemoryError) {
+
+                drainIdleBuffers(activeSession.chunkSize)
+                future.completeExceptionally(
+                    IOException("Native chunk buffer allocation failed (out of memory)", e)
+                )
+            }
         }
     }
 
