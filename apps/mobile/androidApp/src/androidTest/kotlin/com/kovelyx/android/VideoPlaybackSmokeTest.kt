@@ -1,10 +1,15 @@
 package com.kovelyx.android
 
+import android.app.Activity
+import android.content.Intent
 import android.util.Base64
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.kovelyx.app.core.ui.KovelyxTheme
@@ -51,6 +56,32 @@ class VideoPlaybackSmokeTest {
 
     @Test fun exoPlayerSurfaceReadsH264() = play(AndroidPlaybackEngine.ExoPlayer)
     @Test fun libmpvSurfaceReadsH264() = play(AndroidPlaybackEngine.Libmpv)
+
+    @Test fun bundledVlcFinishesH264AndReturnsPlaybackResult() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val context = instrumentation.targetContext
+        val downloads = File(context.filesDir, "downloads").apply { mkdirs() }
+        val fixture = File.createTempFile("vlc-smoke-", ".mp4", downloads)
+        try {
+            instrumentation.context.assets.open("media3-smoke.mp4.b64").use {
+                fixture.writeBytes(Base64.decode(it.readBytes(), Base64.DEFAULT))
+            }
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", fixture)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setClassName(context, "com.kovelyx.player.VlcPlaybackActivity")
+                setDataAndType(uri, "video/mp4")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            ActivityScenario.launchActivityForResult<Activity>(intent).use { scenario ->
+                compose.waitUntil(30_000) { scenario.state == Lifecycle.State.DESTROYED }
+                val result = scenario.result
+                assertTrue("VLC must successfully finish the episode", result.resultCode == Activity.RESULT_OK)
+                assertTrue("VLC must reach the end", result.resultData?.getStringExtra("end_by") == "playback_completion")
+            }
+        } finally {
+            fixture.delete()
+        }
+    }
 
     @Test fun displayRangeUsesOnlySupportedModesUpTo144HzWithoutChangingResolution() {
         val activity = AtomicReference<android.app.Activity>()
