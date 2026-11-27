@@ -3029,12 +3029,17 @@ window.playerUpdate = update => {
     window.clearTimeout(pendingPlaybackTimer);
     pendingPlaybackTimer = 0;
   }
+  const isPlaying = pendingIsPlaying === null ? nativeIsPlaying : pendingIsPlaying;
+  const isLoading = Boolean(update.loading || update.isLoading);
+  const steadyPlayback = hasReceivedPlayerControls && isPlaying && state.isPlaying &&
+    !isLoading && !state.isLoading && state.durationMs === durationMs &&
+    volumeLevel === state.volumeLevel && !audioTracksChanged && !subtitleTracksChanged;
   state = {
     ...state,
     durationMs,
     positionMs,
-    isPlaying: pendingIsPlaying === null ? nativeIsPlaying : pendingIsPlaying,
-    isLoading: Boolean(update.loading || update.isLoading),
+    isPlaying,
+    isLoading,
     volumeLevel,
     audioTracks,
     subtitleTracks,
@@ -3052,6 +3057,11 @@ window.playerUpdate = update => {
       activeSubtitleLanguageKey = selected.languageKey;
       pendingSubtitleOptionId = selected.id;
     }
+  }
+  // A clock tick only changes the timeline. Hidden controls catch up on the next reveal.
+  if (steadyPlayback) {
+    if (state.controlsVisible && !isScrubbing) setProgress(positionMs, durationMs);
+    return;
   }
   renderChrome();
   if ((audioTracksChanged && activeModal === "audio") ||
