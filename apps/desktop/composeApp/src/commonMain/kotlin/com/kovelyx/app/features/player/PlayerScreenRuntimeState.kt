@@ -247,7 +247,7 @@ internal class PlayerScreenRuntime(
     var showVideoSettingsModal by mutableStateOf(false)
     var showStreamInfo by mutableStateOf(false)
     var streamMediaInfo by mutableStateOf(PlayerMediaInfo())
-    var playbackEngineOverride by mutableStateOf<AndroidPlaybackEngine?>(null)
+    var playbackEngineOverride by mutableStateOf(args.launchId?.let(PlayerLaunchStore::get)?.requestedEngine)
     var audioTracks by mutableStateOf<List<AudioTrack>>(emptyList())
     var serverAudioTracks by mutableStateOf<List<AudioTrack>>(emptyList())
     var serverSubtitleTracks by mutableStateOf<List<SubtitleTrack>>(emptyList())

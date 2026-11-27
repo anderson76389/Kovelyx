@@ -709,6 +709,15 @@ internal fun MainAppContent(
     val activePlaybackProfileId = profileState.activeProfile?.profileIndex ?: ProfileRepository.activeProfileId
     val launchExternalPlayer = rememberExternalPlayerLauncher { result ->
         if (result != null) {
+            val previous = lastExternalPlayerLaunch
+            val requested = result.requestedEngine
+            if (requested != null && previous != null && previous.profileId == activePlaybackProfileId) {
+                val resumed = previous.copy(initialPositionMs = result.positionMs, initialProgressFraction = null, requestedEngine = requested)
+                val id = PlayerLaunchStore.put(resumed)
+                navController.navigate(PlayerRoute(launchId = id, title = resumed.title)) {
+                    if (currentRoute is PlayerRoute) popUpTo<PlayerRoute> { inclusive = true }
+                }
+            }
             val fallbackSession = lastExternalPlayerLaunch?.externalPlaybackSession()
             coroutineScope.launch {
                 recordExternalPlaybackProgress(result, fallbackSession)

@@ -61,6 +61,11 @@ typedef struct mpv_event {
     uint64_t reply_userdata;
     void *data;
 } mpv_event;
+typedef struct mpv_event_property {
+    const char *name;
+    mpv_format format;
+    void *data;
+} mpv_event_property;
 typedef struct mpv_event_end_file {
     int reason;
     int error;
@@ -1883,6 +1888,7 @@ private:
                 throw std::runtime_error(std::string("mpv_initialize failed: ") + api.errorText(initResult));
             }
 
+            observingCacheWait = api.observeProperty(mpv, 2, "paused-for-cache", MPV_FORMAT_FLAG) >= 0;
             observingTracks = api.observeProperty(mpv, 1, "track-list", MPV_FORMAT_NONE) >= 0;
             std::vector<const char *> loadCommand = {"loadfile", sourceUrl.c_str()};
             std::string loadOptions;
@@ -1974,6 +1980,7 @@ private:
     }
 
     bool diagnosticsVisible = false;
+    std::atomic_bool observingCacheWait{false};
     std::mutex diagnosticsMutex;
     bool waitingForCache = false;
     uint64_t cacheWaitStart = 0, completedWaitMs = 0, cacheWaitCount = 0;
@@ -2006,7 +2013,7 @@ private:
                << ",volumeLevel:" << volumeLevel
                << ",paused:" << (paused ? "true" : "false")
                << ",loading:" << (loading ? "true" : "false");
-        observeCacheWait(!paused && flagProperty("paused-for-cache", false));
+        if (!observingCacheWait) observeCacheWait(!paused && flagProperty("paused-for-cache", false));
         script << ",windowsDiagnostics:true";
         if (diagnosticsVisible) script << ",stats:" << playbackStatsJson();
         if (!observingTracks || tracksChanged.exchange(false)) {
@@ -2145,6 +2152,11 @@ private:
             if (!event) continue;
             if (event->event_id == MPV_EVENT_SHUTDOWN) {
                 return;
+            }
+            if (event->event_id == MPV_EVENT_PROPERTY_CHANGE && event->reply_userdata == 2 && event->data) {
+                const auto *property = static_cast<const mpv_event_property *>(event->data);
+                observeCacheWait(property->format == MPV_FORMAT_FLAG && property->data &&
+                                 *static_cast<const int *>(property->data) != 0);
             }
             if (event->event_id == MPV_EVENT_PROPERTY_CHANGE && event->reply_userdata == 1) {
                 tracksChanged.store(true);

@@ -1,3 +1,4 @@
 <resources>
     <string name="player_vlc_incompatible_headers">Ce flux exige des en-têtes que VLC ne transmet pas. Continue avec le lecteur intégré.</string>
+    <string name="player_vlc_not_installed">VLC (à installer sur cet ordinateur)</string>
 </resources>

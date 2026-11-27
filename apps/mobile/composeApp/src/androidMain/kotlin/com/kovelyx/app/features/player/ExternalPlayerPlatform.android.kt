@@ -74,7 +74,10 @@ internal actual object ExternalPlayerPlatform {
     ): Intent = Intent(Intent.ACTION_VIEW).apply {
         setDataAndType(uri, request.sourceUrl.videoMimeType())
         when (playerId) {
-            "libvlc" -> setClass(context, com.kovelyx.player.VlcPlaybackActivity::class.java)
+            "libvlc" -> {
+                setClass(context, com.kovelyx.player.VlcPlaybackActivity::class.java)
+                putExtra("kovelyx_engine_picker", true)
+            }
             "org.videolan.vlc" -> setPackage(playerId)
         }
         addCategory(Intent.CATEGORY_DEFAULT)

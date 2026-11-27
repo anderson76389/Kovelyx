@@ -28,7 +28,8 @@ data class ExternalPlayerInput(
     // Pre-resolved intro/outro skip segments as a JSON array string
     // (`[{"type","start","end"}]`, times in seconds). Read by mpvNova.
     val skipSegmentsJson: String? = null,
-    val preference: com.kovelyx.tv.data.local.PlayerPreference? = null
+    val preference: com.kovelyx.tv.data.local.PlayerPreference? = null,
+    val allowEngineReturn: Boolean = false,
 )
 
 /**
@@ -38,7 +39,8 @@ data class ExternalPlayerInput(
 data class ExternalPlayerResult(
     val positionMs: Long,
     val durationMs: Long?,
-    val endedByUser: Boolean = true
+    val endedByUser: Boolean = true,
+    val returnEngine: String? = null,
 )
 
 /**
@@ -63,6 +65,7 @@ class ExternalPlayerResultContract : ActivityResultContract<ExternalPlayerInput,
                 com.kovelyx.tv.data.local.PlayerPreference.VLC_EXTERNAL -> setPackage("org.videolan.vlc")
                 else -> Unit
             }
+            if (input.allowEngineReturn) putExtra("kovelyx_engine_picker", true)
             setDataAndType(Uri.parse(input.url), "video/*")
 
             input.title?.let {
@@ -149,7 +152,8 @@ class ExternalPlayerResultContract : ActivityResultContract<ExternalPlayerInput,
         android.util.Log.d("ExtPlayerContract", "parseResult: resultCode=$resultCode, intent=$intent, extras=${intent?.extras?.keySet()?.toList()}")
         val data = intent ?: return null
 
-        val position = parsePosition(data)
+        val returnEngine = data.getStringExtra("kovelyx_return_engine")?.takeIf { it == "Libmpv" || it == "ExoPlayer" }
+        val position = parsePosition(data) ?: if (returnEngine != null) 0L else null
         val duration = parseDuration(data)
         // MX Player / Just Player / mpvNova report the end reason here (vanilla mpv-android and
         // VLC do not).
@@ -191,7 +195,8 @@ class ExternalPlayerResultContract : ActivityResultContract<ExternalPlayerInput,
         return ExternalPlayerResult(
             positionMs = effectivePosition,
             durationMs = duration,
-            endedByUser = endedByUser
+            endedByUser = endedByUser,
+            returnEngine = returnEngine,
         )
     }
 

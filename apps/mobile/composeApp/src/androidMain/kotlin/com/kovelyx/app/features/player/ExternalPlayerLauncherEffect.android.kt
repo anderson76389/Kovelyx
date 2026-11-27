@@ -17,6 +17,7 @@ actual fun rememberExternalPlayerLauncher(
                 positionMs = it.positionMs,
                 durationMs = it.durationMs,
                 endedByUser = it.endedByUser,
+                requestedEngine = it.requestedEngine,
             )
         }
         onResult(commonResult)

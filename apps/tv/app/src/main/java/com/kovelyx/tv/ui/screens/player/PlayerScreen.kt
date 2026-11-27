@@ -243,14 +243,27 @@ fun PlayerScreen(
 
     val currentOnPlaybackEnded by rememberUpdatedState(onPlaybackEnded)
     val currentOnBackPress by rememberUpdatedState(onBackPress)
-    fun handoff(preference: com.kovelyx.tv.data.local.PlayerPreference?) {
+    val embeddedVlc = androidx.activity.compose.rememberLauncherForActivityResult(
+        com.kovelyx.tv.core.player.ExternalPlayerResultContract()
+    ) { result ->
+        externalHandoffInProgress = false
+        if (result != null) {
+            viewModel.onEvent(PlayerEvent.OnSeekTo(result.positionMs))
+            val target = result.returnEngine
+            val usingMpv = uiState.internalPlayerEngine == InternalPlayerEngine.MVP_PLAYER
+            if (target != null && (target == "Libmpv") != usingMpv) {
+                viewModel.onEvent(PlayerEvent.OnSwitchInternalPlayerEngine)
+            }
+        }
+    }
+    fun openExternalPlayer() {
         if (!externalHandoffInProgress) {
             externalHandoffInProgress = true
             val timeline = viewModel.playbackTimeline.value
             val completed = !timeline.isLive &&
                 timeline.duration > 0L &&
                 (timeline.currentPosition.toFloat() / timeline.duration.toFloat()) >= WatchProgress.COMPLETED_THRESHOLD
-            viewModel.launchInExternalPlayer(context, timeline.currentPosition, preference) { launched ->
+            viewModel.launchInExternalPlayer(context, timeline.currentPosition) { launched ->
                 externalHandoffInProgress = false
                 if (launched && !exitDispatched) {
                     exitDispatched = true
@@ -1399,7 +1412,7 @@ fun PlayerScreen(
                         viewModel.onEvent(PlayerEvent.OnShowMoreDialog)
                     }
                 },
-                onOpenInExternalPlayer = { handoff(null) }.takeUnless { uiState.isServerStream },
+                onOpenInExternalPlayer = { openExternalPlayer() }.takeUnless { uiState.isServerStream },
                 onShowStreamInfo = {
                     restoreStreamInfoFocus = true
                     viewModel.onEvent(PlayerEvent.OnShowStreamInfo)
@@ -1748,7 +1761,25 @@ fun PlayerScreen(
                     if (choice == "VLC") {
                         if (viewModel.getCurrentHeaders().keys.any { !it.equals("user-agent", true) && !it.equals("referer", true) }) {
                             android.widget.Toast.makeText(context, R.string.vlc_incompatible_headers, android.widget.Toast.LENGTH_LONG).show()
-                        } else handoff(com.kovelyx.tv.data.local.PlayerPreference.VLC)
+                        } else if (!externalHandoffInProgress) {
+                            val input = com.kovelyx.tv.core.player.ExternalPlayerInput(
+                                url = viewModel.getCurrentStreamUrl(),
+                                title = uiState.title,
+                                headers = viewModel.getCurrentHeaders(),
+                                resumePositionMs = viewModel.playbackTimeline.value.currentPosition,
+                                subtitles = uiState.addonSubtitles.map { sub ->
+                                    com.kovelyx.tv.core.player.SubtitleInput(sub.url, sub.getDisplayLanguage(), sub.lang)
+                                },
+                                preference = com.kovelyx.tv.data.local.PlayerPreference.VLC,
+                                allowEngineReturn = true,
+                            )
+                            externalHandoffInProgress = true
+                            try {
+                                embeddedVlc.launch(input)
+                            } catch (_: android.content.ActivityNotFoundException) {
+                                externalHandoffInProgress = false
+                            }
+                        }
                     } else if (choice != current) viewModel.onEvent(PlayerEvent.OnSwitchInternalPlayerEngine)
                 },
                 onDismiss = { viewModel.onEvent(PlayerEvent.OnDismissTransientOverlay) }

@@ -301,7 +301,6 @@ class PlayerViewModel @Inject constructor(
     fun launchInExternalPlayer(
         activityContext: Context,
         resumePositionMs: Long,
-        preference: com.kovelyx.tv.data.local.PlayerPreference? = null,
         onResult: (Boolean) -> Unit
     ) {
         val url = controller.getCurrentStreamUrl()
@@ -373,7 +372,6 @@ class PlayerViewModel @Inject constructor(
                     subtitles = cachedSubtitles,
                     nextEpisodeSnapshot = nextEpisodeSnapshot,
                     cloudSessionToken = controller.cloudSessionToken,
-                    preferenceOverride = preference,
                     context = activityContext
                 )
             } catch (_: Exception) {

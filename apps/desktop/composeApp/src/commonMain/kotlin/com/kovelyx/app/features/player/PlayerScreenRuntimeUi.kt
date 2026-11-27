@@ -268,7 +268,7 @@ internal fun PlayerScreenRuntime.RenderPlayerRuntimeUi() {
         audioLabel = stringResource(Res.string.compose_player_audio),
         sourcesLabel = stringResource(Res.string.compose_player_sources),
         episodesLabel = stringResource(Res.string.compose_player_episodes),
-        externalPlayerLabel = stringResource(Res.string.streams_open_external_player),
+        externalPlayerLabel = stringResource(Res.string.cd_switch_player_engine),
         playLabel = stringResource(Res.string.detail_btn_play),
         pauseLabel = stringResource(Res.string.compose_action_pause),
         closeLabel = stringResource(Res.string.compose_player_close),

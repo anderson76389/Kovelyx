@@ -13,6 +13,7 @@ data class ExternalPlayerResult(
     val positionMs: Long,
     val durationMs: Long?,
     val endedByUser: Boolean = true,
+    val requestedEngine: AndroidPlaybackEngine? = null,
 )
 
 /**
@@ -34,6 +35,9 @@ class ExternalPlayerActivityContract : ActivityResultContract<Intent, ExternalPl
         // Some players return RESULT_OK, others return RESULT_CANCELED even on normal exit.
         // We try to parse position regardless of resultCode.
         val data = intent ?: return null
+        val requestedEngine = AndroidPlaybackEngine.entries.firstOrNull {
+            it != AndroidPlaybackEngine.Auto && it.name == data.getStringExtra("kovelyx_return_engine")
+        }
         val endedByUser = parseEndReason(data)
         val duration = parseDuration(data)
         // MX Player omits both "position" and "duration" once a file has played to completion, so a
@@ -41,6 +45,7 @@ class ExternalPlayerActivityContract : ActivityResultContract<Intent, ExternalPl
         // additionally gated on RESULT_OK so an errored playback cannot be recorded as watched.
         val parsedPosition = parsePosition(data)
         val position = when {
+            requestedEngine != null -> parsedPosition ?: 0L
             parsedPosition != null -> parsedPosition
             !endedByUser && resultCode == Activity.RESULT_OK -> duration ?: 0L
             else -> return null
@@ -50,6 +55,7 @@ class ExternalPlayerActivityContract : ActivityResultContract<Intent, ExternalPl
             positionMs = position,
             durationMs = duration,
             endedByUser = endedByUser,
+            requestedEngine = requestedEngine,
         )
     }
 

@@ -116,6 +116,7 @@ internal fun PlayerDestination(
         }
         ExternalPlayerSelectionDialog(
             players = choices,
+            enabled = { player -> !request.incompatibleWithVlc(player.id) && player.id != "missing-vlc" },
             title = stringResource(Res.string.cd_switch_player_engine),
             selectedPlayerId = "current-internal",
             onDismiss = { pendingExternal = null },
@@ -130,29 +131,15 @@ internal fun PlayerDestination(
                     KovelyxToastController.show(warning)
                     return@select
                 }
-                val playerLaunch = PlayerLaunch(
-                    profileId = launch.profileId,
-                    title = launch.title,
+                val playerLaunch = launch.copy(
                     sourceUrl = request.sourceUrl,
                     sourceHeaders = request.sourceHeaders,
-                    logo = launch.logo,
-                    poster = launch.poster,
-                    background = launch.background,
-                    seasonNumber = launch.seasonNumber,
-                    episodeNumber = launch.episodeNumber,
-                    episodeTitle = launch.episodeTitle,
-                    episodeThumbnail = launch.episodeThumbnail,
                     streamTitle = request.streamTitle ?: launch.streamTitle,
-                    streamSubtitle = launch.streamSubtitle,
-                    bingeGroup = launch.bingeGroup,
-                    pauseDescription = launch.pauseDescription,
-                    providerName = launch.providerName,
-                    providerAddonId = launch.providerAddonId,
-                    contentType = launch.contentType,
-                    videoId = launch.videoId,
-                    parentMetaId = launch.parentMetaId,
-                    parentMetaType = launch.parentMetaType,
+                    seasonNumber = request.season ?: launch.seasonNumber,
+                    episodeNumber = request.episode ?: launch.episodeNumber,
+                    episodeTitle = request.episodeTitle ?: launch.episodeTitle,
                     initialPositionMs = request.resumePositionMs,
+                    initialProgressFraction = null,
                 )
                 onExternalPlayerLaunch(playerLaunch)
                 val intentResult = ExternalPlayerPlatform.buildIntent(

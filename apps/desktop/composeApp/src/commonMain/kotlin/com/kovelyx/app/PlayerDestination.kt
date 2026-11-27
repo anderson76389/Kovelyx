@@ -129,10 +129,12 @@ internal fun PlayerDestination(
         val currentLabel = if (activeEngine == AndroidPlaybackEngine.Libmpv) "libmpv (β)" else activeEngine?.label ?: if (isDesktop) "mpv" else stringResource(Res.string.settings_playback_player_preference_internal)
         val available = remember(request) { ExternalPlayerPlatform.availablePlayers() }
         val warning = stringResource(Res.string.player_vlc_incompatible_headers)
+        val vlcMissing = stringResource(Res.string.player_vlc_not_installed)
         val choices = buildList {
             add(ExternalPlayerApp("current-internal", currentLabel))
             if (activeEngine != null) add(ExternalPlayerApp("other-internal", if (other == AndroidPlaybackEngine.Libmpv) "libmpv (β)" else other.label))
-            addAll(available.map { player ->
+            if (isDesktop && available.none { it.id == "vlc" }) add(ExternalPlayerApp("missing-vlc", vlcMissing))
+            addAll(available.filter { it.id != "system" || !isDesktop || request.sourceUrl.startsWith("file:", true) }.map { player ->
                 if (request.incompatibleWithVlc(player.id))
                     player.copy(name = "${player.name} — $warning")
                 else player
@@ -140,6 +142,7 @@ internal fun PlayerDestination(
         }
         ExternalPlayerSelectionDialog(
             players = choices,
+            enabled = { player -> !request.incompatibleWithVlc(player.id) && player.id != "missing-vlc" },
             title = stringResource(Res.string.cd_switch_player_engine),
             selectedPlayerId = "current-internal",
             onDismiss = { pendingExternal = null },
@@ -154,29 +157,15 @@ internal fun PlayerDestination(
                     KovelyxToastController.show(warning)
                     return@select
                 }
-                val playerLaunch = PlayerLaunch(
-                    profileId = launch.profileId,
-                    title = launch.title,
+                val playerLaunch = launch.copy(
                     sourceUrl = request.sourceUrl,
                     sourceHeaders = request.sourceHeaders,
-                    logo = launch.logo,
-                    poster = launch.poster,
-                    background = launch.background,
-                    seasonNumber = launch.seasonNumber,
-                    episodeNumber = launch.episodeNumber,
-                    episodeTitle = launch.episodeTitle,
-                    episodeThumbnail = launch.episodeThumbnail,
                     streamTitle = request.streamTitle ?: launch.streamTitle,
-                    streamSubtitle = launch.streamSubtitle,
-                    bingeGroup = launch.bingeGroup,
-                    pauseDescription = launch.pauseDescription,
-                    providerName = launch.providerName,
-                    providerAddonId = launch.providerAddonId,
-                    contentType = launch.contentType,
-                    videoId = launch.videoId,
-                    parentMetaId = launch.parentMetaId,
-                    parentMetaType = launch.parentMetaType,
+                    seasonNumber = request.season ?: launch.seasonNumber,
+                    episodeNumber = request.episode ?: launch.episodeNumber,
+                    episodeTitle = request.episodeTitle ?: launch.episodeTitle,
                     initialPositionMs = request.resumePositionMs,
+                    initialProgressFraction = null,
                 )
                 onExternalPlayerLaunch(playerLaunch)
                 val intentResult = ExternalPlayerPlatform.buildIntent(
