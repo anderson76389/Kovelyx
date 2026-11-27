@@ -15,10 +15,13 @@ class TmdbImageUrlsTest {
     }
 
     @Test
-    fun `other tmdb sizes remain unchanged`() {
-        val posterUrl = "https://image.tmdb.org/t/p/w500/poster.jpg"
-
-        assertEquals(posterUrl, originalTmdbImageUrl(posterUrl))
+    fun `full width artwork upgrades smaller TMDB variants and preserves the path and query`() {
+        for (size in listOf("w500", "w780", "h632", "original")) {
+            assertEquals(
+                "https://image.tmdb.org/t/p/original/art.jpg?language=fr",
+                originalTmdbImageUrl("https://image.tmdb.org/t/p/$size/art.jpg?language=fr"),
+            )
+        }
     }
 
     @Test
