@@ -1715,28 +1715,36 @@ class MetaDetailsViewModel @Inject constructor(
         }
     }
 
+    private class SeasonIndex(val videos: List<Video>, val television: Boolean) {
+        private val groups = if (television) {
+            videos.asSequence()
+                .filter { it.season != null || it.episode != null }
+                .map { if (it.season == null) it.copy(season = 0) else it }
+                .groupBy { it.season }
+        } else {
+            videos.groupBy { it.season }
+        }
+        private val synthetic by lazy {
+            videos.mapIndexed { index, video -> video.copy(season = 1, episode = index + 1) }
+        }
+
+        fun episodes(season: Int): List<Video> {
+            val group = groups[season]
+            if (group != null) return group.sortedBy { it.episode }
+            if (!television && groups.size == 1 && null in groups) return synthetic
+            return emptyList()
+        }
+    }
+
+    private var seasonIndex: SeasonIndex? = null
+
+    @Synchronized
     private fun getEpisodesForSeason(meta: Meta, season: Int): List<Video> {
         val videos = meta.videos
-        if (meta.apiType.equals("tv", ignoreCase = true)) {
-            // Match Mobile's groupedEpisodesForDisplay: ignore unnumbered EPG
-            // rows and group videos without a season under specials (season 0).
-            return videos
-                .filter { it.season != null || it.episode != null }
-                .filter { (it.season ?: 0) == season }
-                .map { if (it.season == null) it.copy(season = 0) else it }
-                .sortedBy { it.episode }
-        }
-        val filtered = videos.filter { it.season == season }
-        if (filtered.isNotEmpty()) return filtered.sortedBy { it.episode }
-        // Fallback: if no videos match the season (e.g. "other" type with
-        // null seasons), return all videos with synthetic season/episode
-        // numbers so the episode UI can track watched state.
-        if (videos.isNotEmpty() && videos.all { it.season == null }) {
-            return videos.mapIndexed { index, video ->
-                video.copy(season = 1, episode = index + 1)
-            }
-        }
-        return emptyList()
+        val television = meta.apiType.equals("tv", ignoreCase = true)
+        val index = seasonIndex?.takeIf { it.videos === videos && it.television == television }
+            ?: SeasonIndex(videos, television).also { seasonIndex = it }
+        return index.episodes(season)
     }
 
     private fun selectCommentsMode(mode: CommentsMode) {
