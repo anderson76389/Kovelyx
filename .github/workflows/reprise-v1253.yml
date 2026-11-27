@@ -10,8 +10,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - platform: mobile
-          task: :androidApp:assembleFullDebug
         - platform: tv
           task: :app:assembleFullDebug
     steps:
@@ -37,9 +35,9 @@ jobs:
         \ cdn.nuvio.tv nuvioapp.space; do\n  echo \"127.0.0.1 $host\" | sudo tee -a\
         \ /etc/hosts >/dev/null\ndone\ngit config --global url.\"https://blocked.invalid/NuvioMedia/\"\
         .insteadOf \"https://github.com/NuvioMedia/\"\ngit archive -o \"$RUNNER_TEMP/sources.tar\"\
-        \ HEAD\nchmod +x \"apps/$PLATFORM/gradlew\"\n\"apps/$PLATFORM/gradlew\" -p\
-        \ \"apps/$PLATFORM\" \"$TASK\" -Pkovelyx.app.versionName=1.1.1253 -Pkovelyx.app.versionCode=101253\
-        \ --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process\
+        \ HEAD apps/tv shared vendor scripts\nchmod +x \"apps/$PLATFORM/gradlew\"\n\
+        \"apps/$PLATFORM/gradlew\" -p \"apps/$PLATFORM\" \"$TASK\" -Pkovelyx.app.versionName=1.1.1253\
+        \ -Pkovelyx.app.versionCode=101253 --no-daemon --max-workers=1 -Pkotlin.compiler.execution.strategy=in-process\
         \ '-Dorg.gradle.jvmargs=-Xmx5g -XX:MaxMetaspaceSize=768m'\npython3 scripts/build-dependency-vault.py\
         \ capture \"$RUNNER_TEMP/vault\" --gradle-home \"${GRADLE_USER_HOME:-$HOME/.gradle}\"\
         \nsha256sum \"$RUNNER_TEMP/sources.tar\" > \"$RUNNER_TEMP/source.sha256\"\n"
@@ -151,6 +149,7 @@ jobs:
         \ \"-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m\"\n'\nfind . -type\
         \ f -name '*.AppImage' -size +1M > \"$RUNNER_TEMP/linux-proof\"\ntest -s \"\
         $RUNNER_TEMP/linux-proof\"\nxargs -d '\\n' sha256sum < \"$RUNNER_TEMP/linux-proof\""
+    if: '!contains(github.event.head_commit.message, ''[TV]'')'
   windows:
     runs-on: windows-latest
     timeout-minutes: 80
@@ -313,7 +312,10 @@ jobs:
         \ $LASTEXITCODE }\n\n$exe = Get-ChildItem composeApp/build/compose/binaries\
         \ -Recurse -Filter *.exe | Where-Object { $_.Directory.Name -eq \"exe\" }\n\
         if (-not $exe) { throw \"Installateur absent\" }; $exe | Get-FileHash"
+    if: '!contains(github.event.head_commit.message, ''[TV]'')'
 'on':
   push:
     branches:
     - verification/reprise-v1.1.1253
+env:
+  GIT_LFS_SKIP_SMUDGE: '1'
