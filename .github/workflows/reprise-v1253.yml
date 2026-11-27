@@ -3,8 +3,8 @@ permissions:
   contents: read
   actions: read
 jobs:
-  windows:
-    runs-on: windows-latest
+  linux:
+    runs-on: ubuntu-24.04
     timeout-minutes: 80
     env:
       KOVELYX_BUILD_VERSION: 1.1.1253
@@ -24,169 +24,97 @@ jobs:
       with:
         cache-read-only: true
     - name: Bloquer les domaines amont
-      shell: pwsh
-      run: '$hostsFile = Join-Path $env:WINDIR ''System32/drivers/etc/hosts''
+      shell: bash
+      run: "set -euo pipefail\nfor host in nuvio.tv www.nuvio.tv api.nuvio.tv auth.nuvio.tv\
+        \ cdn.nuvio.tv nuvioapp.space; do\n  echo \"127.0.0.1 $host\" | sudo tee -a\
+        \ /etc/hosts >/dev/null\ndone\ngit config --global url.\"https://blocked.invalid/NuvioMedia/\"\
+        .insteadOf \"https://github.com/NuvioMedia/\"\n"
+    - name: Installer les bibliothèques Linux et outils de packaging
+      shell: bash
+      run: "set -euo pipefail\nbash apps/desktop/scripts/linux/install-desktop-build-dependencies.sh\
+        \ \\\n  rpm rpm2cpio cpio fakeroot libwebkit2gtk-4.1-0 libmpv2 \\\n  libxcomposite1\
+        \ libxext6 gstreamer1.0-plugins-good gstreamer1.0-libav \\\n  glib-networking\
+        \ squashfs-tools desktop-file-utils\n"
+    - name: Générer les icônes et ressources à l'identité Kovelyx
+      shell: bash
+      run: 'set -euo pipefail
 
-        foreach ($domain in @(''nuvio.tv'',''www.nuvio.tv'',''api.nuvio.tv'',''auth.nuvio.tv'',''cdn.nuvio.tv'',''nuvioapp.space''))
-        { Add-Content $hostsFile "127.0.0.1 $domain"; Add-Content $hostsFile "::1
-        $domain" }
+        python3 -m pip install --disable-pip-version-check ''Pillow==11.3.0''
 
-        git config --global url.https://blocked.invalid/NuvioMedia/.insteadOf https://github.com/NuvioMedia/'
-    - name: Générer l'icône Kovelyx originale
-      shell: pwsh
-      run: 'python -m pip install --disable-pip-version-check ''Pillow==11.3.0''
+        python3 scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
 
-        python scripts/generate-windows-icon.py --dest apps/desktop/composeApp/src/desktopMain/resources/icons
+        python3 scripts/generate-compose-brand.py --project apps/desktop
 
-        python scripts/generate-compose-brand.py --project apps/desktop
-
-        if ($LASTEXITCODE -ne 0) { throw ''Génération des logos Kovelyx en échec''
-        }
-
-        if (-not (Test-Path ''apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.ico''))
-        { throw ''ICO Kovelyx manquant'' }
-
-        if (-not (Test-Path ''apps/desktop/composeApp/src/commonMain/composeResources/drawable/app_logo_wordmark_original.png''))
-        { throw ''Wordmark Kovelyx manquant'' }
+        test -s apps/desktop/composeApp/src/desktopMain/resources/icons/kovelyx.png
 
         '
-    - name: Restaurer la DLL MPV depuis Kovelyx uniquement
-      shell: pwsh
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: "$ErrorActionPreference = \"Stop\"\n$expected = '07c68bb211f23a218ded0a36eb12207dc3aeb44e5318ffca6ce9dcc7c3173906'\n\
-        $dst = 'apps/desktop/composeApp/src/desktopMain/native/windows/runtime'\n\
-        $restored = $false\n# Chemin rapide : sauvegarde temporaire produite par notre\
-        \ workflow.\n$runsJson = & gh api \"repos/$env:GITHUB_REPOSITORY/actions/workflows/native-windows.yml/runs?branch=main&status=success&per_page=10\"\
-        \nif ($LASTEXITCODE -eq 0) {\n  $runs = $runsJson | ConvertFrom-Json\n  $success\
-        \ = @($runs.workflow_runs | Where-Object { $_.conclusion -eq 'success' } |\
-        \ Select-Object -First 1)\n  if ($success.Count -eq 1) {\n    $root = Join-Path\
-        \ $env:RUNNER_TEMP 'kovelyx-mpv'\n    New-Item -ItemType Directory -Force\
-        \ -Path $root | Out-Null\n    & gh run download $success[0].id --repo $env:GITHUB_REPOSITORY\
-        \ --name kovelyx-windows-mpv --dir $root\n    $dll = Join-Path $root 'libmpv-2.dll'\n\
-        \    if ($LASTEXITCODE -eq 0 -and (Test-Path $dll)) {\n      $checksum = (Get-FileHash\
-        \ $dll -Algorithm SHA256).Hash.ToLowerInvariant()\n      if ($checksum -eq\
-        \ $expected -and (Get-Item $dll).Length -eq 115320296) {\n        New-Item\
-        \ -ItemType Directory -Force -Path $dst | Out-Null\n        Copy-Item -LiteralPath\
-        \ $dll -Destination (Join-Path $dst 'libmpv-2.dll') -Force\n        $restored\
-        \ = $true\n        Write-Host 'MPV vérifié depuis les artefacts Kovelyx.'\n\
-        \      }\n    }\n  }\n}\n# Chemin autonome durable : ZIP d'une Release Kovelyx,\
-        \ sans Nuvio.\nif (-not $restored) {\n  Write-Host 'Archive temporaire absente/expirée\
-        \ : restauration depuis les Releases Kovelyx.'\n  & ./scripts/restore-windows-mpv.ps1\n\
-        \  if ($LASTEXITCODE -ne 0) { throw 'Restauration autonome MPV en échec.'\
-        \ }\n}\n$file = Join-Path $dst 'libmpv-2.dll'\nif (-not (Test-Path $file))\
-        \ { throw 'Runtime MPV absent après la restauration.' }\n$actual = (Get-FileHash\
-        \ $file -Algorithm SHA256).Hash.ToLowerInvariant()\nif ($actual -ne $expected)\
-        \ { throw 'SHA-256 du runtime MPV invalide.' }\n\"### Runtime Windows vérifié\
-        \ depuis Kovelyx, indépendamment des dépôts Nuvio\" >> $env:GITHUB_STEP_SUMMARY\n"
-    - name: Préparer le SDK officiel Microsoft WebView2
-      id: webview
-      shell: pwsh
-      run: '$ErrorActionPreference = "Stop"
-
-        $version = "1.0.2739.15"
-
-        $dir = Join-Path $env:RUNNER_TEMP "kovelyx-webview2"
-
-        New-Item -ItemType Directory -Force -Path $dir | Out-Null
-
-        $package = Join-Path $dir "sdk.zip"
-
-        Invoke-WebRequest -Uri "https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/$version"
-        -OutFile $package
-
-        Expand-Archive -Path $package -DestinationPath (Join-Path $dir "sdk") -Force
-
-        $sdk = Join-Path $dir "sdk"
-
-        if (-not (Test-Path (Join-Path $sdk "build/native/include/WebView2.h"))) {
-        throw "WebView2.h introuvable." }
-
-        if (-not (Test-Path (Join-Path $sdk "build/native/x64/WebView2Loader.dll.lib")))
-        { throw "WebView2Loader.dll.lib introuvable." }
-
-        "WEBVIEW_DIR=$sdk" >> $env:GITHUB_ENV
-
-        Write-Host "SDK WebView2 $version prêt."
-
-        '
+    - name: Préparer appimagetool
+      shell: bash
+      run: "set -euo pipefail\ntool=\"$RUNNER_TEMP/appimagetool-x86_64.AppImage\"\n\
+        curl --fail --location --retry 3 --connect-timeout 20 \\\n  'https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage'\
+        \ \\\n  --output \"$tool\"\necho \"e8c1169c4af66c3184d7ee110713d4be04befe671fa358e2c1591ee840553b03\
+        \  $tool\" | sha256sum -c -\ntest \"$(head -c 4 \"$tool\" | od -An -tx1 |\
+        \ tr -d '[:space:]')\" = 7f454c46\nchmod +x \"$tool\"\necho \"APPIMAGETOOL=$tool\"\
+        \ >> \"$GITHUB_ENV\"\n\n# Preserve exactly the verified ELF runtime of Kovelyx\
+        \ 1.1.1253.\nkit=\"$RUNNER_TEMP/appimage-kit\"\nmkdir \"$kit\"\ncp \"$tool\"\
+        \ \"$kit/appimagetool\"\ncurl -fsSL --retry 3 https://github.com/anderson76389/Kovelyx/releases/download/v1.1.1253/Kovelyx-Linux-x86_64-v1.1.1253.AppImage\
+        \ -o \"$RUNNER_TEMP/reference.AppImage\"\necho \"1b07d63c4a1b68efc41671220d7498f59a88acfe314dda236b51defc8bfe71c5\
+        \  $RUNNER_TEMP/reference.AppImage\" | sha256sum -c -\nhead -c 944632 \"$RUNNER_TEMP/reference.AppImage\"\
+        \ > \"$kit/runtime\"\necho \"7c37584261184af846be352ae9f31659ba4fd63ff614c08a996aa17199ad390d\
+        \  $kit/runtime\" | sha256sum -c -\ncat > \"$kit/pack\" <<'PACK'\n#!/usr/bin/env\
+        \ bash\nset -eu\ndir=\"$(dirname \"$0\")\"\ntest \"$1\" = --appimage-extract-and-run\n\
+        shift\nexec \"$dir/appimagetool\" --appimage-extract-and-run --runtime-file\
+        \ \"$dir/runtime\" \"$@\"\nPACK\nchmod +x \"$kit/pack\"\ntar czf \"$RUNNER_TEMP/appimage-kit.tgz\"\
+        \ -C \"$kit\" .\necho \"APPIMAGETOOL=$kit/pack\" >> \"$GITHUB_ENV\"\n"
     - name: Archiver les sources préparées avant la première compilation
       shell: bash
-      run: "set -euo pipefail\nRUNNER_TEMP=\"$(cygpath -u \"$RUNNER_TEMP\")\"\ngit\
-        \ ls-files -co --exclude-standard -z > files.nul.tmp\npython - <<'PYFILE'\n\
-        from pathlib import Path\np=Path(\"files.nul.tmp\")\npaths=set(p.read_bytes().split(b\"\
-        \\0\"))-{b\"\",b\"files.nul.tmp\"}\nfor f in Path(\"apps/desktop/composeApp/src\"\
-        ).rglob(\"*\"):\n    if f.is_file():paths.add(f.as_posix().encode())\np.write_bytes(b\"\
-        \\0\".join(sorted(paths))+b\"\\0\")\nPYFILE\ntar --null -T files.nul.tmp -cf\
-        \ \"$RUNNER_TEMP/source.tar\"\nsha256sum \"$RUNNER_TEMP/source.tar\" > \"\
-        $RUNNER_TEMP/sources.sha256\""
-    - name: Compiler l'installateur MSI via Visual Studio et Gradle
+      run: "set -euo pipefail\ngit ls-files -co --exclude-standard -z > files.nul.tmp\n\
+        python - <<'PYFILE'\nfrom pathlib import Path\np=Path(\"files.nul.tmp\")\n\
+        paths=set(p.read_bytes().split(b\"\\0\"))-{b\"\",b\"files.nul.tmp\"}\nfor\
+        \ f in Path(\"apps/desktop/composeApp/src\").rglob(\"*\"):\n    if f.is_file():paths.add(f.as_posix().encode())\n\
+        p.write_bytes(b\"\\0\".join(sorted(paths))+b\"\\0\")\nPYFILE\ntar --null -T\
+        \ files.nul.tmp -cf \"$RUNNER_TEMP/source.tar\"\nsha256sum \"$RUNNER_TEMP/source.tar\"\
+        \ > \"$RUNNER_TEMP/sources.sha256\""
+    - name: Compiler le paquet Linux
       working-directory: apps/desktop
-      shell: pwsh
-      run: "$ErrorActionPreference = \"Stop\"\n$vswhere = \"C:/Program Files (x86)/Microsoft\
-        \ Visual Studio/Installer/vswhere.exe\"\n$vs = & $vswhere -latest -products\
-        \ \"*\" -property installationPath\nif (-not $vs) { throw \"Visual Studio\
-        \ C++ introuvable sur le runner Windows.\" }\n$vsdev = Join-Path $vs \"Common7/Tools/VsDevCmd.bat\"\
-        \nif (-not (Test-Path $vsdev)) { throw \"VsDevCmd.bat introuvable.\" }\n$batch\
-        \ = Join-Path $env:RUNNER_TEMP \"kovelyx-build-msi.bat\"\n@(\n  \"@echo off\"\
-        ,\n  \"call `\"$vsdev`\" -arch=x64 -host_arch=x64\",\n  \"if errorlevel 1\
-        \ exit /b 1\",\n  \"call .\\\\gradlew.bat :composeApp:packageReleaseExe --no-daemon\
-        \ --max-workers=2 --stacktrace `\"-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION`\"\
-        \ `\"-Pnuvio.webview2.dir=$env:WEBVIEW_DIR`\" `\"-Dorg.gradle.jvmargs=-Xmx4g\
-        \ -XX:MaxMetaspaceSize=768m`\"\",\n  \"exit /b %errorlevel%\"\n) | Set-Content\
-        \ -Path $batch -Encoding ASCII\n& $batch\nif ($LASTEXITCODE -ne 0) { exit\
-        \ $LASTEXITCODE }\n"
+      shell: bash
+      run: 'chmod +x gradlew scripts/linux/*.sh
+
+        ./gradlew :composeApp:packageReleaseAppImage --no-daemon --max-workers=2 --no-configuration-cache
+        -Pnuvio.desktop.versionName=1.1.1253 "-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m"'
     - name: Restaurer les archives dans des répertoires vides
       shell: bash
       run: 'set -euo pipefail
 
-        RUNNER_TEMP="$(cygpath -u "$RUNNER_TEMP")"
-
         sha256sum -c "$RUNNER_TEMP/sources.sha256"
 
-        gradle_cache="$(cygpath -u "${GRADLE_USER_HOME:-$HOME/.gradle}")"
-
-        test -s "$gradle_cache/compose-jb/wix311.zip"
-
         python scripts/build-dependency-vault.py capture "$RUNNER_TEMP/coffre" --gradle-home
-        "$gradle_cache" --toolchain-file "wix=$gradle_cache/compose-jb/wix311.zip"
-        --toolchain-file "webview=$RUNNER_TEMP/kovelyx-webview2/sdk.zip"
+        "${GRADLE_USER_HOME:-$HOME/.gradle}" --toolchain-file "appimage=$RUNNER_TEMP/appimage-kit.tgz"
 
         python scripts/build-dependency-vault.py restore "$RUNNER_TEMP/coffre" "$RUNNER_TEMP/deps"
 
-        mkdir -p "$RUNNER_TEMP/deps/gradle-home/compose-jb" "$RUNNER_TEMP/deps/webview-sdk"
+        mkdir "$RUNNER_TEMP/deps/appimage-kit"
 
-        cp "$RUNNER_TEMP/deps/toolchains/wix/wix311.zip" "$RUNNER_TEMP/deps/gradle-home/compose-jb/wix311.zip"
+        tar xf "$RUNNER_TEMP/deps/toolchains/appimage/appimage-kit.tgz" -C "$RUNNER_TEMP/deps/appimage-kit"
 
-        unzip -q "$RUNNER_TEMP/deps/toolchains/webview/sdk.zip" -d "$RUNNER_TEMP/deps/webview-sdk"
-
-        test -f "$RUNNER_TEMP/deps/webview-sdk/build/native/include/WebView2.h"
-
-        echo "WEBVIEW_DIR=$(cygpath -w "$RUNNER_TEMP/deps/webview-sdk")" >> "$GITHUB_ENV"
+        echo "APPIMAGETOOL=$RUNNER_TEMP/deps/appimage-kit/pack" >> "$GITHUB_ENV"
 
         mkdir "$RUNNER_TEMP/repris"
 
         tar xf "$RUNNER_TEMP/source.tar" -C "$RUNNER_TEMP/repris"
 
-        echo "GRADLE_USER_HOME=$(cygpath -w "$RUNNER_TEMP/deps/gradle-home")" >> "$GITHUB_ENV"'
-    - name: Recompiler le véritable EXE depuis le coffre
-      shell: pwsh
-      run: "Set-Location \"$env:RUNNER_TEMP/repris/apps/desktop\"\n$ErrorActionPreference\
-        \ = \"Stop\"\n$vswhere = \"C:/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe\"\
-        \n$vs = & $vswhere -latest -products \"*\" -property installationPath\nif\
-        \ (-not $vs) { throw \"Visual Studio C++ introuvable sur le runner Windows.\"\
-        \ }\n$vsdev = Join-Path $vs \"Common7/Tools/VsDevCmd.bat\"\nif (-not (Test-Path\
-        \ $vsdev)) { throw \"VsDevCmd.bat introuvable.\" }\n$batch = Join-Path $env:RUNNER_TEMP\
-        \ \"kovelyx-build-msi.bat\"\n@(\n  \"@echo off\",\n  \"call `\"$vsdev`\" -arch=x64\
-        \ -host_arch=x64\",\n  \"if errorlevel 1 exit /b 1\",\n  \"call .\\\\gradlew.bat\
-        \ :composeApp:packageReleaseExe --offline --no-build-cache --rerun-tasks --no-configuration-cache\
-        \ --no-daemon --max-workers=2 --stacktrace `\"-Pnuvio.desktop.versionName=$env:KOVELYX_BUILD_VERSION`\"\
-        \ `\"-Pnuvio.webview2.dir=$env:WEBVIEW_DIR`\" `\"-Dorg.gradle.jvmargs=-Xmx4g\
-        \ -XX:MaxMetaspaceSize=768m`\"\",\n  \"exit /b %errorlevel%\"\n) | Set-Content\
-        \ -Path $batch -Encoding ASCII\n& $batch\nif ($LASTEXITCODE -ne 0) { exit\
-        \ $LASTEXITCODE }\n\n$exe = Get-ChildItem composeApp/build/compose/binaries\
-        \ -Recurse -Filter *.exe | Where-Object { $_.Directory.Name -eq \"exe\" }\n\
-        if (-not $exe) { throw \"Installateur absent\" }; $exe | Get-FileHash"
+        echo "GRADLE_USER_HOME=$RUNNER_TEMP/deps/gradle-home" >> "$GITHUB_ENV"'
+    - name: Recompiler AppImage sans réseau extérieur
+      shell: bash
+      run: "set -euo pipefail\ncd \"$RUNNER_TEMP/repris/apps/desktop\"\nchmod +x gradlew\
+        \ scripts/linux/*.sh\nsudo --preserve-env=GRADLE_USER_HOME,JAVA_HOME,ANDROID_HOME,ANDROID_SDK_ROOT,APPIMAGETOOL\
+        \ unshare --net -- bash -ec '\n  ip link set lo up\n  test -z \"$(ip route\
+        \ show default)\"\n  exec runuser -u \"$SUDO_USER\" --preserve-environment\
+        \ -- ./gradlew :composeApp:packageReleaseAppImage --offline --rerun-tasks\
+        \ --no-configuration-cache --no-build-cache --no-daemon --max-workers=2 -Pnuvio.desktop.versionName=1.1.1253\
+        \ \"-Dorg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=768m\"\n'\nfind . -type\
+        \ f -name '*.AppImage' -size +1M > \"$RUNNER_TEMP/linux-proof\"\ntest -s \"\
+        $RUNNER_TEMP/linux-proof\"\nxargs -d '\\n' sha256sum < \"$RUNNER_TEMP/linux-proof\""
 'on':
   push:
     branches:
