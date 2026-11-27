@@ -385,6 +385,7 @@ class ExternalPlaybackTracker @Inject constructor(
         autoLaunch: Boolean = false,
         nextEpisodeSnapshot: ExternalNextEpisodeSnapshot? = null,
         cloudSessionToken: String? = null,
+        preferenceOverride: com.kovelyx.tv.data.local.PlayerPreference? = null,
         context: Context
     ): Boolean {
         if (shouldCancelPendingAutoLaunch(autoLaunch)) {
@@ -428,7 +429,7 @@ class ExternalPlaybackTracker @Inject constructor(
             } else {
                 withContext(Dispatchers.Main.immediate) {
                     doLaunch(
-                        preference = settings.playerPreference,
+                        preference = preferenceOverride ?: settings.playerPreference,
                         url = url,
                         title = title,
                         headers = headers,

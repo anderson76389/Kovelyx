@@ -94,11 +94,9 @@ internal fun PlayerControlActions(
     onSourcesClick: (() -> Unit)?,
     onEpisodesClick: (() -> Unit)?,
     onNextEpisodeClick: (() -> Unit)?,
-    onSwitchEngineClick: (() -> Unit)?,
-    onSpeedClick: () -> Unit,
+    onChoosePlayer: (() -> Unit)?,
     onResizeModeClick: () -> Unit,
     onVideoSettingsClick: (() -> Unit)?,
-    onOpenInExternalPlayer: (() -> Unit)?,
     onStreamInfoClick: () -> Unit,
     onSubmitIntroClick: (() -> Unit)?,
     onInteraction: () -> Unit,
@@ -130,26 +128,16 @@ internal fun PlayerControlActions(
                 painter = appIconPainter(AppIconResource.PlayerEpisodes),
             )
         },
-        onSwitchEngineClick?.let {
+        onChoosePlayer?.let {
             PlayerControlAction(
                 stringResource(Res.string.cd_switch_player_engine), it,
                 icon = Icons.Rounded.SwapHoriz,
             )
         },
         PlayerControlAction(
-            "${stringResource(Res.string.compose_player_speed)} ${formatPlaybackSpeedLabel(playbackSnapshot.playbackSpeed)}",
-            onSpeedClick, icon = Icons.Rounded.Speed,
-        ),
-        PlayerControlAction(
             stringResource(resizeMode.labelRes), onResizeModeClick,
             painter = appIconPainter(AppIconResource.PlayerAspectRatio),
         ),
-        onOpenInExternalPlayer?.let {
-            PlayerControlAction(
-                stringResource(Res.string.streams_open_external_player), it,
-                icon = Icons.AutoMirrored.Rounded.OpenInNew,
-            )
-        },
         PlayerControlAction(
             stringResource(Res.string.cd_stream_info), onStreamInfoClick,
             icon = Icons.Rounded.Info,

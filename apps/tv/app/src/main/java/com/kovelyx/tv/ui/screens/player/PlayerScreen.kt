@@ -243,6 +243,30 @@ fun PlayerScreen(
 
     val currentOnPlaybackEnded by rememberUpdatedState(onPlaybackEnded)
     val currentOnBackPress by rememberUpdatedState(onBackPress)
+    fun handoff(preference: com.kovelyx.tv.data.local.PlayerPreference?) {
+        if (!externalHandoffInProgress) {
+            externalHandoffInProgress = true
+            val timeline = viewModel.playbackTimeline.value
+            val completed = !timeline.isLive &&
+                timeline.duration > 0L &&
+                (timeline.currentPosition.toFloat() / timeline.duration.toFloat()) >= WatchProgress.COMPLETED_THRESHOLD
+            viewModel.launchInExternalPlayer(context, timeline.currentPosition, preference) { launched ->
+                externalHandoffInProgress = false
+                if (launched && !exitDispatched) {
+                    exitDispatched = true
+                    val (focusSeason, focusEpisode) = uiState.returnFocusSeasonEpisode(completed)
+                    currentOnBackPress(
+                        uiState.currentVideoId,
+                        focusSeason,
+                        focusEpisode,
+                        autoPlayEnabledForBack,
+                        completed
+                    )
+                }
+            }
+        }
+    }
+
     val currentOnPlayRecommendation by rememberUpdatedState(onPlayRecommendation)
     val currentOnOpenRecommendationDetails by rememberUpdatedState(onOpenRecommendationDetails)
     val nextEpisodeForEndPrompt = uiState.nextEpisode?.takeIf {
@@ -1362,12 +1386,11 @@ fun PlayerScreen(
                 onShowSourcesPanel = { viewModel.onEvent(PlayerEvent.OnShowSourcesPanel) },
                 onShowAudioDialog = { viewModel.onEvent(PlayerEvent.OnShowAudioOverlay) },
                 onShowSubtitleDialog = { viewModel.onEvent(PlayerEvent.OnShowSubtitleOverlay) },
-                onShowSpeedDialog = { viewModel.onEvent(PlayerEvent.OnShowSpeedDialog) },
                 onToggleAspectRatio = {
                     Log.d("PlayerScreen", "onToggleAspectRatio called - dispatching event")
                     viewModel.onEvent(PlayerEvent.OnToggleAspectRatio)
                 },
-                onSwitchPlayerEngine = { viewModel.onEvent(PlayerEvent.OnSwitchInternalPlayerEngine) },
+                onSwitchPlayerEngine = { viewModel.onEvent(PlayerEvent.OnShowSpeedDialog) },
                 onReportPlaybackIssue = { viewModel.onEvent(PlayerEvent.OnReportPlaybackIssue) },
                 onToggleMoreActions = {
                     if (uiState.showMoreDialog) {
@@ -1376,29 +1399,7 @@ fun PlayerScreen(
                         viewModel.onEvent(PlayerEvent.OnShowMoreDialog)
                     }
                 },
-                onOpenInExternalPlayer = {
-                    if (!externalHandoffInProgress) {
-                        externalHandoffInProgress = true
-                        val timeline = viewModel.playbackTimeline.value
-                        val completed = !timeline.isLive &&
-                            timeline.duration > 0L &&
-                            (timeline.currentPosition.toFloat() / timeline.duration.toFloat()) >= WatchProgress.COMPLETED_THRESHOLD
-                        viewModel.launchInExternalPlayer(context, timeline.currentPosition) { launched ->
-                            externalHandoffInProgress = false
-                            if (launched && !exitDispatched) {
-                                exitDispatched = true
-                                val (focusSeason, focusEpisode) = uiState.returnFocusSeasonEpisode(completed)
-                                currentOnBackPress(
-                                    uiState.currentVideoId,
-                                    focusSeason,
-                                    focusEpisode,
-                                    autoPlayEnabledForBack,
-                                    completed
-                                )
-                            }
-                        }
-                    }
-                }.takeUnless { uiState.isServerStream },
+                onOpenInExternalPlayer = { handoff(null) }.takeUnless { uiState.isServerStream },
                 onShowStreamInfo = {
                     restoreStreamInfoFocus = true
                     viewModel.onEvent(PlayerEvent.OnShowStreamInfo)
@@ -1738,9 +1739,18 @@ fun PlayerScreen(
         }
 
         if (uiState.showSpeedDialog) {
-            SpeedSelectionDialog(
-                currentSpeed = uiState.playbackSpeed,
-                onSpeedSelected = { viewModel.onEvent(PlayerEvent.OnSetPlaybackSpeed(it)) },
+            val current = if (uiState.internalPlayerEngine == InternalPlayerEngine.MVP_PLAYER) "libmpv (β)" else "ExoPlayer"
+            PlayerEngineSelectionDialog(
+                choices = if (uiState.isServerStream) listOf("ExoPlayer", "libmpv (β)") else listOf("ExoPlayer", "VLC", "libmpv (β)"),
+                selected = current,
+                onSelect = { choice ->
+                    viewModel.onEvent(PlayerEvent.OnDismissTransientOverlay)
+                    if (choice == "VLC") {
+                        if (viewModel.getCurrentHeaders().keys.any { !it.equals("user-agent", true) && !it.equals("referer", true) }) {
+                            android.widget.Toast.makeText(context, R.string.vlc_incompatible_headers, android.widget.Toast.LENGTH_LONG).show()
+                        } else handoff(com.kovelyx.tv.data.local.PlayerPreference.VLC)
+                    } else if (choice != current) viewModel.onEvent(PlayerEvent.OnSwitchInternalPlayerEngine)
+                },
                 onDismiss = { viewModel.onEvent(PlayerEvent.OnDismissTransientOverlay) }
             )
         }
@@ -2176,7 +2186,6 @@ private fun PlayerControlsOverlay(
     onShowSourcesPanel: () -> Unit,
     onShowAudioDialog: () -> Unit,
     onShowSubtitleDialog: () -> Unit,
-    onShowSpeedDialog: () -> Unit,
     onToggleAspectRatio: () -> Unit,
     onSwitchPlayerEngine: () -> Unit,
     onReportPlaybackIssue: () -> Unit,
@@ -2453,16 +2462,6 @@ private fun PlayerControlsOverlay(
                             horizontalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.xs),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            ControlButton(
-                                icon = Icons.Default.Speed,
-                                contentDescription = stringResource(R.string.cd_playback_speed),
-                                onClick = {
-                                    onShowSpeedDialog()
-                                },
-                                upFocusRequester = progressUpTarget,
-                                onDownKey = onHideControls,
-                                onFocused = onResetHideTimer
-                            )
                             ControlButton(
                                 icon = Icons.Default.AspectRatio,
                                 iconPainter = customAspectPainter,
@@ -3547,23 +3546,20 @@ internal fun PlayerOverlayButton(
 }
 
 @Composable
-private fun SpeedSelectionDialog(
-    currentSpeed: Float,
-    onSpeedSelected: (Float) -> Unit,
-    onDismiss: () -> Unit
+private fun PlayerEngineSelectionDialog(
+    choices: List<String>,
+    selected: String,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit,
 ) {
-    val selectedIndex = remember(currentSpeed) {
-        PLAYBACK_SPEEDS.indices.minByOrNull { index ->
-            abs(PLAYBACK_SPEEDS[index] - currentSpeed)
-        } ?: 0
-    }
+    val selectedIndex = choices.indexOf(selected).coerceAtLeast(0)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = selectedIndex)
-    val speedFocusRequesters = remember {
-        PLAYBACK_SPEEDS.map { FocusRequester() }
+    val engineFocusRequesters = remember(choices) {
+        choices.map { FocusRequester() }
     }
 
     LaunchedEffect(selectedIndex) {
-        runCatching { speedFocusRequesters[selectedIndex].requestFocus() }
+        runCatching { engineFocusRequesters[selectedIndex].requestFocus() }
     }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -3577,7 +3573,7 @@ private fun SpeedSelectionDialog(
                 modifier = Modifier.padding(KovelyxTheme.spacing.xl)
             ) {
                 Text(
-                    text = stringResource(R.string.player_speed_title),
+                    text = stringResource(R.string.cd_switch_player_engine),
                     style = MaterialTheme.typography.headlineSmall,
                     color = KovelyxTheme.colors.TextPrimary,
                     modifier = Modifier.padding(bottom = KovelyxTheme.spacing.lg)
@@ -3588,12 +3584,12 @@ private fun SpeedSelectionDialog(
                     verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm),
                     contentPadding = PaddingValues(top = KovelyxTheme.spacing.xs)
                 ) {
-                    itemsIndexed(PLAYBACK_SPEEDS) { index, speed ->
-                        SpeedItem(
-                            modifier = Modifier.focusRequester(speedFocusRequesters[index]),
-                            speed = speed,
-                            isSelected = speed == currentSpeed,
-                            onClick = { onSpeedSelected(speed) }
+                    itemsIndexed(choices) { index, engine ->
+                        EngineItem(
+                            modifier = Modifier.focusRequester(engineFocusRequesters[index]),
+                            engine = engine,
+                            isSelected = engine == selected,
+                            onClick = { onSelect(engine) }
                         )
                     }
                 }
@@ -3672,9 +3668,9 @@ private fun MoreActionItem(
 }
 
 @Composable
-private fun SpeedItem(
+private fun EngineItem(
     modifier: Modifier = Modifier,
-    speed: Float,
+    engine: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -3699,7 +3695,7 @@ private fun SpeedItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (speed == 1f) stringResource(R.string.player_speed_normal) else "${speed}x",
+                text = engine,
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (isSelected) KovelyxTheme.colors.Primary else KovelyxTheme.colors.TextPrimary
             )

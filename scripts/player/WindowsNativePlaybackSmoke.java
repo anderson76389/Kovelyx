@@ -143,6 +143,43 @@ public final class WindowsNativePlaybackSmoke {
             if (rtxStatus.get() < 0) throw new AssertionError("RTX request never reported its runtime status");
             System.out.println("RTX requested: status=" + rtxStatus.get() + " (0=standard fallback, 1=pipeline configured, 2=upscale unnecessary)");
             System.out.println("PASS: HTTP MP4, provider header, resume and second player creation, position=" + position);
+            if (args.length == 3) {
+                type.getMethod("dispose", long.class).invoke(bridge, handle);
+                handle = 0;
+                Method stats = type.getMethod("windowsPlaybackStats", long.class);
+                Path report = Path.of(args[1]).resolveSibling("episode-1080p.jsonl");
+                try (BufferedWriter log = Files.newBufferedWriter(report)) {
+                    for (int episode = 1; episode <= 3; episode++) {
+                        handle = ((Number) type.getMethod("create", long.class, String.class, String[].class,
+                            boolean.class, long.class, String.class, int.class, boolean.class, sinkType)
+                            .invoke(bridge, hwnd, args[2], new String[0], true, 0L, controls, 1, false, sink)).longValue();
+                        long target = episode == 1 ? 22 * 60_000L - 1000 : 30_000L;
+                        long lastPosition = 0;
+                        long lastAdvance = System.nanoTime();
+                        long started = lastAdvance;
+                        while (lastPosition < target) {
+                            Thread.sleep(2000);
+                            long now = System.nanoTime();
+                            long current = ((Number) positionMs.invoke(bridge, handle)).longValue();
+                            if (current > lastPosition) lastAdvance = now;
+                            if (now - lastAdvance > 20_000_000_000L || now - started > (target + 90_000L) * 1_000_000L)
+                                throw new AssertionError("Episode " + episode + " stalled at " + current);
+                            lastPosition = current;
+                            log.write("{\"episode\":" + episode + ",\"positionMs\":" + current
+                                + ",\"stats\":" + stats.invoke(bridge, handle) + "}");
+                            log.newLine();
+                            log.flush();
+                        }
+                        type.getMethod("dispose", long.class).invoke(bridge, handle);
+                        handle = 0;
+                        Thread.sleep(1500);
+                        String afterClose = (String) stats.invoke(bridge, 0L);
+                        log.write("{\"episode\":" + episode + ",\"afterClose\":" + afterClose + "}");
+                        log.newLine();
+                        System.out.println("Episode " + episode + " closed: " + afterClose);
+                    }
+                }
+            }
         } catch (InvocationTargetException failure) {
             throw new RuntimeException("Packaged native player failed", failure.getCause());
         } finally {

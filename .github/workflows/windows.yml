@@ -32,6 +32,11 @@ on:
       - 'scripts/player/**'
       - '.github/workflows/windows.yml'
   workflow_dispatch:
+    inputs:
+      episode_diagnostic:
+        description: "Mesurer un épisode 1080p complet et deux réouvertures"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -314,6 +319,21 @@ jobs:
           $hash = (Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant()
           ($hash + '  ' + (Split-Path $target -Leaf)) | Set-Content -Path ($target + '.sha256') -Encoding Ascii
           ('ZIP portable complet : ' + $target + ', SHA256=' + $hash) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+      - name: Sélectionner le diagnostic long pour les changements du lecteur Windows
+        id: episode
+        shell: pwsh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REQUESTED: ${{ inputs.episode_diagnostic }}
+        run: |
+          $enabled = $env:REQUESTED -eq 'true'
+          if ($env:BASE_SHA -and $env:HEAD_SHA) {
+            $changes = git diff --name-only "$env:BASE_SHA...$env:HEAD_SHA"
+            if ($LASTEXITCODE -ne 0) { throw 'Impossible de vérifier les modifications du lecteur' }
+            $enabled = [bool]($changes -match '(desktopMain/native/windows/player_bridge|desktopMain/resources/player-ui/|^scripts/player/)')
+          }
+          "enabled=$enabled" >> $env:GITHUB_OUTPUT
       - name: Vérifier la vraie lecture dans Kovelyx.exe et son lecteur natif
         if: steps.native.outputs.available == 'true'
         shell: pwsh
@@ -321,7 +341,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $exe = Get-ChildItem 'apps/desktop/composeApp/build/compose/binaries/main-release/app' -Recurse -Filter Kovelyx.exe | Select-Object -First 1
           if (-not $exe) { throw 'Application Windows à tester introuvable' }
-          ./scripts/player/test-windows-playback.ps1 -AppRoot $exe.Directory.FullName -IncludeApplication
+          ./scripts/player/test-windows-playback.ps1 -AppRoot $exe.Directory.FullName -IncludeApplication -EpisodeDiagnostic:('${{ steps.episode.outputs.enabled }}' -eq 'True')
       - name: Comparer la RAM des vrais EXE Windows (release précédente et candidat)
         if: steps.native.outputs.available == 'true'
         shell: pwsh

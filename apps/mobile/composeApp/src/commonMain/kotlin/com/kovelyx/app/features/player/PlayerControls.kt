@@ -105,7 +105,6 @@ internal fun PlayerControlsShell(
     onSeekBack: () -> Unit,
     onSeekForward: () -> Unit,
     onResizeModeClick: () -> Unit,
-    onSpeedClick: () -> Unit,
     onSubtitleClick: () -> Unit,
     onAudioClick: () -> Unit,
     onVideoSettingsClick: (() -> Unit)? = null,
@@ -183,8 +182,6 @@ internal fun PlayerControlsShell(
                     onParentalGuideAnimationComplete = onParentalGuideAnimationComplete,
                     onLockToggle = onLockToggle,
                     onVideoSettingsClick = onVideoSettingsClick,
-                    onOpenInExternalPlayer = onOpenInExternalPlayer,
-                    onSwitchEngineClick = onSwitchEngineClick,
                     onBack = onBack,
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -245,7 +242,7 @@ internal fun PlayerControlsShell(
                     onScrubChange = onScrubChange,
                     onScrubFinished = onScrubFinished,
                     onResizeModeClick = onResizeModeClick,
-                    onSpeedClick = onSpeedClick,
+                    onChoosePlayer = onOpenInExternalPlayer ?: onSwitchEngineClick,
                     onSubtitleClick = onSubtitleClick,
                     onAudioClick = onAudioClick,
                     onSourcesClick = onSourcesClick,
@@ -300,11 +297,9 @@ internal fun PlayerControlsShell(
                         onSourcesClick = onSourcesClick,
                         onEpisodesClick = onEpisodesClick,
                         onNextEpisodeClick = onNextEpisodeClick,
-                        onSwitchEngineClick = onSwitchEngineClick,
-                        onSpeedClick = onSpeedClick,
+                        onChoosePlayer = onOpenInExternalPlayer ?: onSwitchEngineClick,
                         onResizeModeClick = onResizeModeClick,
                         onVideoSettingsClick = onVideoSettingsClick,
-                        onOpenInExternalPlayer = onOpenInExternalPlayer,
                         onStreamInfoClick = onStreamInfoClick,
                         onSubmitIntroClick = onSubmitIntroClick,
                         onInteraction = onInteraction,
@@ -332,8 +327,6 @@ private fun PlayerHeader(
     onParentalGuideAnimationComplete: () -> Unit,
     onLockToggle: () -> Unit,
     onVideoSettingsClick: (() -> Unit)?,
-    onOpenInExternalPlayer: (() -> Unit)?,
-    onSwitchEngineClick: (() -> Unit)?,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -426,24 +419,6 @@ private fun PlayerHeader(
                             buttonSize = metrics.headerIconSize + 16.dp,
                             iconSize = metrics.headerIconSize,
                             onClick = onSubmitIntroClick,
-                        )
-                    }
-                    if (onSwitchEngineClick != null) {
-                        PlayerHeaderIconButton(
-                            icon = Icons.Filled.SwapHoriz,
-                            contentDescription = stringResource(Res.string.cd_switch_player_engine),
-                            buttonSize = metrics.headerIconSize + 16.dp,
-                            iconSize = metrics.headerIconSize,
-                            onClick = onSwitchEngineClick,
-                        )
-                    }
-                    if (onOpenInExternalPlayer != null) {
-                        PlayerHeaderIconButton(
-                            icon = Icons.AutoMirrored.Filled.OpenInNew,
-                            contentDescription = stringResource(Res.string.streams_open_external_player),
-                            buttonSize = metrics.headerIconSize + 16.dp,
-                            iconSize = metrics.headerIconSize,
-                            onClick = onOpenInExternalPlayer,
                         )
                     }
                     PlayerHeaderIconButton(
@@ -609,7 +584,7 @@ private fun ProgressControls(
     onScrubChange: (Long) -> Unit,
     onScrubFinished: (Long) -> Unit,
     onResizeModeClick: () -> Unit,
-    onSpeedClick: () -> Unit,
+    onChoosePlayer: (() -> Unit)?,
     onSubtitleClick: () -> Unit,
     onAudioClick: () -> Unit,
     onSourcesClick: (() -> Unit)? = null,
@@ -653,11 +628,13 @@ private fun ProgressControls(
                         painter = aspectRatioPainter,
                         onClick = onResizeModeClick,
                     )
-                    PlayerActionPillButton(
-                        label = formatPlaybackSpeedLabel(playbackSnapshot.playbackSpeed),
-                        icon = Icons.Filled.Speed,
-                        onClick = onSpeedClick,
-                    )
+                    onChoosePlayer?.let { choose ->
+                        PlayerActionPillButton(
+                            label = stringResource(Res.string.cd_switch_player_engine),
+                            icon = Icons.Filled.SwapHoriz,
+                            onClick = choose,
+                        )
+                    }
                     PlayerActionPillButton(
                         label = stringResource(Res.string.compose_player_subs),
                         painter = subtitlesPainter,

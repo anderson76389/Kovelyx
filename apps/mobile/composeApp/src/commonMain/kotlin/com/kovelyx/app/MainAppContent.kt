@@ -71,6 +71,7 @@ import com.kovelyx.app.core.ui.KovelyxContinueWatchingActionSheet
 import com.kovelyx.app.core.ui.KovelyxFloatingPrompt
 import com.kovelyx.app.core.ui.KovelyxPosterZoomActionOverlay
 import com.kovelyx.app.core.ui.KovelyxStatusModal
+import com.kovelyx.app.features.player.incompatibleWithVlc
 import com.kovelyx.app.core.ui.KovelyxToastController
 import com.kovelyx.app.core.ui.KovelyxToastHost
 import com.kovelyx.app.core.ui.PosterZoomAnchor
@@ -780,6 +781,13 @@ internal fun MainAppContent(
         }
 
         suspend fun openExternalPlayback(launch: PlayerLaunch): Boolean {
+            val baseRequest = launch.toExternalPlayerPlaybackRequest()
+            if (baseRequest.incompatibleWithVlc(playerSettingsUiState.externalPlayerId)) {
+                KovelyxToastController.show(getString(Res.string.player_vlc_incompatible_headers))
+                val launchId = PlayerLaunchStore.put(launch)
+                navController.navigate(PlayerRoute(launchId = launchId, title = launch.title))
+                return true
+            }
             lastExternalPlayerLaunch = launch
 
             val bingeGroup = launch.bingeGroup
@@ -787,7 +795,6 @@ internal fun MainAppContent(
                 BingeGroupCacheRepository.save(launch.parentMetaId, bingeGroup)
             }
 
-            val baseRequest = launch.toExternalPlayerPlaybackRequest()
             val shouldForwardSubtitles = playerSettingsUiState.externalPlayerForwardSubtitles &&
                 !playerSettingsUiState.preferredSubtitleLanguage.equals(SubtitleLanguageOption.NONE, ignoreCase = true)
             val shouldSendSkipSegments = playerSettingsUiState.externalPlayerSendSkipSegments
