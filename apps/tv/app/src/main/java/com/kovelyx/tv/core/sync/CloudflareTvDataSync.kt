@@ -1,5 +1,8 @@
 package com.kovelyx.tv.core.sync
 
+import kotlinx.coroutines.flow.drop
+import com.kovelyx.tv.core.recommendations.TvRecommendationManager
+import com.kovelyx.maintenance.ui.PlaybackSyncCadence
 import android.util.Log
 import com.kovelyx.tv.core.auth.CloudflareTvAccountClient
 import com.kovelyx.tv.core.profile.ProfileManager
@@ -63,11 +66,24 @@ class CloudflareTvDataSync @Inject constructor(
     // snapshot finishes, not silently discarded by the inFlight gate.
     private val rerunRequested = ConcurrentHashMap.newKeySet<Int>()
 
+    private val cadence = PlaybackSyncCadence()
+
+    fun requestDuringPlayback(profileId: Int) {
+        val owner = CloudflareTvAccountClient.account?.id ?: return
+        if (cadence.admit(owner, profileId, TvRecommendationManager.isPlaybackActive.value)) request(profileId)
+    }
+
     init {
+        scope.launch {
+            TvRecommendationManager.isPlaybackActive.drop(1).collect { playing ->
+                if (!playing && CloudflareTvAccountClient.account != null) request(profileManager.activeProfileId.value)
+            }
+        }
         // Observe actual local TV changes (player position, library, watched flags).
         // Only different snapshots trigger an upload; echo updates don't loop.
         scope.launch {
             profileManager.activeProfileId.collectLatest { profileId ->
+                var previous: Pair<List<SavedLibraryItem>, List<WatchedItem>>? = null
                 combine(
                     library.libraryItems,
                     progress.observeAllRawProgress(profileId),
@@ -75,8 +91,12 @@ class CloudflareTvDataSync @Inject constructor(
                 ) { libraryItems, positions, history ->
                     Triple(libraryItems, positions, history)
                 }.cloudflareSnapshotUpdates()
-                    .collect {
-                        if (CloudflareTvAccountClient.account != null) request(profileId)
+                    .collect { (items, _, history) ->
+                        val collections = items to history
+                        if (CloudflareTvAccountClient.account != null) {
+                            if (previous == collections) requestDuringPlayback(profileId) else request(profileId)
+                        }
+                        previous = collections
                     }
             }
         }

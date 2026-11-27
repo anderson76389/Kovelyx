@@ -1,5 +1,6 @@
 package com.kovelyx.app.features.player
 
+import com.kovelyx.app.core.cloud.CloudflareDataSync
 import com.kovelyx.app.core.i18n.localizedSeasonEpisodeCode
 import com.kovelyx.app.core.ui.KovelyxToastController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -374,6 +375,13 @@ internal fun PlayerScreenRuntime.BindPlayerRuntimeEffects() {
                 flushWatchProgress()
             }
         }
+    }
+
+    DisposableEffect(profileId, playbackSnapshot.isPlaying) {
+        val playing = playbackSnapshot.isPlaying
+        val playingProfile = profileId
+        if (playing) CloudflareDataSync.playbackStarted(playingProfile)
+        onDispose { if (playing) CloudflareDataSync.playbackStopped(playingProfile) }
     }
 
     DisposableEffect(Unit) {

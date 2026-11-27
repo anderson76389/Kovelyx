@@ -56,12 +56,9 @@ fun EpisodeRatingsSection(
     firstItemFocusRequester: FocusRequester? = null,
     ratingsGridFocusRequester: FocusRequester? = null
 ) {
-    val seasonNumbers = remember(episodes) {
-        episodes
-            .mapNotNull { it.season }
-            .filter { it > 0 } // Never show specials season (S0)
-            .distinct()
-            .sorted()
+    val episodesBySeason = remember(episodes) { episodes.groupBy { it.season } }
+    val seasonNumbers = remember(episodesBySeason) {
+        episodesBySeason.keys.filterNotNull().filter { it > 0 }.sorted()
     }
     val seasonSignature = remember(seasonNumbers) { seasonNumbers.joinToString(",") }
     val seasonFocusRequesters = remember(seasonNumbers) {
@@ -83,9 +80,9 @@ fun EpisodeRatingsSection(
         }
     }
 
-    val episodesForSeason = remember(episodes, selectedSeason) {
-        episodes
-            .filter { it.season == selectedSeason && it.episode != null }
+    val episodesForSeason = remember(episodesBySeason, selectedSeason) {
+        episodesBySeason[selectedSeason].orEmpty()
+            .filter { it.episode != null }
             .distinctBy { it.season to it.episode }
             .sortedBy { it.episode }
     }

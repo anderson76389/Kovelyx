@@ -1412,7 +1412,7 @@ object WatchProgressRepository {
     private fun pushScrobbleToServer(entry: WatchProgressEntry, profileId: Int) {
         if (ServerItemRef.isServerId(entry.parentMetaId)) return
         if (CloudflareAccountClient.enabled) {
-            CloudflareDataSync.request(profileId)
+            CloudflareDataSync.requestDuringPlayback(profileId)
             return
         }
         val operationGeneration = profileGeneration.takeIf { profileId == currentProfileId }

@@ -1,5 +1,8 @@
 package com.kovelyx.app.core.cloud
 
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.MutableStateFlow
+import com.kovelyx.maintenance.ui.PlaybackSyncCadence
 import co.touchlab.kermit.Logger
 import com.kovelyx.app.core.sync.SyncClientIdentityStorage
 import kotlin.random.Random
@@ -106,6 +109,26 @@ object CloudflareDataSync {
                 }
             }
         }
+    }
+
+    private val cadence = PlaybackSyncCadence()
+    private val playingProfiles = MutableStateFlow<Map<Int, Int>>(emptyMap())
+
+    fun playbackStarted(profileId: Int) {
+        playingProfiles.update { it + (profileId to (it.getOrElse(profileId) { 0 } + 1)) }
+    }
+
+    fun playbackStopped(profileId: Int) {
+        playingProfiles.update {
+            val remaining = it.getOrElse(profileId) { 0 } - 1
+            if (remaining <= 0) it - profileId else it + (profileId to remaining)
+        }
+        request(profileId)
+    }
+
+    fun requestDuringPlayback(profileId: Int) {
+        val owner = CloudflareAccountClient.currentSession?.userId ?: return
+        if (cadence.admit(owner, profileId, profileId in playingProfiles.value)) request(profileId)
     }
 
     fun request(profileId: Int) {

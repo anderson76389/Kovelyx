@@ -310,7 +310,8 @@ class StartupSyncService @Inject constructor(
         minIntervalMs: Long = 0L
     ): Boolean {
         if (CloudflareTvAccountClient.enabled) {
-            cloudflareSync.request(profileManager.activeProfileId.value)
+            val profile = profileManager.activeProfileId.value
+            if (reason == "periodic") cloudflareSync.requestDuringPlayback(profile) else cloudflareSync.request(profile)
             return true
         }
         val state = authManager.authState.value as? AuthState.FullAccount ?: return false

@@ -1,6 +1,23 @@
 package com.kovelyx.maintenance.ui
 
 fun main() {
+    val cadence = PlaybackSyncCadence()
+    var attempts = 0
+    var pulls = 0
+    for (second in 1..36_000) {
+        for (period in listOf(90, 120)) {
+            if (second % period == 0) {
+                attempts++
+                if (cadence.admit("viewer", 1, true, second * 1000L)) pulls++
+            }
+        }
+    }
+    check(attempts == 700 && pulls in 55..60)
+    check(cadence.admit("viewer", 1, false, 36_000_001))
+    check(cadence.admit("viewer", 2, true, 36_000_002))
+    check(cadence.admit("second viewer", 2, true, 36_000_003))
+    check(!cadence.admit("second viewer", 2, true, 36_000_004))
+    println("10 h of playback: $attempts periodic requests, $pulls full sync admissions")
     val a = "account-a:1"
     val b = "account-b:1"
     check(SyncHealth.describe(a).contains("Aucune réussite"))
