@@ -538,7 +538,7 @@ object SyncManager {
                     val state = AuthRepository.state.value as? AuthState.Authenticated
                     if (state != null && !state.isAnonymous &&
                         ProfileRepository.activeProfileId == profileId) {
-                        CloudflareDataSync.request(profileId)
+                        CloudflareDataSync.requestDuringPlayback(profileId)
                     }
                 }
             }

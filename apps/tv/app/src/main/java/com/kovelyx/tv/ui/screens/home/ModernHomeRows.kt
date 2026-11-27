@@ -2,6 +2,7 @@
 
 package com.kovelyx.tv.ui.screens.home
 
+import androidx.compose.ui.layout.layout
 import com.kovelyx.tv.ui.theme.KovelyxTheme
 
 import android.view.KeyEvent as AndroidKeyEvent
@@ -858,22 +859,16 @@ internal fun ModernRowSection(
             snapshotFlow { expandedCatalogFocusKey.value }
                 .collect { expandedKey ->
                     if (expandedKey == null) return@collect
-                    // Find the index of the expanded item in this row
-                    val expandedIndex = row.items.list.indexOfFirst { item ->
-                        when (val p = item.payload) {
-                            is ModernPayload.Catalog -> p.focusKey == expandedKey
-                            is ModernPayload.CollectionFolder -> p.focusKey == expandedKey
+                    delay(50)
+                    val layoutInfo = rowListState.layoutInfo
+                    val items = currentRowState.value.items.list
+                    val itemInfo = layoutInfo.visibleItemsInfo.firstOrNull { visible ->
+                        when (val payload = items.getOrNull(visible.index)?.payload) {
+                            is ModernPayload.Catalog -> payload.focusKey == expandedKey
+                            is ModernPayload.CollectionFolder -> payload.focusKey == expandedKey
                             else -> false
                         }
-                    }
-                    if (expandedIndex < 0) return@collect
-                    // Small delay so the item is still in visible layout info
-                    delay(50)
-                    // Calculate overshoot using the known final expanded width rather than
-                    // the mid-animation layout size which underestimates the trailing edge.
-                    val layoutInfo = rowListState.layoutInfo
-                    val itemInfo = layoutInfo.visibleItemsInfo.firstOrNull { it.index == expandedIndex }
-                        ?: return@collect
+                    } ?: return@collect
                     val viewportEnd = layoutInfo.viewportEndOffset
                     val itemEndExpanded = itemInfo.offset + expandedCardWidthPx
                     if (itemEndExpanded > viewportEnd) {
@@ -1105,7 +1100,6 @@ private fun ModernCarouselCard(
     } else {
         rememberUpdatedState(cardWidth)
     }
-    val animatedCardWidth by animatedCardWidthState
     // Freeze the logo URL for row cards - enrichment updates must not cause flickering.
     // The first non-blank value wins and is never replaced.
     // Primary source of truth is the data-layer frozen value (survives navigation);
@@ -1303,7 +1297,11 @@ private fun ModernCarouselCard(
 
     Column(
         modifier = modifier
-            .width(animatedCardWidth)
+            .layout { measurable, constraints ->
+                val width = animatedCardWidthState.value.roundToPx().coerceIn(constraints.minWidth, constraints.maxWidth)
+                val child = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+                layout(child.width, child.height) { child.placeRelative(0, 0) }
+            }
             .recompositionHighlighter(),
         verticalArrangement = Arrangement.spacedBy(KovelyxTheme.spacing.sm)
     ) {
