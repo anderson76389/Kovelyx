@@ -3,6 +3,7 @@
 #endif
 #include <windows.h>
 #include <windowsx.h>
+#include <psapi.h>
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <dwmapi.h>
@@ -60,6 +61,11 @@ typedef struct mpv_event {
     uint64_t reply_userdata;
     void *data;
 } mpv_event;
+typedef struct mpv_event_property {
+    const char *name;
+    mpv_format format;
+    void *data;
+} mpv_event_property;
 typedef struct mpv_event_end_file {
     int reason;
     int error;
@@ -1038,6 +1044,32 @@ public:
     std::atomic_bool tracksChanged{true};
     std::atomic_bool observingTracks{false};
 
+    static long long processRamMiB(bool peak = false) {
+        PROCESS_MEMORY_COUNTERS mem{};
+        if (!K32GetProcessMemoryInfo(GetCurrentProcess(), &mem, sizeof(mem))) return -1;
+        return static_cast<long long>((peak ? mem.PeakWorkingSetSize : mem.WorkingSetSize) / 1048576);
+    }
+
+    std::string playbackStatsJson() {
+        std::ostringstream out;
+        const auto ram = processRamMiB();
+        uint64_t stalls, waitMs;
+        {
+            std::lock_guard<std::mutex> lock(diagnosticsMutex);
+            stalls = cacheWaitCount;
+            waitMs = completedWaitMs + (waitingForCache ? GetTickCount64() - cacheWaitStart : 0);
+        }
+        out << "{\"hw\":\"" << jsonEscape(stringProperty("hwdec-current", "")) << "\""
+            << ",\"fps\":" << doubleProperty("container-fps", -1)
+            << ",\"hz\":" << doubleProperty("display-fps", -1)
+            << ",\"decoderDrops\":" << int64Property("decoder-frame-drop-count", -1)
+            << ",\"outputDrops\":" << int64Property("frame-drop-count", -1)
+            << ",\"stalls\":" << stalls << ",\"waitMs\":" << waitMs
+            << ",\"ram\":" << ram << ",\"initialRam\":" << initialRamMiB
+            << ",\"peakRam\":" << processRamMiB(true) << "}";
+        return out.str();
+    }
+
     void onTimer() {
         if (shuttingDown.load()) return;
         syncControls();
@@ -1856,6 +1888,7 @@ private:
                 throw std::runtime_error(std::string("mpv_initialize failed: ") + api.errorText(initResult));
             }
 
+            observingCacheWait = api.observeProperty(mpv, 2, "paused-for-cache", MPV_FORMAT_FLAG) >= 0;
             observingTracks = api.observeProperty(mpv, 1, "track-list", MPV_FORMAT_NONE) >= 0;
             std::vector<const char *> loadCommand = {"loadfile", sourceUrl.c_str()};
             std::string loadOptions;
@@ -1946,6 +1979,26 @@ private:
         webView->ExecuteScript(script.c_str(), nullptr);
     }
 
+    bool diagnosticsVisible = false;
+    std::atomic_bool observingCacheWait{false};
+    std::mutex diagnosticsMutex;
+    bool waitingForCache = false;
+    uint64_t cacheWaitStart = 0, completedWaitMs = 0, cacheWaitCount = 0;
+    const long long initialRamMiB = processRamMiB();
+
+    void observeCacheWait(bool buffering) {
+        std::lock_guard<std::mutex> lock(diagnosticsMutex);
+        if (waitingForCache == buffering) return;
+        const auto now = GetTickCount64();
+        if (buffering) {
+            cacheWaitStart = now;
+            ++cacheWaitCount;
+        } else {
+            completedWaitMs += now - cacheWaitStart;
+        }
+        waitingForCache = buffering;
+    }
+
     void syncControls() {
         if (!webView) return;
         double duration = doubleProperty("duration", 0.0);
@@ -1960,6 +2013,9 @@ private:
                << ",volumeLevel:" << volumeLevel
                << ",paused:" << (paused ? "true" : "false")
                << ",loading:" << (loading ? "true" : "false");
+        if (!observingCacheWait) observeCacheWait(!paused && flagProperty("paused-for-cache", false));
+        script << ",windowsDiagnostics:true";
+        if (diagnosticsVisible) script << ",stats:" << playbackStatsJson();
         if (!observingTracks || tracksChanged.exchange(false)) {
             script << ",audioTracks:" << audioTracksJson()
                    << ",subtitleTracks:" << subtitleTracksJson();
@@ -1974,6 +2030,11 @@ private:
         if (type.empty()) return;
         double value = extractJsonNumber(messageJson, L"value", 0.0);
 
+        if (type == "diagnostics") {
+            diagnosticsVisible = value != 0;
+            syncControls();
+            return;
+        }
         if (type == "controlsReady") {
             tracksChanged.store(true);
             controlsWebReady.store(true);
@@ -2091,6 +2152,11 @@ private:
             if (!event) continue;
             if (event->event_id == MPV_EVENT_SHUTDOWN) {
                 return;
+            }
+            if (event->event_id == MPV_EVENT_PROPERTY_CHANGE && event->reply_userdata == 2 && event->data) {
+                const auto *property = static_cast<const mpv_event_property *>(event->data);
+                observeCacheWait(property->format == MPV_FORMAT_FLAG && property->data &&
+                                 *static_cast<const int *>(property->data) != 0);
             }
             if (event->event_id == MPV_EVENT_PROPERTY_CHANGE && event->reply_userdata == 1) {
                 tracksChanged.store(true);
@@ -2993,6 +3059,12 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_setResizeMode(JNIEnv *, jobject, jlong handle, jint mode) {
     auto player = playerFromHandle(handle);
     if (player) player->setResizeMode(mode);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_kovelyx_app_features_player_desktop_NativePlayerBridge_windowsPlaybackStats(JNIEnv *env, jobject, jlong handle) {
+    if (auto player = playerFromHandle(handle)) return newJavaStringUtf8(env, player->playbackStatsJson());
+    return newJavaStringUtf8(env, "{\"ram\":" + std::to_string(WindowsMpvWebPlayer::processRamMiB()) + "}");
 }
 
 extern "C" JNIEXPORT jstring JNICALL

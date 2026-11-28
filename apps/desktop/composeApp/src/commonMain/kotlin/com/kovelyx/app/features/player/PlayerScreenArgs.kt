@@ -23,7 +23,7 @@ internal data class PlayerScreenArgs(
     val pauseDescription: String?,
     val onBack: PlayerBackRequest,
     val onSystemBackHandlerChanged: (handler: (() -> Unit)?) -> Unit = {},
-    val onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest) -> Unit)?,
+    val onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest, AndroidPlaybackEngine?, () -> Unit) -> Unit)?,
     val onOpenExternalUrl: ((String) -> Unit)?,
     val modifier: Modifier,
     val logo: String?,

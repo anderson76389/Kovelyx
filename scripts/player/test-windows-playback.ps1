@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$AppRoot, [switch]$IncludeApplication)
+param([Parameter(Mandatory=$true)][string]$AppRoot, [switch]$IncludeApplication, [switch]$EpisodeDiagnostic)
 $ErrorActionPreference = 'Stop'
 $AppRoot = (Resolve-Path -LiteralPath $AppRoot).Path
 $work = Join-Path $env:RUNNER_TEMP 'kovelyx-native-playback'
@@ -14,7 +14,18 @@ $java = Join-Path $env:JAVA_HOME 'bin/java.exe'
 # Use the CI JDK to exercise the shipped JARs and native DLLs, without substituting libraries.
 if (-not (Test-Path $java)) { throw 'CI Java launcher missing' }
 $classpath = "$work;$(Join-Path $AppRoot 'app/*')"
-& $java '--add-opens=java.desktop/java.awt=ALL-UNNAMED' '--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED' '-cp' $classpath WindowsNativePlaybackSmoke ([Uri]$fixture).AbsoluteUri (Join-Path $work 'playback.png') 2>&1 | Tee-Object -FilePath (Join-Path $work 'playback.log')
+$diagnosticArgs = @()
+if ($EpisodeDiagnostic) {
+    if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) {
+        choco install ffmpeg -y --no-progress
+        if ($LASTEXITCODE -ne 0) { throw 'Could not install FFmpeg for the synthetic episode' }
+    }
+    $episode = Join-Path $work 'episode.mp4'
+    & ffmpeg -hide_banner -loglevel error -y -stream_loop -1 -i $fixture -t 1320 -c copy -movflags +faststart $episode
+    if ($LASTEXITCODE -ne 0) { throw 'Could not prepare synthetic 22-minute episode' }
+    $diagnosticArgs = @(([Uri]$episode).AbsoluteUri)
+}
+& $java '--add-opens=java.desktop/java.awt=ALL-UNNAMED' '--add-opens=java.desktop/sun.awt.windows=ALL-UNNAMED' '-cp' $classpath WindowsNativePlaybackSmoke ([Uri]$fixture).AbsoluteUri (Join-Path $work 'playback.png') @diagnosticArgs 2>&1 | Tee-Object -FilePath (Join-Path $work 'playback.log')
 if ($LASTEXITCODE -ne 0) { throw 'Packaged video playback failed; inspect playback.log' }
 '1080p H.264 (24000/1001 fps) playback progressed with the controls visible and hidden using the packaged libraries.' >> $env:GITHUB_STEP_SUMMARY
 if ($IncludeApplication) {

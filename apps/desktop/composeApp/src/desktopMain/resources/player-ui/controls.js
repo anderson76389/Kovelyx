@@ -34,7 +34,8 @@ const playbackMetadata = document.querySelector(".metadata");
 const streamTitle = document.getElementById("streamTitle");
 const providerName = document.getElementById("providerName");
 const resizeLabel = document.getElementById("resizeLabel");
-const speedLabel = document.getElementById("speedLabel");
+const diagnosticsButton = document.getElementById("diagnosticsButton");
+const diagnosticsPanel = document.getElementById("playbackDiagnostics");
 const subtitlesLabel = document.getElementById("subtitlesLabel");
 const audioLabel = document.getElementById("audioLabel");
 const sourcesLabel = document.getElementById("sourcesLabel");
@@ -2285,7 +2286,6 @@ const renderChrome = () => {
   setText(streamTitle, state.streamTitle);
   setText(providerName, state.providerName);
   resizeLabel.textContent = state.resizeModeLabel || "Fit";
-  speedLabel.textContent = state.playbackSpeedLabel || "1x";
   subtitlesLabel.textContent = state.subtitlesLabel || "Subs";
   audioLabel.textContent = state.audioLabel || "Audio";
   sourcesLabel.textContent = state.sourcesLabel || "Sources";
@@ -2674,6 +2674,14 @@ document.querySelectorAll("[data-command]").forEach(button => {
     }
     noteChromeActivity(true);
     const command = button.dataset.command;
+    if (command === "diagnostics") {
+      const enabled = diagnosticsButton.getAttribute("aria-pressed") !== "true";
+      diagnosticsButton.setAttribute("aria-pressed", String(enabled));
+      diagnosticsPanel.hidden = !enabled;
+      send("diagnostics", enabled ? 1 : 0);
+      return;
+    }
+
     if (command === "toggle") {
       if (event.detail !== 0 && suppressNextPointerToggleClick) {
         suppressNextPointerToggleClick = false;
@@ -3012,6 +3020,21 @@ timeLabel.addEventListener("click", () => {
 });
 
 window.playerUpdate = update => {
+  if (update.windowsDiagnostics && diagnosticsButton.hidden) diagnosticsButton.hidden = false;
+  if (update.stats && !diagnosticsPanel.hidden) {
+    const d = update.stats;
+    const metric = (value, unit = "", decimals = 0) => Number.isFinite(value) && value >= 0
+      ? value.toFixed(decimals) + unit : "—";
+    diagnosticsPanel.textContent = [
+      "Diagnostic vidéo · Windows",
+      "Décodage : " + (d.hw || "—"),
+      "Vidéo : " + metric(d.fps, " i/s", 2) + "   Écran : " + metric(d.hz, " Hz", 2),
+      "Images perdues · décodage : " + metric(d.decoderDrops) + "   affichage : " + metric(d.outputDrops),
+      "Attentes du tampon : " + d.stalls + "   Durée : " + metric(d.waitMs / 1000, " s", 1),
+      "RAM du processus Kovelyx : " + metric(d.ram, " Mio") + "   Au démarrage du lecteur : " + metric(d.initialRam, " Mio"),
+      "Pic du processus depuis son lancement : " + metric(d.peakRam, " Mio"),
+    ].join("\n");
+  }
   const durationMs = Math.round((Number(update.duration) || 0) * 1000);
   const positionMs = Math.round((Number(update.position) || 0) * 1000);
   const reportedVolumeLevel = Number(update.volumeLevel);

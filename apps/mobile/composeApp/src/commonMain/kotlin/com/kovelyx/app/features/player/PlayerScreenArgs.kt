@@ -16,7 +16,7 @@ internal data class PlayerScreenArgs(
     val initialBingeGroup: String?,
     val pauseDescription: String?,
     val onBack: () -> Unit,
-    val onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest) -> Unit)?,
+    val onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest, AndroidPlaybackEngine?, () -> Unit) -> Unit)?,
     val onOpenExternalUrl: ((String) -> Unit)?,
     val modifier: Modifier,
     val logo: String?,

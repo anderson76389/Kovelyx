@@ -7,6 +7,7 @@
 </head>
 <body>
   <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+    <symbol id="icon-info" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M2 12h4l3-7 5 14 3-7h5"/></symbol>
     <symbol id="icon-play" viewBox="0 0 24 24">
       <path d="M21.4086 9.35258C23.5305 10.5065 23.5305 13.4935 21.4086 14.6474L8.59662 21.6145C6.53435 22.736 4 21.2763 4 18.9671L4 5.0329C4 2.72368 6.53435 1.26402 8.59661 2.38548L21.4086 9.35258Z"/>
     </symbol>
@@ -98,6 +99,7 @@
   </svg>
 
   <div class="player" id="playerRoot" tabindex="-1">
+    <pre id="playbackDiagnostics" hidden></pre>
     <div class="top-gradient"></div>
     <div class="bottom-gradient"></div>
     <div class="pip-lock-overlay" id="pipLockOverlay" aria-hidden="true"></div>
@@ -136,6 +138,7 @@
       <header class="header">
         <nav class="header-actions" aria-label="Player actions">
           <button class="header-button" id="submitIntroButton" data-command="submitIntro" aria-label="Submit intro"><svg><use href="#icon-flag"></use></svg></button>
+          <button class="header-button" id="diagnosticsButton" data-command="diagnostics" aria-label="Diagnostic vidéo" title="Diagnostic vidéo" aria-pressed="false" hidden><svg><use href="#icon-info"></use></svg></button>
           <button class="header-button" id="videoSettingsButton" data-command="videoSettings" aria-label="Video settings"><svg><use href="#icon-build"></use></svg></button>
           <button class="header-button pip-lock-button" id="pipLockButton" type="button" aria-pressed="false" aria-label="Lock player controls"><svg><use href="#icon-lock"></use></svg></button>
           <button class="header-button" id="pipButton" data-command="pictureInPicture" aria-label=""><svg><use href="#icon-pip"></use></svg></button>
@@ -218,10 +221,9 @@
               <svg><use href="#icon-skip-next"></use></svg><span id="nextEpisodeButtonLabel">Next episode</span>
             </button>
             <button class="action" data-command="resize"><svg><use href="#icon-aspect"></use></svg><span id="resizeLabel">Fit</span></button>
-            <button class="action" data-command="speed"><svg><use href="#icon-speed"></use></svg><span id="speedLabel">1x</span></button>
+            <button class="action" id="externalButton" data-command="external" hidden><svg><use href="#icon-swap"></use></svg></button>
             <button class="action" data-command="subtitles"><svg><use href="#icon-subs"></use></svg><span id="subtitlesLabel">Subs</span></button>
             <button class="action" data-command="audio"><svg><use href="#icon-audio"></use></svg><span id="audioLabel">Audio</span></button>
-            <button class="action" id="externalButton" data-command="external" hidden><svg><use href="#icon-swap"></use></svg></button>
             <button class="action optional" id="sourcesButton" data-command="sources"><svg><use href="#icon-source"></use></svg><span id="sourcesLabel">Sources</span></button>
             <button class="action optional" id="episodesButton" data-command="episodes"><svg><use href="#icon-episodes"></use></svg><span id="episodesLabel">Episodes</span></button>
           </div>

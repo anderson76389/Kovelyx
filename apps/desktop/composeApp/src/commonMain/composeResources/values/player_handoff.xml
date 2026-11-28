@@ -1,0 +1,4 @@
+<resources>
+    <string name="player_vlc_incompatible_headers">This stream requires headers VLC cannot forward. Continue in the built-in player.</string>
+    <string name="player_vlc_not_installed">VLC (install VLC to use it)</string>
+</resources>

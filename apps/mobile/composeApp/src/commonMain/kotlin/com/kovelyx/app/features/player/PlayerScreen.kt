@@ -19,7 +19,7 @@ fun PlayerScreen(
     initialBingeGroup: String? = null,
     pauseDescription: String? = null,
     onBack: () -> Unit,
-    onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest) -> Unit)? = null,
+    onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest, AndroidPlaybackEngine?, () -> Unit) -> Unit)? = null,
     onOpenExternalUrl: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     logo: String? = null,

@@ -882,7 +882,7 @@ button:disabled {
 .player.pip-mode .header-button:not(#pipButton):not(#pipLockButton),
 .player.pip-mode .metadata,
 .player.pip-mode [data-command="resize"],
-.player.pip-mode [data-command="speed"],
+.player.pip-mode [data-command="external"],
 .player.pip-mode [data-command="sources"],
 .player.pip-mode [data-command="episodes"],
 .player.pip-mode [data-command="playNextEpisode"],
@@ -3430,4 +3430,19 @@ svg {
   fill: currentColor;
   stroke: none;
   pointer-events: none;
+}
+
+#playbackDiagnostics {
+  position: absolute;
+  left: 2%;
+  top: 16%;
+  z-index: 40;
+  pointer-events: none;
+  margin: 0;
+  padding: .65em .9em;
+  border-radius: .5em;
+  background: rgba(0, 0, 0, .82);
+  color: white;
+  font: 14px/1.45 Consolas, monospace;
+  white-space: pre-wrap;
 }

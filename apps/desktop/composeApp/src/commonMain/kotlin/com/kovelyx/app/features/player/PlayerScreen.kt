@@ -20,7 +20,7 @@ internal fun PlayerScreen(
     pauseDescription: String? = null,
     onBack: PlayerBackRequest,
     onSystemBackHandlerChanged: (handler: (() -> Unit)?) -> Unit = {},
-    onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest) -> Unit)? = null,
+    onOpenInExternalPlayer: ((ExternalPlayerPlaybackRequest, AndroidPlaybackEngine?, () -> Unit) -> Unit)? = null,
     onOpenExternalUrl: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
     logo: String? = null,

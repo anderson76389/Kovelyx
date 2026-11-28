@@ -1,0 +1,3 @@
+<resources>
+    <string name="vlc_incompatible_headers">Ce flux exige des en-têtes que VLC ne transmet pas. Continue avec le lecteur intégré.</string>
+</resources>

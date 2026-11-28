@@ -362,7 +362,6 @@ class PlayerViewModel @Inject constructor(
             val nextEpisodeSnapshot = controller.metaVideos.takeIf { it.isNotEmpty() }?.let {
                 externalPlaybackTracker.resolveNextEpisodeSnapshot(metadata, it)
             }
-            controller.stopAndRelease()
             val launched = try {
                 externalPlaybackTracker.launchPlayer(
                     metadata = metadata,
@@ -378,6 +377,7 @@ class PlayerViewModel @Inject constructor(
             } catch (_: Exception) {
                 false
             }
+            if (launched) controller.stopAndRelease()
             onResult(launched)
         }
     }

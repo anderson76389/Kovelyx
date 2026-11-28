@@ -2138,12 +2138,14 @@ private fun PlayerPreferenceDialog(
 internal fun ExternalPlayerSelectionDialog(
     players: List<ExternalPlayerApp>,
     selectedPlayerId: String?,
+    enabled: (ExternalPlayerApp) -> Boolean = { true },
     onPlayerSelected: (String) -> Unit,
+    title: String = stringResource(Res.string.settings_playback_external_player_app),
     onDismiss: () -> Unit,
 ) {
     DialogSurface(
         onDismissRequest = onDismiss,
-        title = stringResource(Res.string.settings_playback_external_player_app),
+        title = title,
     ) {
         if (players.isEmpty()) {
             Text(
@@ -2161,6 +2163,7 @@ internal fun ExternalPlayerSelectionDialog(
                     DialogOption(
                         text = player.name,
                         selected = isSelected,
+                        enabled = enabled(player),
                         onClick = { onPlayerSelected(player.id) },
                     )
                 }

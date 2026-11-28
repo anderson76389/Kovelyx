@@ -308,7 +308,6 @@ private fun PlayerScreenRuntime.RenderPlayerControls(displayedPositionMs: Long, 
             onSeekBack = { seekBy(-10_000L) },
             onSeekForward = { seekBy(10_000L) },
             onResizeModeClick = { cycleResizeMode() },
-            onSpeedClick = { cyclePlaybackSpeed() },
             onSubtitleClick = {
                 refreshTracks()
                 showSubtitleModal = true
@@ -358,6 +357,8 @@ private fun PlayerScreenRuntime.RenderPlayerControls(displayedPositionMs: Long, 
                             episode = activeEpisodeNumber,
                             episodeTitle = activeEpisodeTitle,
                         ),
+                        playerController?.playbackEngine,
+                        { switchPlaybackEngine() },
                     )
                 }
             },

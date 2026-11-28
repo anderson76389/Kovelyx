@@ -21,11 +21,27 @@ class VlcPlaybackActivity : Activity() {
     private var completed = false
     private var resumeMs = 0L
 
+    private var returnEngine: String? = null
+    private var pickerButton: android.widget.ImageButton? = null
+
+    private fun chooseEngine() {
+        android.app.AlertDialog.Builder(this)
+            .setSingleChoiceItems(arrayOf("ExoPlayer", "VLC", "libmpv (β)"), 1) { dialog, index ->
+                dialog.dismiss()
+                if (index != 1) {
+                    returnEngine = if (index == 0) "ExoPlayer" else "Libmpv"
+                    finish()
+                }
+            }.show()
+    }
+
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
         val uri = intent.data ?: run { finish(); return }
         val layout = VLCVideoLayout(this)
-        setContentView(layout)
+        val host = android.widget.FrameLayout(this)
+        host.addView(layout, android.widget.FrameLayout.LayoutParams(-1, -1))
+        setContentView(host)
         engine = LibVLC(this, arrayListOf())
         player = MediaPlayer(engine)
         val controls = android.widget.MediaController(this)
@@ -43,7 +59,27 @@ class VlcPlaybackActivity : Activity() {
             override fun canSeekForward() = player.isSeekable
             override fun getAudioSessionId() = 0
         })
-        layout.setOnClickListener { controls.show() }
+        if (intent.getBooleanExtra("kovelyx_engine_picker", false)) {
+            val side = (48 * resources.displayMetrics.density).toInt()
+            val button = android.widget.ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_menu_rotate)
+                contentDescription = "Changer de lecteur"
+                setOnClickListener { chooseEngine() }
+            }
+            host.addView(button, android.widget.FrameLayout.LayoutParams(side, side,
+                android.view.Gravity.TOP or android.view.Gravity.END))
+            pickerButton = button
+            button.visibility = android.view.View.GONE
+        }
+        val hidePicker = Runnable { pickerButton?.visibility = android.view.View.GONE }
+        layout.setOnClickListener {
+            controls.show()
+            pickerButton?.apply {
+                visibility = android.view.View.VISIBLE
+                removeCallbacks(hidePicker)
+                postDelayed(hidePicker, 3500)
+            }
+        }
         player.attachViews(layout, null, true, false)
         resumeMs = state?.getLong("position") ?: intent.getLongExtra("extra_position", 0L)
         val media = if (uri.scheme == ContentResolver.SCHEME_CONTENT) {
@@ -101,6 +137,10 @@ class VlcPlaybackActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_MENU && pickerButton != null) {
+            if (event.repeatCount == 0) chooseEngine()
+            return true
+        }
         when (keyCode) {
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ->
                 if (event.repeatCount == 0) { if (player.isPlaying) player.pause() else player.play() }
@@ -124,7 +164,8 @@ class VlcPlaybackActivity : Activity() {
     override fun finish() {
         if (isFinishing || isDestroyed) return
         if (::player.isInitialized) setResult(RESULT_OK, Intent().apply {
-            putExtra("extra_position", player.time)
+            returnEngine?.let { putExtra("kovelyx_return_engine", it) }
+            putExtra("extra_position", player.time.coerceAtLeast(0L))
             putExtra("extra_duration", player.length)
             if (completed) putExtra("end_by", "playback_completion")
         })

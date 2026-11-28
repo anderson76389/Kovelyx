@@ -44,6 +44,10 @@ data class ExternalPlayerPlaybackRequest(
     }
 }
 
+internal fun ExternalPlayerPlaybackRequest.incompatibleWithVlc(playerId: String?): Boolean =
+    playerId in setOf("vlc", "libvlc", "org.videolan.vlc") &&
+        sourceHeaders.keys.any { !it.equals("user-agent", true) && !it.equals("referer", true) }
+
 enum class ExternalPlayerOpenResult {
     Opened,
     NotConfigured,
