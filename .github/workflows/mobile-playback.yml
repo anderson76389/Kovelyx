@@ -1,7 +1,7 @@
 name: Lire une vidéo dans les deux lecteurs Android mobile
 on:
   push:
-    branches: [main, fix/cloudflare-network-status-and-settings]
+    branches: [test/compatibilite-v1270]
     paths:
       - 'shared/**'
       - 'apps/mobile/**'
@@ -12,6 +12,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: kovelyx-mobile-real-playback-${{ github.ref }}
   cancel-in-progress: true
@@ -59,20 +60,32 @@ jobs:
           sudo dnsmasq --conf-file=/tmp/kovelyx-playback-dnsmasq.conf --pid-file=/tmp/kv-playback-dnsmasq.pid
           sudo chmod 644 /tmp/kv-playback-nuvio-dns.log
           dig @127.0.0.1 +short api.nuvio.tv A | grep -Fx '0.0.0.0'
+      - name: Préparer un extrait de test H.264 HD avec audio
+        run: |
+          sudo apt-get install -y -qq ffmpeg
+          asset=$(find apps/mobile -path '*/src/androidTest/assets/media3-smoke.mp4.b64' -print -quit)
+          test -n "$asset"
+          ffmpeg -v error -f lavfi -i testsrc2=size=1280x720:rate=30 -f lavfi -i sine=frequency=440 -t 10 -c:v libx264 -crf 23 -pix_fmt yuv420p -c:a aac /tmp/compat.mp4
+          base64 /tmp/compat.mp4 > "$asset"
+          digest=$(sha256sum /tmp/compat.mp4 | cut -d' ' -f1)
+          sed -i "s/566c872a74649ee8c04e9c43dccb4d17ec40ebdb4c365acd1bf5387ce3416cef/$digest/" apps/mobile/androidApp/src/androidTest/kotlin/com/kovelyx/android/VideoPlaybackSmokeTest.kt
       - name: Vérifier la lecture H264 dans les surfaces ExoPlayer et libmpv
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
-          profile: pixel_6
+          profile: Nexus 5
           cores: 2
-          ram-size: 3072M
-          heap-size: 512M
+          ram-size: 2048M
+          heap-size: 256M
           disk-size: 4096M
           disable-animations: true
           emulator-options: '-no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -dns-server 127.0.0.1'
-          script: bash scripts/tests/mobile-playback-nuvio-blackout.sh
+          script: |
+            adb shell cat /proc/meminfo | head -3
+            adb shell cat /sys/devices/system/cpu/online
+            bash scripts/tests/mobile-playback-nuvio-blackout.sh
       - name: Rapports de lecture et diagnostics Android
         if: always()
         uses: actions/upload-artifact@v4
@@ -82,3 +95,27 @@ jobs:
             apps/mobile/androidApp/build/outputs/androidTest-results/connected/**
             apps/mobile/androidApp/build/reports/androidTests/connected/**
           retention-days: 14
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Tester le paquet Windows avec deux processeurs logiques et un tas Java limité
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $sha = 'ab73c8d26ee124624c9717056ebd7706c2f2f779'
+          $id = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/windows.yml/runs?head_sha=$sha&event=push&status=success" --jq '.workflow_runs[0].id'
+          gh run download $id --name Kovelyx-Windows-installers-experimental --dir packages
+          if ($LASTEXITCODE) { throw 'Téléchargement impossible' }
+          $zip = Get-Item "packages/Kovelyx-Windows-Portable-$sha.zip"
+          Expand-Archive $zip.FullName app
+          $exe = Get-ChildItem app -Recurse -Filter Kovelyx.exe | Select-Object -First 1
+          $env:JAVA_TOOL_OPTIONS = '-Xmx256m -XX:ActiveProcessorCount=2'
+          (Get-Process -Id $PID).ProcessorAffinity = 3
+          ./scripts/player/test-windows-playback.ps1 -AppRoot $exe.Directory.FullName -IncludeApplication
